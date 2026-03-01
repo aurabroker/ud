@@ -36,29 +36,23 @@
         @media (min-width: 768px) {
             .chart-container { height: 350px; }
         }
-        /* Custom scrollbar for form sections */
+        /* Custom scrollbar */
         .custom-scroll::-webkit-scrollbar { width: 8px; }
-        .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         
         /* FAQ Accordion Styling */
-        details > summary {
-            list-style: none;
-        }
-        details > summary::-webkit-details-marker {
-            display: none;
-        }
+        details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
         
         /* Floating Button Animation */
         @keyframes pulse-ring {
-            0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
-            100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+            0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(37, 99, 235, 0); }
+            100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
         }
-        .pulse-btn {
-            animation: pulse-ring 2s infinite;
-        }
+        .pulse-btn { animation: pulse-ring 2s infinite; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased selection:bg-blue-100 selection:text-blue-900">
@@ -85,7 +79,7 @@
             </div>
         </div>
         <!-- Mobile Menu -->
-        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-slate-100 p-4 space-y-3 shadow-lg absolute w-full">
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-slate-100 p-4 space-y-3 shadow-lg absolute w-full z-50">
             <a href="#o-nas" class="block text-slate-600 py-2 border-b border-slate-50">O Nas</a>
             <a href="#dlaczego-warto" class="block text-slate-600 py-2 border-b border-slate-50">Dla Kogo?</a>
             <a href="#opinie" class="block text-slate-600 py-2 border-b border-slate-50">Opinie</a>
@@ -94,10 +88,35 @@
         </div>
     </nav>
 
-    <!-- Floating Contact Button -->
-    <a href="tel:+48504400901" class="fixed bottom-6 right-6 bg-green-500 text-white w-14 h-14 rounded-full shadow-2xl hover:bg-green-600 transition-transform hover:scale-110 z-50 flex items-center justify-center pulse-btn" aria-label="Zadzwoń do nas">
-        <span class="text-2xl">📞</span>
-    </a>
+    <!-- WIRTUALNY ASYSTENT / CHATBOT -->
+    <div id="chat-widget" class="fixed bottom-24 right-6 w-[340px] max-w-[calc(100vw-3rem)] bg-white rounded-2xl shadow-2xl border border-slate-200 flex-col z-[100] overflow-hidden transition-all duration-300 transform scale-0 origin-bottom-right opacity-0 flex">
+        <div class="bg-blue-600 text-white p-4 flex justify-between items-center shadow-md z-10">
+            <span class="font-bold flex items-center gap-2"><span class="text-xl">🤖</span> Asystent Aura</span>
+            <button id="close-chat" class="text-white hover:text-slate-200 text-2xl font-bold leading-none">&times;</button>
+        </div>
+        <div class="p-5 h-80 overflow-y-auto bg-slate-50 text-sm space-y-4 custom-scroll">
+            <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-100 rounded-tl-none w-11/12 text-slate-700 leading-relaxed">
+                Cześć! 👋 Jestem wirtualnym asystentem Aura Expert. 
+            </div>
+            <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-100 rounded-tl-none w-11/12 text-slate-700 leading-relaxed">
+                Jeśli masz pytania, zostaw poniżej wniosek, a nasz licencjonowany agent skontaktuje się z Tobą i dopasuje ofertę.
+            </div>
+            <div class="bg-blue-50 p-4 rounded-xl shadow-sm border border-blue-200 rounded-tl-none w-full relative overflow-hidden mt-2">
+                <div class="absolute -right-4 -top-4 text-6xl opacity-10">⚡</div>
+                <strong class="text-blue-900 block mb-2 text-base">Znasz już swoje potrzeby?</strong>
+                <span class="text-slate-700 block mb-4">Omiń formalności i wystaw polisę Leadenhall samodzielnie, w 100% online przez nasz dedykowany link!</span>
+                <!-- TUTAJ WSTAW SWÓJ LINK DO LEADENHALL -->
+                <a href="TWÓJ_LINK_DO_LEADENHALL" target="_blank" class="block text-center bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition-colors shadow-md">
+                    Kup Polisę Online ➔
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Przycisk włączający Asystenta -->
+    <button id="chat-toggle-btn" class="fixed bottom-6 right-6 bg-blue-600 text-white w-14 h-14 rounded-full shadow-2xl hover:bg-blue-700 transition-transform hover:scale-110 z-[100] flex items-center justify-center pulse-btn cursor-pointer border-2 border-white">
+        <span class="text-2xl">💬</span>
+    </button>
 
     <!-- Hero Section -->
     <section class="relative bg-white overflow-hidden">
@@ -112,7 +131,7 @@
                         <p class="mt-3 text-base text-slate-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
                             Specjalistyczne ubezpieczenie utraty dochodu dla B2B, Wolnych Zawodów i Zatrudnionych. Chronimy Twój styl życia, gdy Ty nie możesz pracować.
                         </p>
-                        <p class="mt-2 text-sm text-slate-400 font-medium">Partnerzy ubezpieczeniowi (coverholderzy Lloyd's w Polsce: Leadenhall Insurance SA & CEU sp.z o.o.</p>
+                        <p class="mt-2 text-sm text-slate-400 font-medium">Zaufani Partnerzy: Leadenhall Insurance SA & CEU</p>
                         <div class="mt-8 sm:flex sm:justify-center lg:justify-start gap-4">
                             <div class="rounded-md shadow">
                                 <a href="#kalkulator" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 md:py-4 md:text-lg transition-colors">
@@ -152,7 +171,7 @@
                 <div class="bg-slate-50 p-8 rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg transition-all duration-300" data-aos="fade-up" data-aos-delay="100">
                     <div class="text-4xl mb-4 bg-white w-16 h-16 rounded-lg flex items-center justify-center shadow-sm">🤝</div>
                     <h3 class="text-xl font-bold text-slate-900 mb-3">Zaufani Partnerzy</h3>
-                    <p class="text-slate-600 leading-relaxed">Współpracujemy z Leadenhall Insurance S.A. oraz CEU sp. z o.o. reprezentujących Lloyd's Insurance Company S.A., gwarantując najwyższą wypłacalność i globalne standardy likwidacji szkód.</p>
+                    <p class="text-slate-600 leading-relaxed">Współpracujemy z Lloyd's Insurance Company S.A. (poprzez Leadenhall) oraz CEU, gwarantując najwyższą wypłacalność i globalne standardy likwidacji szkód.</p>
                 </div>
                 <div class="bg-slate-50 p-8 rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg transition-all duration-300" data-aos="fade-up" data-aos-delay="200">
                     <div class="text-4xl mb-4 bg-white w-16 h-16 rounded-lg flex items-center justify-center shadow-sm">🎯</div>
@@ -259,7 +278,6 @@
 
     <!-- Calculator Section -->
     <section id="kalkulator" class="py-20 bg-slate-900 text-white relative overflow-hidden">
-        <!-- Tło dekoracyjne -->
         <div class="absolute top-0 left-0 w-full h-full overflow-hidden opacity-10 pointer-events-none">
             <div class="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-blue-500 blur-3xl"></div>
             <div class="absolute bottom-0 right-0 w-full max-w-2xl h-96 rounded-full bg-teal-500 blur-3xl"></div>
@@ -275,10 +293,10 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
                     
                     <!-- Controls -->
-                    <div class="space-y-8">
+                    <div class="space-y-8 text-slate-800">
                         <div>
                             <label class="block text-sm font-semibold text-slate-700 mb-2">Wykonywany Zawód</label>
-                            <select id="calc-profession" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border bg-slate-50 text-slate-800 outline-none">
+                            <select id="calc-profession" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border bg-slate-50 outline-none">
                                 <option value="programista">Programista / IT / Biuro</option>
                                 <option value="lekarz">Lekarz / Stomatolog / Pielęgniarka</option>
                                 <option value="kosmetolog">Kosmetolog / Branża Beauty</option>
@@ -294,10 +312,6 @@
                                 <span class="font-bold text-blue-600 text-lg" id="calc-income-display">10 000 zł</span>
                             </div>
                             <input type="range" id="calc-income-slider" min="3000" max="60000" step="500" value="10000" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
-                            <div class="flex justify-between mt-2 text-xs text-slate-400">
-                                <span>3 000 zł</span>
-                                <span>60 000+ zł</span>
-                            </div>
                         </div>
 
                         <div>
@@ -308,11 +322,11 @@
                             </div>
                         </div>
 
-                        <!-- Special Toggles based on Profession -->
+                        <!-- Special Toggles -->
                         <div id="med-options" class="hidden p-4 bg-blue-50 rounded-xl border border-blue-100 transition-all">
                             <label class="flex items-center space-x-3 cursor-pointer">
                                 <input type="checkbox" id="calc-hiv" class="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer">
-                                <span class="text-sm font-medium text-slate-800">Dodatkowa ochrona: Ekspozycja zawodowa (HIV/WZW)</span>
+                                <span class="text-sm font-medium text-slate-800">Ochrona: Ekspozycja zawodowa (HIV/WZW)</span>
                             </label>
                         </div>
 
@@ -320,9 +334,7 @@
 
                     <!-- Result Card -->
                     <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl shadow-lg p-8 flex flex-col justify-between relative overflow-hidden text-white">
-                        <div class="absolute -top-10 -right-10 text-[12rem] font-black text-white opacity-5 pointer-events-none">
-                            zł
-                        </div>
+                        <div class="absolute -top-10 -right-10 text-[12rem] font-black text-white opacity-5 pointer-events-none">zł</div>
                         
                         <div class="relative z-10">
                             <h3 class="text-lg font-medium text-blue-300 uppercase tracking-wider text-sm">Szacunkowa Składka</h3>
@@ -330,7 +342,6 @@
                                 <span class="text-6xl font-extrabold text-white" id="calc-result">145</span>
                                 <span class="text-2xl font-medium text-slate-400">zł / mies.</span>
                             </div>
-                            <p class="text-xs text-slate-400 mt-2">* Kwota ma charakter wyłącznie edukacyjny.</p>
                         </div>
 
                         <div class="mt-8 space-y-4 relative z-10">
@@ -342,17 +353,9 @@
                                 <span class="text-slate-300">Świadczenie za 1 dzień choroby:</span>
                                 <span class="font-bold text-white" id="calc-daily">266 zł</span>
                             </div>
-                            <div class="flex justify-between text-sm items-center border-b border-slate-700 pb-3">
-                                <span class="text-slate-300">Ochrona szpitalna:</span>
-                                <span class="font-bold text-green-400">W ZESTAWIE</span>
-                            </div>
-                            <div id="res-hiv" class="hidden flex justify-between text-sm items-center pt-1">
-                                <span class="text-slate-300">Klauzula HIV/WZW:</span>
-                                <span class="font-bold text-green-400">Włączona</span>
-                            </div>
                         </div>
 
-                        <button onclick="scrollToForm()" class="mt-10 w-full bg-blue-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-blue-500 hover:shadow-lg hover:shadow-blue-500/30 transition-all relative z-10">
+                        <button onclick="scrollToForm()" class="mt-10 w-full bg-blue-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-blue-500 transition-all relative z-10">
                             Uzyskaj Dokładną Ofertę
                         </button>
                     </div>
@@ -367,7 +370,7 @@
             <div class="text-center mb-12" data-aos="fade-up">
                 <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wide">Bezpieczny Wniosek</span>
                 <h2 class="text-3xl font-bold text-slate-900 mt-4 tracking-tight">Przejdźmy do konkretów</h2>
-                <p class="text-slate-500 mt-2">Wypełnij krótki wniosek, a nasz licencjonowany agent przygotuje dla Ciebie wiążącą, szytą na miarę ofertę. To zajmie tylko 3 minuty.</p>
+                <p class="text-slate-500 mt-2">Wypełnij wniosek, a agent przygotuje dla Ciebie ofertę.</p>
             </div>
 
             <div class="bg-white shadow-xl rounded-2xl overflow-hidden border border-slate-200" data-aos="fade-up" data-aos-delay="150">
@@ -394,28 +397,27 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-sm font-semibold text-slate-700 mb-1">Imię i Nazwisko</label>
-                                <input type="text" name="fullName" required class="block w-full rounded-md border-slate-300 border shadow-sm p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
+                                <input type="text" name="fullName" required class="block w-full rounded-md border-slate-300 border shadow-sm p-3 focus:ring-2 focus:ring-blue-500 outline-none">
                             </div>
                             <div>
-                                <label class="block text-sm font-semibold text-slate-700 mb-1">PESEL (do wyliczenia wieku)</label>
-                                <input type="text" name="pesel" required pattern="[0-9]{11}" placeholder="11 cyfr" class="block w-full rounded-md border-slate-300 border shadow-sm p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">PESEL</label>
+                                <input type="text" name="pesel" required pattern="[0-9]{11}" placeholder="11 cyfr" class="block w-full rounded-md border-slate-300 border shadow-sm p-3 focus:ring-2 focus:ring-blue-500 outline-none">
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-slate-700 mb-1">Forma Zatrudnienia</label>
-                                <select name="employmentType" id="employmentType" class="block w-full rounded-md border-slate-300 border shadow-sm p-3 focus:ring-2 focus:ring-blue-500 bg-white outline-none">
+                                <select name="employmentType" class="block w-full rounded-md border-slate-300 border shadow-sm p-3 bg-white outline-none">
                                     <option value="b2b">Samozatrudnienie (B2B/JDG)</option>
                                     <option value="uop">Umowa o Pracę</option>
                                     <option value="zlecenie">Umowa Zlecenie/Dzieło</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-semibold text-slate-700 mb-1">Dokładny Zawód (np. Lekarz Stomatolog)</label>
-                                <input type="text" name="profession" required class="block w-full rounded-md border-slate-300 border shadow-sm p-3 focus:ring-2 focus:ring-blue-500 outline-none">
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Dokładny Zawód</label>
+                                <input type="text" name="profession" required class="block w-full rounded-md border-slate-300 border shadow-sm p-3 outline-none">
                             </div>
                         </div>
                         
-                        <!-- Extra questions for Business Owners (CSV 003) -->
-                        <div id="business-questions" class="bg-slate-50 p-5 rounded-xl border border-slate-200 hidden mt-6">
+                        <div id="business-questions" class="bg-slate-50 p-5 rounded-xl border border-slate-200 mt-6">
                             <h4 class="font-bold text-slate-900 mb-3">Dla prowadzących działalność gospodarczą</h4>
                             <div class="space-y-4">
                                 <label class="flex items-center space-x-3 cursor-pointer">
@@ -430,18 +432,18 @@
                         </div>
                     </div>
 
-                    <!-- STEP 2: Ankieta Medyczna (CSV 002) -->
+                    <!-- STEP 2: Ankieta Medyczna (Rozszerzona) -->
                     <div id="step-2" class="hidden space-y-6">
                         <h3 class="text-2xl font-bold text-slate-800">Ankieta Medyczna</h3>
                         <div class="bg-blue-50 p-4 rounded-lg border border-blue-100 text-sm text-blue-800 flex gap-3">
                             <span class="text-xl">ℹ️</span>
-                            <p>Zgodnie z wymogami ubezpieczyciela, odpowiedz szczerze na poniższe pytania. Dotyczą one okresu ostatnich 24 miesięcy.</p>
+                            <p>Zgodnie z wymogami ubezpieczyciela, odpowiedz szczerze na pytania dotyczące okresu <strong>ostatnich 24 miesięcy</strong>.</p>
                         </div>
                         
-                        <div class="space-y-3">
+                        <div class="space-y-3 h-[400px] overflow-y-auto custom-scroll pr-2">
                             <!-- Pytanie 1 -->
                             <div class="flex flex-col sm:flex-row sm:items-center justify-between bg-white border border-slate-200 p-4 rounded-lg hover:border-blue-300 transition-colors gap-4">
-                                <span class="text-sm font-medium text-slate-700">Problemy z sercem, nadciśnienie, bóle w klatce piersiowej?</span>
+                                <span class="text-sm font-medium text-slate-700">1. Problemy z sercem, nadciśnienie, bóle w klatce piersiowej?</span>
                                 <div class="flex gap-4 shrink-0">
                                     <label class="flex items-center cursor-pointer"><input type="radio" name="med_heart" value="yes" class="mr-2 w-4 h-4 text-blue-600">Tak</label>
                                     <label class="flex items-center cursor-pointer"><input type="radio" name="med_heart" value="no" checked class="mr-2 w-4 h-4 text-blue-600">Nie</label>
@@ -449,7 +451,7 @@
                             </div>
                             <!-- Pytanie 2 -->
                             <div class="flex flex-col sm:flex-row sm:items-center justify-between bg-white border border-slate-200 p-4 rounded-lg hover:border-blue-300 transition-colors gap-4">
-                                <span class="text-sm font-medium text-slate-700">Cukrzyca, problemy z nerkami lub układem moczowym?</span>
+                                <span class="text-sm font-medium text-slate-700">2. Cukrzyca, problemy z nerkami, prostatą lub układem moczowym?</span>
                                 <div class="flex gap-4 shrink-0">
                                     <label class="flex items-center cursor-pointer"><input type="radio" name="med_diabetes" value="yes" class="mr-2 w-4 h-4 text-blue-600">Tak</label>
                                     <label class="flex items-center cursor-pointer"><input type="radio" name="med_diabetes" value="no" checked class="mr-2 w-4 h-4 text-blue-600">Nie</label>
@@ -457,69 +459,110 @@
                             </div>
                             <!-- Pytanie 3 -->
                             <div class="flex flex-col sm:flex-row sm:items-center justify-between bg-white border border-slate-200 p-4 rounded-lg hover:border-blue-300 transition-colors gap-4">
-                                <span class="text-sm font-medium text-slate-700">Problemy z kręgosłupem, stawami, układem kostnym?</span>
+                                <span class="text-sm font-medium text-slate-700">3. Problemy z kręgosłupem, stawami, układem kostnym?</span>
                                 <div class="flex gap-4 shrink-0">
                                     <label class="flex items-center cursor-pointer"><input type="radio" name="med_bones" value="yes" class="mr-2 w-4 h-4 text-blue-600">Tak</label>
                                     <label class="flex items-center cursor-pointer"><input type="radio" name="med_bones" value="no" checked class="mr-2 w-4 h-4 text-blue-600">Nie</label>
                                 </div>
                             </div>
+                            <!-- Pytanie 4 -->
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between bg-white border border-slate-200 p-4 rounded-lg hover:border-blue-300 transition-colors gap-4">
+                                <span class="text-sm font-medium text-slate-700">4. Niestrawność, wrzód żołądka, choroby jelit/układu trawiennego?</span>
+                                <div class="flex gap-4 shrink-0">
+                                    <label class="flex items-center cursor-pointer"><input type="radio" name="med_stomach" value="yes" class="mr-2 w-4 h-4 text-blue-600">Tak</label>
+                                    <label class="flex items-center cursor-pointer"><input type="radio" name="med_stomach" value="no" checked class="mr-2 w-4 h-4 text-blue-600">Nie</label>
+                                </div>
+                            </div>
+                            <!-- Pytanie 5 -->
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between bg-white border border-slate-200 p-4 rounded-lg hover:border-blue-300 transition-colors gap-4">
+                                <span class="text-sm font-medium text-slate-700">5. Depresja, załamanie nerwowe, epilepsja lub drgawki?</span>
+                                <div class="flex gap-4 shrink-0">
+                                    <label class="flex items-center cursor-pointer"><input type="radio" name="med_neuro" value="yes" class="mr-2 w-4 h-4 text-blue-600">Tak</label>
+                                    <label class="flex items-center cursor-pointer"><input type="radio" name="med_neuro" value="no" checked class="mr-2 w-4 h-4 text-blue-600">Nie</label>
+                                </div>
+                            </div>
+                            <!-- Pytanie 6 -->
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between bg-white border border-slate-200 p-4 rounded-lg hover:border-blue-300 transition-colors gap-4">
+                                <span class="text-sm font-medium text-slate-700">6. Czy przebyłeś operację chirurgiczną lub stosujesz stale leki?</span>
+                                <div class="flex gap-4 shrink-0">
+                                    <label class="flex items-center cursor-pointer"><input type="radio" name="med_surgery" value="yes" class="mr-2 w-4 h-4 text-blue-600">Tak</label>
+                                    <label class="flex items-center cursor-pointer"><input type="radio" name="med_surgery" value="no" checked class="mr-2 w-4 h-4 text-blue-600">Nie</label>
+                                </div>
+                            </div>
+                            <!-- Pytanie 7 -->
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between bg-white border border-slate-200 p-4 rounded-lg hover:border-blue-300 transition-colors gap-4">
+                                <span class="text-sm font-medium text-slate-700">7. Czy odbyłeś testy krwi w związku z AIDS lub wirusem HIV?</span>
+                                <div class="flex gap-4 shrink-0">
+                                    <label class="flex items-center cursor-pointer"><input type="radio" name="med_aids" value="yes" class="mr-2 w-4 h-4 text-blue-600">Tak</label>
+                                    <label class="flex items-center cursor-pointer"><input type="radio" name="med_aids" value="no" checked class="mr-2 w-4 h-4 text-blue-600">Nie</label>
+                                </div>
+                            </div>
                             
-                            <div class="mt-6 pt-4 border-t border-slate-100">
-                                <label class="block text-sm font-semibold text-slate-700 mb-2">Jeśli zaznaczono TAK, podaj krótkie szczegóły (opcjonalnie):</label>
-                                <textarea name="healthNotes" rows="3" class="block w-full rounded-md border-slate-300 border shadow-sm p-3 focus:ring-blue-500 outline-none resize-none" placeholder="Np. nadciśnienie uregulowane lekami od 2021r..."></textarea>
+                            <div class="mt-4 pt-4 border-t border-slate-100">
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Jeśli zaznaczono TAK na którekolwiek z pytań, podaj szczegóły (opcjonalnie):</label>
+                                <textarea name="healthNotes" rows="3" class="block w-full rounded-md border-slate-300 border shadow-sm p-3 focus:ring-blue-500 outline-none resize-none"></textarea>
                             </div>
                         </div>
                     </div>
 
-                    <!-- STEP 3: Risk Activities (CSV 001/Risk) -->
+                    <!-- STEP 3: Risk Activities -->
                     <div id="step-3" class="hidden space-y-6">
                         <h3 class="text-2xl font-bold text-slate-800">Styl Życia i Ryzyko</h3>
-                        <p class="text-slate-600 mb-4">Zaznacz aktywności, które regularnie uprawiasz. Polisa uwzględni ochronę w tych obszarach.</p>
+                        <p class="text-slate-600 mb-4">Zaznacz aktywności, które regularnie uprawiasz. Polisa uwzględni odpowiednią ochronę.</p>
                         
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <label class="flex items-center p-4 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors shadow-sm">
-                                <input type="checkbox" name="risk_motorcycle" class="h-5 w-5 text-blue-600 rounded mr-3 border-slate-300">
+                            <label class="flex items-center p-4 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer shadow-sm">
+                                <input type="checkbox" name="risk_motorcycle" class="h-5 w-5 text-blue-600 rounded mr-3">
                                 <span class="text-sm font-medium text-slate-700">Motocykl (>125ccm)</span>
                             </label>
-                            <label class="flex items-center p-4 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors shadow-sm">
-                                <input type="checkbox" name="risk_diving" class="h-5 w-5 text-blue-600 rounded mr-3 border-slate-300">
-                                <span class="text-sm font-medium text-slate-700">Nurkowanie (powyżej 30m)</span>
+                            <label class="flex items-center p-4 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer shadow-sm">
+                                <input type="checkbox" name="risk_diving" class="h-5 w-5 text-blue-600 rounded mr-3">
+                                <span class="text-sm font-medium text-slate-700">Nurkowanie (pow. 30m)</span>
                             </label>
-                            <label class="flex items-center p-4 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors shadow-sm">
-                                <input type="checkbox" name="risk_horse" class="h-5 w-5 text-blue-600 rounded mr-3 border-slate-300">
+                            <label class="flex items-center p-4 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer shadow-sm">
+                                <input type="checkbox" name="risk_horse" class="h-5 w-5 text-blue-600 rounded mr-3">
                                 <span class="text-sm font-medium text-slate-700">Jazda konna / Skoki</span>
                             </label>
-                            <label class="flex items-center p-4 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors shadow-sm">
-                                <input type="checkbox" name="risk_aviation" class="h-5 w-5 text-blue-600 rounded mr-3 border-slate-300">
+                            <label class="flex items-center p-4 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer shadow-sm">
+                                <input type="checkbox" name="risk_aviation" class="h-5 w-5 text-blue-600 rounded mr-3">
                                 <span class="text-sm font-medium text-slate-700">Sporty lotnicze</span>
                             </label>
                         </div>
                     </div>
 
-                    <!-- STEP 4: Summary & Contact -->
+                    <!-- STEP 4: Summary & Contact & EXCLUSIONS -->
                     <div id="step-4" class="hidden space-y-6">
                         <h3 class="text-2xl font-bold text-slate-800">Kontakt i Zgody</h3>
-                        <p class="text-slate-600">Gdzie mamy przesłać przygotowaną ofertę?</p>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
                             <div>
                                 <label class="block text-sm font-semibold text-slate-700 mb-1">Adres Email</label>
-                                <input type="email" name="email" required class="block w-full rounded-md border-slate-300 border shadow-sm p-3 focus:ring-2 focus:ring-blue-500 outline-none">
+                                <input type="email" name="email" required class="block w-full rounded-md border-slate-300 border shadow-sm p-3">
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-slate-700 mb-1">Telefon Kontaktowy</label>
-                                <input type="tel" name="phone" required class="block w-full rounded-md border-slate-300 border shadow-sm p-3 focus:ring-2 focus:ring-blue-500 outline-none">
+                                <input type="tel" name="phone" required class="block w-full rounded-md border-slate-300 border shadow-sm p-3">
                             </div>
+                        </div>
+
+                        <!-- SEKCJA WYŁĄCZEŃ -->
+                        <div class="bg-red-50 p-4 rounded-xl border border-red-200 mt-2">
+                            <label class="flex items-start gap-3 cursor-pointer">
+                                <input type="checkbox" name="exclusions_accepted" required class="mt-1 h-5 w-5 text-red-600 rounded border-red-300 focus:ring-red-500">
+                                <span class="text-sm text-red-900 leading-relaxed font-medium">
+                                    Oświadczam, że zapoznałem/am się z <button type="button" onclick="toggleExclusionsModal()" class="text-red-700 underline font-bold hover:text-red-800">Głównymi Wyłączeniami Odpowiedzialności</button> (w tym dot. chorób przewlekłych kręgosłupa i stawów z ostatnich 24 m-cy).
+                                </span>
+                            </label>
                         </div>
 
                         <div class="space-y-4 bg-slate-50 p-5 rounded-xl border border-slate-200 text-xs text-slate-600">
                             <label class="flex items-start gap-3 cursor-pointer">
-                                <input type="checkbox" required class="mt-0.5 h-4 w-4 text-blue-600 rounded border-gray-300">
-                                <span class="leading-relaxed">Oświadczam, że zapoznałem/am się z <a href="regulamin.html" target="_blank" class="text-blue-600 font-semibold hover:underline">Regulaminem Serwisu</a> i <a href="polityka-cookies.html" target="_blank" class="text-blue-600 font-semibold hover:underline">Polityką Prywatności</a>.</span>
+                                <input type="checkbox" required class="mt-0.5 h-4 w-4 text-blue-600 rounded">
+                                <span class="leading-relaxed">Oświadczam, że zapoznałem/am się z <a href="regulamin.html" target="_blank" class="text-blue-600 font-semibold hover:underline">Regulaminem</a> i <a href="polityka-cookies.html" target="_blank" class="text-blue-600 font-semibold hover:underline">Polityką Prywatności</a>.</span>
                             </label>
                             <label class="flex items-start gap-3 cursor-pointer">
-                                <input type="checkbox" required class="mt-0.5 h-4 w-4 text-blue-600 rounded border-gray-300">
-                                <span class="leading-relaxed">Wyrażam zgodę na przetwarzanie podanych danych osobowych (w tym danych o zdrowiu) przez Aura Expert sp. z o.o. w celu przygotowania i przedstawienia mi spersonalizowanej oferty ubezpieczenia utraty dochodu. Wiem, że mogę cofnąć zgodę w dowolnym momencie.</span>
+                                <input type="checkbox" required class="mt-0.5 h-4 w-4 text-blue-600 rounded">
+                                <span class="leading-relaxed">Wyrażam zgodę na przetwarzanie danych osobowych (w tym danych medycznych) przez Aura Expert w celu przygotowania oferty.</span>
                             </label>
                         </div>
                     </div>
@@ -541,50 +584,62 @@
         </div>
     </section>
 
-    <!-- FAQ Section -->
+    <!-- ROZBUDOWANE FAQ -->
     <section id="faq" class="py-20 bg-white border-t border-slate-200">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12" data-aos="fade-up">
-                <h2 class="text-3xl font-bold text-slate-900 tracking-tight">Najczęściej zadawane pytania</h2>
+                <h2 class="text-3xl font-bold text-slate-900 tracking-tight">Najczęściej zadawane pytania (FAQ)</h2>
+                <p class="mt-3 text-slate-500">Kluczowe informacje na bazie Ogólnych Warunków Ubezpieczenia (OWU).</p>
             </div>
             
             <div class="space-y-4" data-aos="fade-up" data-aos-delay="100">
-                <!-- FAQ Item 1 -->
                 <details class="group border border-slate-200 rounded-lg bg-slate-50 [&_summary::-webkit-details-marker]:hidden">
                     <summary class="flex cursor-pointer items-center justify-between gap-1.5 p-5 text-slate-900 font-semibold">
-                        Czy składkę z polisy mogę wliczyć w koszty prowadzenia działalności?
-                        <span class="shrink-0 transition duration-300 group-open:-rotate-180">
-                            <span class="text-xl font-bold text-blue-600">↓</span>
-                        </span>
+                        Kiedy ubezpieczenie NIE zadziała (wyłączenia)?
+                        <span class="shrink-0 transition duration-300 group-open:-rotate-180 text-xl font-bold text-blue-600">↓</span>
                     </summary>
                     <div class="px-5 pb-5 text-slate-600 leading-relaxed border-t border-slate-200 pt-4">
-                        W wielu przypadkach przedsiębiorcy zaliczają ubezpieczenie związane stricte z ochroną płynności firmy do kosztów uzyskania przychodu. Ostateczna decyzja zależy od profilu Twojej działalności i indywidualnej interpretacji. Zawsze zalecamy skonsultowanie tego ze swoim biurem rachunkowym.
-                    </div>
-                </details>
-                
-                <!-- FAQ Item 2 -->
-                <details class="group border border-slate-200 rounded-lg bg-slate-50 [&_summary::-webkit-details-marker]:hidden">
-                    <summary class="flex cursor-pointer items-center justify-between gap-1.5 p-5 text-slate-900 font-semibold">
-                        Jak szybko otrzymam pieniądze w razie wypadku lub choroby?
-                        <span class="shrink-0 transition duration-300 group-open:-rotate-180">
-                            <span class="text-xl font-bold text-blue-600">↓</span>
-                        </span>
-                    </summary>
-                    <div class="px-5 pb-5 text-slate-600 leading-relaxed border-t border-slate-200 pt-4">
-                        Wypłata świadczenia (tzw. likwidacja szkody) następuje zazwyczaj w ciągu kilkunastu dni od momentu przesłania kompletu dokumentacji medycznej potwierdzającej zwolnienie lekarskie. Proces obsługiwany jest sprawnie, z myślą o zapewnieniu Ci płynności.
+                        Główne wyłączenia to m.in.: celowe samookaleczenie, wypadki pod wpływem alkoholu/narkotyków, działania wojenne oraz zawodowe uprawianie sportu. Ponadto, ochrona <strong>nie obejmuje chorób przewlekłych (oraz zwyrodnień kręgosłupa/stawów)</strong>, które były leczone lub konsultowane u lekarza w ciągu ostatnich 24 miesięcy przed zawarciem polisy.
                     </div>
                 </details>
 
-                <!-- FAQ Item 3 -->
                 <details class="group border border-slate-200 rounded-lg bg-slate-50 [&_summary::-webkit-details-marker]:hidden">
                     <summary class="flex cursor-pointer items-center justify-between gap-1.5 p-5 text-slate-900 font-semibold">
-                        Czy ubezpieczenie chroni mnie za granicą? (np. podczas wakacji)
-                        <span class="shrink-0 transition duration-300 group-open:-rotate-180">
-                            <span class="text-xl font-bold text-blue-600">↓</span>
-                        </span>
+                        Jak wyliczane jest świadczenie na działalności?
+                        <span class="shrink-0 transition duration-300 group-open:-rotate-180 text-xl font-bold text-blue-600">↓</span>
                     </summary>
                     <div class="px-5 pb-5 text-slate-600 leading-relaxed border-t border-slate-200 pt-4">
-                        Tak! Ochrona wypadkowa i chorobowa w ramach utraty dochodu działa 24 godziny na dobę, 7 dni w tygodniu, na całym świecie. Niezależnie czy złamiesz nogę w pracy w Warszawie, czy podczas urlopu we Włoszech – masz prawo do świadczenia.
+                        Suma ubezpieczenia nie może przekroczyć 80% Twojego średniego miesięcznego przychodu. Przy działalności B2B przychód ten wyliczany jest na podstawie ostatnich 12 miesięcy, po odjęciu kosztów podwykonawców, materiałów (jeśli handlujesz) oraz podatku VAT. Świadczenie dzienne to ta kwota podzielona przez 30 dni.
+                    </div>
+                </details>
+
+                <details class="group border border-slate-200 rounded-lg bg-slate-50 [&_summary::-webkit-details-marker]:hidden">
+                    <summary class="flex cursor-pointer items-center justify-between gap-1.5 p-5 text-slate-900 font-semibold">
+                        Czym jest okres wyczekiwania (franszyza)?
+                        <span class="shrink-0 transition duration-300 group-open:-rotate-180 text-xl font-bold text-blue-600">↓</span>
+                    </summary>
+                    <div class="px-5 pb-5 text-slate-600 leading-relaxed border-t border-slate-200 pt-4">
+                        Standardowo polisa aktywuje wypłatę po tzw. okresie karencji/franszyzy (np. po 30 dniach ciągłego zwolnienia lekarskiego). Oznacza to, że ubezpieczenie chroni przed poważnymi, długotrwałymi problemami zdrowotnymi, które realnie zagrażają płynności firmy.
+                    </div>
+                </details>
+                
+                <details class="group border border-slate-200 rounded-lg bg-slate-50 [&_summary::-webkit-details-marker]:hidden">
+                    <summary class="flex cursor-pointer items-center justify-between gap-1.5 p-5 text-slate-900 font-semibold">
+                        Czy ubezpieczenie działa za granicą?
+                        <span class="shrink-0 transition duration-300 group-open:-rotate-180 text-xl font-bold text-blue-600">↓</span>
+                    </summary>
+                    <div class="px-5 pb-5 text-slate-600 leading-relaxed border-t border-slate-200 pt-4">
+                        Tak. Ochrona działa 24/7 na całym świecie (o ile ubezpieczyciel nie wykluczy danego terytorium ze względu na toczącą się tam wojnę / sankcje ONZ, UE lub USA). Wypadek na wakacjach jest normalnie objęty ochroną.
+                    </div>
+                </details>
+
+                <details class="group border border-slate-200 rounded-lg bg-slate-50 [&_summary::-webkit-details-marker]:hidden">
+                    <summary class="flex cursor-pointer items-center justify-between gap-1.5 p-5 text-slate-900 font-semibold">
+                        Chcę kupić polisę od razu, bez agenta. Czy to możliwe?
+                        <span class="shrink-0 transition duration-300 group-open:-rotate-180 text-xl font-bold text-blue-600">↓</span>
+                    </summary>
+                    <div class="px-5 pb-5 text-slate-600 leading-relaxed border-t border-slate-200 pt-4">
+                        Tak! Jeśli znasz swoje potrzeby, możesz wystawić polisę samodzielnie. Otwórz okienko Asystenta (niebieska ikonka czatu w rogu ekranu) i kliknij "Kup Polisę Online". System przekieruje Cię na bezpieczną stronę sprzedażową Leadenhall.
                     </div>
                 </details>
             </div>
@@ -600,7 +655,7 @@
                     <span class="text-2xl font-bold text-white">Aura Expert</span>
                 </div>
                 <p class="text-sm text-slate-400 max-w-md leading-relaxed">
-                    Profesjonalne doradztwo w zakresie ubezpieczeń utraty dochodu. Jesteśmy agentem ubezpieczeniowym wpisanym do rejestru KNF, co gwarantuje bezpieczeństwo Twoich danych i transakcji.
+                    Profesjonalne doradztwo w zakresie ubezpieczeń utraty dochodu. Zapewniamy bezpieczeństwo Twoich danych i transakcji. Jesteśmy dumnym partnerem Leadenhall.
                 </p>
             </div>
             
@@ -608,8 +663,7 @@
                 <h4 class="text-white font-bold mb-5 tracking-wider uppercase text-sm">Dokumenty</h4>
                 <ul class="space-y-3 text-sm">
                     <li><a href="#" class="hover:text-blue-400 transition-colors">OWU Leadenhall</a></li>
-                    <li><a href="#" class="hover:text-blue-400 transition-colors">Karty Produktu</a></li>
-                    <li><a href="polityka-cookies.html" class="hover:text-blue-400 transition-colors">Polityka Cookies i Prywatności</a></li>
+                    <li><a href="polityka-cookies.html" class="hover:text-blue-400 transition-colors">Polityka Cookies i RODO</a></li>
                     <li><a href="regulamin.html" class="hover:text-blue-400 transition-colors">Regulamin Serwisu</a></li>
                 </ul>
             </div>
@@ -617,234 +671,108 @@
             <div>
                 <h4 class="text-white font-bold mb-5 tracking-wider uppercase text-sm">Kontakt</h4>
                 <ul class="space-y-3 text-sm">
-                    <li class="flex items-center gap-2"><span class="text-blue-500">✉</span> biuro@utratadochodu.com</li>
-                    <li class="flex items-center gap-2"><span class="text-blue-500">📞</span> +48 504 400 901</li>
-                    <li class="mt-4 text-xs text-slate-500 pt-2 border-t border-slate-800">
-                        Współpracujemy z:<br>Leadenhall Insurance S.A. i CEU sp. z o.o.
-                    </li>
+                    <li class="flex items-center gap-2"><span class="text-blue-500">✉</span> kontakt@auraexpert.pl</li>
+                    <li class="flex items-center gap-2"><span class="text-blue-500">📞</span> +48 000 000 000</li>
                 </ul>
             </div>
         </div>
-        <div class="max-w-7xl mx-auto px-4 mt-12 pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center text-xs text-slate-500">
-            <p>&copy; 2026 Aura Expert sp. z o.o. Wszelkie prawa zastrzeżone.</p>
-            <p class="mt-2 md:mt-0">Zaprojektowane dla Twojego bezpieczeństwa finansowego.</p>
-        </div>
     </footer>
 
-    <!-- Success Modal -->
-    <div id="success-modal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 bg-slate-900 bg-opacity-75 transition-opacity backdrop-blur-sm" aria-hidden="true"></div>
-            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 text-center sm:text-left sm:flex sm:items-start">
-                    <div class="mx-auto flex-shrink-0 flex items-center justify-center h-16 w-16 rounded-full bg-green-100 sm:mx-0 sm:h-12 sm:w-12">
-                        <span class="text-green-600 text-2xl font-bold">✓</span>
-                    </div>
-                    <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                        <h3 class="text-xl leading-6 font-bold text-slate-900" id="modal-title">Sukces! Wniosek Wysłany.</h3>
-                        <div class="mt-3">
-                            <p class="text-slate-600">
-                                Dziękujemy za zaufanie. Twoje dane zostały bezpiecznie i szyfrowanie przesłane. Licencjonowany agent Aura Expert skontaktuje się z Tobą telefonicznie w ciągu 24h z gotową wyceną.
-                            </p>
-                        </div>
+    <!-- MODAL WYŁĄCZEŃ (Exclusions Pop-up) -->
+    <div id="exclusions-modal" class="fixed inset-0 z-[110] hidden overflow-y-auto" aria-modal="true">
+        <div class="flex items-center justify-center min-h-screen p-4 text-center sm:p-0">
+            <div class="fixed inset-0 bg-slate-900 bg-opacity-80 backdrop-blur-sm transition-opacity" onclick="toggleExclusionsModal()"></div>
+            <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full z-10">
+                <div class="bg-white px-6 pt-5 pb-4 sm:p-8 sm:pb-4 text-left">
+                    <h3 class="text-2xl font-bold text-red-600 mb-4 flex items-center gap-2"><span>⚠️</span> Ważne Wyłączenia Odpowiedzialności</h3>
+                    <div class="mt-2 text-sm text-slate-600 space-y-4 h-64 overflow-y-auto pr-2 custom-scroll">
+                        <p>Zgodnie z OWU Leadenhall ubezpieczyciel nie ponosi odpowiedzialności za roszczenia związane z:</p>
+                        <ul class="list-disc pl-5 space-y-2 font-medium">
+                            <li><strong>Chorobami sprzed polisy:</strong> roszczenia wynikające z chorób, które w okresie 24 m-cy przed zawarciem polisy wymagały leczenia lub konsultacji medycznej (chyba że ubezpieczyciel wyraził na nie pisemną zgodę).</li>
+                            <li><strong>Problemami z kręgosłupem:</strong> zwyrodnienia kręgosłupa i stawów konsultowane lub leczone w ciągu ostatnich 24 m-cy.</li>
+                            <li>Celowym samookaleczeniem, usiłowaniem samobójstwa.</li>
+                            <li>Wypadkami pod wpływem alkoholu, narkotyków lub leków (bez zaleceń lekarza).</li>
+                            <li>Zawodowym uprawianiem sportu lub udziałem w wyścigach/zawodach z nagrodami.</li>
+                            <li>Popełnieniem (lub próbą) przestępstwa.</li>
+                            <li>Działaniami wojennymi, terroryzmem lub naruszeniem sankcji (ONZ, UE, USA).</li>
+                        </ul>
+                        <p class="text-xs italic mt-4 text-slate-500">* Powyższa lista stanowi jedynie wyciąg najważniejszych wyłączeń. Pełna lista znajduje się w Ogólnych Warunkach Ubezpieczenia (OWU) dostarczanych z ofertą.</p>
                     </div>
                 </div>
-                <div class="bg-slate-50 px-4 py-4 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <button type="button" onclick="closeModal()" class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-6 py-3 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm transition-colors">
-                        Zrozumiałem, zamknij
+                <div class="bg-slate-50 px-6 py-4 sm:flex sm:flex-row-reverse">
+                    <button type="button" onclick="toggleExclusionsModal()" class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-6 py-2 bg-slate-800 text-base font-bold text-white hover:bg-slate-900 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
+                        Rozumiem zasady
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Error Modal -->
-    <div id="error-modal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 bg-slate-900 bg-opacity-75 transition-opacity backdrop-blur-sm" aria-hidden="true"></div>
-            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 text-center sm:text-left sm:flex sm:items-start">
-                    <div class="mx-auto flex-shrink-0 flex items-center justify-center h-16 w-16 rounded-full bg-red-100 sm:mx-0 sm:h-12 sm:w-12">
-                        <span class="text-red-600 text-2xl font-bold">!</span>
-                    </div>
-                    <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                        <h3 class="text-xl leading-6 font-bold text-slate-900" id="error-modal-title">Wystąpił Błąd</h3>
-                        <div class="mt-3">
-                            <p class="text-slate-600">
-                                Przepraszamy, połączenie z serwerem nie powiodło się. Upewnij się, że masz dostęp do internetu lub zadzwoń do nas bezpośrednio.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-slate-50 px-4 py-4 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <button type="button" onclick="closeErrorModal()" class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-6 py-3 bg-slate-800 text-base font-medium text-white hover:bg-slate-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm transition-colors">
-                        Zamknij i spróbuj ponownie
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Modele Sukcesu / Błędu -->
+    <div id="success-modal" class="fixed inset-0 z-50 hidden overflow-y-auto"><div class="flex items-center justify-center min-h-screen p-4"><div class="fixed inset-0 bg-slate-900 bg-opacity-75 backdrop-blur-sm"></div><div class="bg-white rounded-2xl p-8 z-10 text-center max-w-sm mx-auto shadow-2xl"><div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100 mb-4"><span class="text-green-600 text-2xl font-bold">✓</span></div><h3 class="text-xl font-bold text-slate-900">Wysłano pomyślnie!</h3><p class="mt-2 text-sm text-slate-500 mb-6">Nasz agent przeanalizuje dane medyczne i skontaktuje się z Tobą w ciągu 24h z przygotowaną ofertą.</p><button onclick="closeModal()" class="w-full bg-blue-600 text-white rounded-lg px-4 py-2 font-bold hover:bg-blue-700">Zamknij</button></div></div></div>
+    <div id="error-modal" class="fixed inset-0 z-50 hidden overflow-y-auto"><div class="flex items-center justify-center min-h-screen p-4"><div class="fixed inset-0 bg-slate-900 bg-opacity-75 backdrop-blur-sm"></div><div class="bg-white rounded-2xl p-8 z-10 text-center max-w-sm mx-auto shadow-2xl"><div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-100 mb-4"><span class="text-red-600 text-2xl font-bold">!</span></div><h3 class="text-xl font-bold text-slate-900">Wystąpił Błąd</h3><p class="mt-2 text-sm text-slate-500 mb-6">Brak połączenia z serwerem. Upewnij się, że jesteś online i spróbuj ponownie.</p><button onclick="closeErrorModal()" class="w-full bg-slate-800 text-white rounded-lg px-4 py-2 font-bold hover:bg-slate-900">Zamknij</button></div></div></div>
 
     <!-- Zewnętrzne skrypty -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 
     <script>
-        // Inicjalizacja animacji scrollowania (AOS)
-        AOS.init({
-            duration: 800,
-            once: true,
-            offset: 100
-        });
+        // Logika modala WYŁĄCZEŃ
+        function toggleExclusionsModal() {
+            const modal = document.getElementById('exclusions-modal');
+            modal.classList.toggle('hidden');
+        }
 
-        // Efekt cienia pod Menu przy scrollowaniu
-        window.addEventListener('scroll', () => {
-            const nav = document.getElementById('navbar');
-            if (window.scrollY > 10) {
-                nav.classList.add('shadow-md');
+        // Logika CHATBOTA
+        const chatBtn = document.getElementById('chat-toggle-btn');
+        const chatWidget = document.getElementById('chat-widget');
+        const closeChatBtn = document.getElementById('close-chat');
+
+        function toggleChat() {
+            if (chatWidget.classList.contains('scale-0')) {
+                chatWidget.classList.remove('scale-0', 'opacity-0');
+                chatWidget.classList.add('scale-100', 'opacity-100');
+                chatBtn.querySelector('span').innerText = '✕';
+                chatBtn.classList.remove('pulse-btn');
             } else {
-                nav.classList.remove('shadow-md');
+                chatWidget.classList.remove('scale-100', 'opacity-100');
+                chatWidget.classList.add('scale-0', 'opacity-0');
+                chatBtn.querySelector('span').innerText = '💬';
             }
-        });
+        }
+        chatBtn.addEventListener('click', toggleChat);
+        closeChatBtn.addEventListener('click', toggleChat);
+        setTimeout(() => { if (chatWidget.classList.contains('scale-0')) toggleChat(); }, 8000); // otwiera sie po 8 sek
 
-        // Płynne przewijanie JS
+        AOS.init({ duration: 800, once: true });
+
+        // Scroll
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault(); 
-                const targetId = this.getAttribute('href').substring(1);
-                const targetElement = document.getElementById(targetId);
-                
-                if (targetElement) {
-                    targetElement.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-                
-                const mobileMenu = document.getElementById('mobile-menu');
-                if(mobileMenu && !mobileMenu.classList.contains('hidden')) {
-                    mobileMenu.classList.add('hidden');
-                }
+                const target = document.getElementById(this.getAttribute('href').substring(1));
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
             });
         });
 
-        // --- HERO CHART LOGIC ---
+        // MOCK CHART - Hero
         const ctxHero = document.getElementById('heroChart').getContext('2d');
         new Chart(ctxHero, {
             type: 'bar',
-            data: {
-                labels: ['Pełne Zdrowie', 'Choroba L4 - ZUS', 'L4: ZUS + UtrataDochodu'],
-                datasets: [{
-                    label: 'Twój Dochód Netto (PLN)',
-                    data: [15000, 2800, 14500],
-                    backgroundColor: ['#e2e8f0', '#ef4444', '#2563eb'],
-                    borderRadius: 6
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    title: { display: true, text: 'Symulacja 30 dni: B2B / Koszty stałe', font: { family: 'Inter' } }
-                },
-                scales: {
-                    y: { beginAtZero: true, grid: { display: false } },
-                    x: { grid: { display: false } }
-                }
-            }
+            data: { labels: ['Pełne Zdrowie', 'L4 ZUS', 'L4 ZUS + Aura'], datasets: [{ label: 'Dochód Netto (PLN)', data: [15000, 2800, 14500], backgroundColor: ['#e2e8f0', '#ef4444', '#2563eb'], borderRadius: 6 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
         });
 
-        // --- SEGMENTATION TABS & RADAR CHART ---
-        const segmentData = {
-            beauty: {
-                title: "Dla Salonów i Kosmetologów",
-                content: `
-                    <p class="text-slate-600 mb-6 leading-relaxed">Jako fryzjer, kosmetyczka czy kosmetolog, Twoje ręce to Twoje jedyne narzędzie pracy. Nawet drobny uraz, złamanie palca czy choroba zakaźna może wykluczyć Cię z zawodu na tygodnie.</p>
-                    <ul class="space-y-4">
-                        <li class="flex items-start"><span class="mr-3 text-green-500 text-xl">✔</span> <div><strong class="text-slate-800">Wariant HIV/WZW:</strong> Wypłata jednorazowa do 150 000 zł przy nieszczęśliwym zakażeniu.</div></li>
-                        <li class="flex items-start"><span class="mr-3 text-green-500 text-xl">✔</span> <div><strong class="text-slate-800">Koszty Stałe:</strong> Świadczenie dzienne, które pozwoli utrzymać najem lokalu i ZUS.</div></li>
-                    </ul>`,
-                chartData: [80, 90, 40, 90, 70]
-            },
-            med: {
-                title: "Dla Lekarzy i Pielęgniarek",
-                content: `
-                    <p class="text-slate-600 mb-6 leading-relaxed">Medycy są codziennie narażeni na ekspozycję zawodową oraz roszczenia pacjentów. Oferta CEU/Leadenhall jest bezkompromisowo dedykowana specyfice Twojego dyżuru.</p>
-                    <ul class="space-y-4">
-                        <li class="flex items-start"><span class="mr-3 text-green-500 text-xl">✔</span> <div><strong class="text-slate-800">Agresja Pacjenta:</strong> Dodatkowe świadczenia przy wypadkach w miejscu pracy.</div></li>
-                        <li class="flex items-start"><span class="mr-3 text-green-500 text-xl">✔</span> <div><strong class="text-slate-800">Wysokie sumy:</strong> Szpitalne stawki dzienne pokrywające straty z kontraktu B2B.</div></li>
-                    </ul>`,
-                chartData: [90, 95, 60, 85, 90]
-            },
-            b2b: {
-                title: "Dla IT, Prawników i B2B",
-                content: `
-                    <p class="text-slate-600 mb-6 leading-relaxed">Na kontrakcie B2B słowo "L4" często oznacza brak faktury w tym miesiącu. Nasza polisa działa jak "Prywatne Zwolnienie", zapewniając płynność w razie długiej choroby.</p>
-                    <ul class="space-y-4">
-                        <li class="flex items-start"><span class="mr-3 text-green-500 text-xl">✔</span> <div><strong class="text-slate-800">Ochrona do 80% przychodów:</strong> Realne zastępstwo dla wypłat ZUS.</div></li>
-                        <li class="flex items-start"><span class="mr-3 text-green-500 text-xl">✔</span> <div><strong class="text-slate-800">Elastyczność:</strong> Możliwość wypłaty nawet przez 24 miesiące niezdolności.</div></li>
-                    </ul>`,
-                chartData: [95, 20, 30, 80, 60]
-            }
-        };
-
+        // MOCK CHART - Radar
         const ctxRadar = document.getElementById('coverageRadar').getContext('2d');
-        let radarChart = new Chart(ctxRadar, {
-            type: 'radar',
-            data: {
-                labels: ['Ochrona Dochodu', 'Zakażenia (WZW)', 'OC / Prawne', 'Inwalidztwo', 'Pobyt Szpital'],
-                datasets: [{
-                    label: 'Poziom Ochrony Polisy',
-                    data: segmentData.beauty.chartData,
-                    fill: true,
-                    backgroundColor: 'rgba(37, 99, 235, 0.15)',
-                    borderColor: 'rgb(37, 99, 235)',
-                    pointBackgroundColor: 'rgb(37, 99, 235)',
-                    pointBorderColor: '#fff',
-                    pointHoverBackgroundColor: '#fff',
-                    pointHoverBorderColor: 'rgb(37, 99, 235)'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    r: {
-                        angleLines: { color: 'rgba(0,0,0,0.05)' },
-                        grid: { color: 'rgba(0,0,0,0.05)' },
-                        suggestedMin: 0,
-                        suggestedMax: 100,
-                        ticks: { display: false },
-                        pointLabels: { font: { family: 'Inter', size: 11 }, color: '#64748b' }
-                    }
-                }
-            }
-        });
-
+        let radarChart = new Chart(ctxRadar, { type: 'radar', data: { labels: ['Dochód', 'Zakażenia', 'OC', 'Inwalidztwo', 'Szpital'], datasets: [{ data: [80, 90, 40, 90, 70], backgroundColor: 'rgba(37, 99, 235, 0.15)', borderColor: '#2563eb', pointBackgroundColor: '#2563eb' }]}, options: { responsive: true, maintainAspectRatio: false, scales: { r: { suggestedMin: 0, suggestedMax: 100, ticks: { display: false } } } } });
         function switchSegment(key) {
-            document.querySelectorAll('.segment-btn').forEach(btn => {
-                btn.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
-                btn.classList.add('text-slate-500');
-            });
-            const activeBtn = document.getElementById(`btn-${key}`);
-            activeBtn.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
-            activeBtn.classList.remove('text-slate-500');
-
-            const container = document.getElementById('segment-content');
-            
-            container.style.opacity = 0;
-            setTimeout(() => {
-                container.innerHTML = `<h3 class="text-2xl font-bold mb-3 text-slate-800">${segmentData[key].title}</h3>${segmentData[key].content}`;
-                container.style.opacity = 1;
-            }, 150);
-
-            radarChart.data.datasets[0].data = segmentData[key].chartData;
-            radarChart.update();
+            const dataMap = { 'beauty': [80, 90, 40, 90, 70], 'med': [90, 95, 60, 85, 90], 'b2b': [95, 20, 30, 80, 60]};
+            radarChart.data.datasets[0].data = dataMap[key]; radarChart.update();
+            document.querySelectorAll('.segment-btn').forEach(btn => btn.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600'));
+            document.getElementById(`btn-${key}`).classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
         }
 
-        // --- CALCULATOR LOGIC ---
+        // KALKULATOR
         const incomeSlider = document.getElementById('calc-income-slider');
         const incomeDisplay = document.getElementById('calc-income-display');
         const professionSelect = document.getElementById('calc-profession');
@@ -852,15 +780,7 @@
         const periodBtns = document.querySelectorAll('.calc-period-btn');
         let periodMultiplier = 1;
 
-        const riskMultipliers = {
-            'programista': 0.012,
-            'lekarz': 0.015,
-            'kosmetolog': 0.018,
-            'prawnik': 0.013,
-            'architekt': 0.014,
-            'inne': 0.015,
-            'fizyczne': 0.025
-        };
+        const riskMultipliers = { 'programista': 0.012, 'lekarz': 0.015, 'kosmetolog': 0.018, 'prawnik': 0.013, 'architekt': 0.014, 'inne': 0.015, 'fizyczne': 0.025 };
 
         function calculatePremium() {
             const income = parseInt(incomeSlider.value);
@@ -868,47 +788,24 @@
             const isHiv = hivCheck.checked;
             
             const sumInsured = Math.round(income * 0.8);
-            const dailyBenefit = Math.round(sumInsured / 30);
-            
             let baseRate = riskMultipliers[profession] || 0.015;
-            
             if (isHiv) baseRate += 0.003; 
             if (periodMultiplier > 1) baseRate *= 1.1; 
 
             let premium = Math.round(sumInsured * baseRate);
-            
             incomeDisplay.textContent = income.toLocaleString() + ' zł';
-            
-            const resultEl = document.getElementById('calc-result');
-            let currentVal = parseInt(resultEl.innerText) || 0;
-            let diff = premium - currentVal;
-            if(Math.abs(diff) > 0) {
-                resultEl.innerText = premium;
-            }
-
+            document.getElementById('calc-result').innerText = premium;
             document.getElementById('calc-sum-insured').textContent = sumInsured.toLocaleString() + ' zł';
-            document.getElementById('calc-daily').textContent = dailyBenefit + ' zł';
+            document.getElementById('calc-daily').textContent = Math.round(sumInsured / 30) + ' zł';
             
             const medOptions = document.getElementById('med-options');
-            const resHiv = document.getElementById('res-hiv');
-            
             if (['lekarz', 'kosmetolog'].includes(profession)) {
                 medOptions.classList.remove('hidden');
-                if(isHiv) {
-                    resHiv.classList.remove('hidden');
-                    resHiv.classList.add('flex');
-                } else {
-                    resHiv.classList.add('hidden');
-                    resHiv.classList.remove('flex');
-                }
             } else {
                 medOptions.classList.add('hidden');
-                resHiv.classList.add('hidden');
-                resHiv.classList.remove('flex');
                 hivCheck.checked = false;
             }
         }
-
         incomeSlider.addEventListener('input', calculatePremium);
         professionSelect.addEventListener('change', calculatePremium);
         hivCheck.addEventListener('change', calculatePremium);
@@ -916,132 +813,67 @@
         periodBtns.forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.preventDefault(); 
-                periodBtns.forEach(b => {
-                    b.classList.remove('bg-white', 'text-blue-600', 'shadow-sm');
-                    b.classList.add('text-slate-500');
-                });
-                btn.classList.add('bg-white', 'text-blue-600', 'shadow-sm');
-                btn.classList.remove('text-slate-500');
+                periodBtns.forEach(b => { b.classList.remove('bg-white', 'text-blue-600', 'shadow-sm'); b.classList.add('text-slate-500'); });
+                btn.classList.add('bg-white', 'text-blue-600', 'shadow-sm'); btn.classList.remove('text-slate-500');
                 periodMultiplier = btn.dataset.val === "24" ? 1.8 : 1;
                 calculatePremium();
             });
         });
-
         calculatePremium();
 
-        // --- FORM WIZARD LOGIC ---
+        // WIZARD
         let currentStep = 1;
         const totalSteps = 4;
-
         function showStep(step) {
             for (let i = 1; i <= totalSteps; i++) {
                 document.getElementById(`step-${i}`).classList.add('hidden');
-                const bar = document.getElementById(`bar-${i}`);
-                if (i <= step) {
-                    bar.classList.remove('bg-slate-200');
-                    bar.classList.add('bg-blue-600');
-                } else {
-                    bar.classList.remove('bg-blue-600');
-                    bar.classList.add('bg-slate-200');
-                }
+                document.getElementById(`bar-${i}`).classList.toggle('bg-blue-600', i <= step);
+                document.getElementById(`bar-${i}`).classList.toggle('bg-slate-200', i > step);
             }
             document.getElementById(`step-${step}`).classList.remove('hidden');
             document.getElementById('step-indicator').textContent = `Krok ${step} z ${totalSteps}`;
-
             document.getElementById('prev-btn').classList.toggle('hidden', step === 1);
             document.getElementById('next-btn').classList.toggle('hidden', step === totalSteps);
             document.getElementById('submit-btn').classList.toggle('hidden', step !== totalSteps);
         }
-
-        document.getElementById('next-btn').addEventListener('click', () => {
-            if (currentStep < totalSteps) {
-                currentStep++;
-                showStep(currentStep);
-            }
-        });
-
-        document.getElementById('prev-btn').addEventListener('click', () => {
-            if (currentStep > 1) {
-                currentStep--;
-                showStep(currentStep);
-            }
-        });
-
+        document.getElementById('next-btn').addEventListener('click', () => { if (currentStep < totalSteps) { currentStep++; showStep(currentStep); }});
+        document.getElementById('prev-btn').addEventListener('click', () => { if (currentStep > 1) { currentStep--; showStep(currentStep); }});
+        
         const emploCheck = document.getElementById('employsPeople');
         const emploField = document.getElementById('employee-count-field');
         if(emploCheck && emploField) {
             emploCheck.addEventListener('change', () => {
                 emploField.classList.toggle('hidden', !emploCheck.checked);
-                document.querySelector('[name="employeeCount"]').required = emploCheck.checked;
             });
         }
-        
-        function scrollToForm() {
-            document.getElementById('wniosek').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+        function scrollToForm() { document.getElementById('wniosek').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
 
-        // --- SUBMISSION & GOOGLE SHEETS LOGIC ---
+        // SUBMISSION
         const form = document.getElementById('insurance-form');
-        
         form.addEventListener('submit', (e) => {
             e.preventDefault();
-            
             const formData = new FormData(form);
             const dataObj = Object.fromEntries(formData.entries());
             
-            dataObj.risk_motorcycle = form.querySelector('[name="risk_motorcycle"]').checked ? "Yes" : "No";
-            dataObj.med_heart = form.querySelector('[name="med_heart"]:checked')?.value || "No";
-            dataObj.risk_diving = form.querySelector('[name="risk_diving"]').checked ? "Yes" : "No";
-            dataObj.risk_horse = form.querySelector('[name="risk_horse"]').checked ? "Yes" : "No";
-            dataObj.risk_aviation = form.querySelector('[name="risk_aviation"]').checked ? "Yes" : "No";
-            
+            // Ręczne łapanie checkboxów i radio
+            const fields = ['med_heart','med_diabetes','med_bones','med_stomach','med_neuro','med_surgery','med_aids','risk_motorcycle','risk_diving','risk_horse','risk_aviation', 'exclusions_accepted'];
+            fields.forEach(f => {
+                const el = form.querySelector(`[name="${f}"]`);
+                if(el && el.type === 'checkbox') dataObj[f] = el.checked ? "Yes" : "No";
+                if(el && el.type === 'radio') dataObj[f] = form.querySelector(`[name="${f}"]:checked`)?.value || "No";
+            });
+
             const submitBtn = document.getElementById('submit-btn');
-            const originalText = submitBtn.innerText;
-            submitBtn.innerText = "Wysyłanie...";
-            submitBtn.disabled = true;
+            const originalText = submitBtn.innerText; submitBtn.innerText = "Wysyłanie..."; submitBtn.disabled = true;
 
             const googleScriptURL = 'https://script.google.com/a/macros/utratadochodu.com/s/AKfycbxbDwbsp1F8EWGMoNQiBgMVB0PmUQnW--RrmNHAAZuS4oxVTNRetxbY-n5kptXMpGjoFg/exec';
 
-            fetch(googleScriptURL, {
-                method: 'POST',
-                mode: 'no-cors', 
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(dataObj)
-            })
-            .then(() => {
-                submitBtn.innerText = originalText;
-                submitBtn.disabled = false;
-                document.getElementById('success-modal').classList.remove('hidden');
-            })
-            .catch((error) => {
-                submitBtn.innerText = originalText;
-                submitBtn.disabled = false;
-                document.getElementById('error-modal').classList.remove('hidden');
-            });
+            fetch(googleScriptURL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dataObj) })
+            .then(() => { submitBtn.innerText = originalText; submitBtn.disabled = false; document.getElementById('success-modal').classList.remove('hidden'); })
+            .catch(() => { submitBtn.innerText = originalText; submitBtn.disabled = false; document.getElementById('error-modal').classList.remove('hidden'); });
         });
-
-        function closeModal() {
-            document.getElementById('success-modal').classList.add('hidden');
-            form.reset();
-            currentStep = 1;
-            showStep(1);
-        }
-
-        function closeErrorModal() {
-            document.getElementById('error-modal').classList.add('hidden');
-        }
-        
-        document.getElementById('mobile-menu-btn').addEventListener('click', () => {
-            const menu = document.getElementById('mobile-menu');
-            menu.classList.toggle('hidden');
-        });
-
+        function closeModal() { document.getElementById('success-modal').classList.add('hidden'); form.reset(); currentStep = 1; showStep(1); }
+        function closeErrorModal() { document.getElementById('error-modal').classList.add('hidden'); }
     </script>
 </body>
-
 </html>
-
-
-
