@@ -582,6 +582,27 @@
     .success-celebration {
       animation: success-bounce 1s ease;
     }
+    
+    /* FAQ Accordion */
+    .faq-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+    }
+    
+    .faq-content.active {
+      max-height: 1000px;
+      transition: max-height 0.5s ease-in;
+    }
+    
+    .faq-icon {
+      transition: transform 0.3s ease;
+      font-weight: bold;
+    }
+    
+    .faq-icon.active {
+      transform: rotate(45deg);
+    }
   </style>
 </head>
 <body>
@@ -672,6 +693,7 @@
       </div>
       <a href="#jak-dziala" class="text-sm font-semibold hover:text-slate-300 transition hidden md:block">Jak działa</a>
       <a href="#kalkulator" class="text-sm font-semibold hover:text-slate-300 transition hidden md:block">Kalkulator</a>
+      <a href="#faq" class="text-sm font-semibold hover:text-slate-300 transition hidden md:block">FAQ</a>
       <a href="#wyłączenia" class="text-sm font-semibold hover:text-slate-300 transition hidden md:block">Wyłączenia</a>
       <a href="https://aura.expert/kariera" target="_blank" class="text-sm font-semibold hover:text-slate-300 transition hidden md:block">Pracuj z nami</a>
       <a href="#kontakt" class="bg-white text-brand-navy px-5 py-2 rounded-lg font-bold text-sm hover:bg-slate-100 transition">Kontakt</a>
@@ -919,6 +941,230 @@
       
       <div class="mt-6 text-xs text-slate-500 text-center">
         * Wyliczenie ma charakter orientacyjny. Dokładna składka zależy od indywidualnej oceny ryzyka.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" class="py-20 bg-white">
+  <div class="max-w-4xl mx-auto px-6">
+    <div class="text-center mb-16">
+      <h2 class="text-4xl font-black mb-4">Najczęściej zadawane pytania</h2>
+      <p class="text-xl text-slate-600">Wszystko czego potrzebujesz wiedzieć o ubezpieczeniu utraty dochodu</p>
+    </div>
+    
+    <div class="space-y-4">
+      <!-- FAQ Item 1 -->
+      <div class="bg-white border-2 border-slate-200 rounded-2xl overflow-hidden">
+        <button class="faq-button w-full text-left px-6 py-5 flex items-center justify-between hover:bg-slate-50 transition" onclick="toggleFaq(1)">
+          <span class="font-bold text-lg">Czym różni się ubezpieczenie utraty dochodu od zwykłego NNW?</span>
+          <span class="faq-icon text-2xl" id="faqIcon1" style="color: var(--brand-primary)">+</span>
+        </button>
+        <div class="faq-content" id="faqContent1">
+          <div class="px-6 pb-5 text-slate-600">
+            <p class="mb-3"><strong>Ubezpieczenie NNW (następstw nieszczęśliwych wypadków)</strong> wypłaca jednorazową kwotę gdy doznasz trwałego uszczerbku na zdrowiu po wypadku (np. 20% uszczerbku = 20% sumy ubezpieczenia).</p>
+            <p class="mb-3"><strong>Ubezpieczenie utraty dochodu</strong> wypłaca comiesięczne świadczenie przez cały okres, gdy nie możesz pracować – zarówno po wypadku jak i chorobie. Działa jak „pensja zastępcza".</p>
+            <p><strong>Przykład:</strong> Jeśli po operacji nie możesz pracować przez 4 miesiące, NNW może nie wypłacić nic (brak trwałego uszczerbku), a ubezpieczenie utraty dochodu wypłaci Ci 4× miesięczną sumę ubezpieczenia.</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- FAQ Item 2 -->
+      <div class="bg-white border-2 border-slate-200 rounded-2xl overflow-hidden">
+        <button class="faq-button w-full text-left px-6 py-5 flex items-center justify-between hover:bg-slate-50 transition" onclick="toggleFaq(2)">
+          <span class="font-bold text-lg">Czy mogę wykupić polisę jeśli pracuję na B2B lub prowadzę działalność?</span>
+          <span class="faq-icon text-2xl" id="faqIcon2" style="color: var(--brand-primary)">+</span>
+        </button>
+        <div class="faq-content" id="faqContent2">
+          <div class="px-6 pb-5 text-slate-600">
+            <p class="mb-3"><strong>Tak!</strong> To ubezpieczenie jest idealne właśnie dla osób samozatrudnionych, freelancerów, właścicieli firm i pracujących na kontraktach B2B.</p>
+            <p class="mb-3">Nie musisz być zatrudniony na etacie. Polisa chroni Twoje przychody niezależnie od formy zatrudnienia:</p>
+            <ul class="list-disc list-inside space-y-2 ml-4">
+              <li>Działalność gospodarcza (JDG, spółka)</li>
+              <li>Kontrakt B2B</li>
+              <li>Umowa o pracę</li>
+              <li>Umowa zlecenie</li>
+              <li>Wolny zawód (lekarz, prawnik, architekt)</li>
+              <li>Praktyka prywatna</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <!-- FAQ Item 3 -->
+      <div class="bg-white border-2 border-slate-200 rounded-2xl overflow-hidden">
+        <button class="faq-button w-full text-left px-6 py-5 flex items-center justify-between hover:bg-slate-50 transition" onclick="toggleFaq(3)">
+          <span class="font-bold text-lg">Jak szybko następuje wypłata świadczenia?</span>
+          <span class="faq-icon text-2xl" id="faqIcon3" style="color: var(--brand-primary)">+</span>
+        </button>
+        <div class="faq-content" id="faqContent3">
+          <div class="px-6 pb-5 text-slate-600">
+            <p class="mb-3">Wypłata następuje po upływie <strong>okresu karencji</strong>, który wybierasz przy zakupie polisy:</p>
+            <ul class="list-disc list-inside space-y-2 ml-4 mb-3">
+              <li><strong>0 dni</strong> – wypłata od 1. dnia niezdolności (najwyższa składka)</li>
+              <li><strong>7 dni</strong> – wypłata od 8. dnia</li>
+              <li><strong>14 dni</strong> – wypłata od 15. dnia</li>
+              <li><strong>30 dni</strong> – wypłata od 31. dnia (zalecane, optymalna składka)</li>
+              <li><strong>60 dni</strong> – wypłata od 61. dnia (niższa składka)</li>
+              <li><strong>90 dni</strong> – wypłata od 91. dnia (najniższa składka)</li>
+            </ul>
+            <p>Po złożeniu dokumentacji medycznej i pozytywnej weryfikacji szkody, pierwsze świadczenie wpływa na konto w ciągu <strong>7-14 dni roboczych</strong>.</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- FAQ Item 4 -->
+      <div class="bg-white border-2 border-slate-200 rounded-2xl overflow-hidden">
+        <button class="faq-button w-full text-left px-6 py-5 flex items-center justify-between hover:bg-slate-50 transition" onclick="toggleFaq(4)">
+          <span class="font-bold text-lg">Jak długo mogę otrzymywać comiesięczne wypłaty?</span>
+          <span class="faq-icon text-2xl" id="faqIcon4" style="color: var(--brand-primary)">+</span>
+        </button>
+        <div class="faq-content" id="faqContent4">
+          <div class="px-6 pb-5 text-slate-600">
+            <p class="mb-3">Świadczenie wypłacane jest przez cały okres niezdolności do pracy, maksymalnie przez:</p>
+            <ul class="list-disc list-inside space-y-2 ml-4 mb-3">
+              <li><strong>12 miesięcy</strong> (wariant podstawowy)</li>
+              <li><strong>24 miesiące</strong> (wariant rozszerzony)</li>
+            </ul>
+            <p class="mb-3">Wypłata kończy się gdy:</p>
+            <ul class="list-disc list-inside space-y-2 ml-4">
+              <li>Wrócisz do pełnej zdolności do pracy, lub</li>
+              <li>Upłynie maksymalny okres wypłaty (12 lub 24 miesiące), lub</li>
+              <li>Skończysz 65 lat (wiek maksymalny ochrony)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <!-- FAQ Item 5 -->
+      <div class="bg-white border-2 border-slate-200 rounded-2xl overflow-hidden">
+        <button class="faq-button w-full text-left px-6 py-5 flex items-center justify-between hover:bg-slate-50 transition" onclick="toggleFaq(5)">
+          <span class="font-bold text-lg">Czy polisa obejmuje choroby psychiczne i przewlekłe?</span>
+          <span class="faq-icon text-2xl" id="faqIcon5" style="color: var(--brand-primary)">+</span>
+        </button>
+        <div class="faq-content" id="faqContent5">
+          <div class="px-6 pb-5 text-slate-600">
+            <p class="mb-3"><strong>Choroby przewlekłe istniejące przed podpisaniem umowy</strong> są wyłączone. Jeśli leczyłeś się na daną chorobę w ciągu 24 miesięcy przed zawarciem polisy, nie będzie ona objęta ochroną.</p>
+            <p class="mb-3"><strong>Nowe choroby przewlekłe</strong> powstałe po zawarciu umowy (po okresie wyczekiwania) są objęte ochroną.</p>
+            <p class="mb-3"><strong>Choroby psychiczne</strong> – zależy od wariantu polisy:</p>
+            <ul class="list-disc list-inside space-y-2 ml-4">
+              <li>Wariant podstawowy: wyłączenie chorób psychicznych</li>
+              <li>Wariant rozszerzony: ochrona obejmuje depresję, zespół wypalenia zawodowego, zaburzenia lękowe (po okresie wyczekiwania 6 miesięcy)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <!-- FAQ Item 6 -->
+      <div class="bg-white border-2 border-slate-200 rounded-2xl overflow-hidden">
+        <button class="faq-button w-full text-left px-6 py-5 flex items-center justify-between hover:bg-slate-50 transition" onclick="toggleFaq(6)">
+          <span class="font-bold text-lg">Co jeśli wrócę do pracy na krótko, a potem znów zachoruję?</span>
+          <span class="faq-icon text-2xl" id="faqIcon6" style="color: var(--brand-primary)">+</span>
+        </button>
+        <div class="faq-content" id="faqContent6">
+          <div class="px-6 pb-5 text-slate-600">
+            <p class="mb-3">Jeśli przerwa w niezdolności do pracy trwa:</p>
+            <ul class="list-disc list-inside space-y-2 ml-4 mb-3">
+              <li><strong>Do 14 dni</strong> – wypłata świadczenia jest kontynuowana bez ponownego okresu karencji</li>
+              <li><strong>Powyżej 14 dni</strong> – okres karencji liczy się od nowa przy kolejnym zdarzeniu</li>
+            </ul>
+            <p><strong>Przykład:</strong> Wróciłeś do pracy na 10 dni po operacji, ale okazało się że to za wcześnie i znów trafiłeś na L4 – wypłata jest kontynuowana. Gdyby przerwa była 20 dni, karencja liczyłaby się od początku.</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- FAQ Item 7 -->
+      <div class="bg-white border-2 border-slate-200 rounded-2xl overflow-hidden">
+        <button class="faq-button w-full text-left px-6 py-5 flex items-center justify-between hover:bg-slate-50 transition" onclick="toggleFaq(7)">
+          <span class="font-bold text-lg">Jakie dokumenty są potrzebne do zgłoszenia szkody?</span>
+          <span class="faq-icon text-2xl" id="faqIcon7" style="color: var(--brand-primary)">+</span>
+        </button>
+        <div class="faq-content" id="faqContent7">
+          <div class="px-6 pb-5 text-slate-600">
+            <p class="mb-3">Do zgłoszenia szkody potrzebujesz:</p>
+            <ul class="list-disc list-inside space-y-2 ml-4">
+              <li><strong>Formularz zgłoszenia szkody</strong> (dostępny online)</li>
+              <li><strong>Zaświadczenie lekarskie ZUS ZLA</strong> (zwolnienie lekarskie L4)</li>
+              <li><strong>Dokumentacja medyczna</strong> – wyniki badań, karty informacyjne ze szpitala, opisy zabiegów</li>
+              <li><strong>Orzeczenie ZUS o niezdolności do pracy</strong> (jeśli posiadasz)</li>
+              <li><strong>Decyzja o zawieszeniu w zawodzie</strong> (dla lekarzy, prawników – jeśli dotyczy)</li>
+              <li><strong>Zaświadczenie o dochodach</strong> (PIT, potwierdzenie przelewów B2B)</li>
+            </ul>
+            <p class="mt-3">Wszystkie dokumenty możesz przesłać online przez bezpieczny portal ubezpieczyciela.</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- FAQ Item 8 -->
+      <div class="bg-white border-2 border-slate-200 rounded-2xl overflow-hidden">
+        <button class="faq-button w-full text-left px-6 py-5 flex items-center justify-between hover:bg-slate-50 transition" onclick="toggleFaq(8)">
+          <span class="font-bold text-lg">Czy mogę zwiększyć sumę ubezpieczenia w trakcie trwania polisy?</span>
+          <span class="faq-icon text-2xl" id="faqIcon8" style="color: var(--brand-primary)">+</span>
+        </button>
+        <div class="faq-content" id="faqContent8">
+          <div class="px-6 pb-5 text-slate-600">
+            <p class="mb-3"><strong>Tak, możesz zwiększyć ochronę</strong> w rocznicę polisy lub po istotnej zmianie dochodów.</p>
+            <p class="mb-3">Warunki zwiększenia sumy:</p>
+            <ul class="list-disc list-inside space-y-2 ml-4">
+              <li>Udokumentujesz wyższe przychody (PIT, zestawienie przelewów)</li>
+              <li>Wypełnisz nowy kwestionariusz zdrowia (tylko dla zwiększonej części)</li>
+              <li>Składka zostanie przeliczona proporcjonalnie do nowej sumy</li>
+              <li>Dla zwiększonej części obowiązuje nowy 90-dniowy okres wyczekiwania</li>
+            </ul>
+            <p class="mt-3">Nie możesz zmniejszyć sumy w trakcie trwania umowy, chyba że udokumentujesz trwały spadek dochodów.</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- FAQ Item 9 -->
+      <div class="bg-white border-2 border-slate-200 rounded-2xl overflow-hidden">
+        <button class="faq-button w-full text-left px-6 py-5 flex items-center justify-between hover:bg-slate-50 transition" onclick="toggleFaq(9)">
+          <span class="font-bold text-lg">Co się stanie jeśli zmienię zawód?</span>
+          <span class="faq-icon text-2xl" id="faqIcon9" style="color: var(--brand-primary)">+</span>
+        </button>
+        <div class="faq-content" id="faqContent9">
+          <div class="px-6 pb-5 text-slate-600">
+            <p class="mb-3">Musisz <strong>niezwłocznie poinformować ubezpieczyciela</strong> o zmianie zawodu, ponieważ zmiana profilu ryzyka może wpłynąć na składkę.</p>
+            <p class="mb-3"><strong>Zmiana na zawód o podobnym ryzyku</strong> (np. programista → analityk danych) – składka pozostaje bez zmian.</p>
+            <p class="mb-3"><strong>Zmiana na zawód o wyższym ryzyku</strong> (np. księgowy → elektryk wysokościowy) – składka wzrośnie proporcjonalnie do ryzyka.</p>
+            <p class="mb-3"><strong>Zmiana na zawód o niższym ryzyku</strong> (np. spawacz → biurowiec) – możesz renegocjować niższą składkę.</p>
+            <p>Jeśli nie zgłosisz zmiany zawodu, ubezpieczyciel może odmówić wypłaty świadczenia lub obniżyć jego wysokość proporcjonalnie do zapłaconej składki.</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- FAQ Item 10 -->
+      <div class="bg-white border-2 border-slate-200 rounded-2xl overflow-hidden">
+        <button class="faq-button w-full text-left px-6 py-5 flex items-center justify-between hover:bg-slate-50 transition" onclick="toggleFaq(10)">
+          <span class="font-bold text-lg">Czy polisa działa za granicą?</span>
+          <span class="faq-icon text-2xl" id="faqIcon10" style="color: var(--brand-primary)">+</span>
+        </button>
+        <div class="faq-content" id="faqContent10">
+          <div class="px-6 pb-5 text-slate-600">
+            <p class="mb-3"><strong>Tak, ochrona obejmuje cały świat</strong> (wariant podstawowy i rozszerzony).</p>
+            <p class="mb-3">Jeśli ulegasz wypadkowi lub zachorujesz za granicą:</p>
+            <ul class="list-disc list-inside space-y-2 ml-4 mb-3">
+              <li>Polisa wypłaca świadczenie niezależnie od miejsca zdarzenia</li>
+              <li>Musisz przedstawić zaświadczenia lekarskie w języku polskim lub angielskim (lub przetłumaczone przez tłumacza przysięgłego)</li>
+              <li>Pobyt za granicą nie może przekroczyć 6 miesięcy w roku (w przeciwnym razie ubezpieczyciel może zakończyć umowę)</li>
+            </ul>
+            <p><strong>Uwaga:</strong> Jeśli pracujesz za granicą na stałe (przeniesienie rezydencji), musisz to zgłosić – może wymagać zmiany warunków polisy.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="mt-12 text-center bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-3xl p-8">
+      <h3 class="text-2xl font-bold mb-3">Nie znalazłeś odpowiedzi?</h3>
+      <p class="text-slate-600 mb-6">Skontaktuj się z nami – odpowiemy na wszystkie pytania</p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="tel:+48600000000" class="bg-white text-brand-navy px-8 py-3 rounded-xl font-bold hover:bg-slate-50 transition inline-flex items-center justify-center gap-2">
+          📞 +48 600 000 000
+        </a>
+        <a href="mailto:kontakt@utratadochodu.pl" class="bg-white text-brand-navy px-8 py-3 rounded-xl font-bold hover:bg-slate-50 transition inline-flex items-center justify-center gap-2">
+          ✉️ kontakt@utratadochodu.pl
+        </a>
       </div>
     </div>
   </div>
