@@ -1577,7 +1577,461 @@ const PROFESSIONS = {
     heroBenefit3: 'Elastyczne sumy ubezpieczenia do 50 000 zł/mies',
     featuresSubtitle: 'Kompleksowa ochrona finansowa dostosowana do pracy lekarza',
     feature1Desc: 'Wypłata świadczenia już od 1. dnia niezdolności do pracy. Szybka decyzja bez zbędnej biurokracji.',
-    feature2Desc: 'Dostosuj ochronę do swoich realnych przychodów z praktyki prywatnej i kontraktów medycznych.',
+    feature2Desc: 'Dostosuj ochronę do swoich realnych przychodów z praktyki prywatnej i kontraktów szpitalnych.',
+    calcSubtitle: 'Sprawdź ile kosztuje Twoja ochrona finansowa jako lekarz',
+    testimonials: [
+      { name: 'Dr Anna Kowalska', profession: 'Lekarz rodzinny', avatar: 'https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=100&h=100&fit=crop', text: 'Po zapaleniu stawów nie mogłam przyjmować pacjentów przez 3 miesiące. Dzięki ubezpieczeniu nie musiałam martwić się o rachunki.' },
+      { name: 'Dr Marek Nowak', profession: 'Chirurg', avatar: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=100&h=100&fit=crop', text: 'Wypadek samochodowy – złamana ręka. Polisa wypłacała mi 20 000 zł miesięcznie przez 5 miesięcy. Spokój finansowy w trudnym momencie.' },
+      { name: 'Dr Katarzyna Wiśniewska', profession: 'Dermatolog', avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=100&h=100&fit=crop', text: 'Prowadzę prywatny gabinet – ubezpieczenie utraty dochodu to must-have. Czuję się bezpieczna finansowo.' }
+    ]
+  },
+  prawnik: {
+    color: '#1e294a',
+    colorName: 'navy',
+    icon: '⚖️',
+    name: 'Prawnicy',
+    title: 'Ubezpieczenie utraty dochodu dla prawników',
+    subtitle: 'Chroń swoje przychody w razie choroby, wypadku lub zawieszenia w wykonywaniu zawodu. Ochrona stworzona z myślą o adwokatach i radcach prawnych.',
+    avgIncome: 20000,
+    professionLabel: 'Ubezpieczenie dla prawników',
+    heroImage: '⚖️',
+    heroBenefit1: 'Ochrona przy zawieszeniu prawa wykonywania zawodu',
+    heroBenefit2: 'Bez względu na formę prowadzenia kancelarii',
+    heroBenefit3: 'Sumy ubezpieczenia dopasowane do przychodów z praktyki',
+    featuresSubtitle: 'Kompleksowa ochrona finansowa dostosowana do pracy prawnika',
+    feature1Desc: 'Wypłata świadczenia już od 1. dnia niezdolności do pracy. Bez zbędnej biurokracji prawnej.',
+    feature2Desc: 'Dostosuj ochronę do swoich realnych przychodów z kancelarii i zleceń procesowych.',
+    calcSubtitle: 'Sprawdź ile kosztuje Twoja ochrona finansowa jako prawnik',
+    testimonials: [
+      { name: 'Adw. Tomasz Lewandowski', profession: 'Adwokat', avatar: 'https://images.unsplash.com/photo-1556157382-97eda2f9e2bf?w=100&h=100&fit=crop', text: 'Po operacji kręgosłupa nie mogłem prowadzić spraw przez 4 miesiące. Ubezpieczenie pokryło wszystkie stałe koszty kancelarii.' },
+      { name: 'Radca prawny Magdalena Zielińska', profession: 'Radca prawny', avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&h=100&fit=crop', text: 'Zawieszenie w wykonywaniu zawodu na 6 miesięcy. Polisa uratowała mnie finansowo – otrzymywałam 15 000 zł miesięcznie.' },
+      { name: 'Adw. Paweł Kamiński', profession: 'Adwokat', avatar: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=100&h=100&fit=crop', text: 'Prowadzę jednoosobową kancelarię. To ubezpieczenie daje mi spokój – wiem że w razie choroby nie stracę stabilności.' }
+    ]
+  },
+  it: {
+    color: '#06b6d4',
+    colorName: 'cyan',
+    icon: '💻',
+    name: 'IT',
+    title: '> Ubezpieczenie utraty dochodu dla IT',
+    subtitle: 'Zabezpiecz swoje przychody w razie choroby lub wypadku. Ochrona finansowa dla programistów, deweloperów i specjalistów IT.',
+    avgIncome: 18000,
+    professionLabel: 'Ubezpieczenie dla IT',
+    heroImage: '💻',
+    heroBenefit1: 'Ochrona przy długotrwałej chorobie (RSI, wypalenie)',
+    heroBenefit2: 'Bez względu na formę współpracy (B2B, UoP, zdalnie)',
+    heroBenefit3: 'Dopasowane do przychodów z projektów i kontraktów',
+    featuresSubtitle: 'Kompleksowa ochrona finansowa dostosowana do branży IT',
+    feature1Desc: 'Wypłata świadczenia już od 1. dnia niezdolności do pracy. Git push do bezpieczeństwa finansowego.',
+    feature2Desc: 'Dostosuj ochronę do swoich realnych przychodów z projektów, kontraktów B2B i freelance.',
+    calcSubtitle: '$ Sprawdź ile kosztuje Twoja ochrona finansowa jako developer',
+    testimonials: [
+      { name: 'Michał Kowalczyk', profession: 'Senior Developer', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop', text: 'RSI po 10 latach w IT – nie mogłem kodować przez 6 miesięcy. Polisa wypłacała 18k/mies. Mega spokój.' },
+      { name: 'Aleksandra Nowak', profession: 'Frontend Developer', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop', text: 'Wypalenie zawodowe + depresja. Nie wierzyłam że polisa to pokryje, a pokryła. 4 miesiące na leczenie bez stresu finansowego.' },
+      { name: 'Kamil Wiśniewski', profession: 'DevOps Engineer', avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop', text: 'Kontrakty B2B = zero gwarancji. To ubezpieczenie to mój safety net. Best investment ever.' }
+    ]
+  },
+  architekt: {
+    color: '#8b5cf6',
+    colorName: 'violet',
+    icon: '📐',
+    name: 'Architekci',
+    title: 'Ubezpieczenie utraty dochodu dla architektów',
+    subtitle: 'Chroń swoje przychody w razie choroby, wypadku lub czasowej niezdolności do projektowania. Ochrona dla architektów i urbanistów.',
+    avgIncome: 16000,
+    professionLabel: 'Ubezpieczenie dla architektów',
+    heroImage: '📐',
+    heroBenefit1: 'Ochrona przy utrazie zdolności do kreślenia/projektowania',
+    heroBenefit2: 'Bez względu na formę prowadzenia pracowni',
+    heroBenefit3: 'Dopasowane do przychodów z projektów i nadzorów',
+    featuresSubtitle: 'Kompleksowa ochrona finansowa dostosowana do pracy architekta',
+    feature1Desc: 'Wypłata świadczenia już od 1. dnia niezdolności do pracy. Projektuj bezpieczeństwo finansowe.',
+    feature2Desc: 'Dostosuj ochronę do swoich realnych przychodów z projektów architektonicznych i nadzorów budowlanych.',
+    calcSubtitle: 'Zaprojektuj swoją ochronę finansową jako architekt',
+    testimonials: [
+      { name: 'Arch. Piotr Nowicki', profession: 'Architekt', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop', text: 'Uraz ręki – nie mogłem kreślić przez 3 miesiące. Polisa wypłacała 16k miesięcznie. Stałe koszty biura pokryte.' },
+      { name: 'Arch. Joanna Kowalska', profession: 'Architekt wnętrz', avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop', text: 'Choroba oczu – miesiąc bez możliwości pracy przy komputerze. Ubezpieczenie ratowało moją płynność finansową.' },
+      { name: 'Arch. Marek Zieliński', profession: 'Urbanista', avatar: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=100&h=100&fit=crop', text: 'Prowadzę jednoosobową pracownię. To ubezpieczenie to fundament bezpieczeństwa finansowego w nieprzewidywalnych sytuacjach.' }
+    ]
+  },
+  weterynarz: {
+    color: '#14b8a6',
+    colorName: 'teal',
+    icon: '🐾',
+    name: 'Weterynarze',
+    title: 'Ubezpieczenie utraty dochodu dla weterynarzy',
+    subtitle: 'Zabezpiecz swoje przychody w razie choroby, wypadku lub czasowej niezdolności do wykonywania zawodu. Ochrona dla lekarzy weterynarii.',
+    avgIncome: 14000,
+    professionLabel: 'Ubezpieczenie dla weterynarzy',
+    heroImage: '🐾',
+    heroBenefit1: 'Ochrona przy chorobie zakaźnej od zwierząt',
+    heroBenefit2: 'Bez względu na formę prowadzenia praktyki weterynaryjnej',
+    heroBenefit3: 'Dopasowane do przychodów z kliniki i wizyt domowych',
+    featuresSubtitle: 'Kompleksowa ochrona finansowa dostosowana do pracy weterynarza',
+    feature1Desc: 'Wypłata świadczenia już od 1. dnia niezdolności do pracy. Zadbaj o swoją ochronę finansową.',
+    feature2Desc: 'Dostosuj ochronę do swoich realnych przychodów z praktyki weterynaryjnej i kliniki zwierząt.',
+    calcSubtitle: 'Sprawdź ile kosztuje Twoja ochrona finansowa jako weterynarz',
+    testimonials: [
+      { name: 'Lek. wet. Anna Kwiatkowska', profession: 'Weterynarz', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop', text: 'Alergia na sierść zwierząt – nieoczekiwana i ciężka. 4 miesiące bez możliwości pracy. Polisa pokryła wszystko.' },
+      { name: 'Lek. wet. Tomasz Lis', profession: 'Weterynarz chirurg', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop', text: 'Złamanie nadgarstka po upadku w klinice. Ubezpieczenie wypłacało 14k/mies przez 3 miesiące. Spokojnie mogłem się leczyć.' },
+      { name: 'Lek. wet. Katarzyna Walczak', profession: 'Weterynarz małych zwierząt', avatar: 'https://images.unsplash.com/photo-1576201836106-db1758fd1c97?w=100&h=100&fit=crop', text: 'Prowadzę mobilną praktykę – ubezpieczenie utraty dochodu to mój must-have. W końcu mogę spać spokojnie.' }
+    ]
+  },
+  ksiegowy: {
+    color: '#f59e0b',
+    colorName: 'amber',
+    icon: '📊',
+    name: 'Księgowi',
+    title: 'Ubezpieczenie utraty dochodu dla księgowych',
+    subtitle: 'Zabezpiecz swoje przychody w razie choroby lub wypadku. Ochrona finansowa dla księgowych i doradców podatkowych.',
+    avgIncome: 12000,
+    professionLabel: 'Ubezpieczenie dla księgowych',
+    heroImage: '📊',
+    heroBenefit1: 'Ochrona w sezonie rozliczeniowym (I kwartał)',
+    heroBenefit2: 'Bez względu na formę prowadzenia biura rachunkowego',
+    heroBenefit3: 'Dopasowane do przychodów z obsługi klientów',
+    featuresSubtitle: 'Kompleksowa ochrona finansowa dostosowana do pracy księgowego',
+    feature1Desc: 'Wypłata świadczenia już od 1. dnia niezdolności do pracy. Bilans bezpieczeństwa w twoją stronę.',
+    feature2Desc: 'Dostosuj ochronę do swoich realnych przychodów z obsługi księgowej klientów i doradztwa podatkowego.',
+    calcSubtitle: 'Rozlicz swoją ochronę finansową jako księgowy',
+    testimonials: [
+      { name: 'Małgorzata Dąbrowska', profession: 'Księgowa', avatar: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=100&h=100&fit=crop', text: 'Choroba w lutym – najgorszy możliwy moment. Polisa wypłacała 12k przez 2 miesiące. Klienci obsłużeni przez zastępstwo.' },
+      { name: 'Robert Kowalski', profession: 'Doradca podatkowy', avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop', text: 'Zawał serca w 40. roku życia. 6 miesięcy rekonwalescencji. Bez polisy straciłbym wszystko. Teraz wiem że warto.' },
+      { name: 'Iwona Mazur', profession: 'Księgowa', avatar: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=100&h=100&fit=crop', text: 'Prowadzę biuro rachunkowe – to ubezpieczenie daje mi spokój finansowy. Polecam każdemu samozatrudnionemu księgowemu.' }
+    ]
+  },
+  beauty: {
+    color: '#ec4899',
+    colorName: 'pink',
+    icon: '✨',
+    name: 'Beauty',
+    title: 'Ubezpieczenie utraty dochodu dla branży beauty',
+    subtitle: 'Zabezpiecz swoje przychody w razie choroby, wypadku lub utrazu sprawności rąk. Ochrona dla kosmetologów, stylistów i specjalistów beauty.',
+    avgIncome: 10000,
+    professionLabel: 'Ubezpieczenie dla beauty',
+    heroImage: '✨',
+    heroBenefit1: 'Ochrona przy utrawie sprawności rąk (kluczowe dla branży)',
+    heroBenefit2: 'Bez względu na formę prowadzenia salonu/gabinetu',
+    heroBenefit3: 'Dopasowane do przychodów z usług kosmetycznych',
+    featuresSubtitle: 'Kompleksowa ochrona finansowa dostosowana do branży beauty',
+    feature1Desc: 'Wypłata świadczenia już od 1. dnia niezdolności do pracy. Twoje piękne bezpieczeństwo finansowe.',
+    feature2Desc: 'Dostosuj ochronę do swoich realnych przychodów z usług kosmetycznych, stylizacji i zabiegów beauty.',
+    calcSubtitle: 'Wystylizuj swoją ochronę finansową w branży beauty',
+    testimonials: [
+      { name: 'Natalia Lewandowska', profession: 'Kosmetolog', avatar: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=100&h=100&fit=crop', text: 'Alergia na kosmetyki profesjonalne – musiałam zawiesić pracę na 5 miesięcy. Polisa wypłacała 10k miesięcznie. Ratowało to mój salon.' },
+      { name: 'Paulina Kowalczyk', profession: 'Stylista paznokci', avatar: 'https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?w=100&h=100&fit=crop', text: 'Zespół cieśni nadgarstka – urazy ze wykonywania zawodu. 4 miesiące bez pracy. Ubezpieczenie pokryło wszystko. Teraz znów styluję.' },
+      { name: 'Karolina Wiśniewska', profession: 'Wizażystka', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop', text: 'Wypadek samochodowy przed sezonem ślubnym. Polisa wypłacała mi świadczenie przez 3 miesiące – przetrwałam finansowo.' }
+    ]
+  },
+  universal: {
+    color: '#e11d48',
+    colorName: 'rose',
+    icon: '💼',
+    name: 'Profesjonaliści',
+    title: 'Ubezpieczenie utraty dochodu',
+    subtitle: 'Zabezpiecz swoje przychody w razie choroby, wypadku lub utraty zdolności do pracy. Ochrona finansowa dostosowana do Twoich potrzeb.',
+    avgIncome: 15000,
+    professionLabel: 'Ubezpieczenie dla profesjonalistów',
+    heroImage: '💼',
+    heroBenefit1: 'Wypłata już od 1. dnia niezdolności do pracy',
+    heroBenefit2: 'Bez obowiązku zatrudnienia na etacie',
+    heroBenefit3: 'Elastyczne sumy ubezpieczenia do 50 000 zł/mies',
+    featuresSubtitle: 'Kompleksowa ochrona finansowa dostosowana do Twojej sytuacji',
+    feature1Desc: 'Pieniądze na koncie już od 1. dnia niezdolności do pracy. Bez zbędnej biurokracji i długiego oczekiwania.',
+    feature2Desc: 'Dostosuj sumę ubezpieczenia do swoich realnych przychodów. Od 5 000 do 50 000 zł miesięcznie.',
+    calcSubtitle: 'Sprawdź ile kosztuje Twoja ochrona finansowa',
+    testimonials: [
+      { name: 'Jan Kowalski', profession: 'Przedsiębiorca', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop', text: 'Po wypadku nie mogłem pracować przez 4 miesiące. Ubezpieczenie wypłacało mi 15 000 zł miesięcznie – uratowało moją firmę.' },
+      { name: 'Anna Nowak', profession: 'Freelancer', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop', text: 'Ciężka choroba – 6 miesięcy leczenia. Polisa pokryła wszystkie koszty życia. Bez niej nie dałabym rady.' },
+      { name: 'Piotr Wiśniewski', profession: 'Konsultant', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop', text: 'Pracuję na B2B – to ubezpieczenie to mój must-have. Spokój finansowy w razie nieprzewidzianych sytuacji.' }
+    ]
+  }
+};
+
+// ============================================
+// STATE MANAGEMENT
+// ============================================
+let currentProfession = null;
+let currentStep = 1;
+const totalSteps = 4;
+
+// ============================================
+// PROFESSION SELECTION
+// ============================================
+function selectProfession(professionKey) {
+  currentProfession = professionKey;
+  const profession = PROFESSIONS[professionKey];
+  
+  // Apply theme
+  document.body.className = `theme-${professionKey} smooth-transition`;
+  document.documentElement.style.setProperty('--brand-primary', profession.color);
+  
+  // Hide overlay
+  document.getElementById('professionOverlay').classList.add('hidden');
+  
+  // Update profession tag
+  document.getElementById('professionTagContainer').classList.remove('hidden');
+  document.getElementById('professionIcon').textContent = profession.icon;
+  document.getElementById('professionName').textContent = profession.name;
+  
+  // Update hero section
+  document.getElementById('heroIcon').textContent = profession.icon;
+  document.getElementById('heroProfessionLabel').textContent = profession.professionLabel;
+  document.getElementById('heroTitle').textContent = profession.title;
+  document.getElementById('heroSubtitle').textContent = profession.subtitle;
+  document.getElementById('heroBenefit1').textContent = profession.heroBenefit1;
+  document.getElementById('heroBenefit2').textContent = profession.heroBenefit2;
+  document.getElementById('heroBenefit3').textContent = profession.heroBenefit3;
+  
+  // Update features section
+  document.getElementById('featuresSubtitle').textContent = profession.featuresSubtitle;
+  document.getElementById('feature1Desc').textContent = profession.feature1Desc;
+  document.getElementById('feature2Desc').textContent = profession.feature2Desc;
+  
+  // Update calculator
+  document.getElementById('calcSubtitle').textContent = profession.calcSubtitle;
+  document.getElementById('income').value = profession.avgIncome;
+  document.getElementById('sumInsured').value = profession.avgIncome;
+  updateSlider('income', profession.avgIncome);
+  updateSlider('sumInsured', profession.avgIncome);
+  
+  // Generate testimonials
+  generateTestimonials(profession.testimonials);
+  
+  // Add matrix effect for IT
+  if (professionKey === 'it') {
+    createMatrixEffect();
+  }
+  
+  // Trigger celebration
+  createConfetti(50);
+  
+  calculatePremium();
+}
+
+function skipProfessionSelector() {
+  selectProfession('universal');
+}
+
+function showProfessionSelector() {
+  document.getElementById('professionOverlay').classList.remove('hidden');
+}
+
+// ============================================
+// CALCULATOR
+// ============================================
+function updateSlider(id, value) {
+  const slider = document.getElementById(id);
+  const display = document.getElementById(id + 'Display');
+  
+  if (id === 'income' || id === 'sumInsured') {
+    display.textContent = new Intl.NumberFormat('pl-PL').format(value) + ' PLN';
+    const percentage = ((value - slider.min) / (slider.max - slider.min)) * 100;
+    slider.style.background = `linear-gradient(to right, var(--brand-primary) 0%, var(--brand-primary) ${percentage}%, #e2e8f0 ${percentage}%, #e2e8f0 100%)`;
+  } else if (id === 'age') {
+    display.textContent = value + ' lat';
+    const percentage = ((value - slider.min) / (slider.max - slider.min)) * 100;
+    slider.style.background = `linear-gradient(to right, var(--brand-primary) 0%, var(--brand-primary) ${percentage}%, #e2e8f0 ${percentage}%, #e2e8f0 100%)`;
+  }
+}
+
+function calculatePremium() {
+  const income = parseInt(document.getElementById('income').value);
+  const age = parseInt(document.getElementById('age').value);
+  const sumInsured = parseInt(document.getElementById('sumInsured').value);
+  
+  // Simplified premium calculation formula
+  let basePremium = sumInsured * 0.018; // 1.8% of sum insured
+  
+  // Age factor
+  if (age < 30) basePremium *= 0.9;
+  else if (age >= 30 && age < 40) basePremium *= 1.0;
+  else if (age >= 40 && age < 50) basePremium *= 1.2;
+  else if (age >= 50) basePremium *= 1.5;
+  
+  // Profession factor
+  if (currentProfession === 'lekarz') basePremium *= 1.1;
+  if (currentProfession === 'it') basePremium *= 0.9;
+  if (currentProfession === 'beauty') basePremium *= 1.0;
+  
+  const premium = Math.round(basePremium);
+  const percentage = ((premium / income) * 100).toFixed(1);
+  
+  document.getElementById('premiumResult').textContent = new Intl.NumberFormat('pl-PL').format(premium) + ' PLN';
+  document.getElementById('premiumPercent').textContent = percentage + '%';
+}
+
+// ============================================
+// FORM NAVIGATION
+// ============================================
+function nextStep() {
+  if (currentStep < totalSteps) {
+    document.querySelector(`.form-step[data-step="${currentStep}"]`).classList.remove('active');
+    currentStep++;
+    document.querySelector(`.form-step[data-step="${currentStep}"]`).classList.add('active');
+    updateProgressBar();
+    scrollToSection('formularz');
+  }
+}
+
+function prevStep() {
+  if (currentStep > 1) {
+    document.querySelector(`.form-step[data-step="${currentStep}"]`).classList.remove('active');
+    currentStep--;
+    document.querySelector(`.form-step[data-step="${currentStep}"]`).classList.add('active');
+    updateProgressBar();
+    scrollToSection('formularz');
+  }
+}
+
+function updateProgressBar() {
+  const progress = (currentStep / totalSteps) * 100;
+  document.getElementById('progressBar').style.width = progress + '%';
+}
+
+// Form submission
+document.getElementById('offerForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  
+  // Show success message
+  const formContainer = document.querySelector('#formularz .bg-slate-50');
+  formContainer.innerHTML = `
+    <div class="text-center py-16 success-celebration">
+      <div class="text-6xl mb-4">🎉</div>
+      <h3 class="text-3xl font-black mb-4" style="color: var(--brand-primary)">Dziękujemy za zgłoszenie!</h3>
+      <p class="text-xl text-slate-600 mb-6">Twoja oferta zostanie przygotowana w ciągu 24 godzin.</p>
+      <p class="text-slate-600 mb-8">Skontaktujemy się z Tobą w wybranym przez Ciebie czasie.</p>
+      <div class="flex gap-4 justify-center">
+        <a href="#" class="btn-primary">Wróć na stronę główną</a>
+      </div>
+    </div>
+  `;
+  
+  createConfetti(100);
+  scrollToSection('formularz');
+});
+
+// ============================================
+// FAQ
+// ============================================
+function toggleFaq(id) {
+  const content = document.getElementById('faqContent' + id);
+  const icon = document.getElementById('faqIcon' + id);
+  
+  content.classList.toggle('active');
+  icon.classList.toggle('active');
+}
+
+// ============================================
+// TESTIMONIALS
+// ============================================
+function generateTestimonials(testimonials) {
+  const grid = document.getElementById('testimonialsGrid');
+  grid.innerHTML = testimonials.map(t => `
+    <div class="testimonial-card">
+      <div class="flex items-center gap-4 mb-4" style="position: relative; z-index: 1;">
+        <img src="${t.avatar}" alt="${t.name}" class="w-16 h-16 rounded-full object-cover" loading="lazy">
+        <div>
+          <div class="font-bold text-lg">${t.name}</div>
+          <div class="text-sm text-slate-500">${t.profession}</div>
+        </div>
+      </div>
+      <p class="text-slate-600" style="position: relative; z-index: 1;">${t.text}</p>
+    </div>
+  `).join('');
+}
+
+// ============================================
+// ANIMATIONS
+// ============================================
+function createConfetti(count) {
+  for (let i = 0; i < count; i++) {
+    setTimeout(() => {
+      const confetti = document.createElement('div');
+      confetti.classList.add('confetti');
+      confetti.style.left = Math.random() * 100 + 'vw';
+      confetti.style.background = ['#e11d48', '#10b981', '#06b6d4', '#8b5cf6', '#f59e0b'][Math.floor(Math.random() * 5)];
+      confetti.style.width = (Math.random() * 10 + 5) + 'px';
+      confetti.style.height = confetti.style.width;
+      confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+      document.body.appendChild(confetti);
+      
+      setTimeout(() => confetti.remove(), 3000);
+    }, i * 30);
+  }
+}
+
+function createMatrixEffect() {
+  const matrixBg = document.createElement('div');
+  matrixBg.className = 'matrix-bg';
+  document.getElementById('heroSection').appendChild(matrixBg);
+  
+  const chars = '01';
+  for (let i = 0; i < 30; i++) {
+    const column = document.createElement('div');
+    column.className = 'matrix-column';
+    column.style.left = (i * 3.33) + '%';
+    column.style.animationDuration = (Math.random() * 5 + 10) + 's';
+    column.style.animationDelay = (Math.random() * 5) + 's';
+    
+    let text = '';
+    for (let j = 0; j < 50; j++) {
+      text += chars[Math.floor(Math.random() * chars.length)] + '\n';
+    }
+    column.textContent = text;
+    
+    matrixBg.appendChild(column);
+  }
+}
+
+function createHeroParticles() {
+  const particlesContainer = document.getElementById('heroParticles');
+  if (!particlesContainer) return;
+  
+  for (let i = 0; i < 30; i++) {
+    const particle = document.createElement('div');
+    particle.className = 'particle';
+    particle.style.left = Math.random() * 100 + '%';
+    particle.style.animationDelay = Math.random() * 15 + 's';
+    particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+    particlesContainer.appendChild(particle);
+  }
+}
+
+// ============================================
+// UTILITIES
+// ============================================
+function scrollToSection(id) {
+  const element = document.getElementById(id);
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+// ============================================
+// INITIALIZATION
+// ============================================
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize sliders
+  updateSlider('income', 15000);
+  updateSlider('age', 35);
+  updateSlider('sumInsured', 15000);
+  
+  // Create hero particles
+  createHeroParticles();
+  
+  // Initial premium calculation
+  calculatePremium();
+  
+  // Show profession selector after short delay
+  setTimeout(() => {
+    document.getElementById('professionOverlay').style.opacity = '1';
+  }, 300);
+});
+</script>
+
+</body>
+</html>tów medycznych.',
     calcSubtitle: 'Sprawdź ile kosztuje ochrona Twojego dochodu z praktyki lekarskiej',
     testimonials: [
       { name: 'Dr Anna Kowalska', role: 'Chirurg', text: 'Po wypadku nie mogłam operować przez 6 miesięcy. Ubezpieczenie pozwoliło mi utrzymać stabilność finansową i spokojnie wrócić do zdrowia.' },
