@@ -1,0 +1,2110 @@
+<!DOCTYPE html>
+<html lang="pl" class="antialiased">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ubezpieczenie Utraty Dochodu - Ochrona dla Lekarzy, Prawników, IT | UTRATADOCHODU.PL</title>
+  <meta name="description" content="Ubezpieczenie utraty dochodu dla profesjonalistów. Wypłata już od 1. dnia niezdolności do pracy. Suma ochrony do 50 000 zł/mies. Oblicz składkę online w 2 minuty!">
+  <meta name="keywords" content="ubezpieczenie utraty dochodu, ubezpieczenie dla lekarzy, ubezpieczenie dla prawników, ubezpieczenie IT, ochrona przychodu, niezdolność do pracy">
+  <meta name="author" content="Aura Expert sp. z o.o.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://utratadochodu.pl">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://utratadochodu.pl">
+  <meta property="og:title" content="Ubezpieczenie Utraty Dochodu - Ochrona dla Profesjonalistów">
+  <meta property="og:description" content="Zabezpiecz swoje przychody w razie choroby lub wypadku. Wypłata już od 1. dnia niezdolności do pracy.">
+  <meta property="og:image" content="https://utratadochodu.pl/og-image.jpg">
+  
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://utratadochodu.pl">
+  <meta property="twitter:title" content="Ubezpieczenie Utraty Dochodu - Ochrona dla Profesjonalistów">
+  <meta property="twitter:description" content="Zabezpiecz swoje przychody w razie choroby lub wypadku. Wypłata już od 1. dnia niezdolności do pracy.">
+  <meta property="twitter:image" content="https://utratadochodu.pl/og-image.jpg">
+  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'brand-navy': '#1e294a',
+            'brand-rose': '#e11d48',
+            'brand-emerald': '#10b981',
+            'brand-cyan': '#06b6d4',
+            'brand-violet': '#8b5cf6',
+            'brand-teal': '#14b8a6',
+            'brand-amber': '#f59e0b',
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    :root {
+      --brand-primary: #e11d48;
+      --brand-secondary: #1e294a;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+      overflow-x: hidden;
+    }
+    
+    .profession-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, #1e294a 0%, #334155 100%);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+    
+    .profession-overlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    
+    .profession-card {
+      background: white;
+      border-radius: 20px;
+      padding: 1.75rem 1.25rem;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      border: 2px solid #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      min-height: 160px;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    
+    .profession-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 16px 32px rgba(0,0,0,0.12);
+      border-color: var(--brand-primary);
+      border-width: 2px;
+    }
+    
+    .profession-card .icon {
+      font-size: 2.5rem;
+      line-height: 1;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    }
+    
+    .profession-card img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #f1f5f9;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+    }
+    
+    .profession-card .title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-top: 0.25rem;
+    }
+    
+    .profession-card .desc {
+      font-size: 0.875rem;
+      color: #64748b;
+      text-align: center;
+      font-weight: 500;
+    }
+    
+    /* PROFESSION-SPECIFIC THEMES */
+    body.theme-lekarz {
+      position: relative;
+    }
+    
+    body.theme-lekarz::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: 
+        repeating-linear-gradient(0deg, transparent, transparent 19px, rgba(16, 185, 129, 0.03) 19px, rgba(16, 185, 129, 0.03) 20px),
+        repeating-linear-gradient(90deg, transparent, transparent 19px, rgba(16, 185, 129, 0.03) 19px, rgba(16, 185, 129, 0.03) 20px);
+      pointer-events: none;
+      z-index: 1;
+    }
+    
+    body.theme-prawnik .hero-gradient {
+      background: linear-gradient(135deg, #1e294a 0%, #334155 100%),
+                  repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(255,255,255,0.02) 2px, rgba(255,255,255,0.02) 3px);
+    }
+    
+    body.theme-prawnik::after {
+      content: '§';
+      position: fixed;
+      font-size: 600px;
+      color: rgba(255,255,255,0.015);
+      top: 50%;
+      right: -100px;
+      transform: translateY(-50%);
+      font-weight: 900;
+      pointer-events: none;
+      z-index: 0;
+      font-family: Georgia, serif;
+    }
+    
+    body.theme-it {
+      font-family: 'Courier New', monospace;
+    }
+    
+    body.theme-it h1, 
+    body.theme-it h2, 
+    body.theme-it h3 {
+      font-family: 'Courier New', monospace;
+      letter-spacing: -0.02em;
+    }
+    
+    body.theme-it h1::before {
+      content: '> ';
+      color: var(--brand-primary);
+    }
+    
+    body.theme-it h2::before {
+      content: '$ ';
+      color: var(--brand-primary);
+      font-size: 0.9em;
+    }
+    
+    .matrix-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+    
+    .matrix-column {
+      position: absolute;
+      top: -100%;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      color: #06b6d4;
+      text-shadow: 0 0 5px #06b6d4;
+      animation: matrix-fall linear infinite;
+      white-space: pre;
+      line-height: 1.2;
+    }
+    
+    @keyframes matrix-fall {
+      to {
+        top: 100%;
+      }
+    }
+    
+    body.theme-architekt {
+      position: relative;
+    }
+    
+    body.theme-architekt::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: 
+        linear-gradient(rgba(139, 92, 246, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(139, 92, 246, 0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    body.theme-architekt .hero-gradient::after {
+      content: '';
+      position: absolute;
+      top: 20%;
+      right: -10%;
+      width: 400px;
+      height: 400px;
+      border: 2px solid rgba(255,255,255,0.05);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    
+    body.theme-weterynarz::before {
+      content: '🐾';
+      position: fixed;
+      font-size: 400px;
+      opacity: 0.02;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-15deg);
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    body.theme-ksiegowy {
+      position: relative;
+    }
+    
+    body.theme-ksiegowy::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: 
+        repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(245, 158, 11, 0.02) 39px, rgba(245, 158, 11, 0.02) 40px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    body.theme-beauty {
+      position: relative;
+    }
+    
+    body.theme-beauty::before {
+      content: '✨';
+      position: fixed;
+      font-size: 300px;
+      opacity: 0.02;
+      top: 20%;
+      right: -50px;
+      pointer-events: none;
+      z-index: 0;
+      animation: float-sparkle 20s ease-in-out infinite;
+    }
+    
+    @keyframes float-sparkle {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-50px) rotate(180deg); }
+    }
+    
+    .smooth-transition {
+      transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.6s ease-out;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .hero-gradient {
+      background: linear-gradient(135deg, var(--brand-secondary) 0%, #334155 100%);
+    }
+    
+    .profession-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255,255,255,0.1);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.2);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .profession-tag:hover {
+      background: rgba(255,255,255,0.2);
+      transform: scale(1.05);
+    }
+    
+    .calc-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      font-size: 1rem;
+      transition: all 0.2s;
+      background: #f8fafc;
+    }
+    
+    .calc-input:focus {
+      outline: none;
+      border-color: var(--brand-primary);
+      background: white;
+      box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.1);
+    }
+    
+    .btn-primary {
+      background: var(--brand-primary);
+      color: white;
+      padding: 1rem 2rem;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 1.125rem;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3);
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(225, 29, 72, 0.4);
+    }
+    
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+    
+    .feature-card {
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 2rem;
+      transition: all 0.3s;
+    }
+    
+    .feature-card:hover {
+      border-color: var(--brand-primary);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+      transform: translateY(-4px);
+    }
+    
+    .testimonial-card {
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .testimonial-card::before {
+      content: '"';
+      position: absolute;
+      top: -20px;
+      left: 20px;
+      font-size: 120px;
+      color: #f1f5f9;
+      font-family: Georgia, serif;
+      line-height: 1;
+    }
+    
+    .slider-container {
+      position: relative;
+      width: 100%;
+    }
+    
+    .slider {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 8px;
+      border-radius: 5px;
+      background: linear-gradient(to right, var(--brand-primary) 0%, var(--brand-primary) 50%, #e2e8f0 50%, #e2e8f0 100%);
+      outline: none;
+      transition: background 0.15s;
+    }
+    
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--brand-primary);
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      transition: all 0.2s;
+    }
+    
+    .slider::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    
+    .slider::-moz-range-thumb {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--brand-primary);
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    
+    .hero-image {
+      width: 100%;
+      height: 400px;
+      object-fit: cover;
+      border-radius: 20px;
+    }
+    
+    .form-step {
+      display: none;
+    }
+    
+    .form-step.active {
+      display: block;
+      animation: fadeIn 0.4s ease-out;
+    }
+    
+    .progress-bar {
+      height: 4px;
+      background: #e2e8f0;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: var(--brand-primary);
+      transition: width 0.3s ease;
+    }
+    
+    /* Confetti Animation */
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background: var(--brand-primary);
+      position: absolute;
+      animation: confetti-fall 3s linear forwards;
+      pointer-events: none;
+      z-index: 10000;
+    }
+    
+    @keyframes confetti-fall {
+      0% {
+        transform: translateY(0) rotateZ(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotateZ(720deg);
+        opacity: 0;
+      }
+    }
+    
+    /* Floating particles background */
+    .particles {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+    }
+    
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      animation: float 15s infinite ease-in-out;
+    }
+    
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0) translateX(0);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-100vh) translateX(50px);
+        opacity: 0;
+      }
+    }
+    
+    /* Pulse animation for CTA buttons */
+    @keyframes pulse-glow {
+      0%, 100% {
+        box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3);
+      }
+      50% {
+        box-shadow: 0 8px 24px rgba(225, 29, 72, 0.6);
+      }
+    }
+    
+    .btn-primary:hover {
+      animation: pulse-glow 2s infinite;
+    }
+    
+    /* Success celebration animation */
+    @keyframes success-bounce {
+      0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+      }
+      40% {
+        transform: translateY(-20px);
+      }
+      60% {
+        transform: translateY(-10px);
+      }
+    }
+    
+    .success-celebration {
+      animation: success-bounce 1s ease;
+    }
+  </style>
+</head>
+<body>
+
+<!-- PROFESSION SELECTOR OVERLAY -->
+<div id="professionOverlay" class="profession-overlay">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="text-center mb-12 fade-in">
+      <h1 class="text-5xl font-black text-white mb-4">Kim jesteś zawodowo?</h1>
+      <p class="text-xl text-slate-300">Dostosujemy ofertę ubezpieczenia do Twojej profesji</p>
+    </div>
+    
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div class="profession-card" onclick="selectProfession('lekarz')">
+        <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=200&h=200&fit=crop" alt="Lekarz" loading="lazy">
+        <div class="title">Lekarz</div>
+        <div class="desc">Lekarze, dentyści</div>
+      </div>
+      
+      <div class="profession-card" onclick="selectProfession('prawnik')">
+        <img src="https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=200&h=200&fit=crop" alt="Prawnik" loading="lazy">
+        <div class="title">Prawnik</div>
+        <div class="desc">Adwokaci, radcy</div>
+      </div>
+      
+      <div class="profession-card" onclick="selectProfession('it')">
+        <img src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=200&h=200&fit=crop" alt="IT" loading="lazy">
+        <div class="title">IT</div>
+        <div class="desc">Programiści, devs</div>
+      </div>
+      
+      <div class="profession-card" onclick="selectProfession('architekt')">
+        <img src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=200&h=200&fit=crop" alt="Architekt" loading="lazy">
+        <div class="title">Architekt</div>
+        <div class="desc">Projektanci, urbaniści</div>
+      </div>
+      
+      <div class="profession-card" onclick="selectProfession('weterynarz')">
+        <img src="https://images.unsplash.com/photo-1576201836106-db1758fd1c97?w=200&h=200&fit=crop" alt="Weterynarz" loading="lazy">
+        <div class="title">Weterynarz</div>
+        <div class="desc">Lekarze weterynarii</div>
+      </div>
+      
+      <div class="profession-card" onclick="selectProfession('ksiegowy')">
+        <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=200&h=200&fit=crop" alt="Księgowy" loading="lazy">
+        <div class="title">Księgowy</div>
+        <div class="desc">Księgowi, doradcy</div>
+      </div>
+      
+      <div class="profession-card" onclick="selectProfession('beauty')">
+        <img src="https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?w=200&h=200&fit=crop" alt="Beauty" loading="lazy">
+        <div class="title">Beauty</div>
+        <div class="desc">Kosmetolodzy, styliści</div>
+      </div>
+      
+      <div class="profession-card" onclick="selectProfession('universal')">
+        <img src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=200&h=200&fit=crop" alt="Profesjonalista" loading="lazy">
+        <div class="title">Inna</div>
+        <div class="desc">Wersja uniwersalna</div>
+      </div>
+    </div>
+    
+    <div class="text-center">
+      <button onclick="skipProfessionSelector()" class="text-slate-300 hover:text-white text-sm underline">
+        Pomiń i pokaż wersję uniwersalną
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="bg-brand-navy text-white shadow-lg sticky top-0 z-40">
+  <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="text-2xl font-black tracking-tight">
+        UTRATA<span id="headerBrand" class="smooth-transition" style="color: var(--brand-primary)">DOCHODU</span>
+      </div>
+      <span class="bg-white/10 text-white text-[10px] px-2 py-1 rounded-md tracking-widest font-bold" id="versionBadge">V 2.1</span>
+    </div>
+    
+    <div class="flex items-center gap-4">
+      <div id="professionTagContainer" class="hidden">
+        <div class="profession-tag" onclick="showProfessionSelector()">
+          <span id="professionIcon">💼</span>
+          <span id="professionName">Zmień profesję</span>
+          <span>▼</span>
+        </div>
+      </div>
+      <a href="#jak-dziala" class="text-sm font-semibold hover:text-slate-300 transition hidden md:block">Jak działa</a>
+      <a href="#kalkulator" class="text-sm font-semibold hover:text-slate-300 transition hidden md:block">Kalkulator</a>
+      <a href="#wyłączenia" class="text-sm font-semibold hover:text-slate-300 transition hidden md:block">Wyłączenia</a>
+      <a href="https://aura.expert/kariera" target="_blank" class="text-sm font-semibold hover:text-slate-300 transition hidden md:block">Pracuj z nami</a>
+      <a href="#kontakt" class="bg-white text-brand-navy px-5 py-2 rounded-lg font-bold text-sm hover:bg-slate-100 transition">Kontakt</a>
+    </div>
+  </div>
+</header>
+
+<!-- HERO SECTION -->
+<section id="heroSection" class="hero-gradient text-white py-20 smooth-transition" style="position: relative; overflow: hidden;">
+  <div class="particles" id="heroParticles"></div>
+  <div class="max-w-7xl mx-auto px-6" style="position: relative; z-index: 10;">
+    <div class="grid md:grid-cols-2 gap-12 items-center">
+      <div class="fade-in">
+        <div class="inline-flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full text-sm font-semibold mb-6 backdrop-blur">
+          <span id="heroIcon" class="smooth-transition">💼</span>
+          <span id="heroProfessionLabel" class="smooth-transition">Ubezpieczenie dla profesjonalistów</span>
+        </div>
+        
+        <h1 id="heroTitle" class="text-5xl md:text-6xl font-black mb-6 leading-tight smooth-transition">
+          Ubezpieczenie<br/>utraty dochodu
+        </h1>
+        
+        <p id="heroSubtitle" class="text-xl text-slate-300 mb-8 smooth-transition">
+          Zabezpiecz swoje przychody w razie choroby, wypadku lub utraty zdolności do pracy. Ochrona finansowa dostosowana do Twoich potrzeb.
+        </p>
+        
+        <div class="flex flex-col sm:flex-row gap-4">
+          <a href="#kalkulator" class="btn-primary text-center">
+            Oblicz składkę →
+          </a>
+          <button onclick="scrollToSection('features')" class="bg-white/10 text-white px-8 py-4 rounded-xl font-bold backdrop-blur hover:bg-white/20 transition">
+            Dowiedz się więcej
+          </button>
+        </div>
+        
+        <div class="mt-12 flex items-center gap-8 text-sm">
+          <div>
+            <div class="text-3xl font-black" id="heroStat1">15 min</div>
+            <div class="text-slate-400">Szybka wycena</div>
+          </div>
+          <div>
+            <div class="text-3xl font-black" id="heroStat2">2000+</div>
+            <div class="text-slate-400">Zadowolonych klientów</div>
+          </div>
+          <div>
+            <div class="text-3xl font-black">98%</div>
+            <div class="text-slate-400">Wypłacalność</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="relative">
+        <div class="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20">
+          <div class="text-center mb-6">
+            <img id="heroImage" src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=600&h=400&fit=crop" alt="Ochrona finansowa" class="hero-image mb-4" loading="lazy">
+            <h3 class="text-2xl font-bold">Ochrona bez kompromisów</h3>
+          </div>
+          <div class="space-y-4">
+            <div class="flex items-center gap-3 text-sm">
+              <div class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">✓</div>
+              <span id="heroBenefit1">Wypłata już od 1. dnia niezdolności do pracy</span>
+            </div>
+            <div class="flex items-center gap-3 text-sm">
+              <div class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">✓</div>
+              <span id="heroBenefit2">Bez obowiązku zatrudnienia na etacie</span>
+            </div>
+            <div class="flex items-center gap-3 text-sm">
+              <div class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">✓</div>
+              <span id="heroBenefit3">Elastyczne sumy ubezpieczenia do 50 000 zł/mies</span>
+            </div>
+            <div class="flex items-center gap-3 text-sm">
+              <div class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">✓</div>
+              <span>Ochrona w Polsce i za granicą</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- JAK DZIAŁA -->
+<section id="jak-dziala" class="py-20 bg-white">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="text-center mb-16">
+      <h2 class="text-4xl font-black mb-4">Jak działa ubezpieczenie utraty dochodu?</h2>
+      <p class="text-xl text-slate-600">Prosty mechanizm, który chroni Twoje finanse w trudnych momentach</p>
+    </div>
+    
+    <div class="grid md:grid-cols-2 gap-12 mb-16">
+      <div>
+        <img src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&h=600&fit=crop" alt="Ubezpieczenie" class="rounded-3xl shadow-xl mb-6" loading="lazy">
+      </div>
+      <div class="flex flex-col justify-center">
+        <h3 class="text-3xl font-bold mb-6">Co to jest ubezpieczenie utraty dochodu?</h3>
+        <p class="text-lg text-slate-600 mb-4">
+          To polisa, która <strong>wypłaca Ci comiesięczne świadczenie</strong>, gdy z powodu choroby, wypadku lub czasowej niezdolności do pracy tracisz źródło przychodu.
+        </p>
+        <p class="text-lg text-slate-600 mb-4">
+          Działa jak <strong>miesięczna pensja zastępcza</strong> – pozwala Ci spłacać rachunki, kredyty i utrzymać dotychczasowy standard życia, gdy nie możesz pracować.
+        </p>
+        <p class="text-lg text-slate-600">
+          W przeciwieństwie do standardowego ubezpieczenia zdrowotnego czy NNW, które wypłacają jednorazową kwotę, tutaj <strong>otrzymujesz regularne, comiesięczne wypłaty</strong> przez cały okres niezdolności do pracy.
+        </p>
+      </div>
+    </div>
+    
+    <div class="bg-slate-50 rounded-3xl p-12">
+      <h3 class="text-3xl font-bold mb-8 text-center">Jak to działa krok po kroku?</h3>
+      <div class="grid md:grid-cols-4 gap-8">
+        <div class="text-center">
+          <div class="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center text-2xl font-black text-white" style="background: var(--brand-primary)">1</div>
+          <h4 class="font-bold mb-2">Wykupujesz polisę</h4>
+          <p class="text-sm text-slate-600">Określasz sumę ubezpieczenia i okres karencji dopasowany do Twoich potrzeb</p>
+        </div>
+        <div class="text-center">
+          <div class="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center text-2xl font-black text-white" style="background: var(--brand-primary)">2</div>
+          <h4 class="font-bold mb-2">Zdarzenie ubezpieczeniowe</h4>
+          <p class="text-sm text-slate-600">Chorujesz, ulegasz wypadkowi lub następuje czasowe zawieszenie w zawodzie</p>
+        </div>
+        <div class="text-center">
+          <div class="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center text-2xl font-black text-white" style="background: var(--brand-primary)">3</div>
+          <h4 class="font-bold mb-2">Zgłaszasz szkodę</h4>
+          <p class="text-sm text-slate-600">Wysyłasz dokumentację medyczną i zaświadczenie o niezdolności do pracy</p>
+        </div>
+        <div class="text-center">
+          <div class="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center text-2xl font-black text-white" style="background: var(--brand-primary)">4</div>
+          <h4 class="font-bold mb-2">Otrzymujesz wypłatę</h4>
+          <p class="text-sm text-slate-600">Co miesiąc na Twoje konto wpływa uzgodniona suma do momentu powrotu do pracy</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="grid md:grid-cols-3 gap-8 mt-12">
+      <div class="bg-white border-2 border-slate-200 rounded-2xl p-6">
+        <div class="text-3xl mb-3">💰</div>
+        <h4 class="font-bold mb-2">Suma ubezpieczenia</h4>
+        <p class="text-sm text-slate-600">Wybierasz kwotę od 5 000 do 50 000 zł miesięcznie, która odpowiada Twoim realnym przychodom</p>
+      </div>
+      <div class="bg-white border-2 border-slate-200 rounded-2xl p-6">
+        <div class="text-3xl mb-3">⏱️</div>
+        <h4 class="font-bold mb-2">Okres karencji</h4>
+        <p class="text-sm text-slate-600">To czas od zdarzenia do pierwszej wypłaty: 0, 7, 14, 30, 60 lub 90 dni. Im dłuższy – tym niższa składka</p>
+      </div>
+      <div class="bg-white border-2 border-slate-200 rounded-2xl p-6">
+        <div class="text-3xl mb-3">📅</div>
+        <h4 class="font-bold mb-2">Okres wypłaty</h4>
+        <p class="text-sm text-slate-600">Świadczenie wypłacane jest do 12-24 miesięcy lub do momentu powrotu do pracy (w zależności od wariantu)</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features" class="py-20 bg-slate-50">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="text-center mb-16">
+      <h2 class="text-4xl font-black mb-4">Dlaczego warto?</h2>
+      <p class="text-xl text-slate-600" id="featuresSubtitle">Kompleksowa ochrona finansowa dostosowana do Twojej sytuacji</p>
+    </div>
+    
+    <div class="grid md:grid-cols-3 gap-8">
+      <div class="feature-card">
+        <div class="text-5xl mb-4">⚡</div>
+        <h3 class="text-xl font-bold mb-3">Szybka wypłata</h3>
+        <p class="text-slate-600" id="feature1Desc">Pieniądze na koncie już od 1. dnia niezdolności do pracy. Bez zbędnej biurokracji i długiego oczekiwania.</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="text-5xl mb-4">🎯</div>
+        <h3 class="text-xl font-bold mb-3">Elastyczna ochrona</h3>
+        <p class="text-slate-600" id="feature2Desc">Dostosuj sumę ubezpieczenia do swoich realnych przychodów. Od 5 000 do 50 000 zł miesięcznie.</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="text-5xl mb-4">💰</div>
+        <h3 class="text-xl font-bold mb-3">Przystępna składka</h3>
+        <p class="text-slate-600">Koszt ubezpieczenia dostosowany do Twojego wieku, zawodu i sumy ochrony. Bez ukrytych opłat.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CALCULATOR -->
+<section id="kalkulator" class="py-20 bg-white">
+  <div class="max-w-4xl mx-auto px-6">
+    <div class="text-center mb-12">
+      <h2 class="text-4xl font-black mb-4">Kalkulator składki</h2>
+      <p class="text-xl text-slate-600" id="calcSubtitle">Sprawdź ile kosztuje Twoja ochrona finansowa</p>
+    </div>
+    
+    <div class="bg-slate-50 border-2 border-slate-200 rounded-3xl p-8">
+      <div class="grid md:grid-cols-2 gap-8">
+        <!-- LEFT: Sliders -->
+        <div class="space-y-6">
+          <div>
+            <div class="flex justify-between items-center mb-3">
+              <label class="text-sm font-bold text-slate-700">Miesięczny dochód</label>
+              <span class="text-xl font-black" style="color: var(--brand-primary)" id="incomeDisplay">15 000 PLN</span>
+            </div>
+            <input type="range" id="income" class="slider" min="5000" max="50000" step="1000" value="15000" oninput="updateSlider('income', this.value); calculatePremium()">
+            <div class="flex justify-between text-xs text-slate-500 mt-1">
+              <span>5 000 PLN</span>
+              <span>50 000 PLN</span>
+            </div>
+          </div>
+          
+          <div>
+            <div class="flex justify-between items-center mb-3">
+              <label class="text-sm font-bold text-slate-700">Wiek</label>
+              <span class="text-xl font-black" style="color: var(--brand-primary)" id="ageDisplay">35 lat</span>
+            </div>
+            <input type="range" id="age" class="slider" min="18" max="65" step="1" value="35" oninput="updateSlider('age', this.value); calculatePremium()">
+            <div class="flex justify-between text-xs text-slate-500 mt-1">
+              <span>18 lat</span>
+              <span>65 lat</span>
+            </div>
+          </div>
+          
+          <div>
+            <div class="flex justify-between items-center mb-3">
+              <label class="text-sm font-bold text-slate-700">Suma ubezpieczenia</label>
+              <span class="text-xl font-black" style="color: var(--brand-primary)" id="sumDisplay">15 000 PLN</span>
+            </div>
+            <input type="range" id="sumInsured" class="slider" min="5000" max="50000" step="5000" value="15000" oninput="updateSlider('sumInsured', this.value); calculatePremium()">
+            <div class="flex justify-between text-xs text-slate-500 mt-1">
+              <span>5 000 PLN</span>
+              <span>50 000 PLN</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- RIGHT: Premium Result -->
+        <div class="flex items-center">
+          <div class="bg-white border-2 rounded-2xl p-8 w-full" style="border-color: var(--brand-primary)">
+            <div class="text-center">
+              <div class="text-sm font-bold text-slate-600 mb-2">Szacunkowa składka miesięczna:</div>
+              <div id="premiumResult" class="text-5xl font-black mb-4 smooth-transition" style="color: var(--brand-primary)">270 PLN</div>
+              <p class="text-sm text-slate-600 mb-6">To tylko <strong id="premiumPercent">1.8%</strong> Twojego dochodu miesięcznego</p>
+              <button onclick="scrollToSection('formularz')" class="btn-primary w-full">Otrzymaj pełną ofertę →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="mt-6 text-xs text-slate-500 text-center">
+        * Wyliczenie ma charakter orientacyjny. Dokładna składka zależy od indywidualnej oceny ryzyka.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WYŁĄCZENIA -->
+<section id="wyłączenia" class="py-20 bg-slate-50">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="text-center mb-16">
+      <h2 class="text-4xl font-black mb-4">Wyłączenia i ograniczenia</h2>
+      <p class="text-xl text-slate-600">Bądź świadom, czego polisa nie obejmuje – transparentność to podstawa</p>
+    </div>
+    
+    <div class="grid md:grid-cols-2 gap-8 mb-12">
+      <div class="bg-white border-2 border-red-200 rounded-3xl p-8">
+        <div class="flex items-start gap-4 mb-4">
+          <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 text-2xl">❌</div>
+          <div>
+            <h3 class="text-xl font-bold mb-2">Standardowe wyłączenia</h3>
+            <p class="text-sm text-slate-600 mb-4">Te sytuacje nie są objęte ochroną ubezpieczeniową:</p>
+          </div>
+        </div>
+        <ul class="space-y-3">
+          <li class="flex items-start gap-3">
+            <span class="text-red-500 font-bold mt-1">•</span>
+            <span class="text-sm"><strong>Choroby przewlekłe istniejące przed zawarciem umowy</strong> – schorzenia, na które leczyłeś się w ciągu 24 miesięcy przed podpisaniem polisy</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-red-500 font-bold mt-1">•</span>
+            <span class="text-sm"><strong>Próby samobójcze i samookaleczenia</strong> – umyślne działania prowadzące do utraty zdolności do pracy</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-red-500 font-bold mt-1">•</span>
+            <span class="text-sm"><strong>Działania pod wpływem alkoholu/narkotyków</strong> – wypadki lub choroby będące bezpośrednią konsekwencją nadużywania substancji</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-red-500 font-bold mt-1">•</span>
+            <span class="text-sm"><strong>Udział w działaniach wojennych/zamieszkach</strong> – urazy powstałe podczas konfliktów zbrojnych, terroryzmu, zamieszek</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-red-500 font-bold mt-1">•</span>
+            <span class="text-sm"><strong>Sporty ekstremalne bez dopłaty</strong> – BASE jumping, alpinizm wysokogórski, nurkowanie głębokie (wymagają dodatkowego wariantu)</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-red-500 font-bold mt-1">•</span>
+            <span class="text-sm"><strong>Ciąża i poród (standardowo)</strong> – planowana ciąża i poród nie są objęte, chyba że wykupisz rozszerzenie</span>
+          </li>
+        </ul>
+      </div>
+      
+      <div class="bg-white border-2 border-amber-200 rounded-3xl p-8">
+        <div class="flex items-start gap-4 mb-4">
+          <div class="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 text-2xl">⚠️</div>
+          <div>
+            <h3 class="text-xl font-bold mb-2">Ograniczenia czasowe i kwotowe</h3>
+            <p class="text-sm text-slate-600 mb-4">Parametry wypłaty świadczenia:</p>
+          </div>
+        </div>
+        <ul class="space-y-3">
+          <li class="flex items-start gap-3">
+            <span class="text-amber-500 font-bold mt-1">•</span>
+            <span class="text-sm"><strong>Okres karencji</strong> – pierwsza wypłata następuje po upływie wybranego okresu (0-90 dni od zdarzenia)</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-amber-500 font-bold mt-1">•</span>
+            <span class="text-sm"><strong>Maksymalny okres wypłaty</strong> – świadczenie wypłacane maksymalnie przez 12-24 miesiące (zależnie od wariantu)</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-amber-500 font-bold mt-1">•</span>
+            <span class="text-sm"><strong>Limit wieku</strong> – ochrona do 65. roku życia (po tym wieku polisa wygasa)</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-amber-500 font-bold mt-1">•</span>
+            <span class="text-sm"><strong>Wymóg kontynuacji leczenia</strong> – musisz być pod stałą opieką lekarską i stosować zalecenia terapeutyczne</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-amber-500 font-bold mt-1">•</span>
+            <span class="text-sm"><strong>Przerwy w niezdolności</strong> – jeśli wrócisz do pracy na więcej niż 14 dni, okres karencji liczy się od nowa</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-amber-500 font-bold mt-1">•</span>
+            <span class="text-sm"><strong>Maksymalna suma ubezpieczenia</strong> – nie więcej niż 80% udokumentowanego dochodu miesięcznego</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-3xl p-8">
+      <div class="flex items-start gap-4">
+        <div class="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0 text-2xl">ℹ️</div>
+        <div>
+          <h3 class="text-xl font-bold mb-3">Ważne informacje</h3>
+          <ul class="space-y-2 text-sm text-slate-700">
+            <li>✓ <strong>Okres wyczekiwania:</strong> Pierwszych 90 dni od zawarcia umowy to okres wyczekiwania – choroba w tym czasie nie jest objęta ochroną (wypadki TAK)</li>
+            <li>✓ <strong>Kwestionariusz zdrowia:</strong> Musisz szczerze odpowiedzieć na pytania o stan zdrowia – zatajenie informacji może skutkować odmową wypłaty</li>
+            <li>✓ <strong>Definicja niezdolności:</strong> Polisa wypłaca świadczenie gdy jesteś <strong>całkowicie</strong> niezdolny do wykonywania swojego zawodu (nie częściowo)</li>
+            <li>✓ <strong>Dokumentacja:</strong> Do wypłaty wymagane są zaświadczenia lekarskie, orzeczenia ZUS/KRUS lub decyzje o zawieszeniu w zawodzie</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FORMULARZ OFERTOWY -->
+<section id="formularz" class="py-20 bg-white">
+  <div class="max-w-4xl mx-auto px-6">
+    <div class="text-center mb-12">
+      <h2 class="text-4xl font-black mb-4">Otrzymaj pełną ofertę</h2>
+      <p class="text-xl text-slate-600">Wypełnij formularz – skontaktujemy się w ciągu 24h z dopasowaną propozycją</p>
+    </div>
+    
+    <div class="bg-slate-50 border-2 border-slate-200 rounded-3xl p-8">
+      <div class="progress-bar mb-8">
+        <div id="progressBar" class="progress-fill" style="width: 25%"></div>
+      </div>
+      
+      <form id="offerForm">
+        <!-- KROK 1: Dane podstawowe -->
+        <div class="form-step active" data-step="1">
+          <h3 class="text-2xl font-bold mb-6">Krok 1: Dane podstawowe</h3>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-2">Imię i nazwisko *</label>
+              <input type="text" class="calc-input" placeholder="np. Jan Kowalski" required>
+            </div>
+            <div class="grid md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-bold text-slate-700 mb-2">Email *</label>
+                <input type="email" class="calc-input" placeholder="jan.kowalski@example.com" required>
+              </div>
+              <div>
+                <label class="block text-sm font-bold text-slate-700 mb-2">Telefon *</label>
+                <input type="tel" class="calc-input" placeholder="+48 600 000 000" required>
+              </div>
+            </div>
+            <div class="grid md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-bold text-slate-700 mb-2">Data urodzenia *</label>
+                <input type="date" class="calc-input" required>
+              </div>
+              <div>
+                <label class="block text-sm font-bold text-slate-700 mb-2">PESEL *</label>
+                <input type="text" class="calc-input" placeholder="00000000000" maxlength="11" required>
+              </div>
+            </div>
+          </div>
+          <button type="button" onclick="nextStep()" class="btn-primary w-full mt-8">Dalej →</button>
+        </div>
+        
+        <!-- KROK 2: Zawód i dochody -->
+        <div class="form-step" data-step="2">
+          <h3 class="text-2xl font-bold mb-6">Krok 2: Zawód i dochody</h3>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-2">Wykonywany zawód *</label>
+              <input type="text" class="calc-input" placeholder="np. Lekarz rodzinny, Programista, Prawnik" required>
+            </div>
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-2">Forma zatrudnienia *</label>
+              <select class="calc-input" required>
+                <option value="">-- Wybierz --</option>
+                <option value="b2b">Działalność gospodarcza (B2B)</option>
+                <option value="uop">Umowa o pracę</option>
+                <option value="uz">Umowa zlecenie</option>
+                <option value="wolny">Wolny zawód</option>
+                <option value="praktyka">Praktyka prywatna</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-2">Średni miesięczny dochód netto *</label>
+              <input type="number" class="calc-input" placeholder="np. 15000" required>
+              <p class="text-xs text-slate-500 mt-1">Podaj średnią z ostatnich 6 miesięcy</p>
+            </div>
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-2">Pożądana suma ubezpieczenia miesięcznie *</label>
+              <input type="number" class="calc-input" placeholder="np. 15000" min="5000" max="50000" step="1000" required>
+              <p class="text-xs text-slate-500 mt-1">Podaj kwotę od 5 000 do 50 000 PLN</p>
+            </div>
+          </div>
+          <div class="flex gap-4 mt-8">
+            <button type="button" onclick="prevStep()" class="bg-slate-200 text-slate-700 px-8 py-3 rounded-xl font-bold hover:bg-slate-300 transition">← Wstecz</button>
+            <button type="button" onclick="nextStep()" class="btn-primary flex-grow">Dalej →</button>
+          </div>
+        </div>
+        
+        <!-- KROK 3: Stan zdrowia -->
+        <div class="form-step" data-step="3">
+          <h3 class="text-2xl font-bold mb-6">Krok 3: Kwestionariusz zdrowia</h3>
+          <div class="space-y-4">
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+              <p class="text-sm text-slate-700"><strong>Ważne:</strong> Odpowiedz szczerze na poniższe pytania. Zatajenie informacji może skutkować odmową wypłaty świadczenia.</p>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-3">Czy w ciągu ostatnich 24 miesięcy byłeś leczony lub pozostawałeś pod opieką lekarską z powodu choroby przewlekłej? *</label>
+              <div class="flex gap-4">
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="chronic" value="nie" class="w-4 h-4" required>
+                  <span>Nie</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="chronic" value="tak" class="w-4 h-4">
+                  <span>Tak</span>
+                </label>
+              </div>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-3">Czy w ciągu ostatnich 12 miesięcy byłeś hospitalizowany lub przeszedłeś zabieg operacyjny? *</label>
+              <div class="flex gap-4">
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="hospitalization" value="nie" class="w-4 h-4" required>
+                  <span>Nie</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="hospitalization" value="tak" class="w-4 h-4">
+                  <span>Tak</span>
+                </label>
+              </div>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-3">Czy obecnie przyjmujesz jakiekolwiek leki na stałe? *</label>
+              <div class="flex gap-4">
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="medication" value="nie" class="w-4 h-4" required>
+                  <span>Nie</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="medication" value="tak" class="w-4 h-4">
+                  <span>Tak</span>
+                </label>
+              </div>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-2">Dodatkowe informacje o stanie zdrowia (opcjonalnie)</label>
+              <textarea class="calc-input" rows="4" placeholder="Jeśli odpowiedziałeś TAK na któreś z pytań, opisz szczegóły..."></textarea>
+            </div>
+          </div>
+          <div class="flex gap-4 mt-8">
+            <button type="button" onclick="prevStep()" class="bg-slate-200 text-slate-700 px-8 py-3 rounded-xl font-bold hover:bg-slate-300 transition">← Wstecz</button>
+            <button type="button" onclick="nextStep()" class="btn-primary flex-grow">Dalej →</button>
+          </div>
+        </div>
+        
+        <!-- KROK 4: Preferencje i podsumowanie -->
+        <div class="form-step" data-step="4">
+          <h3 class="text-2xl font-bold mb-6">Krok 4: Preferencje i podsumowanie</h3>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-2">Preferowany okres karencji *</label>
+              <select class="calc-input" required>
+                <option value="">-- Wybierz --</option>
+                <option value="0">0 dni (wypłata od 1. dnia) – wyższa składka</option>
+                <option value="7">7 dni</option>
+                <option value="14">14 dni</option>
+                <option value="30" selected>30 dni (zalecane)</option>
+                <option value="60">60 dni – niższa składka</option>
+                <option value="90">90 dni – najniższa składka</option>
+              </select>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-2">Preferowany sposób kontaktu *</label>
+              <select class="calc-input" required>
+                <option value="">-- Wybierz --</option>
+                <option value="telefon">Telefon</option>
+                <option value="email">Email</option>
+                <option value="video">Wideokonferencja (Zoom/Teams)</option>
+              </select>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-2">Kiedy możemy się skontaktować? *</label>
+              <select class="calc-input" required>
+                <option value="">-- Wybierz --</option>
+                <option value="rano">Rano (8:00 - 12:00)</option>
+                <option value="poludnie">Popołudnie (12:00 - 16:00)</option>
+                <option value="wieczor">Wieczór (16:00 - 20:00)</option>
+              </select>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-2">Dodatkowe uwagi lub pytania</label>
+              <textarea class="calc-input" rows="4" placeholder="Czy masz dodatkowe pytania? Opisz swoją sytuację..."></textarea>
+            </div>
+            
+            <div class="bg-slate-100 rounded-xl p-6 mt-6">
+              <h4 class="font-bold mb-3">Zgody i oświadczenia *</h4>
+              <div class="space-y-3">
+                <label class="flex items-start gap-3 cursor-pointer">
+                  <input type="checkbox" class="mt-1 w-4 h-4" required>
+                  <span class="text-sm">Oświadczam, że informacje podane w formularzu są prawdziwe i kompletne</span>
+                </label>
+                <label class="flex items-start gap-3 cursor-pointer">
+                  <input type="checkbox" class="mt-1 w-4 h-4" required>
+                  <span class="text-sm">Wyrażam zgodę na przetwarzanie danych osobowych w celu przygotowania oferty (zgodnie z RODO)</span>
+                </label>
+                <label class="flex items-start gap-3 cursor-pointer">
+                  <input type="checkbox" class="mt-1 w-4 h-4" required>
+                  <span class="text-sm">Wyrażam zgodę na kontakt telefoniczny/mailowy w sprawie oferty</span>
+                </label>
+                <label class="flex items-start gap-3 cursor-pointer">
+                  <input type="checkbox" class="mt-1 w-4 h-4">
+                  <span class="text-sm">Chcę otrzymywać newsletter z informacjami o produktach ubezpieczeniowych (opcjonalnie)</span>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="flex gap-4 mt-8">
+            <button type="button" onclick="prevStep()" class="bg-slate-200 text-slate-700 px-8 py-3 rounded-xl font-bold hover:bg-slate-300 transition">← Wstecz</button>
+            <button type="submit" class="btn-primary flex-grow">Wyślij formularz →</button>
+          </div>
+        </div>
+      </form>
+    </div>
+    
+    <div class="mt-8 text-center text-sm text-slate-500">
+      <p>📞 Wolisz porozmawiać? Zadzwoń: <strong>+48 600 000 000</strong></p>
+      <p class="mt-2">✉️ Lub napisz: <strong>kontakt@utratadochodu.pl</strong></p>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials" class="py-20 bg-slate-50">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="text-center mb-16">
+      <h2 class="text-4xl font-black mb-4">Zaufali nam profesjonaliści</h2>
+      <p class="text-xl text-slate-600">Zobacz co mówią nasi klienci</p>
+    </div>
+    
+    <div class="grid md:grid-cols-3 gap-8" id="testimonialsGrid">
+      <!-- Testimonials będą generowane dynamicznie przez JS -->
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="py-20 hero-gradient text-white">
+  <div class="max-w-4xl mx-auto px-6 text-center">
+    <h2 class="text-4xl md:text-5xl font-black mb-6">Zabezpiecz swój dochód już dziś</h2>
+    <p class="text-xl text-slate-300 mb-8">Wypełnij krótki formularz i otrzymaj spersonalizowaną ofertę w 24h</p>
+    <button class="btn-primary text-xl px-12 py-5">Otrzymaj ofertę bezpłatnie →</button>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer id="kontakt" class="bg-slate-900 text-slate-300 py-12">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="grid md:grid-cols-4 gap-8 mb-8">
+      <div>
+        <div class="text-2xl font-black text-white mb-4">UTRATA<span style="color: var(--brand-primary)">DOCHODU</span></div>
+        <p class="text-sm">Ubezpieczenie utraty dochodu dla profesjonalistów.</p>
+        <p class="text-sm mt-2"><strong>Aura Expert sp. z o.o.</strong></p>
+      </div>
+      <div>
+        <h4 class="font-bold text-white mb-4">Produkty</h4>
+        <ul class="space-y-2 text-sm">
+          <li><a href="#" class="hover:text-white">Ubezpieczenie utraty dochodu</a></li>
+          <li><a href="#" class="hover:text-white">Dla lekarzy</a></li>
+          <li><a href="#" class="hover:text-white">Dla prawników</a></li>
+          <li><a href="#" class="hover:text-white">Dla IT</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-bold text-white mb-4">Firma</h4>
+        <ul class="space-y-2 text-sm">
+          <li><a href="https://aura.expert" target="_blank" class="hover:text-white">O nas</a></li>
+          <li><a href="https://aura.expert/kariera" target="_blank" class="hover:text-white">Pracuj z nami</a></li>
+          <li><a href="#" class="hover:text-white">Blog</a></li>
+          <li><a href="#kontakt" class="hover:text-white">Kontakt</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-bold text-white mb-4">Kontakt</h4>
+        <ul class="space-y-2 text-sm">
+          <li>📧 kontakt@utratadochodu.pl</li>
+          <li>📞 +48 600 000 000</li>
+          <li>📍 Warszawa, Polska</li>
+        </ul>
+      </div>
+    </div>
+    <div class="border-t border-slate-800 pt-8 text-sm text-center">
+      <p>&copy; 2026 UTRATADOCHODU.PL — <strong>Aura Expert sp. z o.o.</strong> Wszelkie prawa zastrzeżone.</p>
+      <p class="mt-2 text-xs text-slate-500">KRS: 0000000000 | NIP: 0000000000 | REGON: 000000000</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ============================================
+// PROFESSION CONFIGURATION
+// ============================================
+const PROFESSIONS = {
+  lekarz: {
+    color: '#10b981',
+    colorName: 'emerald',
+    icon: '🩺',
+    name: 'Lekarze',
+    title: 'Ubezpieczenie utraty dochodu dla lekarzy',
+    subtitle: 'Zabezpiecz swoje przychody w razie choroby, zawieszenia prawa wykonywania zawodu lub wypadku. Ochrona finansowa stworzona z myślą o lekarzach.',
+    avgIncome: 25000,
+    professionLabel: 'Ubezpieczenie dla lekarzy',
+    heroImage: '🩺',
+    heroBenefit1: 'Ochrona przy zawieszeniu prawa wykonywania zawodu',
+    heroBenefit2: 'Bez obowiązku zatrudnienia na etacie w szpitalu',
+    heroBenefit3: 'Elastyczne sumy ubezpieczenia do 50 000 zł/mies',
+    featuresSubtitle: 'Kompleksowa ochrona finansowa dostosowana do pracy lekarza',
+    feature1Desc: 'Wypłata świadczenia już od 1. dnia niezdolności do pracy. Szybka decyzja bez zbędnej biurokracji.',
+    feature2Desc: 'Dostosuj ochronę do swoich realnych przychodów z praktyki prywatnej i kontraktów medycznych.',
+    calcSubtitle: 'Sprawdź ile kosztuje ochrona Twojego dochodu z praktyki lekarskiej',
+    testimonials: [
+      { name: 'Dr Anna Kowalska', role: 'Chirurg', text: 'Po wypadku nie mogłam operować przez 6 miesięcy. Ubezpieczenie pozwoliło mi utrzymać stabilność finansową i spokojnie wrócić do zdrowia.' },
+      { name: 'Dr Piotr Nowak', role: 'Kardiolog', text: 'Jako lekarz prowadzący prywatną praktykę wiedziałem, że muszę zabezpieczyć swój dochód. Polisa dała mi spokój ducha.' },
+      { name: 'Dr Magdalena Zielińska', role: 'Dermatolog', text: 'Świetna ochrona dostosowana do specyfiki pracy lekarza. Polecam każdemu medykowi prowadzącemu własną działalność.' }
+    ]
+  },
+  prawnik: {
+    color: '#1e294a',
+    colorName: 'navy',
+    icon: '⚖️',
+    name: 'Prawnicy',
+    title: 'Ubezpieczenie utraty dochodu dla prawników',
+    subtitle: 'Zabezpiecz swoje honoraria w razie choroby, wypadku lub czasowego zawieszenia w wykonywaniu zawodu. Ochrona dla radców prawnych i adwokatów.',
+    avgIncome: 20000,
+    professionLabel: 'Ubezpieczenie dla prawników',
+    heroImage: '⚖️',
+    heroBenefit1: 'Ochrona przy zawieszeniu w wykonywaniu zawodu',
+    heroBenefit2: 'Zabezpieczenie honorariów z prowadzonych spraw',
+    heroBenefit3: 'Elastyczne sumy ubezpieczenia do 40 000 zł/mies',
+    featuresSubtitle: 'Kompleksowa ochrona finansowa dla radców prawnych i adwokatów',
+    feature1Desc: 'Wypłata świadczenia już od 1. dnia niezdolności. Bez długiego oczekiwania na decyzję.',
+    feature2Desc: 'Dostosuj sumę ochrony do swoich rzeczywistych przychodów z prowadzonej kancelarii.',
+    calcSubtitle: 'Sprawdź koszt ochrony Twoich honorariów prawniczych',
+    testimonials: [
+      { name: 'Mec. Jan Kowalski', role: 'Adwokat', text: 'Po operacji nie mogłem prowadzić spraw przez 4 miesiące. Ubezpieczenie pozwoliło mi skupić się na zdrowiu bez stresu finansowego.' },
+      { name: 'Mec. Katarzyna Lewandowska', role: 'Radca prawny', text: 'Jako osoba prowadząca własną kancelarię musiałam zabezpieczyć się finansowo. Ta polisa daje mi spokój.' },
+      { name: 'Mec. Tomasz Wiśniewski', role: 'Adwokat', text: 'Profesjonalna ochrona dostosowana do realiów pracy prawnika. Polecam każdemu prowadzącemu własną kancelarię.' }
+    ]
+  },
+  it: {
+    color: '#06b6d4',
+    colorName: 'cyan',
+    icon: '💻',
+    name: 'IT',
+    title: 'Ubezpieczenie utraty dochodu dla programistów',
+    subtitle: 'Zabezpiecz swoje przychody z projektów IT w razie choroby lub wypadku. Ochrona dla freelancerów, kontraktorów i właścicieli software house.',
+    avgIncome: 18000,
+    professionLabel: 'Ubezpieczenie dla branży IT',
+    heroImage: '💻',
+    heroBenefit1: 'Ochrona przy niezdolności do kodowania',
+    heroBenefit2: 'Bez względu na formę zatrudnienia (B2B, UoP)',
+    heroBenefit3: 'Elastyczne sumy ubezpieczenia do 50 000 zł/mies',
+    featuresSubtitle: 'Kompleksowa ochrona dla profesjonalistów IT',
+    feature1Desc: 'Wypłata już od 1. dnia niezdolności do pracy. Szybka procedura bez zbędnej biurokracji.',
+    feature2Desc: 'Dostosuj ochronę do swoich realnych przychodów z projektów IT, kontraktów i własnego biznesu.',
+    calcSubtitle: 'Sprawdź koszt zabezpieczenia Twoich przychodów z IT',
+    testimonials: [
+      { name: 'Marek Nowak', role: 'Senior Developer', text: 'Po wypadku nie mogłem pracować przez 3 miesiące. Ubezpieczenie pokryło mi utracone kontrakty z klientami.' },
+      { name: 'Anna Kowalska', role: 'Tech Lead', text: 'Jako freelancerka potrzebowałam zabezpieczenia na wypadek choroby. Ta polisa daje mi spokój finansowy.' },
+      { name: 'Piotr Zieliński', role: 'DevOps Engineer', text: 'Świetna ochrona dla ludzi IT pracujących na B2B. Polecam każdemu kontraktorowi.' }
+    ]
+  },
+  architekt: {
+    color: '#8b5cf6',
+    colorName: 'violet',
+    icon: '📐',
+    name: 'Architekci',
+    title: 'Ubezpieczenie utraty dochodu dla architektów',
+    subtitle: 'Zabezpiecz swoje przychody z projektów architektonicznych w razie choroby lub wypadku. Ochrona dla projektantów i właścicieli pracowni.',
+    avgIncome: 16000,
+    professionLabel: 'Ubezpieczenie dla architektów',
+    heroImage: '📐',
+    heroBenefit1: 'Ochrona przy niemożności prowadzenia projektów',
+    heroBenefit2: 'Zabezpieczenie honorariów projektowych',
+    heroBenefit3: 'Elastyczne sumy ubezpieczenia do 40 000 zł/mies',
+    featuresSubtitle: 'Kompleksowa ochrona dla projektantów i urbanistów',
+    feature1Desc: 'Wypłata świadczenia już od 1. dnia niezdolności do projektowania i nadzoru.',
+    feature2Desc: 'Dostosuj ochronę do swoich rzeczywistych przychodów z prowadzonych projektów.',
+    calcSubtitle: 'Sprawdź koszt ochrony Twoich honorariów projektowych',
+    testimonials: [
+      { name: 'Arch. Tomasz Kowalski', role: 'Architekt', text: 'Po kontuzji nie mogłem pracować przez 5 miesięcy. Ubezpieczenie pokryło mi utracone projekty.' },
+      { name: 'Arch. Maria Nowak', role: 'Projektant wnętrz', text: 'Prowadzę własną pracownię i musiałam zabezpieczyć swoje przychody. Polisa daje mi spokój.' },
+      { name: 'Arch. Jan Wiśniewski', role: 'Urbanista', text: 'Profesjonalna ochrona dla projektantów. Polecam każdemu prowadzącemu własną działalność.' }
+    ]
+  },
+  weterynarz: {
+    color: '#14b8a6',
+    colorName: 'teal',
+    icon: '🐾',
+    name: 'Weterynarze',
+    title: 'Ubezpieczenie utraty dochodu dla weterynarzy',
+    subtitle: 'Zabezpiecz swoje przychody z praktyki weterynaryjnej w razie choroby, wypadku lub zawieszenia prawa wykonywania zawodu.',
+    avgIncome: 14000,
+    professionLabel: 'Ubezpieczenie dla weterynarzy',
+    heroImage: '🐾',
+    heroBenefit1: 'Ochrona przy zawieszeniu prawa wykonywania zawodu',
+    heroBenefit2: 'Zabezpieczenie przychodów z praktyki weterynaryjnej',
+    heroBenefit3: 'Elastyczne sumy ubezpieczenia do 35 000 zł/mies',
+    featuresSubtitle: 'Kompleksowa ochrona dla lekarzy weterynarii',
+    feature1Desc: 'Wypłata świadczenia już od 1. dnia niezdolności do prowadzenia praktyki weterynaryjnej.',
+    feature2Desc: 'Dostosuj ochronę do swoich rzeczywistych przychodów z gabinetu lub kliniki weterynaryjnej.',
+    calcSubtitle: 'Sprawdź koszt ochrony przychodów z praktyki weterynaryjnej',
+    testimonials: [
+      { name: 'Lek. wet. Anna Kowalska', role: 'Weterynarz', text: 'Po złamaniu ręki nie mogłam prowadzić zabiegów przez 4 miesiące. Ubezpieczenie uratowało mój gabinet.' },
+      { name: 'Lek. wet. Piotr Nowak', role: 'Weterynarz', text: 'Prowadzę własną klinikę i potrzebowałem zabezpieczenia. Ta polisa daje mi finansowy spokój.' },
+      { name: 'Lek. wet. Katarzyna Zielińska', role: 'Weterynarz', text: 'Świetna ochrona dostosowana do specyfiki pracy weterynarza. Polecam!' }
+    ]
+  },
+  ksiegowy: {
+    color: '#f59e0b',
+    colorName: 'amber',
+    icon: '📊',
+    name: 'Księgowi',
+    title: 'Ubezpieczenie utraty dochodu dla księgowych',
+    subtitle: 'Zabezpiecz swoje przychody z usług księgowych i doradczych w razie choroby lub wypadku. Ochrona dla biur rachunkowych i doradców podatkowych.',
+    avgIncome: 12000,
+    professionLabel: 'Ubezpieczenie dla księgowych',
+    heroImage: '📊',
+    heroBenefit1: 'Ochrona przy niemożności prowadzenia księgowości',
+    heroBenefit2: 'Zabezpieczenie przychodów z biura rachunkowego',
+    heroBenefit3: 'Elastyczne sumy ubezpieczenia do 30 000 zł/mies',
+    featuresSubtitle: 'Kompleksowa ochrona dla księgowych i doradców podatkowych',
+    feature1Desc: 'Wypłata świadczenia już od 1. dnia niezdolności do prowadzenia księgowości i doradztwa.',
+    feature2Desc: 'Dostosuj ochronę do swoich rzeczywistych przychodów z prowadzonego biura rachunkowego.',
+    calcSubtitle: 'Sprawdź koszt ochrony przychodów z usług księgowych',
+    testimonials: [
+      { name: 'Maria Kowalska', role: 'Księgowa', text: 'Po operacji nie mogłam pracować przez 3 miesiące. Ubezpieczenie pokryło mi utracone przychody z klientów.' },
+      { name: 'Jan Nowak', role: 'Doradca podatkowy', text: 'Prowadzę własne biuro i musiałem zabezpieczyć swoje przychody. Polisa daje mi spokój.' },
+      { name: 'Katarzyna Lewandowska', role: 'Główna księgowa', text: 'Profesjonalna ochrona dla księgowych. Polecam każdemu prowadzącemu działalność.' }
+    ]
+  },
+  beauty: {
+    color: '#ec4899',
+    colorName: 'pink',
+    icon: '💅',
+    name: 'Beauty',
+    title: 'Ubezpieczenie utraty dochodu dla kosmetologów',
+    subtitle: 'Zabezpiecz swoje przychody z usług beauty w razie choroby lub wypadku. Ochrona dla właścicieli salonów kosmetycznych i stylistów.',
+    avgIncome: 10000,
+    professionLabel: 'Ubezpieczenie dla branży beauty',
+    heroImage: '💅',
+    heroBenefit1: 'Ochrona przy niemożności wykonywania zabiegów',
+    heroBenefit2: 'Zabezpieczenie przychodów z salonu beauty',
+    heroBenefit3: 'Elastyczne sumy ubezpieczenia do 25 000 zł/mies',
+    featuresSubtitle: 'Kompleksowa ochrona dla kosmetologów i stylistów',
+    feature1Desc: 'Wypłata świadczenia już od 1. dnia niezdolności do wykonywania zabiegów kosmetycznych.',
+    feature2Desc: 'Dostosuj ochronę do swoich rzeczywistych przychodów z salonu kosmetycznego.',
+    calcSubtitle: 'Sprawdź koszt ochrony przychodów z usług beauty',
+    testimonials: [
+      { name: 'Anna Kowalska', role: 'Kosmetolog', text: 'Po kontuzji dłoni nie mogłam wykonywać zabiegów przez 2 miesiące. Ubezpieczenie uratowało mój salon.' },
+      { name: 'Magdalena Nowak', role: 'Stylista', text: 'Prowadzę własny salon i potrzebowałam zabezpieczenia. Ta polisa daje mi spokój finansowy.' },
+      { name: 'Katarzyna Zielińska', role: 'Właścicielka salonu', text: 'Świetna ochrona dla branży beauty. Polecam każdej osobie prowadzącej salon!' }
+    ]
+  },
+  universal: {
+    color: '#e11d48',
+    colorName: 'rose',
+    icon: '💼',
+    name: 'Profesjonaliści',
+    title: 'Ubezpieczenie utraty dochodu',
+    subtitle: 'Zabezpiecz swoje przychody w razie choroby, wypadku lub utraty zdolności do pracy. Ochrona finansowa dostosowana do Twoich potrzeb.',
+    avgIncome: 15000,
+    professionLabel: 'Ubezpieczenie dla profesjonalistów',
+    heroImage: '🛡️',
+    heroBenefit1: 'Wypłata już od 1. dnia niezdolności do pracy',
+    heroBenefit2: 'Bez obowiązku zatrudnienia na etacie',
+    heroBenefit3: 'Elastyczne sumy ubezpieczenia do 50 000 zł/mies',
+    featuresSubtitle: 'Kompleksowa ochrona finansowa dostosowana do Twojej sytuacji',
+    feature1Desc: 'Pieniądze na koncie już od 1. dnia niezdolności do pracy. Bez zbędnej biurokracji i długiego oczekiwania.',
+    feature2Desc: 'Dostosuj sumę ubezpieczenia do swoich realnych przychodów. Od 5 000 do 50 000 zł miesięcznie.',
+    calcSubtitle: 'Sprawdź ile kosztuje Twoja ochrona finansowa',
+    testimonials: [
+      { name: 'Jan Kowalski', role: 'Przedsiębiorca', text: 'Po wypadku nie mogłem pracować przez pół roku. Ubezpieczenie pozwoliło mi utrzymać stabilność finansową.' },
+      { name: 'Anna Nowak', role: 'Freelancer', text: 'Jako osoba samozatrudniona potrzebowałam zabezpieczenia. Ta polisa daje mi spokój ducha.' },
+      { name: 'Piotr Zieliński', role: 'Konsultant', text: 'Profesjonalna ochrona dostosowana do moich potrzeb. Polecam każdemu prowadzącemu własną działalność.' }
+    ]
+  }
+};
+
+// ============================================
+// STATE MANAGEMENT
+// ============================================
+let currentProfession = null;
+
+// ============================================
+// PROFESSION SELECTOR
+// ============================================
+function selectProfession(professionKey) {
+  currentProfession = professionKey;
+  
+  // Save to sessionStorage
+  sessionStorage.setItem('userProfession', professionKey);
+  sessionStorage.setItem('professionExpiry', Date.now() + 30*24*60*60*1000);
+  
+  // Add to URL without page reload
+  setUrlParameter('p', professionKey);
+  
+  hideProfessionOverlay();
+  applyProfession(professionKey);
+}
+
+function showProfessionSelector() {
+  document.getElementById('professionOverlay').classList.remove('hidden');
+}
+
+function hideProfessionOverlay() {
+  document.getElementById('professionOverlay').classList.add('hidden');
+}
+
+function skipProfessionSelector() {
+  selectProfession('universal');
+}
+
+// ============================================
+// APPLY PROFESSION THEME
+// ============================================
+function applyProfession(professionKey) {
+  const config = PROFESSIONS[professionKey];
+  
+  // Update CSS variables
+  document.documentElement.style.setProperty('--brand-primary', config.color);
+  
+  // Apply profession-specific theme class
+  document.body.className = '';
+  document.body.classList.add(`theme-${professionKey}`);
+  
+  // Create profession-specific effects
+  if (professionKey === 'it') {
+    createMatrixEffect();
+  } else {
+    removeMatrixEffect();
+  }
+  
+  // Update header
+  document.getElementById('headerBrand').style.color = config.color;
+  document.getElementById('professionIcon').textContent = config.icon;
+  document.getElementById('professionName').textContent = config.name;
+  document.getElementById('professionTagContainer').classList.remove('hidden');
+  
+  // Update hero section
+  document.getElementById('heroIcon').textContent = config.icon;
+  document.getElementById('heroProfessionLabel').textContent = config.professionLabel;
+  document.getElementById('heroTitle').innerHTML = config.title.replace('utraty dochodu', 'utraty dochodu');
+  document.getElementById('heroSubtitle').textContent = config.subtitle;
+  
+  // Update hero image with real photo
+  const heroImages = {
+    lekarz: 'https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=600&h=400&fit=crop',
+    prawnik: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=600&h=400&fit=crop',
+    it: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&h=400&fit=crop',
+    architekt: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=600&h=400&fit=crop',
+    weterynarz: 'https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?w=600&h=400&fit=crop',
+    ksiegowy: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=600&h=400&fit=crop',
+    beauty: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=600&h=400&fit=crop',
+    universal: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=600&h=400&fit=crop'
+  };
+  document.getElementById('heroImage').src = heroImages[professionKey] || heroImages.universal;
+  document.getElementById('heroBenefit1').textContent = config.heroBenefit1;
+  document.getElementById('heroBenefit2').textContent = config.heroBenefit2;
+  document.getElementById('heroBenefit3').textContent = config.heroBenefit3;
+  
+  // Update features
+  document.getElementById('featuresSubtitle').textContent = config.featuresSubtitle;
+  document.getElementById('feature1Desc').textContent = config.feature1Desc;
+  document.getElementById('feature2Desc').textContent = config.feature2Desc;
+  
+  // Update calculator
+  document.getElementById('calcSubtitle').textContent = config.calcSubtitle;
+  document.getElementById('income').value = config.avgIncome;
+  
+  // Update testimonials
+  updateTestimonials(config.testimonials);
+  
+  // Recalculate premium
+  calculatePremium();
+  
+  // Smooth scroll to top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ============================================
+// TESTIMONIALS
+// ============================================
+function updateTestimonials(testimonials) {
+  const grid = document.getElementById('testimonialsGrid');
+  grid.innerHTML = testimonials.map(t => `
+    <div class="testimonial-card">
+      <p class="text-slate-600 mb-6 relative z-10">${t.text}</p>
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center text-2xl">
+          ${PROFESSIONS[currentProfession].icon}
+        </div>
+        <div>
+          <div class="font-bold text-slate-900">${t.name}</div>
+          <div class="text-sm text-slate-500">${t.role}</div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ============================================
+// SLIDER UPDATES
+// ============================================
+function updateSlider(id, value) {
+  const displays = {
+    income: 'incomeDisplay',
+    age: 'ageDisplay',
+    sumInsured: 'sumDisplay'
+  };
+  
+  const formats = {
+    income: (v) => `${parseInt(v).toLocaleString('pl-PL')} PLN`,
+    age: (v) => `${v} lat`,
+    sumInsured: (v) => `${parseInt(v).toLocaleString('pl-PL')} PLN`
+  };
+  
+  const displayId = displays[id];
+  const format = formats[id];
+  
+  if (displayId && format) {
+    document.getElementById(displayId).textContent = format(value);
+  }
+  
+  // Update slider gradient
+  const slider = document.getElementById(id);
+  const min = parseInt(slider.min);
+  const max = parseInt(slider.max);
+  const val = parseInt(value);
+  const percent = ((val - min) / (max - min)) * 100;
+  slider.style.background = `linear-gradient(to right, var(--brand-primary) 0%, var(--brand-primary) ${percent}%, #e2e8f0 ${percent}%, #e2e8f0 100%)`;
+}
+
+// Initialize sliders
+window.addEventListener('DOMContentLoaded', () => {
+  updateSlider('income', 15000);
+  updateSlider('age', 35);
+  updateSlider('sumInsured', 15000);
+});
+
+// ============================================
+// FORM STEPS
+// ============================================
+let currentStep = 1;
+const totalSteps = 4;
+
+function nextStep() {
+  if (currentStep < totalSteps) {
+    document.querySelector(`.form-step[data-step="${currentStep}"]`).classList.remove('active');
+    currentStep++;
+    document.querySelector(`.form-step[data-step="${currentStep}"]`).classList.add('active');
+    updateProgress();
+    window.scrollTo({ top: document.getElementById('formularz').offsetTop - 100, behavior: 'smooth' });
+  }
+}
+
+function prevStep() {
+  if (currentStep > 1) {
+    document.querySelector(`.form-step[data-step="${currentStep}"]`).classList.remove('active');
+    currentStep--;
+    document.querySelector(`.form-step[data-step="${currentStep}"]`).classList.add('active');
+    updateProgress();
+    window.scrollTo({ top: document.getElementById('formularz').offsetTop - 100, behavior: 'smooth' });
+  }
+}
+
+function updateProgress() {
+  const percent = (currentStep / totalSteps) * 100;
+  document.getElementById('progressBar').style.width = `${percent}%`;
+}
+
+document.getElementById('offerForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  
+  // Celebration confetti!
+  triggerConfetti();
+  
+  // Success message with animation
+  const formContainer = document.querySelector('#formularz .bg-slate-50');
+  formContainer.innerHTML = `
+    <div class="text-center py-12 success-celebration">
+      <div class="text-6xl mb-4">🎉</div>
+      <h3 class="text-3xl font-black mb-4" style="color: var(--brand-primary)">Dziękujemy!</h3>
+      <p class="text-xl text-slate-600 mb-6">Twój formularz został wysłany pomyślnie.</p>
+      <p class="text-lg text-slate-600">Skontaktujemy się z Tobą w ciągu <strong>24 godzin</strong> z spersonalizowaną ofertą.</p>
+      <div class="mt-8">
+        <button onclick="location.reload()" class="btn-primary">Powrót do strony głównej</button>
+      </div>
+    </div>
+  `;
+  
+  // Scroll to success message
+  window.scrollTo({ top: document.getElementById('formularz').offsetTop - 100, behavior: 'smooth' });
+});
+
+// ============================================
+// CONFETTI CELEBRATION
+// ============================================
+function triggerConfetti() {
+  const colors = ['#e11d48', '#10b981', '#06b6d4', '#8b5cf6', '#f59e0b'];
+  const confettiCount = 100;
+  
+  for (let i = 0; i < confettiCount; i++) {
+    setTimeout(() => {
+      const confetti = document.createElement('div');
+      confetti.className = 'confetti';
+      confetti.style.left = Math.random() * 100 + 'vw';
+      confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+      confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+      confetti.style.animationDelay = (Math.random() * 0.5) + 's';
+      document.body.appendChild(confetti);
+      
+      setTimeout(() => confetti.remove(), 3500);
+    }, i * 20);
+  }
+}
+
+// ============================================
+// FLOATING PARTICLES
+// ============================================
+function createParticles(containerId, count = 30) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  
+  for (let i = 0; i < count; i++) {
+    const particle = document.createElement('div');
+    particle.className = 'particle';
+    particle.style.left = Math.random() * 100 + '%';
+    particle.style.animationDelay = Math.random() * 15 + 's';
+    particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+    container.appendChild(particle);
+  }
+}
+
+// ============================================
+// CALCULATOR
+// ============================================
+function calculatePremium() {
+  const income = parseFloat(document.getElementById('income').value) || 15000;
+  const age = parseInt(document.getElementById('age').value) || 35;
+  const sumInsured = parseInt(document.getElementById('sumInsured').value) || 15000;
+  
+  // Simplified premium calculation
+  let baseRate = 0.018; // 1.8% base rate
+  
+  // Age adjustment
+  if (age < 30) baseRate *= 0.8;
+  else if (age > 45) baseRate *= 1.3;
+  else if (age > 55) baseRate *= 1.6;
+  
+  // Profession adjustment
+  if (currentProfession === 'lekarz') baseRate *= 0.9;
+  else if (currentProfession === 'prawnik') baseRate *= 0.95;
+  else if (currentProfession === 'it') baseRate *= 0.85;
+  
+  const premium = Math.round(sumInsured * baseRate);
+  const percent = ((premium / income) * 100).toFixed(1);
+  
+  document.getElementById('premiumResult').textContent = `${premium.toLocaleString('pl-PL')} PLN`;
+  document.getElementById('premiumPercent').textContent = `${percent}%`;
+}
+
+// ============================================
+// SCROLL HELPERS
+// ============================================
+function scrollToSection(id) {
+  document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+}
+
+// ============================================
+// URL PARAMETER HELPERS
+// ============================================
+function getUrlParameter(name) {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get(name);
+}
+
+function setUrlParameter(name, value) {
+  const url = new URL(window.location);
+  url.searchParams.set(name, value);
+  window.history.replaceState({}, '', url);
+}
+
+// ============================================
+// INITIALIZATION
+// ============================================
+function init() {
+  // Priority 1: Check URL parameter ?p=profession
+  const urlProfession = getUrlParameter('p');
+  
+  if (urlProfession && PROFESSIONS[urlProfession]) {
+    // Auto-select based on URL parameter
+    currentProfession = urlProfession;
+    sessionStorage.setItem('userProfession', urlProfession);
+    sessionStorage.setItem('professionExpiry', Date.now() + 30*24*60*60*1000);
+    hideProfessionOverlay();
+    applyProfession(urlProfession);
+    return;
+  }
+  
+  // Priority 2: Check sessionStorage
+  const savedProfession = sessionStorage.getItem('userProfession');
+  const expiryTime = sessionStorage.getItem('professionExpiry');
+  
+  if (savedProfession && expiryTime && Date.now() < parseInt(expiryTime)) {
+    // Auto-load saved profession and add to URL
+    currentProfession = savedProfession;
+    setUrlParameter('p', savedProfession);
+    hideProfessionOverlay();
+    applyProfession(savedProfession);
+  } else {
+    // Show profession selector
+    setTimeout(() => {
+      document.getElementById('professionOverlay').classList.remove('hidden');
+    }, 500);
+  }
+  
+  // Initial calculation
+  calculatePremium();
+}
+
+// ============================================
+// MATRIX EFFECT FOR IT THEME
+// ============================================
+function createMatrixEffect() {
+  // Remove existing matrix
+  const existing = document.querySelector('.matrix-bg');
+  if (existing) existing.remove();
+  
+  const matrixBg = document.createElement('div');
+  matrixBg.className = 'matrix-bg';
+  document.body.insertBefore(matrixBg, document.body.firstChild);
+  
+  const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+  const columnCount = Math.floor(window.innerWidth / 20);
+  
+  for (let i = 0; i < columnCount; i++) {
+    const column = document.createElement('div');
+    column.className = 'matrix-column';
+    column.style.left = (i * 20) + 'px';
+    column.style.animationDuration = (Math.random() * 5 + 10) + 's';
+    column.style.animationDelay = (Math.random() * 5) + 's';
+    
+    let text = '';
+    for (let j = 0; j < 50; j++) {
+      text += chars.charAt(Math.floor(Math.random() * chars.length)) + '\n';
+    }
+    column.textContent = text;
+    
+    matrixBg.appendChild(column);
+  }
+}
+
+function removeMatrixEffect() {
+  const matrixBg = document.querySelector('.matrix-bg');
+  if (matrixBg) matrixBg.remove();
+}
+
+// Run on page load
+window.addEventListener('DOMContentLoaded', () => {
+  init();
+  createParticles('heroParticles', 30);
+  logVersion();
+});
+
+// ============================================
+// VERSION LOGGING
+// ============================================
+function logVersion() {
+  const version = '2.1.0';
+  const buildDate = '2026-03-12';
+  
+  console.log('%c🚀 UTRATADOCHODU.PL', 'font-size: 20px; font-weight: bold; color: #e11d48;');
+  console.log('%cVersion: ' + version, 'font-size: 14px; color: #10b981;');
+  console.log('%cBuild Date: ' + buildDate, 'font-size: 12px; color: #64748b;');
+  console.log('%cProfession Theme System: Active', 'font-size: 12px; color: #06b6d4;');
+  
+  // Log to localStorage for debugging
+  localStorage.setItem('app_version', version);
+  localStorage.setItem('app_build_date', buildDate);
+  localStorage.setItem('app_loaded_at', new Date().toISOString());
+  
+  // Display in title attribute for easy checking
+  document.body.setAttribute('data-version', version);
+}
+
+// ============================================
+// INSTRUKCJA KONFIGURACJI SUBDOMEN
+// ============================================
+/*
+KROK 1: KONFIGURACJA DNS (u dostawcy domeny)
+============================================
+Zaloguj się do panelu zarządzania domeną (np. home.pl, OVH, Cloudflare)
+
+Dodaj rekordy CNAME dla każdej profesji:
+
+Typ    | Nazwa        | Wartość (Target)
+-------|--------------|------------------
+CNAME  | lekarz       | utratadochodu.pl
+CNAME  | prawnik      | utratadochodu.pl
+CNAME  | programista  | utratadochodu.pl
+CNAME  | architekt    | utratadochodu.pl
+CNAME  | weterynarz   | utratadochodu.pl
+CNAME  | ksiegowy     | utratadochodu.pl
+CNAME  | beauty       | utratadochodu.pl
+
+WAŻNE: Propagacja DNS może zająć 24-48h
+
+KROK 2: KONFIGURACJA SERWERA WWW
+=================================
+
+A) Jeśli używasz Apache (.htaccess):
+-------------------------------------
+Dodaj do pliku .htaccess w głównym katalogu:
+
+RewriteEngine On
+RewriteCond %{HTTP_HOST} ^lekarz\.utratadochodu\.pl$ [NC]
+RewriteRule ^(.*)$ /index.html [L]
+
+RewriteCond %{HTTP_HOST} ^prawnik\.utratadochodu\.pl$ [NC]
+RewriteRule ^(.*)$ /index.html [L]
+
+RewriteCond %{HTTP_HOST} ^programista\.utratadochodu\.pl$ [NC]
+RewriteRule ^(.*)$ /index.html [L]
+
+RewriteCond %{HTTP_HOST} ^architekt\.utratadochodu\.pl$ [NC]
+RewriteRule ^(.*)$ /index.html [L]
+
+RewriteCond %{HTTP_HOST} ^weterynarz\.utratadochodu\.pl$ [NC]
+RewriteRule ^(.*)$ /index.html [L]
+
+RewriteCond %{HTTP_HOST} ^ksiegowy\.utratadochodu\.pl$ [NC]
+RewriteRule ^(.*)$ /index.html [L]
+
+RewriteCond %{HTTP_HOST} ^beauty\.utratadochodu\.pl$ [NC]
+RewriteRule ^(.*)$ /index.html [L]
+
+
+B) Jeśli używasz Nginx (nginx.conf):
+-------------------------------------
+Dodaj do pliku konfiguracyjnego:
+
+server {
+    listen 80;
+    server_name lekarz.utratadochodu.pl prawnik.utratadochodu.pl programista.utratadochodu.pl 
+                architekt.utratadochodu.pl weterynarz.utratadochodu.pl 
+                ksiegowy.utratadochodu.pl beauty.utratadochodu.pl;
+    
+    root /var/www/utratadochodu;
+    index index.html;
+    
+    location / {
+        try_files $uri /index.html;
+    }
+}
+
+
+C) Jeśli używasz Cloudflare Pages / Vercel / Netlify:
+-------------------------------------------------------
+W ustawieniach projektu dodaj Custom Domains:
+- lekarz.utratadochodu.pl
+- prawnik.utratadochodu.pl
+- programista.utratadochodu.pl
+- architekt.utratadochodu.pl
+- weterynarz.utratadochodu.pl
+- ksiegowy.utratadochodu.pl
+- beauty.utratadochodu.pl
+
+Platform automatycznie utworzy SSL i skonfiguruje routing.
+
+
+KROK 3: WGRYWANIE PLIKU
+========================
+1. Zapisz ten plik HTML jako "index.html"
+2. Wgraj do głównego katalogu serwera (public_html, www, htdocs)
+3. Upewnij się, że plik jest dostępny pod wszystkimi subdomenami
+
+
+KROK 4: TESTOWANIE
+===================
+Po 24-48h od konfiguracji DNS sprawdź każdą subdomenę:
+
+✓ https://lekarz.utratadochodu.pl → Motyw medyczny (siatka)
+✓ https://prawnik.utratadochodu.pl → Motyw prawniczy (§ symbol)
+✓ https://programista.utratadochodu.pl → Motyw IT (Matrix effect)
+✓ https://architekt.utratadochodu.pl → Motyw architektoniczny (siatka techniczna)
+✓ https://weterynarz.utratadochodu.pl → Motyw weterynaryjny (🐾)
+✓ https://ksiegowy.utratadochodu.pl → Motyw księgowy (linie)
+✓ https://beauty.utratadochodu.pl → Motyw beauty (✨)
+
+
+KROK 5: SSL/HTTPS (WAŻNE!)
+===========================
+Jeśli używasz:
+
+A) Cloudflare:
+   - Przejdź do SSL/TLS → Edge Certificates
+   - Włącz "Always Use HTTPS"
+   - Wybierz "Full" lub "Full (strict)"
+
+B) Let's Encrypt (darmowy SSL):
+   - Zainstaluj certbot
+   - Uruchom: certbot --apache -d lekarz.utratadochodu.pl -d prawnik.utratadochodu.pl ...
+   
+C) Panel hostingowy (np. cPanel):
+   - Przejdź do "SSL/TLS Status"
+   - Zaznacz wszystkie subdomeny
+   - Kliknij "Run AutoSSL"
+
+
+KROK 6: WERYFIKACJA AUTOMATYCZNEGO ŁADOWANIA
+=============================================
+Otwórz Developer Tools (F12) w przeglądarce:
+- Zakładka Console nie powinna pokazywać błędów
+- W zakładce Network sprawdź, czy hostname jest poprawnie wykrywany
+
+
+TROUBLESHOOTING
+================
+Problem: Subdomena nie działa
+✓ Sprawdź propagację DNS: https://dnschecker.org
+✓ Sprawdź logi serwera WWW
+✓ Wyczyść cache przeglądarki (Ctrl+Shift+Del)
+
+Problem: Błąd SSL
+✓ Upewnij się, że certyfikat obejmuje wszystkie subdomeny
+✓ Sprawdź konfigurację SSL w panelu hostingowym
+
+Problem: Motyw się nie zmienia
+✓ Sprawdź Console (F12) w przeglądarce
+✓ Upewnij się, że JavaScript jest włączony
+✓ Wyczyść cache przeglądarki
+
+
+KONTAKT
+=======
+Jeśli potrzebujesz pomocy z konfiguracją:
+📧 kontakt@utratadochodu.pl
+📞 +48 600 000 000
+
+SZCZEGÓŁOWA INSTRUKCJA: https://aura.expert/docs/subdomain-setup
+*/
+
+// ============================================
+// SEO & ANALYTICS HELPERS
+// ============================================
+// Track calculator usage
+document.getElementById('income').addEventListener('change', () => {
+  // Google Analytics event tracking (add your GA code)
+  // gtag('event', 'calculator_used', { 'event_category': 'engagement' });
+});
+
+// Track profession selection
+function selectProfession(professionKey) {
+  currentProfession = professionKey;
+  sessionStorage.setItem('userProfession', professionKey);
+  sessionStorage.setItem('professionExpiry', Date.now() + 30*24*60*60*1000);
+  
+  hideProfessionOverlay();
+  applyProfession(professionKey);
+}ack profession selection
+  // gtag('event', 'profession_selected', { 'event_category': 'conversion', 'event_label': professionKey });
+  
+  hideProfessionOverlay();
+  applyProfession(professionKey);
+}
+
+// Track form steps
+function nextStep() {
+  if (currentStep < totalSteps) {
+    document.querySelector(`.form-step[data-step="${currentStep}"]`).classList.remove('active');
+    currentStep++;
+    document.querySelector(`.form-step[data-step="${currentStep}"]`).classList.add('active');
+    updateProgress();
+    
+    // Track step progression
+    // gtag('event', 'form_step_' + currentStep, { 'event_category': 'form_progress' });
+    
+    window.scrollTo({ top: document.getElementById('formularz').offsetTop - 100, behavior: 'smooth' });
+  }
+}
+</script>
+
+</body>
+</html>
