@@ -738,9 +738,9 @@
             });
         }
 
-        // WYSYŁKA FORMULARZA (ZMODYFIKOWANA)
+        // --- ZINTEGROWANA WYSYŁKA FORMULARZA (Google Script, Web3Forms, Supabase, GetResponse) ---
         const form = document.getElementById('insurance-form');
-        form.addEventListener('submit', (e) => {
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const dataObj = Object.fromEntries(new FormData(form).entries());
             
@@ -757,32 +757,79 @@
 
             const btn = document.getElementById('submit-btn'); 
             const origTxt = btn.innerText; btn.innerText = "Wysyłanie..."; btn.disabled = true;
-            
-            // WAŻNE: Wklej poniżej swój aktualny link skryptu
-            const googleAppScriptURL = 'https://script.google.com/macros/s/AKfycbxbDwbsp1F8EWGMoNQiBgMVB0PmUQnW--RrmNHAAZuS4oxVTNRetxbY-n5kptXMpGjoFg/exec';
 
-            fetch(googleAppScriptURL, { 
-                method: 'POST', 
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // To omija błędy CORS
-                body: JSON.stringify(dataObj) 
-            })
-            .then(response => response.json())
-            .then(data => {
-                btn.innerText = origTxt; 
-                btn.disabled = false;
-                if(data.status === 'success') {
+            try {
+                // 1. Zapis do Web3Forms (Powiadomienie na e-mail)
+                const formDataWeb3 = new FormData(form);
+                formDataWeb3.append("access_key", "a05c1eff-c8a2-4693-adea-ce31908bf1c3");
+                const web3Promise = fetch("https://api.web3forms.com/submit", {
+                    method: "POST",
+                    body: formDataWeb3
+                });
+
+                // 2. Zapis do bazy Supabase
+                const supabaseUrl = "https://kukvgsjrmrqtzhkszzum.supabase.co"; 
+                const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt1a3Znc2pybXJxdHpoa3N6enVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5MTI0NzYsImV4cCI6MjA4ODQ4ODQ3Nn0.wOB-4CJTcRksSUY7WD7CXEccTKNxPIVF8AT8hczS5zY";
+                const supabasePromise = fetch(`${supabaseUrl}/rest/v1/udochodu_contacts`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "apikey": supabaseAnonKey,
+                        "Authorization": `Bearer ${supabaseAnonKey}`,
+                        "Prefer": "return=minimal" 
+                    },
+                    body: JSON.stringify({
+                        name: dataObj.fullName, // Pobiera pole name="fullName"
+                        email: dataObj.email
+                    })
+                });
+
+                // 3. Zapis do GetResponse
+                const getResponseApiKey = "xgxrgohdxoz6vsnmxf90o4ld8j15x2ld"; 
+                const getResponsePromise = fetch("https://api.getresponse.com/v3/contacts", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Auth-Token": `api-key ${getResponseApiKey}`
+                    },
+                    body: JSON.stringify({
+                        name: dataObj.fullName,
+                        email: dataObj.email,
+                        campaign: { campaignId: "XIMwU" }
+                    })
+                });
+
+                // 4. Istniejący zapis do Arkuszy Google (Google Apps Script)
+                const googleAppScriptURL = 'https://script.google.com/macros/s/AKfycbxbDwbsp1F8EWGMoNQiBgMVB0PmUQnW--RrmNHAAZuS4oxVTNRetxbY-n5kptXMpGjoFg/exec';
+                const googlePromise = fetch(googleAppScriptURL, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(dataObj) 
+                }).then(res => res.json());
+
+                // Oczekujemy aż wszystkie 4 skrypty "strzelą" jednocześnie (to mocno przyspieszy ładowanie)
+                const [web3Res, supabaseRes, grRes, googleRes] = await Promise.all([
+                    web3Promise,
+                    supabasePromise,
+                    getResponsePromise,
+                    googlePromise
+                ]);
+
+                // Jeśli główny skrypt (Google) zwróci sukces, pokazujemy modal na stronie
+                if(googleRes.status === 'success') {
                     document.getElementById('success-modal').classList.remove('hidden');
                 } else {
-                    console.error("Błąd skryptu:", data.message);
-                    alert("Wystąpił błąd po stronie serwera: " + data.message);
+                    console.error("Błąd Google Script:", googleRes.message);
+                    alert("Wystąpił błąd po stronie serwera: " + googleRes.message);
                 }
-            })
-            .catch((error) => { 
+
+            } catch (error) { 
+                console.error("Błąd sieci podczas wysyłania (któregoś z serwisów):", error);
+                document.getElementById('error-modal').classList.remove('hidden'); 
+            } finally {
                 btn.innerText = origTxt; 
                 btn.disabled = false; 
-                console.error("Błąd sieci/CORS:", error);
-                document.getElementById('error-modal').classList.remove('hidden'); 
-            });
+            }
         });
         
         function closeModal() { document.getElementById('success-modal').classList.add('hidden'); form.reset(); currentStepIndex = 0; updateWizardUI(); }
@@ -793,5 +840,3 @@
     </script>
 </body>
 </html>
-
-
