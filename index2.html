@@ -48,10 +48,10 @@
         .pulse-btn { animation: pulse-ring 2s infinite; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased selection:bg-blue-100 selection:text-blue-900">
+<body class="bg-slate-100 text-slate-800 antialiased selection:bg-blue-100 selection:text-blue-900">
 
     <!-- Nawigacja -->
-    <nav class="bg-white border-b border-slate-200 sticky top-0 z-50 transition-all duration-300" id="navbar">
+    <nav class="bg-slate-100/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 transition-all duration-300" id="navbar">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <a href="#" class="flex items-center gap-2">
@@ -62,6 +62,7 @@
                     <a href="#dlaczego-warto" class="text-slate-600 hover:text-blue-600 transition-colors font-medium">Dla Kogo?</a>
                     <a href="#kalkulator" class="text-slate-600 hover:text-blue-600 transition-colors font-medium">Kalkulator</a>
                     <a href="o-nas.html" class="text-slate-600 hover:text-blue-600 transition-colors font-medium">O Nas</a>
+                    <a href="blog.html" class="text-slate-600 hover:text-blue-600 transition-colors font-medium">Blog / Aktualności</a>
                     <a href="pracuj-z-nami.html" class="text-amber-600 hover:text-amber-700 transition-colors font-semibold">Pracuj z nami</a>
                     <a href="#wniosek" class="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 transition-colors shadow-sm font-semibold">Złóż Wniosek</a>
                 </div>
@@ -75,6 +76,7 @@
             <a href="#dlaczego-warto" class="block text-slate-600 py-2 border-b border-slate-50">Dla Kogo?</a>
             <a href="#kalkulator" class="block text-slate-600 py-2 border-b border-slate-50">Kalkulator</a>
             <a href="o-nas.html" class="block text-slate-600 py-2 border-b border-slate-50">O Nas</a>
+            <a href="blog.html" class="block text-slate-600 py-2 border-b border-slate-50">Blog / Aktualności</a>
             <a href="pracuj-z-nami.html" class="block text-amber-600 font-bold py-2 border-b border-slate-50">Pracuj z nami</a>
             <a href="#wniosek" class="block text-blue-600 font-bold py-2">Złóż Wniosek</a>
         </div>
@@ -108,19 +110,19 @@
     </button>
 
     <!-- Hero Section -->
-    <section class="relative bg-white overflow-hidden">
+    <section class="relative bg-gradient-to-br from-slate-100 to-slate-200 overflow-hidden">
         <div class="max-w-7xl mx-auto flex flex-col lg:flex-row items-center">
-            <div class="relative z-10 pb-8 bg-white sm:pb-16 md:pb-20 lg:w-1/2 lg:pb-28 xl:pb-32 pt-16 px-4 sm:px-6 lg:px-8 w-full">
+            <div class="relative z-10 pb-8 sm:pb-16 md:pb-20 lg:w-1/2 lg:pb-28 xl:pb-32 pt-16 px-4 sm:px-6 lg:px-8 w-full">
                 <main class="mt-10 mx-auto max-w-7xl sm:mt-12 md:mt-16 lg:mt-20 xl:mt-28" data-aos="fade-right">
                     <div class="sm:text-center lg:text-left">
-                        <h1 class="text-4xl tracking-tight font-extrabold text-slate-900 sm:text-5xl md:text-6xl">
-                            <span class="block xl:inline">Zabezpiecz swój dochód,</span>
-                            <span class="block text-blue-600 xl:inline">niezależnie od losu.</span>
+                        <h1 class="text-4xl tracking-tight font-extrabold text-slate-900 sm:text-5xl md:text-6xl leading-tight">
+                            Zabezpiecz swój <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-teal-500">dochód.</span><br />
+                            <span class="text-3xl sm:text-4xl md:text-5xl text-slate-700 font-bold mt-2 block">Niezależnie od losu.</span>
                         </h1>
-                        <p class="mt-3 text-base text-slate-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
+                        <p class="mt-4 text-base text-slate-600 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
                             Specjalistyczne ubezpieczenie utraty dochodu dla B2B, Wolnych Zawodów i Zatrudnionych. Chronimy Twój styl życia, gdy Ty nie możesz pracować.
                         </p>
-                        <p class="mt-3 text-sm font-semibold text-slate-700 bg-slate-100 inline-block px-3 py-1 rounded-md border border-slate-200 shadow-sm">
+                        <p class="mt-4 text-sm font-semibold text-slate-700 bg-white/60 backdrop-blur-sm inline-block px-4 py-2 rounded-lg border border-slate-300 shadow-sm">
                             Kluczowi Partnerzy: CEU sp. z o.o. & Leadenhall Insurance SA
                         </p>
                         <div class="mt-8 sm:flex sm:justify-center lg:justify-start gap-4">
@@ -139,92 +141,96 @@
                 </main>
             </div>
             
-            <!-- NOWA SYMULACJA ZAMIAST WYKRESU -->
-            <div class="lg:w-1/2 w-full bg-slate-100 lg:min-h-screen flex items-center justify-center p-4 sm:p-8" data-aos="fade-left" data-aos-delay="200">
-                <div class="w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-200 relative overflow-hidden">
+            <!-- NOWA SYMULACJA (TABELA 2x2 I KARENCJA) -->
+            <div class="lg:w-1/2 w-full lg:min-h-screen flex items-center justify-center p-4 sm:p-8" data-aos="fade-left" data-aos-delay="200">
+                <div class="w-full max-w-xl bg-white rounded-3xl shadow-2xl border border-slate-200 relative overflow-hidden">
                     <div class="absolute -top-3 -right-3 bg-amber-400 text-amber-900 font-black text-xs px-4 py-1.5 rounded-full shadow-lg transform rotate-3 z-10 border border-amber-300">
-                        SYMULATOR CHOROBOWEGO
+                        KALKULATOR RYZYKA
                     </div>
                     
-                    <div class="bg-slate-900 text-white p-6 pb-8 rounded-t-3xl">
-                        <h3 class="text-xl font-bold mb-5 flex items-center gap-2">
-                            <span>🏥</span> 30 dni na zwolnieniu lekarskim (B2B)
+                    <div class="bg-slate-900 text-white p-6 pb-6 rounded-t-3xl">
+                        <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                            <span>🏥</span> Analiza luki dochodowej (B2B)
                         </h3>
                         
-                        <!-- Interaktywny Suwak -->
-                        <div class="mb-2">
-                            <div class="flex justify-between mb-2">
-                                <span class="text-sm text-slate-300">Twój standardowy miesięczny przychód:</span>
-                                <span class="font-bold text-white text-lg" id="sim-income-display">15 000 zł</span>
+                        <!-- Interaktywne Suwaki -->
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm text-slate-300">Miesięczny przychód netto:</span>
+                                    <span class="font-bold text-white text-lg" id="sim-income-display">15 000 zł</span>
+                                </div>
+                                <input type="range" id="sim-income-slider" min="5000" max="40000" step="1000" value="15000" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500">
                             </div>
-                            <input type="range" id="sim-income-slider" min="5000" max="40000" step="1000" value="15000" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500">
-                        </div>
-                        <div class="flex justify-between text-xs text-slate-400">
-                            <span>Szacowane koszty stałe (ZUS, biuro, leasing itp.):</span>
-                            <span class="font-medium text-red-400" id="sim-costs-display">-3 500 zł</span>
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm text-slate-300">Czas trwania choroby (L4):</span>
+                                    <span class="font-bold text-amber-400 text-lg" id="sim-days-display">90 dni (3 m-ce)</span>
+                                </div>
+                                <input type="range" id="sim-days-slider" min="30" max="180" step="10" value="90" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-500">
+                                <p class="text-xs text-slate-400 mt-1.5 flex items-start gap-1">
+                                    <span>⚠️</span> <span>W symulacji uwzględniono <strong>21 dni karencji</strong> (okresu wyczekiwania), za które polisa nie wypłaca odszkodowania w przypadku choroby.</span>
+                                </p>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="p-6 space-y-6 -mt-4 relative bg-white rounded-t-2xl">
-                        <!-- Scenariusz A: Sam ZUS -->
-                        <div class="border border-red-200 bg-red-50/40 rounded-2xl p-5 relative transition-all hover:shadow-md">
-                            <div class="absolute top-0 left-0 w-1.5 h-full bg-red-500 rounded-l-2xl"></div>
-                            <div class="flex justify-between items-start mb-3">
-                                <div>
-                                    <span class="text-xs font-bold text-red-600 uppercase tracking-wider">Opcja A</span>
-                                    <h4 class="font-bold text-slate-800 text-base">Zdajesz się na sam ZUS</h4>
-                                </div>
-                                <div class="text-right">
-                                    <span class="block text-xs text-slate-500">Zostaje na życie:</span>
-                                    <span class="font-black text-xl text-red-600" id="sim-zus-result">-700 zł</span>
-                                </div>
+                    <div class="p-5 bg-slate-50 relative rounded-b-3xl">
+                        <!-- TABELA 2x2 -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <!-- Wiersz 1: Nagłówki -->
+                            <div class="bg-slate-800 text-white p-3 rounded-t-xl text-center shadow-inner border-b-4 border-red-500 flex flex-col justify-center">
+                                <span class="text-[10px] uppercase tracking-wider text-slate-300 font-bold mb-0.5">Opcja A</span>
+                                <span class="font-black text-sm sm:text-base leading-tight">Zdajesz się<br/>na sam ZUS</span>
+                            </div>
+                            <div class="bg-blue-600 text-white p-3 rounded-t-xl text-center shadow-inner border-b-4 border-green-400 flex flex-col justify-center">
+                                <span class="text-[10px] uppercase tracking-wider text-blue-200 font-bold mb-0.5">Opcja B</span>
+                                <span class="font-black text-sm sm:text-base leading-tight">ZUS + Nasza<br/>Polisa</span>
                             </div>
                             
-                            <!-- Wynik rozbity -->
-                            <div class="bg-white rounded-xl p-3 border border-red-100 text-sm">
-                                <div class="flex justify-between mb-1">
-                                    <span class="text-slate-600">Zasiłek z ZUS (min. podstawa):</span>
-                                    <span class="font-bold text-slate-800">+2 800 zł</span>
+                            <!-- Wiersz 2: Dane (Sam ZUS) -->
+                            <div class="bg-white border border-red-100 p-4 rounded-b-xl flex flex-col shadow-sm relative overflow-hidden">
+                                <div class="absolute top-0 left-0 w-1 h-full bg-red-100"></div>
+                                <div class="space-y-3 flex-grow text-xs sm:text-sm">
+                                    <div>
+                                        <span class="text-slate-500 block">Suma z ZUS (min.):</span>
+                                        <span class="font-bold text-slate-800" id="sim-zus-payout">+8 400 zł</span>
+                                    </div>
+                                    <div class="border-t border-slate-100 pt-2">
+                                        <span class="text-slate-500 block">Koszty stałe firmy:</span>
+                                        <span class="font-bold text-red-500" id="sim-zus-costs">-10 500 zł</span>
+                                    </div>
                                 </div>
-                                <div class="flex justify-between">
-                                    <span class="text-slate-600">Opłacenie kosztów stałych firmy:</span>
-                                    <span class="font-bold text-red-500" id="sim-zus-costs">-3 500 zł</span>
+                                <div class="mt-4 pt-3 border-t border-red-200">
+                                    <span class="text-xs text-slate-500 block font-medium">Bilans po kosztach:</span>
+                                    <span class="text-xl sm:text-2xl font-black text-red-600 leading-none block mt-1" id="sim-zus-result">-2 100 zł</span>
+                                    <span class="text-[10px] text-red-700 font-medium block mt-1 leading-tight">Dokładasz z własnej kieszeni.</span>
                                 </div>
                             </div>
-                            <p class="text-xs text-red-700 mt-2 font-medium">⚠️ Zasiłek nie pokrywa nawet kosztów utrzymania firmy. Dokładasz z oszczędności.</p>
-                        </div>
 
-                        <!-- Scenariusz B: ZUS + Polisa -->
-                        <div class="border border-blue-200 bg-blue-50/50 rounded-2xl p-5 relative transition-all hover:shadow-md">
-                            <div class="absolute top-0 left-0 w-1.5 h-full bg-blue-600 rounded-l-2xl"></div>
-                            <div class="absolute right-4 top-4 text-4xl opacity-10 pointer-events-none">🛡️</div>
-                            <div class="flex justify-between items-start mb-3">
-                                <div>
-                                    <span class="text-xs font-bold text-blue-600 uppercase tracking-wider">Opcja B</span>
-                                    <h4 class="font-bold text-slate-800 text-base">ZUS + Nasza Polisa</h4>
+                            <!-- Wiersz 2: Dane (Polisa) -->
+                            <div class="bg-blue-50/50 border border-blue-100 p-4 rounded-b-xl flex flex-col shadow-sm relative overflow-hidden">
+                                <div class="absolute top-0 left-0 w-1 h-full bg-blue-200"></div>
+                                <div class="space-y-3 flex-grow text-xs sm:text-sm">
+                                    <div>
+                                        <span class="text-slate-500 block">Suma z ZUS:</span>
+                                        <span class="font-medium text-slate-700" id="sim-policy-zus">+8 400 zł</span>
+                                    </div>
+                                    <div>
+                                        <span class="font-bold text-blue-800 block">Wypłata z polisy:</span>
+                                        <span class="font-black text-blue-600" id="sim-policy-payout">+27 600 zł</span>
+                                    </div>
+                                    <div class="border-t border-blue-100 pt-2">
+                                        <span class="text-slate-500 block">Koszty stałe firmy:</span>
+                                        <span class="font-bold text-red-500" id="sim-policy-costs">-10 500 zł</span>
+                                    </div>
                                 </div>
-                                <div class="text-right">
-                                    <span class="block text-xs text-slate-500">Zostaje na życie:</span>
-                                    <span class="font-black text-2xl text-green-600" id="sim-policy-result">9 300 zł</span>
-                                </div>
-                            </div>
-                            
-                            <!-- Wynik rozbity -->
-                            <div class="bg-white rounded-xl p-3 border border-blue-100 text-sm">
-                                <div class="flex justify-between mb-1">
-                                    <span class="text-slate-600">Zasiłek z ZUS (min. podstawa):</span>
-                                    <span class="font-medium text-slate-700">+2 800 zł</span>
-                                </div>
-                                <div class="flex justify-between mb-1">
-                                    <span class="text-slate-600 font-semibold text-blue-800">Wypłata z polisy (odszkodowanie):</span>
-                                    <span class="font-bold text-blue-600" id="sim-policy-payout">+10 000 zł</span>
-                                </div>
-                                <div class="flex justify-between pt-1 border-t border-slate-100 mt-1">
-                                    <span class="text-slate-600">Opłacenie kosztów stałych firmy:</span>
-                                    <span class="font-bold text-red-500" id="sim-policy-costs">-3 500 zł</span>
+                                <div class="mt-4 pt-3 border-t border-blue-200">
+                                    <span class="text-xs text-slate-500 block font-medium">Zostaje na życie:</span>
+                                    <span class="text-xl sm:text-2xl font-black text-green-600 leading-none block mt-1" id="sim-policy-result">+25 500 zł</span>
+                                    <span class="text-[10px] text-blue-800 font-bold block mt-1 leading-tight">Spokój o budżet domowy.</span>
                                 </div>
                             </div>
-                            <p class="text-xs text-blue-800 mt-2 font-medium">✅ Rachunki zapłacone, firma przetrwa, a Ty spokojnie wracasz do zdrowia.</p>
                         </div>
                     </div>
                 </div>
@@ -233,7 +239,7 @@
     </section>
 
     <!-- Segmentacja -->
-    <section id="dlaczego-warto" class="py-20 bg-white border-t border-slate-200">
+    <section id="dlaczego-warto" class="py-20 bg-slate-50 border-t border-slate-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="mb-12 text-center md:text-left" data-aos="fade-right">
                 <h2 class="text-3xl font-bold text-slate-900 tracking-tight">Dla kogo jest to ubezpieczenie?</h2>
@@ -371,7 +377,7 @@
                         <h3 class="text-2xl font-bold text-slate-800">Dane Podstawowe</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div><label class="block text-sm font-semibold text-slate-700 mb-1">Imię i Nazwisko</label><input type="text" name="fullName" required class="block w-full rounded-md border-slate-300 border shadow-sm p-3 outline-none focus:ring-2 focus:ring-blue-500"></div>
-                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">PESEL</label><input type="text" name="pesel" required pattern="[0-9]{11}" placeholder="11 cyfr" class="block w-full rounded-md border-slate-300 border shadow-sm p-3 outline-none focus:ring-2 focus:ring-blue-500"></div>
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">PESEL</label><input type="text" name="pesel" required maxlength="11" pattern="\d{11}" inputmode="numeric" placeholder="11 cyfr" class="block w-full rounded-md border-slate-300 border shadow-sm p-3 outline-none focus:ring-2 focus:ring-blue-500"></div>
                             <div>
                                 <label class="block text-sm font-semibold text-slate-700 mb-1">Forma Zatrudnienia</label>
                                 <select name="employmentType" class="block w-full rounded-md border-slate-300 border shadow-sm p-3 bg-white outline-none focus:ring-2 focus:ring-blue-500">
@@ -566,6 +572,7 @@
                 <h4 class="text-white font-bold mb-5 tracking-wider uppercase text-sm">Nawigacja</h4>
                 <ul class="space-y-3 text-sm">
                     <li><a href="o-nas.html" class="hover:text-blue-400 transition-colors">O Nas (Nasi Partnerzy)</a></li>
+                    <li><a href="blog.html" class="hover:text-blue-400 transition-colors">Blog / Aktualności</a></li>
                     <li><a href="pracuj-z-nami.html" class="hover:text-amber-400 transition-colors text-amber-500 font-semibold">Dla Agentów - Współpraca</a></li>
                     <li><a href="polityka-cookies.html" class="hover:text-blue-400 transition-colors">Polityka Cookies i RODO</a></li>
                     <li><a href="regulamin.html" class="hover:text-blue-400 transition-colors">Regulamin Serwisu</a></li>
@@ -646,40 +653,60 @@
         scriptAOS.onload = () => AOS.init({ duration: 800, once: true });
         document.head.appendChild(scriptAOS);
 
-        // --- NOWY SYMULATOR W HERO (Zastępuje wykres heroChart) ---
+        // --- NOWY SYMULATOR W HERO (TABELA 2x2 I KARENCJA) ---
         function updateHeroSimulation() {
             const incomeSlider = document.getElementById('sim-income-slider');
-            if(!incomeSlider) return;
+            const daysSlider = document.getElementById('sim-days-slider');
+            if(!incomeSlider || !daysSlider) return;
             
             const income = parseInt(incomeSlider.value);
+            const days = parseInt(daysSlider.value);
             
-            // Logika założeń do symulacji (możesz dostosować)
-            const minZus = 2800; // Podstawa zasiłku w przybliżeniu
-            const fixedCosts = 2000 + Math.round(income * 0.1); // Szacunkowe koszty np. leasing, księgowość, ZUS
-            const policyPayout = Math.round(income * 0.8) - minZus; // Polisa zazwyczaj dobija do ok. 80% przychodu
+            // Logika założeń do symulacji
+            const minZusMonthly = 2800; 
+            const fixedCostsMonthly = 2000 + Math.round(income * 0.1); 
             
-            const zusNetto = minZus - fixedCosts;
-            const policyNetto = minZus + policyPayout - fixedCosts;
+            const minZusDaily = minZusMonthly / 30;
+            const fixedCostsDaily = fixedCostsMonthly / 30;
+            const policyDailyPayout = (income * 0.8) / 30; // Polisa zazwyczaj dobija do ok. 80% przychodu
+            
+            const waitingPeriod = 21; // 21 dni karencji przy chorobie
+            const payableDays = Math.max(0, days - waitingPeriod);
 
-            // Aktualizacja DOM
+            // Wyliczenia całkowite dla wybranego okresu
+            const totalZus = Math.round(minZusDaily * days);
+            const totalCosts = Math.round(fixedCostsDaily * days);
+            const totalPolicyPayout = Math.round(policyDailyPayout * payableDays);
+
+            const zusNetto = totalZus - totalCosts;
+            const policyNetto = totalZus + totalPolicyPayout - totalCosts;
+
+            // Aktualizacja UI
             document.getElementById('sim-income-display').innerText = income.toLocaleString() + ' zł';
-            document.getElementById('sim-costs-display').innerText = `-${fixedCosts.toLocaleString()} zł`;
+            document.getElementById('sim-days-display').innerText = `${days} dni (~${Math.round((days/30)*10)/10} m-ca)`;
             
-            document.getElementById('sim-zus-costs').innerText = `-${fixedCosts.toLocaleString()} zł`;
+            // Wypełnianie kolumny "Sam ZUS"
+            document.getElementById('sim-zus-payout').innerText = `+${totalZus.toLocaleString()} zł`;
+            document.getElementById('sim-zus-costs').innerText = `-${totalCosts.toLocaleString()} zł`;
             
             const zusResultEl = document.getElementById('sim-zus-result');
-            zusResultEl.innerText = zusNetto.toLocaleString() + ' zł';
-            // Zmiana koloru w zależności od minusa/plusa
-            zusResultEl.className = zusNetto < 0 ? 'font-black text-xl text-red-600' : 'font-black text-xl text-slate-600';
+            zusResultEl.innerText = (zusNetto > 0 ? '+' : '') + zusNetto.toLocaleString() + ' zł';
+            zusResultEl.className = zusNetto < 0 ? 'text-xl sm:text-2xl font-black text-red-600 leading-none block mt-1' : 'text-xl sm:text-2xl font-black text-slate-700 leading-none block mt-1';
 
-            document.getElementById('sim-policy-payout').innerText = `+${policyPayout.toLocaleString()} zł`;
-            document.getElementById('sim-policy-costs').innerText = `-${fixedCosts.toLocaleString()} zł`;
-            document.getElementById('sim-policy-result').innerText = policyNetto.toLocaleString() + ' zł';
+            // Wypełnianie kolumny "Polisa"
+            document.getElementById('sim-policy-zus').innerText = `+${totalZus.toLocaleString()} zł`;
+            document.getElementById('sim-policy-payout').innerText = `+${totalPolicyPayout.toLocaleString()} zł`;
+            document.getElementById('sim-policy-costs').innerText = `-${totalCosts.toLocaleString()} zł`;
+            
+            const policyResultEl = document.getElementById('sim-policy-result');
+            policyResultEl.innerText = (policyNetto > 0 ? '+' : '') + policyNetto.toLocaleString() + ' zł';
         }
 
-        const simSlider = document.getElementById('sim-income-slider');
-        if(simSlider) {
-            simSlider.addEventListener('input', updateHeroSimulation);
+        const simIncomeSlider = document.getElementById('sim-income-slider');
+        const simDaysSlider = document.getElementById('sim-days-slider');
+        if(simIncomeSlider && simDaysSlider) {
+            simIncomeSlider.addEventListener('input', updateHeroSimulation);
+            simDaysSlider.addEventListener('input', updateHeroSimulation);
             updateHeroSimulation(); // Inicjalne załadowanie
         }
         // ---------------------------------------------------------
@@ -828,12 +855,15 @@
 
         function scrollToForm() { document.getElementById('wniosek').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
 
-        // WALIDACJA PESEL (Suma Kontrolna i Długość)
+        // WALIDACJA PESEL (Suma Kontrolna, Długość, Tylko Cyfry)
         const peselInput = document.querySelector('input[name="pesel"]');
         if(peselInput) {
             peselInput.addEventListener('input', function() {
+                // Dodatkowe zabezpieczenie: pozwalaj tylko na cyfry i skracaj do 11 znaków
+                this.value = this.value.replace(/\D/g, '').substring(0, 11);
                 const pesel = this.value;
-                if (!/^\d{11}$/.test(pesel)) {
+                
+                if (pesel.length !== 11) {
                     this.setCustomValidity('PESEL musi składać się dokładnie z 11 cyfr.');
                     return;
                 }
