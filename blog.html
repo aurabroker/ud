@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pl" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog | UtrataDochodu</title>
+    
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-D9XHPWP5DE"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-D9XHPWP5DE');
+    </script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-blue-100 selection:text-blue-900">
+
+    <!-- Nawigacja -->
+    <nav class="bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <a href="index.html" class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-slate-900 rounded flex items-center justify-center text-white font-black text-lg">U</div>
+                    <span class="font-extrabold text-xl text-slate-900 tracking-tight">Utrata<span class="text-blue-600">Dochodu</span></span>
+                </a>
+                <div class="hidden md:flex space-x-8 items-center">
+                    <a href="index.html#dlaczego-warto" class="text-slate-600 hover:text-blue-600 transition-colors font-medium">Dla Kogo?</a>
+                    <a href="index.html#kalkulator" class="text-slate-600 hover:text-blue-600 transition-colors font-medium">Kalkulator</a>
+                    <a href="o-nas.html" class="text-slate-600 hover:text-blue-600 transition-colors font-medium">O Nas</a>
+                    <a href="blog.html" class="text-blue-600 font-bold border-b-2 border-blue-600 h-full flex items-center">Blog / Aktualności</a>
+                    <a href="pracuj-z-nami.html" class="text-amber-600 hover:text-amber-700 transition-colors font-semibold">Pracuj z nami</a>
+                    <a href="index.html#wniosek" class="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 transition-colors shadow-sm font-semibold">Złóż Wniosek</a>
+                </div>
+                <div class="flex items-center md:hidden">
+                    <button id="mobile-menu-btn" class="text-slate-500 hover:text-slate-700 text-2xl font-bold">☰</button>
+                </div>
+            </div>
+        </div>
+        <!-- Menu Mobilne -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-slate-100 p-4 space-y-3 shadow-lg absolute w-full z-50">
+            <a href="index.html" class="block text-slate-600 py-2 border-b border-slate-50">Strona Główna</a>
+            <a href="index.html#kalkulator" class="block text-slate-600 py-2 border-b border-slate-50">Kalkulator</a>
+            <a href="o-nas.html" class="block text-slate-600 py-2 border-b border-slate-50">O Nas</a>
+            <a href="blog.html" class="block text-blue-600 font-bold py-2 border-b border-slate-50">Blog / Aktualności</a>
+            <a href="pracuj-z-nami.html" class="block text-amber-600 font-bold py-2 border-b border-slate-50">Pracuj z nami</a>
+            <a href="index.html#wniosek" class="block text-blue-600 font-bold py-2">Złóż Wniosek</a>
+        </div>
+    </nav>
+
+    <!-- Header Sekcji Bloga -->
+    <div class="bg-slate-900 py-16 sm:py-24">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-4xl font-extrabold text-white sm:text-5xl md:text-6xl tracking-tight">Aktualności i Wiedza</h1>
+            <p class="mt-4 text-lg text-slate-300 max-w-2xl mx-auto">
+                Edukujemy o lukach dochodowych. Przeczytaj poradniki przygotowane przez naszych ekspertów ubezpieczeniowych, zanim zdecydujesz się polegać tylko na ZUS.
+            </p>
+        </div>
+    </div>
+
+    <!-- Lista Artykułów -->
+    <section class="py-12 md:py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                
+                <!-- Wpis 1 -->
+                <article id="post-1" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col hover:shadow-lg transition-shadow">
+                    <div class="bg-blue-50 h-48 flex items-center justify-center border-b border-slate-100">
+                        <span class="text-6xl">💸</span>
+                    </div>
+                    <div class="p-6 sm:p-8 flex flex-col flex-grow">
+                        <div class="text-xs font-bold text-blue-600 uppercase tracking-widest mb-3">Rynek B2B</div>
+                        <h2 class="text-xl font-bold text-slate-900 mb-3 leading-snug"><a href="#" class="hover:text-blue-600 transition-colors">L4 na JDG to często finansowa pułapka. Jak się chronić?</a></h2>
+                        <p class="text-sm text-slate-600 mb-6 flex-grow">
+                            Większość przedsiębiorców opłaca minimalne składki. Zobacz na realnym przykładzie, ile wynosi zasiłek z ZUS i dlaczego często nie starcza on nawet na opłacenie bieżących kosztów prowadzenia firmy.
+                        </p>
+                        <div class="flex justify-between items-center pt-4 border-t border-slate-100">
+                            <span class="text-xs text-slate-500">12 Marca 2026</span>
+                            <a href="#" class="text-sm font-bold text-blue-600 hover:text-blue-800">Czytaj wpis &rarr;</a>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Wpis 2 -->
+                <article id="post-2" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col hover:shadow-lg transition-shadow">
+                    <div class="bg-amber-50 h-48 flex items-center justify-center border-b border-slate-100">
+                        <span class="text-6xl">⚖️</span>
+                    </div>
+                    <div class="p-6 sm:p-8 flex flex-col flex-grow">
+                        <div class="text-xs font-bold text-amber-600 uppercase tracking-widest mb-3">Prawo i ZUS</div>
+                        <h2 class="text-xl font-bold text-slate-900 mb-3 leading-snug"><a href="#" class="hover:text-blue-600 transition-colors">Nowe wytyczne dot. zwolnień lekarskich w 2026 roku</a></h2>
+                        <p class="text-sm text-slate-600 mb-6 flex-grow">
+                            Sprawdź, jak nadchodzące zmiany w prawie i kontrolach ZUS wpłyną na Twoje finanse podczas przewlekłej choroby. Kiedy ubezpieczyciel publiczny może wstrzymać wypłatę?
+                        </p>
+                        <div class="flex justify-between items-center pt-4 border-t border-slate-100">
+                            <span class="text-xs text-slate-500">5 Marca 2026</span>
+                            <a href="#" class="text-sm font-bold text-blue-600 hover:text-blue-800">Czytaj wpis &rarr;</a>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Wpis 3 -->
+                <article id="post-3" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col hover:shadow-lg transition-shadow">
+                    <div class="bg-emerald-50 h-48 flex items-center justify-center border-b border-slate-100">
+                        <span class="text-6xl">⚕️</span>
+                    </div>
+                    <div class="p-6 sm:p-8 flex flex-col flex-grow">
+                        <div class="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-3">Branża Medyczna</div>
+                        <h2 class="text-xl font-bold text-slate-900 mb-3 leading-snug"><a href="#" class="hover:text-blue-600 transition-colors">Medycy a agresja pacjentów. Jak działa specjalistyczna polisa?</a></h2>
+                        <p class="text-sm text-slate-600 mb-6 flex-grow">
+                            Praca w placówce ochrony zdrowia, szczególnie na oddziałach ratunkowych, to rosnące ryzyko. Omawiamy nowe warianty ochrony Leadenhall na wypadek nieszczęśliwych zdarzeń w miejscu pracy.
+                        </p>
+                        <div class="flex justify-between items-center pt-4 border-t border-slate-100">
+                            <span class="text-xs text-slate-500">28 Lutego 2026</span>
+                            <a href="#" class="text-sm font-bold text-blue-600 hover:text-blue-800">Czytaj wpis &rarr;</a>
+                        </div>
+                    </div>
+                </article>
+
+            </div>
+
+            <!-- Przycisk Load More -->
+            <div class="mt-12 text-center">
+                <button class="bg-white border-2 border-slate-200 text-slate-700 px-8 py-3 rounded-lg font-bold hover:bg-slate-50 hover:border-slate-300 transition-colors shadow-sm">
+                    Załaduj starsze wpisy
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer (Taki sam jak na głównej) -->
+    <footer class="bg-slate-900 text-slate-300 py-10 md:py-12 border-t border-slate-800 mt-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-10">
+            <div class="col-span-1 md:col-span-2">
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="w-8 h-8 bg-slate-800 border border-slate-600 rounded flex items-center justify-center text-white font-bold">U</div>
+                    <span class="text-2xl font-extrabold text-white tracking-tight">Utrata<span class="text-blue-500">Dochodu</span></span>
+                </div>
+                <p class="text-sm text-slate-400 max-w-md leading-relaxed">
+                    Specjaliści w zakresie zabezpieczenia dochodu. Współpracujemy z wiodącymi na rynku coverholderami: <strong>CEU sp. z o.o.</strong> oraz <strong>Leadenhall Insurance SA</strong>. Obsługa prawno-operacyjna: Aura Expert sp. z o.o.
+                </p>
+            </div>
+            <div>
+                <h4 class="text-white font-bold mb-4 tracking-wider uppercase text-sm">Nawigacja</h4>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="o-nas.html" class="hover:text-blue-400 transition-colors">O Nas (Partnerzy)</a></li>
+                    <li><a href="blog.html" class="text-blue-400 font-semibold">Blog / Aktualności</a></li>
+                    <li><a href="pracuj-z-nami.html" class="hover:text-amber-400 transition-colors text-amber-500 font-semibold">Dla Agentów - Współpraca</a></li>
+                    <li><a href="polityka-cookies.html" class="hover:text-blue-400 transition-colors">Polityka Cookies i RODO</a></li>
+                    <li><a href="regulamin.html" class="hover:text-blue-400 transition-colors">Regulamin Serwisu</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-white font-bold mb-4 tracking-wider uppercase text-sm">Kontakt</h4>
+                <ul class="space-y-2 text-sm">
+                    <li class="flex items-center gap-2"><span class="text-blue-500">✉</span> biuro@utratadochodu.com</li>
+                    <li class="flex items-center gap-2"><span class="text-blue-500">📞</span> +48 504 400 901</li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Logika Menu Mobilnego
+        document.getElementById('mobile-menu-btn').addEventListener('click', () => { 
+            document.getElementById('mobile-menu').classList.toggle('hidden'); 
+        });
+    </script>
+</body>
+</html>
