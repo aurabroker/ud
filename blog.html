@@ -188,7 +188,7 @@
                 const { data, error } = await supabaseClient.from('aura_articles')
                     .select('id, title, excerpt, tags, published_at, created_at')
                     .eq('status', 'published')
-                    .contains('platforms', ['UtrataDochodu'])
+                    .contains('platforms', ['UtrataDochodu.pl'])
                     .order('published_at', { ascending: false });
 
                 if (error) throw error;
