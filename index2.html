@@ -913,11 +913,10 @@
                     body: JSON.stringify({ name: dataObj.fullName, email: dataObj.email })
                 });
 
-                const getResponseApiKey = "xgxrgohdxoz6vsnmxf90o4ld8j15x2ld"; 
-                const getResponsePromise = fetch("https://api.getresponse.com/v3/contacts", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json", "X-Auth-Token": `api-key ${getResponseApiKey}` },
-                    body: JSON.stringify({ name: dataObj.fullName, email: dataObj.email, campaign: { campaignId: "XIMwU" } })
+                const getResponsePromise = fetch(`${supabaseUrl}/functions/v1/send-to-getresponse`, {
+                      method: "POST",
+                      headers: { "apikey": supabaseAnonKey, "Content-Type": "application/json" },
+                      body: JSON.stringify({ name: dataObj.fullName, email: dataObj.email })
                 });
 
                 const googleAppScriptURL = 'https://script.google.com/macros/s/AKfycbxbDwbsp1F8EWGMoNQiBgMVB0PmUQnW--RrmNHAAZuS4oxVTNRetxbY-n5kptXMpGjoFg/exec';
