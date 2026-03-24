@@ -910,7 +910,7 @@
                 const supabasePromise = fetch(`${supabaseUrl}/rest/v1/udochodu_contacts`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json", "apikey": supabaseAnonKey, "Authorization": `Bearer ${supabaseAnonKey}`, "Prefer": "return=minimal" },
-                    body: JSON.stringify({ name: dataObj.fullName, email: dataObj.email })
+                    body: JSON.stringify({ name: dataObj.fullName, email: dataObj.email, secret_token: "UD_secret_2026_xK9mP" })
                 });
 
                 const getResponsePromise = fetch(`${supabaseUrl}/functions/v1/send-to-getresponse`, {
