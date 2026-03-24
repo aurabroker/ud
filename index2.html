@@ -910,23 +910,19 @@
                 const supabasePromise = fetch(`${supabaseUrl}/rest/v1/udochodu_contacts`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json", "apikey": supabaseAnonKey, "Authorization": `Bearer ${supabaseAnonKey}`, "Prefer": "return=minimal" },
-                    body: JSON.stringify({ name: dataObj.fullName, email: dataObj.email, secret_token: "UD_secret_2026_xK9mP" })
+                    body: JSON.stringify({ name: dataObj.fullName, email: dataObj.email })
                 });
 
-                const getResponsePromise = fetch(`${supabaseUrl}/functions/v1/send-to-getresponse`, {
-                      method: "POST",
-                      headers: { "apikey": supabaseAnonKey, "Content-Type": "application/json" },
-                      body: JSON.stringify({ name: dataObj.fullName, email: dataObj.email })
-                });
+                // GetResponse obsługiwany przez Google Apps Script
 
                 const googleAppScriptURL = 'https://script.google.com/macros/s/AKfycbxbDwbsp1F8EWGMoNQiBgMVB0PmUQnW--RrmNHAAZuS4oxVTNRetxbY-n5kptXMpGjoFg/exec';
                 const googlePromise = fetch(googleAppScriptURL, { 
                     method: 'POST', 
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(dataObj) 
+                    body: JSON.stringify({ ...dataObj, secret_token: "UD_secret_2026_xK9mP" }) 
                 }).then(res => res.json());
 
-                const [web3Res, supabaseRes, grRes, googleRes] = await Promise.all([web3Promise, supabasePromise, getResponsePromise, googlePromise]);
+                const [web3Res, supabaseRes, googleRes] = await Promise.all([web3Promise, supabasePromise, googlePromise]);
 
                 if(googleRes.status === 'success') {
                     document.getElementById('success-modal').classList.remove('hidden');
