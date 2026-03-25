@@ -11,45 +11,28 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
-  <!-- TOAST CONTAINER -->
   <div id="toastContainer" class="toast-container"></div>
 
-  <!-- ========== LOGIN SCREEN ========== -->
+  <!-- LOGIN -->
   <div id="loginScreen" class="login-wrapper">
     <div class="login-card">
-      <div class="login-logo">
-        <div class="login-logo-icon">U</div>
-        <div class="login-logo-text">Utrata<span>Dochodu</span></div>
-      </div>
+      <div class="login-logo"><div class="login-logo-icon">U</div><div class="login-logo-text">Utrata<span>Dochodu</span></div></div>
       <p class="login-subtitle">Panel Ofertowania — Zaloguj się</p>
       <div id="loginError" class="login-error hidden"></div>
       <form id="loginForm" autocomplete="on">
-        <div class="form-group">
-          <label class="form-label" for="loginEmail">Adres Email</label>
-          <input class="form-input" type="email" id="loginEmail" name="email" required autocomplete="email" placeholder="twoj@email.pl">
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="loginPassword">Hasło</label>
-          <input class="form-input" type="password" id="loginPassword" name="password" required autocomplete="current-password" placeholder="Wprowadź hasło">
-        </div>
+        <div class="form-group"><label class="form-label" for="loginEmail">Email</label><input class="form-input" type="email" id="loginEmail" required autocomplete="email" placeholder="twoj@email.pl"></div>
+        <div class="form-group"><label class="form-label" for="loginPassword">Hasło</label><input class="form-input" type="password" id="loginPassword" required autocomplete="current-password" placeholder="Hasło"></div>
         <button type="submit" class="btn btn-primary btn-full btn-lg" id="loginBtn">Zaloguj się</button>
       </form>
-      <p style="text-align:center; font-size:0.7rem; color:var(--slate-400); margin-top:1.25rem;">
-        Aura Consulting sp. z o.o. &middot; Panel wewnętrzny
-      </p>
+      <p style="text-align:center;font-size:0.7rem;color:var(--slate-400);margin-top:1.25rem;">Aura Expert sp. z o.o. &middot; Panel wewnętrzny</p>
     </div>
   </div>
 
-  <!-- ========== APP (hidden until logged in) ========== -->
+  <!-- APP -->
   <div id="appScreen" class="app-wrapper hidden">
-
-    <!-- HEADER -->
     <header class="app-header no-pdf no-client">
       <div class="header-left">
-        <div class="header-logo">
-          <div class="header-logo-icon">U</div>
-          Utrata<span>Dochodu</span>
-        </div>
+        <div class="header-logo"><div class="header-logo-icon">U</div>Utrata<span>Dochodu</span></div>
         <nav class="header-nav" id="headerNav">
           <button class="header-nav-btn active" data-view="dashboard">Oferty</button>
           <button class="header-nav-btn" data-view="admin" id="navAdminBtn">Admin</button>
@@ -58,244 +41,161 @@
       <div class="header-right">
         <div class="header-user">
           <div class="header-user-avatar" id="userAvatar">M</div>
-          <div>
-            <div class="header-user-name" id="userName">—</div>
-            <div class="header-user-role" id="userRole">user</div>
-          </div>
+          <div><div class="header-user-name" id="userName">—</div><div class="header-user-role" id="userRole">user</div></div>
         </div>
-        <button class="btn btn-ghost btn-sm" onclick="App.logout()" title="Wyloguj">Wyloguj</button>
+        <button class="btn btn-ghost btn-sm" onclick="App.logout()">Wyloguj</button>
       </div>
     </header>
 
-    <!-- MOBILE NAV -->
     <div class="mobile-nav no-pdf no-client" id="mobileNav">
       <button class="header-nav-btn active" data-view="dashboard">Oferty</button>
       <button class="header-nav-btn" data-view="admin" id="mobileAdminBtn">Admin</button>
     </div>
 
-    <!-- CLIENT HEADER (shown only in client view) -->
     <header class="client-header hidden" id="clientHeader">
-      <div class="client-header-logo">
-        Utrata<span>Dochodu</span>
-      </div>
+      <div class="client-header-logo">Utrata<span>Dochodu</span></div>
       <div class="client-header-title" id="clientHeaderTitle">Rekomendacja Ofertowa</div>
     </header>
 
-    <!-- MAIN -->
     <main class="app-main">
-
-      <!-- ===== DASHBOARD VIEW ===== -->
+      <!-- DASHBOARD -->
       <div id="viewDashboard">
         <div class="dashboard-header">
-          <div>
-            <h1 class="dashboard-title">Twoje Oferty</h1>
-            <p class="dashboard-subtitle" id="dashboardSubtitle">Zarządzaj i twórz nowe kalkulacje</p>
-          </div>
+          <div><h1 class="dashboard-title">Twoje Oferty</h1><p class="dashboard-subtitle">Zarządzaj i twórz nowe kalkulacje</p></div>
           <button class="btn btn-primary" onclick="App.createNewOffer()">+ Nowa Oferta</button>
         </div>
-        <div id="offersListContainer">
-          <div class="empty-state">
-            <div class="spinner spinner-lg"></div>
-            <p style="margin-top:1rem; font-size:0.8rem;">Ładowanie ofert...</p>
-          </div>
-        </div>
+        <div id="offersListContainer"><div class="empty-state"><div class="spinner spinner-lg"></div></div></div>
       </div>
 
-      <!-- ===== EDITOR VIEW ===== -->
+      <!-- EDITOR -->
       <div id="viewEditor" class="hidden">
-        <!-- Top bar -->
         <div class="editor-topbar no-client">
-          <div style="display:flex; align-items:flex-start; gap:0.75rem; flex:1; min-width:0;">
+          <div style="display:flex;align-items:flex-start;gap:0.75rem;flex:1;min-width:0;">
             <button class="editor-back no-pdf" onclick="App.navigateTo('dashboard')">← Wróć</button>
             <div class="editor-title-group">
-              <input type="text" class="editor-title-input" id="editorOfferName" placeholder="Nazwa oferty (lub zostaw puste)">
-              <input type="text" class="editor-client-input" id="editorClientName" placeholder="Nazwa klienta (opcjonalnie)">
+              <input type="text" class="editor-title-input" id="editorOfferName" placeholder="Nazwa oferty">
+              <input type="text" class="editor-client-input" id="editorClientName" placeholder="Imię i nazwisko klienta">
             </div>
           </div>
           <div class="editor-actions no-pdf">
             <button class="btn btn-primary btn-sm" onclick="App.saveOffer(false)" id="btnSaveOffer">💾 Zapisz</button>
-            <button class="btn btn-success btn-sm hidden" onclick="App.saveOffer(true)" id="btnClientLink">🔗 Link dla Klienta</button>
+            <button class="btn btn-success btn-sm hidden" onclick="App.saveOffer(true)" id="btnClientLink">🔗 Link</button>
             <button class="btn btn-outline btn-sm" onclick="App.exportPDF()" id="btnExportPdf">📄 PDF</button>
           </div>
         </div>
 
-        <!-- Broker Message -->
+        <!-- Client greeting -->
+        <div id="clientGreeting" class="hidden" style="margin-bottom:1rem;"></div>
+
+        <!-- Broker message -->
         <div class="card no-client" style="margin-bottom:1rem;" id="brokerMessageSection">
           <div class="card-body-padded">
-            <label class="form-label">💬 Notatka do oferty (widoczna dla klienta)</label>
-            <textarea class="broker-message-textarea" id="brokerMessage" placeholder="Wiadomość do Klienta, którą zobaczy po otwarciu linku..."></textarea>
+            <label class="form-label">💬 Notatka (widoczna dla klienta)</label>
+            <textarea class="broker-message-textarea" id="brokerMessage" placeholder="Wiadomość do klienta..."></textarea>
           </div>
         </div>
-
-        <!-- Client message display -->
         <div id="clientMessageSection" class="hidden" style="margin-bottom:1rem;">
           <div class="client-message-display" id="clientMessageDisplay"></div>
         </div>
 
-        <!-- Matrix Card -->
+        <!-- Variant tabs -->
+        <div id="variantTabs" class="variant-tabs-bar" style="margin-bottom:0.5rem;"></div>
+
+        <!-- Matrix -->
         <div class="card" style="margin-bottom:1.25rem;" id="exportContent">
           <div class="card-header">
             <div class="card-title">📊 Matryca Porównawcza</div>
-            <div class="no-pdf no-client" style="display:flex; gap:0.5rem;">
+            <div class="no-pdf no-client" style="display:flex;gap:0.5rem;">
               <button class="btn btn-outline btn-sm" onclick="App.openRiskPicker()">+ Ryzyko</button>
               <button class="btn btn-outline btn-sm" onclick="App.openInsurerPicker()">+ Ubezpieczyciel</button>
             </div>
           </div>
-          <div class="card-body">
-            <div class="matrix-wrap">
-              <table class="matrix-table" id="matrixTable">
-                <thead><tr id="matrixHeader"></tr></thead>
-                <tbody id="matrixBody"></tbody>
-              </table>
-            </div>
+          <div class="card-body"><div class="matrix-wrap"><table class="matrix-table" id="matrixTable"><thead><tr id="matrixHeader"></tr></thead><tbody id="matrixBody"></tbody></table></div></div>
+        </div>
+
+        <!-- Wait periods -->
+        <div class="card hidden" style="margin-bottom:1.25rem;" id="waitPeriodsSection"></div>
+
+        <!-- Scoring -->
+        <div class="card" style="margin-bottom:1.25rem;">
+          <div class="card-header"><div class="card-title">🏆 Rekomendacja</div></div>
+          <div class="card-body-padded">
+            <div id="scoringResults" class="scoring-rows"></div>
           </div>
         </div>
 
-        <!-- Scoring Card -->
-        <div class="card" style="margin-bottom:1.25rem;">
-          <div class="card-header">
-            <div class="card-title">🏆 Rekomendacja</div>
-          </div>
-          <div class="card-body-padded">
-            <p style="font-size:0.75rem; color:var(--slate-500); margin-bottom:1rem;">Zakres (70%) + Składka (30%). SU porównywane relatywnie do max w wierszu.</p>
-            <div class="scoring-grid" id="scoringResults">
-              <div class="empty-state" style="padding:2rem;">
-                <p style="font-size:0.8rem; color:var(--slate-400);">Dodaj ryzyka i ubezpieczycieli, aby zobaczyć rekomendację.</p>
-              </div>
-            </div>
-          </div>
-        </div>
+        <!-- Client exclusions -->
+        <div id="clientExclusionsSection" class="hidden"></div>
       </div>
 
-      <!-- ===== ADMIN VIEW ===== -->
+      <!-- ADMIN -->
       <div id="viewAdmin" class="hidden">
         <div class="dashboard-header">
-          <div>
-            <h1 class="dashboard-title">Panel Administracyjny</h1>
-            <p class="dashboard-subtitle">Zarządzanie użytkownikami</p>
-          </div>
+          <div><h1 class="dashboard-title">Panel Administracyjny</h1></div>
           <button class="btn btn-primary" onclick="App.openAddUserModal()">+ Dodaj użytkownika</button>
         </div>
-
-        <div class="card admin-section">
-          <div class="card-header">
-            <div class="card-title">👥 Użytkownicy</div>
-          </div>
-          <div class="card-body">
-            <table class="admin-table">
-              <thead>
-                <tr>
-                  <th>Email</th>
-                  <th>Imię i nazwisko</th>
-                  <th>Rola</th>
-                  <th>Status</th>
-                  <th style="width:100px;">Akcje</th>
-                </tr>
-              </thead>
-              <tbody id="adminUsersList"></tbody>
-            </table>
-          </div>
+        <div style="display:flex;gap:0.5rem;margin-bottom:1rem;">
+          <button class="admin-tab-btn active" data-tab="users" onclick="Admin.switchTab('users')">👥 Użytkownicy</button>
+          <button class="admin-tab-btn" data-tab="clients" onclick="Admin.switchTab('clients')">📋 Klienci z formularza</button>
+        </div>
+        <div class="card" id="adminUsersSection">
+          <div class="card-body"><table class="admin-table"><thead><tr><th>Nazwa</th><th>Rola</th><th>Status</th><th style="width:80px;">Akcje</th></tr></thead><tbody id="adminUsersList"></tbody></table></div>
+        </div>
+        <div class="card hidden" id="adminClientsSection">
+          <div class="card-body"><table class="admin-table"><thead><tr><th>Imię i nazwisko</th><th>Email</th><th>Telefon</th><th>Zatrudnienie</th><th>Medyczne</th><th>Sporty</th><th>Data</th></tr></thead><tbody id="adminClientsList"></tbody></table></div>
         </div>
       </div>
     </main>
 
-    <!-- FOOTER -->
     <footer class="app-footer">
-      Aura Consulting spółka z ograniczoną odpowiedzialnością &middot;
-      ul. Bolkowska 2A/28, Warszawa &middot;
-      KRS 0000426835 &middot; KNF 1972/13<br>
-      <a href="https://www.perplexity.ai/computer" target="_blank" rel="noopener noreferrer" style="opacity:0.6;">Created with Perplexity Computer</a>
+      Aura Expert spółka z ograniczoną odpowiedzialnością &middot; ul. Bolkowska 2A/28, Warszawa &middot; KRS 0000426835 &middot; KNF 1972/13<br>
+      <a href="https://www.perplexity.ai/computer" target="_blank" rel="noopener noreferrer" style="opacity:0.5;">Created with Perplexity Computer</a>
     </footer>
   </div>
 
-  <!-- ========== MODALS ========== -->
+  <!-- MODALS -->
+  <div id="riskPickerModal" class="modal-overlay hidden"><div class="modal-box modal-box-lg"><div class="modal-header"><div class="modal-title">Wybierz Ryzyka</div><button class="modal-close" onclick="App.closeModal('riskPickerModal')">✕</button></div><div class="modal-body" id="riskPickerBody"></div><div class="modal-footer"><button class="btn btn-outline" onclick="App.closeModal('riskPickerModal')">Zamknij</button></div></div></div>
 
-  <!-- Risk Picker Modal -->
-  <div id="riskPickerModal" class="modal-overlay hidden">
+  <div id="insurerPickerModal" class="modal-overlay hidden"><div class="modal-box"><div class="modal-header"><div class="modal-title">Wybierz Ubezpieczyciela</div><button class="modal-close" onclick="App.closeModal('insurerPickerModal')">✕</button></div><div class="modal-body" id="insurerPickerBody"></div><div class="modal-footer"><button class="btn btn-outline" onclick="App.closeModal('insurerPickerModal')">Zamknij</button></div></div></div>
+
+  <div id="addUserModal" class="modal-overlay hidden"><div class="modal-box"><div class="modal-header"><div class="modal-title">Dodaj Użytkownika</div><button class="modal-close" onclick="App.closeModal('addUserModal')">✕</button></div><div class="modal-body"><form id="addUserForm" onsubmit="App.addUser(event)"><div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" id="newUserEmail" required></div><div class="form-group"><label class="form-label">Imię i nazwisko</label><input class="form-input" type="text" id="newUserName" required></div><div class="form-group"><label class="form-label">Hasło (min. 8)</label><input class="form-input" type="password" id="newUserPassword" required minlength="8"></div><div class="form-group"><label class="form-label">Rola</label><select class="form-input" id="newUserRole"><option value="user">Użytkownik</option><option value="admin">Administrator</option></select></div><button type="submit" class="btn btn-primary btn-full" id="addUserBtn">Utwórz konto</button></form></div></div></div>
+
+  <div id="confirmModal" class="modal-overlay hidden"><div class="modal-box" style="max-width:380px;"><div class="modal-header"><div class="modal-title" id="confirmTitle">Potwierdź</div><button class="modal-close" onclick="App.closeModal('confirmModal')">✕</button></div><div class="modal-body"><p style="font-size:0.85rem;color:var(--slate-600);" id="confirmMessage"></p></div><div class="modal-footer"><button class="btn btn-outline" onclick="App.closeModal('confirmModal')">Anuluj</button><button class="btn btn-danger" id="confirmActionBtn">Usuń</button></div></div></div>
+
+  <!-- Client Detail Modal (Admin) -->
+  <div id="clientDetailModal" class="modal-overlay hidden">
+    <div class="modal-box modal-box-lg" style="max-width:720px;">
+      <div class="modal-header"><div class="modal-title" id="clientDetailTitle">Klient</div><button class="modal-close" onclick="App.closeModal('clientDetailModal')">✕</button></div>
+      <div class="modal-body" id="clientDetailBody" style="max-height:65vh;overflow-y:auto;"></div>
+    </div>
+  </div>
+
+  <!-- Exclusions Accept Modal (Client) -->
+  <div id="exclusionsAcceptModal" class="modal-overlay hidden">
     <div class="modal-box modal-box-lg">
-      <div class="modal-header">
-        <div class="modal-title">Wybierz Ryzyka</div>
-        <button class="modal-close" onclick="App.closeModal('riskPickerModal')">✕</button>
-      </div>
-      <div class="modal-body" id="riskPickerBody"></div>
-      <div class="modal-footer">
-        <button class="btn btn-outline" onclick="App.closeModal('riskPickerModal')">Zamknij</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Insurer Picker Modal -->
-  <div id="insurerPickerModal" class="modal-overlay hidden">
-    <div class="modal-box">
-      <div class="modal-header">
-        <div class="modal-title">Wybierz Ubezpieczyciela</div>
-        <button class="modal-close" onclick="App.closeModal('insurerPickerModal')">✕</button>
-      </div>
-      <div class="modal-body" id="insurerPickerBody"></div>
-      <div class="modal-footer">
-        <button class="btn btn-outline" onclick="App.closeModal('insurerPickerModal')">Zamknij</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Add User Modal (Admin) -->
-  <div id="addUserModal" class="modal-overlay hidden">
-    <div class="modal-box">
-      <div class="modal-header">
-        <div class="modal-title">Dodaj Użytkownika</div>
-        <button class="modal-close" onclick="App.closeModal('addUserModal')">✕</button>
-      </div>
-      <div class="modal-body">
-        <form id="addUserForm" onsubmit="App.addUser(event)">
-          <div class="form-group">
-            <label class="form-label">Email</label>
-            <input class="form-input" type="email" id="newUserEmail" required placeholder="email@domena.pl">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Imię i nazwisko</label>
-            <input class="form-input" type="text" id="newUserName" required placeholder="Jan Kowalski">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Hasło (min. 8 znaków)</label>
-            <input class="form-input" type="password" id="newUserPassword" required minlength="8" placeholder="Silne hasło">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Rola</label>
-            <select class="form-input" id="newUserRole">
-              <option value="user">Użytkownik</option>
-              <option value="admin">Administrator</option>
-            </select>
-          </div>
-          <button type="submit" class="btn btn-primary btn-full" id="addUserBtn">Utwórz konto</button>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <!-- Confirm Delete Modal -->
-  <div id="confirmModal" class="modal-overlay hidden">
-    <div class="modal-box" style="max-width:380px;">
-      <div class="modal-header">
-        <div class="modal-title" id="confirmTitle">Potwierdź</div>
-        <button class="modal-close" onclick="App.closeModal('confirmModal')">✕</button>
-      </div>
-      <div class="modal-body">
-        <p style="font-size:0.85rem; color:var(--slate-600);" id="confirmMessage">Czy na pewno?</p>
+      <div class="modal-header"><div class="modal-title" style="color:var(--red-700);">⚠️ Informacja o wyłączeniach</div><button class="modal-close" onclick="App.closeModal('exclusionsAcceptModal')">✕</button></div>
+      <div class="modal-body" id="exclusionsModalBody" style="max-height:350px;overflow-y:auto;font-size:0.8rem;color:var(--slate-600);line-height:1.7;"></div>
+      <div style="padding:0.75rem 1.25rem;text-align:center;font-size:0.7rem;color:var(--amber-600);font-weight:600;" id="exclusionsScrollHint">↓ Przewiń do końca, aby kontynuować ↓</div>
+      <div class="hidden" id="exclusionsCheckboxArea" style="padding:0.75rem 1.25rem;border-top:1px solid var(--slate-200);">
+        <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;font-size:0.8rem;color:var(--slate-700);">
+          <input type="checkbox" id="exclusionsCheckbox" style="margin-top:0.2rem;">
+          <span>Zapoznałem/am się z wyłączeniami odpowiedzialności i otrzymałem/am dokument <strong>Karta Produktu</strong>.</span>
+        </label>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-outline" onclick="App.closeModal('confirmModal')">Anuluj</button>
-        <button class="btn btn-danger" id="confirmActionBtn">Usuń</button>
+        <button class="btn btn-outline" onclick="App.closeModal('exclusionsAcceptModal')">Anuluj</button>
+        <button class="btn btn-success" id="exclusionsAcceptBtn" disabled onclick="ClientView.confirmChoice()">Potwierdzam wybór</button>
       </div>
     </div>
   </div>
 
-  <!-- SCRIPTS -->
   <script src="js/config.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/store.js"></script>
   <script src="js/matrix.js"></script>
   <script src="js/scoring.js"></script>
   <script src="js/admin.js"></script>
+  <script src="js/client.js"></script>
   <script src="js/app.js"></script>
 <script data-pplx-inline-edit>
 (function(){
