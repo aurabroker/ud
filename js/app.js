@@ -161,6 +161,80 @@ const App = {
     finally { btn.innerHTML = orig; btn.disabled = false; }
   },
 
+  async sendOfferByEmail() {
+    const s = Store.state;
+    if (!s.offerId) {
+        App.toast('Najpierw zapisz ofertę', 'error');
+        return;
+    }
+ 
+    // Otwórz modal z inputem email
+    const modal = document.getElementById('sendEmailModal');
+    const emailInput = document.getElementById('sendEmailInput');
+    
+    // Prefill emailem klienta jeśli znany
+    if (s.clientId) {
+        const client = Store.dbClients.find(c => c.id === s.clientId);
+        if (client?.email) emailInput.value = client.email;
+    }
+    
+    modal.classList.remove('hidden');
+},
+ 
+async sendOfferByEmailConfirm() {
+    const s = Store.state;
+    const email = document.getElementById('sendEmailInput').value.trim();
+    if (!email || !email.includes('@')) {
+        App.toast('Podaj prawidłowy adres email', 'error');
+        return;
+    }
+ 
+    const btn = document.getElementById('sendEmailBtn');
+    btn.disabled = true;
+    btn.textContent = 'Wysyłanie...';
+ 
+    try {
+        // Najpierw wygeneruj link jeśli nie istnieje
+        let shareToken = null;
+        if (!s.shareToken) {
+            const result = await Store.saveOffer(true); // generateLink = true
+            shareToken = result.share_token;
+        }
+ 
+        const link = `${window.location.origin}${window.location.pathname}?share=${shareToken || s.shareToken}`;
+ 
+        // Wywołaj Edge Function
+        const res = await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/send-offer-email`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${CONFIG.SUPABASE_ANON_KEY}`
+            },
+            body: JSON.stringify({
+                to_email: email,
+                offer_id: s.offerId,
+                offer_name: s.offerName || 'Oferta ubezpieczenia',
+                client_name: s.clientName || '',
+                broker_name: Auth.getDisplayName(),
+                offer_link: link,
+            })
+        });
+ 
+        const data = await res.json();
+        if (res.ok) {
+            App.closeModal('sendEmailModal');
+            App.toast(`Email wysłany na ${email}`, 'success');
+        } else {
+            throw new Error(data.error || 'Błąd wysyłki');
+        }
+    } catch (err) {
+        App.toast('Błąd: ' + err.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Wyślij';
+    }
+},
+  
   syncEditorUI() {
     document.getElementById('editorOfferName').value = Store.state.offerName;
     document.getElementById('editorClientName').value = Store.state.clientName;
