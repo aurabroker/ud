@@ -555,35 +555,63 @@
 
     <!-- Footer (zmniejszone marginesy) -->
     <footer class="bg-slate-900 text-slate-300 py-10 md:py-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-10">
-            <div class="col-span-1 md:col-span-2">
-                <div class="flex items-center gap-2 mb-4">
-                    <div class="w-8 h-8 bg-slate-800 border border-slate-600 rounded flex items-center justify-center text-white font-bold">U</div>
-                    <span class="text-2xl font-extrabold text-white tracking-tight">Utrata<span class="text-blue-500">Dochodu</span></span>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-10">
+        <div class="col-span-1 md:col-span-2">
+            <div class="flex items-center gap-2 mb-4">
+                <div class="w-8 h-8 bg-slate-800 border border-slate-600 rounded flex items-center justify-center text-white font-bold">U</div>
+                <span class="text-2xl font-extrabold text-white tracking-tight">Utrata<span class="text-blue-500">Dochodu</span></span>
+            </div>
+            <p class="text-sm text-slate-400 max-w-md leading-relaxed">
+                Specjaliści w zakresie zabezpieczenia dochodu. Współpracujemy z wiodącymi na rynku coverholderami: <strong>CEU sp. z o.o.</strong> oraz <strong>Leadenhall Insurance SA</strong>. Obsługa prawno-operacyjna: Aura Expert sp. z o.o.
+            </p>
+
+            <!-- === NOWE: Linki dla Brokerów === -->
+            <div class="mt-6 pt-6 border-t border-slate-700">
+                <p class="text-xs text-slate-500 uppercase tracking-widest font-bold mb-3">Dla Brokerów i Agentów</p>
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <a href="https://app.utratadochodu.pl" 
+                       target="_blank"
+                       class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold px-4 py-2.5 rounded-lg transition-colors shadow-md">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                        </svg>
+                        Panel Brokera
+                    </a>
+                    <a href="https://app.utratadochodu.pl/demo" 
+                       target="_blank"
+                       class="inline-flex items-center gap-2 bg-slate-700 hover:bg-slate-600 text-white text-sm font-bold px-4 py-2.5 rounded-lg transition-colors shadow-md border border-slate-600">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Zobacz DEMO
+                    </a>
                 </div>
-                <p class="text-sm text-slate-400 max-w-md leading-relaxed">
-                    Specjaliści w zakresie zabezpieczenia dochodu. Współpracujemy z wiodącymi na rynku coverholderami: <strong>CEU sp. z o.o.</strong> oraz <strong>Leadenhall Insurance SA</strong>. Obsługa prawno-operacyjna: Aura Expert sp. z o.o.
-                </p>
             </div>
-            <div>
-                <h4 class="text-white font-bold mb-4 tracking-wider uppercase text-sm">Nawigacja</h4>
-                <ul class="space-y-2 text-sm">
-                    <li><a href="o-nas.html" class="hover:text-blue-400 transition-colors">O Nas (Partnerzy)</a></li>
-                    <li><a href="blog.html" class="hover:text-blue-400 transition-colors">Blog / Aktualności</a></li>
-                    <li><a href="pracuj-z-nami.html" class="hover:text-amber-400 transition-colors text-amber-500 font-semibold">Dla Agentów - Współpraca</a></li>
-                    <li><a href="polityka-cookies.html" class="hover:text-blue-400 transition-colors">Polityka Cookies i RODO</a></li>
-                    <li><a href="regulamin.html" class="hover:text-blue-400 transition-colors">Regulamin Serwisu</a></li>
-                </ul>
-            </div>
-            <div>
-                <h4 class="text-white font-bold mb-4 tracking-wider uppercase text-sm">Kontakt</h4>
-                <ul class="space-y-2 text-sm">
-                    <li class="flex items-center gap-2"><span class="text-blue-500">✉</span> biuro@utratadochodu.com</li>
-                    <li class="flex items-center gap-2"><span class="text-blue-500">📞</span> +48 504 400 901</li>
-                </ul>
-            </div>
+            <!-- === KONIEC NOWYCH LINKÓW === -->
         </div>
-    </footer>
+
+        <div>
+            <h4 class="text-white font-bold mb-4 tracking-wider uppercase text-sm">Nawigacja</h4>
+            <ul class="space-y-2 text-sm">
+                <li><a href="o-nas.html" class="hover:text-blue-400 transition-colors">O Nas (Partnerzy)</a></li>
+                <li><a href="blog.html" class="hover:text-blue-400 transition-colors">Blog / Aktualności</a></li>
+                <li><a href="pracuj-z-nami.html" class="hover:text-amber-400 transition-colors text-amber-500 font-semibold">Dla Agentów - Współpraca</a></li>
+                <li><a href="polityka-cookies.html" class="hover:text-blue-400 transition-colors">Polityka Cookies i RODO</a></li>
+                <li><a href="regulamin.html" class="hover:text-blue-400 transition-colors">Regulamin Serwisu</a></li>
+            </ul>
+        </div>
+
+        <div>
+            <h4 class="text-white font-bold mb-4 tracking-wider uppercase text-sm">Kontakt</h4>
+            <ul class="space-y-2 text-sm">
+                <li class="flex items-center gap-2"><span class="text-blue-500">✉</span> biuro@utratadochodu.com</li>
+                <li class="flex items-center gap-2"><span class="text-blue-500">📞</span> +48 504 400 901</li>
+            </ul>
+        </div>
+    </div>
+</footer>
+
 
     <!-- Modal Wyłączeń -->
     <div id="exclusions-modal" class="fixed inset-0 z-[110] hidden overflow-y-auto" aria-modal="true">
