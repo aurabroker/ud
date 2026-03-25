@@ -1,6 +1,6 @@
 /**
- * store.js — State management & Supabase data operations — v2.0
- * Supports variants, waiting periods, indemnity periods, client choice
+ * store.js — State management & Supabase data operations — v3.0
+ * Zmiany: saveClient (nowy/edycja klienta z ankiety brokera)
  */
 
 const Store = {
@@ -8,21 +8,18 @@ const Store = {
   dbInsurers: [],
   dbClients: [],
 
-  // Current offer state
   state: {
     offerId: null,
     offerName: '',
-    clientName: '',       // display name
-    clientId: null,       // link to ud_clients
+    clientName: '',
+    clientId: null,
     brokerMessage: '',
-    insurers: [],         // [{id, name, short_name}]
-    risks: [],            // [{id, name, category, sort_order, weight}]
-    // variants: array of variant objects
-    variants: [
-      // { id: 'v1', label: 'Wariant 1', matrixData: {riskId:{insurerId:{su:''}}}, totals: {insurerId:''}, waitAccident:{insurerId:14}, waitIllness:{insurerId:21}, indemnity:{insurerId:24} }
-    ],
+    shareToken: null,
+    insurers: [],
+    risks: [],
+    variants: [],
     activeVariantIdx: 0,
-    clientChoice: null,   // {variant_id, insurer_id, insurer_name, chosen_at, exclusions_accepted_at}
+    clientChoice: null,
   },
 
   resetState() {
@@ -32,6 +29,7 @@ const Store = {
       clientName: '',
       clientId: null,
       brokerMessage: '',
+      shareToken: null,
       insurers: [],
       risks: [],
       variants: [Store.createEmptyVariant('Wariant 1')],
@@ -70,10 +68,27 @@ const Store = {
 
   // Clients
   async loadClients() {
-    const { data, error } = await sb.from('ud_clients').select('*').order('created_at', { ascending: false }).limit(200);
+    const { data, error } = await sb.from('ud_clients').select('*').order('created_at', { ascending: false }).limit(500);
     if (error) throw error;
     Store.dbClients = data || [];
     return data || [];
+  },
+
+  // Zapisz klienta (nowy lub edycja)
+  async saveClient(payload, clientId = null) {
+    if (clientId) {
+      const { data, error } = await sb.from('ud_clients').update(payload).eq('id', clientId).select().single();
+      if (error) throw error;
+      // Zaktualizuj w lokalnej tablicy
+      const idx = Store.dbClients.findIndex(c => c.id === clientId);
+      if (idx !== -1) Store.dbClients[idx] = data;
+      return data;
+    } else {
+      const { data, error } = await sb.from('ud_clients').insert([payload]).select().single();
+      if (error) throw error;
+      Store.dbClients.unshift(data);
+      return data;
+    }
   },
 
   // Offers
@@ -123,6 +138,7 @@ const Store = {
       if (generateLink) {
         const existing = await Store.loadOffer(s.offerId);
         if (!existing.share_token) updateData.share_token = generateShareToken();
+        else updateData.share_token = existing.share_token;
       }
       const { data, error } = await sb.from('ud_offers').update(updateData).eq('id', s.offerId).select().single();
       if (error) throw error;
@@ -133,6 +149,7 @@ const Store = {
       result = data;
       s.offerId = result.id;
     }
+    if (result.share_token) s.shareToken = result.share_token;
     return result;
   },
 
@@ -141,7 +158,6 @@ const Store = {
     if (error) throw error;
   },
 
-  // Save client choice (from client view)
   async saveClientChoice(offerId, choice) {
     const { data, error } = await sb.from('ud_offers').update({ client_choice: choice }).eq('id', offerId).select().single();
     if (error) throw error;
@@ -155,6 +171,7 @@ const Store = {
     Store.state.clientId = offerRow.client_id || null;
     Store.state.brokerMessage = offerRow.broker_message || '';
     Store.state.clientChoice = offerRow.client_choice || null;
+    Store.state.shareToken = offerRow.share_token || null;
 
     const d = offerRow.data || {};
     Store.state.insurers = d.insurers || [];
@@ -162,7 +179,6 @@ const Store = {
     Store.state.variants = d.variants || [Store.createEmptyVariant('Wariant 1')];
     Store.state.activeVariantIdx = d.activeVariantIdx || 0;
 
-    // Backward compat: old offers without variants
     if (d.matrixData && (!d.variants || d.variants.length === 0)) {
       Store.state.variants = [{
         id: 'v_migrated',
@@ -191,10 +207,7 @@ const Store = {
       if (v.totals[tu.id] === undefined) v.totals[tu.id] = '';
       if (v.waitAccident[tu.id] === undefined) v.waitAccident[tu.id] = 14;
       if (v.waitIllness[tu.id] === undefined) v.waitIllness[tu.id] = 21;
-      if (v.indemnity[tu.id] === undefined) {
-        const name = (tu.short_name || tu.name).toLowerCase();
-        v.indemnity[tu.id] = name.includes('leadenhall') ? 24 : 24;
-      }
+      if (v.indemnity[tu.id] === undefined) v.indemnity[tu.id] = 24;
     });
   },
 
