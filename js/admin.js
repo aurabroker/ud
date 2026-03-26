@@ -1,81 +1,176 @@
 /**
- * admin.js — Admin panel: users + clients — v2.1
+ * admin.js — Admin panel: users + clients + stats + reflinks — v3.0
+ * Supports: 4 tabs, team cards, ref ID hierarchy, client counters
  */
 
 const Admin = {
-  activeTab: 'users',
+  activeTab: 'clients',
 
+  // ---- TAB SWITCHING (4 tabs) ----
   switchTab(tab) {
     Admin.activeTab = tab;
-    document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-    document.getElementById('adminUsersSection').classList.toggle('hidden', tab !== 'users');
-    document.getElementById('adminClientsSection').classList.toggle('hidden', tab !== 'clients');
+    document.querySelectorAll('.admin-tab-content').forEach(el => el.classList.add('hidden'));
+    document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+
+    const tabMap = {
+      clients:  'adminClientsSection',
+      users:    'adminUsersSection',
+      stats:    'adminStatsSection',
+      reflinks: 'adminRefLinksSection'
+    };
+
+    const target = document.getElementById(tabMap[tab]);
+    if (target) target.classList.remove('hidden');
+    document.querySelectorAll(`.admin-tab-btn[data-tab="${tab}"]`).forEach(b => b.classList.add('active'));
+
     if (tab === 'users') Admin.loadUsers();
-    else Admin.loadClients();
+    else if (tab === 'clients') Admin.loadClients();
+    else if (tab === 'stats') Admin.loadStats();
+    else if (tab === 'reflinks') Admin.loadRefLinks();
   },
 
   // ---- USERS ----
   async loadUsers() {
     const tbody = document.getElementById('adminUsersList');
-    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:2rem;"><div class="spinner"></div></td></tr>`;
+    if (!tbody) return;
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2rem;"><div class="spinner"></div></td></tr>`;
+
     try {
       const users = await Store.loadUsers();
-      if (users.length === 0) { tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--slate-400);">Brak użytkowników</td></tr>`; return; }
+      if (users.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--slate-400);">Brak użytkowników</td></tr>`;
+        return;
+      }
+
+      // Try team cards if data supports it
+      const hasTeamData = users.some(u => u.ref_id || u.leader_id);
+      if (hasTeamData && typeof Admin.renderTeamCards === 'function') {
+        Admin.renderTeamCards(users);
+      }
+
+      // Flat table (always rendered as fallback)
       let html = '';
       users.forEach(u => {
         const isCurrent = u.id === Auth.currentUser?.id;
-        const role = u.role === 'admin' ? '<span class="admin-role-badge admin">Admin</span>' : '<span class="admin-role-badge user">User</span>';
-        const status = u.active !== false ? '<span class="admin-status-dot active"></span>Aktywny' : '<span class="admin-status-dot inactive"></span>Zablokowany';
+
+        // Role badge
+        let roleBadge;
+        if (u.role === 'admin') roleBadge = '<span class="admin-role-badge admin">Admin</span>';
+        else if (u.role === 'leader') roleBadge = '<span class="admin-role-badge leader">Lider</span>';
+        else roleBadge = '<span class="admin-role-badge user">User</span>';
+
+        // Status
+        const isActive = u.active !== false;
+        const status = isActive
+          ? '<span class="admin-status-dot active"></span>Aktywny'
+          : '<span class="admin-status-dot inactive"></span>Zablokowany';
+
+        // Client count
+        const clientCount = u.client_count || 0;
+        const clientCell = clientCount > 0
+          ? `<span style="font-weight:700;color:var(--emerald-600,#059669);">${clientCount}</span>`
+          : `<span style="color:var(--slate-400);">0</span>`;
+
+        // Ref ID
+        const refCell = u.ref_id
+          ? `<span class="ref-id-cell" title="Kliknij aby skopiować link" onclick="event.stopPropagation();Admin.copyRef('${u.ref_id}')">${u.ref_id}</span>`
+          : '<span style="color:var(--slate-400);font-size:0.75rem;">—</span>';
+
+        // Actions
+        let actions = '—';
+        if (!isCurrent) {
+          actions = `<div style="display:flex;gap:0.25rem;">
+            <button class="btn btn-ghost btn-sm" onclick="Admin.toggleActive('${u.id}',${isActive})" title="${isActive ? 'Zablokuj' : 'Odblokuj'}">${isActive ? '🔒' : '🔓'}</button>
+            <button class="btn btn-ghost btn-sm" onclick="Admin.toggleRole('${u.id}','${u.role}')" title="${u.role === 'admin' ? 'Na User' : 'Na Admin'}">${u.role === 'admin' ? '👤' : '👑'}</button>
+          </div>`;
+        }
+
         html += `<tr>
-          <td class="admin-user-email">${escHtml(u.full_name || u.id.substring(0,8))}${isCurrent ? ' (Ty)' : ''}</td>
-          <td>${role}</td>
+          <td class="admin-user-email">${escHtml(u.full_name || u.id.substring(0, 8))}${isCurrent ? ' <span style="color:var(--blue-600);font-size:0.7rem;">(Ty)</span>' : ''}</td>
+          <td>${roleBadge}</td>
           <td style="font-size:0.75rem;">${status}</td>
-          <td>${!isCurrent ? `<div style="display:flex;gap:0.25rem;">
-            <button class="btn btn-ghost btn-sm" onclick="Admin.toggleActive('${u.id}',${u.active!==false})">${u.active!==false?'🔒':'🔓'}</button>
-            <button class="btn btn-ghost btn-sm" onclick="Admin.toggleRole('${u.id}','${u.role}')">${u.role==='admin'?'👤':'👑'}</button>
-          </div>` : '—'}</td></tr>`;
+          <td style="text-align:center;">${clientCell}</td>
+          <td>${refCell}</td>
+          <td>${actions}</td>
+        </tr>`;
       });
       tbody.innerHTML = html;
-    } catch (err) { tbody.innerHTML = `<tr><td colspan="4" style="color:var(--red-500);text-align:center;padding:1rem;">${err.message}</td></tr>`; }
+
+      // Populate ref link dropdown
+      Admin.populateRefUserDropdown(users);
+
+    } catch (err) {
+      tbody.innerHTML = `<tr><td colspan="6" style="color:var(--red-500);text-align:center;padding:1rem;">${err.message}</td></tr>`;
+    }
   },
 
   // ---- CLIENTS ----
   async loadClients() {
     const tbody = document.getElementById('adminClientsList');
-    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:2rem;"><div class="spinner"></div></td></tr>`;
+    if (!tbody) return;
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2rem;"><div class="spinner"></div></td></tr>`;
+
     try {
       const clients = await Store.loadClients();
-      if (clients.length === 0) { tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--slate-400);">Brak klientów z formularza</td></tr>`; return; }
+      Admin.updateClientCounters(clients);
+
+      if (clients.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--slate-400);">Brak klientów z formularza</td></tr>`;
+        return;
+      }
+
       let html = '';
       clients.forEach(c => {
-        const date = new Date(c.created_at).toLocaleString('pl-PL', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
-        
-        // Medical flags
-        const medFlags = [];
-        if (c.med_heart) medFlags.push('❤️');
-        if (c.med_diabetes) medFlags.push('💉');
-        if (c.med_bones) medFlags.push('🦴');
-        if (c.med_stomach) medFlags.push('🫁');
-        if (c.med_neuro) medFlags.push('🧠');
-        if (c.med_surgery) medFlags.push('🏥');
-        if (c.med_aids) medFlags.push('⚠️');
-        
-        // Risk flags count
-        const riskFields = ['risk_balloon','risk_sailing','risk_skiing','risk_skydiving','risk_diving','risk_caving','risk_aviation','risk_extreme_bike_boat','risk_climbing','risk_paragliding','risk_horse','risk_horse_jumping','risk_gravity_bike','risk_quad','risk_hunting'];
-        const riskCount = riskFields.filter(f => c[f]).length;
+        const date = new Date(c.created_at).toLocaleString('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+        const refCell = c.ref_source
+          ? `<span class="ref-id-cell">${c.ref_source}</span>`
+          : '<span style="color:var(--slate-400);font-size:0.75rem;">—</span>';
+
+        const assignedTo = c.assigned_user_name || c.assigned_to || '—';
 
         html += `<tr style="cursor:pointer;" onclick="Admin.showClientDetail('${c.id}')">
           <td style="font-weight:600;">${escHtml(c.full_name || '—')}</td>
           <td>${escHtml(c.email || '—')}</td>
           <td>${escHtml(c.phone || '—')}</td>
-          <td>${escHtml(c.employment_type || '—')}</td>
-          <td style="font-size:0.7rem;">${medFlags.length > 0 ? medFlags.join(' ') : '<span style="color:var(--green-500);">✓</span>'}</td>
-          <td style="font-size:0.7rem;">${riskCount > 0 ? `<span style="color:var(--amber-500);font-weight:700;">${riskCount} sportów</span>` : '—'}</td>
+          <td style="font-size:0.8rem;">${escHtml(assignedTo)}</td>
+          <td>${refCell}</td>
           <td style="font-size:0.7rem;color:var(--slate-400);">${date}</td>
         </tr>`;
       });
       tbody.innerHTML = html;
-    } catch (err) { tbody.innerHTML = `<tr><td colspan="7" style="color:var(--red-500);text-align:center;padding:1rem;">${err.message}</td></tr>`; }
+    } catch (err) {
+      tbody.innerHTML = `<tr><td colspan="6" style="color:var(--red-500);text-align:center;padding:1rem;">${err.message}</td></tr>`;
+    }
+  },
+
+  // ---- CLIENT COUNTERS ----
+  updateClientCounters(clients) {
+    const totalEl = document.getElementById('clientsTotalCount');
+    const newEl = document.getElementById('clientsNewCount');
+    const badgeEl = document.getElementById('clientsTabBadge');
+
+    if (totalEl) totalEl.textContent = clients.length;
+
+    const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const newCount = clients.filter(c => new Date(c.created_at).getTime() > weekAgo).length;
+
+    if (newEl) {
+      newEl.textContent = `${newCount} nowych`;
+      newEl.style.display = newCount > 0 ? 'inline' : 'none';
+    }
+    if (badgeEl) {
+      badgeEl.textContent = newCount;
+      badgeEl.style.display = newCount > 0 ? 'inline' : 'none';
+    }
+  },
+
+  // ---- CLIENT SEARCH ----
+  filterClients(query) {
+    const q = query.toLowerCase();
+    document.querySelectorAll('#adminClientsList tr').forEach(row => {
+      row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
   },
 
   // ---- CLIENT DETAIL MODAL ----
@@ -92,7 +187,6 @@ const Admin = {
       ['risk_horse_jumping', 'Skoki konne'], ['risk_gravity_bike', 'Gravity bike'], ['risk_quad', 'Quad/ATV'],
       ['risk_hunting', 'Polowanie']
     ];
-
     const medFields = [
       ['med_heart', 'Serce / nadciśnienie'], ['med_diabetes', 'Cukrzyca / nerki'],
       ['med_bones', 'Kręgosłup / stawy'], ['med_stomach', 'Żołądek / jelita'],
@@ -102,7 +196,6 @@ const Admin = {
 
     let html = `<div class="client-detail-grid">`;
 
-    // Basic info
     html += `<div class="client-detail-section">
       <h4>📋 Dane podstawowe</h4>
       <div class="detail-row"><span>Imię i nazwisko</span><strong>${escHtml(c.full_name || '—')}</strong></div>
@@ -113,7 +206,6 @@ const Admin = {
       <div class="detail-row"><span>Zawód</span><strong>${escHtml(c.profession || '—')}</strong></div>
     </div>`;
 
-    // B2B
     if (c.employs_people || c.b2b_start_date || c.b2b_industry) {
       html += `<div class="client-detail-section">
         <h4>🏢 Dane B2B</h4>
@@ -129,9 +221,7 @@ const Admin = {
       </div>`;
     }
 
-    // Medical
-    html += `<div class="client-detail-section">
-      <h4>🩺 Ankieta medyczna</h4>`;
+    html += `<div class="client-detail-section"><h4>🩺 Ankieta medyczna</h4>`;
     medFields.forEach(([key, label]) => {
       const val = c[key];
       html += `<div class="detail-row"><span>${label}</span><strong style="color:${val ? 'var(--red-600)' : 'var(--green-600)'};">${val ? '⚠️ Tak' : '✓ Nie'}</strong></div>`;
@@ -141,24 +231,19 @@ const Admin = {
     }
     html += `</div>`;
 
-    // Sports/risks
     const activeRisks = riskFields.filter(([key]) => c[key]);
-    html += `<div class="client-detail-section">
-      <h4>⚡ Sporty / ryzyka (${activeRisks.length})</h4>`;
+    html += `<div class="client-detail-section"><h4>⚡ Sporty / ryzyka (${activeRisks.length})</h4>`;
     if (activeRisks.length === 0) {
       html += `<p style="font-size:0.8rem;color:var(--green-600);font-weight:600;">Brak deklarowanych sportów ryzykownych</p>`;
     } else {
       html += `<div style="display:flex;flex-wrap:wrap;gap:0.35rem;">`;
-      activeRisks.forEach(([key, label]) => {
+      activeRisks.forEach(([, label]) => {
         html += `<span style="font-size:0.7rem;font-weight:600;background:var(--amber-50);color:var(--amber-600);padding:0.2rem 0.5rem;border-radius:4px;border:1px solid #fde68a;">${label}</span>`;
       });
       html += `</div>`;
     }
-    html += `</div>`;
+    html += `</div></div>`;
 
-    html += `</div>`;
-
-    // Action: create offer for this client
     html += `<div style="margin-top:1rem;padding-top:0.75rem;border-top:1px solid var(--slate-200);display:flex;gap:0.5rem;">
       <button class="btn btn-primary btn-sm" onclick="Admin.createOfferForClient('${c.id}')">📊 Utwórz ofertę dla tego klienta</button>
     </div>`;
@@ -181,13 +266,71 @@ const Admin = {
     App.toast(`Oferta dla ${c.full_name || 'klienta'} — dodaj ryzyka i ubezpieczycieli`, 'info');
   },
 
+  // ---- USER ACTIONS ----
   async toggleActive(id, active) {
     try { await Store.updateUserProfile(id, { active: !active }); App.toast(active ? 'Zablokowany' : 'Odblokowany', 'success'); Admin.loadUsers(); }
     catch (e) { App.toast(e.message, 'error'); }
   },
+
   async toggleRole(id, role) {
     const nr = role === 'admin' ? 'user' : 'admin';
     try { await Store.updateUserProfile(id, { role: nr }); App.toast(`Rola: ${nr}`, 'success'); Admin.loadUsers(); }
     catch (e) { App.toast(e.message, 'error'); }
+  },
+
+  // ---- REF HELPERS ----
+  copyRef(refId) {
+    const domain = document.getElementById('refLinkDomain')?.value || 'utratadochodu.pl';
+    const link = `${domain}/?ref=${refId}`;
+    navigator.clipboard.writeText(link).then(() => {
+      App.toast(`Link skopiowany: ${link}`, 'success');
+    }).catch(() => { prompt('Link referencyjny:', link); });
+  },
+
+  copyRefLink() {
+    const output = document.getElementById('refLinkOutput');
+    if (!output) return;
+    navigator.clipboard.writeText(output.value).then(() => {
+      const btn = output.nextElementSibling;
+      if (btn) { btn.textContent = '✅ Skopiowano!'; setTimeout(() => btn.textContent = '📋 Kopiuj', 1500); }
+    });
+  },
+
+  populateRefUserDropdown(users) {
+    const select = document.getElementById('refLinkUser');
+    if (!select) return;
+    select.innerHTML = users
+      .filter(u => u.ref_id)
+      .map(u => `<option value="${u.ref_id}">${escHtml(u.full_name || u.id.substring(0, 8))} (${u.ref_id})</option>`)
+      .join('');
+    const refDomain = document.getElementById('refLinkDomain');
+    const refOutput = document.getElementById('refLinkOutput');
+    if (refDomain && refOutput) {
+      refOutput.value = refDomain.value + '/?ref=' + (select.value || '0000');
+    }
+  },
+
+  generateRefId() {
+    const role = document.getElementById('newUserRole')?.value;
+    const leaderId = document.getElementById('newUserLeader')?.value;
+    const refInput = document.getElementById('newUserRefId');
+    if (!refInput) return;
+    if (role === 'leader' || role === 'admin' || !leaderId) {
+      refInput.value = String(Math.floor(Math.random() * 9000) + 1000).padStart(4, '0');
+    } else {
+      refInput.value = leaderId + '.' + String(Math.floor(Math.random() * 90) + 10);
+    }
+  },
+
+  // ---- PLACEHOLDER TABS ----
+  loadStats() {
+    const noData = document.getElementById('statsChartNoData');
+    if (noData) noData.style.display = 'block';
+  },
+
+  loadRefLinks() {
+    if (Store.dbUsers && Store.dbUsers.length > 0) {
+      Admin.populateRefUserDropdown(Store.dbUsers);
+    }
   },
 };
