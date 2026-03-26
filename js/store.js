@@ -230,4 +230,25 @@ const Store = {
     if (error) throw error;
     return data;
   }
+  
+  // Tworz nowego usera przez Edge Function (wymaga service role)
+  async createUser({ email, password, full_name, role, leader_id, affiliate_code }) {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) throw new Error('Brak sesji');
+    const res = await fetch(
+      `${CONFIG.SUPABASE_URL}/functions/v1/create-user`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+          'apikey': CONFIG.SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify({ email, password, full_name, role, leader_id, affiliate_code }),
+      }
+    );
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || 'Blad tworzenia uzytkownika');
+    return json;
+  },
 };
