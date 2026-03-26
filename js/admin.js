@@ -336,7 +336,7 @@ const Admin = {
   },
   
   // ---- NOWY USER MODAL ----
-  openNewUserModal() {
+    openNewUserModal(preLeaderId, preLeaderRefId) {
     // Wypelnij dropdown liderow
     const leaderSel = document.getElementById('newUserLeader');
     if (leaderSel && Store.dbUsers) {
@@ -345,6 +345,13 @@ const Admin = {
           .filter(u => u.role === 'leader' || u.role === 'admin')
           .map(u => `<option value="${u.id}">${escHtml(u.full_name)} (${u.ref_id || '—'})</option>`)
           .join('');
+    }
+          // Pre-wypelnij lidera jesli przekazano z przycisku DODAJ SUBUSER
+    if (preLeaderId && leaderSel) {
+      leaderSel.value = preLeaderId;
+      const roleEl2 = document.getElementById('newUserRole');
+      if (roleEl2) roleEl2.value = 'user';
+      Admin.generateRefId();
     }
     // Reset pol
     ['newUserName','newUserEmail','newUserPassword','newUserRefId']
