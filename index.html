@@ -208,9 +208,29 @@
 
         <!-- TAB: Users -->
         <div class="admin-tab-content hidden" id="adminUsersSection">
-          <div id="teamCardsContainer" style="display:flex;flex-direction:column;gap:1rem;">
-            <!-- Team cards rendered dynamically by Admin.renderTeamCards() -->
-            <div class="empty-state" style="padding:2rem;text-align:center;color:var(--slate-400,#94a3b8);font-size:0.85rem;">Ładowanie zespołów...</div>
+          <!-- Team cards rendered dynamically when Admin.renderTeamCards() is called -->
+          <div id="teamCardsContainer" class="hidden" style="display:none;flex-direction:column;gap:1rem;"></div>
+
+          <!-- Fallback flat table — used by existing admin.js until team cards are wired -->
+          <div class="card" id="adminUsersFallback">
+            <div class="card-header">
+              <div class="card-title">👥 Użytkownicy</div>
+            </div>
+            <div class="card-body" style="max-height:65vh;overflow-y:auto;">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Nazwa</th>
+                    <th>Rola</th>
+                    <th>Status</th>
+                    <th style="text-align:center;">Klienci</th>
+                    <th>ID Ref</th>
+                    <th style="width:80px;">Akcje</th>
+                  </tr>
+                </thead>
+                <tbody id="adminUsersList"></tbody>
+              </table>
+            </div>
           </div>
         </div>
 
@@ -613,6 +633,12 @@
     Admin.renderTeamCards = function(users) {
       const container = document.getElementById('teamCardsContainer');
       if (!container) return;
+
+      // Switch from flat table to team cards
+      const fallback = document.getElementById('adminUsersFallback');
+      if (fallback) fallback.style.display = 'none';
+      container.classList.remove('hidden');
+      container.style.display = 'flex';
 
       const leaders = users.filter(u => !u.leader_id || u.role === 'admin' || u.role === 'leader');
       const members = users.filter(u => u.leader_id && u.role !== 'admin' && u.role !== 'leader');
