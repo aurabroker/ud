@@ -183,26 +183,9 @@
 
         <!-- TAB: Users -->
         <div class="admin-tab-content hidden" id="adminUsersSection">
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title">Użytkownicy systemu</div>
-            </div>
-            <div class="card-body" style="max-height:65vh;overflow-y:auto;">
-              <table class="admin-table">
-                <thead>
-                  <tr>
-                    <th>Nazwa</th>
-                    <th>Rola</th>
-                    <th>Status</th>
-                    <th>Lider</th>
-                    <th style="text-align:center;">Klienci</th>
-                    <th>ID Ref</th>
-                    <th style="width:80px;">Akcje</th>
-                  </tr>
-                </thead>
-                <tbody id="adminUsersList"></tbody>
-              </table>
-            </div>
+          <div id="teamCardsContainer" style="display:flex;flex-direction:column;gap:1rem;">
+            <!-- Team cards rendered dynamically by Admin.renderTeamCards() -->
+            <div class="empty-state" style="padding:2rem;text-align:center;color:var(--slate-400,#94a3b8);font-size:0.85rem;">Ładowanie zespołów...</div>
           </div>
         </div>
 
@@ -326,6 +309,88 @@
             .stats-charts-grid { grid-template-columns: 1fr !important; }
             .reflinks-grid { grid-template-columns: 1fr !important; }
           }
+
+          /* Team card color system — each leader gets a unique ramp */
+          .team-card { border-radius: 16px; overflow: hidden; border: 1px solid; transition: 0.3s; }
+          .team-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+          .team-card-header { padding: 14px 16px; display: flex; align-items: center; gap: 12px; }
+          .team-card-avatar { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; flex-shrink: 0; }
+          .team-card-info { flex: 1; min-width: 0; }
+          .team-card-name { font-weight: 700; font-size: 0.9rem; }
+          .team-card-meta { font-size: 0.75rem; margin-top: 1px; }
+          .team-card-role { font-size: 0.7rem; font-weight: 700; padding: 3px 10px; border-radius: 100px; }
+          .team-card table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+          .team-card thead td { padding: 8px 14px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; }
+          .team-card tbody tr { background: rgba(255,255,255,0.5); }
+          .team-card tbody td { padding: 10px 14px; }
+          .team-card-empty { padding: 14px 16px; font-size: 0.8rem; opacity: 0.6; text-align: center; }
+
+          /* Color ramps for teams */
+          .team-purple { background: #EEEDFE; border-color: #AFA9EC; }
+          .team-purple .team-card-header { border-bottom: 1px solid rgba(83,74,183,0.15); }
+          .team-purple .team-card-avatar { background: #534AB7; color: #EEEDFE; }
+          .team-purple .team-card-name { color: #3C3489; }
+          .team-purple .team-card-meta { color: #534AB7; }
+          .team-purple .team-card-role { background: rgba(83,74,183,0.12); color: #3C3489; }
+          .team-purple thead td { color: #534AB7; }
+          .team-purple tbody td { color: #3C3489; }
+          .team-purple tbody tr { border-top: 1px solid rgba(83,74,183,0.1); }
+          .team-purple .ref-id-cell { background: rgba(83,74,183,0.1); color: #3C3489; }
+
+          .team-teal { background: #E1F5EE; border-color: #5DCAA5; }
+          .team-teal .team-card-header { border-bottom: 1px solid rgba(15,110,86,0.15); }
+          .team-teal .team-card-avatar { background: #0F6E56; color: #E1F5EE; }
+          .team-teal .team-card-name { color: #085041; }
+          .team-teal .team-card-meta { color: #0F6E56; }
+          .team-teal .team-card-role { background: rgba(15,110,86,0.12); color: #085041; }
+          .team-teal thead td { color: #0F6E56; }
+          .team-teal tbody td { color: #085041; }
+          .team-teal tbody tr { border-top: 1px solid rgba(15,110,86,0.1); }
+          .team-teal .ref-id-cell { background: rgba(15,110,86,0.1); color: #085041; }
+
+          .team-coral { background: #FAECE7; border-color: #F0997B; }
+          .team-coral .team-card-header { border-bottom: 1px solid rgba(153,60,29,0.15); }
+          .team-coral .team-card-avatar { background: #993C1D; color: #FAECE7; }
+          .team-coral .team-card-name { color: #712B13; }
+          .team-coral .team-card-meta { color: #993C1D; }
+          .team-coral .team-card-role { background: rgba(153,60,29,0.12); color: #712B13; }
+          .team-coral thead td { color: #993C1D; }
+          .team-coral tbody td { color: #712B13; }
+          .team-coral tbody tr { border-top: 1px solid rgba(153,60,29,0.1); }
+          .team-coral .ref-id-cell { background: rgba(153,60,29,0.1); color: #712B13; }
+
+          .team-blue { background: #E6F1FB; border-color: #85B7EB; }
+          .team-blue .team-card-header { border-bottom: 1px solid rgba(24,95,165,0.15); }
+          .team-blue .team-card-avatar { background: #185FA5; color: #E6F1FB; }
+          .team-blue .team-card-name { color: #0C447C; }
+          .team-blue .team-card-meta { color: #185FA5; }
+          .team-blue .team-card-role { background: rgba(24,95,165,0.12); color: #0C447C; }
+          .team-blue thead td { color: #185FA5; }
+          .team-blue tbody td { color: #0C447C; }
+          .team-blue tbody tr { border-top: 1px solid rgba(24,95,165,0.1); }
+          .team-blue .ref-id-cell { background: rgba(24,95,165,0.1); color: #0C447C; }
+
+          .team-pink { background: #FBEAF0; border-color: #ED93B1; }
+          .team-pink .team-card-header { border-bottom: 1px solid rgba(153,53,86,0.15); }
+          .team-pink .team-card-avatar { background: #993556; color: #FBEAF0; }
+          .team-pink .team-card-name { color: #72243E; }
+          .team-pink .team-card-meta { color: #993556; }
+          .team-pink .team-card-role { background: rgba(153,53,86,0.12); color: #72243E; }
+          .team-pink thead td { color: #993556; }
+          .team-pink tbody td { color: #72243E; }
+          .team-pink tbody tr { border-top: 1px solid rgba(153,53,86,0.1); }
+          .team-pink .ref-id-cell { background: rgba(153,53,86,0.1); color: #72243E; }
+
+          .team-amber { background: #FAEEDA; border-color: #FAC775; }
+          .team-amber .team-card-header { border-bottom: 1px solid rgba(133,79,11,0.15); }
+          .team-amber .team-card-avatar { background: #854F0B; color: #FAEEDA; }
+          .team-amber .team-card-name { color: #633806; }
+          .team-amber .team-card-meta { color: #854F0B; }
+          .team-amber .team-card-role { background: rgba(133,79,11,0.12); color: #633806; }
+          .team-amber thead td { color: #854F0B; }
+          .team-amber tbody td { color: #633806; }
+          .team-amber tbody tr { border-top: 1px solid rgba(133,79,11,0.1); }
+          .team-amber .ref-id-cell { background: rgba(133,79,11,0.1); color: #633806; }
         </style>
       </div>
     </main>
@@ -504,6 +569,109 @@
     const leaderSelect = document.getElementById('newUserLeader');
     if (roleSelect) roleSelect.addEventListener('change', Admin.generateRefId);
     if (leaderSelect) leaderSelect.addEventListener('change', Admin.generateRefId);
+
+    /* ============================================================
+       TEAM CARDS — grupowanie userów wg lidera, każdy w swoim kolorze
+       ============================================================ */
+    const TEAM_COLORS = ['team-purple', 'team-teal', 'team-coral', 'team-blue', 'team-pink', 'team-amber'];
+
+    function getInitials(name) {
+      return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+    }
+
+    function statusBadge(status) {
+      const isActive = status === 'active' || status === 'aktywny';
+      return '<span style="font-size:0.7rem;font-weight:600;padding:2px 6px;border-radius:4px;' +
+        (isActive ? 'background:#E1F5EE;color:#085041;">' + 'aktywny' : 'background:#FCEBEB;color:#791F1F;">' + 'nieaktywny') + '</span>';
+    }
+
+    Admin.renderTeamCards = function(users) {
+      const container = document.getElementById('teamCardsContainer');
+      if (!container) return;
+
+      const leaders = users.filter(u => !u.leader_id || u.role === 'admin' || u.role === 'leader');
+      const members = users.filter(u => u.leader_id && u.role !== 'admin' && u.role !== 'leader');
+
+      let html = '';
+      leaders.forEach((leader, idx) => {
+        const color = TEAM_COLORS[idx % TEAM_COLORS.length];
+        const teamMembers = members.filter(m => m.leader_id === leader.id || m.leader_ref === leader.ref_id);
+        const totalClients = (leader.client_count || 0) + teamMembers.reduce((sum, m) => sum + (m.client_count || 0), 0);
+
+        html += '<div class="team-card ' + color + '">';
+        html += '<div class="team-card-header">';
+        html += '<div class="team-card-avatar">' + getInitials(leader.name || leader.email) + '</div>';
+        html += '<div class="team-card-info">';
+        html += '<div class="team-card-name">' + (leader.name || leader.email) + '</div>';
+        html += '<div class="team-card-meta">' + (leader.role === 'admin' ? 'Admin' : 'Lider') +
+          ' · ref: ' + (leader.ref_id || '—') +
+          ' · ' + totalClients + ' klientów łącznie' +
+          (teamMembers.length > 0 ? ' · ' + teamMembers.length + ' w zespole' : '') + '</div>';
+        html += '</div>';
+        html += '<span class="team-card-role">' + (leader.role || 'leader') + '</span>';
+        html += '</div>';
+
+        if (teamMembers.length > 0) {
+          html += '<table><thead><tr>';
+          html += '<td>Członek zespołu</td><td>Status</td><td style="text-align:center;">Klienci</td><td>ID Ref</td><td style="width:70px;">Akcje</td>';
+          html += '</tr></thead><tbody>';
+
+          teamMembers.forEach(m => {
+            html += '<tr>';
+            html += '<td style="font-weight:600;">' + (m.name || m.email) + '</td>';
+            html += '<td>' + statusBadge(m.status) + '</td>';
+            html += '<td style="text-align:center;font-weight:700;">' + (m.client_count || 0) + '</td>';
+            html += '<td><span class="ref-id-cell">' + (m.ref_id || '—') + '</span></td>';
+            html += '<td><button class="btn btn-outline btn-sm" style="font-size:0.7rem;padding:2px 8px;" onclick="Admin.editUser(\'' + m.id + '\')">✏️</button></td>';
+            html += '</tr>';
+          });
+
+          html += '</tbody></table>';
+        } else {
+          html += '<div class="team-card-empty">Brak członków zespołu — ' +
+            '<button class="btn btn-outline btn-sm" style="font-size:0.7rem;" onclick="App.openAddUserModal()">+ Dodaj</button></div>';
+        }
+
+        html += '</div>';
+      });
+
+      // Samodzielni userzy (bez lidera, ale nie są liderami)
+      const solo = users.filter(u => !u.leader_id && u.role === 'user');
+      if (solo.length > 0) {
+        solo.forEach((u, idx) => {
+          const color = TEAM_COLORS[(leaders.length + idx) % TEAM_COLORS.length];
+          html += '<div class="team-card ' + color + '">';
+          html += '<div class="team-card-header">';
+          html += '<div class="team-card-avatar">' + getInitials(u.name || u.email) + '</div>';
+          html += '<div class="team-card-info">';
+          html += '<div class="team-card-name">' + (u.name || u.email) + '</div>';
+          html += '<div class="team-card-meta">Samodzielny · ref: ' + (u.ref_id || '—') + ' · ' + (u.client_count || 0) + ' klientów</div>';
+          html += '</div>';
+          html += '<span class="team-card-role">user</span>';
+          html += statusBadge(u.status);
+          html += '</div>';
+          html += '</div>';
+        });
+      }
+
+      if (!html) html = '<div class="empty-state" style="padding:2rem;text-align:center;">Brak użytkowników</div>';
+      container.innerHTML = html;
+    };
+
+    // Demo data — remove when connected to real Supabase data
+    Admin._demoTeams = function() {
+      Admin.renderTeamCards([
+        { id: '1', name: 'Maciej Kłos', role: 'admin', ref_id: '0019', status: 'active', client_count: 4 },
+        { id: '2', name: 'Ewa Pawlak', role: 'user', ref_id: '0019.01', status: 'active', client_count: 5, leader_id: '1', leader_ref: '0019' },
+        { id: '3', name: 'Tomasz Nowak', role: 'user', ref_id: '0019.02', status: 'inactive', client_count: 0, leader_id: '1', leader_ref: '0019' },
+        { id: '4', name: 'Kasia Zielińska', role: 'user', ref_id: '0019.03', status: 'active', client_count: 3, leader_id: '1', leader_ref: '0019' },
+        { id: '5', name: 'Anna Wiśniewska', role: 'leader', ref_id: '0042', status: 'active', client_count: 2 },
+        { id: '6', name: 'Paweł Dąbrowski', role: 'user', ref_id: '0042.01', status: 'active', client_count: 6, leader_id: '5', leader_ref: '0042' },
+        { id: '7', name: 'Marta Król', role: 'user', ref_id: '0042.02', status: 'active', client_count: 2, leader_id: '5', leader_ref: '0042' },
+        { id: '8', name: 'Piotr Zieliński', role: 'user', ref_id: '0087', status: 'active', client_count: 3 },
+      ]);
+    };
+    // Uncomment to see demo: Admin._demoTeams();
   })();
   </script>
   
