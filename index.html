@@ -159,7 +159,7 @@
       <div id="viewAdmin" class="hidden">
         <div class="dashboard-header">
           <div><h1 class="dashboard-title">Panel Administracyjny</h1></div>
-          <button class="btn btn-primary" onclick="App.openAddUserModal()">+ Dodaj użytkownika</button>
+          <button class="btn btn-primary" onclick="Admin.openNewUserModal()">+ Dodaj użytkownika</button>
         </div>
 
         <!-- Admin Tabs -->
@@ -451,10 +451,10 @@
 
   <div id="insurerPickerModal" class="modal-overlay hidden"><div class="modal-box"><div class="modal-header"><div class="modal-title">Wybierz Ubezpieczyciela</div><button class="modal-close" onclick="App.closeModal('insurerPickerModal')">✕</button></div><div class="modal-body" id="insurerPickerBody"></div><div class="modal-footer"><button class="btn btn-outline" onclick="App.closeModal('insurerPickerModal')">Zamknij</button></div></div></div>
 
-  <div id="addUserModal" class="modal-overlay hidden">
-    <div class="modal-box">
+      <div id="newUserModal" class="modal-overlay hidden">
+          <div class="modal-box">
       <div class="modal-header"><div class="modal-title">Dodaj Użytkownika</div><button class="modal-close" onclick="App.closeModal('addUserModal')">✕</button></div>
-      <div class="modal-body">
+            <div class="modal-body">
         <form id="addUserForm" onsubmit="App.addUser(event)">
           <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" id="newUserEmail" required></div>
           <div class="form-group"><label class="form-label">Imię i nazwisko</label><input class="form-input" type="text" id="newUserName" required></div>
@@ -481,11 +481,13 @@
             </div>
             <p style="font-size:0.7rem;color:var(--slate-400,#94a3b8);margin-top:0.25rem;">Generowane automatycznie na podstawie roli i lidera.</p>
           </div>
-          <button type="submit" class="btn btn-primary btn-full" id="addUserBtn">Utwórz konto</button>
+        
+        <button type="button" class="btn btn-primary btn-full" id="newUserSubmitBtn" onclick="Admin.submitNewUser()">Utwórz użytkownika</button>
         </form>
+      
       </div>
     </div>
-  </div>
+      
 
   <div id="confirmModal" class="modal-overlay hidden"><div class="modal-box" style="max-width:380px;"><div class="modal-header"><div class="modal-title" id="confirmTitle">Potwierdź</div><button class="modal-close" onclick="App.closeModal('confirmModal')">✕</button></div><div class="modal-body"><p style="font-size:0.85rem;color:var(--slate-600);" id="confirmMessage"></p></div><div class="modal-footer"><button class="btn btn-outline" onclick="App.closeModal('confirmModal')">Anuluj</button><button class="btn btn-danger" id="confirmActionBtn">Usuń</button></div></div></div>
 
