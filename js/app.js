@@ -99,9 +99,7 @@ const App = {
     ];
     container.innerHTML = tabs.map(t => `
       <button onclick="App.switchDashboardTab('${t.key}')"
-        class="px-5 py-2.5 rounded-lg text-sm font-bold transition-colors ${App.dashboardTab === t.key
-          ? 'bg-blue-600 text-white shadow-sm'
-          : 'bg-white text-slate-500 border border-slate-200 hover:border-blue-300 hover:text-blue-600'}">
+        class="admin-tab-btn ${App.dashboardTab === t.key ? 'active' : ''}">
         ${t.label}
       </button>
     `).join('');
@@ -431,15 +429,58 @@ const App = {
   exportPDF() {
     const s = Store.state;
     if (s.insurers.length === 0 || s.risks.length === 0) { App.toast('Pusta oferta', 'error'); return; }
-    document.querySelectorAll('input,select,textarea').forEach(el => { if (el.type !== 'submit') el.setAttribute('value', el.value); });
+
+    const btn = document.getElementById('btnExportPdf');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '⏳ Generuję...'; btn.disabled = true;
+
+    // Freeze form values into attributes so html2canvas captures them
+    document.querySelectorAll('input,select,textarea').forEach(el => {
+      if (el.type !== 'submit') el.setAttribute('value', el.value);
+    });
+
+    // Scroll to top to avoid offset issues
+    window.scrollTo(0, 0);
+
+    // Enter PDF mode — hides .no-pdf elements via CSS
     document.body.classList.add('pdf-mode');
-    const btn = document.getElementById('btnExportPdf'); const orig = btn.innerHTML; btn.innerHTML = '⏳'; btn.disabled = true;
-    html2pdf().set({
-      margin: 0.3, filename: `UD_${s.offerName || 'Oferta'}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, scrollX: 0, scrollY: 0, windowWidth: document.getElementById('exportContent').scrollWidth + 100 },
-      jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
-    }).from(document.getElementById('exportContent')).save().then(() => { btn.innerHTML = orig; btn.disabled = false; document.body.classList.remove('pdf-mode'); });
+
+    const exportEl = document.getElementById('exportContent');
+    const fileName = `UD_${(s.offerName || 'Oferta').replace(/[^a-zA-Z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ _-]/g, '')}.pdf`;
+
+    // Small delay to let browser repaint after pdf-mode class
+    setTimeout(() => {
+      html2pdf().set({
+        margin:       [0.4, 0.3, 0.4, 0.3],
+        filename:     fileName,
+        image:        { type: 'jpeg', quality: 0.95 },
+        html2canvas:  {
+          scale: 2,
+          useCORS: true,
+          scrollX: 0,
+          scrollY: 0,
+          windowWidth: 1200,
+          logging: false,
+          removeContainer: true,
+        },
+        jsPDF:        { unit: 'in', format: 'a4', orientation: 'landscape' },
+        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+      })
+      .from(exportEl)
+      .save()
+      .then(() => {
+        App.toast('PDF wygenerowany', 'success');
+      })
+      .catch(err => {
+        console.error('PDF export error:', err);
+        App.toast('Błąd generowania PDF: ' + (err.message || 'nieznany'), 'error');
+      })
+      .finally(() => {
+        btn.innerHTML = orig;
+        btn.disabled = false;
+        document.body.classList.remove('pdf-mode');
+      });
+    }, 100);
   },
 
   openRiskPicker() { Matrix.renderRiskPicker(); document.getElementById('riskPickerModal').classList.remove('hidden'); },
@@ -455,7 +496,9 @@ const App = {
         document.getElementById('newUserEmail').value.trim(),
         document.getElementById('newUserPassword').value,
         document.getElementById('newUserName').value.trim(),
-        document.getElementById('newUserRole').value
+        document.getElementById('newUserRole').value,
+        document.getElementById('newUserRefId')?.value.trim() || null,
+        document.getElementById('newUserLeader')?.value || null
       );
       App.toast('Użytkownik utworzony', 'success'); App.closeModal('addUserModal'); Admin.loadUsers();
     } catch (err) { App.toast(err.message, 'error'); }
