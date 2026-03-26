@@ -527,137 +527,74 @@
 
   <script>
   /* ============================================================
-     ADMIN TABS — rozszerzona obsługa zakładek
+     TEAM CARDS + Event Listeners
+     (Admin.switchTab, filterClients, generateRefId, copyRefLink
+      are all handled by admin.js v3.0 — NOT duplicated here)
      ============================================================ */
   (function() {
-    const tabMap = {
-      clients:  'adminClientsSection',
-      users:    'adminUsersSection',
-      stats:    'adminStatsSection',
-      reflinks: 'adminRefLinksSection'
-    };
 
-    // Override / extend Admin.switchTab
-    const _origSwitch = (typeof Admin !== 'undefined' && Admin.switchTab) ? Admin.switchTab.bind(Admin) : null;
-
-    if (typeof Admin === 'undefined') window.Admin = {};
-
-    Admin.switchTab = function(tab) {
-      // Hide all tab contents
-      document.querySelectorAll('.admin-tab-content').forEach(el => el.classList.add('hidden'));
-      // Deactivate all tab buttons
-      document.querySelectorAll('.admin-tab-btn').forEach(btn => btn.classList.remove('active'));
-      // Show selected tab
-      const target = document.getElementById(tabMap[tab]);
-      if (target) target.classList.remove('hidden');
-      // Activate button
-      const btn = document.querySelector(`.admin-tab-btn[data-tab="${tab}"]`);
-      if (btn) btn.classList.add('active');
-      // Call original if it existed (for legacy data loading)
-      if (_origSwitch && (tab === 'clients' || tab === 'users')) {
-        try { _origSwitch(tab); } catch(e) {}
-      }
-    };
-
-    /* ============================================================
-       REF ID — hierarchiczny system referencyjny
-       Format: Lider = "0019", Członek zespołu = "0019.01"
-       ============================================================ */
-    Admin.generateRefId = function() {
-      const role = document.getElementById('newUserRole').value;
-      const leaderId = document.getElementById('newUserLeader').value;
-      const refInput = document.getElementById('newUserRefId');
-
-      if (role === 'leader' || role === 'admin' || !leaderId) {
-        // Generate next available base ID (4 digits)
-        const nextId = String(Math.floor(Math.random() * 9000) + 1000);
-        refInput.value = nextId;
-      } else {
-        // Generate sub-ID under leader: leaderRef.XX
-        const subNum = String(Math.floor(Math.random() * 90) + 10);
-        refInput.value = leaderId + '.' + subNum;
-      }
-    };
-
-    Admin.copyRefLink = function() {
-      const output = document.getElementById('refLinkOutput');
-      if (output) {
-        navigator.clipboard.writeText(output.value).then(() => {
-          const btn = output.nextElementSibling;
-          if (btn) { btn.textContent = '✅ Skopiowano!'; setTimeout(() => btn.textContent = '📋 Kopiuj', 1500); }
-        });
-      }
-    };
-
-    Admin.filterClients = function(query) {
-      const q = query.toLowerCase();
-      document.querySelectorAll('#adminClientsList tr').forEach(row => {
-        row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
-      });
-    };
-
-    // Auto-update ref link preview
+    // Event listeners for ref link preview
     const refDomain = document.getElementById('refLinkDomain');
     const refUser = document.getElementById('refLinkUser');
     const refOutput = document.getElementById('refLinkOutput');
     function updateRefLink() {
       if (refDomain && refUser && refOutput) {
-        const ref = refUser.value || '0000';
-        refOutput.value = refDomain.value + '/?ref=' + ref;
+        refOutput.value = refDomain.value + '/?ref=' + (refUser.value || '0000');
       }
     }
     if (refDomain) refDomain.addEventListener('change', updateRefLink);
     if (refUser) refUser.addEventListener('change', updateRefLink);
 
-    // Auto-generate ref ID when role or leader changes
+    // Auto-generate ref ID when role or leader changes in add-user modal
     const roleSelect = document.getElementById('newUserRole');
     const leaderSelect = document.getElementById('newUserLeader');
-    if (roleSelect) roleSelect.addEventListener('change', Admin.generateRefId);
-    if (leaderSelect) leaderSelect.addEventListener('change', Admin.generateRefId);
+    if (roleSelect) roleSelect.addEventListener('change', function() { if (Admin.generateRefId) Admin.generateRefId(); });
+    if (leaderSelect) leaderSelect.addEventListener('change', function() { if (Admin.generateRefId) Admin.generateRefId(); });
 
     /* ============================================================
-       TEAM CARDS — grupowanie userów wg lidera, każdy w swoim kolorze
+       TEAM CARDS — kolorowe karty zespołów (przyszły upgrade)
+       Wywoływane przez Admin.loadUsers() gdy userzy mają ref_id
        ============================================================ */
     const TEAM_COLORS = ['team-purple', 'team-teal', 'team-coral', 'team-blue', 'team-pink', 'team-amber'];
 
     function getInitials(name) {
+      if (!name) return '?';
       return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
     }
 
     function statusBadge(status) {
       const isActive = status === 'active' || status === 'aktywny';
       return '<span style="font-size:0.7rem;font-weight:600;padding:2px 6px;border-radius:4px;' +
-        (isActive ? 'background:#E1F5EE;color:#085041;">' + 'aktywny' : 'background:#FCEBEB;color:#791F1F;">' + 'nieaktywny') + '</span>';
+        (isActive ? 'background:#E1F5EE;color:#085041;">aktywny' : 'background:#FCEBEB;color:#791F1F;">nieaktywny') + '</span>';
     }
 
     Admin.renderTeamCards = function(users) {
       const container = document.getElementById('teamCardsContainer');
       if (!container) return;
 
-      // Switch from flat table to team cards
-      const fallback = document.getElementById('adminUsersFallback');
+      var fallback = document.getElementById('adminUsersFallback');
       if (fallback) fallback.style.display = 'none';
       container.classList.remove('hidden');
       container.style.display = 'flex';
 
-      const leaders = users.filter(u => !u.leader_id || u.role === 'admin' || u.role === 'leader');
-      const members = users.filter(u => u.leader_id && u.role !== 'admin' && u.role !== 'leader');
+      var leaders = users.filter(function(u) { return !u.leader_id || u.role === 'admin' || u.role === 'leader'; });
+      var members = users.filter(function(u) { return u.leader_id && u.role !== 'admin' && u.role !== 'leader'; });
 
-      let html = '';
-      leaders.forEach((leader, idx) => {
-        const color = TEAM_COLORS[idx % TEAM_COLORS.length];
-        const teamMembers = members.filter(m => m.leader_id === leader.id || m.leader_ref === leader.ref_id);
-        const totalClients = (leader.client_count || 0) + teamMembers.reduce((sum, m) => sum + (m.client_count || 0), 0);
+      var html = '';
+      leaders.forEach(function(leader, idx) {
+        var color = TEAM_COLORS[idx % TEAM_COLORS.length];
+        var teamMembers = members.filter(function(m) { return m.leader_id === leader.id || m.leader_ref === leader.ref_id; });
+        var totalClients = (leader.client_count || 0) + teamMembers.reduce(function(sum, m) { return sum + (m.client_count || 0); }, 0);
 
         html += '<div class="team-card ' + color + '">';
         html += '<div class="team-card-header">';
-        html += '<div class="team-card-avatar">' + getInitials(leader.name || leader.email) + '</div>';
+        html += '<div class="team-card-avatar">' + getInitials(leader.full_name || leader.name || leader.email) + '</div>';
         html += '<div class="team-card-info">';
-        html += '<div class="team-card-name">' + (leader.name || leader.email) + '</div>';
+        html += '<div class="team-card-name">' + (leader.full_name || leader.name || leader.email) + '</div>';
         html += '<div class="team-card-meta">' + (leader.role === 'admin' ? 'Admin' : 'Lider') +
-          ' · ref: ' + (leader.ref_id || '—') +
-          ' · ' + totalClients + ' klientów łącznie' +
-          (teamMembers.length > 0 ? ' · ' + teamMembers.length + ' w zespole' : '') + '</div>';
+          ' &middot; ref: ' + (leader.ref_id || '—') +
+          ' &middot; ' + totalClients + ' klientów' +
+          (teamMembers.length > 0 ? ' &middot; ' + teamMembers.length + ' w zespole' : '') + '</div>';
         html += '</div>';
         html += '<span class="team-card-role">' + (leader.role || 'leader') + '</span>';
         html += '</div>';
@@ -666,63 +603,40 @@
           html += '<table><thead><tr>';
           html += '<td>Członek zespołu</td><td>Status</td><td style="text-align:center;">Klienci</td><td>ID Ref</td><td style="width:70px;">Akcje</td>';
           html += '</tr></thead><tbody>';
-
-          teamMembers.forEach(m => {
+          teamMembers.forEach(function(m) {
             html += '<tr>';
-            html += '<td style="font-weight:600;">' + (m.name || m.email) + '</td>';
-            html += '<td>' + statusBadge(m.status) + '</td>';
+            html += '<td style="font-weight:600;">' + (m.full_name || m.name || m.email) + '</td>';
+            html += '<td>' + statusBadge(m.status || (m.active !== false ? 'active' : 'inactive')) + '</td>';
             html += '<td style="text-align:center;font-weight:700;">' + (m.client_count || 0) + '</td>';
             html += '<td><span class="ref-id-cell">' + (m.ref_id || '—') + '</span></td>';
-            html += '<td><button class="btn btn-outline btn-sm" style="font-size:0.7rem;padding:2px 8px;" onclick="Admin.editUser(\'' + m.id + '\')">✏️</button></td>';
+            html += '<td style="font-size:0.75rem;">—</td>';
             html += '</tr>';
           });
-
           html += '</tbody></table>';
         } else {
-          html += '<div class="team-card-empty">Brak członków zespołu — ' +
-            '<button class="btn btn-outline btn-sm" style="font-size:0.7rem;" onclick="App.openAddUserModal()">+ Dodaj</button></div>';
+          html += '<div class="team-card-empty">Brak członków zespołu</div>';
         }
-
         html += '</div>';
       });
 
-      // Samodzielni userzy (bez lidera, ale nie są liderami)
-      const solo = users.filter(u => !u.leader_id && u.role === 'user');
-      if (solo.length > 0) {
-        solo.forEach((u, idx) => {
-          const color = TEAM_COLORS[(leaders.length + idx) % TEAM_COLORS.length];
-          html += '<div class="team-card ' + color + '">';
-          html += '<div class="team-card-header">';
-          html += '<div class="team-card-avatar">' + getInitials(u.name || u.email) + '</div>';
-          html += '<div class="team-card-info">';
-          html += '<div class="team-card-name">' + (u.name || u.email) + '</div>';
-          html += '<div class="team-card-meta">Samodzielny · ref: ' + (u.ref_id || '—') + ' · ' + (u.client_count || 0) + ' klientów</div>';
-          html += '</div>';
-          html += '<span class="team-card-role">user</span>';
-          html += statusBadge(u.status);
-          html += '</div>';
-          html += '</div>';
-        });
-      }
+      var solo = users.filter(function(u) { return !u.leader_id && u.role === 'user'; });
+      solo.forEach(function(u, idx) {
+        var color = TEAM_COLORS[(leaders.length + idx) % TEAM_COLORS.length];
+        html += '<div class="team-card ' + color + '">';
+        html += '<div class="team-card-header">';
+        html += '<div class="team-card-avatar">' + getInitials(u.full_name || u.name || u.email) + '</div>';
+        html += '<div class="team-card-info">';
+        html += '<div class="team-card-name">' + (u.full_name || u.name || u.email) + '</div>';
+        html += '<div class="team-card-meta">Samodzielny &middot; ref: ' + (u.ref_id || '—') + ' &middot; ' + (u.client_count || 0) + ' klientów</div>';
+        html += '</div>';
+        html += '<span class="team-card-role">user</span>';
+        html += statusBadge(u.status || (u.active !== false ? 'active' : 'inactive'));
+        html += '</div></div>';
+      });
 
       if (!html) html = '<div class="empty-state" style="padding:2rem;text-align:center;">Brak użytkowników</div>';
       container.innerHTML = html;
     };
-
-    // Demo data — remove when connected to real Supabase data
-    Admin._demoTeams = function() {
-      Admin.renderTeamCards([
-        { id: '1', name: 'Maciej Kłos', role: 'admin', ref_id: '0019', status: 'active', client_count: 4 },
-        { id: '2', name: 'Ewa Pawlak', role: 'user', ref_id: '0019.01', status: 'active', client_count: 5, leader_id: '1', leader_ref: '0019' },
-        { id: '3', name: 'Tomasz Nowak', role: 'user', ref_id: '0019.02', status: 'inactive', client_count: 0, leader_id: '1', leader_ref: '0019' },
-        { id: '4', name: 'Kasia Zielińska', role: 'user', ref_id: '0019.03', status: 'active', client_count: 3, leader_id: '1', leader_ref: '0019' },
-        { id: '5', name: 'Anna Wiśniewska', role: 'leader', ref_id: '0042', status: 'active', client_count: 2 },
-        { id: '6', name: 'Paweł Dąbrowski', role: 'user', ref_id: '0042.01', status: 'active', client_count: 6, leader_id: '5', leader_ref: '0042' },
-        { id: '7', name: 'Marta Król', role: 'user', ref_id: '0042.02', status: 'active', client_count: 2, leader_id: '5', leader_ref: '0042' },
-        { id: '8', name: 'Piotr Zieliński', role: 'user', ref_id: '0087', status: 'active', client_count: 3 },
-      ]);
-    };
-    // Uncomment to see demo: Admin._demoTeams();
   })();
   </script>
   
