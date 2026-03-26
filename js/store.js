@@ -222,7 +222,7 @@ const Store = {
   async loadUsers() {
     const { data, error } = await sb.from('ud_user_profiles').select('*').order('created_at');
     if (error) throw error;
-    return data || [];
+        return (data || []).map(u => ({ ...u, ref_id: u.ref_id || u.affiliate_code || null }));
   },
 
   async updateUserProfile(userId, updates) {
