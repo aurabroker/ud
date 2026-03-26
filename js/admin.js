@@ -47,12 +47,13 @@ const Admin = {
       if (hasTeamData && typeof Admin.renderTeamCards === 'function') {
         Admin.renderTeamCards(users);
       }
+          if (hasTeamData) return; // nie renderuj flat table gdy sa team cards
 
       // Flat table (always rendered as fallback)
       let html = '';
       users.forEach(u => {
         const isCurrent = u.id === Auth.currentUser?.id;
-
+    
         // Role badge
         let roleBadge;
         if (u.role === 'admin') roleBadge = '<span class="admin-role-badge admin">Admin</span>';
