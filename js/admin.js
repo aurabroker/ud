@@ -333,4 +333,53 @@ const Admin = {
       Admin.populateRefUserDropdown(Store.dbUsers);
     }
   },
+  
+  // ---- NOWY USER MODAL ----
+  openNewUserModal() {
+    // Wypelnij dropdown liderow
+    const leaderSel = document.getElementById('newUserLeader');
+    if (leaderSel && Store.dbUsers) {
+      leaderSel.innerHTML = '<option value="">— brak lidera (samodzielny) —</option>' +
+        Store.dbUsers
+          .filter(u => u.role === 'leader' || u.role === 'admin')
+          .map(u => `<option value="${u.id}">${escHtml(u.full_name)} (${u.ref_id || '—'})</option>`)
+          .join('');
+    }
+    // Reset pol
+    ['newUserName','newUserEmail','newUserPassword','newUserRefId']
+      .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    const roleEl = document.getElementById('newUserRole');
+    if (roleEl) roleEl.value = 'user';
+    document.getElementById('newUserModal')?.classList.remove('hidden');
+  },
+
+  async submitNewUser() {
+    const full_name = document.getElementById('newUserName')?.value?.trim();
+    const email    = document.getElementById('newUserEmail')?.value?.trim();
+    const password = document.getElementById('newUserPassword')?.value?.trim();
+    const role     = document.getElementById('newUserRole')?.value || 'user';
+    const leader_id = document.getElementById('newUserLeader')?.value || null;
+    const affiliate_code = document.getElementById('newUserRefId')?.value?.trim() || null;
+
+    if (!full_name || !email || !password) {
+      App.toast('Uzupelnij wszystkie wymagane pola', 'error'); return;
+    }
+    if (password.length < 6) {
+      App.toast('Haslo musi miec min. 6 znakow', 'error'); return;
+    }
+
+    const btn = document.getElementById('newUserSubmitBtn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Tworzenie...'; }
+
+    try {
+      await Store.createUser({ email, password, full_name, role, leader_id, affiliate_code });
+      App.toast(`Uzytkownik ${full_name} utworzony!`, 'success');
+      document.getElementById('newUserModal')?.classList.add('hidden');
+      Admin.loadUsers();
+    } catch (e) {
+      App.toast(e.message, 'error');
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = 'Utwórz użytkownika'; }
+    }
+  },
 };
