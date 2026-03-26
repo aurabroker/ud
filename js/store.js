@@ -224,14 +224,14 @@ const Store = {
     const { data, error } = await sb.from('ud_user_profiles').select('*').order('created_at');
     if (error) throw error;
                 Store.dbUsers = (data || []).map(u => ({ ...u, ref_id: u.ref_id || u.affiliate_code || null }));
-return (data || []).map(u => ({ ...u, ref_id: u.ref_id || u.affiliate_code || null }));
+    return Store.dbUsers;
   },
 
   async updateUserProfile(userId, updates) {
     const { data, error } = await sb.from('ud_user_profiles').update(updates).eq('id', userId).select().single();
     if (error) throw error;
     return data;
-  }
+  },
   
   // Tworz nowego usera przez Edge Function (wymaga service role)
   async createUser({ email, password, full_name, role, leader_id, affiliate_code }) {
