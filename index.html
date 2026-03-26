@@ -9,6 +9,25 @@
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    /* PDF export mode — hide UI controls, show clean content */
+    body.pdf-mode .no-pdf,
+    body.pdf-mode .app-header,
+    body.pdf-mode .app-footer,
+    body.pdf-mode .mobile-nav,
+    body.pdf-mode .editor-topbar,
+    body.pdf-mode .variant-tabs-bar { display: none !important; }
+
+    body.pdf-mode .app-main { padding: 0 !important; margin: 0 !important; }
+    body.pdf-mode .card { border: 1px solid #e2e8f0 !important; box-shadow: none !important; break-inside: avoid; }
+    body.pdf-mode #exportContent { background: #fff; }
+
+    /* Print styles */
+    @media print {
+      .no-pdf, .app-header, .app-footer, .mobile-nav, .editor-topbar { display: none !important; }
+      .card { break-inside: avoid; }
+    }
+  </style>
 </head>
 <body>
   <div id="toastContainer" class="toast-container"></div>
@@ -103,8 +122,11 @@
         <!-- Variant tabs -->
         <div id="variantTabs" class="variant-tabs-bar" style="margin-bottom:0.5rem;"></div>
 
+        <!-- ===== PDF Export Container START ===== -->
+        <div id="exportContent">
+
         <!-- Matrix -->
-        <div class="card" style="margin-bottom:1.25rem;" id="exportContent">
+        <div class="card" style="margin-bottom:1.25rem;" id="matrixCard">
           <div class="card-header">
             <div class="card-title">📊 Matryca Porównawcza</div>
             <div class="no-pdf no-client" style="display:flex;gap:0.5rem;">
@@ -128,6 +150,9 @@
 
         <!-- Client exclusions -->
         <div id="clientExclusionsSection" class="hidden"></div>
+
+        </div>
+        <!-- ===== PDF Export Container END ===== -->
       </div>
 
       <!-- ADMIN -->
