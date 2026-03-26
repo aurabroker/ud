@@ -136,16 +136,197 @@
           <div><h1 class="dashboard-title">Panel Administracyjny</h1></div>
           <button class="btn btn-primary" onclick="App.openAddUserModal()">+ Dodaj użytkownika</button>
         </div>
-        <div style="display:flex;gap:0.5rem;margin-bottom:1rem;">
-          <button class="admin-tab-btn active" data-tab="users" onclick="Admin.switchTab('users')">👥 Użytkownicy</button>
-          <button class="admin-tab-btn" data-tab="clients" onclick="Admin.switchTab('clients')">📋 Klienci z formularza</button>
+
+        <!-- Admin Tabs -->
+        <div class="admin-tabs" style="display:flex;gap:0.35rem;margin-bottom:1.25rem;border-bottom:1px solid var(--slate-200,#e2e8f0);padding-bottom:0;">
+          <button class="admin-tab-btn active" data-tab="clients" onclick="Admin.switchTab('clients')">
+            📋 Klienci z formularza
+            <span class="admin-tab-badge" id="clientsTabBadge" style="display:none;">0</span>
+          </button>
+          <button class="admin-tab-btn" data-tab="users" onclick="Admin.switchTab('users')">👥 Users</button>
+          <button class="admin-tab-btn" data-tab="stats" onclick="Admin.switchTab('stats')">📊 Statystyki</button>
+          <button class="admin-tab-btn" data-tab="reflinks" onclick="Admin.switchTab('reflinks')">🔗 Ref-linki</button>
         </div>
-        <div class="card" id="adminUsersSection">
-          <div class="card-body"><table class="admin-table"><thead><tr><th>Nazwa</th><th>Rola</th><th>Status</th><th style="width:80px;">Akcje</th></tr></thead><tbody id="adminUsersList"></tbody></table></div>
+
+        <!-- TAB: Klienci z formularza -->
+        <div class="admin-tab-content" id="adminClientsSection">
+          <div class="card">
+            <div class="card-header" style="justify-content:space-between;">
+              <div class="card-title" style="display:flex;align-items:center;gap:0.5rem;">
+                Klienci z formularza
+                <span style="font-size:0.7rem;font-weight:700;display:inline-flex;align-items:center;gap:0.25rem;">
+                  <span style="background:var(--slate-200,#e2e8f0);color:var(--slate-700,#334155);padding:2px 8px;border-radius:100px;" id="clientsTotalCount">0</span>
+                  <span style="background:var(--blue-100,#dbeafe);color:var(--blue-700,#1d4ed8);padding:2px 8px;border-radius:100px;display:none;" id="clientsNewCount">0 nowych</span>
+                </span>
+              </div>
+              <div style="display:flex;gap:0.5rem;align-items:center;">
+                <input type="text" class="form-input" placeholder="Szukaj klienta..." id="adminClientSearch" style="width:200px;padding:6px 10px;font-size:0.8rem;" oninput="Admin.filterClients(this.value)">
+              </div>
+            </div>
+            <div class="card-body" style="max-height:65vh;overflow-y:auto;">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Imię i nazwisko</th>
+                    <th>Email</th>
+                    <th>Telefon</th>
+                    <th>Przypisany do</th>
+                    <th>Źródło (ref)</th>
+                    <th>Data</th>
+                  </tr>
+                </thead>
+                <tbody id="adminClientsList"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
-        <div class="card hidden" id="adminClientsSection">
-          <div class="card-body"><table class="admin-table"><thead><tr><th>Imię i nazwisko</th><th>Email</th><th>Telefon</th><th>Zatrudnienie</th><th>Medyczne</th><th>Sporty</th><th>Data</th></tr></thead><tbody id="adminClientsList"></tbody></table></div>
+
+        <!-- TAB: Users -->
+        <div class="admin-tab-content hidden" id="adminUsersSection">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Użytkownicy systemu</div>
+            </div>
+            <div class="card-body" style="max-height:65vh;overflow-y:auto;">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Nazwa</th>
+                    <th>Rola</th>
+                    <th>Status</th>
+                    <th>Lider</th>
+                    <th style="text-align:center;">Klienci</th>
+                    <th>ID Ref</th>
+                    <th style="width:80px;">Akcje</th>
+                  </tr>
+                </thead>
+                <tbody id="adminUsersList"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
+
+        <!-- TAB: Statystyki -->
+        <div class="admin-tab-content hidden" id="adminStatsSection">
+          <!-- Metric cards row -->
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.75rem;margin-bottom:1.25rem;" class="stats-metrics-grid">
+            <div class="stats-metric-card">
+              <div class="stats-metric-label">Odsłony (30d)</div>
+              <div class="stats-metric-value" id="statPageviews">—</div>
+              <div class="stats-metric-change positive" id="statPageviewsChange"></div>
+            </div>
+            <div class="stats-metric-card">
+              <div class="stats-metric-label">Unikalni (30d)</div>
+              <div class="stats-metric-value" id="statUniques">—</div>
+              <div class="stats-metric-change" id="statUniquesChange"></div>
+            </div>
+            <div class="stats-metric-card">
+              <div class="stats-metric-label">Formularze (30d)</div>
+              <div class="stats-metric-value" id="statForms">—</div>
+              <div class="stats-metric-change" id="statFormsChange"></div>
+            </div>
+            <div class="stats-metric-card">
+              <div class="stats-metric-label">Konwersja</div>
+              <div class="stats-metric-value" id="statConversion">—</div>
+              <div class="stats-metric-change" id="statConversionChange"></div>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:2fr 1fr;gap:1rem;" class="stats-charts-grid">
+            <!-- Chart: Odsłony w czasie -->
+            <div class="card">
+              <div class="card-header"><div class="card-title">Odsłony w czasie</div></div>
+              <div class="card-body-padded">
+                <canvas id="statsChartPageviews" height="220"></canvas>
+                <p style="font-size:0.7rem;color:var(--slate-400,#94a3b8);margin-top:0.5rem;text-align:center;" id="statsChartNoData">Połącz z analytics, aby zobaczyć dane</p>
+              </div>
+            </div>
+            <!-- Ranking: Top ref-linki -->
+            <div class="card">
+              <div class="card-header"><div class="card-title">Top ref-linki</div></div>
+              <div class="card-body" style="max-height:280px;overflow-y:auto;">
+                <table class="admin-table" style="font-size:0.8rem;">
+                  <thead><tr><th>Ref ID</th><th>User</th><th style="text-align:right;">Klienci</th></tr></thead>
+                  <tbody id="statsTopRefs"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: Ref-linki -->
+        <div class="admin-tab-content hidden" id="adminRefLinksSection">
+          <div class="card" style="margin-bottom:1rem;">
+            <div class="card-header"><div class="card-title">Generator linków referencyjnych</div></div>
+            <div class="card-body-padded">
+              <p style="font-size:0.85rem;color:var(--slate-500,#64748b);margin-bottom:1rem;">Każdy użytkownik ma unikalny link. Klient wchodzący z tego linku jest automatycznie przypisany do danego użytkownika.</p>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;" class="reflinks-grid">
+                <div>
+                  <label class="form-label">Domena</label>
+                  <select class="form-input" id="refLinkDomain">
+                    <option value="utratadochodu.pl">utratadochodu.pl</option>
+                    <option value="grupowe.pro">grupowe.pro</option>
+                    <option value="gwarancje.pro">gwarancje.pro</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="form-label">Użytkownik</label>
+                  <select class="form-input" id="refLinkUser"></select>
+                </div>
+              </div>
+              <div style="margin-top:0.75rem;display:flex;align-items:center;gap:0.5rem;">
+                <input class="form-input" type="text" id="refLinkOutput" readonly style="flex:1;font-family:monospace;font-size:0.85rem;background:var(--slate-50,#f8fafc);" value="utratadochodu.pl/?ref=0019">
+                <button class="btn btn-primary btn-sm" onclick="Admin.copyRefLink()">📋 Kopiuj</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><div class="card-title">Struktura zespołów</div></div>
+            <div class="card-body-padded" id="refTeamTree">
+              <p style="font-size:0.8rem;color:var(--slate-400);">Ładowanie struktury...</p>
+            </div>
+          </div>
+        </div>
+
+        <style>
+          .admin-tabs { flex-wrap: wrap; }
+          .admin-tab-btn {
+            padding: 10px 16px; border: none; background: none; cursor: pointer;
+            font-size: 0.85rem; font-weight: 600; color: var(--slate-400,#94a3b8);
+            border-bottom: 2px solid transparent; transition: 0.2s; position: relative;
+            display: inline-flex; align-items: center; gap: 6px;
+          }
+          .admin-tab-btn:hover { color: var(--slate-700,#334155); }
+          .admin-tab-btn.active { color: var(--blue-600,#2563eb); border-bottom-color: var(--blue-600,#2563eb); }
+          .admin-tab-badge {
+            font-size: 0.65rem; font-weight: 800; background: var(--blue-600,#2563eb); color: #fff;
+            padding: 1px 7px; border-radius: 100px; min-width: 18px; text-align: center;
+          }
+
+          .stats-metric-card {
+            background: var(--slate-50,#f8fafc); border-radius: 12px; padding: 1rem 1.25rem;
+          }
+          .stats-metric-label { font-size: 0.75rem; font-weight: 600; color: var(--slate-400,#94a3b8); text-transform: uppercase; letter-spacing: 0.5px; }
+          .stats-metric-value { font-size: 1.75rem; font-weight: 800; color: var(--slate-900,#0f172a); margin: 4px 0 2px; }
+          .stats-metric-change { font-size: 0.75rem; font-weight: 600; }
+          .stats-metric-change.positive { color: var(--emerald-600,#059669); }
+          .stats-metric-change.negative { color: var(--red-600,#dc2626); }
+
+          .ref-id-cell {
+            font-family: 'Fira Code', 'SF Mono', monospace; font-size: 0.75rem; font-weight: 600;
+            color: var(--blue-600, #2563eb); background: var(--blue-50, #eff6ff);
+            padding: 2px 8px; border-radius: 6px; display: inline-block;
+            cursor: pointer; user-select: all;
+          }
+          .ref-id-cell:hover { background: var(--blue-100, #dbeafe); }
+
+          @media (max-width: 768px) {
+            .stats-metrics-grid { grid-template-columns: 1fr 1fr !important; }
+            .stats-charts-grid { grid-template-columns: 1fr !important; }
+            .reflinks-grid { grid-template-columns: 1fr !important; }
+          }
+        </style>
       </div>
     </main>
 
@@ -160,7 +341,41 @@
 
   <div id="insurerPickerModal" class="modal-overlay hidden"><div class="modal-box"><div class="modal-header"><div class="modal-title">Wybierz Ubezpieczyciela</div><button class="modal-close" onclick="App.closeModal('insurerPickerModal')">✕</button></div><div class="modal-body" id="insurerPickerBody"></div><div class="modal-footer"><button class="btn btn-outline" onclick="App.closeModal('insurerPickerModal')">Zamknij</button></div></div></div>
 
-  <div id="addUserModal" class="modal-overlay hidden"><div class="modal-box"><div class="modal-header"><div class="modal-title">Dodaj Użytkownika</div><button class="modal-close" onclick="App.closeModal('addUserModal')">✕</button></div><div class="modal-body"><form id="addUserForm" onsubmit="App.addUser(event)"><div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" id="newUserEmail" required></div><div class="form-group"><label class="form-label">Imię i nazwisko</label><input class="form-input" type="text" id="newUserName" required></div><div class="form-group"><label class="form-label">Hasło (min. 8)</label><input class="form-input" type="password" id="newUserPassword" required minlength="8"></div><div class="form-group"><label class="form-label">Rola</label><select class="form-input" id="newUserRole"><option value="user">Użytkownik</option><option value="admin">Administrator</option></select></div><button type="submit" class="btn btn-primary btn-full" id="addUserBtn">Utwórz konto</button></form></div></div></div>
+  <div id="addUserModal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-header"><div class="modal-title">Dodaj Użytkownika</div><button class="modal-close" onclick="App.closeModal('addUserModal')">✕</button></div>
+      <div class="modal-body">
+        <form id="addUserForm" onsubmit="App.addUser(event)">
+          <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" id="newUserEmail" required></div>
+          <div class="form-group"><label class="form-label">Imię i nazwisko</label><input class="form-input" type="text" id="newUserName" required></div>
+          <div class="form-group"><label class="form-label">Hasło (min. 8)</label><input class="form-input" type="password" id="newUserPassword" required minlength="8"></div>
+          <div class="form-group"><label class="form-label">Rola</label>
+            <select class="form-input" id="newUserRole">
+              <option value="user">Użytkownik</option>
+              <option value="leader">Lider zespołu</option>
+              <option value="admin">Administrator</option>
+            </select>
+          </div>
+          <div class="form-group" id="leaderSelectGroup">
+            <label class="form-label">Przypisz do lidera</label>
+            <select class="form-input" id="newUserLeader">
+              <option value="">— Brak (jest samodzielny / jest liderem)</option>
+            </select>
+            <p style="font-size:0.7rem;color:var(--slate-400,#94a3b8);margin-top:0.25rem;">Jeśli wybierzesz lidera, system automatycznie nada ref ID typu <strong style="font-family:monospace;">0019.03</strong></p>
+          </div>
+          <div class="form-group">
+            <label class="form-label">ID Referencyjne</label>
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+              <input class="form-input" type="text" id="newUserRefId" placeholder="auto" maxlength="8" style="flex:1;font-family:monospace;letter-spacing:1px;" readonly>
+              <button type="button" class="btn btn-outline btn-sm" onclick="Admin.generateRefId()" title="Generuj">🔄</button>
+            </div>
+            <p style="font-size:0.7rem;color:var(--slate-400,#94a3b8);margin-top:0.25rem;">Generowane automatycznie na podstawie roli i lidera.</p>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full" id="addUserBtn">Utwórz konto</button>
+        </form>
+      </div>
+    </div>
+  </div>
 
   <div id="confirmModal" class="modal-overlay hidden"><div class="modal-box" style="max-width:380px;"><div class="modal-header"><div class="modal-title" id="confirmTitle">Potwierdź</div><button class="modal-close" onclick="App.closeModal('confirmModal')">✕</button></div><div class="modal-body"><p style="font-size:0.85rem;color:var(--slate-600);" id="confirmMessage"></p></div><div class="modal-footer"><button class="btn btn-outline" onclick="App.closeModal('confirmModal')">Anuluj</button><button class="btn btn-danger" id="confirmActionBtn">Usuń</button></div></div></div>
 
@@ -199,6 +414,98 @@
   <script src="js/admin.js"></script>
   <script src="js/client.js"></script>
   <script src="js/app.js"></script>
+
+  <script>
+  /* ============================================================
+     ADMIN TABS — rozszerzona obsługa zakładek
+     ============================================================ */
+  (function() {
+    const tabMap = {
+      clients:  'adminClientsSection',
+      users:    'adminUsersSection',
+      stats:    'adminStatsSection',
+      reflinks: 'adminRefLinksSection'
+    };
+
+    // Override / extend Admin.switchTab
+    const _origSwitch = (typeof Admin !== 'undefined' && Admin.switchTab) ? Admin.switchTab.bind(Admin) : null;
+
+    if (typeof Admin === 'undefined') window.Admin = {};
+
+    Admin.switchTab = function(tab) {
+      // Hide all tab contents
+      document.querySelectorAll('.admin-tab-content').forEach(el => el.classList.add('hidden'));
+      // Deactivate all tab buttons
+      document.querySelectorAll('.admin-tab-btn').forEach(btn => btn.classList.remove('active'));
+      // Show selected tab
+      const target = document.getElementById(tabMap[tab]);
+      if (target) target.classList.remove('hidden');
+      // Activate button
+      const btn = document.querySelector(`.admin-tab-btn[data-tab="${tab}"]`);
+      if (btn) btn.classList.add('active');
+      // Call original if it existed (for legacy data loading)
+      if (_origSwitch && (tab === 'clients' || tab === 'users')) {
+        try { _origSwitch(tab); } catch(e) {}
+      }
+    };
+
+    /* ============================================================
+       REF ID — hierarchiczny system referencyjny
+       Format: Lider = "0019", Członek zespołu = "0019.01"
+       ============================================================ */
+    Admin.generateRefId = function() {
+      const role = document.getElementById('newUserRole').value;
+      const leaderId = document.getElementById('newUserLeader').value;
+      const refInput = document.getElementById('newUserRefId');
+
+      if (role === 'leader' || role === 'admin' || !leaderId) {
+        // Generate next available base ID (4 digits)
+        const nextId = String(Math.floor(Math.random() * 9000) + 1000);
+        refInput.value = nextId;
+      } else {
+        // Generate sub-ID under leader: leaderRef.XX
+        const subNum = String(Math.floor(Math.random() * 90) + 10);
+        refInput.value = leaderId + '.' + subNum;
+      }
+    };
+
+    Admin.copyRefLink = function() {
+      const output = document.getElementById('refLinkOutput');
+      if (output) {
+        navigator.clipboard.writeText(output.value).then(() => {
+          const btn = output.nextElementSibling;
+          if (btn) { btn.textContent = '✅ Skopiowano!'; setTimeout(() => btn.textContent = '📋 Kopiuj', 1500); }
+        });
+      }
+    };
+
+    Admin.filterClients = function(query) {
+      const q = query.toLowerCase();
+      document.querySelectorAll('#adminClientsList tr').forEach(row => {
+        row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+      });
+    };
+
+    // Auto-update ref link preview
+    const refDomain = document.getElementById('refLinkDomain');
+    const refUser = document.getElementById('refLinkUser');
+    const refOutput = document.getElementById('refLinkOutput');
+    function updateRefLink() {
+      if (refDomain && refUser && refOutput) {
+        const ref = refUser.value || '0000';
+        refOutput.value = refDomain.value + '/?ref=' + ref;
+      }
+    }
+    if (refDomain) refDomain.addEventListener('change', updateRefLink);
+    if (refUser) refUser.addEventListener('change', updateRefLink);
+
+    // Auto-generate ref ID when role or leader changes
+    const roleSelect = document.getElementById('newUserRole');
+    const leaderSelect = document.getElementById('newUserLeader');
+    if (roleSelect) roleSelect.addEventListener('change', Admin.generateRefId);
+    if (leaderSelect) leaderSelect.addEventListener('change', Admin.generateRefId);
+  })();
+  </script>
   
   <!-- Send Email Modal -->
   <div id="sendEmailModal" class="modal-overlay hidden">
