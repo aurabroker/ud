@@ -7,6 +7,7 @@ const Store = {
   dbRisks: [],
   dbInsurers: [],
   dbClients: [],
+    dbUsers: [],
 
   state: {
     offerId: null,
@@ -222,7 +223,8 @@ const Store = {
   async loadUsers() {
     const { data, error } = await sb.from('ud_user_profiles').select('*').order('created_at');
     if (error) throw error;
-        return (data || []).map(u => ({ ...u, ref_id: u.ref_id || u.affiliate_code || null }));
+                Store.dbUsers = (data || []).map(u => ({ ...u, ref_id: u.ref_id || u.affiliate_code || null }));
+return (data || []).map(u => ({ ...u, ref_id: u.ref_id || u.affiliate_code || null }));
   },
 
   async updateUserProfile(userId, updates) {
