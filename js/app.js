@@ -75,7 +75,7 @@ const App = {
       case 'admin':
         if (!Auth.isAdmin()) { App.toast('Brak uprawnień', 'error'); App.navigateTo('dashboard'); return; }
         document.getElementById('viewAdmin').classList.remove('hidden');
-        Admin.loadUsers();
+        Admin.switchTab(Admin.activeTab || 'clients');
         break;
     }
   },
