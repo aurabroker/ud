@@ -85,16 +85,7 @@
             <button class="btn btn-outline btn-sm" onclick="App.exportPDF()" id="btnExportPdf">📄 PDF</button>
           </div>
         </div>
- 
-// W Scoring.update() — dodaj obok btnClientLink:
-const btnSendEmail = document.getElementById('btnSendEmail');
-if (btnSendEmail) btnSendEmail.classList.toggle('hidden', !hasData);
-*/
-        // W Scoring.update() — dodaj obok btnClientLink:
-const btnSendEmail = document.getElementById('btnSendEmail');
-if (btnSendEmail) btnSendEmail.classList.toggle('hidden', !hasData);
-*/
-        
+
         <!-- Client greeting -->
         <div id="clientGreeting" class="hidden" style="margin-bottom:1rem;"></div>
 
@@ -209,32 +200,26 @@ if (btnSendEmail) btnSendEmail.classList.toggle('hidden', !hasData);
   <script src="js/client.js"></script>
   <script src="js/app.js"></script>
   
-// ============================================================
-// PATCH 2: HTML modalu — dodaj przed </body> w index.html panelu
-// ============================================================
-
-<div id="sendEmailModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
-    <div class="flex items-center justify-center min-h-screen p-4">
-        <div class="fixed inset-0 bg-slate-900 bg-opacity-75 backdrop-blur-sm" onclick="App.closeModal('sendEmailModal')"></div>
-        <div class="bg-white rounded-2xl p-6 z-10 max-w-sm w-full mx-auto shadow-2xl">
-            <h3 class="text-lg font-bold text-slate-900 mb-1">📧 Wyślij ofertę klientowi</h3>
-            <p class="text-sm text-slate-500 mb-4">Klient otrzyma link z ofertą i możliwością wyboru ubezpieczyciela.</p>
-            <label class="block text-sm font-semibold text-slate-700 mb-1">Email klienta</label>
-            <input type="email" id="sendEmailInput" placeholder="klient@example.com"
-                   class="w-full border border-slate-300 rounded-lg p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 mb-4">
-            <div class="flex gap-2">
-                <button onclick="App.closeModal('sendEmailModal')" 
-                        class="flex-1 border border-slate-300 text-slate-700 font-semibold text-sm py-2.5 rounded-lg hover:bg-slate-50">
-                    Anuluj
-                </button>
-                <button id="sendEmailBtn" onclick="App.sendOfferByEmailConfirm()"
-                        class="flex-1 bg-blue-600 text-white font-bold text-sm py-2.5 rounded-lg hover:bg-blue-700 transition-colors">
-                    Wyślij
-                </button>
-            </div>
+  <!-- Send Email Modal -->
+  <div id="sendEmailModal" class="modal-overlay hidden">
+    <div class="modal-box" style="max-width:400px;">
+      <div class="modal-header">
+        <div class="modal-title">📧 Wyślij ofertę klientowi</div>
+        <button class="modal-close" onclick="App.closeModal('sendEmailModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:0.85rem;color:var(--slate-500);margin-bottom:1rem;">Klient otrzyma link z ofertą i możliwością wyboru ubezpieczyciela.</p>
+        <div class="form-group">
+          <label class="form-label">Email klienta</label>
+          <input class="form-input" type="email" id="sendEmailInput" placeholder="klient@example.com" required>
         </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="App.closeModal('sendEmailModal')">Anuluj</button>
+        <button class="btn btn-primary" id="sendEmailBtn" onclick="App.sendOfferByEmailConfirm()">Wyślij</button>
+      </div>
     </div>
-</div>
+  </div>
 
 </body>
 </html>
