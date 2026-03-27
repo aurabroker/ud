@@ -600,7 +600,7 @@
           ' &middot; ' + totalClients + ' klientów' +
           (teamMembers.length > 0 ? ' &middot; ' + teamMembers.length + ' w zespole' : '') + '</div>';
         html += '</div>';
-        html += '<span class="team-card-role">' + (leader.role || 'leader') + '</span>';
+        html += '<span class="team-card-role">' + (leader.role || 'leader') + '</span>'; html += '<button class="btn btn-sm" style="margin-left:auto;font-size:0.72rem;padding:3px 10px;" onclick="Admin.openNewUserModal(\'' + leader.id + '\')">+ Subuser</button>';;
         html += '</div>';
 
         if (teamMembers.length > 0) {
