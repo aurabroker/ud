@@ -623,7 +623,7 @@
         html += '</div>';
       });
 
-      var solo = users.filter(function(u) { return !u.leader_id && u.role === 'user'; });
+      var solo = users.filter(function(u) { return u.leader_id == null && u.role !== 'admin' && u.role !== 'leader'; });
       solo.forEach(function(u, idx) {
         var color = TEAM_COLORS[(leaders.length + idx) % TEAM_COLORS.length];
         html += '<div class="team-card ' + color + '">';
