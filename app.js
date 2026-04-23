@@ -190,6 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initAOS();
   initEmployerSlider();
 
-  // Eksport globalny dla onclick w HTML (zakładki segmentów)
-  window.switchSegment = switchSegment;
+  document.getElementById('btn-beauty')?.addEventListener('click', () => switchSegment('beauty'));
+  document.getElementById('btn-med')?.addEventListener('click',    () => switchSegment('med'));
+  document.getElementById('btn-b2b')?.addEventListener('click',    () => switchSegment('b2b'));
 });

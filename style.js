@@ -96,9 +96,7 @@ function initPeselValidation() {
 /* ──────────────────────────────────────────
    WYSYŁKA FORMULARZA
 ────────────────────────────────────────── */
-const EDGE_FN_URL  = 'https://kukvgsjrmrqtzhkszzum.supabase.co/functions/v1/form-submit';
-const WEB3_URL     = 'https://api.web3forms.com/submit';
-const WEB3_KEY     = 'a05c1eff-c8a2-4693-adea-ce31908bf1c3';
+const EDGE_FN_URL = 'https://kukvgsjrmrqtzhkszzum.supabase.co/functions/v1/form-submit';
 
 const BOOL_FIELDS = [
   'med_heart','med_diabetes','med_bones','med_stomach','med_neuro','med_surgery','med_aids',
@@ -139,12 +137,6 @@ async function submitToSupabase(dataObj) {
   return res.json();
 }
 
-async function submitToWeb3(form) {
-  const formData = new FormData(form);
-  formData.append('access_key', WEB3_KEY);
-  return fetch(WEB3_URL, { method: 'POST', body: formData }).catch(() => {});
-}
-
 function showSuccessModal(form) {
   document.getElementById('success-modal').classList.remove('hidden');
   form.reset();
@@ -172,10 +164,7 @@ function initFormSubmit() {
 
     try {
       const dataObj = collectFormData(form);
-      const [mainRes] = await Promise.all([
-        submitToSupabase(dataObj),
-        submitToWeb3(form),
-      ]);
+      const mainRes = await submitToSupabase(dataObj);
 
       if (mainRes.status === 'success') {
         console.log('Supabase:', mainRes.supabase, '| GetResponse:', mainRes.getresponse);
@@ -221,10 +210,18 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('prev-btn')?.addEventListener('click', goPrev);
   document.getElementById('next-btn')?.addEventListener('click', goNext);
 
-  // Eksport globalny dla onclick w HTML
-  window.toggleExclusionsModal = toggleExclusionsModal;
-  window.closeModal            = closeSuccessModal;
-  window.closeErrorModal       = closeErrorModal;
-  window.scrollToForm          = () =>
-    document.getElementById('wniosek')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.getElementById('calc-to-form-btn')
+    ?.addEventListener('click', () =>
+      document.getElementById('wniosek')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+
+  document.getElementById('exclusions-trigger-btn')
+    ?.addEventListener('click', toggleExclusionsModal);
+  document.getElementById('exclusions-modal-backdrop')
+    ?.addEventListener('click', toggleExclusionsModal);
+  document.getElementById('exclusions-close-btn')
+    ?.addEventListener('click', toggleExclusionsModal);
+  document.getElementById('success-modal-close')
+    ?.addEventListener('click', closeSuccessModal);
+  document.getElementById('error-modal-close')
+    ?.addEventListener('click', closeErrorModal);
 });
