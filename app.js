@@ -121,40 +121,50 @@ function switchSegment(key) {
 }
 
 /* ──────────────────────────────────────────
-   LOSOWE AKTUALNOŚCI W SIDEBARZE
+   AKTUALNOŚCI W SIDEBARZE — pobierane z Supabase
 ────────────────────────────────────────── */
-const blogPosts = [
-  {
-    title: 'L4 na JDG to często pułapka finansowa',
-    excerpt: 'Większość przedsiębiorców opłaca minimalne składki. Zobacz, ile realnie wynosi zasiłek…',
-    link: 'blog.html#post-1',
-  },
-  {
-    title: 'Nowe wytyczne dot. zwolnień lekarskich w 2026',
-    excerpt: 'Sprawdź, jak nadchodzące zmiany w prawie wpłyną na Twoje finanse podczas przewlekłej choroby…',
-    link: 'blog.html#post-2',
-  },
-  {
-    title: 'Medycy a agresja pacjentów. Jak działa polisa?',
-    excerpt: 'Praca w placówce zdrowia to rosnące ryzyko. Nowe warianty ochrony na wypadek nieszczęśliwych zdarzeń…',
-    link: 'blog.html#post-3',
-  },
-];
+const _SB_URL = 'https://kukvgsjrmrqtzhkszzum.supabase.co';
+const _SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt1a3Znc2pybXJxdHpoa3N6enVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5MTI0NzYsImV4cCI6MjA4ODQ4ODQ3Nn0.wOB-4CJTcRksSUY7WD7CXEccTKNxPIVF8AT8hczS5zY';
 
-function initRandomBlogPost() {
+async function initRandomBlogPost() {
   const container = document.getElementById('random-blog-post');
   if (!container) return;
 
-  const post = blogPosts[Math.floor(Math.random() * blogPosts.length)];
-  container.innerHTML = `
-    <div class="bg-slate-50 p-5 sm:p-6 rounded-xl border border-slate-100 hover:border-blue-200 transition-colors shadow-sm group">
-      <span class="text-[10px] font-bold text-blue-600 uppercase tracking-widest mb-3 block">Polecany Wpis</span>
-      <h4 class="font-bold text-slate-900 text-lg sm:text-xl mb-3 group-hover:text-blue-700 transition-colors leading-snug">${post.title}</h4>
-      <p class="text-sm text-slate-600 mb-5 line-clamp-3">${post.excerpt}</p>
-      <a href="${post.link}" class="inline-flex items-center text-sm font-semibold text-white bg-slate-900 px-4 py-2 rounded-lg group-hover:bg-blue-600 transition-colors">
-        Czytaj dalej <span class="ml-2">&rarr;</span>
-      </a>
-    </div>`;
+  try {
+    const params = new URLSearchParams({
+      select: 'id,title,excerpt,published_at',
+      status: 'eq.published',
+      'platforms': 'cs.{"UtrataDochodu.pl"}',
+      order: 'published_at.desc',
+      limit: '5',
+    });
+    const res = await fetch(`${_SB_URL}/rest/v1/aura_articles?${params}`, {
+      headers: { apikey: _SB_KEY, Accept: 'application/json' },
+    });
+
+    if (!res.ok) throw new Error('fetch failed');
+    const data = await res.json();
+
+    if (!data.length) {
+      container.innerHTML = '<p class="text-sm text-slate-400">Brak wpisów.</p>';
+      return;
+    }
+
+    const post = data[Math.floor(Math.random() * data.length)];
+    const link = `blog.html#article-${post.id}`;
+
+    container.innerHTML = `
+      <div class="bg-slate-50 p-5 sm:p-6 rounded-xl border border-slate-100 hover:border-blue-200 transition-colors shadow-sm group">
+        <span class="text-[10px] font-bold text-blue-600 uppercase tracking-widest mb-3 block">Polecany Wpis</span>
+        <h4 class="font-bold text-slate-900 text-lg sm:text-xl mb-3 group-hover:text-blue-700 transition-colors leading-snug">${post.title}</h4>
+        <p class="text-sm text-slate-600 mb-5 line-clamp-3">${post.excerpt || 'Kliknij, aby przeczytać…'}</p>
+        <a href="${link}" class="inline-flex items-center text-sm font-semibold text-white bg-slate-900 px-4 py-2 rounded-lg group-hover:bg-blue-600 transition-colors">
+          Czytaj dalej <span class="ml-2">&rarr;</span>
+        </a>
+      </div>`;
+  } catch {
+    container.innerHTML = '<p class="text-sm text-slate-400">Nie udało się pobrać aktualności.</p>';
+  }
 }
 
 /* ──────────────────────────────────────────
