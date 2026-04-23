@@ -5,14 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UtrataDochodu | Zabezpiecz swoją przyszłość</title>
 
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-D9XHPWP5DE"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-D9XHPWP5DE');
-    </script>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.tailwindcss.com https://unpkg.com https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://kukvgsjrmrqtzhkszzum.supabase.co https://www.google-analytics.com https://region1.google-analytics.com https://analytics.google.com; base-uri 'self'; form-action 'self' https://kukvgsjrmrqtzhkszzum.supabase.co;">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -216,9 +210,9 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
                 <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-200 flex flex-col h-full" data-aos="fade-up" data-aos-delay="100">
                     <div class="flex border-b border-slate-200 flex-wrap sm:flex-nowrap bg-slate-50">
-                        <button onclick="switchSegment('beauty')" class="segment-btn flex-1 py-4 px-2 text-center font-semibold transition-colors text-blue-600 border-b-2 border-blue-600 text-sm sm:text-base bg-white" id="btn-beauty">Branża Beauty</button>
-                        <button onclick="switchSegment('med')" class="segment-btn flex-1 py-4 px-2 text-center font-semibold transition-colors text-slate-500 text-sm sm:text-base hover:bg-white" id="btn-med">Medycy</button>
-                        <button onclick="switchSegment('b2b')" class="segment-btn flex-1 py-4 px-2 text-center font-semibold transition-colors text-slate-500 text-sm sm:text-base hover:bg-white" id="btn-b2b">B2B / IT</button>
+                        <button class="segment-btn flex-1 py-4 px-2 text-center font-semibold transition-colors text-blue-600 border-b-2 border-blue-600 text-sm sm:text-base bg-white" id="btn-beauty">Branża Beauty</button>
+                        <button class="segment-btn flex-1 py-4 px-2 text-center font-semibold transition-colors text-slate-500 text-sm sm:text-base hover:bg-white" id="btn-med">Medycy</button>
+                        <button class="segment-btn flex-1 py-4 px-2 text-center font-semibold transition-colors text-slate-500 text-sm sm:text-base hover:bg-white" id="btn-b2b">B2B / IT</button>
                     </div>
                     <div class="p-6 sm:p-8 flex-grow custom-scroll" id="segment-content">
                         <h3 class="text-2xl font-bold mb-3 text-slate-800">Dla Salonów i Kosmetologów</h3>
@@ -305,7 +299,7 @@
                                 <span class="font-bold text-white text-base sm:text-lg" id="calc-daily">266 zł</span>
                             </div>
                         </div>
-                        <button onclick="scrollToForm()" class="mt-8 sm:mt-10 w-full bg-blue-600 text-white py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg hover:bg-blue-500 transition-all relative z-10 shadow-md">
+                        <button id="calc-to-form-btn" class="mt-8 sm:mt-10 w-full bg-blue-600 text-white py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg hover:bg-blue-500 transition-all relative z-10 shadow-md">
                             Przejdź do Wniosku
                         </button>
                     </div>
@@ -462,7 +456,7 @@
                             <label class="flex items-start gap-3 cursor-pointer">
                                 <input type="checkbox" name="exclusions_accepted" required class="mt-1 h-5 w-5 text-red-600 rounded border-red-300 focus:ring-red-500">
                                 <span class="text-sm text-red-900 leading-relaxed font-medium">
-                                    Oświadczam, że zapoznałem/am się z <button type="button" onclick="toggleExclusionsModal()" class="text-red-700 underline font-bold hover:text-red-800">Głównymi Wyłączeniami Odpowiedzialności</button>.
+                                    Oświadczam, że zapoznałem/am się z <button type="button" id="exclusions-trigger-btn" class="text-red-700 underline font-bold hover:text-red-800">Głównymi Wyłączeniami Odpowiedzialności</button>.
                                 </span>
                             </label>
                         </div>
@@ -557,7 +551,7 @@
     <!-- Modal Wyłączeń -->
     <div id="exclusions-modal" class="fixed inset-0 z-[110] hidden overflow-y-auto" aria-modal="true">
         <div class="flex items-center justify-center min-h-screen p-4 text-center sm:p-0">
-            <div class="fixed inset-0 bg-slate-900 bg-opacity-80 backdrop-blur-sm transition-opacity" onclick="toggleExclusionsModal()"></div>
+            <div id="exclusions-modal-backdrop" class="fixed inset-0 bg-slate-900 bg-opacity-80 backdrop-blur-sm transition-opacity"></div>
             <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full z-10">
                 <div class="bg-white px-6 pt-5 pb-4 sm:p-8 sm:pb-4 text-left">
                     <h3 class="text-2xl font-bold text-red-600 mb-4 flex items-center gap-2"><span>⚠️</span> Ważne Wyłączenia (CEU / Leadenhall)</h3>
@@ -573,7 +567,7 @@
                     </div>
                 </div>
                 <div class="bg-slate-50 px-6 py-4 sm:flex sm:flex-row-reverse">
-                    <button type="button" onclick="toggleExclusionsModal()" class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-6 py-2 bg-slate-800 text-base font-bold text-white hover:bg-slate-900 sm:ml-3 sm:w-auto sm:text-sm">Rozumiem zasady</button>
+                    <button type="button" id="exclusions-close-btn" class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-6 py-2 bg-slate-800 text-base font-bold text-white hover:bg-slate-900 sm:ml-3 sm:w-auto sm:text-sm">Rozumiem zasady</button>
                 </div>
             </div>
         </div>
@@ -587,7 +581,7 @@
                 <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100 mb-4"><span class="text-green-600 text-2xl font-bold">✓</span></div>
                 <h3 class="text-xl font-bold text-slate-900">Wysłano pomyślnie!</h3>
                 <p class="mt-2 text-sm text-slate-500 mb-6">Skontaktujemy się z Tobą w ciągu 24h z przygotowaną ofertą.</p>
-                <button onclick="closeModal()" class="w-full bg-blue-600 text-white rounded-lg px-4 py-2 font-bold hover:bg-blue-700">Zamknij</button>
+                <button id="success-modal-close" class="w-full bg-blue-600 text-white rounded-lg px-4 py-2 font-bold hover:bg-blue-700">Zamknij</button>
             </div>
         </div>
     </div>
@@ -600,14 +594,15 @@
                 <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-100 mb-4"><span class="text-red-600 text-2xl font-bold">!</span></div>
                 <h3 class="text-xl font-bold text-slate-900">Wystąpił Błąd</h3>
                 <p class="mt-2 text-sm text-slate-500 mb-6" id="error-message">Nie udało się wysłać formularza. Spróbuj ponownie później.</p>
-                <button onclick="closeErrorModal()" class="w-full bg-slate-800 text-white rounded-lg px-4 py-2 font-bold hover:bg-slate-900">Zamknij</button>
+                <button id="error-modal-close" class="w-full bg-slate-800 text-white rounded-lg px-4 py-2 font-bold hover:bg-slate-900">Zamknij</button>
             </div>
         </div>
     </div>
 
     <!-- Skrypty — kolejność ma znaczenie -->
-    <script src="calculator.js" defer></script>
-    <script src="form.js" defer></script>
+    <script src="Calculator.js" defer></script>
+    <script src="style.js" defer></script>
     <script src="app.js" defer></script>
+    <script src="cookie-consent.js"></script>
 </body>
 </html>
