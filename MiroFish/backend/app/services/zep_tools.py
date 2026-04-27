@@ -14,6 +14,7 @@ from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, field
 
 from zep_cloud.client import Zep
+from .local_graph_service import LocalZepClient
 
 from ..config import Config
 from ..utils.logger import get_logger
@@ -424,10 +425,10 @@ class ZepToolsService:
     
     def __init__(self, api_key: Optional[str] = None, llm_client: Optional[LLMClient] = None):
         self.api_key = api_key or Config.ZEP_API_KEY
-        if not self.api_key:
-            raise ValueError("ZEP_API_KEY 未配置")
-        
-        self.client = Zep(api_key=self.api_key)
+        if self.api_key:
+            self.client = Zep(api_key=self.api_key)
+        else:
+            self.client = LocalZepClient()
         # LLM客户端用于InsightForge生成子问题
         self._llm_client = llm_client
         logger.info(t("console.zepToolsInitialized"))

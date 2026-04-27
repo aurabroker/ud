@@ -12,6 +12,7 @@ from dataclasses import dataclass
 
 from zep_cloud.client import Zep
 from zep_cloud import EpisodeData, EntityEdgeSourceTarget
+from .local_graph_service import LocalZepClient
 
 from ..config import Config
 from ..models.task import TaskManager, TaskStatus
@@ -45,10 +46,10 @@ class GraphBuilderService:
     
     def __init__(self, api_key: Optional[str] = None):
         self.api_key = api_key or Config.ZEP_API_KEY
-        if not self.api_key:
-            raise ValueError("ZEP_API_KEY 未配置")
-        
-        self.client = Zep(api_key=self.api_key)
+        if self.api_key:
+            self.client = Zep(api_key=self.api_key)
+        else:
+            self.client = LocalZepClient()
         self.task_manager = TaskManager()
     
     def build_graph_async(
