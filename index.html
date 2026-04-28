@@ -1,45 +1,71 @@
 <!DOCTYPE html>
 <html lang="pl" class="scroll-smooth">
 <head>
-
 <!-- ============================================
-     SEO META TAGS - wklej do <head> w index.html
-     utratadochodu.pl - Aura Expert
+     SEO META TAGS v2 — utratadochodu.pl
+     Aura Expert Sp. z o.o. — Multiagencja ubezpieczeniowa
+     Produkty Lloyd's: CEU + Leadenhall Insurance SA
+     
+     ZMIANY vs v1:
+     ✅ Dodano 30+ zawodów w keywords i description
+     ✅ Nowy blok Schema.org: Service (z audience per zawód)
+     ✅ Nowy blok Schema.org: BreadcrumbList
+     ✅ Rozbudowane FAQ o pytania zawodowe (10 pytań vs 6)
+     ✅ Poprawione meta description (więcej fraz kluczowych)
+     ✅ Dodane meta dla AI (llms.txt link)
      ============================================ -->
 
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>UtrataDochodu | Zabezpiecz swoją przyszłość</title>
+     
 <!-- Primary Meta Tags -->
-<title>Ubezpieczenie od utraty dochodu — prywatne L4 dla przedsiębiorców | utratadochodu.pl</title>
-<meta name="description" content="Ubezpieczenie od utraty dochodu chroni Twoje finanse w razie choroby lub wypadku. Oblicz składkę online. Dla JDG, B2B, lekarzy, IT i wolnych zawodów. Broker z licencją KNF.">
-<meta name="keywords" content="ubezpieczenie od utraty dochodu, prywatne L4, ubezpieczenie B2B, utrata dochodu JDG, ubezpieczenie niezdolność do pracy, ubezpieczenie chorobowe przedsiębiorca">
-<meta name="author" content="Aura Consulting Sp. z o.o.">
-<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+<title>Ubezpieczenie od utraty dochodu — prywatne L4 dla przedsiębiorców, lekarzy, IT, prawników | utratadochodu.pl</title>
+<meta name="description" content="Ubezpieczenie od utraty dochodu dla lekarzy, programistów, prawników, stomatologów, architektów, fizjoterapeutów, kierowców i JDG. Oblicz składkę online. Produkty Lloyd's: CEU i Leadenhall. Multiagencja Aura Expert.">
+<meta name="keywords" content="ubezpieczenie od utraty dochodu, prywatne L4, ubezpieczenie B2B, utrata dochodu JDG, ubezpieczenie niezdolność do pracy, ubezpieczenie chorobowe przedsiębiorca, CEU, Leadenhall Insurance, ubezpieczenie dla lekarzy, ubezpieczenie dla programistów, ubezpieczenie dla prawników, ubezpieczenie od utraty dochodu IT, ubezpieczenie dla stomatologów, ubezpieczenie dla architektów, ubezpieczenie dla fizjoterapeutów, ubezpieczenie dla ratowników medycznych, ubezpieczenie dla kierowców, ubezpieczenie dla budowlańców, ubezpieczenie dla farmaceutów, ubezpieczenie dla weterynarzy, ubezpieczenie dla psychologów, ubezpieczenie dla księgowych, ubezpieczenie dla tłumaczy, ubezpieczenie dla fotografów, ubezpieczenie dla trenerów personalnych, ubezpieczenie dla dietetyków, ubezpieczenie dla freelancerów, ubezpieczenie kontrakt B2B, ochrona dochodu, luka dochodowa ZUS">
+<meta name="author" content="Aura Expert Sp. z o.o.">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
 <link rel="canonical" href="https://utratadochodu.pl/">
+<link rel="sitemap" type="application/xml" href="https://utratadochodu.pl/sitemap.xml">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#01696f">
 
 <!-- Open Graph / Facebook -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://utratadochodu.pl/">
-<meta property="og:title" content="Ubezpieczenie od utraty dochodu — prywatne L4 dla przedsiębiorców">
-<meta property="og:description" content="Zabezpiecz swój dochód na wypadek choroby lub wypadku. Kalkulator składki online. Dla JDG, B2B, lekarzy, IT. Broker z licencją KNF.">
+<meta property="og:title" content="Ubezpieczenie od utraty dochodu — prywatne L4 dla lekarzy, IT, prawników, JDG">
+<meta property="og:description" content="Zabezpiecz swój dochód na wypadek choroby lub wypadku. Kalkulator składki online. Dla lekarzy, programistów, prawników, stomatologów, architektów i 30+ innych zawodów. Produkty Lloyd's: CEU i Leadenhall Insurance SA.">
 <meta property="og:image" content="https://utratadochodu.pl/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Ubezpieczenie od utraty dochodu — kalkulator składki online — utratadochodu.pl">
 <meta property="og:site_name" content="utratadochodu.pl">
 <meta property="og:locale" content="pl_PL">
 
 <!-- Twitter -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:url" content="https://utratadochodu.pl/">
-<meta name="twitter:title" content="Ubezpieczenie od utraty dochodu — prywatne L4">
-<meta name="twitter:description" content="Zabezpiecz swój dochód na wypadek choroby lub wypadku. Kalkulator składki online.">
+<meta name="twitter:title" content="Ubezpieczenie od utraty dochodu — prywatne L4 dla przedsiębiorców">
+<meta name="twitter:description" content="Zabezpiecz dochód na wypadek choroby. Kalkulator online. Dla lekarzy, IT, prawników, JDG, B2B. Produkty Lloyd's.">
 <meta name="twitter:image" content="https://utratadochodu.pl/og-image.png">
+<meta name="twitter:image:alt" content="Ubezpieczenie od utraty dochodu — utratadochodu.pl">
 
-<!-- Structured Data: Organization -->
+<!-- AI discovery -->
+<link rel="alternate" type="text/plain" href="https://utratadochodu.pl/llms.txt" title="LLMs.txt">
+
+<!-- ============================================
+     STRUCTURED DATA: Organization
+     ============================================ -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "Organization",
-  "name": "Aura Consulting Sp. z o.o.",
-  "url": "https://utratadochodu.pl",
+  "name": "Aura Expert Sp. z o.o.",
+  "url": "https://auraexpert.pl",
   "logo": "https://utratadochodu.pl/logo.png",
-  "description": "Broker ubezpieczeniowy z licencją KNF. Specjalizacja: ubezpieczenia od utraty dochodu dla przedsiębiorców, wolnych zawodów i pracowników B2B.",
+  "description": "Multiagencja ubezpieczeniowa. Specjalizacja: ubezpieczenia od utraty dochodu dla przedsiębiorców, wolnych zawodów i pracowników B2B. Produkty Lloyd's: CEU Sp. z o.o. oraz Leadenhall Insurance SA.",
   "address": {
     "@type": "PostalAddress",
     "addressLocality": "Warszawa",
@@ -53,45 +79,238 @@
   },
   "sameAs": [
     "https://www.facebook.com/utratadochodupl/",
-    "https://auraconsulting.pl"
+    "https://auraexpert.pl"
   ]
 }
 </script>
 
-<!-- Structured Data: WebSite (enables sitelinks search box) -->
+<!-- ============================================
+     STRUCTURED DATA: WebSite
+     ============================================ -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "WebSite",
   "name": "utratadochodu.pl",
   "url": "https://utratadochodu.pl",
-  "description": "Serwis informacyjny i ofertowy poświęcony ubezpieczeniom na wypadek utraty dochodu"
+  "description": "Serwis informacyjny i ofertowy poświęcony ubezpieczeniom na wypadek utraty dochodu. Produkty Lloyd's: CEU Sp. z o.o. i Leadenhall Insurance SA."
 }
 </script>
 
-<!-- Structured Data: Product (Insurance Product) -->
+<!-- ============================================
+     STRUCTURED DATA: Product (Insurance)
+     ============================================ -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "Product",
   "name": "Ubezpieczenie od utraty dochodu",
-  "description": "Polisa chroniąca dochód w razie choroby lub wypadku. Wypłata nawet do 80% miesięcznego przychodu od 1. dnia L4.",
+  "description": "Polisa chroniąca dochód w razie choroby lub wypadku. Wypłata nawet do 80% miesięcznego przychodu od 1. dnia L4. Produkty Lloyd's dostępne przez Aura Expert: CEU Sp. z o.o. oraz Leadenhall Insurance SA.",
   "brand": {
     "@type": "Brand",
-    "name": "Aura Consulting"
+    "name": "Aura Expert"
   },
+  "manufacturer": [
+    {
+      "@type": "Organization",
+      "name": "CEU Sp. z o.o.",
+      "description": "Coverholder Lloyd's of London"
+    },
+    {
+      "@type": "Organization",
+      "name": "Leadenhall Insurance SA",
+      "description": "Coverholder Lloyd's of London"
+    }
+  ],
   "offers": {
     "@type": "AggregateOffer",
     "priceCurrency": "PLN",
     "lowPrice": "50",
     "highPrice": "500",
-    "offerCount": "5",
-    "description": "Składka miesięczna od 50 zł, zależna od zawodu i zakresu ochrony"
+    "offerCount": "2",
+    "description": "Składka miesięczna od 50 zł, zależna od zawodu i zakresu ochrony. Produkty CEU i Leadenhall Insurance SA."
   }
 }
 </script>
 
-<!-- Structured Data: FAQPage -->
+<!-- ============================================
+     STRUCTURED DATA: Service — NOWY! z listą zawodów
+     Google czyta audience i serviceType
+     ============================================ -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "serviceType": "Ubezpieczenie od utraty dochodu",
+  "name": "Ubezpieczenie od utraty dochodu — prywatne L4",
+  "description": "Ubezpieczenie na wypadek niezdolności do pracy z powodu choroby lub wypadku. Dedykowane dla osób prowadzących jednoosobową działalność gospodarczą, pracujących na kontraktach B2B oraz przedstawicieli wolnych zawodów.",
+  "provider": {
+    "@type": "Organization",
+    "name": "Aura Expert Sp. z o.o.",
+    "url": "https://auraexpert.pl"
+  },
+  "areaServed": {
+    "@type": "Country",
+    "name": "Polska"
+  },
+  "audience": {
+    "@type": "Audience",
+    "audienceType": "Przedsiębiorcy JDG, pracownicy B2B, freelancerzy i przedstawiciele wolnych zawodów",
+    "geographicArea": {
+      "@type": "Country",
+      "name": "Polska"
+    }
+  },
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "Ubezpieczenia od utraty dochodu wg zawodu",
+    "itemListElement": [
+      {
+        "@type": "Offer",
+        "itemOffered": { "@type": "Service", "name": "Ubezpieczenie od utraty dochodu dla lekarzy", "description": "Ochrona dochodu dla lekarzy specjalistów, rezydentów i lekarzy pierwszego kontaktu prowadzących prywatną praktykę." }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": { "@type": "Service", "name": "Ubezpieczenie od utraty dochodu dla stomatologów", "description": "Ochrona dochodu dla dentystów, ortodontów i chirurgów stomatologicznych." }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": { "@type": "Service", "name": "Ubezpieczenie od utraty dochodu dla programistów i specjalistów IT", "description": "Ochrona dochodu dla programistów, DevOps, PM, UX designerów i testerów pracujących na B2B." }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": { "@type": "Service", "name": "Ubezpieczenie od utraty dochodu dla prawników", "description": "Ochrona dochodu dla adwokatów, radców prawnych i notariuszy." }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": { "@type": "Service", "name": "Ubezpieczenie od utraty dochodu dla architektów", "description": "Ochrona dochodu dla architektów, projektantów wnętrz i urbanistów." }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": { "@type": "Service", "name": "Ubezpieczenie od utraty dochodu dla fizjoterapeutów", "description": "Ochrona dochodu dla fizjoterapeutów, osteopatów i terapeutów manualnych." }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": { "@type": "Service", "name": "Ubezpieczenie od utraty dochodu dla ratowników medycznych", "description": "Ochrona dochodu dla ratowników medycznych i pielęgniarek." }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": { "@type": "Service", "name": "Ubezpieczenie od utraty dochodu dla farmaceutów", "description": "Ochrona dochodu dla farmaceutów i właścicieli aptek." }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": { "@type": "Service", "name": "Ubezpieczenie od utraty dochodu dla weterynarzy", "description": "Ochrona dochodu dla lekarzy weterynarii i techników weterynaryjnych." }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": { "@type": "Service", "name": "Ubezpieczenie od utraty dochodu dla psychologów i psychoterapeutów", "description": "Ochrona dochodu dla psychologów, psychoterapeutów i coachów." }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": { "@type": "Service", "name": "Ubezpieczenie od utraty dochodu dla księgowych i doradców podatkowych", "description": "Ochrona dochodu dla księgowych, biegłych rewidentów i doradców podatkowych." }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": { "@type": "Service", "name": "Ubezpieczenie od utraty dochodu dla kierowców i transportowców", "description": "Ochrona dochodu dla kierowców ciężarówek, busów, taksówkarzy i kurierów." }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": { "@type": "Service", "name": "Ubezpieczenie od utraty dochodu dla budowlańców", "description": "Ochrona dochodu dla pracowników budowlanych, elektryków, hydraulików i dekarzy." }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": { "@type": "Service", "name": "Ubezpieczenie od utraty dochodu dla tłumaczy", "description": "Ochrona dochodu dla tłumaczy przysięgłych i freelancerów tłumaczeń." }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": { "@type": "Service", "name": "Ubezpieczenie od utraty dochodu dla fotografów i filmowców", "description": "Ochrona dochodu dla fotografów, kameramenów i montażystów." }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": { "@type": "Service", "name": "Ubezpieczenie od utraty dochodu dla trenerów personalnych i instruktorów fitness", "description": "Ochrona dochodu dla trenerów personalnych, instruktorów jogi, pilatesu i fitness." }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": { "@type": "Service", "name": "Ubezpieczenie od utraty dochodu dla dietetyków", "description": "Ochrona dochodu dla dietetyków klinicznych i poradnianych." }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": { "@type": "Service", "name": "Ubezpieczenie od utraty dochodu dla grafików i designerów", "description": "Ochrona dochodu dla grafików, UX/UI designerów i ilustratorów pracujących na B2B." }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": { "@type": "Service", "name": "Ubezpieczenie od utraty dochodu dla inżynierów", "description": "Ochrona dochodu dla inżynierów budownictwa, mechaników, elektryków i automatyków." }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": { "@type": "Service", "name": "Ubezpieczenie od utraty dochodu dla handlowców i agentów", "description": "Ochrona dochodu dla przedstawicieli handlowych, agentów nieruchomości i brokerów." }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": { "@type": "Service", "name": "Ubezpieczenie od utraty dochodu dla kosmetyczek i kosmetologów", "description": "Ochrona dochodu dla kosmetyczek, kosmetologów i stylistek." }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": { "@type": "Service", "name": "Ubezpieczenie od utraty dochodu dla fryzjerów i barberów", "description": "Ochrona dochodu dla fryzjerów i barberów prowadzących własny salon." }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": { "@type": "Service", "name": "Ubezpieczenie od utraty dochodu dla mechaników samochodowych", "description": "Ochrona dochodu dla mechaników, blacharzy i lakierników." }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": { "@type": "Service", "name": "Ubezpieczenie od utraty dochodu dla logopedów", "description": "Ochrona dochodu dla logopedów i neurologopedów." }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": { "@type": "Service", "name": "Ubezpieczenie od utraty dochodu dla położnych", "description": "Ochrona dochodu dla położnych prowadzących praktykę." }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": { "@type": "Service", "name": "Ubezpieczenie od utraty dochodu dla geodetów", "description": "Ochrona dochodu dla geodetów i kartografów." }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": { "@type": "Service", "name": "Ubezpieczenie od utraty dochodu dla rzeczoznawców", "description": "Ochrona dochodu dla rzeczoznawców majątkowych i biegłych sądowych." }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": { "@type": "Service", "name": "Ubezpieczenie od utraty dochodu dla gastronomów i kucharzy", "description": "Ochrona dochodu dla szefów kuchni, cukierników i właścicieli lokali gastronomicznych." }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": { "@type": "Service", "name": "Ubezpieczenie od utraty dochodu dla rolników i ogrodników", "description": "Ochrona dochodu dla rolników, ogrodników i właścicieli gospodarstw." }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": { "@type": "Service", "name": "Ubezpieczenie od utraty dochodu dla muzyków i artystów", "description": "Ochrona dochodu dla muzyków, aktorów, artystów i twórców." }
+      }
+    ]
+  }
+}
+</script>
+
+<!-- ============================================
+     STRUCTURED DATA: BreadcrumbList — NOWY!
+     ============================================ -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Strona główna",
+      "item": "https://utratadochodu.pl/"
+    }
+  ]
+}
+</script>
+
+<!-- ============================================
+     STRUCTURED DATA: FAQPage — ROZBUDOWANE (10 pytań)
+     ============================================ -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -126,7 +345,7 @@
       "name": "Dla kogo jest ubezpieczenie od utraty dochodu?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Przede wszystkim dla osób samozatrudnionych (JDG), pracujących na kontraktach B2B, lekarzy, programistów, prawników, architektów i innych wolnych zawodów. Polisa jest dostępna także dla pracowników etatowych z wysokimi dochodami."
+        "text": "Przede wszystkim dla osób samozatrudnionych (JDG), pracujących na kontraktach B2B, lekarzy, stomatologów, programistów, prawników, architektów, fizjoterapeutów, ratowników medycznych, farmaceutów, weterynarzy, psychologów, księgowych, kierowców, budowlańców, tłumaczy, fotografów, trenerów personalnych, dietetyków, grafików, inżynierów, kosmetyczek, fryzjerów, mechaników, geodetów, muzyków i innych wolnych zawodów. Polisa jest dostępna także dla pracowników etatowych z wysokimi dochodami."
       }
     },
     {
@@ -136,15 +355,52 @@
         "@type": "Answer",
         "text": "ZUS wypłaca zasiłek chorobowy w wysokości 80% podstawy wymiaru składek, która dla przedsiębiorców jest zazwyczaj znacznie niższa od realnych zarobków. Prywatne ubezpieczenie od utraty dochodu może pokryć nawet 80% faktycznego przychodu i działa niezależnie od ZUS."
       }
+    },
+    {
+      "@type": "Question",
+      "name": "Od jakich ubezpieczycieli pochodzi polisa dostępna na utratadochodu.pl?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Na utratadochodu.pl dostępne są produkty dwóch coverholdersów Lloyd's of London: CEU Sp. z o.o. oraz Leadenhall Insurance SA. Aura Expert Sp. z o.o. działa jako multiagencja ubezpieczeniowa pośrednicząca w sprzedaży tych produktów."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Czy lekarz na kontrakcie B2B potrzebuje ubezpieczenia od utraty dochodu?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tak — lekarze pracujący na kontraktach B2B (np. w szpitalach, klinikach, przychodniach) nie mają prawa do zasiłku chorobowego z ZUS na takich samych zasadach jak pracownicy etatowi. W przypadku choroby lub wypadku tracą cały dochód. Ubezpieczenie od utraty dochodu wypłaca im do 80% miesięcznego przychodu już od pierwszego dnia zwolnienia."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Czy programista na B2B może ubezpieczyć się od utraty dochodu?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tak — programiści, DevOps, testerzy, PM-owie i inni specjaliści IT pracujący na kontraktach B2B to jedna z największych grup klientów ubezpieczenia od utraty dochodu. Ich zawody są klasyfikowane jako niskiego ryzyka, więc składki są atrakcyjne."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Co to jest luka dochodowa i jak ją obliczyć?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Luka dochodowa to różnica między Twoim realnym miesięcznym przychodem a tym, co wypłaci Ci ZUS w razie choroby lub wypadku. Dla przedsiębiorcy opłacającego minimalny ZUS ta luka może wynosić nawet 80–90% dochodu. Skorzystaj z naszego symulatora luki dochodowej, aby zobaczyć ile naprawdę stracisz na L4."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Czy składka ubezpieczenia od utraty dochodu jest kosztem firmy?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tak — składka ubezpieczenia od utraty dochodu opłacana przez przedsiębiorcę (JDG) może stanowić koszt uzyskania przychodu, co obniża podstawę opodatkowania. Warto skonsultować to z księgowym w kontekście indywidualnej sytuacji podatkowej."
+      }
     }
   ]
 }
 </script>
-    
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UtrataDochodu | Zabezpiecz swoją przyszłość</title>
 
+     
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.tailwindcss.com https://unpkg.com https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://kukvgsjrmrqtzhkszzum.supabase.co https://www.google-analytics.com https://region1.google-analytics.com https://analytics.google.com; base-uri 'self'; form-action 'self' https://kukvgsjrmrqtzhkszzum.supabase.co;">
     <meta name="referrer" content="strict-origin-when-cross-origin">
 
