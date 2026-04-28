@@ -1,0 +1,11 @@
+# robots.txt for utratadochodu.pl
+# Aura Consulting - Ubezpieczenie od utraty dochodu
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://utratadochodu.pl/sitemap.xml
+
+# Crawl-delay (optional, gentle on server)
+Crawl-delay: 1

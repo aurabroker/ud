@@ -1,0 +1,103 @@
+# UtrataDochodu.pl
+
+> Serwis informacyjny i ofertowy poświęcony ubezpieczeniom na wypadek utraty dochodu — dla osób fizycznych prowadzących działalność gospodarczą, pracowników na kontraktach B2B oraz freelancerów. Prowadzony przez Aura Expert Sp. z o.o., multiagencję ubezpieczeniową.
+
+## O serwisie
+
+utratadochodu.pl to dedykowana platforma do porównywania i zakupu ubezpieczeń od utraty dochodu. Strona oferuje kalkulator składki online, symulator luki dochodowej (pokazujący różnicę między realnym dochodem a zasiłkiem ZUS) oraz kreator oferty krok po kroku.
+
+Produkty dostępne na stronie pochodzą od dwóch coverholdersów Lloyd's of London:
+- **CEU Sp. z o.o.** — ubezpieczenie na wypadek niezdolności do pracy
+- **Leadenhall Insurance SA** — ubezpieczenie od utraty dochodu
+
+Dystrybucję prowadzi **Aura Expert Sp. z o.o.** — multiagencja ubezpieczeniowa z siedzibą w Warszawie.
+
+## Produkty
+
+- Ubezpieczenie na wypadek niezdolności do pracy (CEU)
+- Ubezpieczenie od utraty dochodu (Leadenhall Insurance SA)
+- Prywatne L4 — świadczenie od 1. lub 31. dnia zwolnienia lekarskiego
+- Ubezpieczenie poważnych zachorowań
+- Grupowe programy ochrony dochodu dla firm
+
+## Dla kogo
+
+Ubezpieczenie od utraty dochodu na utratadochodu.pl jest dedykowane przede wszystkim:
+
+### Zawody medyczne
+- Lekarze (specjaliści, rezydenci, lekarze POZ)
+- Stomatolodzy, ortodonci, chirurdzy stomatologiczni
+- Fizjoterapeuci, osteopaci, terapeuci manualni
+- Ratownicy medyczni, pielęgniarki, położne
+- Farmaceuci, technicy farmaceutyczni
+- Weterynarze
+- Psychologowie, psychoterapeuci
+- Logopedzi, neurologopedzi
+- Dietetycy
+
+### IT i technologia
+- Programiści (frontend, backend, fullstack)
+- DevOps, administratorzy systemów
+- Testerzy, QA
+- Project managerowie, Scrum masterzy
+- UX/UI designerzy, graficy
+- Analitycy danych, data scientists
+
+### Prawo i finanse
+- Adwokaci, radcowie prawni
+- Notariusze
+- Księgowi, biegli rewidenci
+- Doradcy podatkowi
+- Rzeczoznawcy majątkowi, biegli sądowi
+
+### Budownictwo i inżynieria
+- Architekci, projektanci wnętrz, urbaniści
+- Inżynierowie budownictwa, mechanicy, elektrycy
+- Geodeci, kartografowie
+- Budowlańcy, dekarze, hydraulicy, elektrycy
+
+### Transport
+- Kierowcy ciężarówek, busów, piloci
+- Taksówkarze, kurierzy
+
+### Inne zawody
+- Tłumacze (przysięgli i freelancerzy)
+- Fotografowie, filmowcy, montażyści
+- Trenerzy personalni, instruktorzy fitness, jogi, pilatesu
+- Kosmetyczki, kosmetolodzy, stylistki
+- Fryzjerzy, barberzy
+- Mechanicy samochodowi, blacharze, lakiernicy
+- Handlowcy, agenci nieruchomości
+- Gastronomowie, szefowie kuchni, cukiernicy
+- Rolnicy, ogrodnicy
+- Muzycy, aktorzy, artyści
+
+## Narzędzia online
+
+- **Kalkulator składki** — oblicz cenę ubezpieczenia na podstawie zawodu, wieku i dochodu
+- **Symulator luki dochodowej** — sprawdź ile stracisz na L4 przy minimalnym ZUS
+- **Kreator oferty** — krokowy formularz prowadzący do spersonalizowanej oferty
+- **Ankieta medyczna** — online, bez wizyty u lekarza
+
+## Najczęściej zadawane pytania
+
+**Co to jest ubezpieczenie od utraty dochodu?**
+Polisa wypłacająca miesięczne świadczenie w przypadku niezdolności do pracy z powodu choroby lub wypadku. Nie mylić z ubezpieczeniem od utraty pracy.
+
+**Ile kosztuje?**
+Od 2% do 5% miesięcznego dochodu, który chcesz zabezpieczyć. Zależy od wieku, zawodu i sumy ubezpieczenia. Kalkulator na stronie poda dokładną cenę.
+
+**Czym różni się od ZUS?**
+ZUS wypłaca 80% podstawy wymiaru składek — dla przedsiębiorców na minimalnym ZUS to ok. 1400 zł/mies. Prywatne ubezpieczenie pokrywa do 80% realnego przychodu.
+
+**Czy składka jest kosztem firmy?**
+Tak — może stanowić koszt uzyskania przychodu dla JDG.
+
+## Kontakt
+
+- **Aura Expert Sp. z o.o.**
+- Warszawa, Polska
+- Telefon: +48 504 400 901
+- WWW: https://utratadochodu.pl
+- Firma macierzysta: https://auraexpert.pl
+- Facebook: https://www.facebook.com/utratadochodupl/
