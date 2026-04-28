@@ -1,3 +1,142 @@
+// --- ROBOTS.TXT ---
+const ROBOTS_TXT = `User-agent: *
+Allow: /
+ 
+Sitemap: https://utratadochodu.pl/sitemap.xml
+ 
+# Crawl-delay
+Crawl-delay: 1
+`;
+ 
+// --- SITEMAP.XML ---
+const SITEMAP_XML = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://utratadochodu.pl/</loc><lastmod>2026-04-28</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://utratadochodu.pl/niezdolnosc-do-pracy</loc><lastmod>2026-04-28</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://utratadochodu.pl/powazne-zachorowania</loc><lastmod>2026-04-28</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://utratadochodu.pl/przedsiebiorcy</loc><lastmod>2026-04-28</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://utratadochodu.pl/freelancerzy</loc><lastmod>2026-04-28</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://utratadochodu.pl/grupowe</loc><lastmod>2026-04-28</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://utratadochodu.pl/jak-dziala</loc><lastmod>2026-04-28</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://utratadochodu.pl/swiadczenie</loc><lastmod>2026-04-28</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://utratadochodu.pl/kontakt</loc><lastmod>2026-04-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+</urlset>`;
+ 
+// --- LLMS.TXT ---
+const LLMS_TXT = `# UtrataDochodu.pl
+ 
+> Serwis informacyjny i ofertowy poświęcony ubezpieczeniom na wypadek utraty dochodu — dla osób fizycznych prowadzących działalność, pracowników oraz freelancerów. Prowadzony przez Aura Consulting, brokera z licencją KNF.
+ 
+## Produkty
+- Ubezpieczenie na wypadek niezdolności do pracy
+- Ubezpieczenie poważnych zachorowań
+- Ubezpieczenie dla przedsiębiorców (JDG, B2B)
+- Ubezpieczenie dla freelancerów
+- Grupowe programy ochrony dochodu
+ 
+## Kontakt
+- Aura Consulting Sp. z o.o., Warszawa
+- Broker ubezpieczeniowy, licencja KNF
+`;
+ 
+// --- SEO HANDLER ---
+// Dodaj to na POCZĄTKU fetch() w workerze:
+//
+//   async fetch(request, env, ctx) {
+//     const seoResponse = handleSEO(request);
+//     if (seoResponse) return seoResponse;
+//     // ... reszta istniejącego kodu ...
+//   }
+ 
+function handleSEO(request) {
+  const url = new URL(request.url);
+  const path = url.pathname;
+ 
+  // robots.txt
+  if (path === '/robots.txt') {
+    return new Response(ROBOTS_TXT, {
+      headers: {
+        'Content-Type': 'text/plain',
+        'Cache-Control': 'public, max-age=86400',
+      },
+    });
+  }
+ 
+  // sitemap.xml
+  if (path === '/sitemap.xml') {
+    return new Response(SITEMAP_XML, {
+      headers: {
+        'Content-Type': 'application/xml',
+        'Cache-Control': 'public, max-age=3600',
+      },
+    });
+  }
+ 
+  // llms.txt
+  if (path === '/llms.txt') {
+    return new Response(LLMS_TXT, {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'public, max-age=86400',
+      },
+    });
+  }
+ 
+  // Nie pasuje do SEO — kontynuuj normalny flow
+  return null;
+}
+ 
+// ============================================
+// WAŻNE: Upewnij się, że worker NIE zwraca 403
+// dla user-agentów botów wyszukiwarek!
+//
+// Jeśli masz w kodzie coś takiego:
+//   if (isBotUserAgent(request)) return new Response('', { status: 403 });
+// — USUŃ TO NATYCHMIAST!
+//
+// Googlebot, Bingbot, FacebookExternalHit muszą
+// dostawać 200 OK z pełną treścią strony.
+// ============================================
+ 
+// --- OPCJONALNIE: Dodaj SEO headers do KAŻDEJ odpowiedzi ---
+// Użyj tego wrappera na końcowej odpowiedzi:
+ 
+function addSEOHeaders(response) {
+  const newHeaders = new Headers(response.headers);
+  
+  // Zezwól na indeksację
+  newHeaders.set('X-Robots-Tag', 'index, follow');
+  
+  // Security headers (bonus SEO — Google preferuje bezpieczne strony)
+  newHeaders.set('X-Content-Type-Options', 'nosniff');
+  newHeaders.set('X-Frame-Options', 'SAMEORIGIN');
+  newHeaders.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: newHeaders,
+  });
+}
+ 
+// ============================================
+// PEŁNY PRZYKŁAD INTEGRACJI:
+// ============================================
+//
+// export default {
+//   async fetch(request, env, ctx) {
+//     // 1. Obsłuż SEO endpointy
+//     const seoResponse = handleSEO(request);
+//     if (seoResponse) return seoResponse;
+//
+//     // 2. Twój istniejący kod (np. serwowanie SPA z ASSETS)
+//     let response = await env.ASSETS.fetch(request);
+//
+//     // 3. Dodaj SEO headers
+//     return addSEOHeaders(response);
+//   },
+// };
+
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "ud",
