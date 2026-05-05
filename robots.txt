@@ -1,5 +1,5 @@
 # robots.txt for utratadochodu.pl
-# Aura Consulting - Ubezpieczenie od utraty dochodu
+# Aura Expert - Ubezpieczenie utraty dochodu
 
 User-agent: *
 Allow: /
