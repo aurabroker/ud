@@ -1,11 +1,11 @@
-/* UtrataDochodu — form.js
-   Wizard wielokrokowy, walidacja PESEL, wysyłka do Supabase + Web3Forms
+/* UtrataDochodu — style.js
+   Wizard wielokrokowy, walidacja PESEL, wysyłka do Supabase
 */
 
 /* ──────────────────────────────────────────
    WIZARD STATE
 ────────────────────────────────────────── */
-let activeSteps    = ['step-1', 'step-2', 'step-3', 'step-4'];
+let activeSteps    = ['step-1', 'step-2', 'step-risks', 'step-3', 'step-info', 'step-4'];
 let currentStepIndex = 0;
 
 function updateWizardUI() {
@@ -58,10 +58,33 @@ function initEmployerToggle() {
 
   checkbox.addEventListener('change', e => {
     activeSteps = e.target.checked
-      ? ['step-1', 'step-employer', 'step-2', 'step-3', 'step-4']
-      : ['step-1', 'step-2', 'step-3', 'step-4'];
+      ? ['step-1', 'step-employer', 'step-2', 'step-risks', 'step-3', 'step-info', 'step-4']
+      : ['step-1', 'step-2', 'step-risks', 'step-3', 'step-info', 'step-4'];
     updateWizardUI();
   });
+}
+
+/* ──────────────────────────────────────────
+   KLAUZULE NW — toggle warunkowy
+────────────────────────────────────────── */
+function initNwToggle() {
+  const deathCheckbox  = document.getElementById('riskDeathInvalidity');
+  const sumSection     = document.getElementById('nw-sum-section');
+  const clausesSection = document.getElementById('nw-clauses-section');
+  if (!deathCheckbox || !sumSection || !clausesSection) return;
+
+  deathCheckbox.addEventListener('change', e => {
+    sumSection.classList.toggle('hidden', !e.target.checked);
+    if (!e.target.checked) clausesSection.classList.add('hidden');
+  });
+
+  const sumSelect = document.getElementById('nwDeathSum');
+  if (sumSelect) {
+    sumSelect.addEventListener('change', e => {
+      const val = parseInt(e.target.value, 10);
+      clausesSection.classList.toggle('hidden', val < 300000);
+    });
+  }
 }
 
 /* ──────────────────────────────────────────
@@ -99,12 +122,25 @@ function initPeselValidation() {
 const EDGE_FN_URL = 'https://kukvgsjrmrqtzhkszzum.supabase.co/functions/v1/form-submit';
 
 const BOOL_FIELDS = [
+  /* istniejące medyczne */
   'med_heart','med_diabetes','med_bones','med_stomach','med_neuro','med_surgery','med_aids',
+  /* istniejące sport */
   'risk_caving','risk_climbing','risk_extreme_bike_boat','risk_diving','risk_sailing',
   'risk_horse','risk_skiing','risk_hunting','risk_quad','risk_aviation_non_comm',
   'risk_balloon','risk_skydiving','risk_paragliding','risk_horse_jumping',
   'risk_gravity_bike','risk_motorcycle','risk_aviation',
+  /* istniejące zgody */
   'exclusions_accepted','employsPeople',
+  /* nowe — pytania zdrowotne */
+  'weightChange','takesMeds','pendingDiagnosis','disabilityCongenital','smoker',
+  /* nowe — zdarzenia medyczne */
+  'eventHospitalization','eventSickLeave30','eventFurtherDiagnosis',
+  /* nowe — ryzyka */
+  'riskDeathInvalidity','riskTempIncapacity','riskPermIncapacity',
+  /* nowe — klauzule NW */
+  'nwPermanentDamage',
+  /* nowe — klauzula informacyjna */
+  'informedAccepted',
 ];
 
 function collectFormData(form) {
@@ -141,6 +177,7 @@ function showSuccessModal(form) {
   document.getElementById('success-modal').classList.remove('hidden');
   form.reset();
   currentStepIndex = 0;
+  activeSteps = ['step-1', 'step-2', 'step-risks', 'step-3', 'step-info', 'step-4'];
   updateWizardUI();
 }
 
@@ -167,10 +204,8 @@ function initFormSubmit() {
       const mainRes = await submitToSupabase(dataObj);
 
       if (mainRes.status === 'success') {
-        console.log('Supabase:', mainRes.supabase, '| GetResponse:', mainRes.getresponse);
         showSuccessModal(form);
       } else {
-        console.error('Błąd:', mainRes.message);
         showErrorModal(mainRes.message);
       }
     } catch (err) {
@@ -203,6 +238,7 @@ function toggleExclusionsModal() {
 ────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
   initEmployerToggle();
+  initNwToggle();
   initPeselValidation();
   initFormSubmit();
   updateWizardUI();

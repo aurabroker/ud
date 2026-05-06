@@ -6,47 +6,14 @@ const CORS = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-/* ── AES-256-GCM PESEL encryption ── */
-async function encryptPesel(pesel: string): Promise<string> {
-  const keyHex = Deno.env.get('PESEL_ENCRYPTION_KEY');
-  if (!keyHex || keyHex.length !== 64) {
-    throw new Error('PESEL_ENCRYPTION_KEY must be a 64-char hex string (32 bytes)');
-  }
-  const keyBytes = new Uint8Array(keyHex.match(/.{2}/g)!.map((b) => parseInt(b, 16)));
-  const key = await crypto.subtle.importKey('raw', keyBytes, { name: 'AES-GCM' }, false, ['encrypt']);
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const encoded = new TextEncoder().encode(pesel);
-  const cipherBuf = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoded);
-  const combined = new Uint8Array(iv.byteLength + cipherBuf.byteLength);
-  combined.set(iv, 0);
-  combined.set(new Uint8Array(cipherBuf), iv.byteLength);
-  return btoa(String.fromCharCode(...combined));
-}
-
-/* ── Web3Forms notification (no PESEL) ── */
-async function notifyWeb3Forms(data: Record<string, string>): Promise<boolean> {
-  const key = Deno.env.get('WEB3FORMS_KEY');
-  if (!key) return false;
-
-  const safeData = { ...data };
-  delete safeData.pesel;
-  delete safeData.pesel_enc;
-
-  const body = new FormData();
-  body.append('access_key', key);
-  for (const [k, v] of Object.entries(safeData)) body.append(k, String(v));
-
-  const res = await fetch('https://api.web3forms.com/submit', { method: 'POST', body });
-  return res.ok;
-}
-
 /* ── GetResponse contact sync ── */
-async function syncGetResponse(data: Record<string, string>): Promise<boolean> {
+async function syncGetResponse(data: Record<string, unknown>): Promise<boolean> {
   const apiKey = Deno.env.get('GETRESPONSE_API_KEY');
   const listId = Deno.env.get('GETRESPONSE_LIST_ID');
   if (!apiKey || !listId) return false;
 
-  const [firstName, ...rest] = (data.fullName ?? '').split(' ');
+  const fullName = String(data.full_name ?? '');
+  const [firstName, ...rest] = fullName.split(' ');
   const payload = {
     name: firstName,
     email: data.email,
@@ -65,6 +32,12 @@ async function syncGetResponse(data: Record<string, string>): Promise<boolean> {
   return res.ok || res.status === 409;
 }
 
+function yesNo(val: unknown): boolean | null {
+  if (val === 'Yes' || val === true) return true;
+  if (val === 'No'  || val === false) return false;
+  return null;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
 
@@ -72,7 +45,7 @@ serve(async (req) => {
     const body = await req.json();
 
     /* Validate required fields */
-    const pesel: string = (body.pesel ?? '').trim();
+    const pesel: string = String(body.pesel ?? '').trim();
     if (!/^\d{11}$/.test(pesel)) {
       return new Response(JSON.stringify({ status: 'error', message: 'Nieprawidłowy PESEL.' }), {
         status: 400,
@@ -80,26 +53,104 @@ serve(async (req) => {
       });
     }
 
-    /* Encrypt PESEL before any storage */
-    const peselEnc = await encryptPesel(pesel);
+    /* Build explicit column mapping */
+    const record: Record<string, unknown> = {
+      /* ── basic ── */
+      full_name:          body.fullName        ?? body.full_name        ?? null,
+      email:              body.email                                     ?? null,
+      phone:              body.phone                                     ?? null,
+      pesel,
+      employment_type:    body.employmentType  ?? body.employment_type  ?? null,
+      profession:         body.profession                                ?? null,
+      source:             body.source                                   ?? 'direct',
+      affiliate_code_used: body.affiliateCode  ?? body.affiliate_code_used ?? null,
 
-    /* Build safe record: PESEL replaced with ciphertext, never stored in plain */
-    const record: Record<string, string> = { ...body };
-    delete record.pesel;
-    record.pesel_enc = peselEnc;
+      /* ── personal data (new) ── */
+      weight:             body.weight                                    ?? null,
+      height:             body.height                                    ?? null,
+      handedness:         body.handedness                                ?? null,
+      tax_form:           body.taxForm         ?? body.tax_form          ?? null,
+
+      /* ── employer ── */
+      employs_people:     yesNo(body.employsPeople ?? body.employs_people),
+
+      /* ── B2B ── */
+      b2b_income:         body.b2bIncome       ?? body.b2b_income       ?? null,
+      b2b_months:         body.b2bMonths       ?? body.b2b_months       ?? null,
+      b2b_period:         body.b2bPeriod       ?? body.b2b_period       ?? null,
+      b2b_hiv:            body.b2bHiv          ?? body.b2b_hiv          ?? null,
+      b2b_nw_sum:         body.b2bNwSum        ?? body.b2b_nw_sum       ?? null,
+
+      /* ── medical pre-conditions ── */
+      med_heart:          yesNo(body.med_heart          ?? body.medHeart),
+      med_diabetes:       yesNo(body.med_diabetes       ?? body.medDiabetes),
+      med_bones:          yesNo(body.med_bones          ?? body.medBones),
+      med_stomach:        yesNo(body.med_stomach        ?? body.medStomach),
+      med_neuro:          yesNo(body.med_neuro          ?? body.medNeuro),
+      med_surgery:        yesNo(body.med_surgery        ?? body.medSurgery),
+      med_aids:           yesNo(body.med_aids           ?? body.medAids),
+
+      /* ── health screening (new) ── */
+      weight_change:      yesNo(body.weightChange       ?? body.weight_change),
+      takes_meds:         yesNo(body.takesMeds          ?? body.takes_meds),
+      pending_diagnosis:  yesNo(body.pendingDiagnosis   ?? body.pending_diagnosis),
+      disability_congenital: yesNo(body.disabilityCongenital ?? body.disability_congenital),
+      smoker:             yesNo(body.smoker),
+
+      /* ── medical events last 2 years (new) ── */
+      event_hospitalization:   yesNo(body.eventHospitalization   ?? body.event_hospitalization),
+      event_sick_leave_30:     yesNo(body.eventSickLeave30       ?? body.event_sick_leave_30),
+      event_further_diagnosis: yesNo(body.eventFurtherDiagnosis  ?? body.event_further_diagnosis),
+
+      /* ── sport risks ── */
+      risk_caving:              yesNo(body.risk_caving),
+      risk_climbing:            yesNo(body.risk_climbing),
+      risk_extreme_bike_boat:   yesNo(body.risk_extreme_bike_boat),
+      risk_diving:              yesNo(body.risk_diving),
+      risk_sailing:             yesNo(body.risk_sailing),
+      risk_horse:               yesNo(body.risk_horse),
+      risk_skiing:              yesNo(body.risk_skiing),
+      risk_hunting:             yesNo(body.risk_hunting),
+      risk_quad:                yesNo(body.risk_quad),
+      risk_aviation_non_comm:   yesNo(body.risk_aviation_non_comm),
+      risk_balloon:             yesNo(body.risk_balloon),
+      risk_skydiving:           yesNo(body.risk_skydiving),
+      risk_paragliding:         yesNo(body.risk_paragliding),
+      risk_horse_jumping:       yesNo(body.risk_horse_jumping),
+      risk_gravity_bike:        yesNo(body.risk_gravity_bike),
+      risk_motorcycle:          yesNo(body.risk_motorcycle),
+      risk_aviation:            yesNo(body.risk_aviation),
+
+      /* ── coverage selection (new) ── */
+      risk_death_invalidity:  yesNo(body.riskDeathInvalidity  ?? body.risk_death_invalidity),
+      risk_temp_incapacity:   yesNo(body.riskTempIncapacity   ?? body.risk_temp_incapacity),
+      risk_perm_incapacity:   yesNo(body.riskPermIncapacity   ?? body.risk_perm_incapacity),
+
+      /* ── NW clauses (new) ── */
+      nw_death_sum:           body.nwDeathSum          ?? body.nw_death_sum          ?? null,
+      nw_funeral:             body.nwFuneral           ?? body.nw_funeral            ?? null,
+      nw_adaptation:          body.nwAdaptation        ?? body.nw_adaptation         ?? null,
+      nw_hospital_daily:      body.nwHospitalDaily     ?? body.nw_hospital_daily     ?? null,
+      nw_medical_costs:       body.nwMedicalCosts      ?? body.nw_medical_costs      ?? null,
+      nw_unconscious_weekly:  body.nwUnconsciousWeekly ?? body.nw_unconscious_weekly ?? null,
+      nw_permanent_damage:    yesNo(body.nwPermanentDamage ?? body.nw_permanent_damage),
+
+      /* ── consents ── */
+      exclusions_accepted:  yesNo(body.exclusionsAccepted ?? body.exclusions_accepted),
+      informed_accepted:    yesNo(body.informedAccepted   ?? body.informed_accepted),
+    };
+
+    /* Strip null values so Supabase uses column defaults */
+    const cleanRecord = Object.fromEntries(
+      Object.entries(record).filter(([, v]) => v !== null && v !== undefined && v !== ''),
+    );
 
     /* Supabase insert */
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     );
-    const { error: dbError } = await supabase.from('ud_clients').insert([record]);
-
-    /* Fan-out notifications in parallel — failures are non-fatal */
-    const [web3ok, grOk] = await Promise.all([
-      notifyWeb3Forms(record).catch(() => false),
-      syncGetResponse(record).catch(() => false),
-    ]);
+    const { error: dbError } = await supabase.from('ud_clients').insert([cleanRecord]);
 
     if (dbError) {
       console.error('DB insert error:', dbError.message);
@@ -109,8 +160,11 @@ serve(async (req) => {
       );
     }
 
+    /* GetResponse sync — non-fatal */
+    const grOk = await syncGetResponse(cleanRecord).catch(() => false);
+
     return new Response(
-      JSON.stringify({ status: 'success', supabase: 'ok', web3forms: web3ok, getresponse: grOk }),
+      JSON.stringify({ status: 'success', supabase: 'ok', getresponse: grOk }),
       { headers: { ...CORS, 'Content-Type': 'application/json' } },
     );
   } catch (err) {

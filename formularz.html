@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="pl" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wniosek ubezpieczeniowy | UtrataDochodu.pl</title>
+<meta name="description" content="Wypełnij wniosek o ubezpieczenie od utraty dochodu. Produkty Lloyd's: CEU i Leadenhall Insurance SA. Aura Expert Sp. z o.o.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="canonical" href="https://utratadochodu.pl/formularz.html">
+<link rel="icon" type="image/png" href="/favicon.png">
+<meta name="theme-color" content="#01696f">
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  body { font-family: 'Inter', sans-serif; }
+  .custom-scroll::-webkit-scrollbar { width: 6px; }
+  .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; }
+  .custom-scroll::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 3px; }
+</style>
+</head>
+<body class="bg-slate-100 text-slate-800 antialiased">
+
+<!-- Nawigacja -->
+<nav class="bg-white border-b border-slate-200 sticky top-0 z-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-14">
+            <a href="https://utratadochodu.pl" class="flex items-center gap-2">
+                <div class="w-7 h-7 bg-slate-900 rounded flex items-center justify-center text-white font-black text-base">U</div>
+                <span class="font-extrabold text-lg text-slate-900 tracking-tight">Utrata<span class="text-blue-600">Dochodu</span></span>
+            </a>
+            <a href="https://utratadochodu.pl" class="flex items-center text-sm text-slate-500 hover:text-blue-600 transition-colors font-medium">
+                ← Powrót do strony głównej
+            </a>
+        </div>
+    </div>
+</nav>
+
+<!-- Główna treść -->
+<main class="py-10 md:py-14">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-8">
+            <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wide">Bezpieczny Wniosek</span>
+            <h1 class="text-3xl font-bold text-slate-900 mt-3 tracking-tight">Wniosek ubezpieczeniowy</h1>
+            <p class="text-slate-500 mt-2">Wypełnij wniosek. Przeanalizujemy go dla obu naszych partnerów (CEU / Leadenhall).</p>
+        </div>
+
+        <div class="bg-white shadow-xl rounded-2xl overflow-hidden border border-slate-200">
+            <div class="bg-slate-50 border-b border-slate-200 px-6 py-5">
+                <div class="flex justify-between items-center text-sm mb-2">
+                    <span id="step-indicator" class="font-bold text-blue-700 tracking-wide uppercase">Krok 1 z 6</span>
+                    <span class="text-slate-500 text-xs font-bold" id="step-percent">17%</span>
+                </div>
+                <div class="w-full bg-slate-200 rounded-full h-2">
+                    <div id="progress-bar-fill" class="bg-blue-600 h-2 rounded-full transition-all duration-500 ease-out" style="width: 17%"></div>
+                </div>
+            </div>
+
+            <form id="insurance-form" class="p-6 md:p-8 space-y-6">
+
+                <!-- KROK 1: Dane Podstawowe -->
+                <div id="step-1" class="step-container space-y-6 animate-fade-in block">
+                    <h3 class="text-xl sm:text-2xl font-bold text-slate-800">Dane Podstawowe</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
+                        <div><label class="block text-sm font-semibold text-slate-700 mb-1">Imię i Nazwisko</label><input type="text" name="fullName" required autocomplete="name" class="block w-full rounded-md border-slate-300 border shadow-sm p-2.5 sm:p-3 outline-none focus:ring-2 focus:ring-blue-500"></div>
+                        <div><label class="block text-sm font-semibold text-slate-700 mb-1">PESEL</label><input type="text" name="pesel" required maxlength="11" pattern="\d{11}" inputmode="numeric" placeholder="11 cyfr" autocomplete="off" class="block w-full rounded-md border-slate-300 border shadow-sm p-2.5 sm:p-3 outline-none focus:ring-2 focus:ring-blue-500"></div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Forma Zatrudnienia</label>
+                            <select name="employmentType" class="block w-full rounded-md border-slate-300 border shadow-sm p-2.5 sm:p-3 bg-white outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="b2b">Samozatrudnienie (B2B/JDG)</option>
+                                <option value="uop">Umowa o Pracę</option>
+                                <option value="zlecenie">Umowa Zlecenie/Dzieło</option>
+                            </select>
+                        </div>
+                        <div><label class="block text-sm font-semibold text-slate-700 mb-1">Dokładny Zawód</label><input type="text" name="profession" required class="block w-full rounded-md border-slate-300 border shadow-sm p-2.5 sm:p-3 outline-none focus:ring-2 focus:ring-blue-500"></div>
+                    </div>
+                    <!-- Waga / Wzrost -->
+                    <div class="grid grid-cols-2 gap-4 sm:gap-6">
+                        <div><label class="block text-sm font-semibold text-slate-700 mb-1">Waga (kg)</label><input type="number" name="weight" min="30" max="300" placeholder="np. 75" class="block w-full rounded-md border-slate-300 border shadow-sm p-2.5 sm:p-3 outline-none focus:ring-2 focus:ring-blue-500"></div>
+                        <div><label class="block text-sm font-semibold text-slate-700 mb-1">Wzrost (cm)</label><input type="number" name="height" min="100" max="250" placeholder="np. 175" class="block w-full rounded-md border-slate-300 border shadow-sm p-2.5 sm:p-3 outline-none focus:ring-2 focus:ring-blue-500"></div>
+                    </div>
+                    <!-- Ręczność -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Ręczność</label>
+                        <div class="flex gap-8">
+                            <label class="flex items-center cursor-pointer"><input type="radio" name="handedness" value="prawy" class="mr-2 h-4 w-4 text-blue-600"><span class="text-sm text-slate-700">Praworęczny/a</span></label>
+                            <label class="flex items-center cursor-pointer"><input type="radio" name="handedness" value="lewy" class="mr-2 h-4 w-4 text-blue-600"><span class="text-sm text-slate-700">Leworęczny/a</span></label>
+                        </div>
+                    </div>
+                    <!-- Forma opodatkowania -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Forma opodatkowania</label>
+                        <select name="taxForm" class="block w-full rounded-md border-slate-300 border shadow-sm p-2.5 sm:p-3 bg-white outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">— wybierz —</option>
+                            <option value="zasady_ogolne">Zasady ogólne (skala podatkowa)</option>
+                            <option value="liniowy">Podatek liniowy (19%)</option>
+                            <option value="ryczalt">Ryczałt od przychodów ewidencjonowanych</option>
+                            <option value="karta_podatkowa">Karta podatkowa</option>
+                        </select>
+                    </div>
+                    <div class="bg-blue-50 p-4 sm:p-5 rounded-xl border border-blue-100">
+                        <label class="flex items-center space-x-3 cursor-pointer">
+                            <input type="checkbox" name="employsPeople" id="employsPeople" class="h-6 w-6 text-blue-600 rounded border-gray-300 cursor-pointer focus:ring-blue-500">
+                            <span class="text-sm sm:text-base font-bold text-blue-900 leading-tight">Czy prowadzisz działalność gospodarczą i zatrudniasz pracowników?</span>
+                        </label>
+                        <p class="text-xs text-blue-700 mt-2 pl-9">Zaznaczenie tej opcji otworzy dodatkowy krok ze szczegółami firmy.</p>
+                    </div>
+                </div>
+
+                <!-- KROK 1B: Dla zatrudniających -->
+                <div id="step-employer" class="step-container hidden space-y-6">
+                    <h3 class="text-xl sm:text-2xl font-bold text-slate-800">Szczegóły Działalności</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
+                        <div><label class="block text-sm font-semibold text-slate-700 mb-1">Data rozpoczęcia</label><input type="date" name="emp_startDate" class="block w-full rounded-md border-slate-300 border shadow-sm p-2.5 sm:p-3 outline-none focus:ring-2 focus:ring-blue-500"></div>
+                        <div><label class="block text-sm font-semibold text-slate-700 mb-1">Branża</label><input type="text" name="emp_industry" class="block w-full rounded-md border-slate-300 border shadow-sm p-2.5 sm:p-3 outline-none focus:ring-2 focus:ring-blue-500"></div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Charakter działalności</label>
+                            <select name="emp_character" class="block w-full rounded-md border-slate-300 border shadow-sm p-2.5 sm:p-3 bg-white outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="uslugowa">Usługowa</option>
+                                <option value="handlowa">Handlowa</option>
+                                <option value="produkcyjna">Produkcyjna</option>
+                                <option value="mieszana">Mieszana</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Obszar działalności</label>
+                            <select name="emp_area" class="block w-full rounded-md border-slate-300 border shadow-sm p-2.5 sm:p-3 bg-white outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="lokalna">Lokalna</option>
+                                <option value="krajowa">Krajowa</option>
+                                <option value="miedzynarodowa">Międzynarodowa</option>
+                            </select>
+                        </div>
+                        <div><label class="block text-sm font-semibold text-slate-700 mb-1">Pracownicy 2024</label><input type="number" min="0" name="emp_count_2024" placeholder="Np. 2" class="block w-full rounded-md border-slate-300 border shadow-sm p-2.5 sm:p-3 outline-none focus:ring-2 focus:ring-blue-500"></div>
+                        <div><label class="block text-sm font-semibold text-slate-700 mb-1">Aktualna liczba pracowników</label><input type="number" min="1" name="emp_count_current" placeholder="Np. 3" class="block w-full rounded-md border-slate-300 border shadow-sm p-2.5 sm:p-3 outline-none focus:ring-2 focus:ring-blue-500"></div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Mój wkład w przychód firmy: <span id="emp_val" class="text-blue-600">50%</span></label>
+                        <input type="range" name="emp_contribution_slider" id="emp_slider" min="0" max="100" value="50" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Opis roli (opcjonalnie)</label>
+                        <textarea name="emp_description" rows="2" class="block w-full rounded-md border-slate-300 border shadow-sm p-2.5 sm:p-3 outline-none focus:ring-2 focus:ring-blue-500 resize-none" placeholder="Np. Ja wykonuję zabiegi, pracownicy zajmują się recepcją."></textarea>
+                    </div>
+                </div>
+
+                <!-- KROK 2: Stan Zdrowia -->
+                <div id="step-2" class="step-container hidden space-y-6">
+                    <h3 class="text-xl sm:text-2xl font-bold text-slate-800">Stan Zdrowia</h3>
+                    <p class="text-slate-600 text-sm">Odpowiedz szczerze — każda odpowiedź TAK wymaga krótkiego opisu poniżej.</p>
+                    <div class="space-y-3">
+                        <div class="flex flex-col sm:flex-row justify-between bg-white border border-slate-200 p-3 sm:p-4 rounded-lg hover:border-blue-300 transition-colors gap-2 sm:gap-4">
+                            <span class="text-sm font-medium text-slate-700">1. Problemy z sercem, nadciśnienie, bóle w klatce piersiowej?</span>
+                            <div class="flex gap-4 shrink-0"><label class="flex items-center cursor-pointer"><input type="radio" name="med_heart" value="yes" class="mr-2 h-4 w-4 text-blue-600">Tak</label><label class="flex items-center cursor-pointer"><input type="radio" name="med_heart" value="no" checked class="mr-2 h-4 w-4 text-blue-600">Nie</label></div>
+                        </div>
+                        <div class="flex flex-col sm:flex-row justify-between bg-white border border-slate-200 p-3 sm:p-4 rounded-lg hover:border-blue-300 transition-colors gap-2 sm:gap-4">
+                            <span class="text-sm font-medium text-slate-700">2. Cukrzyca, problemy z nerkami, prostatą lub układem moczowym?</span>
+                            <div class="flex gap-4 shrink-0"><label class="flex items-center cursor-pointer"><input type="radio" name="med_diabetes" value="yes" class="mr-2 h-4 w-4 text-blue-600">Tak</label><label class="flex items-center cursor-pointer"><input type="radio" name="med_diabetes" value="no" checked class="mr-2 h-4 w-4 text-blue-600">Nie</label></div>
+                        </div>
+                        <div class="flex flex-col sm:flex-row justify-between bg-white border border-slate-200 p-3 sm:p-4 rounded-lg hover:border-blue-300 transition-colors gap-2 sm:gap-4">
+                            <span class="text-sm font-medium text-slate-700">3. Problemy z kręgosłupem, stawami, układem kostnym?</span>
+                            <div class="flex gap-4 shrink-0"><label class="flex items-center cursor-pointer"><input type="radio" name="med_bones" value="yes" class="mr-2 h-4 w-4 text-blue-600">Tak</label><label class="flex items-center cursor-pointer"><input type="radio" name="med_bones" value="no" checked class="mr-2 h-4 w-4 text-blue-600">Nie</label></div>
+                        </div>
+                        <div class="flex flex-col sm:flex-row justify-between bg-white border border-slate-200 p-3 sm:p-4 rounded-lg hover:border-blue-300 transition-colors gap-2 sm:gap-4">
+                            <span class="text-sm font-medium text-slate-700">4. Choroby żołądka, jelit, wątroby lub trzustki?</span>
+                            <div class="flex gap-4 shrink-0"><label class="flex items-center cursor-pointer"><input type="radio" name="med_stomach" value="yes" class="mr-2 h-4 w-4 text-blue-600">Tak</label><label class="flex items-center cursor-pointer"><input type="radio" name="med_stomach" value="no" checked class="mr-2 h-4 w-4 text-blue-600">Nie</label></div>
+                        </div>
+                        <div class="flex flex-col sm:flex-row justify-between bg-white border border-slate-200 p-3 sm:p-4 rounded-lg hover:border-blue-300 transition-colors gap-2 sm:gap-4">
+                            <span class="text-sm font-medium text-slate-700">5. Choroby neurologiczne, psychiczne lub zaburzenia lękowe?</span>
+                            <div class="flex gap-4 shrink-0"><label class="flex items-center cursor-pointer"><input type="radio" name="med_neuro" value="yes" class="mr-2 h-4 w-4 text-blue-600">Tak</label><label class="flex items-center cursor-pointer"><input type="radio" name="med_neuro" value="no" checked class="mr-2 h-4 w-4 text-blue-600">Nie</label></div>
+                        </div>
+                        <div class="flex flex-col sm:flex-row justify-between bg-white border border-slate-200 p-3 sm:p-4 rounded-lg hover:border-blue-300 transition-colors gap-2 sm:gap-4">
+                            <span class="text-sm font-medium text-slate-700">6. Operacje chirurgiczne lub stałe leki?</span>
+                            <div class="flex gap-4 shrink-0"><label class="flex items-center cursor-pointer"><input type="radio" name="med_surgery" value="yes" class="mr-2 h-4 w-4 text-blue-600">Tak</label><label class="flex items-center cursor-pointer"><input type="radio" name="med_surgery" value="no" checked class="mr-2 h-4 w-4 text-blue-600">Nie</label></div>
+                        </div>
+                        <div class="flex flex-col sm:flex-row justify-between bg-white border border-slate-200 p-3 sm:p-4 rounded-lg hover:border-blue-300 transition-colors gap-2 sm:gap-4">
+                            <span class="text-sm font-medium text-slate-700">7. Testy w związku z AIDS/HIV?</span>
+                            <div class="flex gap-4 shrink-0"><label class="flex items-center cursor-pointer"><input type="radio" name="med_aids" value="yes" class="mr-2 h-4 w-4 text-blue-600">Tak</label><label class="flex items-center cursor-pointer"><input type="radio" name="med_aids" value="no" checked class="mr-2 h-4 w-4 text-blue-600">Nie</label></div>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-slate-100">
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Szczegóły (jeśli zaznaczono TAK na cokolwiek):</label>
+                            <textarea name="healthNotes" rows="2" class="block w-full rounded-md border-slate-300 border shadow-sm p-2.5 sm:p-3 outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+                        </div>
+
+                        <!-- Pytania ogólne -->
+                        <div class="border-t border-slate-200 pt-5 mt-2 space-y-3">
+                            <h4 class="text-base font-bold text-slate-800 mb-3">Pytania ogólne</h4>
+                            <div class="flex flex-col sm:flex-row justify-between bg-white border border-slate-200 p-3 sm:p-4 rounded-lg hover:border-blue-300 transition-colors gap-2 sm:gap-4">
+                                <span class="text-sm font-medium text-slate-700">Zmiana wagi ciała ponad 5 kg w ciągu ostatniego roku (niezwiązana z ciążą/porodem)</span>
+                                <div class="flex gap-4 shrink-0"><label class="flex items-center cursor-pointer"><input type="radio" name="weightChange" value="yes" class="mr-2 h-4 w-4 text-blue-600">Tak</label><label class="flex items-center cursor-pointer"><input type="radio" name="weightChange" value="no" checked class="mr-2 h-4 w-4 text-blue-600">Nie</label></div>
+                            </div>
+                            <div class="flex flex-col sm:flex-row justify-between bg-white border border-slate-200 p-3 sm:p-4 rounded-lg hover:border-blue-300 transition-colors gap-2 sm:gap-4">
+                                <span class="text-sm font-medium text-slate-700">Przyjmowanie na stałe leków przepisanych przez lekarza</span>
+                                <div class="flex gap-4 shrink-0"><label class="flex items-center cursor-pointer"><input type="radio" name="takesMeds" value="yes" class="mr-2 h-4 w-4 text-blue-600">Tak</label><label class="flex items-center cursor-pointer"><input type="radio" name="takesMeds" value="no" checked class="mr-2 h-4 w-4 text-blue-600">Nie</label></div>
+                            </div>
+                            <div class="flex flex-col sm:flex-row justify-between bg-white border border-slate-200 p-3 sm:p-4 rounded-lg hover:border-blue-300 transition-colors gap-2 sm:gap-4">
+                                <span class="text-sm font-medium text-slate-700">Aktualnie prowadzona diagnostyka, oczekiwanie na wyniki badań, zabieg lub rozważane zasięgnięcie porady lekarskiej ze względu na aktualne objawy</span>
+                                <div class="flex gap-4 shrink-0"><label class="flex items-center cursor-pointer"><input type="radio" name="pendingDiagnosis" value="yes" class="mr-2 h-4 w-4 text-blue-600">Tak</label><label class="flex items-center cursor-pointer"><input type="radio" name="pendingDiagnosis" value="no" checked class="mr-2 h-4 w-4 text-blue-600">Nie</label></div>
+                            </div>
+                            <div class="flex flex-col sm:flex-row justify-between bg-white border border-slate-200 p-3 sm:p-4 rounded-lg hover:border-blue-300 transition-colors gap-2 sm:gap-4">
+                                <span class="text-sm font-medium text-slate-700">Trwałe ograniczenia sprawności lub wady wrodzone</span>
+                                <div class="flex gap-4 shrink-0"><label class="flex items-center cursor-pointer"><input type="radio" name="disabilityCongenital" value="yes" class="mr-2 h-4 w-4 text-blue-600">Tak</label><label class="flex items-center cursor-pointer"><input type="radio" name="disabilityCongenital" value="no" checked class="mr-2 h-4 w-4 text-blue-600">Nie</label></div>
+                            </div>
+                            <div class="flex flex-col sm:flex-row justify-between bg-white border border-slate-200 p-3 sm:p-4 rounded-lg hover:border-blue-300 transition-colors gap-2 sm:gap-4">
+                                <span class="text-sm font-medium text-slate-700">Palenie papierosów lub innych wyrobów tytoniowych</span>
+                                <div class="flex gap-4 shrink-0"><label class="flex items-center cursor-pointer"><input type="radio" name="smoker" value="yes" class="mr-2 h-4 w-4 text-blue-600">Tak</label><label class="flex items-center cursor-pointer"><input type="radio" name="smoker" value="no" checked class="mr-2 h-4 w-4 text-blue-600">Nie</label></div>
+                            </div>
+                        </div>
+
+                        <!-- Zdarzenia medyczne -->
+                        <div class="border-t border-slate-200 pt-5 space-y-3">
+                            <h4 class="text-base font-bold text-slate-800 mb-3">Zdarzenia medyczne w ostatnich 2 latach</h4>
+                            <div class="flex flex-col sm:flex-row justify-between bg-white border border-slate-200 p-3 sm:p-4 rounded-lg hover:border-blue-300 transition-colors gap-2 sm:gap-4">
+                                <span class="text-sm font-medium text-slate-700">Miała miejsce hospitalizacja</span>
+                                <div class="flex gap-4 shrink-0"><label class="flex items-center cursor-pointer"><input type="radio" name="eventHospitalization" value="yes" class="mr-2 h-4 w-4 text-blue-600">Tak</label><label class="flex items-center cursor-pointer"><input type="radio" name="eventHospitalization" value="no" checked class="mr-2 h-4 w-4 text-blue-600">Nie</label></div>
+                            </div>
+                            <div class="flex flex-col sm:flex-row justify-between bg-white border border-slate-200 p-3 sm:p-4 rounded-lg hover:border-blue-300 transition-colors gap-2 sm:gap-4">
+                                <span class="text-sm font-medium text-slate-700">Otrzymano zwolnienie lekarskie dłuższe niż 30 dni</span>
+                                <div class="flex gap-4 shrink-0"><label class="flex items-center cursor-pointer"><input type="radio" name="eventSickLeave30" value="yes" class="mr-2 h-4 w-4 text-blue-600">Tak</label><label class="flex items-center cursor-pointer"><input type="radio" name="eventSickLeave30" value="no" checked class="mr-2 h-4 w-4 text-blue-600">Nie</label></div>
+                            </div>
+                            <div class="flex flex-col sm:flex-row justify-between bg-white border border-slate-200 p-3 sm:p-4 rounded-lg hover:border-blue-300 transition-colors gap-2 sm:gap-4">
+                                <span class="text-sm font-medium text-slate-700">Odbyto konsultacje lub badania diagnostyczne, po których lekarz zalecił dalszą diagnostykę lub leczenie</span>
+                                <div class="flex gap-4 shrink-0"><label class="flex items-center cursor-pointer"><input type="radio" name="eventFurtherDiagnosis" value="yes" class="mr-2 h-4 w-4 text-blue-600">Tak</label><label class="flex items-center cursor-pointer"><input type="radio" name="eventFurtherDiagnosis" value="no" checked class="mr-2 h-4 w-4 text-blue-600">Nie</label></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KROK 3: Wybór Ryzyk -->
+                <div id="step-risks" class="step-container hidden space-y-6">
+                    <h3 class="text-xl sm:text-2xl font-bold text-slate-800">Wybór Ryzyk</h3>
+                    <p class="text-slate-600 text-sm sm:text-base">Wskaż ryzyka, które chcesz ubezpieczyć.</p>
+                    <div class="space-y-3">
+                        <label class="flex items-start p-4 border border-slate-200 rounded-xl cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition-colors shadow-sm">
+                            <input type="checkbox" name="riskDeathInvalidity" id="riskDeathInvalidity" class="mt-0.5 h-5 w-5 text-blue-600 rounded mr-4 focus:ring-blue-500">
+                            <div><span class="font-semibold text-slate-800 block">Śmierć / Inwalidztwo w wyniku NW</span><span class="text-xs text-slate-500 mt-0.5 block">Jednorazowe świadczenie</span></div>
+                        </label>
+                        <label class="flex items-start p-4 border border-slate-200 rounded-xl cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition-colors shadow-sm">
+                            <input type="checkbox" name="riskTempIncapacity" class="mt-0.5 h-5 w-5 text-blue-600 rounded mr-4 focus:ring-blue-500">
+                            <div><span class="font-semibold text-slate-800 block">Okresowa niezdolność do pracy</span><span class="text-xs text-slate-500 mt-0.5 block">Świadczenia miesięczne</span></div>
+                        </label>
+                        <label class="flex items-start p-4 border border-slate-200 rounded-xl cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition-colors shadow-sm">
+                            <input type="checkbox" name="riskPermIncapacity" class="mt-0.5 h-5 w-5 text-blue-600 rounded mr-4 focus:ring-blue-500">
+                            <div><span class="font-semibold text-slate-800 block">Trwała niezdolność do pracy</span><span class="text-xs text-slate-500 mt-0.5 block">Jednorazowe świadczenie</span></div>
+                        </label>
+                    </div>
+                    <!-- Suma NW -->
+                    <div id="nw-sum-section" class="hidden border-t border-slate-200 pt-5 space-y-3">
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Suma ubezpieczenia NW (Śmierć / Inwalidztwo)</label>
+                        <select name="nwDeathSum" id="nwDeathSum" class="block w-full rounded-md border-slate-300 border shadow-sm p-2.5 sm:p-3 bg-white outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="100000">100 000 zł</option>
+                            <option value="200000">200 000 zł</option>
+                            <option value="300000">300 000 zł</option>
+                            <option value="500000">500 000 zł</option>
+                            <option value="750000">750 000 zł</option>
+                            <option value="1000000">1 000 000 zł</option>
+                            <option value="1500000">1 500 000 zł</option>
+                            <option value="2000000">2 000 000 zł</option>
+                        </select>
+                    </div>
+                    <!-- Klauzule NW -->
+                    <div id="nw-clauses-section" class="hidden bg-blue-50 border border-blue-200 rounded-xl p-4 sm:p-5 space-y-4">
+                        <h4 class="font-bold text-slate-800 text-sm sm:text-base">Dodatkowe klauzule w ramach NW</h4>
+                        <div class="space-y-3">
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">a) Świadczenie pogrzebowe</label><select name="nwFuneral" class="block w-full rounded-md border-slate-300 border shadow-sm p-2.5 bg-white outline-none focus:ring-2 focus:ring-blue-500 text-sm"><option value="0">Nie wybieram</option><option value="5000">5 000 zł</option><option value="10000">10 000 zł</option><option value="15000">15 000 zł</option><option value="20000">20 000 zł</option><option value="25000">25 000 zł</option></select></div>
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">b) Dostosowanie do życia w niepełnosprawności</label><select name="nwAdaptation" class="block w-full rounded-md border-slate-300 border shadow-sm p-2.5 bg-white outline-none focus:ring-2 focus:ring-blue-500 text-sm"><option value="0">Nie wybieram</option><option value="10000">10 000 zł</option><option value="20000">20 000 zł</option><option value="30000">30 000 zł</option><option value="40000">40 000 zł</option><option value="50000">50 000 zł</option><option value="100000">100 000 zł</option><option value="150000">150 000 zł</option><option value="200000">200 000 zł</option></select></div>
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">c) Dzienne świadczenie szpitalne</label><select name="nwHospitalDaily" class="block w-full rounded-md border-slate-300 border shadow-sm p-2.5 bg-white outline-none focus:ring-2 focus:ring-blue-500 text-sm"><option value="0">Nie wybieram</option><option value="100">100 zł / dzień</option><option value="200">200 zł / dzień</option><option value="300">300 zł / dzień</option><option value="400">400 zł / dzień</option><option value="500">500 zł / dzień</option></select></div>
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">d) Świadczenie do kosztów medycznych</label><select name="nwMedicalCosts" class="block w-full rounded-md border-slate-300 border shadow-sm p-2.5 bg-white outline-none focus:ring-2 focus:ring-blue-500 text-sm"><option value="0">Nie wybieram</option><option value="500">500 zł</option><option value="1000">1 000 zł</option><option value="2500">2 500 zł</option><option value="5000">5 000 zł</option><option value="10000">10 000 zł</option></select></div>
+                            <div><label class="block text-sm font-semibold text-slate-700 mb-1">e) Tygodniowe świadczenie z tytułu stanu nieprzytomności</label><select name="nwUnconsciousWeekly" class="block w-full rounded-md border-slate-300 border shadow-sm p-2.5 bg-white outline-none focus:ring-2 focus:ring-blue-500 text-sm"><option value="0">Nie wybieram</option><option value="250">250 zł / tydzień</option><option value="500">500 zł / tydzień</option><option value="750">750 zł / tydzień</option><option value="1000">1 000 zł / tydzień</option></select></div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">f) Trwałe uszczerbki (5% SU śmierci i inwalidztwa w NW)</label>
+                                <div class="flex gap-8"><label class="flex items-center cursor-pointer"><input type="radio" name="nwPermanentDamage" value="yes" class="mr-2 h-4 w-4 text-blue-600"><span class="text-sm">Tak</span></label><label class="flex items-center cursor-pointer"><input type="radio" name="nwPermanentDamage" value="no" checked class="mr-2 h-4 w-4 text-blue-600"><span class="text-sm">Nie</span></label></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KROK 4: Styl Życia i Ryzyko -->
+                <div id="step-3" class="step-container hidden space-y-6">
+                    <h3 class="text-xl sm:text-2xl font-bold text-slate-800">Styl Życia i Ryzyko</h3>
+                    <p class="text-slate-600 mb-4 text-sm sm:text-base">Zaznacz aktywności, które regularnie uprawiasz.</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                        <label class="flex items-start p-3 sm:p-4 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors shadow-sm"><input type="checkbox" name="risk_caving" class="mt-0.5 h-5 w-5 text-blue-600 rounded mr-3 focus:ring-blue-500"><span class="text-sm font-medium text-slate-700 leading-tight">Eksploracja jaskiń</span></label>
+                        <label class="flex items-start p-3 sm:p-4 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors shadow-sm"><input type="checkbox" name="risk_climbing" class="mt-0.5 h-5 w-5 text-blue-600 rounded mr-3 focus:ring-blue-500"><span class="text-sm font-medium text-slate-700 leading-tight">Wspinaczka wysokogórska</span></label>
+                        <label class="flex items-start p-3 sm:p-4 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors shadow-sm"><input type="checkbox" name="risk_extreme_bike_boat" class="mt-0.5 h-5 w-5 text-blue-600 rounded mr-3 focus:ring-blue-500"><span class="text-sm font-medium text-slate-700 leading-tight">Kolarstwo grawitacyjne / rafting</span></label>
+                        <label class="flex items-start p-3 sm:p-4 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors shadow-sm"><input type="checkbox" name="risk_diving" class="mt-0.5 h-5 w-5 text-blue-600 rounded mr-3 focus:ring-blue-500"><span class="text-sm font-medium text-slate-700 leading-tight">Ryzykowne nurkowanie</span></label>
+                        <label class="flex items-start p-3 sm:p-4 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors shadow-sm"><input type="checkbox" name="risk_sailing" class="mt-0.5 h-5 w-5 text-blue-600 rounded mr-3 focus:ring-blue-500"><span class="text-sm font-medium text-slate-700 leading-tight">Żeglarstwo (załoga)</span></label>
+                        <label class="flex items-start p-3 sm:p-4 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors shadow-sm"><input type="checkbox" name="risk_horse" class="mt-0.5 h-5 w-5 text-blue-600 rounded mr-3 focus:ring-blue-500"><span class="text-sm font-medium text-slate-700 leading-tight">Jazda / skoki konne</span></label>
+                        <label class="flex items-start p-3 sm:p-4 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors shadow-sm"><input type="checkbox" name="risk_skiing" class="mt-0.5 h-5 w-5 text-blue-600 rounded mr-3 focus:ring-blue-500"><span class="text-sm font-medium text-slate-700 leading-tight">Narciarstwo poza trasami</span></label>
+                        <label class="flex items-start p-3 sm:p-4 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors shadow-sm"><input type="checkbox" name="risk_hunting" class="mt-0.5 h-5 w-5 text-blue-600 rounded mr-3 focus:ring-blue-500"><span class="text-sm font-medium text-slate-700 leading-tight">Łowiectwo z użyciem broni</span></label>
+                    </div>
+                </div>
+
+                <!-- KROK 5: Klauzula informacyjna -->
+                <div id="step-info" class="step-container hidden space-y-6">
+                    <h3 class="text-xl sm:text-2xl font-bold text-slate-800">Informacja dla Ubezpieczonego</h3>
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 sm:p-5 text-xs sm:text-sm text-slate-700 leading-relaxed space-y-4 max-h-80 overflow-y-auto custom-scroll">
+                        <p class="font-bold text-slate-800">Ubezpieczony został poinformowany, że:</p>
+                        <ol class="list-decimal list-outside ml-4 space-y-4">
+                            <li>ubezpieczenie nie obejmuje chorób, które były przedmiotem procedury medycznej (włączając konsultacje z lekarzem) w okresie 24 miesięcy bezpośrednio poprzedzających Datę ciągłości wskazaną w pozycji 7 Polisy, za wyjątkiem tych, które zostały zgłoszone w niniejszym wniosku i wyraźnie potwierdzone przez Ubezpieczyciela w polisie. Ubezpieczony został także poinformowany, że wyłączenie to nie będzie stosowane do skutków chorób, które na skutek poprawy stanu zdrowia nie wymagały ponownej procedury medycznej ani konsultacji z lekarzem w nieprzerwanym okresie 24 miesięcy po Dacie ciągłości. Wyjątkiem jest choroba lub proces zwyrodnieniowy kręgosłupa lub stawu, zapalenie stawu lub inny proces zwyrodnieniowy kości, mięśnia, ścięgna lub wiązadła, dla których ten 24-ro miesięczny okres wyłączenia liczony jest zawsze od początku Okresu ubezpieczenia Umowy ubezpieczenia.</li>
+                            <li>ubezpieczenie nie obejmuje także niezdolności do pracy w konsekwencji chorób psychicznych oraz śmierci w wyniku zawału serca, udaru lub wylewu krwi do mózgu, z wyjątkiem wylewu krwi do mózgu spowodowanego bezpośrednio urazem głowy, jest uważana za śmierć naturalną i nie jest objęta tym ubezpieczeniem;</li>
+                            <li>częściowa niezdolność do pracy nie jest objęta ubezpieczeniem i nie uprawnia do otrzymania świadczenia;</li>
+                            <li>w przypadku roszczenia o świadczenie z tytułu całkowitej okresowej niezdolność do pracy musi ona zostać udokumentowana przez Ubezpieczonego na podstawie dokumentacji medycznej sporządzonej zgodnie z obowiązującymi przepisami prawa przez uprawnionego lekarza, a zwolnienie lekarskie e-ZLA (dawniej ZUS-ZLA) nie jest wystarczające do przyznania świadczenia z tego tytułu;</li>
+                            <li>ubezpieczenie nie obejmuje roszczeń o świadczenie z tytułu całkowitej okresowej niezdolności do pracy, jeżeli Ubezpieczony nie mógł wykonywać zawodu wyłącznie z powodu pozostawania w kwarantannie lub zaleceń jakichkolwiek władz publicznych lub innych podmiotów ograniczających lub uniemożliwiających wykonywanie przez niego zawodu z powodu epidemii lub zagrożenia epidemicznego, stanu klęski żywiołowej lub stanu wyjątkowego.</li>
+                        </ol>
+                    </div>
+                    <label class="flex items-start gap-3 cursor-pointer bg-blue-50 p-4 rounded-xl border border-blue-200">
+                        <input type="checkbox" name="informedAccepted" required class="mt-1 h-5 w-5 text-blue-600 rounded border-blue-300 focus:ring-blue-500">
+                        <span class="text-sm font-semibold text-blue-900 leading-relaxed">Potwierdzam, że zapoznałem/am się z powyższą informacją dla Ubezpieczonego i przyjmuję ją do wiadomości.</span>
+                    </label>
+                </div>
+
+                <!-- KROK 6: Kontakt i Zgody -->
+                <div id="step-4" class="step-container hidden space-y-6">
+                    <h3 class="text-xl sm:text-2xl font-bold text-slate-800">Kontakt i Zgody</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 mb-4">
+                        <div><label class="block text-sm font-semibold text-slate-700 mb-1">Adres Email</label><input type="email" name="email" required autocomplete="email" class="block w-full rounded-md border-slate-300 border shadow-sm p-2.5 sm:p-3 focus:ring-2 focus:ring-blue-500 outline-none"></div>
+                        <div><label class="block text-sm font-semibold text-slate-700 mb-1">Telefon Kontaktowy</label><input type="tel" name="phone" required autocomplete="tel" class="block w-full rounded-md border-slate-300 border shadow-sm p-2.5 sm:p-3 focus:ring-2 focus:ring-blue-500 outline-none"></div>
+                    </div>
+                    <div class="bg-red-50 p-4 rounded-xl border border-red-200">
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input type="checkbox" name="exclusions_accepted" required class="mt-1 h-5 w-5 text-red-600 rounded border-red-300 focus:ring-red-500">
+                            <span class="text-sm text-red-900 leading-relaxed font-medium">Oświadczam, że zapoznałem/am się z <button type="button" id="exclusions-trigger-btn" class="text-red-700 underline font-bold hover:text-red-800">Głównymi Wyłączeniami Odpowiedzialności</button>.</span>
+                        </label>
+                    </div>
+                    <div class="space-y-3 sm:space-y-4 bg-slate-50 p-4 sm:p-5 rounded-xl border border-slate-200 text-xs sm:text-sm text-slate-600">
+                        <label class="flex items-start gap-3 cursor-pointer"><input type="checkbox" required class="mt-0.5 h-4 w-4 text-blue-600 rounded"><span class="leading-relaxed">Akceptuję <a href="regulamin.html" target="_blank" rel="noopener noreferrer" class="text-blue-600 font-semibold hover:underline">Regulamin</a> i <a href="polityka-cookies.html" target="_blank" rel="noopener noreferrer" class="text-blue-600 font-semibold hover:underline">Politykę Prywatności</a>.</span></label>
+                        <label class="flex items-start gap-3 cursor-pointer"><input type="checkbox" required class="mt-0.5 h-4 w-4 text-blue-600 rounded"><span class="leading-relaxed">Wyrażam zgodę na przetwarzanie danych przez markę UtrataDochodu w celu przygotowania oferty.</span></label>
+                    </div>
+                </div>
+
+                <!-- Nawigacja wizarda -->
+                <div class="flex justify-between pt-6 sm:pt-8 border-t border-slate-200 mt-6 sm:mt-8">
+                    <button type="button" id="prev-btn" class="hidden px-5 sm:px-6 py-2.5 sm:py-3 border border-slate-300 shadow-sm text-sm font-bold rounded-lg text-slate-700 bg-white hover:bg-slate-50 transition-colors">Wstecz</button>
+                    <button type="button" id="next-btn" class="ml-auto px-6 sm:px-8 py-2.5 sm:py-3 border border-transparent text-sm font-bold rounded-lg text-white bg-blue-600 hover:bg-blue-700 shadow-md transition-colors">Dalej</button>
+                    <button type="submit" id="submit-btn" class="hidden ml-auto px-6 sm:px-8 py-2.5 sm:py-3 border border-transparent text-sm font-bold rounded-lg text-white bg-green-600 hover:bg-green-700 shadow-md transition-all">Wysyłam</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<!-- Modal wyłączeń -->
+<div id="exclusions-modal" class="fixed inset-0 z-[110] hidden overflow-y-auto" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen p-4 text-center sm:p-0">
+        <div id="exclusions-modal-backdrop" class="fixed inset-0 bg-slate-900 bg-opacity-80 backdrop-blur-sm transition-opacity"></div>
+        <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full z-10">
+            <div class="bg-white px-6 pt-5 pb-4 sm:p-8 sm:pb-4 text-left">
+                <h3 class="text-2xl font-bold text-red-600 mb-4 flex items-center gap-2"><span>⚠️</span> Ważne Wyłączenia (CEU / Leadenhall)</h3>
+                <div class="mt-2 text-sm text-slate-600 space-y-4 h-64 overflow-y-auto pr-2 custom-scroll">
+                    <p>Zgodnie z ogólnymi warunkami, ubezpieczyciel nie ponosi odpowiedzialności za roszczenia związane z:</p>
+                    <ul class="list-disc pl-5 space-y-2 font-medium">
+                        <li><strong>Chorobami sprzed polisy:</strong> wynikającymi z chorób leczonych/konsultowanych w okresie 24 m-cy przed zawarciem polisy.</li>
+                        <li><strong>Problemami z kręgosłupem:</strong> zwyrodnienia kręgosłupa i stawów leczone w ostatnich 24 m-cach.</li>
+                        <li>Celowym samookaleczeniem, usiłowaniem samobójstwa.</li>
+                        <li>Wypadkami pod wpływem alkoholu, narkotyków lub leków.</li>
+                        <li>Zawodowym uprawianiem sportu.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="bg-slate-50 px-6 py-4 sm:flex sm:flex-row-reverse">
+                <button type="button" id="exclusions-close-btn" class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-6 py-2 bg-slate-800 text-base font-bold text-white hover:bg-slate-900 sm:ml-3 sm:w-auto sm:text-sm">Rozumiem zasady</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal sukcesu -->
+<div id="success-modal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="fixed inset-0 bg-slate-900 bg-opacity-75 backdrop-blur-sm"></div>
+        <div class="bg-white rounded-2xl p-8 z-10 text-center max-w-sm mx-auto shadow-2xl">
+            <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100 mb-4"><span class="text-green-600 text-2xl font-bold">✓</span></div>
+            <h3 class="text-xl font-bold text-slate-900">Wysłano pomyślnie!</h3>
+            <p class="mt-2 text-sm text-slate-500 mb-6">Skontaktujemy się z Tobą w ciągu 24h z przygotowaną ofertą.</p>
+            <button id="success-modal-close" class="w-full bg-blue-600 text-white rounded-lg px-4 py-2 font-bold hover:bg-blue-700">Zamknij</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal błędu -->
+<div id="error-modal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="fixed inset-0 bg-slate-900 bg-opacity-75 backdrop-blur-sm"></div>
+        <div class="bg-white rounded-2xl p-8 z-10 text-center max-w-sm mx-auto shadow-2xl">
+            <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-100 mb-4"><span class="text-red-600 text-2xl font-bold">!</span></div>
+            <h3 class="text-xl font-bold text-slate-900">Wystąpił Błąd</h3>
+            <p class="mt-2 text-sm text-slate-500 mb-6" id="error-message">Nie udało się wysłać formularza. Spróbuj ponownie później.</p>
+            <button id="error-modal-close" class="w-full bg-slate-800 text-white rounded-lg px-4 py-2 font-bold hover:bg-slate-900">Zamknij</button>
+        </div>
+    </div>
+</div>
+
+<script src="style.js" defer></script>
+<script src="app.js" defer></script>
+</body>
+</html>

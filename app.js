@@ -193,7 +193,7 @@ function initEmployerSlider() {
    INIT
 ────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
-  initChat();
+  // initChat(); // ElevenLabs placeholder — tymczasowo wyłączony
   initMobileMenu();
   initSmoothScroll();
   initRandomBlogPost();
