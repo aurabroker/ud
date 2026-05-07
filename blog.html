@@ -41,34 +41,27 @@
     <!-- STRONA GŁÓWNA BLOGA (Lista) -->
     <div id="blog-list-view">
         <!-- Nawigacja -->
-        <nav class="bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 transition-all duration-300" id="navbar">
+        <nav class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm" id="navbar">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between h-16">
-                    <a href="index.html" class="flex items-center gap-2">
+                <div class="flex justify-between h-16 items-center">
+                    <a href="/" class="flex items-center gap-2">
                         <div class="w-8 h-8 bg-slate-900 rounded flex items-center justify-center text-white font-black text-lg">U</div>
                         <span class="font-extrabold text-xl text-slate-900 tracking-tight">Utrata<span class="text-blue-600">Dochodu</span></span>
                     </a>
-                    <div class="hidden md:flex space-x-8 items-center">
-                        <a href="index.html#dlaczego-warto" class="text-slate-600 hover:text-blue-600 transition-colors font-medium">Dla Kogo?</a>
-                        <a href="index.html#kalkulator" class="text-slate-600 hover:text-blue-600 transition-colors font-medium">Kalkulator</a>
-                        <a href="o-nas.html" class="text-slate-600 hover:text-blue-600 transition-colors font-medium">O Nas</a>
-                        <a href="blog.html" class="text-blue-600 font-bold border-b-2 border-blue-600 h-full flex items-center">Blog / Aktualności</a>
-                        <a href="pracuj-z-nami.html" class="text-amber-600 hover:text-amber-700 transition-colors font-semibold">Pracuj z nami</a>
-                        <a href="index.html#wniosek" class="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 transition-colors shadow-sm font-semibold">Złóż Wniosek</a>
+                    <div class="hidden md:flex space-x-6 items-center">
+                        <a href="/o-nas.html" class="text-slate-600 hover:text-blue-600 transition-colors font-medium text-sm">O nas</a>
+                        <a href="/blog.html" class="text-blue-600 font-bold text-sm border-b-2 border-blue-600 pb-0.5">Blog / Aktualności</a>
+                        <a href="/pracuj-z-nami.html" class="text-amber-600 hover:text-amber-700 transition-colors font-semibold text-sm">Pracuj z nami</a>
+                        <a href="/formularz.html" class="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 transition-colors shadow-sm font-semibold text-sm">Złóż Wniosek</a>
                     </div>
-                    <div class="flex items-center md:hidden">
-                        <button id="mobile-menu-btn" class="text-slate-500 hover:text-slate-700 text-2xl font-bold">☰</button>
-                    </div>
+                    <button onclick="document.getElementById('mob-nav-blog').classList.toggle('hidden')" class="md:hidden text-slate-500 hover:text-slate-700 text-2xl font-bold p-2">&#9776;</button>
                 </div>
             </div>
-            <!-- Menu Mobilne -->
-            <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-slate-100 p-4 space-y-3 shadow-lg absolute w-full z-50">
-                <a href="index.html" class="block text-slate-600 py-2 border-b border-slate-50">Strona Główna</a>
-                <a href="index.html#kalkulator" class="block text-slate-600 py-2 border-b border-slate-50">Kalkulator</a>
-                <a href="o-nas.html" class="block text-slate-600 py-2 border-b border-slate-50">O Nas</a>
-                <a href="blog.html" class="block text-blue-600 font-bold py-2 border-b border-slate-50">Blog / Aktualności</a>
-                <a href="pracuj-z-nami.html" class="block text-amber-600 font-bold py-2 border-b border-slate-50">Pracuj z nami</a>
-                <a href="index.html#wniosek" class="block text-blue-600 font-bold py-2">Złóż Wniosek</a>
+            <div id="mob-nav-blog" class="hidden md:hidden bg-white border-t border-slate-100 p-4 space-y-2 shadow-lg">
+                <a href="/o-nas.html" class="block text-slate-600 py-2 border-b border-slate-50 font-medium">O nas</a>
+                <a href="/blog.html" class="block text-blue-600 font-bold py-2 border-b border-slate-50">Blog / Aktualności</a>
+                <a href="/pracuj-z-nami.html" class="block text-amber-600 font-bold py-2 border-b border-slate-50">Pracuj z nami</a>
+                <a href="/formularz.html" class="block bg-blue-600 text-white text-center py-2.5 rounded-md font-bold mt-1">Złóż Wniosek</a>
             </div>
         </nav>
 
@@ -103,23 +96,22 @@
                         <span class="text-2xl font-extrabold text-white tracking-tight">Utrata<span class="text-blue-500">Dochodu</span></span>
                     </div>
                     <p class="text-sm text-slate-400 max-w-md leading-relaxed">
-                        Specjaliści w zakresie zabezpieczenia dochodu. Współpracujemy z wiodącymi na rynku coverholderami: <strong>CEU sp. z o.o.</strong> oraz <strong>Leadenhall Insurance SA</strong>. Obsługa prawno-operacyjna: Aura Expert sp. z o.o.
+                        Specjaliści w zakresie zabezpieczenia dochodu. Współpracujemy z wiodącymi na rynku coverholderami: <strong>CEU sp. z o.o.</strong> oraz <strong>Leadenhall Insurance SA</strong>. Obsługa prawno-operacyjna: <strong>Aura Expert Sp. z o.o.</strong>
                     </p>
                 </div>
                 <div>
                     <h4 class="text-white font-bold mb-4 tracking-wider uppercase text-sm">Nawigacja</h4>
                     <ul class="space-y-2 text-sm">
-                        <li><a href="o-nas.html" class="hover:text-blue-400 transition-colors">O Nas (Partnerzy)</a></li>
-                        <li><a href="blog.html" class="text-blue-400 font-semibold">Blog / Aktualności</a></li>
-                        <li><a href="pracuj-z-nami.html" class="hover:text-amber-400 transition-colors text-amber-500 font-semibold">Dla Agentów - Współpraca</a></li>
-                        <li><a href="polityka-cookies.html" class="hover:text-blue-400 transition-colors">Polityka Cookies i RODO</a></li>
-                        <li><a href="regulamin.html" class="hover:text-blue-400 transition-colors">Regulamin Serwisu</a></li>
+                        <li><a href="/o-nas.html" class="hover:text-blue-400 transition-colors">O nas</a></li>
+                        <li><a href="/blog.html" class="text-blue-400 font-semibold">Blog / Aktualności</a></li>
+                        <li><a href="/pracuj-z-nami.html" class="text-amber-500 font-semibold hover:text-amber-400 transition-colors">Pracuj z nami</a></li>
+                        <li><a href="/polityka-prywatnosci.html" class="hover:text-blue-400 transition-colors">Polityka prywatności</a></li>
                     </ul>
                 </div>
                 <div>
                     <h4 class="text-white font-bold mb-4 tracking-wider uppercase text-sm">Kontakt</h4>
                     <ul class="space-y-2 text-sm">
-                        <li class="flex items-center gap-2"><span class="text-blue-500">✉</span> biuro@utratadochodu.com</li>
+                        <li class="flex items-center gap-2"><span class="text-blue-500">✉</span> biuro@auraexpert.pl</li>
                         <li class="flex items-center gap-2"><span class="text-blue-500">📞</span> +48 504 400 901</li>
                     </ul>
                 </div>
