@@ -192,6 +192,51 @@ function initEmployerSlider() {
 /* ──────────────────────────────────────────
    INIT
 ────────────────────────────────────────── */
+/* ──────────────────────────────────────────
+   RYZYKO: pokaż pole sumy / info-bubble
+────────────────────────────────────────── */
+function initRiskToggles() {
+  const deathCb = document.getElementById('riskDeathInvalidity');
+  const tempCb  = document.getElementById('riskTempIncapacity');
+  const permCb  = document.getElementById('riskPermIncapacity');
+  if (!deathCb) return;
+
+  deathCb.addEventListener('change', () => {
+    document.getElementById('sum-death-section')?.classList.toggle('hidden', !deathCb.checked);
+  });
+  tempCb?.addEventListener('change', () => {
+    document.getElementById('info-temp-section')?.classList.toggle('hidden', !tempCb.checked);
+  });
+  permCb?.addEventListener('change', () => {
+    document.getElementById('info-perm-section')?.classList.toggle('hidden', !permCb.checked);
+  });
+
+  // Zaokrąglenie sumy w dół do pełnych tysięcy
+  const sumInput = document.getElementById('nwDeathSum');
+  if (sumInput) {
+    sumInput.addEventListener('change', () => {
+      const v = parseInt(sumInput.value, 10);
+      if (!isNaN(v) && v > 0) sumInput.value = Math.floor(v / 1000) * 1000;
+    });
+  }
+}
+
+/* ──────────────────────────────────────────
+   MEDYCZNE: TAK = pokaż pole wyjaśnienia
+────────────────────────────────────────── */
+function initMedicalDetails() {
+  document.querySelectorAll('.med-question-block').forEach(block => {
+    block.querySelectorAll('input[type="radio"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        const details = block.querySelector('.med-details');
+        if (!details) return;
+        const yesChecked = block.querySelector('input[value="yes"]')?.checked;
+        details.classList.toggle('hidden', !yesChecked);
+      });
+    });
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   // initChat(); // ElevenLabs placeholder — tymczasowo wyłączony
   initMobileMenu();
@@ -199,6 +244,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initRandomBlogPost();
   initAOS();
   initEmployerSlider();
+  initRiskToggles();
+  initMedicalDetails();
 
   document.getElementById('btn-beauty')?.addEventListener('click', () => switchSegment('beauty'));
   document.getElementById('btn-med')?.addEventListener('click',    () => switchSegment('med'));
