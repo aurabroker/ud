@@ -674,7 +674,7 @@ HTML_TEMPLATE = """\
 
   <!-- HERO -->
   <section class="relative min-h-[480px] flex items-center"
-           style="background: url('/img/professions/{category}.jpg') center/cover no-repeat;">
+           style="background: url('/img/{category}.jpg') center/cover no-repeat;">
     <div class="absolute inset-0 bg-slate-900/70"></div>
     <div class="relative z-10 max-w-4xl mx-auto px-6 py-20 text-white">
       <p class="text-sm text-blue-300 mb-3 font-semibold uppercase tracking-widest">Ubezpieczenie utraty dochodu</p>
@@ -870,11 +870,14 @@ def render_page(slug, name_pl, category, out_dir):
     jsonld = build_jsonld(slug, name_pl, data["meta_desc"], today.year)
     profession_links = build_profession_links(slug)
 
+    _FALLBACKS = {"budownictwo": "biznes", "pielegniarstwo": "medycyna"}
+    img_cat = _FALLBACKS.get(category, category)
+
     html = HTML_TEMPLATE.format(
         title=f"Ubezpieczenie dla {name_pl} | Utrata Dochodu",
         meta_desc=escape(data["meta_desc"]),
         slug=slug,
-        category=category,
+        category=img_cat,
         h1=f"Ubezpieczenie dla {escape(name_pl)} na wypadek utraty dochodu",
         subtitle=escape(data["subtitle"]),
         name_pl=escape(name_pl),
