@@ -272,7 +272,7 @@ CATEGORY_DEFAULTS = {
         "subtitle": "Jeden miesiąc przerwy w pracy to utrata kontraktu, dyżurów i tysięcy złotych przychodów -- bez żadnej gwarancji ze strony ZUS.",
         "risks": [
             {"icon": "🦠", "title": "Zakażenie zawodowe", "desc": "Codzienny kontakt z pacjentami naraża na patogeny, w tym HCV, HBV i inne choroby zakaźne."},
-            {"icon": "🧠", "title": "Wypalenie i przeciążenie", "desc": "Intensywny tryb dyżurowy i stres kliniczny zwiększają ryzyko zaburzeń zdrowia psychicznego."},
+            {"icon": "🤒", "title": "Choroba zakaźna sezonowa", "desc": "Grypa, angina czy COVID mogą wykluczyć z pracy na kilka tygodni -- bez żadnego wynagrodzenia na B2B."},
             {"icon": "🦴", "title": "Urazy narządu ruchu", "desc": "Wielogodzinna praca w pochyleniu lub przy stole operacyjnym prowadzi do zmian zwyrodnieniowych kręgosłupa."},
         ],
         "income_without": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
@@ -305,7 +305,7 @@ CATEGORY_DEFAULTS = {
         "risks": [
             {"icon": "💉", "title": "Zakłucie igłą", "desc": "Jedno niefortunne zakłucie może wyłączyć z zawodu na miesiące -- zwłaszcza gdy wymagana jest kwarantanna lub leczenie."},
             {"icon": "🦴", "title": "Urazy kręgosłupa", "desc": "Przenoszenie pacjentów i praca w wymuszonej pozycji to najczęstszy powód długotrwałych zwolnień w tej grupie."},
-            {"icon": "😰", "title": "Wypalenie zawodowe", "desc": "Intensywna opieka nad chorymi w obliczu niedostatku personelu prowadzi do chronicznego przeciążenia psychicznego."},
+            {"icon": "🤒", "title": "Choroby zakaźne", "desc": "Codzienny kontakt z chorymi pacjentami to stałe narażenie na infekcje wirusowe i bakteryjne."},
         ],
         "income_without": "~80% podstawy (etat) po 30 dniach; 0 zł na B2B",
         "income_with": "nawet 350 zł / dzień niezdolności",
@@ -313,7 +313,7 @@ CATEGORY_DEFAULTS = {
             {"q": "Czy polisa obejmuje zakłucia i ekspozycje zawodowe?", "a": "Tak -- niezdolność do pracy w wyniku zakłucia igłą lub ekspozycji na materiał biologiczny jest objęta ochroną."},
             {"q": "Czy pracując na etacie też mogę się ubezpieczyć?", "a": "Tak -- polisa uzupełnia świadczenia ZUS, które często nie pokrywają realnej straty dochodu."},
             {"q": "Ile wynosi minimalna suma dzienna?", "a": "Możesz wybrać świadczenie dzienne od 100 zł wzwyż, dopasowane do realnego dochodu."},
-            {"q": "Czy polisa obejmuje choroby psychiczne?", "a": "Wypalenie zawodowe i zaburzenia lękowe są objęte ochroną na takich samych zasadach jak choroby somatyczne."},
+            {"q": "Czy polisa obejmuje choroby psychiczne?", "a": "Polisa obejmuje niezdolność do pracy spowodowaną chorobą psychiczną zdiagnozowaną i potwierdzoną przez lekarza psychiatrę. Wypalenie zawodowe jako samodzielna diagnoza nie jest objęte ochroną."},
         ],
     },
     "farmacja": {
@@ -335,7 +335,7 @@ CATEGORY_DEFAULTS = {
     "it": {
         "subtitle": "Na kontrakcie B2B jedno zdanie brzmi szczególnie groźnie: 'brak faktury w tym miesiącu'. Choroba to nie urlop -- to brak wypłaty.",
         "risks": [
-            {"icon": "🧠", "title": "Wypalenie zawodowe i stres", "desc": "Deadline'y, nadgodziny i presja projektowa -- specjaliści IT są w czołówce grup ryzyka burnout."},
+            {"icon": "🖱️", "title": "RSI i przeciążenia nadgarstka", "desc": "Wielogodzinna praca przy klawiaturze i myszy prowadzi do zespołu przeciążeniowego rąk i nadgarstków."},
             {"icon": "🖥️", "title": "Zespół cieśni nadgarstka", "desc": "Wielogodzinna praca przy klawiaturze prowadzi do zmian nerwowych i zapalenia ścięgien dłoni."},
             {"icon": "👁️", "title": "Choroby wzroku i kręgosłupa", "desc": "Siedzący tryb pracy przed ekranem to chroniczne przeciążenie oczu i lędźwiowego odcinka kręgosłupa."},
         ],
@@ -344,7 +344,7 @@ CATEGORY_DEFAULTS = {
         "faq": [
             {"q": "Czy polisa działa od pierwszego dnia choroby?", "a": "Tak -- po upłynięciu 30-dniowej karencji, świadczenie jest wypłacane od 1. dnia udokumentowanej niezdolności."},
             {"q": "Ile wynosi typowa składka dla specjalisty IT?", "a": "Przy świadczeniu 300 zł/dzień składka wynosi ok. 150–250 zł miesięcznie, w zależności od wieku."},
-            {"q": "Co z wypaleniem zawodowym?", "a": "Burnout skutkujący niezdolnością do pracy jest objęty ochroną -- wymaga zaświadczenia lekarskiego."},
+            {"q": "Co z wypaleniem zawodowym?", "a": "Wypalenie zawodowe jako samodzielna diagnoza nie jest objęte ochroną. Polisa chroni przed niezdolnością do pracy wynikającą z chorób somatycznych i udokumentowanych schorzeń."},
             {"q": "Czy mogę mieć kilka polis jednocześnie?", "a": "Tak, ale łączna suma świadczeń nie może przekroczyć 80% udokumentowanego dochodu netto."},
         ],
     },
@@ -432,7 +432,7 @@ CATEGORY_DEFAULTS = {
         "subtitle": "Nauczyciel bez głosu, trener po kontuzji, wykładowca z wypaleniem -- i lekcje odwołane. A faktura przychodzi bez względu na stan zdrowia.",
         "risks": [
             {"icon": "🗣️", "title": "Choroby głosu i gardła", "desc": "Intensywna praca głosowa przez wiele godzin dziennie to jedno z największych ryzyk zawodowych nauczycieli."},
-            {"icon": "🧠", "title": "Wypalenie zawodowe", "desc": "Praca z uczniami, presja wyników i niskie wynagrodzenia prowadzą do chronicznego przeciążenia psychicznego."},
+            {"icon": "🤒", "title": "Choroby układu oddechowego", "desc": "Nauczyciele mają jeden z najwyższych wskaźników zachorowań na infekcje górnych dróg oddechowych."},
             {"icon": "🦴", "title": "Urazy podczas treningów", "desc": "Trenerzy i nauczyciele WF są narażeni na urazy podczas demonstracji i prowadzenia zajęć ruchowych."},
         ],
         "income_without": "~80% podstawy (etat) po 30 dniach; 0 zł (freelance)",
@@ -440,21 +440,21 @@ CATEGORY_DEFAULTS = {
         "faq": [
             {"q": "Czy polisa obejmuje choroby głosu?", "a": "Tak -- schorzenia strun głosowych i krtani powodujące niezdolność do pracy są objęte ochroną."},
             {"q": "Czy mogę ubezpieczyć się jako lektor języków pracujący freelance?", "a": "Tak -- oferta jest dedykowana samozatrudnionym specjalistom, w tym lektorom i coachom."},
-            {"q": "Co z wypaleniem zawodowym u nauczyciela?", "a": "Wypalenie skutkujące niezdolnością do pracy (potwierdzonym przez lekarza) jest traktowane jak każda inna choroba."},
+            {"q": "Co jeśli zachoruję w szczycie sezonu?", "a": "Polisa działa niezależnie od pory roku -- świadczenie jest wypłacane za każdy dzień udokumentowanej niezdolności do pracy."},
             {"q": "Ile wynosi składka dla trenera?", "a": "Zależy od wieku i wysokości świadczenia. Przy 200 zł/dzień -- od ok. 100 zł miesięcznie."},
         ],
     },
     "biznes": {
         "subtitle": "Nie ma Cię w biurze -- nie ma wyników. Choroba menedżera to chaos w całym projekcie i utrata przychodów.",
         "risks": [
-            {"icon": "🧠", "title": "Wypalenie zawodowe i stres", "desc": "Odpowiedzialność za wyniki zespołu, deadliny i ciągła dostępność -- to prosta droga do przeciążenia."},
+            {"icon": "🫀", "title": "Choroby sercowo-naczyniowe", "desc": "Wysokie tempo pracy, presja wyników i podróże służbowe zwiększają ryzyko zawału i udaru."},
             {"icon": "🫀", "title": "Choroby sercowo-naczyniowe", "desc": "Menedżerowie i właściciele firm to jedna z grup o najwyższym ryzyku zawału i udaru z powodów zawodowych."},
             {"icon": "🦴", "title": "Choroby kręgosłupa", "desc": "Intensywna praca biurowa, podróże służbowe i siedzący tryb pracy prowadzą do zmian przeciążeniowych."},
         ],
         "income_without": "0 zł (B2B) lub ~80% (etat, po 30 dniach)",
         "income_with": "nawet 600 zł / dzień niezdolności",
         "faq": [
-            {"q": "Czy polisa obejmuje wypalenie zawodowe?", "a": "Tak -- burnout skutkujący niezdolnością do pracy na podstawie zaświadczenia lekarskiego jest objęty ochroną."},
+            {"q": "Czy polisa obejmuje wypalenie zawodowe?", "a": "Wypalenie zawodowe nie jest objęte ochroną. Polisa wypłaca świadczenie przy niezdolności do pracy z tytułu chorób somatycznych i wypadków."},
             {"q": "Czy właściciel spółki może się ubezpieczyć?", "a": "Tak -- polisa obejmuje dochód z pracy zawodowej właściciela, niezależnie od formy prawnej firmy."},
             {"q": "Jaki jest maksymalny okres ochrony?", "a": "Do 24 miesięcy ciągłej niezdolności do pracy -- czas wystarczający na pełną rehabilitację."},
             {"q": "Czy mogę ubezpieczyć kilku pracowników naraz?", "a": "Oferta indywidualna chroni jedną osobę. Dla ubezpieczenia grupowego skontaktuj się z doradcą."},
@@ -465,7 +465,7 @@ CATEGORY_DEFAULTS = {
         "risks": [
             {"icon": "🤚", "title": "Urazy dłoni i kończyn", "desc": "Instrumentaliści, fotografowie i graficy w szczególny sposób polegają na sprawności dłoni."},
             {"icon": "🎤", "title": "Choroby głosu i słuchu", "desc": "Wokaliści, dziennikarze i lektorzy są narażeni na zawodowe uszkodzenie strun głosowych i słuchu."},
-            {"icon": "🧠", "title": "Stres i nieregularny tryb pracy", "desc": "Brak stałych dochodów, presja artystyczna i praca projektowa sprzyjają zaburzeniom psychicznym."},
+            {"icon": "🤒", "title": "Choroby i infekcje", "desc": "Nieregularny tryb pracy, praca w plenerze i podróże służbowe obniżają odporność i zwiększają ryzyko zachorowania."},
         ],
         "income_without": "0 zł (brak zleceń = brak przychodu)",
         "income_with": "nawet 400 zł / dzień niezdolności",
@@ -480,14 +480,14 @@ CATEGORY_DEFAULTS = {
         "subtitle": "Praca w służbach mundurowych to codzienne ryzyko urazu. Jedno zdarzenie i zostajesz sam -- bez gwarancji ciągłości wynagrodzenia.",
         "risks": [
             {"icon": "💥", "title": "Urazy podczas interwencji", "desc": "Wypadki służbowe, bójki i interwencje to najczęstsze przyczyny urazów w służbach mundurowych."},
-            {"icon": "🧠", "title": "Stres pourazowy (PTSD)", "desc": "Ekspozycja na zdarzenia traumatyczne to realne ryzyko zaburzeń psychicznych wymagających długiego leczenia."},
+            {"icon": "🤕", "title": "Urazy głowy i kończyn", "desc": "Interwencje fizyczne, pościgi i praca w trudnych warunkach prowadzą do urazów wymagających długiej rehabilitacji."},
             {"icon": "🦴", "title": "Przeciążenia i choroby zawodowe", "desc": "Noszenie ciężkiego ekwipunku, bieganie i praca w ekstremalnych warunkach niszczą stawy i kręgosłup."},
         ],
         "income_without": "~80% podstawy (etat) po 30 dniach; niewystarczające",
         "income_with": "nawet 400 zł / dzień niezdolności",
         "faq": [
             {"q": "Czy polisa obejmuje urazy podczas służby?", "a": "Tak -- niezdolność do pracy wynikająca z urazu, niezależnie od okoliczności, jest objęta ochroną."},
-            {"q": "Czy PTSD jest objęty polisą?", "a": "Tak -- stres pourazowy skutkujący niezdolnością do pracy na podstawie zaświadczenia psychiatrycznego jest chroniony."},
+            {"q": "Czy urazy dozwolone w służbie są objęte polisą?", "a": "Tak -- niezdolność do pracy wynikająca z urazu odniesionego podczas wykonywania obowiązków służbowych jest w pełni objęta ochroną."},
             {"q": "Czy pracownik etatowy służb też potrzebuje polisy?", "a": "ZUS pokrywa jedynie część utraconego dochodu. Polisa uzupełnia tę lukę do 80% Twoich realnych zarobków."},
             {"q": "Jak szybko można zawrzeć umowę?", "a": "Wniosek online zajmuje 5 minut. Ochrona startuje po 30-dniowej karencji od zawarcia umowy."},
         ],
@@ -495,7 +495,7 @@ CATEGORY_DEFAULTS = {
     "prawo": {
         "subtitle": "Adwokat bez zdolności do prowadzenia spraw to kancelaria bez przychodów. Jeden miesiąc choroby może kosztować Cię klientów na lata.",
         "risks": [
-            {"icon": "🧠", "title": "Wypalenie zawodowe i stres", "desc": "Procesy sądowe, terminy procesowe i odpowiedzialność za losy klientów to ekstremalne obciążenie psychiczne."},
+            {"icon": "🤒", "title": "Choroby przewlekłe i sezonowe", "desc": "Intensywna praca przy aktach, brak ruchu i stres prowadzą do obniżonej odporności i częstych infekcji."},
             {"icon": "🦴", "title": "Choroby kręgosłupa", "desc": "Wielogodzinna praca przy biurku i czytanie akt prowadzą do przeciążeń narządu ruchu."},
             {"icon": "🫀", "title": "Choroby sercowo-naczyniowe", "desc": "Prawnicy są jedną z grup zawodowych o najwyższym poziomie stresu chronicznego -- co przekłada się na zdrowie serca."},
         ],
@@ -514,13 +514,13 @@ CATEGORY_DEFAULTS = {
 PROFESSION_DATA = {
     "lekarz": {
         "subtitle": "Jeden miesiąc na zwolnieniu to dla lekarza kontraktowego utrata dyżurów, kontraktów i realnych pieniędzy -- bez grosza ze strony NFZ.",
-        "meta_desc": "Ubezpieczenie dla lekarza od utraty dochodu. Ochrona od 1. dnia choroby, nawet 500 zł/dzień. Dedykowane lekarzom na kontrakcie B2B i NFZ.",
+        "meta_desc": "Ubezpieczenie dla lekarza utraty dochodu. Ochrona od 1. dnia choroby, nawet 500 zł/dzień. Dedykowane lekarzom na kontrakcie B2B i NFZ.",
         "income_without": "0 zł (kontrakt B2B -- brak dyżurów = brak przychodu)",
         "income_with": "nawet 500 zł / dzień niezdolności",
     },
     "chirurg": {
         "subtitle": "Chirurg niezdolny do operowania traci wszystkie kontrakty jednocześnie. Jedna kontuzja ręki i cały harmonogram operacyjny pada.",
-        "meta_desc": "Ubezpieczenie dla chirurga od utraty dochodu. Ochrona zdolności do pracy operacyjnej, dłoni i kontraktów. Nawet 500 zł/dzień.",
+        "meta_desc": "Ubezpieczenie dla chirurga utraty dochodu. Ochrona zdolności do pracy operacyjnej, dłoni i kontraktów. Nawet 500 zł/dzień.",
         "risks": [
             {"icon": "🤚", "title": "Uraz dłoni operacyjnej", "desc": "Chirurg opiera całą karierę na sprawności dłoni -- jeden uraz wyklucza z zawodu natychmiast."},
             {"icon": "🦠", "title": "Zakażenie podczas operacji", "desc": "Praca z krwią i tkankami naraża na zakażenia krwiopochodne, które mogą wykluczyć z pracy na miesiące."},
@@ -529,7 +529,7 @@ PROFESSION_DATA = {
     },
     "stomatolog": {
         "subtitle": "Gabinet bez stomatologa nie generuje przychodu. Uraz nadgarstka, infekcja dłoni albo zakażenie zawodowe i klienci szukają innego lekarza.",
-        "meta_desc": "Ubezpieczenie dla stomatologa od utraty dochodu. Ochrona dłoni, ryzyk zawodowych i kontraktów B2B. Nawet 400 zł/dzień.",
+        "meta_desc": "Ubezpieczenie dla stomatologa utraty dochodu. Ochrona dłoni, ryzyk zawodowych i kontraktów B2B. Nawet 400 zł/dzień.",
         "risks": [
             {"icon": "🤚", "title": "Uraz dłoni i nadgarstka", "desc": "Mikrourazy podczas precyzyjnych zabiegów mogą wykluczyć z wykonywania zawodu na tygodnie."},
             {"icon": "🦠", "title": "Zakażenie krwiopochodne", "desc": "Kontakt z igłami, wiertłami i materiałem biologicznym to ryzyko ekspozycji na HBV, HCV i HIV."},
@@ -538,64 +538,64 @@ PROFESSION_DATA = {
     },
     "pielegniarka": {
         "subtitle": "Pielęgniarka na zwolnieniu to nie tylko problem szpitala -- to Twój problem finansowy. ZUS nie pokryje realnej utraconej kwoty.",
-        "meta_desc": "Ubezpieczenie dla pielęgniarki od utraty dochodu. Ochrona od zakłucia igłą, urazów kręgosłupa i wypalenia zawodowego. Nawet 350 zł/dzień.",
+        "meta_desc": "Ubezpieczenie dla pielęgniarki utraty dochodu. Ochrona od zakłucia igłą, urazów kręgosłupa i wypalenia zawodowego. Nawet 350 zł/dzień.",
     },
     "adwokat": {
         "subtitle": "Kancelaria bez Ciebie nie zarabia -- a klienci nie będą czekać. Jeden miesiąc choroby może kosztować Cię relacje, które budowałeś latami.",
-        "meta_desc": "Ubezpieczenie dla adwokata od utraty dochodu. Ochrona kancelarii B2B, nawet 600 zł/dzień. Wypełnij wniosek online w 5 minut.",
+        "meta_desc": "Ubezpieczenie dla adwokata utraty dochodu. Ochrona kancelarii B2B, nawet 600 zł/dzień. Wypełnij wniosek online w 5 minut.",
         "income_without": "0 zł (kancelaria bez adwokata nie zarabia)",
         "income_with": "nawet 600 zł / dzień niezdolności",
     },
     "radca-prawny": {
         "subtitle": "Radca prawny bez możliwości pracy to kancelaria bez faktur. Ochrona dochodów, której ZUS nigdy Ci nie zapewni.",
-        "meta_desc": "Ubezpieczenie dla radcy prawnego od utraty dochodu. Ochrona kancelarii B2B i etatowych, nawet 600 zł/dzień.",
+        "meta_desc": "Ubezpieczenie dla radcy prawnego utraty dochodu. Ochrona kancelarii B2B i etatowych, nawet 600 zł/dzień.",
         "income_with": "nawet 600 zł / dzień niezdolności",
     },
     "programista": {
         "subtitle": "Na B2B jedno zdanie brzmi groźniej niż notice period: 'nie wystawiam faktury w tym miesiącu'. Choroba to nie urlop -- to brak wypłaty.",
-        "meta_desc": "Ubezpieczenie dla programisty od utraty dochodu. Ochrona B2B, burnout, cieśń nadgarstka i RSI. Nawet 600 zł/dzień.",
+        "meta_desc": "Ubezpieczenie dla programisty utraty dochodu. Ochrona B2B, burnout, cieśń nadgarstka i RSI. Nawet 600 zł/dzień.",
         "income_without": "0 zł (B2B -- brak faktury = brak przychodu)",
         "income_with": "nawet 600 zł / dzień niezdolności",
     },
     "developer": {
         "subtitle": "Sprint bez dewelopera kończy się długiem technicznym i sprintem bez faktury. Choroba na B2B kosztuje podwójnie.",
-        "meta_desc": "Ubezpieczenie dla developera od utraty dochodu. Ochrona kontraktów B2B, burnout i RSI. Nawet 600 zł/dzień.",
+        "meta_desc": "Ubezpieczenie dla developera utraty dochodu. Ochrona kontraktów B2B, burnout i RSI. Nawet 600 zł/dzień.",
     },
     "fizjoterapeuta": {
         "subtitle": "Fizjoterapeuta z urazem ręki nie może leczyć -- i nie może zarabiać. Paradoks zawodowy, który polisa rozwiązuje.",
-        "meta_desc": "Ubezpieczenie dla fizjoterapeuty od utraty dochodu. Ochrona od urazów, chorób dłoni i wypalenia. Nawet 350 zł/dzień.",
+        "meta_desc": "Ubezpieczenie dla fizjoterapeuty utraty dochodu. Ochrona od urazów, chorób dłoni i wypalenia. Nawet 350 zł/dzień.",
         "risks": [
             {"icon": "🤚", "title": "Urazy dłoni i nadgarstka", "desc": "Manualna praca terapeutyczna przez wiele godzin dziennie prowadzi do przeciążeń i stanów zapalnych."},
             {"icon": "🦴", "title": "Choroby kręgosłupa", "desc": "Asystowanie pacjentom i praca w wymuszonej pozycji to typowe ryzyko zawodowe fizjoterapeutów."},
-            {"icon": "🧠", "title": "Wypalenie zawodowe", "desc": "Intensywna praca z chorymi i osobami w rehabilitacji prowadzi do emocjonalnego wyczerpania."},
+            {"icon": "🤒", "title": "Zakażenia od pacjentów", "desc": "Bezpośredni kontakt fizyczny z pacjentami podczas terapii to ryzyko przeniesienia chorób zakaźnych."},
         ],
     },
     "psycholog": {
         "subtitle": "Psycholog na zwolnieniu nie może przyjmować pacjentów. Przerwa w pracy to natychmiastowe straty i ryzyko utraty stałych klientów.",
-        "meta_desc": "Ubezpieczenie dla psychologa od utraty dochodu. Ochrona prywatnej praktyki, burnout i B2B. Nawet 400 zł/dzień.",
+        "meta_desc": "Ubezpieczenie dla psychologa utraty dochodu. Ochrona prywatnej praktyki, burnout i B2B. Nawet 400 zł/dzień.",
         "risks": [
-            {"icon": "🧠", "title": "Wypalenie zawodowe", "desc": "Praca z traumą pacjentów i chroniczne słuchanie cierpienia -- psychologowie są szczególnie narażeni na wtórną traumatyzację."},
-            {"icon": "😰", "title": "Stres zawodowy i depresja", "desc": "Obciążenie emocjonalne wynikające z pracy terapeutycznej może prowadzić do własnych zaburzeń zdrowia psychicznego."},
+            {"icon": "🤒", "title": "Choroby układu nerwowego", "desc": "Intensywna praca umysłowa i emocjonalna zwiększa ryzyko chorób neurologicznych wymagających dłuższego leczenia."},
+            {"icon": "🦴", "title": "Przeciążenia kręgosłupa", "desc": "Wielogodzinna praca siedząca w jednej pozycji prowadzi do zmian przeciążeniowych kręgosłupa."},
             {"icon": "🦴", "title": "Choroby kręgosłupa", "desc": "Wiele godzin dziennie w fotelu terapeutycznym w jednej pozycji to ryzyko przeciążeń kręgosłupa."},
         ],
     },
     "fryzjer": {
         "subtitle": "Twoje ręce to jedyne narzędzie pracy. Alergia na farbę, złamany palec albo stan zapalny ścięgna -- i fotel pustoszeje.",
-        "meta_desc": "Ubezpieczenie dla fryzjera od utraty dochodu. Ochrona alergii zawodowych, urazów dłoni i przerwy w pracy. Od 80 zł/mies.",
+        "meta_desc": "Ubezpieczenie dla fryzjera utraty dochodu. Ochrona alergii zawodowych, urazów dłoni i przerwy w pracy. Od 80 zł/mies.",
         "income_without": "0 zł (salon bez fryzjera nie zarabia)",
         "income_with": "nawet 300 zł / dzień niezdolności",
     },
     "kosmetyczka": {
         "subtitle": "Każde opuszczone okienko zabiegowe to strata. Alergia na preparaty, uraz nadgarstka i grafik jest pusty -- a czynsz zostaje.",
-        "meta_desc": "Ubezpieczenie dla kosmetyczki od utraty dochodu. Ochrona alergii, urazów i przerwy w działalności. Od 80 zł/mies.",
+        "meta_desc": "Ubezpieczenie dla kosmetyczki utraty dochodu. Ochrona alergii, urazów i przerwy w działalności. Od 80 zł/mies.",
     },
     "ksiegowy": {
         "subtitle": "Termin VAT, zamknięcie miesiąca, rozliczenia roczne -- to nie czeka. Ale choroba też nie pyta o termin.",
-        "meta_desc": "Ubezpieczenie dla księgowego od utraty dochodu. Ochrona samozatrudnionych i biur rachunkowych. Nawet 500 zł/dzień.",
+        "meta_desc": "Ubezpieczenie dla księgowego utraty dochodu. Ochrona samozatrudnionych i biur rachunkowych. Nawet 500 zł/dzień.",
     },
     "elektryk": {
         "subtitle": "Jedno porażenie, upadek z drabiny albo złamanie -- i tygodnie bez zleceń. Na budowie nikt Ci ochrony nie zagwarantuje.",
-        "meta_desc": "Ubezpieczenie dla elektryka od utraty dochodu. Ochrona wypadków, urazów i przerwy w zleceniach. Nawet 400 zł/dzień.",
+        "meta_desc": "Ubezpieczenie dla elektryka utraty dochodu. Ochrona wypadków, urazów i przerwy w zleceniach. Nawet 400 zł/dzień.",
         "risks": [
             {"icon": "⚡", "title": "Porażenie prądem", "desc": "Elektricy pracują w warunkach stałego ryzyka porażenia, które może prowadzić do długiej niezdolności do pracy."},
             {"icon": "🪜", "title": "Upadek z wysokości", "desc": "Praca na drabinach, rusztowaniach i w szybach windowych to jedno z najwyższych ryzyk urazów."},
@@ -604,40 +604,40 @@ PROFESSION_DATA = {
     },
     "kierowca-zawodowy": {
         "subtitle": "Kierowca bez zdolności do prowadzenia to tir stojący w bazie i kontrakt wypowiedziany z dnia na dzień.",
-        "meta_desc": "Ubezpieczenie dla kierowcy zawodowego od utraty dochodu. Ochrona utraty uprawnień, chorób i wypadków. Nawet 350 zł/dzień.",
+        "meta_desc": "Ubezpieczenie dla kierowcy zawodowego utraty dochodu. Ochrona utraty uprawnień, chorób i wypadków. Nawet 350 zł/dzień.",
     },
     "taksowkarz": {
         "subtitle": "Każda godzina poza kierownicą to stracona kwota. Na Uberze czy w korporacji -- choroba nie generuje zlecenia.",
-        "meta_desc": "Ubezpieczenie dla taksówkarza od utraty dochodu. Ochrona samozatrudnionych kierowców platform Uber i Bolt. Od 100 zł/mies.",
+        "meta_desc": "Ubezpieczenie dla taksówkarza utraty dochodu. Ochrona samozatrudnionych kierowców platform Uber i Bolt. Od 100 zł/mies.",
     },
     "kurier": {
         "subtitle": "Paczka czeka, a Ty na zwolnieniu. Kurier bez możliwości jazdy to brak wypłaty od pierwszego dnia -- bez wyjątku.",
-        "meta_desc": "Ubezpieczenie dla kuriera od utraty dochodu. Ochrona samozatrudnionych, wypadki, urazy kręgosłupa. Od 100 zł/mies.",
+        "meta_desc": "Ubezpieczenie dla kuriera utraty dochodu. Ochrona samozatrudnionych, wypadki, urazy kręgosłupa. Od 100 zł/mies.",
     },
     "fotograf": {
         "subtitle": "Ślub, sesja, reportaż -- i złamana ręka. Zlecenie przepada, klient odchodzi, a faktura zostaje nieopłacona.",
-        "meta_desc": "Ubezpieczenie dla fotografa od utraty dochodu. Ochrona zleceń, urazów dłoni i przerwy w działalności twórczej.",
+        "meta_desc": "Ubezpieczenie dla fotografa utraty dochodu. Ochrona zleceń, urazów dłoni i przerwy w działalności twórczej.",
     },
     "nauczyciel": {
         "subtitle": "Nauczyciel bez głosu nie poprowadzi lekcji. Choroba krtani, angina czy wypalenie zawodowe -- i cały plan zajęć pada.",
-        "meta_desc": "Ubezpieczenie dla nauczyciela od utraty dochodu. Ochrona chorób głosu, wypalenia i przerw w pracy dydaktycznej.",
+        "meta_desc": "Ubezpieczenie dla nauczyciela utraty dochodu. Ochrona chorób głosu, wypalenia i przerw w pracy dydaktycznej.",
     },
     "trener-personalny": {
         "subtitle": "Trener po kontuzji to trener bez klientów. W tej branży nie istnieje 'praca zdalna' -- musisz być fizycznie sprawny.",
-        "meta_desc": "Ubezpieczenie dla trenera personalnego od utraty dochodu. Ochrona kontuzji, urazów i przerwy w sesjach treningowych.",
+        "meta_desc": "Ubezpieczenie dla trenera personalnego utraty dochodu. Ochrona kontuzji, urazów i przerwy w sesjach treningowych.",
         "risks": [
             {"icon": "🏋️", "title": "Kontuzje podczas demonstracji", "desc": "Trenerzy regularnie demonstrują ćwiczenia -- to naraża ich na te same urazy, co ich podopiecznych."},
             {"icon": "🦴", "title": "Przeciążenia stawów i mięśni", "desc": "Intensywna aktywność fizyczna przez całe zawodowe życie kumuluje mikrourazy prowadzące do chronicznego bólu."},
-            {"icon": "🧠", "title": "Wypalenie zawodowe", "desc": "Ciągła dyspozycyjność, praca w weekendy i wieczory oraz presja wyników klientów prowadzą do wyczerpania."},
+            {"icon": "🤒", "title": "Choroby i infekcje", "desc": "Praca w siłowniach i kontakt z wieloma klientami dziennie to stałe narażenie na choroby zakaźne."},
         ],
     },
     "architekt": {
         "subtitle": "Projekt architektoniczny nie czeka na powrót ze zwolnienia -- a termin oddania jest w umowie. Choroba to niewykonany kontrakt.",
-        "meta_desc": "Ubezpieczenie dla architekta od utraty dochodu. Ochrona samozatrudnionych i pracowni projektowych. Nawet 500 zł/dzień.",
+        "meta_desc": "Ubezpieczenie dla architekta utraty dochodu. Ochrona samozatrudnionych i pracowni projektowych. Nawet 500 zł/dzień.",
     },
     "pilot": {
         "subtitle": "Jedno badanie lotnicze z negatywnym wynikiem i nie możesz wsiąść za stery. Utrata orzeczenia medycznego to utrata zawodu.",
-        "meta_desc": "Ubezpieczenie dla pilota od utraty dochodu. Ochrona utraty orzeczenia lotniczego i niezdolności do wykonywania zawodu.",
+        "meta_desc": "Ubezpieczenie dla pilota utraty dochodu. Ochrona utraty orzeczenia lotniczego i niezdolności do wykonywania zawodu.",
         "risks": [
             {"icon": "📋", "title": "Utrata orzeczenia medycznego", "desc": "Każda choroba wpływająca na wyniki badania lotniczego może skutkować zawieszeniem uprawnień do latania."},
             {"icon": "😴", "title": "Zaburzenia snu i rytmu dobowego", "desc": "Zmiany stref czasowych, nocne loty i nieregularny tryb pracy niszczą zdrowie w długim terminie."},
@@ -677,7 +677,7 @@ HTML_TEMPLATE = """\
            style="background: url('/img/professions/{category}.jpg') center/cover no-repeat;">
     <div class="absolute inset-0 bg-slate-900/70"></div>
     <div class="relative z-10 max-w-4xl mx-auto px-6 py-20 text-white">
-      <p class="text-sm text-blue-300 mb-3 font-semibold uppercase tracking-widest">Ubezpieczenie od utraty dochodu</p>
+      <p class="text-sm text-blue-300 mb-3 font-semibold uppercase tracking-widest">Ubezpieczenie utraty dochodu</p>
       <h1 class="text-4xl md:text-5xl font-extrabold mb-5 leading-tight">{h1}</h1>
       <p class="text-xl text-slate-200 mb-8 max-w-2xl leading-relaxed">{subtitle}</p>
       <a href="/formularz.html"
@@ -748,14 +748,26 @@ HTML_TEMPLATE = """\
     </div>
   </section>
 
+  <!-- WSZYSTKIE ZAWODY -->
+  <section class="bg-slate-100 py-10">
+    <div class="max-w-6xl mx-auto px-6">
+      <h2 class="text-base font-bold text-slate-600 uppercase tracking-wider mb-5 text-center">
+        Ubezpieczenie utraty dochodu &mdash; wszystkie zawody
+      </h2>
+      <div class="flex flex-wrap gap-2 justify-center">
+        {profession_links}
+      </div>
+    </div>
+  </section>
+
   <!-- FOOTER -->
   <footer class="bg-slate-900 text-slate-400 py-8 text-center text-sm">
     <div class="max-w-4xl mx-auto px-6">
       <p class="mb-2">
         <a href="/" class="text-white font-semibold">UtrataDochodu.pl</a>
-        &nbsp;&mdash;&nbsp;ubezpieczenie od utraty dochodu dla samozatrudnionych i specjalistów
+        &nbsp;&mdash;&nbsp;ubezpieczenie utraty dochodu dla samozatrudnionych i specjalistów
       </p>
-      <p>&copy; {year} Aura Broker Sp. z o.o. &nbsp;|&nbsp;
+      <p>&copy; {year} Aura Expert Sp. z o.o. &nbsp;|&nbsp;
         <a href="/polityka-prywatnosci.html" class="hover:text-white transition">Polityka prywatności</a>
       </p>
     </div>
@@ -822,7 +834,7 @@ def get_data(slug, name_pl, category):
     cat = CATEGORY_DEFAULTS.get(category, CATEGORY_DEFAULTS["biznes"])
     ov = PROFESSION_DATA.get(slug, {})
     meta_default = (
-        f"Ubezpieczenie od utraty dochodu dla zawodu {name_pl}. "
+        f"Ubezpieczenie utraty dochodu dla zawodu {name_pl}. "
         "Ochrona od 1. dnia niezdolności do pracy. Wypełnij wniosek online na utratadochodu.pl."
     )
     return {
@@ -835,6 +847,20 @@ def get_data(slug, name_pl, category):
     }
 
 
+def build_profession_links(current_slug):
+    links = []
+    for s, n, _ in PROFESSIONS:
+        if s == current_slug:
+            links.append(
+                f'<span class="text-sm px-3 py-1 bg-blue-600 text-white rounded-full font-semibold">{escape(n)}</span>'
+            )
+        else:
+            links.append(
+                f'<a href="/{s}/" class="text-sm px-3 py-1 bg-white border border-slate-200 text-blue-700 rounded-full hover:bg-blue-50 transition">{escape(n)}</a>'
+            )
+    return "\n        ".join(links)
+
+
 def render_page(slug, name_pl, category, out_dir):
     today = date.today()
     data = get_data(slug, name_pl, category)
@@ -842,6 +868,7 @@ def render_page(slug, name_pl, category, out_dir):
     risks_html = "\n".join(build_risk_card(r) for r in data["risks"])
     faq_html = "\n".join(build_faq_item(f) for f in data["faq"])
     jsonld = build_jsonld(slug, name_pl, data["meta_desc"], today.year)
+    profession_links = build_profession_links(slug)
 
     html = HTML_TEMPLATE.format(
         title=f"Ubezpieczenie dla {name_pl} | Utrata Dochodu",
@@ -857,6 +884,7 @@ def render_page(slug, name_pl, category, out_dir):
         faq_html=faq_html,
         jsonld=jsonld,
         year=today.year,
+        profession_links=profession_links,
     )
 
     folder = os.path.join(out_dir, slug)
