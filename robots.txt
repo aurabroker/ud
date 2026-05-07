@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://utratadochodu.pl/sitemap.xml
+Sitemap: https://utratadochodu.pl/sitemap_professions.xml

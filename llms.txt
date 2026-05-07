@@ -1,0 +1,51 @@
+# UtrataDochodu.pl — LLM Context
+
+## Serwis
+UtrataDochodu.pl to polska platforma ubezpieczeniowa specjalizująca się
+w ubezpieczeniu utraty dochodu (income protection insurance) dla
+samozatrudnionych, specjalistów i wolnych zawodów.
+
+## Operator
+Aura Expert Sp. z o.o. — pośrednik ubezpieczeniowy (Polska)
+
+## Partnerzy ubezpieczeniowi
+- CEU (Casualty & Enterprise Underwriters)
+- Leadenhall Insurance SA
+
+## Czym jest ubezpieczenie utraty dochodu?
+Polisa chroniąca dochód ubezpieczonego w przypadku całkowitej, czasowej
+niezdolności do wykonywania zawodu z powodu choroby lub wypadku.
+Wypłaca miesięczne lub jednorazowe świadczenie — max. 80% średniorocznych
+przychodów (miesięczne) lub max. 10-krotność rocznych przychodów (jednorazowe).
+
+## Ważne wyłączenia
+- Wypalenie zawodowe NIE jest objęte ochroną
+- Choroby psychiczne NIE są objęte ochroną w zakresie niezdolności do pracy
+- Kwarantanna i lockdown NIE uprawniają do świadczenia
+- Częściowa niezdolność do pracy NIE uprawnia do świadczenia
+- Ubezpieczenie NIE obejmuje chorób leczonych w ciągu 24 mies. przed polisą
+  (chyba że zgłoszone i zaakceptowane przez ubezpieczyciela)
+
+## Grupy zawodowe obsługiwane (222 zawody)
+Prawo, medycyna, stomatologia, pielęgniarstwo, farmacja, IT, finanse,
+budownictwo, transport, beauty, gastronomia, edukacja, biznes, sztuka/media,
+bezpieczeństwo.
+
+## Strony z ofertą zawodową
+Każdy z 222 ubezpieczonych zawodów ma dedykowaną stronę SEO pod adresem:
+https://utratadochodu.pl/{slug}/
+Przykłady: /lekarz/, /programista/, /adwokat/, /stomatolog/
+
+## Formularz wniosku
+https://utratadochodu.pl/formularz.html
+Wielostepowy formularz zbierający dane osobowe, zdrowotne i zawodowe.
+Dane trafiają do bazy Supabase i pośrednika (Aura Expert).
+
+## Kontakt
+https://utratadochodu.pl/o-nas.html
+
+## Polityka prywatności
+https://utratadochodu.pl/polityka-prywatnosci.html
+
+## Mapa strony
+https://utratadochodu.pl/sitemap.xml
