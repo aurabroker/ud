@@ -183,20 +183,25 @@ const Admin = {
     const riskFields = [
       ['risk_balloon', 'Baloniarstwo'], ['risk_sailing', 'Żeglarstwo'], ['risk_skiing', 'Narciarstwo'],
       ['risk_skydiving', 'Skoki spadochronowe'], ['risk_diving', 'Nurkowanie'], ['risk_caving', 'Speleologia'],
-      ['risk_aviation', 'Lotnictwo amatorskie'], ['risk_extreme_bike_boat', 'Ekstr. rower/łódź'],
-      ['risk_climbing', 'Wspinaczka'], ['risk_paragliding', 'Paralotniarstwo'], ['risk_horse', 'Jazda konna'],
-      ['risk_horse_jumping', 'Skoki konne'], ['risk_gravity_bike', 'Gravity bike'], ['risk_quad', 'Quad/ATV'],
-      ['risk_hunting', 'Polowanie']
+      ['risk_aviation', 'Lotnictwo amatorskie'], ['risk_aviation_non_comm', 'Lotnictwo niekomercyjne'],
+      ['risk_extreme_bike_boat', 'Ekstr. rower/łódź'], ['risk_climbing', 'Wspinaczka'],
+      ['risk_paragliding', 'Paralotniarstwo'], ['risk_horse', 'Jazda konna'],
+      ['risk_horse_jumping', 'Skoki konne'], ['risk_gravity_bike', 'Gravity bike'],
+      ['risk_quad', 'Quad/ATV'], ['risk_hunting', 'Polowanie'], ['risk_motorcycle', 'Motocykl']
     ];
     const medFields = [
-      ['med_heart', 'Serce / nadciśnienie'], ['med_diabetes', 'Cukrzyca / nerki'],
-      ['med_bones', 'Kręgosłup / stawy'], ['med_stomach', 'Żołądek / jelita'],
-      ['med_neuro', 'Depresja / nerwica'], ['med_surgery', 'Operacje / leki stałe'],
-      ['med_aids', 'AIDS / HIV']
+      ['med_heart', 'Serce / nadciśnienie', 'med_heart_notes'],
+      ['med_diabetes', 'Cukrzyca / nerki', 'med_diabetes_notes'],
+      ['med_bones', 'Kręgosłup / stawy', 'med_bones_notes'],
+      ['med_stomach', 'Żołądek / jelita', 'med_stomach_notes'],
+      ['med_neuro', 'Depresja / nerwica', 'med_neuro_notes'],
+      ['med_surgery', 'Operacje / leki stałe', 'med_surgery_notes'],
+      ['med_aids', 'AIDS / HIV', 'med_aids_notes']
     ];
 
     let html = `<div class="client-detail-grid">`;
 
+    // Dane podstawowe
     html += `<div class="client-detail-section">
       <h4>📋 Dane podstawowe</h4>
       <div class="detail-row"><span>Imię i nazwisko</span><strong>${escHtml(c.full_name || '—')}</strong></div>
@@ -205,8 +210,12 @@ const Admin = {
       <div class="detail-row"><span>PESEL</span><strong>${escHtml(c.pesel || '—')}</strong></div>
       <div class="detail-row"><span>Forma zatrudnienia</span><strong>${escHtml(c.employment_type || '—')}</strong></div>
       <div class="detail-row"><span>Zawód</span><strong>${escHtml(c.profession || '—')}</strong></div>
+      <div class="detail-row"><span>Forma opodatkowania</span><strong>${escHtml(c.tax_form || '—')}</strong></div>
+      <div class="detail-row"><span>Waga / Wzrost</span><strong>${c.weight ? c.weight + ' kg' : '—'} / ${c.height ? c.height + ' cm' : '—'}</strong></div>
+      <div class="detail-row"><span>Ręczność</span><strong>${escHtml(c.handedness || '—')}</strong></div>
     </div>`;
 
+    // Dane B2B
     if (c.employs_people || c.b2b_start_date || c.b2b_industry) {
       html += `<div class="client-detail-section">
         <h4>🏢 Dane B2B</h4>
@@ -217,21 +226,86 @@ const Admin = {
         <div class="detail-row"><span>Obszar</span><strong>${escHtml(c.b2b_area || '—')}</strong></div>
         <div class="detail-row"><span>Pracownicy 2024</span><strong>${escHtml(c.b2b_employees_2024 || '—')}</strong></div>
         <div class="detail-row"><span>Pracownicy 2025</span><strong>${escHtml(c.b2b_employees_2025 || '—')}</strong></div>
+        <div class="detail-row"><span>Dochód B2B</span><strong>${c.b2b_income ? formatCurrency(c.b2b_income) + ' zł' : '—'}</strong></div>
+        <div class="detail-row"><span>Miesięcy działalności</span><strong>${escHtml(String(c.b2b_months || '—'))}</strong></div>
+        <div class="detail-row"><span>Okres karencji</span><strong>${escHtml(c.b2b_period || '—')}</strong></div>
+        <div class="detail-row"><span>HIV (B2B)</span><strong style="color:${c.b2b_hiv ? 'var(--red-600)' : 'var(--green-600)'};">${c.b2b_hiv ? '⚠️ Tak' : '✓ Nie'}</strong></div>
+        <div class="detail-row"><span>Suma NW</span><strong>${c.b2b_nw_sum ? formatCurrency(c.b2b_nw_sum) + ' zł' : '—'}</strong></div>
         <div class="detail-row"><span>Wkład własny</span><strong>${escHtml(c.b2b_own_contribution || '—')}</strong></div>
         ${c.b2b_description ? `<div class="detail-row full"><span>Opis czynności</span><div style="margin-top:0.25rem;font-size:0.8rem;color:var(--slate-600);">${escHtml(c.b2b_description)}</div></div>` : ''}
       </div>`;
     }
 
-    html += `<div class="client-detail-section"><h4>🩺 Ankieta medyczna</h4>`;
-    medFields.forEach(([key, label]) => {
-      const val = c[key];
-      html += `<div class="detail-row"><span>${label}</span><strong style="color:${val ? 'var(--red-600)' : 'var(--green-600)'};">${val ? '⚠️ Tak' : '✓ Nie'}</strong></div>`;
-    });
-    if (c.med_notes) {
-      html += `<div class="detail-row full"><span>Notatki medyczne</span><div style="margin-top:0.25rem;font-size:0.8rem;color:var(--slate-600);background:var(--amber-50);padding:0.5rem;border-radius:4px;border:1px solid #fde68a;">${escHtml(c.med_notes)}</div></div>`;
+    // Wybór ryzyk / sumy
+    if (c.risk_death_invalidity || c.risk_temp_incapacity || c.risk_perm_incapacity || c.nw_death_sum) {
+      html += `<div class="client-detail-section">
+        <h4>🎯 Wybór ryzyk</h4>
+        <div class="detail-row"><span>Śmierć / inwalidztwo</span><strong style="color:${c.risk_death_invalidity ? 'var(--blue-600)' : 'var(--slate-400)'};">${c.risk_death_invalidity ? '✓ Tak' : 'Nie'}</strong></div>
+        <div class="detail-row"><span>Przejściowa niezdolność</span><strong style="color:${c.risk_temp_incapacity ? 'var(--blue-600)' : 'var(--slate-400)'};">${c.risk_temp_incapacity ? '✓ Tak' : 'Nie'}</strong></div>
+        <div class="detail-row"><span>Trwała niezdolność</span><strong style="color:${c.risk_perm_incapacity ? 'var(--blue-600)' : 'var(--slate-400)'};">${c.risk_perm_incapacity ? '✓ Tak' : 'Nie'}</strong></div>
+        <div class="detail-row"><span>Suma NW śmierć</span><strong>${c.nw_death_sum ? formatCurrency(c.nw_death_sum) + ' zł' : '—'}</strong></div>
+      </div>`;
     }
+
+    // Klauzule NW
+    const nwFields = [
+      ['nw_funeral', 'Zasiłek pogrzebowy'], ['nw_adaptation', 'Adaptacja mieszkania'],
+      ['nw_hospital_daily', 'Dzienna szpitalna'], ['nw_medical_costs', 'Koszty leczenia'],
+      ['nw_unconscious_weekly', 'Tygodniowa nieprzytomność'], ['nw_permanent_damage', 'Trwały uszczerbek']
+    ];
+    const activeNw = nwFields.filter(([key]) => c[key]);
+    if (activeNw.length > 0) {
+      html += `<div class="client-detail-section"><h4>🛡️ Klauzule NW (${activeNw.length})</h4>
+        <div style="display:flex;flex-wrap:wrap;gap:0.35rem;">`;
+      activeNw.forEach(([, label]) => {
+        html += `<span style="font-size:0.7rem;font-weight:600;background:#eff6ff;color:var(--blue-600);padding:0.2rem 0.5rem;border-radius:4px;border:1px solid #bfdbfe;">${label}</span>`;
+      });
+      html += `</div></div>`;
+    }
+
+    // Ankieta medyczna
+    html += `<div class="client-detail-section"><h4>🩺 Ankieta medyczna</h4>`;
+    medFields.forEach(([key, label, notesKey]) => {
+      const val = c[key];
+      const notes = c[notesKey];
+      html += `<div class="detail-row"><span>${label}</span><strong style="color:${val ? 'var(--red-600)' : 'var(--green-600)'};">${val ? '⚠️ Tak' : '✓ Nie'}</strong></div>`;
+      if (val && notes) {
+        html += `<div style="margin:-0.15rem 0 0.4rem 0;padding:0.35rem 0.5rem;font-size:0.78rem;color:var(--slate-600);background:var(--amber-50);border-radius:4px;border:1px solid #fde68a;">${escHtml(notes)}</div>`;
+      }
+    });
     html += `</div>`;
 
+    // Przesiew zdrowotny
+    const healthFields = [
+      ['weight_change', 'Zmiana masy ciała'], ['takes_meds', 'Przyjmuje leki stałe'],
+      ['pending_diagnosis', 'Oczekuje na diagnozę'], ['disability_congenital', 'Niepełnospr. wrodzona'],
+      ['smoker', 'Palacz']
+    ];
+    if (healthFields.some(([key]) => c[key] !== undefined && c[key] !== null)) {
+      html += `<div class="client-detail-section"><h4>🔍 Przesiew zdrowotny</h4>`;
+      healthFields.forEach(([key, label]) => {
+        const val = c[key];
+        if (val === undefined || val === null) return;
+        html += `<div class="detail-row"><span>${label}</span><strong style="color:${val ? 'var(--red-600)' : 'var(--green-600)'};">${val ? '⚠️ Tak' : '✓ Nie'}</strong></div>`;
+      });
+      html += `</div>`;
+    }
+
+    // Zdarzenia medyczne (ostatnie 2 lata)
+    const eventFields = [
+      ['event_hospitalization', 'Hospitalizacja'], ['event_sick_leave_30', 'L4 > 30 dni'],
+      ['event_further_diagnosis', 'Dalsza diagnostyka']
+    ];
+    if (eventFields.some(([key]) => c[key])) {
+      html += `<div class="client-detail-section"><h4>🏥 Zdarzenia medyczne (2 lata)</h4>`;
+      eventFields.forEach(([key, label]) => {
+        const val = c[key];
+        html += `<div class="detail-row"><span>${label}</span><strong style="color:${val ? 'var(--red-600)' : 'var(--green-600)'};">${val ? '⚠️ Tak' : '✓ Nie'}</strong></div>`;
+      });
+      html += `</div>`;
+    }
+
+    // Sporty / ryzyka
     const activeRisks = riskFields.filter(([key]) => c[key]);
     html += `<div class="client-detail-section"><h4>⚡ Sporty / ryzyka (${activeRisks.length})</h4>`;
     if (activeRisks.length === 0) {
@@ -243,7 +317,17 @@ const Admin = {
       });
       html += `</div>`;
     }
-    html += `</div></div>`;
+    html += `</div>`;
+
+    // Zgody
+    if (c.exclusions_accepted !== undefined || c.informed_accepted !== undefined) {
+      html += `<div class="client-detail-section"><h4>✅ Zgody</h4>
+        <div class="detail-row"><span>Wyłączenia zaakceptowane</span><strong style="color:${c.exclusions_accepted ? 'var(--green-600)' : 'var(--red-600)'};">${c.exclusions_accepted ? '✓ Tak' : '✗ Nie'}</strong></div>
+        <div class="detail-row"><span>Poinformowany</span><strong style="color:${c.informed_accepted ? 'var(--green-600)' : 'var(--red-600)'};">${c.informed_accepted ? '✓ Tak' : '✗ Nie'}</strong></div>
+      </div>`;
+    }
+
+    html += `</div>`;
 
     html += `<div style="margin-top:1rem;padding-top:0.75rem;border-top:1px solid var(--slate-200);display:flex;gap:0.5rem;">
       <button class="btn btn-primary btn-sm" onclick="Admin.createOfferForClient('${c.id}')">📊 Utwórz ofertę dla tego klienta</button>
