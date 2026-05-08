@@ -8,6 +8,15 @@ const CONFIG = {
   APP_VERSION: 'v2.0',
   COMPANY_NAME: 'Aura Expert sp. z o.o.',
   COMPANY_FULL: 'Aura Expert spółka z ograniczoną odpowiedzialnością z siedzibą w Warszawie przy ul. Bolkowskiej 2A lokal 28',
+
+  // Cloudflare Web Analytics
+  // CF_ACCOUNT_ID: automatycznie ustawiony (aurabroker@gmail.com)
+  CF_ACCOUNT_ID: '1f52c869d091ebf55a2d1789dad4842d',
+  // CF_ANALYTICS_TOKEN: utwórz na dash.cloudflare.com → My Profile → API Tokens
+  //   → Create Token → Custom: Account Analytics: Read
+  CF_ANALYTICS_TOKEN: '',
+  // CF_SITE_TAG: skrypt beacon z Web Analytics → Manage Site → skopiuj token z data-cf-beacon
+  CF_SITE_TAG: '',
 };
 
 const sb = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);

@@ -462,10 +462,132 @@ const Admin = {
     }
   },
 
-  // ---- PLACEHOLDER TABS ----
-  loadStats() {
-    const noData = document.getElementById('statsChartNoData');
-    if (noData) noData.style.display = 'block';
+  // ---- STATS TAB ----
+  _statsChart: null,
+
+  async loadStats() {
+    const { CF_ACCOUNT_ID, CF_ANALYTICS_TOKEN, CF_SITE_TAG } = CONFIG;
+
+    // Form submissions from Supabase (always available)
+    let clients = Store.dbClients;
+    if (clients.length === 0) { try { clients = await Store.loadClients(); } catch(e) {} }
+    const since30d = Date.now() - 30 * 24 * 3600000;
+    const forms30d = clients.filter(c => new Date(c.created_at).getTime() > since30d).length;
+    const el = id => document.getElementById(id);
+    if (el('statForms')) el('statForms').textContent = forms30d;
+
+    // Top ref sources from Supabase
+    const refCounts = {};
+    clients.forEach(c => { if (c.ref_source) refCounts[c.ref_source] = (refCounts[c.ref_source] || 0) + 1; });
+    const topRefs = Object.entries(refCounts).sort((a,b) => b[1]-a[1]).slice(0,10);
+    const refTbody = el('statsTopRefs');
+    if (refTbody) {
+      refTbody.innerHTML = topRefs.length
+        ? topRefs.map(([ref, n]) => `<tr><td><span class="ref-id-cell">${escHtml(ref)}</span></td><td style="font-size:0.75rem;color:var(--slate-500);">—</td><td style="text-align:right;font-weight:700;">${n}</td></tr>`).join('')
+        : `<tr><td colspan="3" style="text-align:center;padding:1rem;color:var(--slate-400);font-size:0.8rem;">Brak danych</td></tr>`;
+    }
+
+    // Cloudflare Web Analytics via GraphQL
+    if (!CF_ANALYTICS_TOKEN || !CF_SITE_TAG) {
+      if (el('statsChartNoData')) el('statsChartNoData').style.display = 'block';
+      if (el('statPageviews')) el('statPageviews').textContent = '—';
+      if (el('statUniques')) el('statUniques').textContent = '—';
+      if (el('statConversion')) el('statConversion').textContent = '—';
+      return;
+    }
+
+    if (el('statsChartNoData')) el('statsChartNoData').textContent = 'Pobieranie danych...';
+
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      const start30 = new Date(Date.now() - 30 * 24 * 3600000).toISOString().slice(0, 10);
+      const start60 = new Date(Date.now() - 60 * 24 * 3600000).toISOString().slice(0, 10);
+
+      const query = `{
+        viewer {
+          accounts(filter: { accountTag: "${CF_ACCOUNT_ID}" }) {
+            current: rumPageloadEventsAdaptiveGroups(
+              filter: { siteTag: "${CF_SITE_TAG}", date_geq: "${start30}", date_leq: "${today}" }
+              limit: 10000 orderBy: [date_ASC]
+            ) { count sum { visits } dimensions { date } }
+            prev: rumPageloadEventsAdaptiveGroups(
+              filter: { siteTag: "${CF_SITE_TAG}", date_geq: "${start60}", date_leq: "${start30}" }
+              limit: 1
+            ) { count sum { visits } }
+          }
+        }
+      }`;
+
+      const resp = await fetch('https://api.cloudflare.com/client/v4/graphql', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${CF_ANALYTICS_TOKEN}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query }),
+      });
+      const json = await resp.json();
+      const acc = json.data?.viewer?.accounts?.[0];
+      const rows = acc?.current || [];
+      const prev = acc?.prev?.[0] || {};
+
+      const totalPv = rows.reduce((s,r) => s + r.count, 0);
+      const totalVis = rows.reduce((s,r) => s + (r.sum?.visits || 0), 0);
+      const prevPv = prev.count || 0;
+      const convRate = totalPv > 0 ? (forms30d / totalPv * 100) : 0;
+      const pvChange = prevPv > 0 ? ((totalPv - prevPv) / prevPv * 100) : null;
+
+      if (el('statPageviews')) el('statPageviews').textContent = totalPv.toLocaleString('pl-PL');
+      if (el('statUniques')) el('statUniques').textContent = totalVis.toLocaleString('pl-PL');
+      if (el('statConversion')) el('statConversion').textContent = convRate.toFixed(2) + '%';
+      if (pvChange !== null && el('statPageviewsChange')) {
+        const sign = pvChange >= 0 ? '+' : '';
+        el('statPageviewsChange').textContent = `${sign}${pvChange.toFixed(0)}% vs poprzednie 30d`;
+        el('statPageviewsChange').className = 'stats-metric-change ' + (pvChange >= 0 ? 'positive' : 'negative');
+      }
+
+      Admin.renderStatsChart(rows);
+      if (el('statsChartNoData')) el('statsChartNoData').style.display = rows.length ? 'none' : 'block';
+
+    } catch(e) {
+      if (el('statsChartNoData')) {
+        el('statsChartNoData').textContent = 'Błąd: ' + e.message;
+        el('statsChartNoData').style.display = 'block';
+      }
+    }
+  },
+
+  renderStatsChart(rows) {
+    const canvas = document.getElementById('statsChartPageviews');
+    if (!canvas || !rows.length) return;
+    if (typeof Chart === 'undefined') return;
+    if (Admin._statsChart) Admin._statsChart.destroy();
+
+    Admin._statsChart = new Chart(canvas, {
+      type: 'bar',
+      data: {
+        labels: rows.map(r => r.dimensions.date.slice(5)),
+        datasets: [{
+          label: 'Odsłony',
+          data: rows.map(r => r.count),
+          backgroundColor: '#3b82f6',
+          borderRadius: 3,
+        }, {
+          label: 'Wizyty',
+          data: rows.map(r => r.sum?.visits || 0),
+          backgroundColor: '#10b981',
+          borderRadius: 3,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: true, position: 'top', labels: { boxWidth: 10, font: { size: 11 } } },
+        },
+        scales: {
+          x: { grid: { display: false }, ticks: { font: { size: 9 }, maxTicksLimit: 10 } },
+          y: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 } } },
+        },
+      },
+    });
   },
 
   loadRefLinks() {
