@@ -663,6 +663,7 @@ HTML_TEMPLATE = """\
   <script type="application/ld+json">
 {jsonld}
   </script>
+  <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{{"token": "PASTE_CF_SITE_TAG_HERE"}}'></script>
 </head>
 <body class="bg-white text-slate-800">
 
