@@ -75,6 +75,12 @@ const Store = {
     return data || [];
   },
 
+  async deleteClient(id) {
+    const { error } = await sb.from('ud_clients').delete().eq('id', id);
+    if (error) throw error;
+    Store.dbClients = Store.dbClients.filter(c => c.id !== id);
+  },
+
   // Zapisz klienta (nowy lub edycja)
   async saveClient(payload, clientId = null) {
     if (clientId) {

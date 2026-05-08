@@ -88,6 +88,7 @@ const App = {
     } else {
       App.loadKlienci();
     }
+    Admin.loadRecentClients();
   },
 
   renderDashboardTabs() {

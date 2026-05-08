@@ -80,10 +80,27 @@
       <!-- DASHBOARD -->
       <div id="viewDashboard">
         <div class="dashboard-header">
-          <div><h1 class="dashboard-title">Twoje Oferty</h1><p class="dashboard-subtitle">Zarządzaj i twórz nowe kalkulacje</p></div>
-          <button class="btn btn-primary" onclick="App.createNewOffer()">+ Nowa Oferta</button>
+          <div>
+            <h1 class="dashboard-title">Twoje Oferty</h1>
+            <p class="dashboard-subtitle">Zarządzaj i twórz nowe kalkulacje</p>
+          </div>
+          <div id="dashboardActions">
+            <button class="btn btn-primary" onclick="App.createNewOffer()">+ Nowa Oferta</button>
+          </div>
         </div>
+        <div id="dashboardTabsBar" style="display:flex;gap:0.25rem;margin-bottom:1rem;border-bottom:1px solid var(--slate-200,#e2e8f0);padding-bottom:0;"></div>
         <div id="offersListContainer"><div class="empty-state"><div class="spinner spinner-lg"></div></div></div>
+
+        <!-- Nowe zgłoszenia z formularza -->
+        <div class="card" style="margin-top:1.5rem;" id="recentClientsCard">
+          <div class="card-header" style="justify-content:space-between;">
+            <div class="card-title">🆕 Ostatnie zgłoszenia z formularza</div>
+            <button class="btn btn-ghost btn-sm" style="font-size:0.78rem;" onclick="App.navigateTo('admin')">Zobacz wszystkie →</button>
+          </div>
+          <div id="recentClientsWidget" style="padding:0.5rem 1rem 1rem;">
+            <div class="spinner"></div>
+          </div>
+        </div>
       </div>
 
       <!-- EDITOR -->
@@ -198,6 +215,7 @@
                     <th>Przypisany do</th>
                     <th>Źródło (ref)</th>
                     <th>Data</th>
+                    <th style="width:44px;"></th>
                   </tr>
                 </thead>
                 <tbody id="adminClientsList"></tbody>
@@ -349,6 +367,14 @@
             cursor: pointer; user-select: all;
           }
           .ref-id-cell:hover { background: var(--blue-100, #dbeafe); }
+
+          .recent-client-row {
+            display: flex; align-items: center; gap: 0.75rem; padding: 0.55rem 0;
+            border-bottom: 1px solid var(--slate-100, #f1f5f9); cursor: pointer;
+            transition: background 0.15s; border-radius: 6px; padding-left: 0.25rem;
+          }
+          .recent-client-row:last-child { border-bottom: none; }
+          .recent-client-row:hover { background: var(--slate-50, #f8fafc); }
 
           @media (max-width: 768px) {
             .stats-metrics-grid { grid-template-columns: 1fr 1fr !important; }

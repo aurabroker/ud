@@ -137,6 +137,9 @@ const Admin = {
           <td style="font-size:0.8rem;">${escHtml(assignedTo)}</td>
           <td>${refCell}</td>
           <td style="font-size:0.7rem;color:var(--slate-400);">${date}</td>
+          <td onclick="event.stopPropagation()">
+            <button class="btn btn-ghost btn-icon" onclick="Admin.deleteClient('${c.id}')" title="Usuń klienta" style="color:var(--red-500,#ef4444);">🗑</button>
+          </td>
         </tr>`;
       });
       tbody.innerHTML = html;
@@ -172,6 +175,58 @@ const Admin = {
     document.querySelectorAll('#adminClientsList tr').forEach(row => {
       row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
     });
+  },
+
+  // ---- DELETE CLIENT ----
+  async deleteClient(id) {
+    const c = Store.dbClients.find(x => x.id === id);
+    const name = c?.full_name || id.substring(0, 8);
+    if (!confirm(`Usunąć klienta "${name}"?\n\nTej operacji nie można cofnąć.`)) return;
+    try {
+      await Store.deleteClient(id);
+      App.toast(`Klient "${name}" usunięty`, 'success');
+      Admin.loadClients();
+      Admin.loadRecentClients();
+    } catch (e) {
+      App.toast(e.message, 'error');
+    }
+  },
+
+  // ---- RECENT CLIENTS WIDGET (dashboard) ----
+  async loadRecentClients() {
+    const el = document.getElementById('recentClientsWidget');
+    if (!el) return;
+    try {
+      let clients = Store.dbClients;
+      if (clients.length === 0) clients = await Store.loadClients();
+      const recent = clients.slice(0, 6);
+      if (recent.length === 0) {
+        el.innerHTML = `<p style="font-size:0.8rem;color:var(--slate-400,#94a3b8);padding:0.25rem 0;">Brak zgłoszeń z formularza.</p>`;
+        return;
+      }
+      const now = Date.now();
+      const fmt = d => {
+        const diff = now - new Date(d).getTime();
+        if (diff < 60 * 60 * 1000) return Math.floor(diff / 60000) + ' min temu';
+        if (diff < 24 * 60 * 60 * 1000) return Math.floor(diff / 3600000) + ' h temu';
+        return new Date(d).toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit' });
+      };
+      el.innerHTML = recent.map(c => {
+        const isNew = (now - new Date(c.created_at).getTime()) < 48 * 3600000;
+        return `<div class="recent-client-row" onclick="Admin.showClientDetail('${c.id}');App.navigateTo('admin')">
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:700;font-size:0.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(c.full_name || '—')}</div>
+            <div style="font-size:0.73rem;color:var(--slate-500,#64748b);">${escHtml(c.profession || c.employment_type || '—')}</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            ${isNew ? '<span style="font-size:0.65rem;font-weight:800;background:#dbeafe;color:#1d4ed8;padding:1px 6px;border-radius:8px;">NOWY</span><br>' : ''}
+            <span style="font-size:0.72rem;color:var(--slate-400,#94a3b8);">${fmt(c.created_at)}</span>
+          </div>
+        </div>`;
+      }).join('');
+    } catch (e) {
+      if (el) el.innerHTML = `<p style="font-size:0.8rem;color:var(--red-500);">${e.message}</p>`;
+    }
   },
 
   // ---- CLIENT DETAIL MODAL ----
