@@ -1,0 +1,38 @@
+# Ubezpieczenie dla Elektryk — UtrataDochodu.pl
+
+## Strona
+https://utratadochodu.pl/elektryk/
+
+## Czym jest ta polisa?
+Ubezpieczenie utraty dochodu (income protection) dla zawodu Elektryk.
+Chroni przed całkowitą, czasową niezdolnością do wykonywania zawodu z powodu
+choroby lub wypadku. Kategoria zawodowa: Budownictwo.
+
+## Świadczenie
+- Wypłata od 1. dnia niezdolności (po 30-dniowej karencji)
+- Bez ubezpieczenia: 0 zł (brak zleceń = brak przychodu)
+- Z polisą: nawet 400 zł / dzień niezdolności
+- Maks. 80% udokumentowanego dochodu netto (do 30 000 zł/mies.)
+- Wariant jednorazowy: do 10-krotności rocznych przychodów
+
+## Kluczowe ryzyki dla zawodu Elektryk
+- Porażenie prądem: Elektricy pracują w warunkach stałego ryzyka porażenia, które może prowadzić do długiej niezdolności do pracy.
+- Upadek z wysokości: Praca na drabinach, rusztowaniach i w szybach windowych to jedno z najwyższych ryzyk urazów.
+- Urazy mechaniczne: Praca w ciasnych przestrzeniach, dźwiganie i montaż instalacji to częste przyczyny urazów kręgosłupa i kończyn.
+
+## Wyłączenia (standardowe)
+- Wypalenie zawodowe jako samodzielna diagnoza
+- Kwarantanna i lockdown
+- Częściowa niezdolność do pracy
+- Choroby leczone w ciągu 24 mies. przed polisą (bez akceptacji ubezpieczyciela)
+
+## Złóż wniosek
+https://utratadochodu.pl/formularz.html
+Wielostepowy formularz online — ok. 5 minut.
+
+## Operator
+Aura Expert Sp. z o.o. — licencjonowany pośrednik ubezpieczeniowy (Polska)
+Partnerzy: CEU (Casualty & Enterprise Underwriters), Leadenhall Insurance SA
+
+## Wszystkie zawody
+https://utratadochodu.pl/llms.txt

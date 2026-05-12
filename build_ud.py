@@ -881,6 +881,60 @@ def build_profession_links(current_slug):
     return "\n        ".join(links)
 
 
+CATEGORY_PL = {
+    "medycyna":      "Medycyna",
+    "stomatologia":  "Stomatologia",
+    "pielegniarstwo":"Pielęgniarstwo",
+    "farmacja":      "Farmacja",
+    "it":            "IT / Tech",
+    "prawo":         "Prawo",
+    "finanse":       "Finanse",
+    "budownictwo":   "Budownictwo",
+    "transport":     "Transport",
+    "beauty":        "Beauty / Uroda",
+    "gastronomia":   "Gastronomia",
+    "edukacja":      "Edukacja",
+    "biznes":        "Biznes",
+    "sztuka":        "Sztuka / Media",
+    "bezpieczenstwo":"Bezpieczeństwo",
+}
+
+
+def render_llms_txt(slug, name_pl, category, data):
+    cat_pl = CATEGORY_PL.get(category, category)
+    risks  = data["risks"][:3]
+    risks_block = "\n".join(
+        f"- {r['title']}: {r['desc']}" for r in risks
+    ) if risks else "- Choroba lub wypadek wykluczające z wykonywania zawodu"
+    return (
+        f"# Ubezpieczenie dla {name_pl} — UtrataDochodu.pl\n\n"
+        f"## Strona\nhttps://utratadochodu.pl/{slug}/\n\n"
+        f"## Czym jest ta polisa?\n"
+        f"Ubezpieczenie utraty dochodu (income protection) dla zawodu {name_pl}.\n"
+        f"Chroni przed całkowitą, czasową niezdolnością do wykonywania zawodu z powodu\n"
+        f"choroby lub wypadku. Kategoria zawodowa: {cat_pl}.\n\n"
+        f"## Świadczenie\n"
+        f"- Wypłata od 1. dnia niezdolności (po 30-dniowej karencji)\n"
+        f"- Bez ubezpieczenia: {data['income_without']}\n"
+        f"- Z polisą: {data['income_with']}\n"
+        f"- Maks. 80% udokumentowanego dochodu netto (do 30 000 zł/mies.)\n"
+        f"- Wariant jednorazowy: do 10-krotności rocznych przychodów\n\n"
+        f"## Kluczowe ryzyki dla zawodu {name_pl}\n"
+        f"{risks_block}\n\n"
+        f"## Wyłączenia (standardowe)\n"
+        f"- Wypalenie zawodowe jako samodzielna diagnoza\n"
+        f"- Kwarantanna i lockdown\n"
+        f"- Częściowa niezdolność do pracy\n"
+        f"- Choroby leczone w ciągu 24 mies. przed polisą (bez akceptacji ubezpieczyciela)\n\n"
+        f"## Złóż wniosek\nhttps://utratadochodu.pl/formularz.html\n"
+        f"Wielostepowy formularz online — ok. 5 minut.\n\n"
+        f"## Operator\n"
+        f"Aura Expert Sp. z o.o. — licencjonowany pośrednik ubezpieczeniowy (Polska)\n"
+        f"Partnerzy: CEU (Casualty & Enterprise Underwriters), Leadenhall Insurance SA\n\n"
+        f"## Wszystkie zawody\nhttps://utratadochodu.pl/llms.txt\n"
+    )
+
+
 def render_page(slug, name_pl, category, out_dir):
     today = date.today()
     data = get_data(slug, name_pl, category)
@@ -914,6 +968,8 @@ def render_page(slug, name_pl, category, out_dir):
     os.makedirs(folder, exist_ok=True)
     with open(os.path.join(folder, "index.html"), "w", encoding="utf-8") as f:
         f.write(html)
+    with open(os.path.join(folder, "llms.txt"), "w", encoding="utf-8") as f:
+        f.write(render_llms_txt(slug, name_pl, category, data))
 
 
 def render_sitemap(slugs, out_dir):
