@@ -1,0 +1,38 @@
+# Ubezpieczenie dla Fizjoterapeuta — UtrataDochodu.pl
+
+## Strona
+https://utratadochodu.pl/fizjoterapeuta/
+
+## Czym jest ta polisa?
+Ubezpieczenie utraty dochodu (income protection) dla zawodu Fizjoterapeuta.
+Chroni przed całkowitą, czasową niezdolnością do wykonywania zawodu z powodu
+choroby lub wypadku. Kategoria zawodowa: Pielęgniarstwo.
+
+## Świadczenie
+- Wypłata od 1. dnia niezdolności (po 30-dniowej karencji)
+- Bez ubezpieczenia: ~80% podstawy (etat) po 30 dniach; 0 zł na B2B
+- Z polisą: nawet 350 zł / dzień niezdolności
+- Maks. 80% udokumentowanego dochodu netto (do 30 000 zł/mies.)
+- Wariant jednorazowy: do 10-krotności rocznych przychodów
+
+## Kluczowe ryzyki dla zawodu Fizjoterapeuta
+- Urazy dłoni i nadgarstka: Manualna praca terapeutyczna przez wiele godzin dziennie prowadzi do przeciążeń i stanów zapalnych.
+- Choroby kręgosłupa: Asystowanie pacjentom i praca w wymuszonej pozycji to typowe ryzyko zawodowe fizjoterapeutów.
+- Zakażenia od pacjentów: Bezpośredni kontakt fizyczny z pacjentami podczas terapii to ryzyko przeniesienia chorób zakaźnych.
+
+## Wyłączenia (standardowe)
+- Wypalenie zawodowe jako samodzielna diagnoza
+- Kwarantanna i lockdown
+- Częściowa niezdolność do pracy
+- Choroby leczone w ciągu 24 mies. przed polisą (bez akceptacji ubezpieczyciela)
+
+## Złóż wniosek
+https://utratadochodu.pl/formularz.html
+Wielostepowy formularz online — ok. 5 minut.
+
+## Operator
+Aura Expert Sp. z o.o. — licencjonowany pośrednik ubezpieczeniowy (Polska)
+Partnerzy: CEU (Casualty & Enterprise Underwriters), Leadenhall Insurance SA
+
+## Wszystkie zawody
+https://utratadochodu.pl/llms.txt

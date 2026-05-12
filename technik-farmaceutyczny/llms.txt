@@ -1,0 +1,38 @@
+# Ubezpieczenie dla Technik Farmaceutyczny — UtrataDochodu.pl
+
+## Strona
+https://utratadochodu.pl/technik-farmaceutyczny/
+
+## Czym jest ta polisa?
+Ubezpieczenie utraty dochodu (income protection) dla zawodu Technik Farmaceutyczny.
+Chroni przed całkowitą, czasową niezdolnością do wykonywania zawodu z powodu
+choroby lub wypadku. Kategoria zawodowa: Farmacja.
+
+## Świadczenie
+- Wypłata od 1. dnia niezdolności (po 30-dniowej karencji)
+- Bez ubezpieczenia: ~80% podstawy (etat) lub 0 zł (B2B)
+- Z polisą: nawet 300 zł / dzień niezdolności
+- Maks. 80% udokumentowanego dochodu netto (do 30 000 zł/mies.)
+- Wariant jednorazowy: do 10-krotności rocznych przychodów
+
+## Kluczowe ryzyki dla zawodu Technik Farmaceutyczny
+- Ekspozycja na substancje chemiczne: Codzienne obcowanie z lekami i odczynnikami może wywołać alergię lub chorobę zawodową.
+- Zakażenie od pacjentów: Bezpośredni kontakt z osobami chorymi przy okienku aptecznym lub w laboratorium.
+- Przeciążenie układu ruchu: Wielogodzinna praca stojąca prowadzi do chorób kręgosłupa i kończyn dolnych.
+
+## Wyłączenia (standardowe)
+- Wypalenie zawodowe jako samodzielna diagnoza
+- Kwarantanna i lockdown
+- Częściowa niezdolność do pracy
+- Choroby leczone w ciągu 24 mies. przed polisą (bez akceptacji ubezpieczyciela)
+
+## Złóż wniosek
+https://utratadochodu.pl/formularz.html
+Wielostepowy formularz online — ok. 5 minut.
+
+## Operator
+Aura Expert Sp. z o.o. — licencjonowany pośrednik ubezpieczeniowy (Polska)
+Partnerzy: CEU (Casualty & Enterprise Underwriters), Leadenhall Insurance SA
+
+## Wszystkie zawody
+https://utratadochodu.pl/llms.txt
