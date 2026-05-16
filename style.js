@@ -174,11 +174,7 @@ async function submitToSupabase(dataObj) {
 }
 
 function showSuccessModal(form) {
-  document.getElementById('success-modal').classList.remove('hidden');
-  form.reset();
-  currentStepIndex = 0;
-  activeSteps = ['step-1', 'step-2', 'step-risks', 'step-3', 'step-info', 'step-4'];
-  updateWizardUI();
+  window.location.href = '/thankyou.html';
 }
 
 function showErrorModal(message) {
