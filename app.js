@@ -132,7 +132,7 @@ async function initRandomBlogPost() {
 
   try {
     const params = new URLSearchParams({
-      select: 'id,title,excerpt,published_at',
+      select: 'id,slug,title,excerpt,published_at',
       status: 'eq.published',
       'platforms': 'cs.{"UtrataDochodu.pl"}',
       order: 'published_at.desc',
@@ -151,7 +151,7 @@ async function initRandomBlogPost() {
     }
 
     const post = data[Math.floor(Math.random() * data.length)];
-    const link = `blog.html#article-${post.id}`;
+    const link = `blog.html#${post.slug || 'article-' + post.id}`;
 
     container.innerHTML = `
       <div class="bg-slate-50 p-5 sm:p-6 rounded-xl border border-slate-100 hover:border-blue-200 transition-colors shadow-sm group">
