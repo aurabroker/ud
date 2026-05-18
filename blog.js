@@ -20,7 +20,7 @@ async function loadBlogPosts() {
   try {
     const { data, error } = await supabaseClient
       .from('aura_articles')
-      .select('id, title, excerpt, tags, published_at, created_at')
+      .select('id, slug, title, excerpt, tags, published_at, created_at')
       .eq('status', 'published')
       .contains('platforms', ['UtrataDochodu.pl'])
       .order('published_at', { ascending: false });
@@ -39,7 +39,7 @@ async function loadBlogPosts() {
         .toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' });
 
       return `
-        <article class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col hover:shadow-lg transition-shadow cursor-pointer" data-article-id="${art.id}">
+        <article class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col hover:shadow-lg transition-shadow cursor-pointer" data-article-id="${art.id}" data-article-slug="${art.slug || ''}">
           <div class="${style.bg} h-48 flex items-center justify-center border-b border-slate-100">
             <span class="text-6xl">${style.emoji}</span>
           </div>
@@ -61,8 +61,10 @@ async function loadBlogPosts() {
   }
 }
 
-async function openArticle(id) {
-  const { data, error } = await supabaseClient.from('aura_articles').select('*').eq('id', id).single();
+async function openArticle(identifier) {
+  const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(identifier);
+  const query = supabaseClient.from('aura_articles').select('*');
+  const { data, error } = await (isUUID ? query.eq('id', identifier) : query.eq('slug', identifier)).single();
   if (error || !data) { alert('Nie udało się pobrać artykułu.'); return; }
 
   document.getElementById('reader-title').textContent = data.title;
@@ -77,7 +79,7 @@ async function openArticle(id) {
   document.getElementById('blog-list-view').classList.add('hidden');
   document.getElementById('article-reader-view').classList.remove('hidden');
   window.scrollTo(0, 0);
-  history.pushState(null, null, '#article-' + id);
+  history.pushState(null, null, '#' + (data.slug || 'article-' + data.id));
 }
 
 function closeArticle() {
@@ -97,12 +99,9 @@ function copyArticleLink() {
 
 async function handleRouting() {
   const hash = window.location.hash.replace('#', '');
-  if (hash.startsWith('article-')) {
-    await openArticle(hash.replace('article-', ''));
-  } else {
-    document.getElementById('article-reader-view').classList.add('hidden');
-    document.getElementById('blog-list-view').classList.remove('hidden');
-  }
+  if (!hash) return;
+  const identifier = hash.startsWith('article-') ? hash.replace('article-', '') : hash;
+  await openArticle(identifier);
 }
 
 /* ── Event Listeners ── */
@@ -114,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
   /* Event delegation for article cards */
   document.getElementById('blog-grid')?.addEventListener('click', (e) => {
     const card = e.target.closest('article[data-article-id]');
-    if (card) openArticle(card.dataset.articleId);
+    if (card) openArticle(card.dataset.articleSlug || card.dataset.articleId);
   });
 
   document.getElementById('close-article-btn')?.addEventListener('click', closeArticle);
@@ -122,7 +121,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.addEventListener('hashchange', () => {
     const hash = window.location.hash.replace('#', '');
-    hash.startsWith('article-') ? openArticle(hash.replace('article-', '')) : closeArticle();
+    if (!hash) { closeArticle(); return; }
+    const identifier = hash.startsWith('article-') ? hash.replace('article-', '') : hash;
+    openArticle(identifier);
   });
 
   loadBlogPosts();
