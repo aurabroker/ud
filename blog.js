@@ -20,7 +20,7 @@ async function loadBlogPosts() {
   try {
     const { data, error } = await supabaseClient
       .from('aura_articles')
-      .select('id, slug, title, excerpt, tags, published_at, created_at')
+      .select('id, slug, title, excerpt, tags, published_at, created_at, preview_image_url, thumbnail_url')
       .eq('status', 'published')
       .contains('platforms', ['UtrataDochodu.pl'])
       .order('published_at', { ascending: false });
@@ -40,8 +40,10 @@ async function loadBlogPosts() {
 
       return `
         <article class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col hover:shadow-lg transition-shadow cursor-pointer" data-article-id="${art.id}" data-article-slug="${art.slug || ''}">
-          <div class="${style.bg} h-48 flex items-center justify-center border-b border-slate-100">
-            <span class="text-6xl">${style.emoji}</span>
+          <div class="${style.bg} h-48 flex items-center justify-center border-b border-slate-100 overflow-hidden">
+            ${art.preview_image_url || art.thumbnail_url
+              ? `<img src="${art.preview_image_url || art.thumbnail_url}" alt="${art.title}" class="w-full h-full object-cover">`
+              : `<span class="text-6xl">${style.emoji}</span>`}
           </div>
           <div class="p-6 sm:p-8 flex flex-col flex-grow">
             <div class="text-xs font-bold ${style.text} uppercase tracking-widest mb-3">${mainTag}</div>
