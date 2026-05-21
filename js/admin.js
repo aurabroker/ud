@@ -292,30 +292,36 @@ const Admin = {
     }
 
     // Wybór ryzyk / sumy
-    if (c.risk_death_invalidity || c.risk_temp_incapacity || c.risk_perm_incapacity || c.nw_death_sum) {
+    if (c.risk_death_invalidity || c.risk_temp_incapacity || c.risk_perm_incapacity || c.nw_death_sum || c.temp_incapacity_sum || c.perm_incapacity_sum) {
       html += `<div class="client-detail-section">
         <h4>🎯 Wybór ryzyk</h4>
         <div class="detail-row"><span>Śmierć / inwalidztwo</span><strong style="color:${c.risk_death_invalidity ? 'var(--blue-600)' : 'var(--slate-400)'};">${c.risk_death_invalidity ? '✓ Tak' : 'Nie'}</strong></div>
         <div class="detail-row"><span>Przejściowa niezdolność</span><strong style="color:${c.risk_temp_incapacity ? 'var(--blue-600)' : 'var(--slate-400)'};">${c.risk_temp_incapacity ? '✓ Tak' : 'Nie'}</strong></div>
+        ${c.temp_incapacity_sum ? `<div class="detail-row"><span style="padding-left:0.75rem;color:var(--slate-400);font-size:0.8rem;">↳ Kwota miesięczna</span><strong style="color:var(--blue-700);">${formatCurrency(c.temp_incapacity_sum)} zł/mies.</strong></div>` : ''}
         <div class="detail-row"><span>Trwała niezdolność</span><strong style="color:${c.risk_perm_incapacity ? 'var(--blue-600)' : 'var(--slate-400)'};">${c.risk_perm_incapacity ? '✓ Tak' : 'Nie'}</strong></div>
+        ${c.perm_incapacity_sum ? `<div class="detail-row"><span style="padding-left:0.75rem;color:var(--slate-400);font-size:0.8rem;">↳ Suma jednorazowa</span><strong style="color:var(--blue-700);">${formatCurrency(c.perm_incapacity_sum)} zł</strong></div>` : ''}
         <div class="detail-row"><span>Suma NW śmierć</span><strong>${c.nw_death_sum ? formatCurrency(c.nw_death_sum) + ' zł' : '—'}</strong></div>
       </div>`;
     }
 
     // Klauzule NW
     const nwFields = [
-      ['nw_funeral', 'Zasiłek pogrzebowy'], ['nw_adaptation', 'Adaptacja mieszkania'],
-      ['nw_hospital_daily', 'Dzienna szpitalna'], ['nw_medical_costs', 'Koszty leczenia'],
-      ['nw_unconscious_weekly', 'Tygodniowa nieprzytomność'], ['nw_permanent_damage', 'Trwały uszczerbek']
+      ['nw_funeral', 'Zasiłek pogrzebowy', 'zł'],
+      ['nw_adaptation', 'Adaptacja mieszkania', 'zł'],
+      ['nw_hospital_daily', 'Dzienna szpitalna', 'zł/dzień'],
+      ['nw_medical_costs', 'Koszty leczenia', 'zł'],
+      ['nw_unconscious_weekly', 'Tygodniowa nieprzytomność', 'zł/tydz.'],
+      ['nw_permanent_damage', 'Trwały uszczerbek', null]
     ];
     const activeNw = nwFields.filter(([key]) => c[key]);
     if (activeNw.length > 0) {
-      html += `<div class="client-detail-section"><h4>🛡️ Klauzule NW (${activeNw.length})</h4>
-        <div style="display:flex;flex-wrap:wrap;gap:0.35rem;">`;
-      activeNw.forEach(([, label]) => {
-        html += `<span style="font-size:0.7rem;font-weight:600;background:#eff6ff;color:var(--blue-600);padding:0.2rem 0.5rem;border-radius:4px;border:1px solid #bfdbfe;">${label}</span>`;
+      html += `<div class="client-detail-section"><h4>🛡️ Klauzule NW (${activeNw.length})</h4>`;
+      activeNw.forEach(([key, label, unit]) => {
+        const val = c[key];
+        const valueStr = (unit && val && typeof val === 'string') ? `${formatCurrency(val)} ${unit}` : '✓ Tak';
+        html += `<div class="detail-row"><span>${label}</span><strong style="color:var(--blue-600);">${valueStr}</strong></div>`;
       });
-      html += `</div></div>`;
+      html += `</div>`;
     }
 
     // Ankieta medyczna
