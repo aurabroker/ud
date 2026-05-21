@@ -69,20 +69,18 @@ function initEmployerToggle() {
 ────────────────────────────────────────── */
 function initNwToggle() {
   const deathCheckbox  = document.getElementById('riskDeathInvalidity');
-  const sumSection     = document.getElementById('nw-sum-section');
   const clausesSection = document.getElementById('nw-clauses-section');
-  if (!deathCheckbox || !sumSection || !clausesSection) return;
+  if (!deathCheckbox || !clausesSection) return;
 
   deathCheckbox.addEventListener('change', e => {
-    sumSection.classList.toggle('hidden', !e.target.checked);
     if (!e.target.checked) clausesSection.classList.add('hidden');
   });
 
-  const sumSelect = document.getElementById('nwDeathSum');
-  if (sumSelect) {
-    sumSelect.addEventListener('change', e => {
+  const sumInput = document.getElementById('nwDeathSum');
+  if (sumInput) {
+    sumInput.addEventListener('change', e => {
       const val = parseInt(e.target.value, 10);
-      clausesSection.classList.toggle('hidden', val < 300000);
+      clausesSection.classList.toggle('hidden', !deathCheckbox.checked || val < 300000);
     });
   }
 }

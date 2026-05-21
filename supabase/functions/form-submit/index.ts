@@ -74,12 +74,15 @@ serve(async (req) => {
       /* ── employer ── */
       employs_people:     yesNo(body.employsPeople ?? body.employs_people),
 
-      /* ── B2B ── */
-      b2b_income:         body.b2bIncome       ?? body.b2b_income       ?? null,
-      b2b_months:         body.b2bMonths       ?? body.b2b_months       ?? null,
-      b2b_period:         body.b2bPeriod       ?? body.b2b_period       ?? null,
-      b2b_hiv:            body.b2bHiv          ?? body.b2b_hiv          ?? null,
-      b2b_nw_sum:         body.b2bNwSum        ?? body.b2b_nw_sum       ?? null,
+      /* ── employer / B2B details ── */
+      b2b_start_date:       body.emp_startDate                           ?? null,
+      b2b_industry:         body.emp_industry                            ?? null,
+      b2b_character:        body.emp_character                           ?? null,
+      b2b_area:             body.emp_area                                ?? null,
+      b2b_employees_2024:   body.emp_count_2024                          ?? null,
+      b2b_employees_2025:   body.emp_count_current                       ?? null,
+      b2b_own_contribution: body.emp_contribution                        ?? null,
+      b2b_description:      body.emp_description                         ?? null,
 
       /* ── medical pre-conditions ── */
       med_heart:          yesNo(body.med_heart          ?? body.medHeart),
@@ -112,19 +115,19 @@ serve(async (req) => {
       risk_skiing:              yesNo(body.risk_skiing),
       risk_hunting:             yesNo(body.risk_hunting),
       risk_quad:                yesNo(body.risk_quad),
-      risk_aviation_non_comm:   yesNo(body.risk_aviation_non_comm),
       risk_balloon:             yesNo(body.risk_balloon),
       risk_skydiving:           yesNo(body.risk_skydiving),
       risk_paragliding:         yesNo(body.risk_paragliding),
       risk_horse_jumping:       yesNo(body.risk_horse_jumping),
       risk_gravity_bike:        yesNo(body.risk_gravity_bike),
-      risk_motorcycle:          yesNo(body.risk_motorcycle),
       risk_aviation:            yesNo(body.risk_aviation),
 
-      /* ── coverage selection (new) ── */
+      /* ── coverage selection ── */
       risk_death_invalidity:  yesNo(body.riskDeathInvalidity  ?? body.risk_death_invalidity),
       risk_temp_incapacity:   yesNo(body.riskTempIncapacity   ?? body.risk_temp_incapacity),
       risk_perm_incapacity:   yesNo(body.riskPermIncapacity   ?? body.risk_perm_incapacity),
+      temp_incapacity_sum:    body.tempIncapacitySum           ?? body.temp_incapacity_sum  ?? null,
+      perm_incapacity_sum:    body.permIncapacitySum           ?? body.perm_incapacity_sum  ?? null,
 
       /* ── NW clauses (new) ── */
       nw_death_sum:           body.nwDeathSum          ?? body.nw_death_sum          ?? null,
