@@ -1181,7 +1181,7 @@ a:hover { text-decoration: underline; }
 }
 
 /* ============================================================
-   PDF EXPORT ADJUSTMENTS
+   PDF EXPORT ADJUSTMENTS (legacy html2pdf mode)
    ============================================================ */
 .pdf-mode .no-pdf { display: none !important; }
 .pdf-mode .matrix-wrap { overflow: visible !important; }
@@ -1385,3 +1385,98 @@ a:hover { text-decoration: underline; }
 .detail-row span:first-child { color: var(--slate-500); }
 .detail-row strong { color: var(--slate-800); text-align: right; }
 .detail-row.full { flex-direction: column; }
+
+/* ============================================================
+   PRINT / PDF (window.print)
+   ============================================================ */
+@media print {
+  /* --- Page setup --- */
+  @page { size: A4 landscape; margin: 1.2cm 1.5cm; }
+
+  /* --- Force color printing (backgrounds, borders, colors) --- */
+  *, *::before, *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* --- Clean base --- */
+  html, body { background: #fff !important; }
+
+  /* --- Hide all UI chrome --- */
+  .app-header,
+  .mobile-nav,
+  .editor-topbar,
+  .variant-tabs-bar,
+  .no-pdf,
+  #brokerMessageSection,
+  #viewDashboard,
+  #viewAdmin,
+  .toast-container,
+  .modal-overlay { display: none !important; }
+
+  /* --- Show app wrapper --- */
+  #loginScreen { display: none !important; }
+  #appScreen { display: block !important; background: #fff !important; }
+  .app-main { padding: 0 !important; margin: 0 !important; background: #fff !important; }
+
+  /* --- Show only editor view --- */
+  #viewDashboard,
+  #viewAdmin { display: none !important; }
+  #viewEditor { display: block !important; }
+
+  /* --- Cards: no shadow, no overflow clip, no page break inside --- */
+  .card {
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: none !important;
+    border-radius: 6px !important;
+    overflow: visible !important;
+    margin-bottom: 0.6rem !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .card-header { background: #f8fafc !important; }
+
+  /* --- Matrix table --- */
+  .matrix-wrap { overflow: visible !important; }
+  .matrix-table {
+    min-width: unset !important;
+    width: 100% !important;
+    font-size: 0.68rem !important;
+  }
+  .matrix-table th,
+  .matrix-table td { padding: 0.35rem 0.5rem !important; }
+  .matrix-category-row { background: #eff6ff !important; }
+  /* Hide interactive remove buttons */
+  .matrix-remove-btn,
+  .th-remove-insurer { display: none !important; }
+
+  /* --- Scoring cards --- */
+  .scoring-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
+  }
+  .score-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    box-shadow: none !important;
+  }
+  .score-card.winner {
+    border-color: #f59e0b !important;
+  }
+  .score-card-details { background: #f8fafc !important; }
+
+  /* --- Scoring rows layout (non-grid variant) --- */
+  .scoring-rows { display: block !important; }
+  .score-row { break-inside: avoid; }
+
+  /* --- Client params & message --- */
+  #clientParamsSection,
+  #clientMessageSection { display: block !important; }
+  .client-message-display {
+    background: #eff6ff !important;
+    border-left: 4px solid #1d4ed8 !important;
+  }
+
+  /* --- Page breaks between major sections --- */
+  #matrixCard { break-after: auto; }
+  #waitPeriodsSection { break-before: auto; }
+}

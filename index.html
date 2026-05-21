@@ -11,23 +11,16 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
-    /* PDF export mode — hide UI controls, show clean content */
+    /* PDF export mode — legacy, kept for safety */
     body.pdf-mode .no-pdf,
     body.pdf-mode .app-header,
-    body.pdf-mode .app-footer,
     body.pdf-mode .mobile-nav,
     body.pdf-mode .editor-topbar,
     body.pdf-mode .variant-tabs-bar { display: none !important; }
-
     body.pdf-mode .app-main { padding: 0 !important; margin: 0 !important; }
-    body.pdf-mode .card { border: 1px solid #e2e8f0 !important; box-shadow: none !important; break-inside: avoid; }
+    body.pdf-mode .card { border: 1px solid #e2e8f0 !important; box-shadow: none !important; }
     body.pdf-mode #exportContent { background: #fff; }
-
-    /* Print styles */
-    @media print {
-      .no-pdf, .app-header, .app-footer, .mobile-nav, .editor-topbar { display: none !important; }
-      .card { break-inside: avoid; }
-    }
+    body.pdf-mode .matrix-wrap { overflow: visible !important; }
   </style>
 </head>
 <body>

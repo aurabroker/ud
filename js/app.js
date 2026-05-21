@@ -431,59 +431,12 @@ const App = {
 
   exportPDF() {
     const s = Store.state;
-    if (s.insurers.length === 0 || s.risks.length === 0) { App.toast('Pusta oferta', 'error'); return; }
-
-    const btn = document.getElementById('btnExportPdf');
-    const orig = btn.innerHTML;
-    btn.innerHTML = '⏳ Generuję...'; btn.disabled = true;
-
-    // Freeze form values into attributes so html2canvas captures them
-    document.querySelectorAll('input,select,textarea').forEach(el => {
-      if (el.type !== 'submit') el.setAttribute('value', el.value);
-    });
-
-    // Scroll to top to avoid offset issues
+    if (s.insurers.length === 0 || s.risks.length === 0) { App.toast('Pusta oferta — dodaj ryzyka i ubezpieczycieli', 'error'); return; }
+    const origTitle = document.title;
+    document.title = `UD_${(s.offerName || 'Oferta').replace(/[^a-zA-Z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ _-]/g, '')}`;
     window.scrollTo(0, 0);
-
-    // Enter PDF mode — hides .no-pdf elements via CSS
-    document.body.classList.add('pdf-mode');
-
-    const exportEl = document.getElementById('exportContent');
-    const fileName = `UD_${(s.offerName || 'Oferta').replace(/[^a-zA-Z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ _-]/g, '')}.pdf`;
-
-    // Small delay to let browser repaint after pdf-mode class
-    setTimeout(() => {
-      html2pdf().set({
-        margin:       [0.4, 0.3, 0.4, 0.3],
-        filename:     fileName,
-        image:        { type: 'jpeg', quality: 0.95 },
-        html2canvas:  {
-          scale: 2,
-          useCORS: true,
-          scrollX: 0,
-          scrollY: 0,
-          windowWidth: 1200,
-          logging: false,
-          removeContainer: true,
-        },
-        jsPDF:        { unit: 'in', format: 'a4', orientation: 'landscape' },
-        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
-      })
-      .from(exportEl)
-      .save()
-      .then(() => {
-        App.toast('PDF wygenerowany', 'success');
-      })
-      .catch(err => {
-        console.error('PDF export error:', err);
-        App.toast('Błąd generowania PDF: ' + (err.message || 'nieznany'), 'error');
-      })
-      .finally(() => {
-        btn.innerHTML = orig;
-        btn.disabled = false;
-        document.body.classList.remove('pdf-mode');
-      });
-    }, 100);
+    window.print();
+    document.title = origTitle;
   },
 
   openRiskPicker() { Matrix.renderRiskPicker(); document.getElementById('riskPickerModal').classList.remove('hidden'); },
