@@ -205,20 +205,21 @@ function initRiskToggles() {
     document.getElementById('sum-death-section')?.classList.toggle('hidden', !deathCb.checked);
   });
   tempCb?.addEventListener('change', () => {
-    document.getElementById('info-temp-section')?.classList.toggle('hidden', !tempCb.checked);
+    document.getElementById('sum-temp-section')?.classList.toggle('hidden', !tempCb.checked);
   });
   permCb?.addEventListener('change', () => {
-    document.getElementById('info-perm-section')?.classList.toggle('hidden', !permCb.checked);
+    document.getElementById('sum-perm-section')?.classList.toggle('hidden', !permCb.checked);
   });
 
-  // Zaokrąglenie sumy w dół do pełnych tysięcy
-  const sumInput = document.getElementById('nwDeathSum');
-  if (sumInput) {
-    sumInput.addEventListener('change', () => {
-      const v = parseInt(sumInput.value, 10);
-      if (!isNaN(v) && v > 0) sumInput.value = Math.floor(v / 1000) * 1000;
+  // Zaokrąglenie sum w dół do pełnych tysięcy
+  ['nwDeathSum', 'permIncapacitySum'].forEach(id => {
+    const input = document.getElementById(id);
+    if (!input) return;
+    input.addEventListener('change', () => {
+      const v = parseInt(input.value, 10);
+      if (!isNaN(v) && v > 0) input.value = Math.floor(v / 1000) * 1000;
     });
-  }
+  });
 }
 
 /* ──────────────────────────────────────────

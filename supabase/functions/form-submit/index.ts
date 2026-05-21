@@ -122,10 +122,12 @@ serve(async (req) => {
       risk_gravity_bike:        yesNo(body.risk_gravity_bike),
       risk_aviation:            yesNo(body.risk_aviation),
 
-      /* ── coverage selection (new) ── */
+      /* ── coverage selection ── */
       risk_death_invalidity:  yesNo(body.riskDeathInvalidity  ?? body.risk_death_invalidity),
       risk_temp_incapacity:   yesNo(body.riskTempIncapacity   ?? body.risk_temp_incapacity),
       risk_perm_incapacity:   yesNo(body.riskPermIncapacity   ?? body.risk_perm_incapacity),
+      temp_incapacity_sum:    body.tempIncapacitySum           ?? body.temp_incapacity_sum  ?? null,
+      perm_incapacity_sum:    body.permIncapacitySum           ?? body.perm_incapacity_sum  ?? null,
 
       /* ── NW clauses (new) ── */
       nw_death_sum:           body.nwDeathSum          ?? body.nw_death_sum          ?? null,
