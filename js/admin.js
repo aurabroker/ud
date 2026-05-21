@@ -406,10 +406,31 @@ const Admin = {
     Store.resetState();
     Store.state.clientId = clientId;
     Store.state.clientName = c.full_name || '';
+    Store.state.clientProfile = Admin._extractClientProfile(c);
     App.syncEditorUI();
     App.navigateTo('editor');
     Matrix.render();
+    ClientView.renderClientParams();
     App.toast(`Oferta dla ${c.full_name || 'klienta'} — dodaj ryzyka i ubezpieczycieli`, 'info');
+  },
+
+  _extractClientProfile(c) {
+    return {
+      employment_type: c.employment_type || null,
+      profession: c.profession || null,
+      risk_death_invalidity: c.risk_death_invalidity || false,
+      risk_temp_incapacity: c.risk_temp_incapacity || false,
+      temp_incapacity_sum: c.temp_incapacity_sum || null,
+      risk_perm_incapacity: c.risk_perm_incapacity || false,
+      perm_incapacity_sum: c.perm_incapacity_sum || null,
+      nw_death_sum: c.nw_death_sum || null,
+      nw_funeral: c.nw_funeral || null,
+      nw_adaptation: c.nw_adaptation || null,
+      nw_hospital_daily: c.nw_hospital_daily || null,
+      nw_medical_costs: c.nw_medical_costs || null,
+      nw_unconscious_weekly: c.nw_unconscious_weekly || null,
+      nw_permanent_damage: c.nw_permanent_damage || null,
+    };
   },
 
   // ---- USER ACTIONS ----

@@ -19,6 +19,66 @@ const ClientView = {
     }
   },
 
+  renderClientParams() {
+    const el = document.getElementById('clientParamsSection');
+    if (!el) return;
+    const p = Store.state.clientProfile;
+    if (!p) { el.classList.add('hidden'); return; }
+
+    const hasRisks = p.risk_death_invalidity || p.risk_temp_incapacity || p.risk_perm_incapacity || p.nw_death_sum;
+    const nwList = [
+      ['nw_funeral', 'Zasiłek pogrzebowy', 'zł'],
+      ['nw_adaptation', 'Adaptacja mieszkania', 'zł'],
+      ['nw_hospital_daily', 'Dzienna szpitalna', 'zł/dzień'],
+      ['nw_medical_costs', 'Koszty leczenia', 'zł'],
+      ['nw_unconscious_weekly', 'Tygodniowa nieprzytomność', 'zł/tydz.'],
+      ['nw_permanent_damage', 'Trwały uszczerbek', null],
+    ];
+    const activeNw = nwList.filter(([key]) => p[key]);
+
+    if (!hasRisks && activeNw.length === 0) { el.classList.add('hidden'); return; }
+
+    let html = `<div class="card" style="margin-bottom:1rem;">
+      <div class="card-header"><div class="card-title">📋 Parametry oferty</div></div>
+      <div class="card-body-padded">`;
+
+    if (p.employment_type || p.profession) {
+      html += `<p style="font-size:0.8rem;color:var(--slate-500);margin-bottom:0.75rem;">`;
+      if (p.employment_type) html += escHtml(p.employment_type);
+      if (p.profession) html += `${p.employment_type ? ' · ' : ''}${escHtml(p.profession)}`;
+      html += `</p>`;
+    }
+
+    if (hasRisks) {
+      html += `<div style="margin-bottom:0.75rem;">
+        <div style="font-size:0.72rem;font-weight:700;color:var(--slate-400);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem;">Wybrane ryzyka</div>`;
+      if (p.risk_death_invalidity)
+        html += `<div class="detail-row"><span>Śmierć / inwalidztwo</span><strong style="color:var(--blue-600);">✓</strong></div>`;
+      if (p.risk_temp_incapacity)
+        html += `<div class="detail-row"><span>Przejściowa niezdolność do pracy</span><strong style="color:var(--blue-600);">${p.temp_incapacity_sum ? formatCurrency(p.temp_incapacity_sum) + ' zł/mies.' : '✓'}</strong></div>`;
+      if (p.risk_perm_incapacity)
+        html += `<div class="detail-row"><span>Trwała niezdolność do pracy</span><strong style="color:var(--blue-600);">${p.perm_incapacity_sum ? formatCurrency(p.perm_incapacity_sum) + ' zł' : '✓'}</strong></div>`;
+      if (p.nw_death_sum)
+        html += `<div class="detail-row"><span>Suma NW (śmierć)</span><strong>${formatCurrency(p.nw_death_sum)} zł</strong></div>`;
+      html += `</div>`;
+    }
+
+    if (activeNw.length > 0) {
+      html += `<div>
+        <div style="font-size:0.72rem;font-weight:700;color:var(--slate-400);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem;">Klauzule NW</div>`;
+      activeNw.forEach(([key, label, unit]) => {
+        const val = p[key];
+        const valueStr = (unit && val && typeof val === 'string') ? `${formatCurrency(val)} ${unit}` : '✓';
+        html += `<div class="detail-row"><span>${label}</span><strong style="color:var(--blue-600);">${valueStr}</strong></div>`;
+      });
+      html += `</div>`;
+    }
+
+    html += `</div></div>`;
+    el.innerHTML = html;
+    el.classList.remove('hidden');
+  },
+
   renderExclusions() {
     const el = document.getElementById('clientExclusionsSection');
     if (!el) return;

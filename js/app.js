@@ -208,9 +208,11 @@ const App = {
     Store.resetState();
     Store.state.clientId = clientId;
     Store.state.clientName = c.full_name || '';
+    Store.state.clientProfile = Admin._extractClientProfile(c);
     App.syncEditorUI();
     App.navigateTo('editor');
     Matrix.render();
+    ClientView.renderClientParams();
     App.toast(`Oferta dla ${c.full_name || 'klienta'} — dodaj ryzyka i ubezpieczycieli`, 'info');
   },
 
@@ -529,6 +531,7 @@ const App = {
         document.getElementById('clientMessageSection').classList.remove('hidden');
         document.getElementById('clientMessageDisplay').textContent = Store.state.brokerMessage;
       }
+      ClientView.renderClientParams();
       Matrix.render();
       ClientView.renderExclusions();
     } catch (err) {
