@@ -21,6 +21,7 @@ const Store = {
     variants: [],
     activeVariantIdx: 0,
     clientChoice: null,
+    clientProfile: null,
   },
 
   resetState() {
@@ -36,6 +37,7 @@ const Store = {
       variants: [Store.createEmptyVariant('Wariant 1')],
       activeVariantIdx: 0,
       clientChoice: null,
+      clientProfile: null,
     };
   },
 
@@ -130,7 +132,7 @@ const Store = {
       name: s.offerName,
       client_name: s.clientName || null,
       client_id: s.clientId || null,
-      data: { insurers: s.insurers, risks: s.risks, variants: s.variants, activeVariantIdx: s.activeVariantIdx },
+      data: { insurers: s.insurers, risks: s.risks, variants: s.variants, activeVariantIdx: s.activeVariantIdx, clientProfile: s.clientProfile || null },
       broker_message: s.brokerMessage || null,
       version: CONFIG.APP_VERSION,
       user_id: Auth.currentUser.id,
@@ -185,6 +187,7 @@ const Store = {
     Store.state.risks = d.risks || [];
     Store.state.variants = d.variants || [Store.createEmptyVariant('Wariant 1')];
     Store.state.activeVariantIdx = d.activeVariantIdx || 0;
+    Store.state.clientProfile = d.clientProfile || null;
 
     if (d.matrixData && (!d.variants || d.variants.length === 0)) {
       Store.state.variants = [{
