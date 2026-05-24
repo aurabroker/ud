@@ -1,7 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND2_API_KEY")!;
-const FROM_EMAIL = "Aura Expert <noreply@utratadochodu.com>";
+const FROM_EMAIL = "UtrataDochodu.pl <noreply@utratadochodu.com>";
 const REPLY_TO = "biuro@utratadochodu.com";
 
 const WA_PHONE  = "48504400901";
