@@ -164,7 +164,7 @@ function getEmailContent(
 
 Deno.serve(async (req: Request) => {
   const authHeader = req.headers.get("Authorization");
-  if (authHeader !== `Bearer ${Deno.env.get("WEBHOOK_SECRET")}`) {
+  if (authHeader !== `Bearer ${Deno.env.get("WEBHOOK_SECRET2")}`) {
     return new Response("Unauthorized", { status: 401 });
   }
 
