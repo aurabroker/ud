@@ -1,8 +1,8 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
-const RESEND_API_KEY = Deno.env.get("RESEND2_API_KEY")!;
-const FROM_EMAIL = "UtrataDochodu.pl <noreply@utratadochodu.com>";
-const REPLY_TO = "biuro@utratadochodu.com";
+const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY")!;
+const FROM_EMAIL = "Aura Expert <noreply@utratadochodu.pl>";
+const REPLY_TO = "kontakt@utratadochodu.pl";
 
 interface WebhookPayload {
   type: "INSERT" | "UPDATE" | "DELETE";
@@ -26,7 +26,7 @@ function getEmailContent(
 
   if (isQuick) {
     return {
-      subject: "UtrataDochodu.pl - Twoje prywatne L4",
+      subject: "Twoje zapytanie dotarło — oddzwonimy w ciągu 24h",
       html: `<!DOCTYPE html>
 <html lang="pl">
 <head>
@@ -52,7 +52,7 @@ function getEmailContent(
         </table>
         <p style="margin:0 0 8px;font-size:14px;font-weight:500;color:#0f172a;">Chcesz ofertę szybciej — bez rozmowy?</p>
         <p style="margin:0 0 20px;font-size:14px;color:#64748b;line-height:1.6;">
-          Wypełnij pełny wniosek ubezpieczeniowy (ok. 12 minut) i wyślemy Ci gotowe oferty od CEU sp. z o.o. i Leadenhall Insurance SA od razu po weryfikacji.
+          Wypełnij pełny wniosek ubezpieczeniowy (ok. 12 minut) i wyślemy Ci gotowe oferty od CEU i Leadenhall od razu po weryfikacji.
         </p>
         <table cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
           <tr><td style="background:#0f172a;border-radius:8px;padding:13px 24px;">
@@ -71,7 +71,7 @@ function getEmailContent(
       <tr><td style="background:#f8f7f2;padding:20px 36px;border-top:1px solid #e5e2d8;">
         <p style="margin:0;font-size:11px;color:#94a3b8;line-height:1.6;">
           Aura Expert Sp. z o.o. · agent ubezpieczeniowy wpisany do rejestru KNF<br>
-          Ubezpieczyciele: CEU sp. z o.o. oraz Leadenhall Insurance SA<br>
+          Ubezpieczyciele: Chaucer Europe Underwriting Sp. z o.o. (CEU) oraz Leadenhall Insurance plc<br>
           <a href="https://utratadochodu.pl" style="color:#94a3b8;">utratadochodu.pl</a>
         </p>
       </td></tr>
@@ -85,7 +85,7 @@ function getEmailContent(
 
   // Pełny wniosek
   return {
-    subject: "UtrataDochodu.pl - Twoje prywatne L4",
+    subject: "Wniosek przyjęty — oferta w ciągu 1–2 dni roboczych",
     html: `<!DOCTYPE html>
 <html lang="pl">
 <head>
@@ -104,7 +104,7 @@ function getEmailContent(
       <tr><td style="padding:32px 36px 24px;">
         <p style="margin:0 0 16px;font-size:16px;color:#334155;">Cześć${firstName ? ` ${firstName}` : ""},</p>
         <p style="margin:0 0 20px;font-size:15px;color:#334155;line-height:1.7;">
-          Twój kompletny wniosek ubezpieczeniowy dotarł. Przekazaliśmy go do weryfikacji przez naszych partnerów — <strong>CEU sp. z o.o.</strong> i <strong>Leadenhall Insurance SA</strong>.
+          Twój kompletny wniosek ubezpieczeniowy dotarł. Przekazaliśmy go do weryfikacji przez naszych partnerów — <strong>CEU</strong> i <strong>Leadenhall Insurance</strong>.
         </p>
         <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
           <tr>
@@ -150,7 +150,7 @@ function getEmailContent(
       <tr><td style="background:#f8f7f2;padding:20px 36px;border-top:1px solid #e5e2d8;">
         <p style="margin:0;font-size:11px;color:#94a3b8;line-height:1.6;">
           Aura Expert Sp. z o.o. · agent ubezpieczeniowy wpisany do rejestru KNF<br>
-          Ubezpieczyciele: CEU sp. z o.o. oraz Leadenhall Insurance SA<br>
+          Ubezpieczyciele: Chaucer Europe Underwriting Sp. z o.o. (CEU) oraz Leadenhall Insurance plc<br>
           <a href="https://utratadochodu.pl" style="color:#94a3b8;">utratadochodu.pl</a>
         </p>
       </td></tr>
@@ -163,6 +163,11 @@ function getEmailContent(
 }
 
 Deno.serve(async (req: Request) => {
+  const authHeader = req.headers.get("Authorization");
+  if (authHeader !== `Bearer ${Deno.env.get("WEBHOOK_SECRET")}`) {
+    return new Response("Unauthorized", { status: 401 });
+  }
+
   let payload: WebhookPayload;
   try {
     payload = await req.json();
