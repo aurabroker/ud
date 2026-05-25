@@ -431,25 +431,62 @@
 <body class="bg-slate-100 text-slate-800 antialiased selection:bg-blue-100 selection:text-blue-900">
 
     <!-- Szybki kontakt -->
-    <section class="bg-slate-900 text-white py-10 px-4">
-        <div class="max-w-4xl mx-auto text-center">
-            <p class="text-amber-400 text-xs font-bold uppercase tracking-widest mb-2">Bezpłatna wycena · odpowiedź w 24h</p>
-            <h2 class="text-2xl sm:text-3xl font-extrabold mb-6">Zostaw dane — oddzwonimy z ofertą</h2>
-            <form id="quick-form" class="flex flex-col sm:flex-row gap-3 max-w-3xl mx-auto" novalidate>
-                <input type="text" id="quick-name" placeholder="Imię i nazwisko" required
-                    class="flex-1 rounded-lg border border-slate-600 bg-slate-800 text-white placeholder-slate-400 p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 min-w-0">
-                <input type="email" id="quick-email" placeholder="Adres e-mail" required
-                    class="flex-1 rounded-lg border border-slate-600 bg-slate-800 text-white placeholder-slate-400 p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 min-w-0">
-                <input type="tel" id="quick-phone" placeholder="Numer telefonu" required
-                    class="flex-1 rounded-lg border border-slate-600 bg-slate-800 text-white placeholder-slate-400 p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 min-w-0">
-                <button type="submit" id="quick-submit"
-                    class="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold text-sm hover:bg-blue-500 transition-colors whitespace-nowrap shadow-lg">
-                    Chcę wycenę →
-                </button>
-            </form>
-            <p id="quick-success" class="hidden text-green-400 font-semibold mt-4">Dziękujemy! Oddzwonimy wkrótce.</p>
-            <p id="quick-error" class="hidden text-red-400 mt-4 text-sm">Wystąpił błąd. Zadzwoń: <a href="tel:+48504400901" class="font-bold underline">+48 504 400 901</a></p>
-            <p class="mt-5 text-xs text-slate-400">Lub <a href="#wniosek" class="underline hover:text-white transition-colors">wypełnij pełny wniosek</a> — od razu otrzymasz gotowe oferty od CEU i Leadenhall Insurance SA.</p>
+    <section class="relative bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white overflow-hidden">
+        <div class="absolute inset-0 pointer-events-none overflow-hidden">
+            <div class="absolute -top-32 -right-32 w-[28rem] h-[28rem] bg-blue-600 rounded-full opacity-10 blur-3xl"></div>
+            <div class="absolute bottom-0 -left-24 w-80 h-80 bg-teal-500 rounded-full opacity-10 blur-3xl"></div>
+        </div>
+        <div class="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+
+                <!-- Lewa strona: propozycja wartości -->
+                <div>
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="relative flex h-3 w-3">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                        </span>
+                        <span class="text-green-400 text-xs font-bold uppercase tracking-widest">Doradca dostępny</span>
+                    </div>
+                    <h2 class="text-3xl sm:text-4xl font-extrabold leading-tight mb-4">
+                        Twoje dochody<br>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-teal-400">zasługują na ochronę.</span>
+                    </h2>
+                    <p class="text-slate-300 mb-6 leading-relaxed">Zostaw dane — doradca oddzwoni z orientacyjną wyceną w ciągu <strong class="text-white">24h roboczych</strong>. Zero zobowiązań.</p>
+                    <ul class="space-y-2.5">
+                        <li class="flex items-center gap-2 text-sm text-slate-300"><span class="text-green-400 font-black text-base">✓</span> Polisa dopasowana do zawodu i formy zatrudnienia</li>
+                        <li class="flex items-center gap-2 text-sm text-slate-300"><span class="text-green-400 font-black text-base">✓</span> Produkty CEU sp. z o.o. i Leadenhall Insurance SA</li>
+                        <li class="flex items-center gap-2 text-sm text-slate-300"><span class="text-green-400 font-black text-base">✓</span> Bezpłatna analiza i porównanie ofert</li>
+                    </ul>
+                </div>
+
+                <!-- Prawa strona: formularz -->
+                <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 sm:p-8">
+                    <p class="text-xs text-amber-400 font-bold uppercase tracking-widest mb-5">Szybka wycena — bezpłatnie</p>
+                    <form id="quick-form" class="space-y-3" novalidate>
+                        <input type="text" id="quick-name" placeholder="Imię i nazwisko" required
+                            class="w-full rounded-lg border border-slate-600 bg-slate-800/80 text-white placeholder-slate-400 p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                        <input type="email" id="quick-email" placeholder="Adres e-mail" required
+                            class="w-full rounded-lg border border-slate-600 bg-slate-800/80 text-white placeholder-slate-400 p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                        <input type="tel" id="quick-phone" placeholder="Numer telefonu" required
+                            class="w-full rounded-lg border border-slate-600 bg-slate-800/80 text-white placeholder-slate-400 p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                        <button type="submit" id="quick-submit"
+                            class="w-full bg-blue-600 hover:bg-blue-500 text-white py-3.5 rounded-lg font-bold text-sm transition-all shadow-lg hover:shadow-blue-500/30 hover:-translate-y-0.5 active:translate-y-0">
+                            Chcę bezpłatną wycenę →
+                        </button>
+                    </form>
+                    <p id="quick-success" class="hidden text-center text-green-400 font-semibold mt-4 py-3 bg-green-500/10 rounded-lg border border-green-500/20">
+                        Dziękujemy! Oddzwonimy wkrótce.
+                    </p>
+                    <p id="quick-error" class="hidden text-center text-red-400 mt-4 text-sm">
+                        Wystąpił błąd. Zadzwoń: <a href="tel:+48504400901" class="font-bold underline">+48 504 400 901</a>
+                    </p>
+                    <p class="mt-4 text-xs text-slate-500 text-center">
+                        Lub <a href="#wniosek" class="text-slate-400 underline hover:text-white transition-colors">wypełnij pełny wniosek</a> — od razu otrzymasz gotowe oferty.
+                    </p>
+                </div>
+
+            </div>
         </div>
     </section>
 
@@ -710,35 +747,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
-
-    <!-- Szybki kontakt -->
-    <section id="szybki-kontakt" class="py-10 bg-white border-t border-slate-100">
-        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-6" data-aos="fade-up">
-                <span class="bg-amber-100 text-amber-800 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wide">Szybka Wycena</span>
-                <h2 class="text-2xl font-bold text-slate-900 mt-3">Wolisz żebyśmy zadzwonili?</h2>
-                <p class="text-slate-500 mt-2 text-sm">Zostaw dane — doradca oddzwoni z orientacyjną wyceną <strong>w ciągu 24h roboczych</strong>.</p>
-            </div>
-            <form id="quick-form" class="flex flex-col sm:flex-row gap-3" data-aos="fade-up" data-aos-delay="100" novalidate>
-                <input type="text" id="quick-name" placeholder="Imię i nazwisko" required
-                    class="flex-1 rounded-lg border border-slate-300 p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 min-w-0">
-                <input type="email" id="quick-email" placeholder="Adres e-mail" required
-                    class="flex-1 rounded-lg border border-slate-300 p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 min-w-0">
-                <input type="tel" id="quick-phone" placeholder="Telefon" required
-                    class="flex-1 rounded-lg border border-slate-300 p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 min-w-0">
-                <button type="submit" id="quick-submit"
-                    class="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold text-sm hover:bg-blue-700 transition-colors whitespace-nowrap shadow-sm">
-                    Zadzwońcie do mnie →
-                </button>
-            </form>
-            <p id="quick-success" class="hidden text-center text-green-700 font-semibold mt-5 py-3 bg-green-50 rounded-lg border border-green-200">
-                Dziękujemy! Oddzwonimy do Ciebie wkrótce.
-            </p>
-            <p id="quick-error" class="hidden text-center text-red-600 mt-5 py-3 bg-red-50 rounded-lg border border-red-200 text-sm">
-                Wystąpił błąd. Spróbuj ponownie lub zadzwoń: <a href="tel:+48504400901" class="font-bold">+48 504 400 901</a>
-            </p>
         </div>
     </section>
 
