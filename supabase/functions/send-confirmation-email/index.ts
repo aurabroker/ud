@@ -4,6 +4,14 @@ const RESEND_API_KEY = Deno.env.get("RESEND2_API_KEY")!;
 const FROM_EMAIL = "UtrataDochodu.pl <noreply@utratadochodu.com>";
 const REPLY_TO = "biuro@utratadochodu.com";
 
+const WA_PHONE  = "48504400901";
+const WA_APIKEY = "5838995";
+
+async function sendWhatsApp(msg: string): Promise<void> {
+  const url = `https://api.callmebot.com/whatsapp.php?phone=${WA_PHONE}&text=${encodeURIComponent(msg)}&apikey=${WA_APIKEY}`;
+  await fetch(url).catch(() => {});
+}
+
 interface WebhookPayload {
   type: "INSERT" | "UPDATE" | "DELETE";
   table: string;
@@ -211,6 +219,14 @@ Deno.serve(async (req: Request) => {
 
   const result = await resendResponse.json();
   console.log(`Email wysłany [${table}]:`, result.id, "→", email);
+
+  const name  = String(record.full_name ?? record.name ?? "—");
+  const phone = String(record.phone ?? "—");
+  const waMsg = isQuick
+    ? `📱 Nowy kontakt!\nImię: ${name}\nTel: ${phone}\nEmail: ${email}`
+    : `📋 Nowy wniosek!\nImię: ${name}\nTel: ${phone}\nEmail: ${email}\nZawód: ${String(record.profession ?? "—")}`;
+  await sendWhatsApp(waMsg);
+
   return new Response(JSON.stringify({ ok: true, id: result.id }), {
     headers: { "Content-Type": "application/json" },
   });
