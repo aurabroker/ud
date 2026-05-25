@@ -168,6 +168,51 @@ async function initRandomBlogPost() {
 }
 
 /* ──────────────────────────────────────────
+   SZYBKI KONTAKT — zapis do udochodu_contacts
+────────────────────────────────────────── */
+function initQuickForm() {
+  const form = document.getElementById('quick-form');
+  if (!form) return;
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const name  = document.getElementById('quick-name')?.value.trim();
+    const email = document.getElementById('quick-email')?.value.trim();
+    const phone = document.getElementById('quick-phone')?.value.trim();
+    if (!name || !email || !phone) return;
+
+    const btn     = document.getElementById('quick-submit');
+    const origTxt = btn.textContent;
+    btn.textContent = 'Wysyłanie…';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch(`${_SB_URL}/rest/v1/udochodu_contacts`, {
+        method: 'POST',
+        headers: {
+          apikey: _SB_KEY,
+          'Content-Type': 'application/json',
+          Prefer: 'return=minimal',
+        },
+        body: JSON.stringify({ name, email, phone }),
+      });
+
+      if (res.ok) {
+        form.classList.add('hidden');
+        document.getElementById('quick-success').classList.remove('hidden');
+      } else {
+        document.getElementById('quick-error').classList.remove('hidden');
+      }
+    } catch {
+      document.getElementById('quick-error').classList.remove('hidden');
+    } finally {
+      btn.textContent = origTxt;
+      btn.disabled = false;
+    }
+  });
+}
+
+/* ──────────────────────────────────────────
    AOS ANIMACJE
 ────────────────────────────────────────── */
 function initAOS() {
@@ -243,6 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initMobileMenu();
   initSmoothScroll();
   initRandomBlogPost();
+  initQuickForm();
   initAOS();
   initEmployerSlider();
   initRiskToggles();
