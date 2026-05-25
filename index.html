@@ -430,6 +430,29 @@
 </head>
 <body class="bg-slate-100 text-slate-800 antialiased selection:bg-blue-100 selection:text-blue-900">
 
+    <!-- Szybki kontakt -->
+    <section class="bg-slate-900 text-white py-10 px-4">
+        <div class="max-w-4xl mx-auto text-center">
+            <p class="text-amber-400 text-xs font-bold uppercase tracking-widest mb-2">Bezpłatna wycena · odpowiedź w 24h</p>
+            <h2 class="text-2xl sm:text-3xl font-extrabold mb-6">Zostaw dane — oddzwonimy z ofertą</h2>
+            <form id="quick-form" class="flex flex-col sm:flex-row gap-3 max-w-3xl mx-auto" novalidate>
+                <input type="text" id="quick-name" placeholder="Imię i nazwisko" required
+                    class="flex-1 rounded-lg border border-slate-600 bg-slate-800 text-white placeholder-slate-400 p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 min-w-0">
+                <input type="email" id="quick-email" placeholder="Adres e-mail" required
+                    class="flex-1 rounded-lg border border-slate-600 bg-slate-800 text-white placeholder-slate-400 p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 min-w-0">
+                <input type="tel" id="quick-phone" placeholder="Numer telefonu" required
+                    class="flex-1 rounded-lg border border-slate-600 bg-slate-800 text-white placeholder-slate-400 p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 min-w-0">
+                <button type="submit" id="quick-submit"
+                    class="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold text-sm hover:bg-blue-500 transition-colors whitespace-nowrap shadow-lg">
+                    Chcę wycenę →
+                </button>
+            </form>
+            <p id="quick-success" class="hidden text-green-400 font-semibold mt-4">Dziękujemy! Oddzwonimy wkrótce.</p>
+            <p id="quick-error" class="hidden text-red-400 mt-4 text-sm">Wystąpił błąd. Zadzwoń: <a href="tel:+48504400901" class="font-bold underline">+48 504 400 901</a></p>
+            <p class="mt-5 text-xs text-slate-400">Lub <a href="#wniosek" class="underline hover:text-white transition-colors">wypełnij pełny wniosek</a> — od razu otrzymasz gotowe oferty od CEU i Leadenhall Insurance SA.</p>
+        </div>
+    </section>
+
     <!-- Nawigacja -->
     <nav class="bg-slate-100/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 transition-all duration-300" id="navbar">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
