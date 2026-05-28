@@ -11,10 +11,23 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1/dist/confetti.browser.min.js"></script>
 <style>
   body { font-family: 'Inter', sans-serif; }
-  .star { font-size: 2.2rem; cursor: pointer; transition: color 0.1s, transform 0.1s; display: inline-block; }
-  .star:hover { transform: scale(1.15); }
+  .star {
+    font-size: 2.6rem; cursor: pointer; display: inline-block;
+    transition: transform 0.12s, filter 0.12s;
+  }
+  .star:hover { transform: scale(1.2); }
+  @keyframes starGlow {
+    0%,100% { filter: drop-shadow(0 0 3px #fbbf24) drop-shadow(0 0 6px #f59e0b); transform: scale(1); }
+    50%      { filter: drop-shadow(0 0 10px #fde68a) drop-shadow(0 0 22px #f59e0b) drop-shadow(0 0 40px #fbbf24); transform: scale(1.1); }
+  }
+  .star-glow { animation: starGlow 1.4s ease-in-out infinite; }
+  .star-glow:nth-child(2) { animation-delay: .18s; }
+  .star-glow:nth-child(3) { animation-delay: .36s; }
+  .star-glow:nth-child(4) { animation-delay: .54s; }
+  .star-glow:nth-child(5) { animation-delay: .72s; }
 </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased">
@@ -71,17 +84,27 @@
         </div>
       </div>
 
+      <!-- Zawód -->
+      <div class="mb-5">
+        <label class="block text-sm font-semibold text-slate-700 mb-1.5">
+          Zawód <span class="text-slate-400 font-normal text-xs">(opcjonalnie)</span>
+        </label>
+        <input id="r-zawod" type="text"
+          class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+          placeholder="np. Lekarz, Programista, Przedsiębiorca">
+      </div>
+
       <!-- Gwiazdki -->
       <div class="mb-5">
         <label class="block text-sm font-semibold text-slate-700 mb-2">Ocena <span class="text-red-500">*</span></label>
         <div id="star-row" class="flex gap-1">
-          <span class="star text-slate-200" data-val="1">★</span>
-          <span class="star text-slate-200" data-val="2">★</span>
-          <span class="star text-slate-200" data-val="3">★</span>
-          <span class="star text-slate-200" data-val="4">★</span>
-          <span class="star text-slate-200" data-val="5">★</span>
+          <span class="star star-glow" style="color:#f59e0b" data-val="1">★</span>
+          <span class="star star-glow" style="color:#f59e0b" data-val="2">★</span>
+          <span class="star star-glow" style="color:#f59e0b" data-val="3">★</span>
+          <span class="star star-glow" style="color:#f59e0b" data-val="4">★</span>
+          <span class="star star-glow" style="color:#f59e0b" data-val="5">★</span>
         </div>
-        <input type="hidden" id="r-rating" value="">
+        <input type="hidden" id="r-rating" value="5">
         <p id="r-rating-err" class="text-red-500 text-xs mt-1 hidden">Wybierz ocenę</p>
       </div>
 
@@ -159,7 +182,7 @@
   const EDGE    = `${SB_URL}/functions/v1/review-admin`;
   const sb      = supabase.createClient(SB_URL, SB_KEY);
   let adminPass = null;
-  let selectedRating = 0;
+  let selectedRating = 5;
 
   /* ── Gwiazdki ── */
   const stars = document.querySelectorAll('.star');
@@ -176,7 +199,9 @@
 
   function paintStars(n) {
     stars.forEach((s, i) => {
-      s.style.color = i < n ? '#f59e0b' : '#e2e8f0';
+      const lit = i < n;
+      s.style.color = lit ? '#f59e0b' : '#e2e8f0';
+      s.classList.toggle('star-glow', lit);
     });
   }
 
@@ -212,6 +237,7 @@
     e.preventDefault();
     const name    = document.getElementById('r-name').value.trim();
     const city    = document.getElementById('r-city').value.trim();
+    const zawod   = document.getElementById('r-zawod').value.trim();
     const rating  = parseInt(document.getElementById('r-rating').value);
     const comment = document.getElementById('r-comment').value.trim();
 
@@ -229,7 +255,7 @@
     btn.disabled = true;
     btn.textContent = 'Wysyłanie…';
 
-    const { error } = await sb.from('ud_review').insert({ name, city, rating, comment: comment || null });
+    const { error } = await sb.from('ud_review').insert({ name, city, zawod: zawod || null, rating, comment: comment || null });
 
     if (error) {
       document.getElementById('form-err').textContent = 'Błąd wysyłania. Spróbuj ponownie.';
@@ -241,6 +267,11 @@
 
     document.getElementById('review-form').classList.add('hidden');
     document.getElementById('form-success').classList.remove('hidden');
+    const end = Date.now() + 3000;
+    (function boom() {
+      confetti({ particleCount: 60, spread: 80, origin: { y: 0.5 }, colors: ['#f59e0b','#3b82f6','#10b981','#f43f5e','#a855f7'] });
+      if (Date.now() < end) requestAnimationFrame(boom);
+    })();
   });
 
   /* ── Admin ── */
