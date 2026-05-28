@@ -1177,6 +1177,25 @@ src="https://www.facebook.com/tr?id=4299065913693248&ev=PageView&noscript=1"
         </div>
     </section>
 
+    <!-- Opinie klientów -->
+    <section class="py-12 md:py-16 bg-slate-50 border-t border-slate-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-10">
+          <div class="text-3xl mb-2">⭐</div>
+          <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900 mb-2">Opinie naszych klientów</h2>
+          <p class="text-slate-500 text-sm">Zaufało nam już wiele osób — przekonaj się, co mówią</p>
+        </div>
+        <div id="homepage-reviews" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
+          <div class="col-span-full text-center text-slate-400 py-8">Ładowanie opinii…</div>
+        </div>
+        <div class="text-center">
+          <a href="/opinia.html" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl transition-colors shadow-sm text-sm">
+            Wystaw opinię <span>&rarr;</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
     <!-- Footer -->
     <footer class="bg-slate-900 text-slate-300 py-10 md:py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-10">
@@ -1287,5 +1306,40 @@ src="https://www.facebook.com/tr?id=4299065913693248&ev=PageView&noscript=1"
   </div>
 </section>
 
+<script>
+(async () => {
+  const grid = document.getElementById('homepage-reviews');
+  if (!grid) return;
+  try {
+    const params = new URLSearchParams({
+      select: 'name,city,rating,comment,created_at',
+      approved: 'eq.true',
+      order: 'created_at.desc',
+      limit: '6',
+    });
+    const res = await fetch('https://kukvgsjrmrqtzhkszzum.supabase.co/rest/v1/ud_review?' + params, {
+      headers: {
+        apikey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt1a3Znc2pybXJxdHpoa3N6enVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5MTI0NzYsImV4cCI6MjA4ODQ4ODQ3Nn0.wOB-4CJTcRksSUY7WD7CXEccTKNxPIVF8AT8hczS5zY',
+        Accept: 'application/json',
+      },
+    });
+    const data = await res.json();
+    const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    if (!data.length) {
+      grid.innerHTML = '<div class="col-span-full text-center text-slate-400 py-8 border-2 border-dashed border-slate-200 rounded-2xl">Bądź pierwszą osobą, która wystawi opinię!</div>';
+      return;
+    }
+    grid.innerHTML = data.map(r => `
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col">
+        <div class="flex gap-0.5 text-amber-400 text-xl mb-3">${'★'.repeat(r.rating)}<span class="text-slate-200">${'★'.repeat(5-r.rating)}</span></div>
+        <p class="text-slate-600 text-sm leading-relaxed flex-grow mb-4">${r.comment ? esc(r.comment) : '<em class="text-slate-400">Brak komentarza</em>'}</p>
+        <div class="flex justify-between items-center border-t border-slate-100 pt-3 text-xs text-slate-500">
+          <span class="font-bold text-slate-800">${esc(r.name)}</span>
+          <span>${esc(r.city)} · ${new Date(r.created_at).toLocaleDateString('pl-PL')}</span>
+        </div>
+      </div>`).join('');
+  } catch { grid.innerHTML = ''; }
+})();
+</script>
 </body>
 </html>
