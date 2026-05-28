@@ -182,7 +182,7 @@
 
   /* ── Załaduj zatwierdzone opinie ── */
   async function loadReviews() {
-    const { data } = await sb.from('aura_reviews')
+    const { data } = await sb.from('ud_review')
       .select('name, city, rating, comment, created_at')
       .eq('approved', true)
       .order('created_at', { ascending: false });
@@ -229,7 +229,7 @@
     btn.disabled = true;
     btn.textContent = 'Wysyłanie…';
 
-    const { error } = await sb.from('aura_reviews').insert({ name, city, rating, comment: comment || null });
+    const { error } = await sb.from('ud_review').insert({ name, city, rating, comment: comment || null });
 
     if (error) {
       document.getElementById('form-err').textContent = 'Błąd wysyłania. Spróbuj ponownie.';
