@@ -1,0 +1,78 @@
+{
+  "feature": "System opinii klientów",
+  "source_repo": "aurabroker/ud",
+  "description": "Kompletny system zbierania, moderowania i wyświetlania opinii. Skopiuj go do repo divorce dostosowując nazwy marki, kolory i URL-e Supabase.",
+
+  "supabase": {
+    "migrations": [
+      {
+        "name": "create_ud_review",
+        "sql": "CREATE TABLE IF NOT EXISTS ud_review (\n  id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n  name       TEXT NOT NULL,\n  city       TEXT NOT NULL,\n  rating     SMALLINT NOT NULL CHECK (rating BETWEEN 1 AND 5),\n  comment    TEXT,\n  zawod      TEXT,\n  platform   TEXT NOT NULL DEFAULT 'UtrataDochodu.pl',\n  approved   BOOLEAN NOT NULL DEFAULT false,\n  created_at TIMESTAMPTZ NOT NULL DEFAULT now()\n);\n\nALTER TABLE ud_review ENABLE ROW LEVEL SECURITY;\n\nCREATE POLICY \"public read approved\" ON ud_review\n  FOR SELECT USING (approved = true);\n\nCREATE POLICY \"public insert\" ON ud_review\n  FOR INSERT WITH CHECK (true);"
+      }
+    ],
+    "notes": [
+      "Zmień wartość DEFAULT w kolumnie 'platform' na nazwę nowego serwisu",
+      "Tabela używa RLS: anonimowi użytkownicy mogą tylko INSERT i SELECT WHERE approved=true",
+      "Admin operuje przez edge function z SUPABASE_SERVICE_ROLE_KEY (omija RLS)"
+    ]
+  },
+
+  "edge_function": {
+    "name": "review-admin",
+    "verify_jwt": false,
+    "file": "supabase/functions/review-admin/index.ts",
+    "env_vars_required": ["ADMIN_PASSWORD", "SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"],
+    "actions": ["list", "approve", "reject", "delete"],
+    "source": "import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';\nimport { createClient } from 'https://esm.sh/@supabase/supabase-js@2';\n\nconst CORS = {\n  'Access-Control-Allow-Origin': '*',\n  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',\n};\n\nconst json = (data, status = 200) =>\n  new Response(JSON.stringify(data), { status, headers: { ...CORS, 'Content-Type': 'application/json' } });\n\nserve(async (req) => {\n  if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });\n  try {\n    const { action, id, password } = await req.json();\n    const adminPassword = Deno.env.get('ADMIN_PASSWORD');\n    if (!adminPassword || password !== adminPassword) return json({ error: 'Unauthorized' }, 401);\n    const supabase = createClient(Deno.env.get('SUPABASE_URL'), Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'));\n    if (action === 'list') {\n      const { data, error } = await supabase.from('ud_review').select('*').order('created_at', { ascending: false });\n      if (error) throw error;\n      return json(data);\n    }\n    if (action === 'approve' || action === 'reject') {\n      const { error } = await supabase.from('ud_review').update({ approved: action === 'approve' }).eq('id', id);\n      if (error) throw error;\n      return json({ ok: true });\n    }\n    if (action === 'delete') {\n      const { error } = await supabase.from('ud_review').delete().eq('id', id);\n      if (error) throw error;\n      return json({ ok: true });\n    }\n    return json({ error: 'Unknown action' }, 400);\n  } catch (e) {\n    return json({ error: String(e) }, 500);\n  }\n});"
+  },
+
+  "files": {
+    "opinia.html": {
+      "description": "Strona formularza opinii + wyświetlanie zatwierdzonych + panel admina",
+      "path": "opinia.html",
+      "adapt": [
+        "Zmień SB_URL i SB_KEY na dane nowego projektu Supabase",
+        "Zmień nazwę marki w <nav> i <title>",
+        "Zmień link CTA w <nav> (href='/formularz.html')",
+        "Zmień tekst 'Utrata<span>Dochodu</span>' na nazwę nowego serwisu",
+        "Opcjonalnie zmień kolory (blue-600 → inny kolor brandowy)"
+      ],
+      "cdn_deps": [
+        "https://cdn.tailwindcss.com",
+        "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2",
+        "https://cdn.jsdelivr.net/npm/canvas-confetti@1/dist/confetti.browser.min.js",
+        "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900"
+      ],
+      "features": {
+        "hero_stars": "5 gwiazdek animowanych (heroSpin: obrót 360° + scale + glow), fala z opóźnieniami 0.25s",
+        "rating_stars": "5 gwiazdek klikanych, domyślnie 5/5, statyczne (bez animacji), hover scale(1.2)",
+        "fields": ["Imię (wymagane)", "Miasto (wymagane)", "Zawód (opcjonalne)", "Ocena gwiazdkowa (wymagana)", "Komentarz (opcjonalne)"],
+        "confetti": "3 sekundy konfetti po wysłaniu formularza (canvas-confetti)",
+        "reviews_list": "Siatka zatwierdzonych opinii pod formularzem (3 kolumny)",
+        "admin_panel": "Ukryty za przyciskiem ⚙ na dole, logowanie hasłem, lista oczekujących i zatwierdzonych, akcje: Zatwierdź / Cofnij / Usuń"
+      }
+    },
+
+    "index.html_section": {
+      "description": "Sekcja opinii na stronie głównej — wkleić między FAQ a <footer>",
+      "table": "ud_review",
+      "limit": 6,
+      "filter": "approved = true",
+      "adapt": [
+        "Zmień SB_URL i SB_KEY",
+        "Zmień URL w linku CTA: href='/opinia.html'"
+      ],
+      "html_snippet": "<section class=\"py-12 md:py-16 bg-slate-50 border-t border-slate-200\">\n  <div class=\"max-w-7xl mx-auto px-4 sm:px-6 lg:px-8\">\n    <div class=\"text-center mb-10\">\n      <div class=\"text-3xl mb-2\">⭐</div>\n      <h2 class=\"text-2xl md:text-3xl font-extrabold text-slate-900 mb-2\">Opinie naszych klientów</h2>\n      <p class=\"text-slate-500 text-sm\">Zaufało nam już wiele osób — przekonaj się, co mówią</p>\n    </div>\n    <div id=\"homepage-reviews\" class=\"grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8\">\n      <div class=\"col-span-full text-center text-slate-400 py-8\">Ładowanie opinii…</div>\n    </div>\n    <div class=\"text-center\">\n      <a href=\"/opinia.html\" class=\"inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl transition-colors shadow-sm text-sm\">\n        Wystaw opinię <span>&rarr;</span>\n      </a>\n    </div>\n  </div>\n</section>",
+      "js_snippet": "<script>\n(async () => {\n  const grid = document.getElementById('homepage-reviews');\n  if (!grid) return;\n  try {\n    const params = new URLSearchParams({\n      select: 'name,city,rating,comment,created_at',\n      approved: 'eq.true',\n      order: 'created_at.desc',\n      limit: '6',\n    });\n    const res = await fetch('SUPABASE_URL/rest/v1/ud_review?' + params, {\n      headers: { apikey: 'SUPABASE_ANON_KEY', Accept: 'application/json' },\n    });\n    const data = await res.json();\n    const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;');\n    if (!data.length) {\n      grid.innerHTML = '<div class=\"col-span-full text-center text-slate-400 py-8 border-2 border-dashed border-slate-200 rounded-2xl\">Bądź pierwszą osobą, która wystawi opinię!</div>';\n      return;\n    }\n    grid.innerHTML = data.map(r => `\n      <div class=\"bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col\">\n        <div class=\"flex gap-0.5 text-amber-400 text-xl mb-3\">${'★'.repeat(r.rating)}<span class=\"text-slate-200\">${'★'.repeat(5-r.rating)}</span></div>\n        <p class=\"text-slate-600 text-sm leading-relaxed flex-grow mb-4\">${r.comment ? esc(r.comment) : '<em class=\"text-slate-400\">Brak komentarza</em>'}</p>\n        <div class=\"flex justify-between items-center border-t border-slate-100 pt-3 text-xs text-slate-500\">\n          <span class=\"font-bold text-slate-800\">${esc(r.name)}</span>\n          <span>${esc(r.city)} · ${new Date(r.created_at).toLocaleDateString('pl-PL')}</span>\n        </div>\n      </div>`).join('');\n  } catch { grid.innerHTML = ''; }\n})();\n</script>"
+    }
+  },
+
+  "checklist": [
+    "1. Uruchom SQL migration (create_ud_review) w Supabase nowego projektu",
+    "2. Ustaw ADMIN_PASSWORD w Supabase Dashboard → Edge Functions → Secrets",
+    "3. Skopiuj opinia.html i zaktualizuj SB_URL, SB_KEY, nazwę marki",
+    "4. Wdróż edge function review-admin (supabase functions deploy review-admin)",
+    "5. Wklej sekcję opinii do index.html przed <footer> + skrypt JS przed </body>",
+    "6. Sprawdź CSP — connect-src musi zawierać domenę Supabase nowego projektu"
+  ]
+}
