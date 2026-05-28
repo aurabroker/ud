@@ -28,6 +28,22 @@
   .star-glow:nth-child(3) { animation-delay: .36s; }
   .star-glow:nth-child(4) { animation-delay: .54s; }
   .star-glow:nth-child(5) { animation-delay: .72s; }
+
+  .hero-star {
+    font-size: 3rem; color: #f59e0b; display: inline-block;
+    animation: heroBounce 1.2s ease-in-out infinite;
+    filter: drop-shadow(0 0 8px #fbbf24) drop-shadow(0 0 20px #f59e0b);
+    text-shadow: 0 0 12px #fde68a;
+  }
+  .hero-star:nth-child(1) { animation-delay: 0s; }
+  .hero-star:nth-child(2) { animation-delay: .15s; }
+  .hero-star:nth-child(3) { animation-delay: .30s; }
+  .hero-star:nth-child(4) { animation-delay: .45s; }
+  .hero-star:nth-child(5) { animation-delay: .60s; }
+  @keyframes heroBounce {
+    0%,100% { transform: translateY(0) scale(1);    filter: drop-shadow(0 0 6px #fbbf24) drop-shadow(0 0 16px #f59e0b); }
+    50%      { transform: translateY(-10px) scale(1.2); filter: drop-shadow(0 0 16px #fde68a) drop-shadow(0 0 36px #fbbf24) drop-shadow(0 0 60px #f59e0b); }
+  }
 </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased">
@@ -48,7 +64,13 @@
 <!-- Hero -->
 <div class="bg-slate-900 py-16 sm:py-20">
   <div class="max-w-2xl mx-auto px-4 text-center">
-    <div class="text-5xl mb-4">⭐</div>
+    <div class="flex justify-center gap-2 mb-5" id="hero-stars">
+      <span class="hero-star">★</span>
+      <span class="hero-star">★</span>
+      <span class="hero-star">★</span>
+      <span class="hero-star">★</span>
+      <span class="hero-star">★</span>
+    </div>
     <h1 class="text-4xl font-extrabold text-white mb-3">Twoja opinia</h1>
     <p class="text-slate-400 text-lg">Pomóż innym podjąć właściwą decyzję.<br>Podziel się swoim doświadczeniem z naszą usługą.</p>
   </div>
