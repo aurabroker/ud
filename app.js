@@ -179,7 +179,8 @@ function initQuickForm() {
     const name  = document.getElementById('quick-name')?.value.trim();
     const email = document.getElementById('quick-email')?.value.trim();
     const phone = document.getElementById('quick-phone')?.value.trim();
-    if (!name || !email || !phone) return;
+    const rodo  = document.getElementById('quick-rodo')?.checked;
+    if (!name || !email || !phone || !rodo) return;
 
     const btn     = document.getElementById('quick-submit');
     const origTxt = btn.textContent;
@@ -194,7 +195,7 @@ function initQuickForm() {
           'Content-Type': 'application/json',
           Prefer: 'return=minimal',
         },
-        body: JSON.stringify({ name, email, phone }),
+        body: JSON.stringify({ name, email, phone, rodo_consent: true }),
       });
 
       if (res.ok) {

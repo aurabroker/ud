@@ -77,10 +77,13 @@ function getEmailContent(
         </p>
       </td></tr>
       <tr><td style="background:#f8f7f2;padding:20px 36px;border-top:1px solid #e5e2d8;">
-        <p style="margin:0;font-size:11px;color:#94a3b8;line-height:1.6;">
+        <p style="margin:0 0 8px;font-size:11px;color:#94a3b8;line-height:1.6;">
           Aura Expert Sp. z o.o. · agent ubezpieczeniowy wpisany do rejestru KNF<br>
           Ubezpieczyciele: CEU sp. z o.o. oraz Leadenhall Insurance SA<br>
           <a href="https://utratadochodu.pl" style="color:#94a3b8;">utratadochodu.pl</a>
+        </p>
+        <p style="margin:8px 0 0;font-size:10px;color:#cbd5e1;line-height:1.5;border-top:1px solid #e5e2d8;padding-top:8px;">
+          Wysyłając formularz na stronie utratadochodu.pl wyraziłeś/aś zgodę na przetwarzanie danych osobowych przez Aura Expert Sp. z o.o. w celu przedstawienia oferty ubezpieczeniowej. Administratorem danych jest Aura Expert Sp. z o.o. Przysługuje Ci prawo dostępu do danych, ich sprostowania, usunięcia lub ograniczenia przetwarzania oraz prawo do cofnięcia zgody w dowolnym momencie (cofnięcie zgody nie wpływa na zgodność z prawem przetwarzania dokonanego przed jej cofnięciem). Szczegóły: <a href="https://utratadochodu.pl/polityka-prywatnosci.html" style="color:#94a3b8;">Polityka Prywatności</a>.
         </p>
       </td></tr>
     </table>
@@ -156,10 +159,13 @@ function getEmailContent(
         </p>
       </td></tr>
       <tr><td style="background:#f8f7f2;padding:20px 36px;border-top:1px solid #e5e2d8;">
-        <p style="margin:0;font-size:11px;color:#94a3b8;line-height:1.6;">
+        <p style="margin:0 0 8px;font-size:11px;color:#94a3b8;line-height:1.6;">
           Aura Expert Sp. z o.o. · agent ubezpieczeniowy wpisany do rejestru KNF<br>
           Ubezpieczyciele: CEU sp. z o.o. oraz Leadenhall Insurance SA<br>
           <a href="https://utratadochodu.pl" style="color:#94a3b8;">utratadochodu.pl</a>
+        </p>
+        <p style="margin:8px 0 0;font-size:10px;color:#cbd5e1;line-height:1.5;border-top:1px solid #e5e2d8;padding-top:8px;">
+          Wysyłając formularz na stronie utratadochodu.pl wyraziłeś/aś zgodę na przetwarzanie danych osobowych przez Aura Expert Sp. z o.o. w celu przedstawienia oferty ubezpieczeniowej. Administratorem danych jest Aura Expert Sp. z o.o. Przysługuje Ci prawo dostępu do danych, ich sprostowania, usunięcia lub ograniczenia przetwarzania oraz prawo do cofnięcia zgody w dowolnym momencie. Szczegóły: <a href="https://utratadochodu.pl/polityka-prywatnosci.html" style="color:#94a3b8;">Polityka Prywatności</a>.
         </p>
       </td></tr>
     </table>
