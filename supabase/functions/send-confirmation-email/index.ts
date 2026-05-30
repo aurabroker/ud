@@ -9,7 +9,13 @@ const WA_APIKEY = "5838995";
 
 async function sendWhatsApp(msg: string): Promise<void> {
   const url = `https://api.callmebot.com/whatsapp.php?phone=${WA_PHONE}&text=${encodeURIComponent(msg)}&apikey=${WA_APIKEY}`;
-  await fetch(url).catch(() => {});
+  try {
+    const res = await fetch(url);
+    const body = await res.text();
+    console.log(`CallMeBot [${res.status}]:`, body.substring(0, 300));
+  } catch (err) {
+    console.error("CallMeBot fetch error:", err);
+  }
 }
 
 interface WebhookPayload {
