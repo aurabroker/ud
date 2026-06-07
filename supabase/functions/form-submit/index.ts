@@ -38,11 +38,38 @@ function yesNo(val: unknown): boolean | null {
   return null;
 }
 
+async function verifyTurnstile(token: string, ip: string): Promise<boolean> {
+  const secret = Deno.env.get('TURNSTILE_SECRET_KEY');
+  if (!secret) return true; // skip if not configured
+
+  const form = new URLSearchParams();
+  form.append('secret', secret);
+  form.append('response', token);
+  if (ip) form.append('remoteip', ip);
+
+  const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+    method: 'POST',
+    body: form,
+  });
+  const data = await res.json();
+  return data.success === true;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
 
   try {
     const body = await req.json();
+
+    /* Turnstile verification */
+    const turnstileToken = String(body['cf-turnstile-response'] ?? '').trim();
+    const clientIp = req.headers.get('CF-Connecting-IP') ?? '';
+    if (!turnstileToken || !(await verifyTurnstile(turnstileToken, clientIp))) {
+      return new Response(
+        JSON.stringify({ status: 'error', message: 'Weryfikacja bezpieczeństwa nie powiodła się. Odśwież stronę i spróbuj ponownie.' }),
+        { status: 400, headers: { ...CORS, 'Content-Type': 'application/json' } },
+      );
+    }
 
     /* Validate required fields */
     const pesel: string = String(body.pesel ?? '').trim();
