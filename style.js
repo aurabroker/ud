@@ -23,6 +23,11 @@ function updateWizardUI() {
   document.getElementById('prev-btn').classList.toggle('hidden', currentStepIndex === 0);
   document.getElementById('next-btn').classList.toggle('hidden', currentStepIndex === total - 1);
   document.getElementById('submit-btn').classList.toggle('hidden', currentStepIndex !== total - 1);
+
+  const turnstileWrapper = document.getElementById('turnstile-wrapper');
+  if (turnstileWrapper) {
+    turnstileWrapper.classList.toggle('hidden', currentStepIndex !== total - 1);
+  }
 }
 
 function goNext() {
@@ -188,6 +193,12 @@ function initFormSubmit() {
   form.addEventListener('submit', async e => {
     e.preventDefault();
 
+    const turnstileToken = form.querySelector('[name="cf-turnstile-response"]')?.value;
+    if (!turnstileToken) {
+      showErrorModal('Proszę potwierdzić, że nie jesteś robotem.');
+      return;
+    }
+
     const btn     = document.getElementById('submit-btn');
     const origTxt = btn.innerText;
     btn.innerText = 'Wysyłanie…';
@@ -195,6 +206,7 @@ function initFormSubmit() {
 
     try {
       const dataObj = collectFormData(form);
+      dataObj['cf-turnstile-response'] = turnstileToken;
       const mainRes = await submitToSupabase(dataObj);
 
       if (mainRes.status === 'success') {
