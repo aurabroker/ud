@@ -10,6 +10,7 @@
 <meta name="theme-color" content="#01696f">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1/dist/confetti.browser.min.js"></script>
 <style>
@@ -139,6 +140,11 @@
           placeholder="Co najbardziej doceniasz w naszej usłudze?"></textarea>
       </div>
 
+      <!-- honeypot — ukryte pole, boty je wypełniają -->
+      <input type="text" name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;width:1px;height:1px;" aria-hidden="true">
+
+      <div class="cf-turnstile mb-4" data-sitekey="0x4AAAAAADgSxo_FfjvXKO29" data-theme="light"></div>
+
       <button type="submit" id="submit-btn"
         class="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold py-3.5 rounded-xl transition-colors text-sm shadow-sm">
         Wyślij opinię
@@ -157,52 +163,10 @@
   </div>
 </div>
 
-<!-- Admin trigger — mały, ledwo widoczny -->
-<div class="text-center py-6">
-  <button onclick="toggleAdmin()" class="text-slate-200 hover:text-slate-400 text-xs transition-colors">⚙</button>
-</div>
-
-<!-- Panel admina -->
-<div id="admin-panel" class="hidden bg-slate-900 min-h-screen text-white px-4 py-14">
-  <div class="max-w-4xl mx-auto">
-
-    <!-- Logowanie -->
-    <div id="admin-login" class="max-w-sm mx-auto">
-      <h2 class="text-2xl font-bold mb-8 text-center">Panel administratora</h2>
-      <input id="admin-pass" type="password" placeholder="Hasło administratora"
-        class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        onkeydown="if(event.key==='Enter') adminLogin()">
-      <button onclick="adminLogin()"
-        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-colors">
-        Zaloguj
-      </button>
-      <p id="login-err" class="text-red-400 text-sm text-center mt-3 hidden">Błędne hasło</p>
-    </div>
-
-    <!-- Zawartość admina -->
-    <div id="admin-content" class="hidden">
-      <div class="flex justify-between items-center mb-10">
-        <h2 class="text-2xl font-bold">Panel administratora</h2>
-        <button onclick="adminLogout()" class="text-slate-400 hover:text-white text-sm transition-colors">Wyloguj</button>
-      </div>
-
-      <div id="admin-stats" class="grid grid-cols-3 gap-4 mb-10"></div>
-
-      <h3 class="text-base font-bold text-amber-400 uppercase tracking-widest mb-4">Oczekujące</h3>
-      <div id="admin-pending" class="space-y-3 mb-12"></div>
-
-      <h3 class="text-base font-bold text-emerald-400 uppercase tracking-widest mb-4">Zatwierdzone</h3>
-      <div id="admin-approved" class="space-y-3"></div>
-    </div>
-  </div>
-</div>
-
 <script>
   const SB_URL  = 'https://kukvgsjrmrqtzhkszzum.supabase.co';
   const SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt1a3Znc2pybXJxdHpoa3N6enVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5MTI0NzYsImV4cCI6MjA4ODQ4ODQ3Nn0.wOB-4CJTcRksSUY7WD7CXEccTKNxPIVF8AT8hczS5zY';
-  const EDGE    = `${SB_URL}/functions/v1/review-admin`;
   const sb      = supabase.createClient(SB_URL, SB_KEY);
-  let adminPass = null;
   let selectedRating = 5;
 
   /* ── Gwiazdki ── */
@@ -271,14 +235,28 @@
     }
     if (!valid) return;
 
+    const turnstileToken = document.querySelector('[name="cf-turnstile-response"]')?.value;
+    if (!turnstileToken) {
+      document.getElementById('form-err').textContent = 'Proszę potwierdzić, że nie jesteś robotem.';
+      document.getElementById('form-err').classList.remove('hidden');
+      return;
+    }
+    const honeypot = document.querySelector('[name="website"]')?.value;
+    if (honeypot) return;
+
     const btn = document.getElementById('submit-btn');
     btn.disabled = true;
     btn.textContent = 'Wysyłanie…';
 
-    const { error } = await sb.from('ud_review').insert({ name, city, zawod: zawod || null, rating, comment: comment || null });
+    const res = await fetch(`${SB_URL}/functions/v1/review-submit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: SB_KEY },
+      body: JSON.stringify({ name, city, zawod: zawod || null, rating, comment: comment || null, 'cf-turnstile-response': turnstileToken }),
+    });
+    const result = await res.json().catch(() => ({}));
 
-    if (error) {
-      document.getElementById('form-err').textContent = 'Błąd wysyłania. Spróbuj ponownie.';
+    if (!res.ok || result.status === 'error') {
+      document.getElementById('form-err').textContent = result.message || 'Błąd wysyłania. Spróbuj ponownie.';
       document.getElementById('form-err').classList.remove('hidden');
       btn.disabled = false;
       btn.textContent = 'Wyślij opinię';
@@ -293,103 +271,6 @@
       if (Date.now() < end) requestAnimationFrame(boom);
     })();
   });
-
-  /* ── Admin ── */
-  function toggleAdmin() {
-    document.getElementById('admin-panel').classList.toggle('hidden');
-    window.scrollTo(0, document.body.scrollHeight);
-  }
-
-  async function adminLogin() {
-    const pass = document.getElementById('admin-pass').value;
-    const res = await fetch(EDGE, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', apikey: SB_KEY },
-      body: JSON.stringify({ action: 'list', password: pass }),
-    });
-    if (!res.ok) {
-      document.getElementById('login-err').classList.remove('hidden');
-      return;
-    }
-    adminPass = pass;
-    document.getElementById('login-err').classList.add('hidden');
-    document.getElementById('admin-login').classList.add('hidden');
-    document.getElementById('admin-content').classList.remove('hidden');
-    renderAdmin(await res.json());
-  }
-
-  function renderAdmin(reviews) {
-    const pending  = reviews.filter(r => !r.approved);
-    const approved = reviews.filter(r => r.approved);
-
-    document.getElementById('admin-stats').innerHTML = `
-      <div class="bg-slate-800 rounded-xl p-4 text-center">
-        <div class="text-3xl font-black text-white">${reviews.length}</div>
-        <div class="text-slate-400 text-xs mt-1">Wszystkich</div>
-      </div>
-      <div class="bg-amber-900/40 rounded-xl p-4 text-center">
-        <div class="text-3xl font-black text-amber-400">${pending.length}</div>
-        <div class="text-slate-400 text-xs mt-1">Oczekujących</div>
-      </div>
-      <div class="bg-emerald-900/40 rounded-xl p-4 text-center">
-        <div class="text-3xl font-black text-emerald-400">${approved.length}</div>
-        <div class="text-slate-400 text-xs mt-1">Zatwierdzonych</div>
-      </div>`;
-
-    document.getElementById('admin-pending').innerHTML = pending.length
-      ? pending.map(adminCard).join('')
-      : '<p class="text-slate-500 text-sm">Brak oczekujących opinii.</p>';
-
-    document.getElementById('admin-approved').innerHTML = approved.length
-      ? approved.map(adminCard).join('')
-      : '<p class="text-slate-500 text-sm">Brak zatwierdzonych opinii.</p>';
-  }
-
-  function adminCard(r) {
-    const stars = '★'.repeat(r.rating) + '<span style="color:#334155">' + '★'.repeat(5 - r.rating) + '</span>';
-    const date  = new Date(r.created_at).toLocaleDateString('pl-PL');
-    const toggleBtn = r.approved
-      ? `<button onclick="adminAction('reject','${r.id}')" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-3 py-2 rounded-lg transition-colors">Cofnij</button>`
-      : `<button onclick="adminAction('approve','${r.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2 rounded-lg transition-colors">Zatwierdź</button>`;
-    return `
-      <div id="acard-${r.id}" class="bg-slate-800 rounded-xl p-5 flex gap-4 items-start">
-        <div class="flex-1 min-w-0">
-          <div class="flex flex-wrap gap-2 items-center mb-1">
-            <span class="text-amber-400 text-sm leading-none">${stars}</span>
-            <span class="font-bold text-sm">${escHtml(r.name)}</span>
-            <span class="text-slate-400 text-xs">${escHtml(r.city)} · ${date}</span>
-          </div>
-          <p class="text-slate-300 text-sm break-words">${r.comment ? escHtml(r.comment) : '<em class="text-slate-500">brak komentarza</em>'}</p>
-        </div>
-        <div class="flex gap-2 flex-shrink-0">
-          ${toggleBtn}
-          <button onclick="adminAction('delete','${r.id}')" class="bg-red-700 hover:bg-red-800 text-white text-xs font-bold px-3 py-2 rounded-lg transition-colors">Usuń</button>
-        </div>
-      </div>`;
-  }
-
-  async function adminAction(action, id) {
-    const res = await fetch(EDGE, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', apikey: SB_KEY },
-      body: JSON.stringify({ action, id, password: adminPass }),
-    });
-    if (!res.ok) { alert('Błąd operacji'); return; }
-    const listRes = await fetch(EDGE, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', apikey: SB_KEY },
-      body: JSON.stringify({ action: 'list', password: adminPass }),
-    });
-    renderAdmin(await listRes.json());
-    loadReviews();
-  }
-
-  function adminLogout() {
-    adminPass = null;
-    document.getElementById('admin-content').classList.add('hidden');
-    document.getElementById('admin-login').classList.remove('hidden');
-    document.getElementById('admin-pass').value = '';
-  }
 
   loadReviews();
 </script>
