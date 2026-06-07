@@ -1,73 +1,44 @@
 /* UtrataDochodu — style.js
-   Wizard wielokrokowy, walidacja PESEL, wysyłka do Supabase
+   Wizard wielokrokowy (Alpine.js), walidacja PESEL, wysyłka do Supabase
 */
 
 /* ──────────────────────────────────────────
-   WIZARD STATE
+   ALPINE — WIZARD STATE
 ────────────────────────────────────────── */
-let activeSteps    = ['step-1', 'step-2', 'step-risks', 'step-3', 'step-info', 'step-4'];
-let currentStepIndex = 0;
+document.addEventListener('alpine:init', () => {
+  Alpine.data('formWizard', () => ({
+    _all: ['step-1', 'step-employer', 'step-2', 'step-risks', 'step-3', 'step-info', 'step-4'],
+    current: 0,
+    employsPeople: false,
 
-function updateWizardUI() {
-  document.querySelectorAll('.step-container').forEach(el => el.classList.add('hidden'));
-  document.getElementById(activeSteps[currentStepIndex]).classList.remove('hidden');
+    get steps()   { return this._all.filter(s => s !== 'step-employer' || this.employsPeople); },
+    get total()   { return this.steps.length; },
+    get stepNum() { return this.current + 1; },
+    get percent() { return Math.round((this.stepNum / this.total) * 100); },
+    get currentId() { return this.steps[this.current]; },
+    get isFirst() { return this.current === 0; },
+    get isLast()  { return this.current === this.total - 1; },
 
-  const stepNum = currentStepIndex + 1;
-  const total   = activeSteps.length;
-  const percent = Math.round((stepNum / total) * 100);
+    isActive(id) { return this.currentId === id; },
 
-  document.getElementById('step-indicator').textContent = `Krok ${stepNum} z ${total}`;
-  document.getElementById('step-percent').textContent   = `${percent}%`;
-  document.getElementById('progress-bar-fill').style.width = `${percent}%`;
+    next() {
+      const el = document.getElementById(this.currentId);
+      for (const input of el.querySelectorAll('input, select, textarea')) {
+        if (!input.checkValidity()) { input.reportValidity(); return; }
+      }
+      if (!this.isLast) { this.current++; window.scrollTo(0, 0); }
+    },
 
-  document.getElementById('prev-btn').classList.toggle('hidden', currentStepIndex === 0);
-  document.getElementById('next-btn').classList.toggle('hidden', currentStepIndex === total - 1);
-  document.getElementById('submit-btn').classList.toggle('hidden', currentStepIndex !== total - 1);
+    prev() {
+      if (!this.isFirst) { this.current--; window.scrollTo(0, 0); }
+    },
 
-  const turnstileWrapper = document.getElementById('turnstile-wrapper');
-  if (turnstileWrapper) {
-    turnstileWrapper.classList.toggle('hidden', currentStepIndex !== total - 1);
-  }
-}
-
-function goNext() {
-  const currentStepEl = document.getElementById(activeSteps[currentStepIndex]);
-  const inputs = currentStepEl.querySelectorAll('input, select, textarea');
-
-  for (const input of inputs) {
-    if (!input.checkValidity()) {
-      input.reportValidity();
-      return;
-    }
-  }
-
-  if (currentStepIndex < activeSteps.length - 1) {
-    currentStepIndex++;
-    updateWizardUI();
-  }
-}
-
-function goPrev() {
-  if (currentStepIndex > 0) {
-    currentStepIndex--;
-    updateWizardUI();
-  }
-}
-
-/* ──────────────────────────────────────────
-   KROK PRACODAWCY — toggle na checkbox
-────────────────────────────────────────── */
-function initEmployerToggle() {
-  const checkbox = document.getElementById('employsPeople');
-  if (!checkbox) return;
-
-  checkbox.addEventListener('change', e => {
-    activeSteps = e.target.checked
-      ? ['step-1', 'step-employer', 'step-2', 'step-risks', 'step-3', 'step-info', 'step-4']
-      : ['step-1', 'step-2', 'step-risks', 'step-3', 'step-info', 'step-4'];
-    updateWizardUI();
-  });
-}
+    toggleEmployer(checked) {
+      this.employsPeople = checked;
+      if (this.current >= this.steps.length) this.current = this.steps.length - 1;
+    },
+  }));
+});
 
 /* ──────────────────────────────────────────
    KLAUZULE NW — toggle warunkowy
@@ -95,27 +66,20 @@ function initNwToggle() {
 ────────────────────────────────────────── */
 function validatePesel(pesel) {
   if (pesel.length !== 11) return 'PESEL musi składać się dokładnie z 11 cyfr.';
-
   const weights = [1, 3, 7, 9, 1, 3, 7, 9, 1, 3];
   let sum = 0;
-  for (let i = 0; i < 10; i++) {
-    sum += parseInt(pesel.charAt(i)) * weights[i];
-  }
+  for (let i = 0; i < 10; i++) sum += parseInt(pesel.charAt(i)) * weights[i];
   const control = (10 - (sum % 10)) % 10;
-  if (control !== parseInt(pesel.charAt(10))) {
-    return 'Nieprawidłowy numer PESEL (błąd sumy kontrolnej).';
-  }
+  if (control !== parseInt(pesel.charAt(10))) return 'Nieprawidłowy numer PESEL (błąd sumy kontrolnej).';
   return '';
 }
 
 function initPeselValidation() {
   const peselInput = document.querySelector('input[name="pesel"]');
   if (!peselInput) return;
-
   peselInput.addEventListener('input', function () {
     this.value = this.value.replace(/\D/g, '').substring(0, 11);
-    const error = validatePesel(this.value);
-    this.setCustomValidity(error);
+    this.setCustomValidity(validatePesel(this.value));
   });
 }
 
@@ -125,30 +89,21 @@ function initPeselValidation() {
 const EDGE_FN_URL = 'https://kukvgsjrmrqtzhkszzum.supabase.co/functions/v1/form-submit';
 
 const BOOL_FIELDS = [
-  /* istniejące medyczne */
   'med_heart','med_diabetes','med_bones','med_stomach','med_neuro','med_surgery','med_aids',
-  /* istniejące sport */
   'risk_caving','risk_climbing','risk_extreme_bike_boat','risk_diving','risk_sailing',
   'risk_horse','risk_skiing','risk_hunting','risk_quad','risk_aviation_non_comm',
   'risk_balloon','risk_skydiving','risk_paragliding','risk_horse_jumping',
   'risk_gravity_bike','risk_motorcycle','risk_aviation',
-  /* istniejące zgody */
   'exclusions_accepted','employsPeople',
-  /* nowe — pytania zdrowotne */
   'weightChange','takesMeds','pendingDiagnosis','disabilityCongenital','smoker',
-  /* nowe — zdarzenia medyczne */
   'eventHospitalization','eventSickLeave30','eventFurtherDiagnosis',
-  /* nowe — ryzyka */
   'riskDeathInvalidity','riskTempIncapacity','riskPermIncapacity',
-  /* nowe — klauzule NW */
   'nwPermanentDamage',
-  /* nowe — klauzula informacyjna */
   'informedAccepted',
 ];
 
 function collectFormData(form) {
   const dataObj = Object.fromEntries(new FormData(form).entries());
-
   BOOL_FIELDS.forEach(f => {
     const el = form.querySelector(`[name="${f}"]`);
     if (!el) return;
@@ -158,12 +113,10 @@ function collectFormData(form) {
       dataObj[f] = form.querySelector(`[name="${f}"]:checked`)?.value || 'No';
     }
   });
-
   if (dataObj.employsPeople === 'Yes') {
     const slider = document.getElementById('emp_slider');
     if (slider) dataObj.emp_contribution = slider.value + '%';
   }
-
   return dataObj;
 }
 
@@ -174,10 +127,6 @@ async function submitToSupabase(dataObj) {
     body: JSON.stringify(dataObj),
   });
   return res.json();
-}
-
-function showSuccessModal(form) {
-  window.location.href = '/thankyou.html';
 }
 
 function showErrorModal(message) {
@@ -208,9 +157,8 @@ function initFormSubmit() {
       const dataObj = collectFormData(form);
       dataObj['cf-turnstile-response'] = turnstileToken;
       const mainRes = await submitToSupabase(dataObj);
-
       if (mainRes.status === 'success') {
-        showSuccessModal(form);
+        window.location.href = '/thankyou.html';
       } else {
         showErrorModal(mainRes.message);
       }
@@ -227,10 +175,6 @@ function initFormSubmit() {
 /* ──────────────────────────────────────────
    MODALS
 ────────────────────────────────────────── */
-function closeSuccessModal() {
-  document.getElementById('success-modal').classList.add('hidden');
-}
-
 function closeErrorModal() {
   document.getElementById('error-modal').classList.add('hidden');
 }
@@ -243,14 +187,9 @@ function toggleExclusionsModal() {
    INIT
 ────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
-  initEmployerToggle();
   initNwToggle();
   initPeselValidation();
   initFormSubmit();
-  updateWizardUI();
-
-  document.getElementById('prev-btn')?.addEventListener('click', goPrev);
-  document.getElementById('next-btn')?.addEventListener('click', goNext);
 
   document.getElementById('calc-to-form-btn')
     ?.addEventListener('click', () =>
@@ -262,8 +201,6 @@ document.addEventListener('DOMContentLoaded', () => {
     ?.addEventListener('click', toggleExclusionsModal);
   document.getElementById('exclusions-close-btn')
     ?.addEventListener('click', toggleExclusionsModal);
-  document.getElementById('success-modal-close')
-    ?.addEventListener('click', closeSuccessModal);
   document.getElementById('error-modal-close')
     ?.addEventListener('click', closeErrorModal);
 });
