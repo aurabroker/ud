@@ -1,5 +1,6 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { logError } from '../_shared/logger.ts';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -183,7 +184,8 @@ serve(async (req) => {
     const { error: dbError } = await supabase.from('ud_clients').insert([cleanRecord]);
 
     if (dbError) {
-      console.error('DB insert error:', dbError.message);
+      const ip = req.headers.get('CF-Connecting-IP') ?? undefined;
+      await logError('form-submit', dbError.message, { code: dbError.code }, ip);
       return new Response(
         JSON.stringify({ status: 'error', message: 'Błąd zapisu. Spróbuj ponownie.' }),
         { status: 500, headers: { ...CORS, 'Content-Type': 'application/json' } },
@@ -191,13 +193,18 @@ serve(async (req) => {
     }
 
     /* GetResponse sync — non-fatal */
-    const grOk = await syncGetResponse(cleanRecord).catch(() => false);
+    const grOk = await syncGetResponse(cleanRecord).catch(async (e) => {
+      await logError('form-submit', `GetResponse sync failed: ${e.message}`);
+      return false;
+    });
 
     return new Response(
       JSON.stringify({ status: 'success', supabase: 'ok', getresponse: grOk }),
       { headers: { ...CORS, 'Content-Type': 'application/json' } },
     );
   } catch (err) {
+    const ip = req.headers.get('CF-Connecting-IP') ?? undefined;
+    await logError('form-submit', String(err), undefined, ip);
     console.error('Unhandled error:', err);
     return new Response(
       JSON.stringify({ status: 'error', message: 'Nieoczekiwany błąd serwera.' }),

@@ -1,5 +1,6 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { logError } from '../_shared/logger.ts';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -55,13 +56,13 @@ serve(async (req) => {
 
     const { error } = await supabase.from('ud_review').insert({ name, city, zawod, rating, comment });
     if (error) {
-      console.error('DB error:', error.message);
+      await logError('review-submit', error.message, { code: error.code }, ip);
       return json({ status: 'error', message: 'Błąd zapisu.' }, 500);
     }
 
     return json({ status: 'success' });
   } catch (e) {
-    console.error('Unhandled:', e);
+    await logError('review-submit', String(e), undefined, req.headers.get('CF-Connecting-IP') ?? undefined);
     return json({ status: 'error', message: 'Nieoczekiwany błąd.' }, 500);
   }
 });
