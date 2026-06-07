@@ -6,6 +6,24 @@ const SB_URL = 'https://kukvgsjrmrqtzhkszzum.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt1a3Znc2pybXJxdHpoa3N6enVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5MTI0NzYsImV4cCI6MjA4ODQ4ODQ3Nn0.wOB-4CJTcRksSUY7WD7CXEccTKNxPIVF8AT8hczS5zY';
 const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
 
+function imgTransform(url, width, quality = 80) {
+  if (!url) return null;
+  const transformed = url.replace(
+    '/storage/v1/object/public/',
+    '/storage/v1/render/image/public/',
+  );
+  const sep = transformed.includes('?') ? '&' : '?';
+  return `${transformed}${sep}width=${width}&quality=${quality}&format=webp`;
+}
+
+function cardImg(art, altText) {
+  const rawUrl = art.preview_image_url || art.thumbnail_url;
+  if (!rawUrl) return null;
+  const src    = imgTransform(rawUrl, 800);
+  const src2x  = imgTransform(rawUrl, 1200);
+  return `<img src="${src}" srcset="${src} 800w, ${src2x} 1200w" sizes="(max-width:640px) 100vw, (max-width:1024px) 50vw, 33vw" alt="${altText}" class="w-full h-full object-cover" loading="lazy" decoding="async" width="800" height="192">`;
+}
+
 const cardStyles = [
   { bg: 'bg-blue-50',    text: 'text-blue-600',   emoji: '💸' },
   { bg: 'bg-amber-50',   text: 'text-amber-600',  emoji: '⚖️' },
@@ -41,9 +59,7 @@ async function loadBlogPosts() {
       return `
         <article class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col hover:shadow-lg transition-shadow cursor-pointer" data-article-id="${art.id}" data-article-slug="${art.slug || ''}">
           <div class="${style.bg} h-48 flex items-center justify-center border-b border-slate-100 overflow-hidden">
-            ${art.preview_image_url || art.thumbnail_url
-              ? `<img src="${art.preview_image_url || art.thumbnail_url}" alt="${art.title}" class="w-full h-full object-cover">`
-              : `<span class="text-6xl">${style.emoji}</span>`}
+            ${cardImg(art, art.title) || `<span class="text-6xl">${style.emoji}</span>`}
           </div>
           <div class="p-6 sm:p-8 flex flex-col flex-grow">
             <div class="text-xs font-bold ${style.text} uppercase tracking-widest mb-3">${mainTag}</div>
