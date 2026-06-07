@@ -33,17 +33,40 @@ const cardStyles = [
   { bg: 'bg-indigo-50',  text: 'text-indigo-600', emoji: '📈' },
 ];
 
+const CACHE_KEY = 'ud_blog_articles';
+const CACHE_TTL = 5 * 60 * 1000; // 5 minut
+
+function getCached() {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const { ts, data } = JSON.parse(raw);
+    if (Date.now() - ts > CACHE_TTL) { localStorage.removeItem(CACHE_KEY); return null; }
+    return data;
+  } catch { return null; }
+}
+
+function setCache(data) {
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data })); } catch {}
+}
+
 async function loadBlogPosts() {
   const grid = document.getElementById('blog-grid');
   try {
-    const { data, error } = await supabaseClient
-      .from('aura_articles')
-      .select('id, slug, title, excerpt, tags, published_at, created_at, preview_image_url, thumbnail_url')
-      .eq('status', 'published')
-      .contains('platforms', ['UtrataDochodu.pl'])
-      .order('published_at', { ascending: false });
+    let data = getCached();
 
-    if (error) throw error;
+    if (!data) {
+      const { data: fetched, error } = await supabaseClient
+        .from('aura_articles')
+        .select('id, slug, title, excerpt, tags, published_at, created_at, preview_image_url, thumbnail_url')
+        .eq('status', 'published')
+        .contains('platforms', ['UtrataDochodu.pl'])
+        .order('published_at', { ascending: false });
+
+      if (error) throw error;
+      data = fetched;
+      setCache(data);
+    }
 
     if (!data || data.length === 0) {
       grid.innerHTML = '<div class="col-span-full text-center text-slate-500 py-10 border-2 border-dashed border-slate-200 rounded-3xl">Brak wpisów w bazie. Opublikuj je w panelu administracyjnym.</div>';
