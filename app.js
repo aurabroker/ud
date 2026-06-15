@@ -179,7 +179,13 @@ function initQuickForm() {
     const name  = document.getElementById('quick-name')?.value.trim();
     const email = document.getElementById('quick-email')?.value.trim();
     const phone = document.getElementById('quick-phone')?.value.trim();
+    const turnstileToken = form.querySelector('[name="cf-turnstile-response"]')?.value;
     if (!name || !email || !phone) return;
+    if (!turnstileToken) {
+      document.getElementById('quick-turnstile-error').classList.remove('hidden');
+      return;
+    }
+    document.getElementById('quick-turnstile-error').classList.add('hidden');
 
     const btn     = document.getElementById('quick-submit');
     const origTxt = btn.textContent;
@@ -194,7 +200,7 @@ function initQuickForm() {
           'Content-Type': 'application/json',
           Prefer: 'return=minimal',
         },
-        body: JSON.stringify({ name, email, phone }),
+        body: JSON.stringify({ name, email, phone, 'cf-turnstile-response': turnstileToken }),
       });
 
       if (res.ok) {
