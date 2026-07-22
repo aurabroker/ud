@@ -1,0 +1,10 @@
+# Cloudflare Pages — konfiguracja projektu udapp (SvelteKit).
+# nodejs_compat jest WYMAGANE (unpdf / Web Crypto / bufory).
+name = "udapp"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".svelte-kit/cloudflare"
+
+# Zmienne środowiskowe NIE są tu trzymane (sekrety!).
+# Ustaw je w panelu Cloudflare: Settings → Variables and Secrets,
+# albo: npx wrangler pages secret put <NAZWA>
