@@ -62,13 +62,19 @@ npx wrangler pages secret put SMSAPI_TOKEN
 - **Supabase Auth:** konta agentów (już są w `ud_user_profiles`). Nowych agentów dodaje się
   w Supabase → Authentication → Users (email+hasło), a profil w `ud_user_profiles` (rola `user`/`admin`).
 - **Supabase Storage:** buckety `ud-offers` i `ud-owu` już utworzone (prywatne).
+- **Biblioteka OWU:** przed wysyłką ofert wgraj OWU w panelu → **Biblioteka OWU**
+  (`/panel/owu`). Leadenhall ma 3 OWU, CEU 2 — każdy wariant z własnym **symbolem**
+  (klucz dopasowania, np. `LW044/AD_D_TTD_PTD/PL/3`, `LOI PREMIUM`). System podpina
+  właściwe OWU do oferty automatycznie po tym symbolu.
 
 ---
 
 ## D) Test po wdrożeniu (smoke test)
 
 1. Wejdź na `PUBLIC_APP_URL` → przekierowanie na `/login` → zaloguj się jako agent.
-2. „+ Nowa oferta" → wgraj PDF Leadenhall i/lub CEU → sprawdź sparsowane warianty.
+   Najpierw uzupełnij **Biblioteka OWU** (`/panel/owu`) — wgraj OWU Leadenhall/CEU.
+2. „+ Nowa oferta" → wgraj PDF Leadenhall i/lub CEU → sprawdź sparsowane warianty
+   (właściwe OWU podepnie się automatycznie po symbolu).
 3. Uzupełnij email + telefon klienta → „Wyślij klientowi".
 4. Otwórz link z maila (lub skopiowany) w trybie incognito → wpisz PIN z SMS → oferta się odblokuje.
 5. Pobierz PDF/OWU, zadaj pytanie, wybierz wariant — sprawdź, czy agent dostał maile.

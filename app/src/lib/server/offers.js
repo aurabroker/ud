@@ -8,6 +8,7 @@ import { generateShareToken, generatePin, hashPin } from './crypto.js';
 import { sendSms } from './sms.js';
 import { sendEmail } from './email.js';
 import { offerLinkEmail } from './templates.js';
+import { pickOwu } from './owuMatch.js';
 import { env } from '$env/dynamic/private';
 import { env as pubEnv } from '$env/dynamic/public';
 
@@ -87,24 +88,31 @@ export async function createOfferFromPdfs(p) {
     documents.push({ ...doc, storage_path: storagePath, insurer_type });
   }
 
-  // 3) Podepnij OWU z biblioteki dla użytych ubezpieczycieli
-  for (const type of insurerTypes) {
-    const { data: owu } = await sb
-      .from('ud_owu_library')
-      .select('*')
-      .eq('insurer_type', type)
-      .eq('active', true)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    if (owu) {
+  // 3) Podepnij właściwe OWU do każdego wariantu — dopasowanie po symbolu.
+  //    Leadenhall ma 3 OWU, CEU 2 — oferta wskazuje swój symbol (owu_symbol).
+  const attachedOwu = new Set(); // dedup po storage_path
+  const owuCache = {}; // insurer_type -> lista aktywnych OWU
+  for (const doc of documents) {
+    if (!owuCache[doc.insurer_type]) {
+      const { data } = await sb
+        .from('ud_owu_library')
+        .select('*')
+        .eq('insurer_type', doc.insurer_type)
+        .eq('active', true);
+      owuCache[doc.insurer_type] = data || [];
+    }
+    const owu = pickOwu(owuCache[doc.insurer_type], doc.owu_symbol);
+    if (owu && !attachedOwu.has(owu.storage_path)) {
+      attachedOwu.add(owu.storage_path);
       await sb.from('ud_offer_files').insert({
         offer_id: offer.id,
+        document_id: doc.id,
         file_type: 'owu',
-        file_name: `OWU ${owu.title}.pdf`,
+        file_name: owu.file_name || `OWU ${owu.title}.pdf`,
         storage_bucket: owu.storage_bucket,
         storage_path: owu.storage_path,
-        insurer_type: type
+        insurer_type: doc.insurer_type,
+        size_bytes: owu.size_bytes || null
       });
     }
   }

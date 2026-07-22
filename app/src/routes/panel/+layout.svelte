@@ -5,7 +5,13 @@
 </script>
 
 <header class="header">
-  <a href="/panel" style="color:#fff;text-decoration:none;" class="logo">Utrata<span>Dochodu</span></a>
+  <div style="display:flex;align-items:center;gap:1.5rem;">
+    <a href="/panel" style="color:#fff;text-decoration:none;" class="logo">Utrata<span>Dochodu</span></a>
+    <nav style="display:flex;gap:1rem;font-size:.9rem;">
+      <a href="/panel" style="color:#cbd5e1;text-decoration:none;">Oferty</a>
+      <a href="/panel/owu" style="color:#cbd5e1;text-decoration:none;">Biblioteka OWU</a>
+    </nav>
+  </div>
   <div style="display:flex;align-items:center;gap:1rem;">
     <div style="text-align:right;line-height:1.2;">
       <div style="font-size:.85rem;font-weight:600;">{name}</div>
