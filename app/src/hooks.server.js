@@ -46,3 +46,16 @@ export async function handle({ event, resolve }) {
     filterSerializedResponseHeaders: (name) => name === 'content-range' || name === 'x-supabase-api-version'
   });
 }
+
+/**
+ * handleError — loguje i UJAWNIA komunikat błędu na stronie 500.
+ * (Diagnostyka deploymentu — po ustabilizowaniu można skrócić message.)
+ */
+export function handleError({ error, event }) {
+  const message = error instanceof Error ? error.message : String(error);
+  console.error('[500]', event?.url?.pathname, '->', message, error?.stack || '');
+  return {
+    message,
+    where: event?.url?.pathname
+  };
+}
