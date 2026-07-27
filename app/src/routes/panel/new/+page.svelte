@@ -1,9 +1,26 @@
 <script>
   import { enhance } from '$app/forms';
-  let { form } = $props();
+  let { data, form } = $props();
   let loading = $state(false);
   let fileNames = $state([]);
   function onFiles(e) { fileNames = [...e.target.files].map((f) => f.name); }
+
+  // Wybór istniejącego klienta
+  let clientId = $state('');
+  let clientName = $state('');
+  let clientEmail = $state('');
+  let clientPhone = $state('');
+
+  function onPickClient(e) {
+    clientId = e.target.value;
+    const c = data.clients.find((x) => x.id === clientId);
+    if (c) {
+      clientName = c.full_name || '';
+      clientEmail = c.email || '';
+      clientPhone = c.phone || '';
+    }
+  }
+  const picked = $derived(!!clientId);
 </script>
 
 <svelte:head><title>Nowa oferta — Panel</title></svelte:head>
@@ -28,23 +45,39 @@
   </div>
 
   <div class="card card-pad" style="margin-bottom:1.25rem;">
-    <h3 style="font-size:1rem;margin-bottom:1rem;">2. Dane klienta</h3>
+    <h3 style="font-size:1rem;margin-bottom:1rem;">2. Klient</h3>
+
+    <div class="field">
+      <label class="label" for="clientPick">Wybierz istniejącego klienta (z bazy) lub wpisz nowego</label>
+      <select class="input" id="clientPick" onchange={onPickClient}>
+        <option value="">— nowy klient (wpisz ręcznie) —</option>
+        {#each data.clients as c}
+          <option value={c.id}>{c.full_name}{c.email ? ` · ${c.email}` : ''}{c.phone ? ` · ${c.phone}` : ''}</option>
+        {/each}
+      </select>
+      {#if picked}
+        <p class="muted" style="margin-top:.4rem;font-size:.8rem;">✓ Dane uzupełnione z bazy. Oferta zostanie powiązana z tym klientem. Możesz je nadpisać poniżej.</p>
+      {/if}
+    </div>
+
+    <input type="hidden" name="clientId" value={clientId} />
+
     <div class="field">
       <label class="label" for="offerName">Nazwa oferty (wewnętrzna)</label>
       <input class="input" id="offerName" name="offerName" placeholder="np. Kowalski — utrata dochodu" />
     </div>
     <div class="field">
       <label class="label" for="clientName">Imię i nazwisko klienta</label>
-      <input class="input" id="clientName" name="clientName" />
+      <input class="input" id="clientName" name="clientName" bind:value={clientName} />
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
       <div class="field">
         <label class="label" for="clientEmail">Email klienta</label>
-        <input class="input" type="email" id="clientEmail" name="clientEmail" placeholder="do wysłania linku" />
+        <input class="input" type="email" id="clientEmail" name="clientEmail" bind:value={clientEmail} placeholder="do wysłania linku" />
       </div>
       <div class="field">
         <label class="label" for="clientPhone">Telefon klienta</label>
-        <input class="input" id="clientPhone" name="clientPhone" placeholder="48XXXXXXXXX (PIN SMS)" />
+        <input class="input" id="clientPhone" name="clientPhone" bind:value={clientPhone} placeholder="48XXXXXXXXX (PIN SMS)" />
       </div>
     </div>
     <div class="field">

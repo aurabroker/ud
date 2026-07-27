@@ -1,6 +1,19 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { createOfferFromPdfs } from '$lib/server/offers.js';
 
+export async function load({ locals }) {
+  const { user } = await locals.safeGetSession();
+  if (!user) throw redirect(303, '/login');
+
+  const { data: clients } = await locals.supabase
+    .from('ud_clients')
+    .select('id, full_name, email, phone, profession, employment_type')
+    .order('created_at', { ascending: false })
+    .limit(500);
+
+  return { clients: clients || [] };
+}
+
 export const actions = {
   default: async ({ request, locals }) => {
     const { user } = await locals.safeGetSession();
@@ -8,10 +21,26 @@ export const actions = {
 
     const form = await request.formData();
     const offerName = String(form.get('offerName') || '').trim();
-    const clientName = String(form.get('clientName') || '').trim();
-    const clientEmail = String(form.get('clientEmail') || '').trim();
-    const clientPhone = String(form.get('clientPhone') || '').trim();
+    const clientId = String(form.get('clientId') || '').trim() || null;
+    let clientName = String(form.get('clientName') || '').trim();
+    let clientEmail = String(form.get('clientEmail') || '').trim();
+    let clientPhone = String(form.get('clientPhone') || '').trim();
     const brokerMessage = String(form.get('brokerMessage') || '').trim();
+
+    // Jeśli wybrano istniejącego klienta — dane bierzemy z bazy (autorytatywnie),
+    // z fallbackiem na to, co agent ewentualnie nadpisał w formularzu.
+    if (clientId) {
+      const { data: c } = await locals.supabase
+        .from('ud_clients')
+        .select('full_name, email, phone')
+        .eq('id', clientId)
+        .maybeSingle();
+      if (c) {
+        clientName = clientName || c.full_name || '';
+        clientEmail = clientEmail || c.email || '';
+        clientPhone = clientPhone || c.phone || '';
+      }
+    }
 
     const uploads = form.getAll('pdfs').filter((f) => f && typeof f === 'object' && f.size > 0);
     if (uploads.length === 0) return fail(400, { error: 'Dodaj przynajmniej jeden plik PDF.' });
@@ -32,6 +61,7 @@ export const actions = {
         clientName,
         clientEmail,
         clientPhone,
+        clientId,
         brokerMessage,
         files
       });
