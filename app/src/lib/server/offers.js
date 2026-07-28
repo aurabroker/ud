@@ -9,6 +9,8 @@ import { sendSms } from './sms.js';
 import { sendEmail } from './email.js';
 import { offerLinkEmail } from './templates.js';
 import { pickOwu } from './owuMatch.js';
+import { buildOfferSummaryHtml } from './summaryHtml.js';
+import { htmlToPdf } from './pdfshift.js';
 import { env } from '$env/dynamic/private';
 import { env as pubEnv } from '$env/dynamic/public';
 
@@ -139,6 +141,36 @@ export async function createOfferFromPdfs(p) {
         size_bytes: owu.size_bytes || null
       });
     }
+  }
+
+  // 4) Brandowane podsumowanie PDF (PDFShift) — do pobrania przez klienta.
+  //    Odporne: brak klucza / błąd nie przerywa tworzenia oferty.
+  try {
+    const html = buildOfferSummaryHtml({
+      clientName: p.clientName,
+      offerName: p.offerName,
+      documents
+    });
+    const pdf = await htmlToPdf(html);
+    if (pdf.ok && pdf.buffer) {
+      const path = `${offer.id}/podsumowanie.pdf`;
+      const bytes = new Uint8Array(pdf.buffer);
+      const { error: upErr } = await sb.storage
+        .from(BUCKET)
+        .upload(path, bytes, { contentType: 'application/pdf', upsert: true });
+      if (!upErr) {
+        await sb.from('ud_offer_files').insert({
+          offer_id: offer.id,
+          file_type: 'summary',
+          file_name: 'Podsumowanie oferty.pdf',
+          storage_bucket: BUCKET,
+          storage_path: path,
+          size_bytes: bytes.byteLength
+        });
+      }
+    }
+  } catch (e) {
+    console.warn('[pdfshift] podsumowanie nie wygenerowane:', e?.message || e);
   }
 
   return { offerId: offer.id, shareToken, documents };
