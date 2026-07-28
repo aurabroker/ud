@@ -7,7 +7,7 @@ import { createServerClient } from '@supabase/ssr';
 import { env } from '$env/dynamic/private';
 import { env as pubEnv } from '$env/dynamic/public';
 
-const VERSION = 'diag-7-smstoken';
+const VERSION = 'diag-8-aliasy';
 
 export async function GET({ cookies }) {
   const out = { version: VERSION, ok: false };
@@ -21,8 +21,8 @@ export async function GET({ cookies }) {
       PIN_COOKIE_SECRET: present(env.PIN_COOKIE_SECRET),
       SMS_TOKEN: present(env.SMSPLANET_TOKEN || env.SMSTOKEN),
       SMS_SENDER: present(env.SMSPLANET_SENDER || env.SMSSENDER),
-      RESEND_API_KEY: present(env.RESEND_API_KEY),
-      PDFSHIFT_API_KEY: present(env.PDFSHIFT_API_KEY)
+      RESEND: present(env.RESEND_API_KEY || env.RESEND_API),
+      PDFSHIFT: present(env.PDFSHIFT_API_KEY || env.PDFSHIFT_API)
     };
     // pokaż początek URL, by wykryć literówki/spacje (bez pełnej wartości)
     out.urlPreview = (pubEnv.PUBLIC_SUPABASE_URL || '').slice(0, 34);

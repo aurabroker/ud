@@ -9,7 +9,7 @@ import { env } from '$env/dynamic/private';
  * @returns {Promise<{ ok: boolean, stub?: boolean, buffer?: ArrayBuffer, error?: string }>}
  */
 export async function htmlToPdf(html) {
-  const key = env.PDFSHIFT_API_KEY;
+  const key = env.PDFSHIFT_API_KEY || env.PDFSHIFT_API;
   if (!key) {
     console.warn('[pdfshift] PDFSHIFT_API_KEY brak — tryb stub (PDF nie wygenerowany).');
     return { ok: false, stub: true };

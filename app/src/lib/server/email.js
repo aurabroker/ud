@@ -9,7 +9,7 @@ import { env } from '$env/dynamic/private';
  * @returns {Promise<{ sent: boolean, stub?: boolean, id?: string, error?: string }>}
  */
 export async function sendEmail({ to, subject, html, replyTo }) {
-  const key = env.RESEND_API_KEY;
+  const key = env.RESEND_API_KEY || env.RESEND_API;
   const from = env.RESEND_FROM || 'Utrata Dochodu <onboarding@resend.dev>';
 
   if (!key) {
