@@ -6,6 +6,7 @@
   let sending = $state(false);
   let copied = $state(false);
   let editing = $state(false);
+  let adding = $state(false);
 
   const statusLabel = { draft: 'Szkic', sent: 'Wysłana', viewed: 'Otwarta', chosen: 'Wybrana', rejected: 'Rezygnacja' };
   const choice = data.offer.client_choice;
@@ -133,6 +134,25 @@
   {:else}
     <p class="muted">Brak sparsowanych wariantów.</p>
   {/if}
+
+  <!-- Dodawanie wariantów -->
+  <div style="margin-top:1.25rem;border-top:1px dashed var(--slate-200);padding-top:1rem;">
+    <h4 style="font-size:.92rem;margin-bottom:.6rem;">➕ Dodaj wariant(y) — wgraj kolejne PDF-y</h4>
+    <form method="POST" action="?/addDocs" enctype="multipart/form-data"
+      use:enhance={() => { adding = true; return async ({ update }) => { await update({ reset: true }); adding = false; }; }}>
+      <div style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:flex-end;">
+        <div class="field" style="margin:0;flex:1;min-width:240px;">
+          <label class="label" for="addPdfs">Pliki ofert (Leadenhall / CEU) — można kilka naraz</label>
+          <input class="input" type="file" id="addPdfs" name="pdfs" accept="application/pdf" multiple required />
+        </div>
+        <div class="field" style="margin:0;max-width:170px;">
+          <label class="label" for="addPass">Hasło PDF (jeśli jest)</label>
+          <input class="input" id="addPass" name="pdfPassword" inputmode="numeric" maxlength="12" autocomplete="off" />
+        </div>
+        <button class="btn btn-primary" type="submit" disabled={adding}>{adding ? 'Wczytuję…' : 'Dodaj do porównania'}</button>
+      </div>
+    </form>
+  </div>
 </div>
 
 <!-- Wybór klienta -->

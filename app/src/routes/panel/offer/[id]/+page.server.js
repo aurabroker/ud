@@ -1,6 +1,6 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { createAdminClient } from '$lib/server/supabase.js';
-import { sendOfferToClient, deleteOffer, deleteOfferDocument } from '$lib/server/offers.js';
+import { sendOfferToClient, deleteOffer, deleteOfferDocument, addDocumentsToOffer } from '$lib/server/offers.js';
 import { env as pubEnv } from '$env/dynamic/public';
 
 export async function load({ params, locals }) {
@@ -63,6 +63,28 @@ export const actions = {
     const { error: e } = await sb.from('ud_offers').update(patch).eq('id', params.id);
     if (e) return fail(400, { error: 'Zapis: ' + e.message });
     return { saved: true };
+  },
+
+  addDocs: async ({ params, request, locals }) => {
+    const { user } = await locals.safeGetSession();
+    if (!user) throw redirect(303, '/login');
+    const form = await request.formData();
+    const password = String(form.get('pdfPassword') || '').trim();
+    const uploads = form.getAll('pdfs').filter((f) => f && typeof f === 'object' && f.size > 0);
+    if (uploads.length === 0) return fail(400, { error: 'Dodaj przynajmniej jeden plik PDF.' });
+    const files = [];
+    for (const f of uploads) {
+      if (f.type && f.type !== 'application/pdf' && !f.name.toLowerCase().endsWith('.pdf')) {
+        return fail(400, { error: `Plik „${f.name}" nie jest PDF-em.` });
+      }
+      files.push({ name: f.name, bytes: new Uint8Array(await f.arrayBuffer()) });
+    }
+    try {
+      const res = await addDocumentsToOffer(params.id, files, password || null);
+      return { saved: true, added: res.added };
+    } catch (e) {
+      return fail(400, { error: e?.message || 'Błąd dodawania wariantów' });
+    }
   },
 
   deleteDoc: async ({ params, request, locals }) => {

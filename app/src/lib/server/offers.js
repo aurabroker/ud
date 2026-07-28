@@ -177,6 +177,137 @@ export async function createOfferFromPdfs(p) {
 }
 
 /**
+ * Dodaje kolejne warianty (pliki PDF) do istniejącej oferty.
+ * Parsuje, zapisuje, podpina brakujące OWU i regeneruje podsumowanie.
+ * @param {string} offerId
+ * @param {Array<{ name: string, bytes: Uint8Array }>} files
+ * @param {string|null} [password]
+ */
+export async function addDocumentsToOffer(offerId, files, password) {
+  const sb = createAdminClient();
+  const { data: offer, error } = await sb.from('ud_offers').select('*').eq('id', offerId).single();
+  if (error || !offer) throw new Error('Oferta nie znaleziona');
+
+  // Parsuj wszystkie przed zapisem (błąd hasła nie zostawia śmieci).
+  const parsedFiles = [];
+  for (const f of files) {
+    let res;
+    try {
+      res = await parseOfferPdf(f.bytes, { password: password || undefined });
+    } catch (e) {
+      const name = e?.name || '';
+      if (name === 'PasswordException' || /password/i.test(e?.message || '')) {
+        throw new Error(`Plik „${f.name}" jest zabezpieczony hasłem${password ? ', a podane hasło jest błędne' : ' — podaj hasło'}.`);
+      }
+      throw new Error(`Nie udało się odczytać „${f.name}": ${e?.message || e}`);
+    }
+    parsedFiles.push({ file: f, parsed: res.offer, insurer_type: res.insurer_type });
+  }
+
+  // Następny sort_order
+  const { data: last } = await sb
+    .from('ud_offer_documents')
+    .select('sort_order')
+    .eq('offer_id', offerId)
+    .order('sort_order', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  let sort = (last?.sort_order ?? -1) + 1;
+
+  const newDocs = [];
+  for (const { file: f, parsed, insurer_type } of parsedFiles) {
+    const { data: doc, error: docErr } = await sb
+      .from('ud_offer_documents')
+      .insert({ offer_id: offerId, sort_order: sort++, source_filename: f.name, ...parsed })
+      .select()
+      .single();
+    if (docErr) throw new Error('Zapis dokumentu: ' + docErr.message);
+
+    const storagePath = `${offerId}/${doc.id}.pdf`;
+    await sb.storage.from(BUCKET).upload(storagePath, f.bytes, { contentType: 'application/pdf', upsert: true });
+    await sb.from('ud_offer_documents').update({ storage_path: storagePath }).eq('id', doc.id);
+    await sb.from('ud_offer_files').insert({
+      offer_id: offerId,
+      document_id: doc.id,
+      file_type: 'offer_pdf',
+      file_name: f.name,
+      storage_bucket: BUCKET,
+      storage_path: storagePath,
+      insurer_type,
+      size_bytes: f.bytes.byteLength
+    });
+    newDocs.push({ ...doc, insurer_type });
+  }
+
+  // OWU dla nowych wariantów (dedup względem już podpiętych).
+  const { data: existingOwu } = await sb
+    .from('ud_offer_files')
+    .select('storage_path')
+    .eq('offer_id', offerId)
+    .eq('file_type', 'owu');
+  const attached = new Set((existingOwu || []).map((r) => r.storage_path));
+  const owuCache = {};
+  for (const doc of newDocs) {
+    if (!owuCache[doc.insurer_type]) {
+      const { data } = await sb.from('ud_owu_library').select('*').eq('insurer_type', doc.insurer_type).eq('active', true);
+      owuCache[doc.insurer_type] = data || [];
+    }
+    const owu = pickOwu(owuCache[doc.insurer_type], doc.owu_symbol);
+    if (owu && !attached.has(owu.storage_path)) {
+      attached.add(owu.storage_path);
+      await sb.from('ud_offer_files').insert({
+        offer_id: offerId,
+        document_id: doc.id,
+        file_type: 'owu',
+        file_name: owu.file_name || `OWU ${owu.title}.pdf`,
+        storage_bucket: owu.storage_bucket,
+        storage_path: owu.storage_path,
+        insurer_type: doc.insurer_type,
+        size_bytes: owu.size_bytes || null
+      });
+    }
+  }
+
+  await regenerateSummary(sb, offerId);
+  return { ok: true, added: newDocs.length };
+}
+
+/** Regeneruje podsumowanie PDF z wszystkich wariantów oferty (usuwa stare). */
+async function regenerateSummary(sb, offerId) {
+  try {
+    const { data: offer } = await sb.from('ud_offers').select('name, client_name').eq('id', offerId).single();
+    const { data: documents } = await sb.from('ud_offer_documents').select('*').eq('offer_id', offerId).order('sort_order');
+
+    // usuń stare podsumowanie
+    const { data: old } = await sb.from('ud_offer_files').select('id, storage_path').eq('offer_id', offerId).eq('file_type', 'summary');
+    for (const o of old || []) {
+      await sb.storage.from(BUCKET).remove([o.storage_path]).catch(() => {});
+      await sb.from('ud_offer_files').delete().eq('id', o.id);
+    }
+
+    const html = buildOfferSummaryHtml({ clientName: offer?.client_name, offerName: offer?.name, documents: documents || [] });
+    const pdf = await htmlToPdf(html);
+    if (pdf.ok && pdf.buffer) {
+      const path = `${offerId}/podsumowanie.pdf`;
+      const bytes = new Uint8Array(pdf.buffer);
+      const { error: upErr } = await sb.storage.from(BUCKET).upload(path, bytes, { contentType: 'application/pdf', upsert: true });
+      if (!upErr) {
+        await sb.from('ud_offer_files').insert({
+          offer_id: offerId,
+          file_type: 'summary',
+          file_name: 'Podsumowanie oferty.pdf',
+          storage_bucket: BUCKET,
+          storage_path: path,
+          size_bytes: bytes.byteLength
+        });
+      }
+    }
+  } catch (e) {
+    console.warn('[pdfshift] regeneracja podsumowania:', e?.message || e);
+  }
+}
+
+/**
  * Generuje PIN, zapisuje hash (48h), wysyła SMS + email z linkiem.
  * @param {string} offerId
  * @returns {Promise<{ ok: boolean, sms: any, email: any, pinDev?: string }>}
