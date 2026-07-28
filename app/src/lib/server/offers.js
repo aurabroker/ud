@@ -12,8 +12,8 @@ import { pickOwu } from './owuMatch.js';
 import { buildOfferSummaryHtml } from './summaryHtml.js';
 import { htmlToPdf } from './pdfshift.js';
 import { getSettings } from './settings.js';
+import { clientBaseUrl } from './appUrl.js';
 import { env } from '$env/dynamic/private';
-import { env as pubEnv } from '$env/dynamic/public';
 
 const BUCKET = 'ud-offers';
 
@@ -345,8 +345,7 @@ export async function sendOfferToClient(offerId) {
     expires_at: expiresAt
   });
 
-  const appUrl = (pubEnv.PUBLIC_APP_URL || '').replace(/\/$/, '');
-  const link = `${appUrl}/offer/${offer.share_token}`;
+  const link = `${clientBaseUrl()}/offer/${offer.share_token}`;
 
   let sms = { sent: false };
   if (offer.client_phone) {

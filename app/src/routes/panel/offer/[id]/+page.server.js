@@ -1,7 +1,7 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { createAdminClient } from '$lib/server/supabase.js';
 import { sendOfferToClient, deleteOffer, deleteOfferDocument, addDocumentsToOffer } from '$lib/server/offers.js';
-import { env as pubEnv } from '$env/dynamic/public';
+import { clientBaseUrl } from '$lib/server/appUrl.js';
 
 export async function load({ params, locals }) {
   const { user } = await locals.safeGetSession();
@@ -20,7 +20,6 @@ export async function load({ params, locals }) {
       sb.from('ud_clients').select('id, full_name, email, phone').order('created_at', { ascending: false }).limit(500)
     ]);
 
-  const appUrl = (pubEnv.PUBLIC_APP_URL || '').replace(/\/$/, '');
   return {
     offer,
     documents: documents || [],
@@ -28,7 +27,7 @@ export async function load({ params, locals }) {
     questions: questions || [],
     pin,
     clients: clients || [],
-    link: `${appUrl}/offer/${offer.share_token}`
+    link: `${clientBaseUrl()}/offer/${offer.share_token}`
   };
 }
 
