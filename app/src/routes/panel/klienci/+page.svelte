@@ -19,7 +19,10 @@
     <h1 style="font-size:1.5rem;">Klienci</h1>
     <p class="muted">{data.clients.length} klientów · kliknij, aby otworzyć kartę</p>
   </div>
-  <input class="input" style="max-width:280px;" placeholder="Szukaj: nazwisko, email, telefon…" bind:value={q} />
+  <div style="display:flex;gap:.5rem;align-items:center;">
+    <input class="input" style="max-width:280px;" placeholder="Szukaj: nazwisko, email, telefon…" bind:value={q} />
+    <a class="btn btn-primary" href="/panel/klienci/nowy" style="white-space:nowrap;">+ Dodaj klienta</a>
+  </div>
 </div>
 
 <div class="card">
