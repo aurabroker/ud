@@ -5,41 +5,59 @@
 
   const statusLabel = { draft: 'Szkic', sent: 'Wysłana', viewed: 'Otwarta', chosen: 'Wybrana', rejected: 'Rezygnacja' };
 
-  // Pomocnicze zestawy pól
-  const podstawowe = [
-    ['Email', c.email], ['Telefon', c.phone], ['PESEL', c.pesel],
-    ['Zawód', c.profession], ['Forma zatrudnienia', c.employment_type],
-    ['Wzrost', c.height], ['Waga', c.weight], ['Forma opodatkowania', c.tax_form],
-    ['Źródło', c.source]
-  ].filter(([, v]) => v);
+  // Etykiety znanych pól (reszta pokaże się z surową nazwą)
+  const LABELS = {
+    email: 'Email', phone: 'Telefon', pesel: 'PESEL', profession: 'Zawód',
+    employment_type: 'Forma zatrudnienia', employs_people: 'Zatrudnia pracowników',
+    height: 'Wzrost', weight: 'Waga', weight_change: 'Zmiana wagi', handedness: 'Ręczność',
+    tax_form: 'Forma opodatkowania', smoker: 'Pali', takes_meds: 'Bierze leki',
+    pending_diagnosis: 'Diagnostyka w toku', disability_congenital: 'Wada wrodzona', source: 'Źródło',
+    b2b_start_date: 'Start działalności', b2b_industry: 'Branża', b2b_character: 'Charakter działalności',
+    b2b_area: 'Obszar', b2b_employees_2024: 'Zatrudnienie 2024', b2b_employees_2025: 'Zatrudnienie 2025',
+    b2b_own_contribution: 'Wkład własny', b2b_description: 'Opis działalności',
+    risk_death_invalidity: 'Śmierć / inwalidztwo', risk_temp_incapacity: 'Przejściowa niezdolność',
+    risk_perm_incapacity: 'Trwała niezdolność', temp_incapacity_sum: 'Suma — przejściowa',
+    perm_incapacity_sum: 'Suma — trwała', nw_death_sum: 'Suma NW (śmierć)', nw_funeral: 'Zasiłek pogrzebowy',
+    nw_adaptation: 'Adaptacja mieszkania', nw_hospital_daily: 'Dzienna szpitalna', nw_medical_costs: 'Koszty leczenia',
+    nw_unconscious_weekly: 'Tygodniowa nieprzytomność', nw_permanent_damage: 'Trwały uszczerbek',
+    med_heart: 'Serce/krążenie', med_diabetes: 'Cukrzyca', med_bones: 'Kości/stawy', med_stomach: 'Żołądek',
+    med_neuro: 'Neurologia', med_surgery: 'Operacje', med_aids: 'HIV/AIDS', med_notes: 'Uwagi medyczne',
+    event_hospitalization: 'Hospitalizacja', event_sick_leave_30: 'L4 > 30 dni', event_further_diagnosis: 'Dalsza diagnostyka',
+    informed_accepted: 'Klauzula informacyjna', exclusions_accepted: 'Akceptacja wyłączeń',
+    affiliate_code_used: 'Kod afiliacyjny', full_name: 'Imię i nazwisko',
+    risk_balloon: 'Balon', risk_sailing: 'Żeglarstwo', risk_skiing: 'Narty', risk_skydiving: 'Spadochron',
+    risk_diving: 'Nurkowanie', risk_caving: 'Speleologia', risk_aviation: 'Lotnictwo',
+    risk_extreme_bike_boat: 'Ekstremalny rower/łódź', risk_climbing: 'Wspinaczka', risk_paragliding: 'Paralotnia',
+    risk_horse: 'Konie', risk_horse_jumping: 'Skoki konne', risk_gravity_bike: 'Gravity bike',
+    risk_quad: 'Quad', risk_hunting: 'Myślistwo'
+  };
 
-  const ryzyka = [
-    ['Śmierć / inwalidztwo', c.risk_death_invalidity],
-    ['Przejściowa niezdolność', c.risk_temp_incapacity, c.temp_incapacity_sum],
-    ['Trwała niezdolność', c.risk_perm_incapacity, c.perm_incapacity_sum]
-  ].filter(([, v]) => v);
+  // Pola pomijane (techniczne)
+  const SKIP = new Set(['id', 'created_at', 'referred_by', 'form_data', 'full_name']);
 
-  const nw = [
-    ['Suma NW (śmierć)', c.nw_death_sum], ['Zasiłek pogrzebowy', c.nw_funeral],
-    ['Adaptacja mieszkania', c.nw_adaptation], ['Dzienna szpitalna', c.nw_hospital_daily],
-    ['Koszty leczenia', c.nw_medical_costs], ['Tygodniowa nieprzytomność', c.nw_unconscious_weekly],
-    ['Trwały uszczerbek', c.nw_permanent_damage]
-  ].filter(([, v]) => v);
+  function fmt(v) {
+    if (v === true) return 'Tak';
+    if (v === false) return 'Nie';
+    return String(v);
+  }
+  function label(k) { return LABELS[k] || k; }
 
-  const zdrowie = [
-    ['Serce/krążenie', c.med_heart], ['Cukrzyca', c.med_diabetes], ['Kości/stawy', c.med_bones],
-    ['Żołądek', c.med_stomach], ['Neurologia', c.med_neuro], ['Operacje', c.med_surgery],
-    ['HIV/AIDS', c.med_aids], ['Pali', c.smoker], ['Bierze leki', c.takes_meds],
-    ['Diagnostyka w toku', c.pending_diagnosis], ['Hospitalizacja', c.event_hospitalization],
-    ['L4 > 30 dni', c.event_sick_leave_30]
-  ].filter(([, v]) => v === true);
+  // Wszystkie niepuste pola klienta (poza technicznymi)
+  const allFields = $derived(
+    Object.entries(c)
+      .filter(([k, v]) => !SKIP.has(k) && v !== null && v !== '' && v !== undefined && !(typeof v === 'object'))
+      .map(([k, v]) => [label(k), fmt(v)])
+  );
 
-  const sporty = [
-    ['Balon', c.risk_balloon], ['Żeglarstwo', c.risk_sailing], ['Narty', c.risk_skiing],
-    ['Spadochron', c.risk_skydiving], ['Nurkowanie', c.risk_diving], ['Speleologia', c.risk_caving],
-    ['Lotnictwo', c.risk_aviation], ['Wspinaczka', c.risk_climbing], ['Paralotnia', c.risk_paragliding],
-    ['Konie', c.risk_horse], ['Quad', c.risk_quad], ['Myślistwo', c.risk_hunting]
-  ].filter(([, v]) => v === true);
+  // form_data — pełny zrzut z formularza
+  const formEntries = $derived(
+    c.form_data && typeof c.form_data === 'object'
+      ? Object.entries(c.form_data).map(([k, v]) => [
+          label(k),
+          v === null || v === '' ? '—' : typeof v === 'object' ? JSON.stringify(v) : fmt(v)
+        ])
+      : []
+  );
 </script>
 
 <svelte:head><title>{c.full_name} — Karta klienta</title></svelte:head>
@@ -57,63 +75,35 @@
   <a class="btn btn-primary" href="/panel/new?client={c.id}">+ Utwórz ofertę dla klienta</a>
 </div>
 
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;align-items:start;">
-  <!-- Dane podstawowe -->
-  <div class="card card-pad">
-    <h3 style="font-size:1rem;margin-bottom:.75rem;">Dane podstawowe</h3>
-    {#each podstawowe as [label, val]}
-      <div style="display:flex;justify-content:space-between;padding:.35rem 0;border-bottom:1px solid var(--slate-100);font-size:.9rem;">
-        <span class="muted">{label}</span><strong>{val}</strong>
+<!-- WSZYSTKIE pola z rekordu klienta -->
+<div class="card card-pad" style="margin-bottom:1.25rem;">
+  <h3 style="font-size:1rem;margin-bottom:.75rem;">Dane klienta ({allFields.length} pól)</h3>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.15rem 1.5rem;">
+    {#each allFields as [k, v]}
+      <div style="display:flex;justify-content:space-between;gap:1rem;padding:.35rem 0;border-bottom:1px solid var(--slate-100);font-size:.88rem;">
+        <span class="muted">{k}</span><strong style="text-align:right;">{v}</strong>
       </div>
     {/each}
   </div>
-
-  <!-- Parametry do oferty -->
-  <div class="card card-pad">
-    <h3 style="font-size:1rem;margin-bottom:.75rem;">📋 Parametry do oferty</h3>
-    {#if ryzyka.length}
-      <div style="font-size:.72rem;font-weight:700;color:var(--slate-400);text-transform:uppercase;margin:.25rem 0 .4rem;">Ryzyka</div>
-      {#each ryzyka as [label, , sum]}
-        <div style="display:flex;justify-content:space-between;padding:.3rem 0;font-size:.9rem;">
-          <span>{label}</span><strong style="color:var(--blue-600);">{sum ? sum + ' zł' : '✓'}</strong>
-        </div>
-      {/each}
-    {/if}
-    {#if nw.length}
-      <div style="font-size:.72rem;font-weight:700;color:var(--slate-400);text-transform:uppercase;margin:.75rem 0 .4rem;">Klauzule NW</div>
-      {#each nw as [label, val]}
-        <div style="display:flex;justify-content:space-between;padding:.3rem 0;font-size:.9rem;">
-          <span>{label}</span><strong style="color:var(--blue-600);">{val === true ? '✓' : val}</strong>
-        </div>
-      {/each}
-    {/if}
-    {#if !ryzyka.length && !nw.length}<p class="muted">Brak wskazanych parametrów.</p>{/if}
-  </div>
-
-  <!-- Zdrowie -->
-  {#if zdrowie.length || c.med_notes}
-    <div class="card card-pad">
-      <h3 style="font-size:1rem;margin-bottom:.75rem;">Zdrowie</h3>
-      <div style="display:flex;flex-wrap:wrap;gap:.4rem;">
-        {#each zdrowie as [label]}<span class="badge badge-viewed">{label}</span>{/each}
-      </div>
-      {#if c.med_notes}<p class="muted" style="margin-top:.6rem;font-size:.85rem;">{c.med_notes}</p>{/if}
-    </div>
-  {/if}
-
-  <!-- Ryzyka aktywne -->
-  {#if sporty.length}
-    <div class="card card-pad">
-      <h3 style="font-size:1rem;margin-bottom:.75rem;">Ryzyka aktywnego życia</h3>
-      <div style="display:flex;flex-wrap:wrap;gap:.4rem;">
-        {#each sporty as [label]}<span class="badge badge-rejected">{label}</span>{/each}
-      </div>
-    </div>
-  {/if}
 </div>
 
+<!-- Pełne dane z formularza (form_data) -->
+{#if formEntries.length}
+  <div class="card card-pad" style="margin-bottom:1.25rem;">
+    <h3 style="font-size:1rem;margin-bottom:.25rem;">📝 Pełne dane z formularza</h3>
+    <p class="muted" style="margin:0 0 .75rem;font-size:.82rem;">Kompletny zapis zgłoszenia z utratadochodu.pl</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.15rem 1.5rem;">
+      {#each formEntries as [k, v]}
+        <div style="display:flex;justify-content:space-between;gap:1rem;padding:.35rem 0;border-bottom:1px solid var(--slate-100);font-size:.88rem;">
+          <span class="muted">{k}</span><strong style="text-align:right;word-break:break-word;">{v}</strong>
+        </div>
+      {/each}
+    </div>
+  </div>
+{/if}
+
 <!-- Oferty klienta -->
-<div class="card card-pad" style="margin-top:1.25rem;">
+<div class="card card-pad">
   <h3 style="font-size:1rem;margin-bottom:.75rem;">Oferty klienta ({data.offers.length})</h3>
   {#if data.offers.length}
     <table>
