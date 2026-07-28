@@ -42,6 +42,12 @@
         {#each fileNames as n}<li>{n}</li>{/each}
       </ul>
     {/if}
+    <div class="field" style="margin-top:1rem;max-width:260px;">
+      <label class="label" for="pdfPassword">Hasło do PDF (jeśli zabezpieczone)</label>
+      <input class="input" id="pdfPassword" name="pdfPassword" inputmode="numeric" maxlength="12"
+        placeholder="np. 4-cyfrowe hasło Leadenhall" autocomplete="off" />
+      <p class="muted" style="margin-top:.35rem;font-size:.78rem;">Leadenhall szyfruje oferty. Zostaw puste, jeśli plik nie ma hasła (np. CEU).</p>
+    </div>
   </div>
 
   <div class="card card-pad" style="margin-bottom:1.25rem;">

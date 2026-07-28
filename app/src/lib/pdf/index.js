@@ -40,8 +40,9 @@ export function parseOfferText(text, forceType) {
  * @param {'leadenhall'|'ceu'} [forceType]
  * @returns {Promise<{ offer: import('./model.js').NormalizedOffer, totalPages: number, insurer_type: string }>}
  */
-export async function parseOfferPdf(data, forceType) {
-  const { text, totalPages } = await extractPdfText(data);
+export async function parseOfferPdf(data, options = {}) {
+  const { forceType, password } = typeof options === 'string' ? { forceType: options } : options;
+  const { text, totalPages } = await extractPdfText(data, password);
   const type = forceType || detectInsurer(text);
   if (!type) throw new Error('Nie rozpoznano szablonu oferty (Leadenhall/CEU).');
   const offer = parseOfferText(text, type);

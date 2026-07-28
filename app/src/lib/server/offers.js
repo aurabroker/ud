@@ -24,12 +24,32 @@ const BUCKET = 'ud-offers';
  * @param {string} [p.clientPhone]
  * @param {string|null} [p.clientId] - opcjonalne powiązanie z ud_clients
  * @param {string} [p.brokerMessage]
- * @param {Array<{ name: string, bytes: Uint8Array }>} p.files
+ * @param {string} [p.password] - hasło do zaszyfrowanych PDF (np. Leadenhall)
+ * @param {Array<{ name: string, bytes: Uint8Array, password?: string }>} p.files
  * @returns {Promise<{ offerId: string, shareToken: string, documents: any[] }>}
  */
 export async function createOfferFromPdfs(p) {
   const sb = createAdminClient();
   const shareToken = generateShareToken();
+
+  // 0) Najpierw sparsuj WSZYSTKIE pliki (z hasłem) — zanim cokolwiek zapiszemy.
+  //    Dzięki temu błąd hasła nie zostawia osieroconej oferty.
+  const parsedFiles = [];
+  for (const f of p.files) {
+    let res;
+    try {
+      res = await parseOfferPdf(f.bytes, { password: p.password || f.password });
+    } catch (e) {
+      const name = e?.name || '';
+      if (name === 'PasswordException' || /password/i.test(e?.message || '')) {
+        throw new Error(
+          `Plik „${f.name}" jest zabezpieczony hasłem${p.password ? ', a podane hasło jest błędne' : ' — podaj 4-cyfrowe hasło'}.`
+        );
+      }
+      throw new Error(`Nie udało się odczytać „${f.name}": ${e?.message || e}`);
+    }
+    parsedFiles.push({ file: f, parsed: res.offer, insurer_type: res.insurer_type });
+  }
 
   // 1) Parent ud_offers
   const { data: offer, error: offerErr } = await sb
@@ -54,10 +74,9 @@ export async function createOfferFromPdfs(p) {
   const documents = [];
   const insurerTypes = new Set();
 
-  // 2) Każdy PDF: parse -> upload -> ud_offer_documents + ud_offer_files
-  for (let i = 0; i < p.files.length; i++) {
-    const f = p.files[i];
-    const { offer: parsed, insurer_type } = await parseOfferPdf(f.bytes);
+  // 2) Każdy PDF: zapis -> upload -> ud_offer_documents + ud_offer_files
+  for (let i = 0; i < parsedFiles.length; i++) {
+    const { file: f, parsed, insurer_type } = parsedFiles[i];
     insurerTypes.add(insurer_type);
 
     const { data: doc, error: docErr } = await sb
