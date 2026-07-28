@@ -7,7 +7,7 @@ import { createServerClient } from '@supabase/ssr';
 import { env } from '$env/dynamic/private';
 import { env as pubEnv } from '$env/dynamic/public';
 
-const VERSION = 'diag-8-aliasy';
+const VERSION = 'diag-9';
 
 export async function GET({ cookies }) {
   const out = { version: VERSION, ok: false };
@@ -19,8 +19,8 @@ export async function GET({ cookies }) {
       PUBLIC_APP_URL: present(pubEnv.PUBLIC_APP_URL),
       SUPABASE_SERVICE_ROLE_KEY: present(env.SUPABASE_SERVICE_ROLE_KEY),
       PIN_COOKIE_SECRET: present(env.PIN_COOKIE_SECRET),
-      SMS_TOKEN: present(env.SMSPLANET_TOKEN || env.SMSTOKEN),
-      SMS_SENDER: present(env.SMSPLANET_SENDER || env.SMSSENDER),
+      SMS_TOKEN: present(env.SMSPLANET_TOKEN || env.SMSTOKEN || env.SMS_TOKEN),
+      SMS_SENDER: present(env.SMSPLANET_SENDER || env.SMSSENDER || env.SMS_SENDER),
       RESEND: present(env.RESEND_API_KEY || env.RESEND_API),
       PDFSHIFT: present(env.PDFSHIFT_API_KEY || env.PDFSHIFT_API)
     };
