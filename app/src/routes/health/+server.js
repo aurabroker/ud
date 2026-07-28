@@ -19,7 +19,7 @@ export async function GET({ cookies }) {
       PUBLIC_APP_URL: present(pubEnv.PUBLIC_APP_URL),
       SUPABASE_SERVICE_ROLE_KEY: present(env.SUPABASE_SERVICE_ROLE_KEY),
       PIN_COOKIE_SECRET: present(env.PIN_COOKIE_SECRET),
-      SMSAPI_TOKEN: present(env.SMSAPI_TOKEN),
+      SMSPLANET_TOKEN: present(env.SMSPLANET_TOKEN),
       RESEND_API_KEY: present(env.RESEND_API_KEY),
       PDFSHIFT_API_KEY: present(env.PDFSHIFT_API_KEY)
     };
