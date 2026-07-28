@@ -78,7 +78,7 @@
   <a class="btn btn-primary" href="/panel/new?client={c.id}">+ Utwórz ofertę dla klienta</a>
 </div>
 
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;align-items:start;">
+<div style="display:flex;flex-direction:column;gap:1.25rem;">
   <!-- Dane podstawowe -->
   <div class="card card-pad">
     <h3 style="font-size:1rem;margin-bottom:.75rem;">Dane osobowe / kontakt</h3>
@@ -104,7 +104,7 @@
   </div>
 
   <!-- Parametry ubezpieczenia -->
-  <div class="card card-pad" style="grid-column:1 / -1;">
+  <div class="card card-pad">
     <h3 style="font-size:1rem;margin-bottom:.75rem;">📋 Parametry do oferty</h3>
     <table>
       <tbody>

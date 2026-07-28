@@ -76,9 +76,9 @@
 </div>
 
 <style>
-  .cmp-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--slate-200); }
+  .cmp-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--slate-400); }
   table.cmp { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
-  table.cmp th, table.cmp td { padding: 10px 14px; border-bottom: 1px solid var(--slate-200); text-align: left; vertical-align: middle; }
+  table.cmp th, table.cmp td { padding: 10px 14px; border-bottom: 1px solid var(--slate-300); border-right: 1px solid var(--slate-200); text-align: left; vertical-align: middle; }
   table.cmp thead th { background: var(--slate-800); color: #fff; border-bottom: none; min-width: 170px; }
   table.cmp thead th.lbl-col { background: var(--slate-900); min-width: 210px; }
   table.cmp .ins { font-weight: 700; font-size: 0.92rem; }
