@@ -53,30 +53,52 @@
 <!-- Edycja oferty -->
 {#if editing}
   <div class="card card-pad" style="margin-bottom:1.25rem;border-left:4px solid var(--blue-600);">
-    <h3 style="font-size:1rem;margin-bottom:1rem;">Edycja oferty</h3>
+    <h3 style="font-size:1rem;margin-bottom:1.25rem;">Edycja oferty</h3>
     <form method="POST" action="?/save" use:enhance={() => async ({ update }) => { await update({ reset: false }); editing = false; }}>
+
       <div class="field">
         <label class="label" for="e_client">Klient z bazy</label>
         <select class="input" id="e_client" name="clientId" bind:value={eClientId} onchange={onPickClient}>
-          <option value="">— brak powiązania / ręcznie —</option>
+          <option value="">— brak powiązania / dane ręczne —</option>
           {#each data.clients as c}<option value={c.id}>{c.full_name}{c.email ? ` · ${c.email}` : ''}</option>{/each}
         </select>
       </div>
-      <div class="field"><label class="label" for="e_name">Nazwa oferty</label>
-        <input class="input" id="e_name" name="name" bind:value={eName} /></div>
-      <div class="field"><label class="label" for="e_cn">Imię i nazwisko klienta</label>
-        <input class="input" id="e_cn" name="clientName" bind:value={eClientName} /></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-        <div class="field"><label class="label" for="e_ce">Email</label>
-          <input class="input" id="e_ce" name="clientEmail" bind:value={eClientEmail} /></div>
-        <div class="field"><label class="label" for="e_cp">Telefon</label>
-          <input class="input" id="e_cp" name="clientPhone" bind:value={eClientPhone} /></div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:0 1.25rem;">
+        <div class="field">
+          <label class="label" for="e_name">Nazwa oferty (wewnętrzna)</label>
+          <input class="input" id="e_name" name="name" bind:value={eName} />
+        </div>
+        <div class="field">
+          <label class="label" for="e_cn">Imię i nazwisko klienta</label>
+          <input class="input" id="e_cn" name="clientName" bind:value={eClientName} />
+        </div>
       </div>
-      <div class="field"><label class="label" for="e_code">Kod dostępu (hasło PDF / SMS)</label>
-        <input class="input" id="e_code" name="accessCode" bind:value={eCode} style="max-width:180px;" /></div>
-      <div class="field"><label class="label" for="e_msg">Wiadomość dla klienta</label>
-        <textarea class="input" id="e_msg" name="brokerMessage" rows="3" bind:value={eMessage}></textarea></div>
-      <button class="btn btn-primary" type="submit">Zapisz zmiany</button>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0 1.25rem;">
+        <div class="field">
+          <label class="label" for="e_ce">Email klienta</label>
+          <input class="input" id="e_ce" name="clientEmail" bind:value={eClientEmail} />
+        </div>
+        <div class="field">
+          <label class="label" for="e_cp">Telefon klienta</label>
+          <input class="input" id="e_cp" name="clientPhone" bind:value={eClientPhone} />
+        </div>
+        <div class="field">
+          <label class="label" for="e_code">Kod dostępu (hasło PDF / SMS)</label>
+          <input class="input" id="e_code" name="accessCode" bind:value={eCode} />
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label" for="e_msg">Wiadomość dla klienta</label>
+        <textarea class="input" id="e_msg" name="brokerMessage" rows="3" bind:value={eMessage}></textarea>
+      </div>
+
+      <div style="display:flex;gap:.5rem;">
+        <button class="btn btn-primary" type="submit">Zapisz zmiany</button>
+        <button class="btn btn-ghost" type="button" onclick={() => (editing = false)}>Anuluj</button>
+      </div>
     </form>
   </div>
 {/if}
@@ -97,9 +119,10 @@
     <button class="btn btn-ghost" onclick={copyLink}>{copied ? '✓ Skopiowano' : 'Kopiuj'}</button>
     <form method="POST" action="?/send" use:enhance={() => { sending = true; return async ({ update }) => { await update(); sending = false; }; }}>
       <button class="btn btn-primary" type="submit" disabled={sending}>
-        {sending ? 'Wysyłam…' : (data.offer.status === 'draft' ? 'Wyślij klientowi (PIN + email)' : 'Wyślij ponownie')}
+        {sending ? 'Wysyłam…' : (data.offer.status === 'draft' ? 'Wyślij klientowi (SMS + email)' : 'Wyślij ponownie')}
       </button>
     </form>
+    <a class="btn btn-ghost" href="/panel/offer/{data.offer.id}/summary" target="_blank" rel="noopener">⬇ Pobierz PDF</a>
   </div>
   {#if data.offer.access_code}
     <p style="margin-top:.6rem;font-size:.9rem;">

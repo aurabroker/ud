@@ -368,6 +368,9 @@ export async function sendOfferToClient(offerId) {
     .update({ status: 'sent', sent_at: new Date().toISOString() })
     .eq('id', offerId);
 
+  // Po wysyłce upewnij się, że PDF podsumowania jest wygenerowany (do pobrania).
+  await ensureSummaryUrl(offerId).catch(() => {});
+
   // pinDev zwracany tylko w trybie stub (brak realnej wysyłki), do testów
   const pinDev = sms.stub || email.stub ? pin : undefined;
   return { ok: true, sms, email, pinDev };
@@ -402,6 +405,34 @@ export async function deleteOfferDocument(offerId, documentId) {
   if (paths.length) await sb.storage.from(BUCKET).remove(paths).catch(() => {});
   await sb.from('ud_offer_documents').delete().eq('id', documentId).eq('offer_id', offerId);
   return { ok: true };
+}
+
+/**
+ * Zwraca signed URL do PDF podsumowania; generuje go, jeśli jeszcze nie istnieje.
+ * @returns {Promise<string|null>} null gdy nie da się wygenerować (brak PDFShift)
+ */
+export async function ensureSummaryUrl(offerId) {
+  const sb = createAdminClient();
+  let { data: file } = await sb
+    .from('ud_offer_files')
+    .select('storage_bucket, storage_path')
+    .eq('offer_id', offerId)
+    .eq('file_type', 'summary')
+    .maybeSingle();
+
+  if (!file) {
+    await regenerateSummary(sb, offerId);
+    ({ data: file } = await sb
+      .from('ud_offer_files')
+      .select('storage_bucket, storage_path')
+      .eq('offer_id', offerId)
+      .eq('file_type', 'summary')
+      .maybeSingle());
+  }
+  if (!file) return null;
+  const { data, error } = await sb.storage.from(file.storage_bucket).createSignedUrl(file.storage_path, 300);
+  if (error) return null;
+  return data.signedUrl;
 }
 
 /** Signed URL do pobrania pliku oferty (5 min). */
