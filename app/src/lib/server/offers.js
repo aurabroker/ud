@@ -51,6 +51,10 @@ export async function createOfferFromPdfs(p) {
     parsedFiles.push({ file: f, parsed: res.offer, insurer_type: res.insurer_type });
   }
 
+  // Kod dostępu = hasło PDF (jeśli podane) albo losowy 4-cyfrowy.
+  // Ten sam kod odblokowuje link do oferty i otwiera pobrane pliki PDF.
+  const accessCode = (p.password && /^\d{4,}$/.test(p.password)) ? p.password : generatePin();
+
   // 1) Parent ud_offers
   const { data: offer, error: offerErr } = await sb
     .from('ud_offers')
@@ -63,6 +67,7 @@ export async function createOfferFromPdfs(p) {
       client_phone: p.clientPhone || null,
       broker_message: p.brokerMessage || null,
       share_token: shareToken,
+      access_code: accessCode,
       source: 'pdf_import',
       status: 'draft',
       data: {}
@@ -149,11 +154,16 @@ export async function sendOfferToClient(offerId) {
   const { data: offer, error } = await sb.from('ud_offers').select('*').eq('id', offerId).single();
   if (error || !offer) throw new Error('Oferta nie znaleziona');
 
-  const pin = generatePin();
+  // Jeden kod: access_code (= hasło PDF lub losowy). Odblokowuje link i otwiera pliki.
+  let pin = offer.access_code;
+  if (!pin) {
+    pin = generatePin();
+    await sb.from('ud_offers').update({ access_code: pin }).eq('id', offerId);
+  }
   const ttlHours = parseInt(env.PIN_TTL_HOURS || '48', 10);
   const expiresAt = new Date(Date.now() + ttlHours * 3600 * 1000).toISOString();
 
-  // Unieważnij poprzednie PIN-y, zapisz nowy
+  // Unieważnij poprzednie PIN-y, zapisz nowy (hash tego samego kodu)
   await sb.from('ud_offer_pins').delete().eq('offer_id', offerId);
   await sb.from('ud_offer_pins').insert({
     offer_id: offerId,
@@ -168,7 +178,7 @@ export async function sendOfferToClient(offerId) {
   if (offer.client_phone) {
     sms = await sendSms(
       offer.client_phone,
-      `Twoje haslo do oferty: ${pin} (wazne ${ttlHours}h). Otworz: ${link}`
+      `Haslo do oferty: ${pin} (otwiera link i pliki PDF, wazne ${ttlHours}h). Otworz: ${link}`
     );
   }
 

@@ -133,7 +133,8 @@
 
     <!-- Pliki -->
     <div class="card card-pad" style="margin-bottom:1.25rem;">
-      <h2 style="font-size:1.1rem;margin-bottom:.75rem;">Dokumenty do pobrania</h2>
+      <h2 style="font-size:1.1rem;margin-bottom:.35rem;">Dokumenty do pobrania</h2>
+      <p class="muted" style="margin:0 0 .75rem;font-size:.82rem;">🔒 Pliki oferty mogą być zabezpieczone — otwórz je <strong>tym samym 4-cyfrowym hasłem</strong>, które otrzymałeś/aś SMS-em.</p>
       <div style="display:flex;flex-direction:column;gap:.5rem;">
         {#each data.files as f}
           <a class="btn btn-ghost" style="justify-content:flex-start;" href="/offer/{data.token}/download/{f.id}" target="_blank" rel="noopener">

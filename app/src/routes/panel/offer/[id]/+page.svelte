@@ -47,8 +47,14 @@
       </button>
     </form>
   </div>
+  {#if data.offer.access_code}
+    <p style="margin-top:.6rem;font-size:.9rem;">
+      🔑 Kod dostępu klienta: <strong style="letter-spacing:.1em;font-size:1.05rem;">{data.offer.access_code}</strong>
+      <span class="muted"> — odblokowuje link i otwiera pobrane pliki PDF (wysyłany SMS-em).</span>
+    </p>
+  {/if}
   {#if data.pin}
-    <p class="muted" style="margin-top:.6rem;">PIN aktywny do {dateP(data.pin.expires_at)} · próby: {data.pin.attempts}/3{#if data.pin.verified_at} · zweryfikowany ✓{/if}</p>
+    <p class="muted" style="margin-top:.3rem;">Kod aktywny do {dateP(data.pin.expires_at)} · próby: {data.pin.attempts}/3{#if data.pin.verified_at} · zweryfikowany ✓{/if}</p>
   {/if}
 </div>
 
