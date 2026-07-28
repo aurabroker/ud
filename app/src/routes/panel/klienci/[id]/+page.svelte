@@ -78,7 +78,7 @@
   <a class="btn btn-primary" href="/panel/new?client={c.id}">+ Utwórz ofertę dla klienta</a>
 </div>
 
-<div style="display:flex;flex-direction:column;gap:1.25rem;">
+<div class="kk-sections">
   <!-- Dane podstawowe -->
   <div class="card card-pad">
     <h3 style="font-size:1rem;margin-bottom:.75rem;">Dane osobowe / kontakt</h3>
@@ -196,3 +196,16 @@
     <p class="muted">Brak ofert dla tego klienta.</p>
   {/if}
 </div>
+
+<style>
+  /* Wymuszony, KOMPAKTOWY układ jednokolumnowy — nic nie stoi obok siebie. */
+  .kk-sections { display: block !important; }
+  .kk-sections > :global(.card) {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 0 0.6rem 0 !important;
+    padding: 0.7rem 0.9rem !important;
+  }
+  .kk-sections :global(h3) { font-size: 0.9rem !important; margin-bottom: 0.4rem !important; padding-bottom: 0.35rem !important; }
+  .kk-sections :global(td) { padding: 0.25rem 0.5rem !important; font-size: 0.83rem !important; }
+</style>

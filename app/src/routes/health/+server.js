@@ -7,7 +7,7 @@ import { createServerClient } from '@supabase/ssr';
 import { env } from '$env/dynamic/private';
 import { env as pubEnv } from '$env/dynamic/public';
 
-const VERSION = 'diag-10-logo';
+const VERSION = 'diag-11-kompakt';
 
 export async function GET({ cookies }) {
   const out = { version: VERSION, ok: false };
