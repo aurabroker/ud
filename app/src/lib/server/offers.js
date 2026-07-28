@@ -152,7 +152,8 @@ export async function createOfferFromPdfs(p) {
       clientName: p.clientName,
       offerName: p.offerName,
       documents,
-      logoUrl: settings.logo_url || ''
+      logoUrl: settings.logo_url || '',
+      footerText: settings.pdf_footer || ''
     });
     const pdf = await htmlToPdf(html);
     if (pdf.ok && pdf.buffer) {
@@ -293,7 +294,8 @@ async function regenerateSummary(sb, offerId) {
       clientName: offer?.client_name,
       offerName: offer?.name,
       documents: documents || [],
-      logoUrl: settings.logo_url || ''
+      logoUrl: settings.logo_url || '',
+      footerText: settings.pdf_footer || ''
     });
     const pdf = await htmlToPdf(html);
     if (pdf.ok && pdf.buffer) {

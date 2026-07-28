@@ -61,6 +61,11 @@
       <label class="label" for="exclusions_text">Tekst wyłączeń odpowiedzialności (widok klienta, przy wyborze)</label>
       <textarea class="input" id="exclusions_text" name="exclusions_text" rows="6">{s.exclusions_text || ''}</textarea>
     </div>
+    <div class="field">
+      <label class="label" for="pdf_footer">Stopka PDF podsumowania</label>
+      <textarea class="input" id="pdf_footer" name="pdf_footer" rows="2" placeholder="np. nota prawna, dane firmy, kontakt">{s.pdf_footer || ''}</textarea>
+      <p class="muted" style="margin-top:.35rem;font-size:.78rem;">Puste = domyślna nota. Widoczna na dole generowanego PDF-a.</p>
+    </div>
   </div>
 
   <button class="btn btn-primary btn-lg" type="submit">Zapisz ustawienia</button>

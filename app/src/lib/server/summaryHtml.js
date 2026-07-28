@@ -28,7 +28,10 @@ const ROWS = [
  * @param {{ clientName?: string, offerName?: string, documents: any[] }} p
  * @returns {string} kompletny dokument HTML
  */
-export function buildOfferSummaryHtml({ clientName, offerName, documents = [], logoUrl = '' }) {
+const DEFAULT_FOOTER =
+  'Dokument informacyjny. Wiążące są Ogólne Warunki Ubezpieczenia (OWU) oraz oferty ubezpieczycieli. Aura Expert sp. z o.o. · Panel Ofertowania UtrataDochodu.';
+
+export function buildOfferSummaryHtml({ clientName, offerName, documents = [], logoUrl = '', footerText = '' }) {
   const today = new Date().toLocaleDateString('pl-PL', { day: '2-digit', month: 'long', year: 'numeric' });
   const brand = logoUrl
     ? `<img src="${esc(logoUrl)}" alt="Logo" style="height:52px;width:auto;" />`
@@ -64,9 +67,6 @@ export function buildOfferSummaryHtml({ clientName, offerName, documents = [], l
       <thead><tr><th>Parametr</th>${cols}</tr></thead>
       <tbody>${rows}</tbody>
     </table>
-    <div class="foot">
-      Dokument informacyjny. Wiążące są Ogólne Warunki Ubezpieczenia (OWU) oraz oferty ubezpieczycieli.
-      Aura Expert sp. z o.o. · Panel Ofertowania UtrataDochodu.
-    </div>
+    <div class="foot">${esc(footerText || DEFAULT_FOOTER)}</div>
   </body></html>`;
 }

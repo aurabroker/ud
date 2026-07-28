@@ -27,7 +27,7 @@ export const actions = {
   save: async ({ request, locals }) => {
     const sb = await requireAdmin(locals);
     const form = await request.formData();
-    const keys = ['company_name', 'company_full', 'default_broker_message', 'exclusions_text'];
+    const keys = ['company_name', 'company_full', 'default_broker_message', 'exclusions_text', 'pdf_footer'];
     const rows = keys.map((key) => ({ key, value: String(form.get(key) ?? ''), updated_at: new Date().toISOString() }));
     const { error: e } = await sb.from('ud_settings').upsert(rows, { onConflict: 'key' });
     if (e) return fail(400, { error: 'Zapis: ' + e.message });

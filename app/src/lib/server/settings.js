@@ -9,7 +9,8 @@ const DEFAULTS = {
   default_broker_message: '',
   exclusions_text: '',
   logo_url: '',
-  logo_path: ''
+  logo_path: '',
+  pdf_footer: ''
 };
 
 /** @returns {Promise<Record<string, any>>} */
