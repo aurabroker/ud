@@ -12,8 +12,8 @@ import { env } from '$env/dynamic/private';
  * @returns {Promise<{ sent: boolean, stub?: boolean, id?: string, error?: string }>}
  */
 export async function sendSms(phone, message) {
-  const token = env.SMSPLANET_TOKEN;
-  const sender = env.SMSPLANET_SENDER || 'Info';
+  const token = env.SMSPLANET_TOKEN || env.SMSTOKEN;
+  const sender = env.SMSPLANET_SENDER || env.SMSSENDER || 'Info';
   const to = String(phone).replace(/[^\d]/g, '');
 
   if (!token) {
