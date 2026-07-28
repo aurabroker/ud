@@ -5,20 +5,21 @@
   let fileNames = $state([]);
   function onFiles(e) { fileNames = [...e.target.files].map((f) => f.name); }
 
-  // Wybór istniejącego klienta
-  let clientId = $state('');
+  // Wybór istniejącego klienta (opcjonalnie preselekcja z ?client=)
+  let clientId = $state(data.preselectClientId || '');
   let clientName = $state('');
   let clientEmail = $state('');
   let clientPhone = $state('');
 
+  function fill(id) {
+    const c = data.clients.find((x) => x.id === id);
+    if (c) { clientName = c.full_name || ''; clientEmail = c.email || ''; clientPhone = c.phone || ''; }
+  }
+  if (clientId) fill(clientId);
+
   function onPickClient(e) {
     clientId = e.target.value;
-    const c = data.clients.find((x) => x.id === clientId);
-    if (c) {
-      clientName = c.full_name || '';
-      clientEmail = c.email || '';
-      clientPhone = c.phone || '';
-    }
+    fill(clientId);
   }
   const picked = $derived(!!clientId);
 </script>
@@ -55,7 +56,7 @@
 
     <div class="field">
       <label class="label" for="clientPick">Wybierz istniejącego klienta (z bazy) lub wpisz nowego</label>
-      <select class="input" id="clientPick" onchange={onPickClient}>
+      <select class="input" id="clientPick" bind:value={clientId} onchange={() => fill(clientId)}>
         <option value="">— nowy klient (wpisz ręcznie) —</option>
         {#each data.clients as c}
           <option value={c.id}>{c.full_name}{c.email ? ` · ${c.email}` : ''}{c.phone ? ` · ${c.phone}` : ''}</option>
@@ -88,7 +89,7 @@
     </div>
     <div class="field">
       <label class="label" for="brokerMessage">Wiadomość dla klienta (opcjonalnie)</label>
-      <textarea class="input" id="brokerMessage" name="brokerMessage" rows="3"></textarea>
+      <textarea class="input" id="brokerMessage" name="brokerMessage" rows="3">{data.defaultMessage || ''}</textarea>
     </div>
   </div>
 

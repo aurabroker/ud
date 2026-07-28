@@ -233,6 +233,37 @@ export async function sendOfferToClient(offerId) {
   return { ok: true, sms, email, pinDev };
 }
 
+/**
+ * Usuwa ofertę wraz z plikami w Storage (tylko bucket ud-offers — NIE ruszamy
+ * współdzielonych OWU z ud-owu). Rekordy potomne kasuje FK ON DELETE CASCADE.
+ */
+export async function deleteOffer(offerId) {
+  const sb = createAdminClient();
+  const { data: files } = await sb
+    .from('ud_offer_files')
+    .select('storage_bucket, storage_path')
+    .eq('offer_id', offerId);
+  const paths = (files || []).filter((f) => f.storage_bucket === BUCKET).map((f) => f.storage_path);
+  if (paths.length) await sb.storage.from(BUCKET).remove(paths).catch(() => {});
+  const { error } = await sb.from('ud_offers').delete().eq('id', offerId);
+  if (error) throw new Error('Usuwanie oferty: ' + error.message);
+  return { ok: true };
+}
+
+/** Usuwa pojedynczy wariant (dokument) oferty + jego pliki w ud-offers. */
+export async function deleteOfferDocument(offerId, documentId) {
+  const sb = createAdminClient();
+  const { data: files } = await sb
+    .from('ud_offer_files')
+    .select('storage_bucket, storage_path')
+    .eq('offer_id', offerId)
+    .eq('document_id', documentId);
+  const paths = (files || []).filter((f) => f.storage_bucket === BUCKET).map((f) => f.storage_path);
+  if (paths.length) await sb.storage.from(BUCKET).remove(paths).catch(() => {});
+  await sb.from('ud_offer_documents').delete().eq('id', documentId).eq('offer_id', offerId);
+  return { ok: true };
+}
+
 /** Signed URL do pobrania pliku oferty (5 min). */
 export async function signedFileUrl(bucket, path, expiresIn = 300) {
   const sb = createAdminClient();

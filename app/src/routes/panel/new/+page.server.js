@@ -1,17 +1,25 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { createOfferFromPdfs } from '$lib/server/offers.js';
+import { getSettings } from '$lib/server/settings.js';
 
-export async function load({ locals }) {
+export async function load({ locals, url }) {
   const { user } = await locals.safeGetSession();
   if (!user) throw redirect(303, '/login');
 
-  const { data: clients } = await locals.supabase
-    .from('ud_clients')
-    .select('id, full_name, email, phone, profession, employment_type')
-    .order('created_at', { ascending: false })
-    .limit(500);
+  const [{ data: clients }, settings] = await Promise.all([
+    locals.supabase
+      .from('ud_clients')
+      .select('id, full_name, email, phone, profession, employment_type')
+      .order('created_at', { ascending: false })
+      .limit(500),
+    getSettings()
+  ]);
 
-  return { clients: clients || [] };
+  return {
+    clients: clients || [],
+    preselectClientId: url.searchParams.get('client') || '',
+    defaultMessage: settings.default_broker_message || ''
+  };
 }
 
 export const actions = {

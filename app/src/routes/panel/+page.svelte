@@ -1,4 +1,5 @@
 <script>
+  import { enhance } from '$app/forms';
   let { data } = $props();
   const statusLabel = { draft: 'Szkic', sent: 'Wysłana', viewed: 'Otwarta', chosen: 'Wybrana', rejected: 'Rezygnacja' };
   function fmtDate(s) { return s ? new Date(s).toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—'; }
@@ -29,7 +30,14 @@
             <td>{o.client_name || '—'}</td>
             <td><span class="badge badge-{o.status}">{statusLabel[o.status] || o.status}</span></td>
             <td class="muted">{fmtDate(o.created_at)}</td>
-            <td style="text-align:right;"><a href="/panel/offer/{o.id}">Otwórz →</a></td>
+            <td style="text-align:right;white-space:nowrap;">
+              <a href="/panel/offer/{o.id}">Otwórz →</a>
+              <form method="POST" action="?/delete" use:enhance={() => ({ update }) => update()} style="display:inline;margin-left:.75rem;"
+                onsubmit={(e) => { if (!confirm('Usunąć ofertę?')) e.preventDefault(); }}>
+                <input type="hidden" name="id" value={o.id} />
+                <button class="btn btn-ghost" style="padding:.25rem .55rem;font-size:.78rem;color:var(--red-600);">Usuń</button>
+              </form>
+            </td>
           </tr>
         {/each}
       </tbody>

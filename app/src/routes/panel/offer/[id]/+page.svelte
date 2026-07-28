@@ -5,10 +5,24 @@
   let { data, form } = $props();
   let sending = $state(false);
   let copied = $state(false);
+  let editing = $state(false);
 
   const statusLabel = { draft: 'Szkic', sent: 'Wysłana', viewed: 'Otwarta', chosen: 'Wybrana', rejected: 'Rezygnacja' };
   const choice = data.offer.client_choice;
 
+  // pola edycji
+  let eClientId = $state(data.offer.client_id || '');
+  let eName = $state(data.offer.name || '');
+  let eClientName = $state(data.offer.client_name || '');
+  let eClientEmail = $state(data.offer.client_email || '');
+  let eClientPhone = $state(data.offer.client_phone || '');
+  let eMessage = $state(data.offer.broker_message || '');
+  let eCode = $state(data.offer.access_code || '');
+
+  function onPickClient() {
+    const c = data.clients.find((x) => x.id === eClientId);
+    if (c) { eClientName = c.full_name || ''; eClientEmail = c.email || ''; eClientPhone = c.phone || ''; }
+  }
   function copyLink() {
     navigator.clipboard.writeText(data.link).then(() => { copied = true; setTimeout(() => (copied = false), 2000); });
   }
@@ -23,9 +37,48 @@
     <h1 style="font-size:1.5rem;">{data.offer.name}</h1>
     <p class="muted">{data.offer.client_name || 'Bez nazwiska'} · <span class="badge badge-{data.offer.status}">{statusLabel[data.offer.status]}</span></p>
   </div>
+  <div style="display:flex;gap:.5rem;">
+    <button class="btn btn-ghost" onclick={() => (editing = !editing)}>{editing ? 'Zamknij edycję' : '✎ Edytuj'}</button>
+    <form method="POST" action="?/delete" use:enhance={() => ({ update }) => update()}
+      onsubmit={(e) => { if (!confirm('Usunąć całą ofertę? Tej operacji nie można cofnąć.')) e.preventDefault(); }}>
+      <button class="btn btn-ghost" style="color:var(--red-600);">🗑 Usuń ofertę</button>
+    </form>
+  </div>
 </div>
 
 {#if form?.error}<div class="error-box">{form.error}</div>{/if}
+{#if form?.saved}<div class="ok-box">Zapisano.</div>{/if}
+
+<!-- Edycja oferty -->
+{#if editing}
+  <div class="card card-pad" style="margin-bottom:1.25rem;border-left:4px solid var(--blue-600);">
+    <h3 style="font-size:1rem;margin-bottom:1rem;">Edycja oferty</h3>
+    <form method="POST" action="?/save" use:enhance={() => async ({ update }) => { await update({ reset: false }); editing = false; }}>
+      <div class="field">
+        <label class="label" for="e_client">Klient z bazy</label>
+        <select class="input" id="e_client" name="clientId" bind:value={eClientId} onchange={onPickClient}>
+          <option value="">— brak powiązania / ręcznie —</option>
+          {#each data.clients as c}<option value={c.id}>{c.full_name}{c.email ? ` · ${c.email}` : ''}</option>{/each}
+        </select>
+      </div>
+      <div class="field"><label class="label" for="e_name">Nazwa oferty</label>
+        <input class="input" id="e_name" name="name" bind:value={eName} /></div>
+      <div class="field"><label class="label" for="e_cn">Imię i nazwisko klienta</label>
+        <input class="input" id="e_cn" name="clientName" bind:value={eClientName} /></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div class="field"><label class="label" for="e_ce">Email</label>
+          <input class="input" id="e_ce" name="clientEmail" bind:value={eClientEmail} /></div>
+        <div class="field"><label class="label" for="e_cp">Telefon</label>
+          <input class="input" id="e_cp" name="clientPhone" bind:value={eClientPhone} /></div>
+      </div>
+      <div class="field"><label class="label" for="e_code">Kod dostępu (hasło PDF / SMS)</label>
+        <input class="input" id="e_code" name="accessCode" bind:value={eCode} style="max-width:180px;" /></div>
+      <div class="field"><label class="label" for="e_msg">Wiadomość dla klienta</label>
+        <textarea class="input" id="e_msg" name="brokerMessage" rows="3" bind:value={eMessage}></textarea></div>
+      <button class="btn btn-primary" type="submit">Zapisz zmiany</button>
+    </form>
+  </div>
+{/if}
 {#if form?.sent}
   <div class="ok-box">
     Oferta wysłana.
@@ -60,9 +113,23 @@
 
 <!-- Porównanie wariantów -->
 <div class="card card-pad" style="margin-bottom:1.25rem;">
-  <h3 style="font-size:1rem;margin-bottom:1rem;">Warianty ({data.documents.length})</h3>
+  <h3 style="font-size:1rem;margin-bottom:1rem;">Warianty do porównania ({data.documents.length})</h3>
   {#if data.documents.length}
     <OfferComparison documents={data.documents} />
+    {#if editing}
+      <div style="margin-top:1rem;display:flex;flex-direction:column;gap:.4rem;">
+        {#each data.documents as d}
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;font-size:.85rem;border-top:1px solid var(--slate-100);padding-top:.4rem;">
+            <span>{d.source_filename || d.offer_number || d.insurer_type}</span>
+            <form method="POST" action="?/deleteDoc" use:enhance={() => ({ update }) => update()}
+              onsubmit={(e) => { if (!confirm('Usunąć ten wariant?')) e.preventDefault(); }}>
+              <input type="hidden" name="documentId" value={d.id} />
+              <button class="btn btn-ghost" style="padding:.25rem .6rem;font-size:.78rem;color:var(--red-600);">Usuń wariant</button>
+            </form>
+          </div>
+        {/each}
+      </div>
+    {/if}
   {:else}
     <p class="muted">Brak sparsowanych wariantów.</p>
   {/if}

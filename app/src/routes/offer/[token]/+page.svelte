@@ -127,7 +127,8 @@
 
     <!-- Porównanie -->
     <div class="card card-pad" style="margin-bottom:1.25rem;">
-      <h2 style="font-size:1.1rem;margin-bottom:1rem;">Porównanie ofert</h2>
+      <h2 style="font-size:1.15rem;margin-bottom:.35rem;">Porównanie ofert{data.documents.length > 1 ? ` (${data.documents.length})` : ''}</h2>
+      <p class="muted" style="margin:0 0 1rem;font-size:.85rem;">Zestawienie przygotowanych dla Ciebie wariantów. Wybierz najlepszy lub zapytaj o szczegóły.</p>
       <OfferComparison documents={data.documents} selectable={!choice} onchoose={openChoose} chosenId={chosenDocId} />
     </div>
 
@@ -183,13 +184,17 @@
           <h3 style="font-size:1.15rem;margin-bottom:.75rem;">Potwierdź wybór</h3>
           <p style="margin-bottom:1rem;">Wybierasz wariant. Przed potwierdzeniem zapoznaj się z wyłączeniami odpowiedzialności.</p>
           <div style="background:var(--slate-50);border:1px solid var(--slate-200);border-radius:8px;padding:1rem;font-size:.82rem;color:var(--slate-600);line-height:1.6;max-height:220px;overflow:auto;margin-bottom:1rem;">
-            <strong>Ważne wyłączenia (CEU / Leadenhall):</strong>
-            <ul style="padding-left:1.2rem;margin:.5rem 0 0;">
-              <li>Choroby leczone/konsultowane w okresie 24 miesięcy przed polisą.</li>
-              <li>Zwyrodnienia kręgosłupa i stawów leczone w ostatnich 24 miesiącach.</li>
-              <li>Celowe samookaleczenie, działanie pod wpływem alkoholu/środków odurzających.</li>
-              <li>Zawodowe uprawianie sportu, strefy wojny/sankcji.</li>
-            </ul>
+            <strong>Ważne wyłączenia odpowiedzialności:</strong>
+            {#if data.exclusionsText}
+              <p style="margin:.5rem 0 0;white-space:pre-wrap;">{data.exclusionsText}</p>
+            {:else}
+              <ul style="padding-left:1.2rem;margin:.5rem 0 0;">
+                <li>Choroby leczone/konsultowane w okresie 24 miesięcy przed polisą.</li>
+                <li>Zwyrodnienia kręgosłupa i stawów leczone w ostatnich 24 miesiącach.</li>
+                <li>Celowe samookaleczenie, działanie pod wpływem alkoholu/środków odurzających.</li>
+                <li>Zawodowe uprawianie sportu, strefy wojny/sankcji.</li>
+              </ul>
+            {/if}
             <p style="margin:.6rem 0 0;">Pełna lista w OWU i Karcie Produktu (do pobrania powyżej).</p>
           </div>
           <label style="display:flex;gap:.5rem;align-items:flex-start;font-size:.88rem;margin-bottom:1rem;cursor:pointer;">

@@ -1,6 +1,7 @@
 import { error } from '@sveltejs/kit';
 import { createAdminClient } from '$lib/server/supabase.js';
 import { isVerified } from '$lib/server/clientAuth.js';
+import { getSettings } from '$lib/server/settings.js';
 
 export async function load({ params, cookies }) {
   const sb = createAdminClient();
@@ -29,9 +30,10 @@ export async function load({ params, cookies }) {
     await sb.from('ud_offers').update({ status: 'viewed', viewed_at: new Date().toISOString() }).eq('id', offer.id);
   }
 
-  const [{ data: documents }, { data: files }] = await Promise.all([
+  const [{ data: documents }, { data: files }, settings] = await Promise.all([
     sb.from('ud_offer_documents').select('*').eq('offer_id', offer.id).order('sort_order'),
-    sb.from('ud_offer_files').select('id, file_type, file_name, insurer_type').eq('offer_id', offer.id)
+    sb.from('ud_offer_files').select('id, file_type, file_name, insurer_type').eq('offer_id', offer.id),
+    getSettings()
   ]);
 
   return {
@@ -46,6 +48,8 @@ export async function load({ params, cookies }) {
       client_choice: offer.client_choice
     },
     documents: documents || [],
-    files: files || []
+    files: files || [],
+    exclusionsText: settings.exclusions_text || '',
+    companyName: settings.company_name || ''
   };
 }
