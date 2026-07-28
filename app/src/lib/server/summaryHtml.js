@@ -28,8 +28,11 @@ const ROWS = [
  * @param {{ clientName?: string, offerName?: string, documents: any[] }} p
  * @returns {string} kompletny dokument HTML
  */
-export function buildOfferSummaryHtml({ clientName, offerName, documents = [] }) {
+export function buildOfferSummaryHtml({ clientName, offerName, documents = [], logoUrl = '' }) {
   const today = new Date().toLocaleDateString('pl-PL', { day: '2-digit', month: 'long', year: 'numeric' });
+  const brand = logoUrl
+    ? `<img src="${esc(logoUrl)}" alt="Logo" style="height:52px;width:auto;" />`
+    : `<div class="brand">Utrata<span>Dochodu</span></div>`;
   const cols = documents.map((d) => `<th>${esc(insurerLabel(d.insurer_type))}</th>`).join('');
   const rows = ROWS.map(
     ([label, fn]) => `<tr><td class="lbl">${esc(label)}</td>${documents.map((d) => `<td>${esc(fn(d))}</td>`).join('')}</tr>`
@@ -50,7 +53,7 @@ export function buildOfferSummaryHtml({ clientName, offerName, documents = [] })
     td.lbl { font-weight:600; color:#334155; background:#f8fafc; width:230px; }
     .foot { margin-top:24px; font-size:11px; color:#94a3b8; border-top:1px solid #e2e8f0; padding-top:10px; }
   </style></head><body>
-    <div class="brand">Utrata<span>Dochodu</span></div>
+    ${brand}
     <div class="title">Rekomendacja ofertowa — porównanie ofert ubezpieczenia utraty dochodu</div>
     <div class="meta">
       ${clientName ? `Przygotowana dla: <strong>${esc(clientName)}</strong><br>` : ''}

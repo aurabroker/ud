@@ -7,7 +7,9 @@ const DEFAULTS = {
   company_name: 'Aura Expert sp. z o.o.',
   company_full: '',
   default_broker_message: '',
-  exclusions_text: ''
+  exclusions_text: '',
+  logo_url: '',
+  logo_path: ''
 };
 
 /** @returns {Promise<Record<string, any>>} */

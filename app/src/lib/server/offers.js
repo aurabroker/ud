@@ -11,6 +11,7 @@ import { offerLinkEmail } from './templates.js';
 import { pickOwu } from './owuMatch.js';
 import { buildOfferSummaryHtml } from './summaryHtml.js';
 import { htmlToPdf } from './pdfshift.js';
+import { getSettings } from './settings.js';
 import { env } from '$env/dynamic/private';
 import { env as pubEnv } from '$env/dynamic/public';
 
@@ -146,10 +147,12 @@ export async function createOfferFromPdfs(p) {
   // 4) Brandowane podsumowanie PDF (PDFShift) — do pobrania przez klienta.
   //    Odporne: brak klucza / błąd nie przerywa tworzenia oferty.
   try {
+    const settings = await getSettings();
     const html = buildOfferSummaryHtml({
       clientName: p.clientName,
       offerName: p.offerName,
-      documents
+      documents,
+      logoUrl: settings.logo_url || ''
     });
     const pdf = await htmlToPdf(html);
     if (pdf.ok && pdf.buffer) {
@@ -285,7 +288,13 @@ async function regenerateSummary(sb, offerId) {
       await sb.from('ud_offer_files').delete().eq('id', o.id);
     }
 
-    const html = buildOfferSummaryHtml({ clientName: offer?.client_name, offerName: offer?.name, documents: documents || [] });
+    const settings = await getSettings();
+    const html = buildOfferSummaryHtml({
+      clientName: offer?.client_name,
+      offerName: offer?.name,
+      documents: documents || [],
+      logoUrl: settings.logo_url || ''
+    });
     const pdf = await htmlToPdf(html);
     if (pdf.ok && pdf.buffer) {
       const path = `${offerId}/podsumowanie.pdf`;
