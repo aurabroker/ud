@@ -30,11 +30,11 @@
     <div class="card-pad muted" style="text-align:center;padding:2.5rem 1rem;">Brak klientów.</div>
   {:else}
     <table>
-      <thead><tr><th>Klient</th><th>Kontakt</th><th>Zawód</th><th>Przypisany do</th><th>Dodano</th><th></th></tr></thead>
+      <thead><tr><th>Klient</th><th>Kontakt</th><th>Zawód</th><th>Przypisany do</th><th>Dodano</th></tr></thead>
       <tbody>
         {#each filtered as c}
           <tr>
-            <td style="font-weight:600;">{c.full_name || '—'}</td>
+            <td style="font-weight:600;"><a href="/panel/klienci/{c.id}">{c.full_name || '—'}</a></td>
             <td class="muted" style="font-size:.82rem;">{c.email || '—'}<br />{c.phone || ''}</td>
             <td class="muted">{c.profession || '—'}</td>
             <td>
@@ -45,7 +45,6 @@
               {/if}
             </td>
             <td class="muted">{dateP(c.created_at)}</td>
-            <td style="text-align:right;"><a href="/panel/klienci/{c.id}">Karta →</a></td>
           </tr>
         {/each}
       </tbody>
