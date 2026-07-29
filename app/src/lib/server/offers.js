@@ -409,27 +409,19 @@ export async function deleteOfferDocument(offerId, documentId) {
 }
 
 /**
- * Zwraca signed URL do PDF podsumowania; generuje go, jeśli jeszcze nie istnieje.
+ * Zwraca signed URL do PDF podsumowania. ZAWSZE regeneruje, żeby PDF
+ * odzwierciedlał aktualne ustawienia (stopka, logo).
  * @returns {Promise<string|null>} null gdy nie da się wygenerować (brak PDFShift)
  */
 export async function ensureSummaryUrl(offerId) {
   const sb = createAdminClient();
-  let { data: file } = await sb
+  await regenerateSummary(sb, offerId);
+  const { data: file } = await sb
     .from('ud_offer_files')
     .select('storage_bucket, storage_path')
     .eq('offer_id', offerId)
     .eq('file_type', 'summary')
     .maybeSingle();
-
-  if (!file) {
-    await regenerateSummary(sb, offerId);
-    ({ data: file } = await sb
-      .from('ud_offer_files')
-      .select('storage_bucket, storage_path')
-      .eq('offer_id', offerId)
-      .eq('file_type', 'summary')
-      .maybeSingle());
-  }
   if (!file) return null;
   const { data, error } = await sb.storage.from(file.storage_bucket).createSignedUrl(file.storage_path, 300);
   if (error) return null;
