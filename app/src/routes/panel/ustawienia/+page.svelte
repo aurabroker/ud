@@ -97,6 +97,10 @@
       <textarea class="input" id="pdf_footer" name="pdf_footer" rows="2" placeholder="np. nota prawna, dane firmy, kontakt">{s.pdf_footer || ''}</textarea>
       <p class="muted" style="margin-top:.35rem;font-size:.78rem;">Puste = domyślna nota. Widoczna na dole generowanego PDF-a.</p>
     </div>
+    {#if s.sample_pdf_url}
+      <a class="btn btn-ghost" href={s.sample_pdf_url} target="_blank" rel="noopener">📄 Podgląd wzorca PDF (aktualne ustawienia)</a>
+      <p class="muted" style="margin-top:.35rem;font-size:.78rem;">Wzorzec odświeża się automatycznie po każdym zapisie ustawień / zmianie logo.</p>
+    {/if}
   </div>
 
   <button class="btn btn-primary btn-lg" type="submit">Zapisz ustawienia</button>

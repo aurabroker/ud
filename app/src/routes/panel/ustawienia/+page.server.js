@@ -2,6 +2,7 @@ import { error, fail, redirect } from '@sveltejs/kit';
 import { createAdminClient } from '$lib/server/supabase.js';
 import { getSettings } from '$lib/server/settings.js';
 import { runHealthChecks } from '$lib/server/health.js';
+import { regenerateSamplePdf } from '$lib/server/offers.js';
 
 const PUBLIC_BUCKET = 'ud-public';
 
@@ -32,6 +33,7 @@ export const actions = {
     const rows = keys.map((key) => ({ key, value: String(form.get(key) ?? ''), updated_at: new Date().toISOString() }));
     const { error: e } = await sb.from('ud_settings').upsert(rows, { onConflict: 'key' });
     if (e) return fail(400, { error: 'Zapis: ' + e.message });
+    await regenerateSamplePdf().catch(() => {}); // odśwież wzorzec PDF
     return { ok: true };
   },
 
@@ -54,6 +56,7 @@ export const actions = {
     const { data: pub } = sb.storage.from(PUBLIC_BUCKET).getPublicUrl(path);
     await setSetting(sb, 'logo_url', pub.publicUrl);
     await setSetting(sb, 'logo_path', path);
+    await regenerateSamplePdf().catch(() => {}); // odśwież wzorzec PDF z nowym logo
     return { ok: true };
   },
 
@@ -63,6 +66,7 @@ export const actions = {
     if (settings.logo_path) await sb.storage.from(PUBLIC_BUCKET).remove([settings.logo_path]).catch(() => {});
     await setSetting(sb, 'logo_url', '');
     await setSetting(sb, 'logo_path', '');
+    await regenerateSamplePdf().catch(() => {}); // odśwież wzorzec PDF bez logo
     return { ok: true };
   }
 };

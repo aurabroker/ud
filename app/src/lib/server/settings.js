@@ -10,7 +10,8 @@ const DEFAULTS = {
   exclusions_text: '',
   logo_url: '',
   logo_path: '',
-  pdf_footer: ''
+  pdf_footer: '',
+  sample_pdf_url: ''
 };
 
 /** @returns {Promise<Record<string, any>>} */

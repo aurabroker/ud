@@ -428,6 +428,57 @@ export async function ensureSummaryUrl(offerId) {
   return data.signedUrl;
 }
 
+// Przykładowe warianty do wzorca PDF (podgląd ustawień: stopka, logo).
+const SAMPLE_DOCS = [
+  {
+    insurer_type: 'leadenhall', offer_number: 'LHQ0000000/1', insurance_period: '12 miesięcy',
+    death_covered: false, temp_incapacity_covered: true, temp_monthly_benefit: 10000,
+    temp_sum_insured: null, temp_daily_cap: null, perm_incapacity_covered: false,
+    perm_sum_insured: 240000, indemnity_period: '24 miesiące', wait_accident: 14, wait_illness: 21,
+    premium_total: 3036, premium_monthly: 253
+  },
+  {
+    insurer_type: 'ceu', offer_number: 'LOIP/0000/000000', insurance_period: '12 miesięcy',
+    death_covered: false, temp_incapacity_covered: true, temp_monthly_benefit: 16700,
+    temp_sum_insured: 392450, temp_daily_cap: 5000, perm_incapacity_covered: true,
+    perm_sum_insured: 2400000, indemnity_period: '24 miesiące', wait_accident: 14, wait_illness: 21,
+    premium_total: 13464.96, premium_monthly: 1122.08
+  }
+];
+
+/**
+ * Regeneruje wzorzec PDF (podgląd) z aktualnych ustawień (stopka, logo).
+ * Zapisuje do publicznego bucketa i zapisuje URL w ud_settings.sample_pdf_url.
+ * @returns {Promise<string|null>}
+ */
+export async function regenerateSamplePdf() {
+  const sb = createAdminClient();
+  const settings = await getSettings();
+  const html = buildOfferSummaryHtml({
+    clientName: 'Jan Kowalski (wzór)',
+    offerName: 'Wzór oferty',
+    documents: SAMPLE_DOCS,
+    logoUrl: settings.logo_url || '',
+    footerText: settings.pdf_footer || ''
+  });
+  const pdf = await htmlToPdf(html);
+  if (!pdf.ok || !pdf.buffer) return null;
+
+  const path = 'wzorzec.pdf';
+  const { error: upErr } = await sb.storage
+    .from('ud-public')
+    .upload(path, new Uint8Array(pdf.buffer), { contentType: 'application/pdf', upsert: true });
+  if (upErr) return null;
+
+  const { data: pub } = sb.storage.from('ud-public').getPublicUrl(path);
+  const url = `${pub.publicUrl}?t=${Date.now()}`; // cache-bust
+  await sb.from('ud_settings').upsert(
+    { key: 'sample_pdf_url', value: url, updated_at: new Date().toISOString() },
+    { onConflict: 'key' }
+  );
+  return url;
+}
+
 /** Signed URL do pobrania pliku oferty (5 min). */
 export async function signedFileUrl(bucket, path, expiresIn = 300) {
   const sb = createAdminClient();
