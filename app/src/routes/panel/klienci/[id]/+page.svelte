@@ -198,14 +198,17 @@
 </div>
 
 <style>
-  /* Wymuszony, KOMPAKTOWY układ jednokolumnowy — nic nie stoi obok siebie. */
-  .kk-sections { display: block !important; }
-  .kk-sections > :global(.card) {
-    display: block !important;
-    width: 100% !important;
-    margin: 0 0 0.6rem 0 !important;
-    padding: 0.7rem 0.9rem !important;
+  /* DWIE kolumny obok siebie, kompaktowo. Na wąskim ekranie -> 1 kolumna. */
+  .kk-sections {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    align-items: start;
   }
+  @media (max-width: 720px) {
+    .kk-sections { grid-template-columns: 1fr; }
+  }
+  .kk-sections > :global(.card) { padding: 0.7rem 0.9rem !important; }
   .kk-sections :global(h3) { font-size: 0.9rem !important; margin-bottom: 0.4rem !important; padding-bottom: 0.35rem !important; }
   .kk-sections :global(td) { padding: 0.25rem 0.5rem !important; font-size: 0.83rem !important; }
 </style>
