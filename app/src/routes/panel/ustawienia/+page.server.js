@@ -1,6 +1,7 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { createAdminClient } from '$lib/server/supabase.js';
 import { getSettings } from '$lib/server/settings.js';
+import { runHealthChecks } from '$lib/server/health.js';
 
 const PUBLIC_BUCKET = 'ud-public';
 
@@ -15,8 +16,8 @@ async function requireAdmin(locals) {
 
 export async function load({ locals }) {
   await requireAdmin(locals);
-  const settings = await getSettings();
-  return { settings };
+  const [settings, health] = await Promise.all([getSettings(), runHealthChecks()]);
+  return { settings, health };
 }
 
 async function setSetting(sb, key, value) {

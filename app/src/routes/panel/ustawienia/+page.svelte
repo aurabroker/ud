@@ -12,6 +12,37 @@
 {#if form?.error}<div class="error-box">{form.error}</div>{/if}
 {#if form?.ok}<div class="ok-box">Zapisano.</div>{/if}
 
+<!-- HEALTH -->
+{#if data.health}
+  {@const dot = { ok: '#16a34a', warn: '#f59e0b', error: '#dc2626' }}
+  {@const label = { ok: 'OK', warn: 'Ostrzeżenie', error: 'Błąd' }}
+  <div class="card card-pad" style="margin-bottom:1.25rem;">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+      <h3 style="font-size:1rem;margin:0;border:0;padding:0;">Stan aplikacji (Health)</h3>
+      <span style="display:inline-flex;align-items:center;gap:.4rem;font-size:.85rem;font-weight:700;">
+        <span style="width:12px;height:12px;border-radius:50%;background:{dot[data.health.summary]};display:inline-block;"></span>
+        {label[data.health.summary]} · {data.health.version}
+      </span>
+    </div>
+    <table style="margin-top:.75rem;">
+      <tbody>
+        {#each data.health.checks as c}
+          <tr>
+            <td style="width:20px;">
+              <span title={label[c.status]} style="width:12px;height:12px;border-radius:50%;background:{dot[c.status]};display:inline-block;box-shadow:0 0 0 3px {dot[c.status]}22;"></span>
+            </td>
+            <td style="font-weight:600;">{c.label}</td>
+            <td style="text-align:right;color:{c.status === 'error' ? 'var(--red-700)' : c.status === 'warn' ? '#92400e' : 'var(--slate-500)'};font-size:.83rem;">
+              {c.detail || (c.status === 'ok' ? '✓' : '')}
+            </td>
+          </tr>
+        {/each}
+      </tbody>
+    </table>
+    <p class="muted" style="margin-top:.6rem;font-size:.78rem;">🟢 OK · 🟠 ostrzeżenie/konflikt (funkcja może nie działać) · 🔴 błąd (do naprawy)</p>
+  </div>
+{/if}
+
 <!-- Logo -->
 <div class="card card-pad" style="margin-bottom:1.25rem;">
   <h3 style="font-size:1rem;margin-bottom:.75rem;">Logo (używane w PDF podsumowania i panelu)</h3>
