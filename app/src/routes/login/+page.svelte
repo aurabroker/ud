@@ -1,5 +1,6 @@
 <script>
   import { enhance } from '$app/forms';
+  import { APP_VERSION } from '$lib/version.js';
   let { form } = $props();
   let loading = $state(false);
 </script>
@@ -28,6 +29,6 @@
         {loading ? 'Logowanie…' : 'Zaloguj się'}
       </button>
     </form>
-    <p class="muted" style="text-align:center;margin-top:1.25rem;font-size:.72rem;">Aura Expert sp. z o.o. · Panel wewnętrzny</p>
+    <p class="muted" style="text-align:center;margin-top:1.25rem;font-size:.72rem;">Aura Expert sp. z o.o. · Panel wewnętrzny · {APP_VERSION}</p>
   </div>
 </div>

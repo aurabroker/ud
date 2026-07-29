@@ -1,5 +1,6 @@
 <script>
   import { page } from '$app/stores';
+  import { APP_VERSION } from '$lib/version.js';
   let { data, children } = $props();
   const name = data.profile?.full_name || data.user?.email || 'Agent';
   const role = data.profile?.role || 'user';
@@ -22,7 +23,10 @@
 
 <header class="header">
   <div style="display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;">
-    <a href="/panel" style="color:#fff;text-decoration:none;" class="logo">Utrata<span>Dochodu</span></a>
+    <a href="/panel" style="color:#fff;text-decoration:none;display:inline-flex;align-items:center;gap:.45rem;" class="logo">
+      <span style="display:inline-flex;width:28px;height:28px;background:#38bdf8;color:#0f172a;border-radius:7px;align-items:center;justify-content:center;font-weight:900;font-size:1.05rem;">U</span>
+      Utrata<span>Dochodu</span>
+    </a>
     <nav style="display:flex;gap:.25rem;flex-wrap:wrap;">
       {#each tabs as tab}
         <a href={tab.href}
@@ -35,7 +39,7 @@
   <div style="display:flex;align-items:center;gap:1rem;">
     <div style="text-align:right;line-height:1.2;">
       <div style="font-size:.85rem;font-weight:600;">{name}</div>
-      <div style="font-size:.72rem;color:var(--slate-400);">{role}</div>
+      <div style="font-size:.72rem;color:var(--slate-400);">{role} · <span title="Wersja aplikacji">{APP_VERSION}</span></div>
     </div>
     <form method="POST" action="/logout"><button class="btn btn-ghost" style="color:#fff;border-color:#475569;">Wyloguj</button></form>
   </div>

@@ -6,8 +6,9 @@ import { json } from '@sveltejs/kit';
 import { createServerClient } from '@supabase/ssr';
 import { env } from '$env/dynamic/private';
 import { env as pubEnv } from '$env/dynamic/public';
+import { APP_VERSION } from '$lib/version.js';
 
-const VERSION = 'diag-12-2col';
+const VERSION = APP_VERSION;
 
 export async function GET({ cookies }) {
   const out = { version: VERSION, ok: false };
