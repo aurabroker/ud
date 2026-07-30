@@ -1,4 +1,4 @@
-import { error, redirect } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
 import { createAdminClient } from '$lib/server/supabase.js';
 import { isVerified } from '$lib/server/clientAuth.js';
 import { signedFileUrl } from '$lib/server/offers.js';
@@ -16,12 +16,24 @@ export async function GET({ params, cookies }) {
 
   const { data: file } = await sb
     .from('ud_offer_files')
-    .select('storage_bucket, storage_path')
+    .select('storage_bucket, storage_path, file_name')
     .eq('id', params.fileId)
     .eq('offer_id', offer.id)
     .maybeSingle();
   if (!file) throw error(404, 'Plik nie istnieje');
 
   const url = await signedFileUrl(file.storage_bucket, file.storage_path, 300);
-  throw redirect(302, url);
+
+  // Strumieniujemy plik przez naszą domenę — URL Supabase nie jest ujawniany.
+  const res = await fetch(url);
+  if (!res.ok) throw error(502, 'Nie udało się pobrać pliku.');
+
+  const name = (file.file_name || 'dokument.pdf').replace(/["\\]/g, '');
+  return new Response(res.body, {
+    headers: {
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="${name}"`,
+      'Cache-Control': 'no-store'
+    }
+  });
 }
