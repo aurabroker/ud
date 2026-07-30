@@ -12,7 +12,7 @@
     pinError = '';
     pinLoading = true;
     try {
-      const res = await fetch(`/offer/${data.token}/verify-pin`, {
+      const res = await fetch(`/offer/${data.token}/unlock`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ pin })
@@ -94,10 +94,11 @@
         Wpisz 4-cyfrowe hasło, które otrzymałeś/aś SMS-em.
       </p>
       {#if pinError}<div class="error-box">{pinError}</div>{/if}
-      <form onsubmit={submitPin}>
+      <form onsubmit={submitPin} novalidate>
         <input class="input" style="text-align:center;font-size:1.6rem;letter-spacing:.5rem;font-weight:700;"
-          inputmode="numeric" maxlength="4" pattern="\d{4}" placeholder="••••"
-          bind:value={pin} autocomplete="one-time-code" />
+          inputmode="numeric" maxlength="4" placeholder="••••"
+          bind:value={pin} oninput={(e) => (pin = e.currentTarget.value.replace(/\D/g, '').slice(0, 4))}
+          autocomplete="one-time-code" />
         <button class="btn btn-primary btn-full btn-lg" style="margin-top:1rem;" type="submit" disabled={pinLoading || pin.length !== 4}>
           {pinLoading ? 'Sprawdzam…' : 'Odblokuj ofertę'}
         </button>
