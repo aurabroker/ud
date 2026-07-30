@@ -22,11 +22,12 @@
     </div>
   {:else}
     <table>
-      <thead><tr><th>Oferta</th><th>Klient</th><th>Status</th><th>Utworzona</th><th></th></tr></thead>
+      <thead><tr><th>Oferta nr</th><th>Nazwa</th><th>Klient</th><th>Status</th><th>Utworzona</th><th></th></tr></thead>
       <tbody>
         {#each data.offers as o}
           <tr>
-            <td style="font-weight:600;">{o.name}</td>
+            <td style="font-weight:600;font-size:.82rem;">{o.offer_number || '—'}</td>
+            <td>{o.name}</td>
             <td>{o.client_name || '—'}</td>
             <td><span class="badge badge-{o.status}">{statusLabel[o.status] || o.status}</span></td>
             <td class="muted">{fmtDate(o.created_at)}</td>

@@ -32,6 +32,7 @@ export function parseLeadenhall(text) {
   // Pozycja B — Całkowita okresowa niezdolność do pracy
   o.temp_incapacity_covered = isCovered(firstMatch(text, /Pozycja\s+B\s*-\s*(Nie\s+objęta|Objęta)/i));
   o.temp_monthly_benefit = matchAmount(text, /([\d  ]+)\s*zł,\s*nie\s+więcej\s+jednak\s+niż/i);
+  o.temp_monthly_pct = matchInt(text, /nie\s+więcej\s+jednak\s+niż\s+(\d+)\s*%/i);
   o.indemnity_period = firstMatch(text, /Okres\s+odszkodowawczy\s+(\d+\s*miesi[a-ząćęłńóśźż]+)/i);
   o.wait_illness = matchInt(text, /Okres\s+wyczekiwania\s*\(choroba\)\s+(\d+)\s*dni/i);
   o.wait_accident = matchInt(text, /Okres\s+wyczekiwania\s*\(wypadek\)\s+(\d+)\s*dni/i);

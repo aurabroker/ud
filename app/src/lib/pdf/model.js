@@ -18,6 +18,7 @@
  * @property {boolean|null} death_covered
  * @property {boolean|null} temp_incapacity_covered
  * @property {number|null} temp_monthly_benefit
+ * @property {number|null} temp_monthly_pct
  * @property {number|null} temp_sum_insured
  * @property {number|null} temp_daily_cap
  * @property {boolean|null} perm_incapacity_covered
@@ -55,6 +56,7 @@ export function emptyOffer(insurer_type) {
     death_covered: null,
     temp_incapacity_covered: null,
     temp_monthly_benefit: null,
+    temp_monthly_pct: null,
     temp_sum_insured: null,
     temp_daily_cap: null,
     perm_incapacity_covered: null,

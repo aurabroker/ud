@@ -50,6 +50,7 @@ export const actions = {
     const clientId = String(form.get('clientId') || '').trim() || null;
     const patch = {
       name: String(form.get('name') || '').trim() || 'Oferta',
+      offer_number: String(form.get('offerNumber') || '').trim() || null,
       client_id: clientId,
       client_name: String(form.get('clientName') || '').trim() || null,
       client_email: String(form.get('clientEmail') || '').trim() || null,

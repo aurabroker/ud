@@ -46,6 +46,7 @@ export function parseCEU(text) {
   );
   o.temp_incapacity_covered = isCovered(firstMatch(tempSec, /(Nie\s+objęt\w+|Objęt\w+)\s+ubezpieczeniem/i));
   o.temp_monthly_benefit = matchAmount(tempSec, /Maksymalne\s+świadczenie\s+miesięczne\s+([\d  ]+,\d{2})\s*zł/i);
+  o.temp_monthly_pct = matchInt(tempSec, /nie\s+może\s+przekroczyć\s+(\d+)\s*%/i);
   o.temp_daily_cap = matchAmount(tempSec, /oraz\s+([\d  ]+)\s*PLN\/dzień/i);
   o.temp_sum_insured = matchAmount(tempSec, /Suma\s+ubezpieczenia\s+([\d  ]+,\d{2})\s*zł/i);
   o.indemnity_period = firstMatch(tempSec, /Okres\s+świadczeń\s+(\d+\s*miesi[a-ząćęłńóśźż]+)/i);

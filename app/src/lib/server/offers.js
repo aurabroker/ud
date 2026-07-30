@@ -17,6 +17,35 @@ import { env } from '$env/dynamic/private';
 
 const BUCKET = 'ud-offers';
 
+/** Inicjały agenta z pełnego imienia i nazwiska (np. "Jan Kowalski" -> "JK"). */
+function initialsFrom(name) {
+  const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return 'XX';
+  const ini = (parts[0][0] || '') + (parts[1]?.[0] || parts[0][1] || 'X');
+  return ini.toUpperCase();
+}
+
+/** Nazwisko klienta = ostatni człon. */
+function surnameFrom(name) {
+  const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+  return parts.length ? parts[parts.length - 1] : '';
+}
+
+/**
+ * Numer oferty: UD/{rok}/{inicjały agenta}/{00042}[/{nazwisko}]
+ */
+async function generateOfferNumber(sb, agentUserId, clientName) {
+  const { data: prof } = await sb.from('ud_user_profiles').select('full_name').eq('id', agentUserId).maybeSingle();
+  const initials = initialsFrom(prof?.full_name);
+  const { data: seq } = await sb.rpc('ud_next_offer_seq');
+  const n = String(seq ?? 0).padStart(5, '0');
+  const year = new Date().getFullYear();
+  const surname = surnameFrom(clientName);
+  let num = `UD/${year}/${initials}/${n}`;
+  if (surname) num += `/${surname}`;
+  return num;
+}
+
 /**
  * Tworzy ofertę z jednego lub wielu PDF-ów (Leadenhall/CEU).
  * @param {Object} p
@@ -57,6 +86,7 @@ export async function createOfferFromPdfs(p) {
   // Kod dostępu = hasło PDF (jeśli podane) albo losowy 4-cyfrowy.
   // Ten sam kod odblokowuje link do oferty i otwiera pobrane pliki PDF.
   const accessCode = (p.password && /^\d{4,}$/.test(p.password)) ? p.password : generatePin();
+  const offerNumber = await generateOfferNumber(sb, p.agentUserId, p.clientName);
 
   // 1) Parent ud_offers
   const { data: offer, error: offerErr } = await sb
@@ -71,6 +101,7 @@ export async function createOfferFromPdfs(p) {
       broker_message: p.brokerMessage || null,
       share_token: shareToken,
       access_code: accessCode,
+      offer_number: offerNumber,
       source: 'pdf_import',
       status: 'draft',
       data: {}
@@ -148,12 +179,19 @@ export async function createOfferFromPdfs(p) {
   //    Odporne: brak klucza / błąd nie przerywa tworzenia oferty.
   try {
     const settings = await getSettings();
+    let employmentType = '';
+    if (p.clientId) {
+      const { data: cl } = await sb.from('ud_clients').select('employment_type').eq('id', p.clientId).maybeSingle();
+      employmentType = cl?.employment_type || '';
+    }
     const html = buildOfferSummaryHtml({
       clientName: p.clientName,
       offerName: p.offerName,
       documents,
       logoUrl: settings.logo_url || '',
-      footerText: settings.pdf_footer || ''
+      footerText: settings.pdf_footer || '',
+      employmentType,
+      offerNumber
     });
     const pdf = await htmlToPdf(html);
     if (pdf.ok && pdf.buffer) {
@@ -279,8 +317,18 @@ export async function addDocumentsToOffer(offerId, files, password) {
 /** Regeneruje podsumowanie PDF z wszystkich wariantów oferty (usuwa stare). */
 async function regenerateSummary(sb, offerId) {
   try {
-    const { data: offer } = await sb.from('ud_offers').select('name, client_name').eq('id', offerId).single();
+    const { data: offer } = await sb
+      .from('ud_offers')
+      .select('name, client_name, client_id, offer_number')
+      .eq('id', offerId)
+      .single();
     const { data: documents } = await sb.from('ud_offer_documents').select('*').eq('offer_id', offerId).order('sort_order');
+
+    let employmentType = '';
+    if (offer?.client_id) {
+      const { data: cl } = await sb.from('ud_clients').select('employment_type').eq('id', offer.client_id).maybeSingle();
+      employmentType = cl?.employment_type || '';
+    }
 
     // usuń stare podsumowanie
     const { data: old } = await sb.from('ud_offer_files').select('id, storage_path').eq('offer_id', offerId).eq('file_type', 'summary');
@@ -295,7 +343,9 @@ async function regenerateSummary(sb, offerId) {
       offerName: offer?.name,
       documents: documents || [],
       logoUrl: settings.logo_url || '',
-      footerText: settings.pdf_footer || ''
+      footerText: settings.pdf_footer || '',
+      employmentType,
+      offerNumber: offer?.offer_number || ''
     });
     const pdf = await htmlToPdf(html);
     if (pdf.ok && pdf.buffer) {
@@ -459,7 +509,9 @@ export async function regenerateSamplePdf() {
     offerName: 'Wzór oferty',
     documents: SAMPLE_DOCS,
     logoUrl: settings.logo_url || '',
-    footerText: settings.pdf_footer || ''
+    footerText: settings.pdf_footer || '',
+    employmentType: 'uop',
+    offerNumber: 'UD/2026/AD/00042/Kowalski'
   });
   const pdf = await htmlToPdf(html);
   if (!pdf.ok || !pdf.buffer) return null;

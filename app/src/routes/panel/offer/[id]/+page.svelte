@@ -14,6 +14,7 @@
   // pola edycji
   let eClientId = $state(data.offer.client_id || '');
   let eName = $state(data.offer.name || '');
+  let eOfferNumber = $state(data.offer.offer_number || '');
   let eClientName = $state(data.offer.client_name || '');
   let eClientEmail = $state(data.offer.client_email || '');
   let eClientPhone = $state(data.offer.client_phone || '');
@@ -36,7 +37,9 @@
 <div style="display:flex;align-items:center;justify-content:space-between;margin:.5rem 0 1.5rem;flex-wrap:wrap;gap:1rem;">
   <div>
     <h1 style="font-size:1.5rem;">{data.offer.name}</h1>
-    <p class="muted">{data.offer.client_name || 'Bez nazwiska'} · <span class="badge badge-{data.offer.status}">{statusLabel[data.offer.status]}</span></p>
+    <p class="muted">
+      {#if data.offer.offer_number}<strong>{data.offer.offer_number}</strong> · {/if}{data.offer.client_name || 'Bez nazwiska'} · <span class="badge badge-{data.offer.status}">{statusLabel[data.offer.status]}</span>
+    </p>
   </div>
   <div style="display:flex;gap:.5rem;">
     <button class="btn btn-ghost" onclick={() => (editing = !editing)}>{editing ? 'Zamknij edycję' : '✎ Edytuj'}</button>
@@ -68,6 +71,10 @@
         <div class="field">
           <label class="label" for="e_name">Nazwa oferty (wewnętrzna)</label>
           <input class="input" id="e_name" name="name" bind:value={eName} />
+        </div>
+        <div class="field">
+          <label class="label" for="e_num">Oferta nr (system; można dodać nazwisko)</label>
+          <input class="input" id="e_num" name="offerNumber" bind:value={eOfferNumber} />
         </div>
         <div class="field">
           <label class="label" for="e_cn">Imię i nazwisko klienta</label>
