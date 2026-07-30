@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import { createAdminClient } from '$lib/server/supabase.js';
-import { verifyPin } from '$lib/server/crypto.js';
+import { verifyPin, hashPin } from '$lib/server/crypto.js';
 import { setVerifiedCookie } from '$lib/server/clientAuth.js';
 
 export async function POST({ params, request, cookies }) {
@@ -12,12 +12,12 @@ export async function POST({ params, request, cookies }) {
   const sb = createAdminClient();
   const { data: offer } = await sb
     .from('ud_offers')
-    .select('id, share_token')
+    .select('id, share_token, access_code')
     .eq('share_token', params.token)
     .maybeSingle();
   if (!offer) return json({ ok: false, error: 'Oferta nie istnieje.' }, { status: 404 });
 
-  const { data: pinRow } = await sb
+  let { data: pinRow } = await sb
     .from('ud_offer_pins')
     .select('*')
     .eq('offer_id', offer.id)
@@ -25,7 +25,22 @@ export async function POST({ params, request, cookies }) {
     .limit(1)
     .maybeSingle();
 
-  if (!pinRow) return json({ ok: false, error: 'Brak aktywnego hasła. Skontaktuj się z agentem.' }, { status: 400 });
+  // Lazy-provision: link bywa udostępniany ręcznie (Kopiuj → email), zanim agent
+  // kliknie „Wyślij". Jeśli oferta ma już kod dostępu (access_code = hasło PDF),
+  // tworzymy aktywne hasło w locie — link działa od razu, a limit prób nadal obowiązuje.
+  const isValidCode = offer.access_code && /^\d{4}$/.test(String(offer.access_code));
+  if ((!pinRow || new Date(pinRow.expires_at) < new Date()) && isValidCode) {
+    await sb.from('ud_offer_pins').delete().eq('offer_id', offer.id);
+    const expiresAt = new Date(Date.now() + 720 * 3600 * 1000).toISOString(); // 30 dni
+    const { data: fresh } = await sb
+      .from('ud_offer_pins')
+      .insert({ offer_id: offer.id, pin_hash: await hashPin(String(offer.access_code)), expires_at: expiresAt })
+      .select('*')
+      .single();
+    pinRow = fresh;
+  }
+
+  if (!pinRow) return json({ ok: false, error: 'Brak aktywnego hasła. Ustaw kod dostępu w panelu lub wyślij ofertę.' }, { status: 400 });
   if (new Date(pinRow.expires_at) < new Date()) {
     return json({ ok: false, error: 'Hasło wygasło. Poproś agenta o nowe.' }, { status: 400 });
   }
