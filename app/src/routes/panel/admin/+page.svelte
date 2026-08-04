@@ -13,7 +13,10 @@
     <h1 style="font-size:1.5rem;">Panel Admina</h1>
     <p class="muted">Zarządzanie użytkownikami ({data.users.length})</p>
   </div>
-  <button class="btn btn-primary" onclick={() => (showNew = !showNew)}>{showNew ? 'Anuluj' : '+ Nowy użytkownik'}</button>
+  <div style="display:flex;gap:.5rem;">
+    <a class="btn btn-ghost" href="/panel/admin/podglad-oferty">👁 Podgląd oferty klienta</a>
+    <button class="btn btn-primary" onclick={() => (showNew = !showNew)}>{showNew ? 'Anuluj' : '+ Nowy użytkownik'}</button>
+  </div>
 </div>
 
 {#if form?.error}<div class="error-box">{form.error}</div>{/if}

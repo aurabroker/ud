@@ -8,7 +8,7 @@ import { generateShareToken, generatePin, hashPin } from './crypto.js';
 import { sendSms } from './sms.js';
 import { sendEmail } from './email.js';
 import { offerLinkEmail } from './templates.js';
-import { pickOwu } from './owuMatch.js';
+import { resolveOwus } from './owuMatch.js';
 import { buildOfferSummaryHtml } from './summaryHtml.js';
 import { htmlToPdf } from './pdfshift.js';
 import { getSettings } from './settings.js';
@@ -159,8 +159,9 @@ export async function createOfferFromPdfs(p) {
         .eq('active', true);
       owuCache[doc.insurer_type] = data || [];
     }
-    const owu = pickOwu(owuCache[doc.insurer_type], doc.owu_symbol);
-    if (owu && !attachedOwu.has(owu.storage_path)) {
+    const owus = resolveOwus(owuCache[doc.insurer_type], doc);
+    for (const owu of owus) {
+      if (attachedOwu.has(owu.storage_path)) continue;
       attachedOwu.add(owu.storage_path);
       await sb.from('ud_offer_files').insert({
         offer_id: offer.id,
@@ -294,8 +295,9 @@ export async function addDocumentsToOffer(offerId, files, password) {
       const { data } = await sb.from('ud_owu_library').select('*').eq('insurer_type', doc.insurer_type).eq('active', true);
       owuCache[doc.insurer_type] = data || [];
     }
-    const owu = pickOwu(owuCache[doc.insurer_type], doc.owu_symbol);
-    if (owu && !attached.has(owu.storage_path)) {
+    const owus = resolveOwus(owuCache[doc.insurer_type], doc);
+    for (const owu of owus) {
+      if (attached.has(owu.storage_path)) continue;
       attached.add(owu.storage_path);
       await sb.from('ud_offer_files').insert({
         offer_id: offerId,

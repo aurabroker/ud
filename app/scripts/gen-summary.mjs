@@ -5,19 +5,23 @@ import { OFFER_CONDITIONS_HTML } from '../src/lib/server/offerConditions.js';
 const nf = new Intl.NumberFormat('pl-PL', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 const money = (n) => (n == null || n === '' ? '—' : nf.format(typeof n === 'string' ? parseFloat(n) : n) + ' zł');
 const yesNo = (b) => (b === true ? 'Tak' : b === false ? 'Nie' : '—');
-const insurerLabel = (t) => ({ leadenhall: 'Leadenhall (Lloyd’s)', ceu: 'CEU — LOI Premium' }[t] || t);
+const insurerLabel = (t) => ({ leadenhall: 'Leadenhall Insurance SA', ceu: 'CEU — LOI Premium' }[t] || t);
+const insurerRow = () => 'Lloyd’s';
+const tempIncap = (d) => {
+  const covered = d.temp_incapacity_covered === true || d.temp_monthly_benefit != null || d.temp_sum_insured != null;
+  return covered ? { green: true, text: 'TAK' } : yesNo(d.temp_incapacity_covered);
+};
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const emplLabel = (c) => ({ uop: 'Umowa o pracę', b2b: 'B2B / działalność gospodarcza' }[String(c||'').toLowerCase()] || c || '—');
 const isUop = (c) => /^uop$/i.test(String(c||'').trim()) || /umowa o prac/i.test(String(c||''));
 
 const ROWS = [
-  ['Ubezpieczyciel', (d) => insurerLabel(d.insurer_type)],
+  ['Ubezpieczyciel', () => insurerRow()],
   ['Numer oferty (ubezpieczyciel)', (d) => d.offer_number || '—'],
   ['Okres ubezpieczenia', (d) => d.insurance_period || '—'],
   ['Śmierć / inwalidztwo (NW)', (d) => yesNo(d.death_covered)],
-  ['Okresowa niezdolność do pracy', (d) => yesNo(d.temp_incapacity_covered)],
+  ['Okresowa niezdolność do pracy', (d) => tempIncap(d)],
   ['— świadczenie miesięczne', (d) => money(d.temp_monthly_benefit)],
-  ['— limit (% przychodu)', (d) => (d.temp_monthly_pct != null ? d.temp_monthly_pct + '%' : '—')],
   ['— suma ubezpieczenia', (d) => money(d.temp_sum_insured)],
   ['Trwała niezdolność do pracy', (d) => yesNo(d.perm_incapacity_covered)],
   ['— suma ubezpieczenia', (d) => money(d.perm_sum_insured)],
@@ -31,7 +35,8 @@ function buildHtml(documents, clientName, employmentType, offerNumber) {
   const pct = isUop(employmentType) ? 65 : 80;
   const clause = `Kwota świadczenia miesięcznego nie może przekroczyć ${pct}% kwoty stanowiącej 1/12 Ubezpieczonego przychodu za okres 12 miesięcy bezpośrednio poprzedzających zawarcie Umowy ubezpieczenia.`;
   const cols = documents.map((d) => `<th>${esc(insurerLabel(d.insurer_type))}</th>`).join('');
-  const rows = ROWS.map(([l, fn]) => `<tr><td class="lbl">${esc(l)}</td>${documents.map((d) => `<td>${esc(fn(d))}</td>`).join('')}</tr>`).join('');
+  const cell = (v) => (v && v.green ? `<span style="color:#15803d;font-weight:700">${esc(v.text)}</span>` : esc(v));
+  const rows = ROWS.map(([l, fn]) => `<tr><td class="lbl">${esc(l)}</td>${documents.map((d) => `<td>${cell(fn(d))}</td>`).join('')}</tr>`).join('');
   const premium = `<tr class="premium"><td class="lbl">Składka roczna (łącznie)</td>${documents.map((d)=>`<td><strong>${esc(money(d.premium_total))}</strong></td>`).join('')}</tr><tr class="premium"><td class="lbl">Rata miesięczna</td>${documents.map((d)=>`<td>${esc(money(d.premium_monthly))}</td>`).join('')}</tr>`;
   return `<!doctype html><html lang="pl"><head><meta charset="utf-8"><style>
     *{box-sizing:border-box}body{font-family:'Helvetica Neue',Arial,sans-serif;color:#1e293b;margin:0;padding:28px;font-size:12px}
@@ -52,7 +57,7 @@ function buildHtml(documents, clientName, employmentType, offerNumber) {
       <tr><td class="k">Data</td><td>${esc(today)}</td></tr>
     </table>
     <div class="clause">${esc(clause)}</div>
-    <table class="cmp"><thead><tr><th>Parametr</th>${cols}</tr></thead><tbody>${rows}${premium}</tbody></table>
+    <table class="cmp"><thead><tr><th>przedstawiciel Lloyd's</th>${cols}</tr></thead><tbody>${rows}${premium}</tbody></table>
     ${OFFER_CONDITIONS_HTML}
   </body></html>`;
 }

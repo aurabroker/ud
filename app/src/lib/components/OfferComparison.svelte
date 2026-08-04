@@ -1,15 +1,21 @@
 <script>
-  import { money, yesNo, insurerLabel } from '$lib/format.js';
+  import { money, yesNo, insurerLabel, insurerRow } from '$lib/format.js';
   let { documents = [], selectable = false, onchoose = null, chosenId = null } = $props();
 
+  // Okresowa niezdolność „z oferty": gdy pokrycie faktycznie jest — TAK na zielono zamiast „—".
+  function tempIncap(d) {
+    const covered = d.temp_incapacity_covered === true || d.temp_monthly_benefit != null || d.temp_sum_insured != null;
+    if (covered) return { green: true, text: 'TAK' };
+    return yesNo(d.temp_incapacity_covered);
+  }
+
   const rows = [
-    ['Ubezpieczyciel', (d) => insurerLabel(d.insurer_type)],
+    ['Ubezpieczyciel', () => insurerRow()],
     ['Numer oferty', (d) => d.offer_number || '—'],
     ['Okres ubezpieczenia', (d) => d.insurance_period || '—'],
     ['Śmierć / inwalidztwo (NW)', (d) => yesNo(d.death_covered)],
-    ['Okresowa niezdolność do pracy', (d) => yesNo(d.temp_incapacity_covered)],
+    ['Okresowa niezdolność do pracy', (d) => tempIncap(d)],
     ['— świadczenie miesięczne', (d) => money(d.temp_monthly_benefit)],
-    ['— limit (% przychodu)', (d) => (d.temp_monthly_pct != null ? d.temp_monthly_pct + '%' : '—')],
     ['— suma ubezpieczenia', (d) => money(d.temp_sum_insured)],
     ['— limit dzienny', (d) => money(d.temp_daily_cap)],
     ['Trwała niezdolność do pracy', (d) => yesNo(d.perm_incapacity_covered)],
@@ -24,7 +30,7 @@
   <table class="cmp">
     <thead>
       <tr>
-        <th class="lbl-col">Parametr</th>
+        <th class="lbl-col">przedstawiciel Lloyd's</th>
         {#each documents as d}
           <th><div class="ins">{insurerLabel(d.insurer_type)}</div></th>
         {/each}
@@ -34,7 +40,10 @@
       {#each rows as [label, fn]}
         <tr>
           <td class="lbl">{label}</td>
-          {#each documents as d}<td>{fn(d)}</td>{/each}
+          {#each documents as d}
+            {@const v = fn(d)}
+            <td>{#if v && v.green}<span class="yes">{v.text}</span>{:else}{v}{/if}</td>
+          {/each}
         </tr>
       {/each}
       <tr class="premium">
@@ -73,4 +82,5 @@
   td.lbl { font-weight: 600; color: var(--slate-600); background: var(--slate-50); }
   tbody tr:nth-child(even) td:not(.lbl) { background: #fbfcfe; }
   tr.premium td { font-size: 0.95rem; border-top: 2px solid var(--slate-200); }
+  .yes { color: #15803d; font-weight: 700; }
 </style>

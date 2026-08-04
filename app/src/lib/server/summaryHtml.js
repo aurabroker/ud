@@ -1,7 +1,7 @@
 /**
  * summaryHtml.js — brandowany HTML podsumowania oferty (→ PDFShift → PDF).
  */
-import { money, yesNo, insurerLabel } from '$lib/format.js';
+import { money, yesNo, insurerLabel, insurerRow } from '$lib/format.js';
 import { OFFER_CONDITIONS_HTML } from './offerConditions.js';
 
 function esc(s) {
@@ -25,14 +25,20 @@ function isUop(code) {
   return /^uop$/i.test(String(code || '').trim()) || /umowa o prac/i.test(String(code || ''));
 }
 
+/** Okresowa niezdolność „z oferty": gdy pokrycie faktycznie jest — TAK na zielono zamiast „—". */
+function tempIncap(d) {
+  const covered = d.temp_incapacity_covered === true || d.temp_monthly_benefit != null || d.temp_sum_insured != null;
+  if (covered) return { green: true, text: 'TAK' };
+  return yesNo(d.temp_incapacity_covered);
+}
+
 const ROWS = [
-  ['Ubezpieczyciel', (d) => insurerLabel(d.insurer_type)],
+  ['Ubezpieczyciel', () => insurerRow()],
   ['Numer oferty (ubezpieczyciel)', (d) => d.offer_number || '—'],
   ['Okres ubezpieczenia', (d) => d.insurance_period || '—'],
   ['Śmierć / inwalidztwo (NW)', (d) => yesNo(d.death_covered)],
-  ['Okresowa niezdolność do pracy', (d) => yesNo(d.temp_incapacity_covered)],
+  ['Okresowa niezdolność do pracy', (d) => tempIncap(d)],
   ['— świadczenie miesięczne', (d) => money(d.temp_monthly_benefit)],
-  ['— limit (% przychodu)', (d) => (d.temp_monthly_pct != null ? d.temp_monthly_pct + '%' : '—')],
   ['— suma ubezpieczenia', (d) => money(d.temp_sum_insured)],
   ['Trwała niezdolność do pracy', (d) => yesNo(d.perm_incapacity_covered)],
   ['— suma ubezpieczenia', (d) => money(d.perm_sum_insured)],
@@ -58,8 +64,9 @@ export function buildOfferSummaryHtml({
   const clause = `Kwota świadczenia miesięcznego nie może przekroczyć ${pct}% kwoty stanowiącej 1/12 Ubezpieczonego przychodu za okres 12 miesięcy bezpośrednio poprzedzających zawarcie Umowy ubezpieczenia.`;
 
   const cols = documents.map((d) => `<th>${esc(insurerLabel(d.insurer_type))}</th>`).join('');
+  const cell = (v) => (v && v.green ? `<span style="color:#15803d;font-weight:700">${esc(v.text)}</span>` : esc(v));
   const rows = ROWS.map(
-    ([label, fn]) => `<tr><td class="lbl">${esc(label)}</td>${documents.map((d) => `<td>${esc(fn(d))}</td>`).join('')}</tr>`
+    ([label, fn]) => `<tr><td class="lbl">${esc(label)}</td>${documents.map((d) => `<td>${cell(fn(d))}</td>`).join('')}</tr>`
   ).join('');
   const premiumRows = `
     <tr class="premium"><td class="lbl">Składka roczna (łącznie)</td>${documents.map((d) => `<td><strong>${esc(money(d.premium_total))}</strong></td>`).join('')}</tr>
@@ -104,7 +111,7 @@ export function buildOfferSummaryHtml({
     <div class="clause">${esc(clause)}</div>
 
     <table class="cmp">
-      <thead><tr><th>Parametr</th>${cols}</tr></thead>
+      <thead><tr><th>przedstawiciel Lloyd's</th>${cols}</tr></thead>
       <tbody>${rows}${premiumRows}</tbody>
     </table>
 

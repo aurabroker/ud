@@ -16,8 +16,14 @@ export function yesNo(b) {
   return '—';
 }
 
+/** Etykieta nagłówka kolumny (przedstawiciel Lloyd's). */
 export function insurerLabel(t) {
-  return { leadenhall: 'Leadenhall (Lloyd’s)', ceu: 'CEU — LOI Premium' }[t] || t || '—';
+  return { leadenhall: 'Leadenhall Insurance SA', ceu: 'CEU — LOI Premium' }[t] || t || '—';
+}
+
+/** Wartość w wierszu „Ubezpieczyciel" — zawsze Lloyd's (Leadenhall i CEU to coverholderzy Lloyd's). */
+export function insurerRow() {
+  return 'Lloyd’s';
 }
 
 export function dateP(s) {

@@ -2,12 +2,13 @@ import { error } from '@sveltejs/kit';
 import { createAdminClient } from '$lib/server/supabase.js';
 import { isVerified } from '$lib/server/clientAuth.js';
 import { getSettings } from '$lib/server/settings.js';
+import { OFFER_CONDITIONS_HTML } from '$lib/server/offerConditions.js';
 
 export async function load({ params, cookies }) {
   const sb = createAdminClient();
   const { data: offer } = await sb
     .from('ud_offers')
-    .select('id, name, client_name, broker_message, share_token, status, client_choice')
+    .select('id, name, offer_number, client_name, broker_message, share_token, status, client_choice')
     .eq('share_token', params.token)
     .maybeSingle();
 
@@ -42,6 +43,7 @@ export async function load({ params, cookies }) {
     offer: {
       id: offer.id,
       name: offer.name,
+      offer_number: offer.offer_number,
       client_name: offer.client_name,
       broker_message: offer.broker_message,
       status: offer.status,
@@ -49,7 +51,7 @@ export async function load({ params, cookies }) {
     },
     documents: documents || [],
     files: files || [],
-    exclusionsText: settings.exclusions_text || '',
-    companyName: settings.company_name || ''
+    conditionsHtml: OFFER_CONDITIONS_HTML,
+    distributor: { name: settings.company_name || 'Aura Expert sp. z o.o.' }
   };
 }

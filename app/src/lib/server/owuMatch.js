@@ -28,3 +28,43 @@ export function pickOwu(candidates, offerSymbol) {
   }
   return candidates.length === 1 ? candidates[0] : null;
 }
+
+/** Znajduje OWU, którego symbol zawiera podany prefiks (np. "LW048"). */
+export function findOwuBySymbol(candidates, sym) {
+  const target = normSym(sym);
+  if (!target) return null;
+  return (
+    candidates.find((c) => {
+      const s = normSym(c.symbol);
+      return s && (s === target || s.includes(target) || target.includes(s));
+    }) || null
+  );
+}
+
+/**
+ * Zwraca ZESTAW OWU do podpięcia dla danego wariantu oferty.
+ * Leadenhall: baza LW044/LW046/LW047 (z owu_base) + LW048 tylko gdy oferta obejmuje
+ * ryzyka HIV/WZW i baza to LW046 lub LW047 (LW044 nie przewiduje HIV/WZW).
+ * CEU / brak bazy: pojedyncze dopasowanie po symbolu (jak dotąd).
+ * @returns {Array} lista rekordów OWU (bez duplikatów)
+ */
+export function resolveOwus(candidates, doc) {
+  if (!candidates || candidates.length === 0) return [];
+  const raw = (doc && doc.parsed_raw) || {};
+  const base = raw.owu_base || null;
+
+  if (base) {
+    const out = [];
+    const baseOwu = findOwuBySymbol(candidates, base) || pickOwu(candidates, doc.owu_symbol);
+    if (baseOwu) out.push(baseOwu);
+    const baseAllowsRiders = /LW04[67]/i.test(base); // LW046 lub LW047
+    if (raw.covers_hiv_wzw && baseAllowsRiders) {
+      const lw048 = findOwuBySymbol(candidates, 'LW048');
+      if (lw048 && !out.includes(lw048)) out.push(lw048);
+    }
+    return out;
+  }
+
+  const one = pickOwu(candidates, doc && doc.owu_symbol);
+  return one ? [one] : [];
+}

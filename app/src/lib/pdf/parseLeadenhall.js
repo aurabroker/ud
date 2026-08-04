@@ -63,11 +63,17 @@ export function parseLeadenhall(text) {
     || firstMatch(text, /(LW044\/\S+)/);
   o.offer_date = parseDateISO(firstMatch(text, /Warszawa,\s*(\d{1,2}\s+[a-ząćęłńóśźż]+\s+\d{4})/i));
 
+  // Bazowy prefiks OWU (LW044 / LW046 / LW047) + ryzyka HIV/WZW → decyduje o LW048.
+  const owuBase = (o.owu_symbol && (o.owu_symbol.match(/LW0\d{2}/i) || [])[0]) || null;
+  const coversHivWzw = /\bHIV\b/i.test(text) || /\bWZW\b/i.test(text);
+
   o.parsed_raw = {
     base_premium,
     distribution_fee: o.distribution_fee,
     total_to_pay: o.premium_total,
-    installments: o.installments
+    installments: o.installments,
+    owu_base: owuBase ? owuBase.toUpperCase() : null,
+    covers_hiv_wzw: coversHivWzw
   };
 
   return o;
