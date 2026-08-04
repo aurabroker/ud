@@ -65,7 +65,12 @@ export function parseLeadenhall(text) {
 
   // Bazowy prefiks OWU (LW044 / LW046 / LW047) + ryzyka HIV/WZW → decyduje o LW048.
   const owuBase = (o.owu_symbol && (o.owu_symbol.match(/LW0\d{2}/i) || [])[0]) || null;
-  const coversHivWzw = /\bHIV\b/i.test(text) || /\bWZW\b/i.test(text);
+  // HIV/WZW liczy się tylko gdy FAKTYCZNIE objęte — pozycja 8 oferty stwierdza status wprost
+  // (np. „…HIV i WZW nie są objęte ubezpieczeniem"). Sama obecność słów nie wystarcza.
+  const hivSentence = (text.match(/[^.\n]*\b(?:HIV|WZW)\b[^.\n]*/i) || [])[0] || '';
+  // Uwaga: nie używamy \b wokół polskich liter (np. „są") — w JS regex ą nie jest znakiem słowa.
+  const hivNegated = /nie\s+(?:są|sa|jest)\s+obj|nie\s+obejmuj|wyłączon|nie\s+podlegaj|\bbrak\b/i.test(hivSentence);
+  const coversHivWzw = !!hivSentence && !hivNegated;
 
   o.parsed_raw = {
     base_premium,
