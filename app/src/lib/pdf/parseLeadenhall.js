@@ -63,14 +63,24 @@ export function parseLeadenhall(text) {
     || firstMatch(text, /(LW044\/\S+)/);
   o.offer_date = parseDateISO(firstMatch(text, /Warszawa,\s*(\d{1,2}\s+[a-ząćęłńóśźż]+\s+\d{4})/i));
 
-  // Bazowy prefiks OWU (LW044 / LW046 / LW047) + ryzyka HIV/WZW → decyduje o LW048.
+  // Bazowy prefiks OWU (LW044 / LW046 / LW047).
   const owuBase = (o.owu_symbol && (o.owu_symbol.match(/LW0\d{2}/i) || [])[0]) || null;
-  // HIV/WZW liczy się tylko gdy FAKTYCZNIE objęte — pozycja 8 oferty stwierdza status wprost
-  // (np. „…HIV i WZW nie są objęte ubezpieczeniem"). Sama obecność słów nie wystarcza.
-  const hivSentence = (text.match(/[^.\n]*\b(?:HIV|WZW)\b[^.\n]*/i) || [])[0] || '';
-  // Uwaga: nie używamy \b wokół polskich liter (np. „są") — w JS regex ą nie jest znakiem słowa.
-  const hivNegated = /nie\s+(?:są|sa|jest)\s+obj|nie\s+obejmuj|wyłączon|nie\s+podlegaj|\bbrak\b/i.test(hivSentence);
-  const coversHivWzw = !!hivSentence && !hivNegated;
+
+  // HIV/WZW liczy się tylko gdy FAKTYCZNIE objęte — oferta stwierdza status wprost:
+  //   objęte:    „…zakażenia wirusem HIV jest objęte ubezpieczeniem"
+  //   nieobjęte: „…HIV i WZW nie są objęte ubezpieczeniem"
+  // (uwaga: nie używamy \b wokół polskich liter, np. „są" — ą nie jest znakiem słowa w JS regex)
+  const hivExcluded = /(?:HIV|WZW)[^.\n]{0,40}nie\s+(?:są|sa|jest)\s+objęt|(?:HIV|WZW)[^.\n]{0,40}nie\s+obejmuj|(?:HIV|WZW)[^.\n]{0,40}wyłączon/i.test(text);
+  const hivCovered =
+    /zakażeni\w*\s+wirus\w+\s+(?:HIV|WZW)\s+jest\s+objęt/i.test(text) ||
+    /(?:HIV|WZW)[^.\n]{0,40}\bjest\s+objęt\w*\s+ubezpieczeni/i.test(text);
+  const coversHivWzw = hivCovered && !hivExcluded;
+
+  // Symbol warunków HIV/WZW faktycznie wskazany w ofercie (LW048 lub LW049 – wariant medyczny).
+  const hivSymMatch =
+    text.match(/wypadek\s+zakażeni\w*\s+wirus\w+\s+HIV\s+oraz\s+WZW[^.]{0,90}?(LW\d{3})/i) ||
+    text.match(/zakażeni\w*\s+wirus\w+\s+HIV[^.]{0,90}?oznaczon\w+\s+symbolem\s+(LW\d{3})/i);
+  const hivOwuSymbol = coversHivWzw && hivSymMatch ? hivSymMatch[1].toUpperCase() : null;
 
   o.parsed_raw = {
     base_premium,
@@ -78,7 +88,8 @@ export function parseLeadenhall(text) {
     total_to_pay: o.premium_total,
     installments: o.installments,
     owu_base: owuBase ? owuBase.toUpperCase() : null,
-    covers_hiv_wzw: coversHivWzw
+    covers_hiv_wzw: coversHivWzw,
+    hiv_owu_symbol: hivOwuSymbol
   };
 
   return o;
