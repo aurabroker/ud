@@ -92,13 +92,7 @@
 <main class="ov">
   <h1 class="ov-title">Utworzone oferty{#if offer.offer_number} · <span class="ov-num">{offer.offer_number}</span>{/if}</h1>
 
-  <!-- PORÓWNANIE OFERT — na samej górze -->
-  <section class="ov-card">
-    <h2 class="ov-h2">Porównanie ofert{documents.length > 1 ? ` (${documents.length})` : ''}</h2>
-    <OfferComparison {documents} selectable={!choice} onchoose={openChoose} chosenId={chosenDocId} />
-  </section>
-
-  <!-- 2 KOLUMNY: dane Klienta | dokumenty PDF -->
+  <!-- 2 KOLUMNY: dane Klienta | dokumenty PDF — na samej górze -->
   <div class="ov-grid2">
     <section class="ov-card">
       <h2 class="ov-h2">Dane Klienta</h2>
@@ -139,6 +133,12 @@
       {/if}
     </section>
   </div>
+
+  <!-- PORÓWNANIE OFERT -->
+  <section class="ov-card">
+    <h2 class="ov-h2">Porównanie ofert{documents.length > 1 ? ` (${documents.length})` : ''}</h2>
+    <OfferComparison {documents} selectable={!choice} onchoose={openChoose} chosenId={chosenDocId} />
+  </section>
 
   {#if offer.broker_message}
     <section class="ov-card ov-msg"><p>{offer.broker_message}</p></section>
