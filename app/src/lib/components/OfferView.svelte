@@ -7,23 +7,15 @@
     documents = [],
     files = [],
     conditionsHtml = '',
-    distributor = null,
+    distributorPdf = null,
     preview = false
   } = $props();
 
-  const DIST_DEFAULT = {
-    name: 'Aura Expert sp. z o.o.',
-    address: 'ul. Bolkowska 2A/28, 01-466 Warszawa',
-    krs: '0000599840',
-    nip: '5242793544',
-    regon: '363673048',
-    rpu: '11229690/A'
-  };
-  const dist = $derived({ ...DIST_DEFAULT, ...(distributor || {}) });
-
   const owuFiles = $derived(files.filter((f) => f.file_type === 'owu'));
   const offerPdfs = $derived(files.filter((f) => f.file_type === 'offer_pdf'));
+  const summaryFile = $derived(files.find((f) => f.file_type === 'summary') || null);
   const dlHref = (f) => (preview ? '#' : `/offer/${token}/download/${f.id}`);
+  const distHref = preview ? '#' : '/dystrybutor';
 
   // --- Akcje klienta ---
   let choice = $state(offer?.client_choice || null);
@@ -83,13 +75,53 @@
 </script>
 
 <main class="container" style="max-width:960px;">
-  <!-- Nagłówek: Utworzone oferty -->
+  <!-- Nagłówek -->
   <div class="ov-top">
     <h1>Utworzone oferty</h1>
     <p class="muted">
       {#if offer.offer_number}<strong>{offer.offer_number}</strong> · {/if}
       Rekomendacja ofertowa{#if offer.client_name} dla: {offer.client_name}{/if}
     </p>
+  </div>
+
+  <!-- DOKUMENTY DO POBRANIA (pliki PDF na górze) -->
+  <div class="card card-pad" style="margin-bottom:1rem;">
+    <h2 class="ov-h2">Dokumenty do pobrania</h2>
+
+    <!-- Pliki oferty (PDF) — na samej górze -->
+    <h3 class="ov-h3">Oferty (pliki PDF)</h3>
+    <p class="muted ov-note">🔒 Pliki mogą być zabezpieczone — otwórz je <strong>tym samym 4-cyfrowym hasłem</strong> z SMS-a.</p>
+    <div class="ov-docs">
+      {#each offerPdfs as f}
+        <a class="btn btn-ghost ov-doc" href={dlHref(f)} target="_blank" rel="noopener">📄 {f.file_name}</a>
+      {/each}
+      {#if offerPdfs.length === 0}<p class="muted">Brak plików ofert.</p>{/if}
+    </div>
+
+    <!-- Porównanie ofert (PDF) -->
+    {#if summaryFile}
+      <h3 class="ov-h3">Porównanie ofert (PDF)</h3>
+      <div class="ov-docs">
+        <a class="btn btn-ghost ov-doc" href={dlHref(summaryFile)} target="_blank" rel="noopener">📊 {summaryFile.file_name || 'Porównanie ofert (rekomendacja).pdf'}</a>
+      </div>
+    {/if}
+
+    <!-- Warunki ubezpieczenia i dokumenty -->
+    <h3 class="ov-h3">Warunki ubezpieczenia i dokumenty</h3>
+    <div class="ov-docs">
+      {#each owuFiles as f}
+        <a class="btn btn-ghost ov-doc" href={dlHref(f)} target="_blank" rel="noopener">📖 {f.file_name}</a>
+      {/each}
+      {#if owuFiles.length === 0}<p class="muted">Dokumenty (OWU, Karta produktowa) zostaną dołączone do oferty.</p>{/if}
+    </div>
+
+    <!-- Informacja o dystrybutorze (PDF) -->
+    {#if distributorPdf}
+      <h3 class="ov-h3">Informacja o dystrybutorze</h3>
+      <div class="ov-docs">
+        <a class="btn btn-ghost ov-doc" href={distHref} target="_blank" rel="noopener">🏢 {distributorPdf.name || 'Informacja o dystrybutorze.pdf'}</a>
+      </div>
+    {/if}
   </div>
 
   {#if offer.broker_message}
@@ -104,37 +136,12 @@
     </div>
   {/if}
 
-  <!-- Porównanie -->
+  <!-- Porównanie (interaktywne) -->
   <div class="card card-pad" style="margin-bottom:1rem;">
     <h2 class="ov-h2">Porównanie ofert{documents.length > 1 ? ` (${documents.length})` : ''}</h2>
     <p class="muted" style="margin:0 0 1rem;font-size:.85rem;">Zestawienie przygotowanych dla Ciebie wariantów. Wybierz najlepszy lub zapytaj o szczegóły.</p>
     <OfferComparison {documents} selectable={!choice} onchoose={openChoose} chosenId={chosenDocId} />
   </div>
-
-  <!-- Dokumenty: OWU + Karta produktowa -->
-  <div class="card card-pad" style="margin-bottom:1rem;">
-    <h2 class="ov-h2">Warunki ubezpieczenia i dokumenty</h2>
-    <p class="muted" style="margin:0 0 .75rem;font-size:.85rem;">Ogólne Warunki Ubezpieczenia (OWU) oraz Karta produktowa dobrane do Twojej oferty.</p>
-    <div class="ov-docs">
-      {#each owuFiles as f}
-        <a class="btn btn-ghost ov-doc" href={dlHref(f)} target="_blank" rel="noopener">📖 {f.file_name}</a>
-      {/each}
-      {#if owuFiles.length === 0}<p class="muted">Dokumenty zostaną dołączone do oferty.</p>{/if}
-    </div>
-  </div>
-
-  <!-- Pliki oferty (PDF) -->
-  {#if offerPdfs.length}
-    <div class="card card-pad" style="margin-bottom:1rem;">
-      <h2 class="ov-h2">Twoje oferty (pliki PDF)</h2>
-      <p class="muted" style="margin:0 0 .75rem;font-size:.82rem;">🔒 Pliki mogą być zabezpieczone — otwórz je <strong>tym samym 4-cyfrowym hasłem</strong> z SMS-a.</p>
-      <div class="ov-docs">
-        {#each offerPdfs as f}
-          <a class="btn btn-ghost ov-doc" href={dlHref(f)} target="_blank" rel="noopener">📄 {f.file_name}</a>
-        {/each}
-      </div>
-    </div>
-  {/if}
 
   <!-- Istotne informacje o warunkach oferty -->
   {#if conditionsHtml}
@@ -142,15 +149,6 @@
       {@html conditionsHtml}
     </div>
   {/if}
-
-  <!-- Informacje o dystrybutorze -->
-  <div class="card card-pad ov-dist" style="margin-bottom:1rem;">
-    <h2 class="ov-h2">Informacje o dystrybutorze</h2>
-    <p style="margin:.25rem 0;"><strong>{dist.name}</strong></p>
-    <p class="muted" style="margin:.15rem 0;">{dist.address}</p>
-    <p class="muted" style="margin:.15rem 0;">KRS {dist.krs} · NIP {dist.nip} · REGON {dist.regon}</p>
-    <p class="muted" style="margin:.15rem 0;">Rejestr Pośredników Ubezpieczeniowych: {dist.rpu}</p>
-  </div>
 
   <!-- Decyzja -->
   {#if !choice}
@@ -206,6 +204,8 @@
   .ov-top { margin: .5rem 0 1.25rem; }
   .ov-top h1 { font-size: 1.7rem; margin: 0 0 .25rem; }
   .ov-h2 { font-size: 1.15rem; margin: 0 0 .5rem; }
+  .ov-h3 { font-size: .98rem; margin: 1.1rem 0 .4rem; color: var(--slate-700); }
+  .ov-note { margin: 0 0 .6rem; font-size: .82rem; }
   .ov-docs { display: flex; flex-direction: column; gap: .5rem; }
   .ov-doc { justify-content: flex-start; }
   .ov-modal { position: fixed; inset: 0; background: rgba(15,23,42,.6); display: flex; align-items: center; justify-content: center; padding: 1.5rem; z-index: 50; }

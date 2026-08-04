@@ -60,6 +60,6 @@
     documents={data.documents}
     files={data.files}
     conditionsHtml={data.conditionsHtml}
-    distributor={data.distributor}
+    distributorPdf={data.distributorPdf}
   />
 {/if}

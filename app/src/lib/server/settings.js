@@ -11,7 +11,9 @@ const DEFAULTS = {
   logo_url: '',
   logo_path: '',
   pdf_footer: '',
-  sample_pdf_url: ''
+  sample_pdf_url: '',
+  distributor_pdf_path: '',
+  distributor_pdf_name: ''
 };
 
 /** @returns {Promise<Record<string, any>>} */

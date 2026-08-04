@@ -68,5 +68,33 @@ export const actions = {
     await setSetting(sb, 'logo_path', '');
     await regenerateSamplePdf().catch(() => {}); // odśwież wzorzec PDF bez logo
     return { ok: true };
+  },
+
+  uploadDistributor: async ({ request, locals }) => {
+    const sb = await requireAdmin(locals);
+    const form = await request.formData();
+    const file = form.get('distributor');
+    if (!file || typeof file !== 'object' || file.size === 0) return fail(400, { error: 'Wybierz plik PDF.' });
+    if ((file.type && file.type !== 'application/pdf') && !/\.pdf$/i.test(file.name)) {
+      return fail(400, { error: 'Informacja o dystrybutorze musi być plikiem PDF.' });
+    }
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    const path = `dystrybutor-${Date.now()}.pdf`;
+    const { error: upErr } = await sb.storage
+      .from(PUBLIC_BUCKET)
+      .upload(path, bytes, { contentType: 'application/pdf', upsert: true });
+    if (upErr) return fail(400, { error: 'Upload: ' + upErr.message });
+    await setSetting(sb, 'distributor_pdf_path', path);
+    await setSetting(sb, 'distributor_pdf_name', file.name || 'Informacja o dystrybutorze.pdf');
+    return { ok: true };
+  },
+
+  removeDistributor: async ({ locals }) => {
+    const sb = await requireAdmin(locals);
+    const settings = await getSettings();
+    if (settings.distributor_pdf_path) await sb.storage.from(PUBLIC_BUCKET).remove([settings.distributor_pdf_path]).catch(() => {});
+    await setSetting(sb, 'distributor_pdf_path', '');
+    await setSetting(sb, 'distributor_pdf_name', '');
+    return { ok: true };
   }
 };

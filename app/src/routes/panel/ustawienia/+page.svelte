@@ -69,6 +69,32 @@
   </form>
 </div>
 
+<!-- Informacja o dystrybutorze (PDF) -->
+<div class="card card-pad" style="margin-bottom:1.25rem;">
+  <h3 style="font-size:1rem;margin-bottom:.75rem;">Informacja o dystrybutorze (PDF)</h3>
+  {#if s.distributor_pdf_path}
+    <div style="display:flex;align-items:center;gap:1.25rem;margin-bottom:1rem;flex-wrap:wrap;">
+      <a class="btn btn-ghost" href="/dystrybutor" target="_blank" rel="noopener">📄 {s.distributor_pdf_name || 'Informacja o dystrybutorze.pdf'}</a>
+      <form method="POST" action="?/removeDistributor" use:enhance
+        onsubmit={(e) => { if (!confirm('Usunąć plik informacji o dystrybutorze?')) e.preventDefault(); }}>
+        <button class="btn btn-ghost" style="color:var(--red-600);">Usuń plik</button>
+      </form>
+    </div>
+  {:else}
+    <p class="muted" style="margin-bottom:.75rem;">Brak pliku — klient nie zobaczy pozycji „Informacja o dystrybutorze".</p>
+  {/if}
+  <form method="POST" action="?/uploadDistributor" enctype="multipart/form-data" use:enhance>
+    <div style="display:flex;gap:.75rem;align-items:flex-end;flex-wrap:wrap;">
+      <div class="field" style="margin:0;">
+        <label class="label" for="distributor">Wgraj plik PDF</label>
+        <input class="input" type="file" id="distributor" name="distributor" accept="application/pdf" required />
+      </div>
+      <button class="btn btn-primary" type="submit">Wgraj PDF</button>
+    </div>
+    <p class="muted" style="margin-top:.5rem;font-size:.8rem;">Dokument globalny — dołączany do każdego widoku oferty klienta.</p>
+  </form>
+</div>
+
 <form method="POST" action="?/save" use:enhance>
   <div class="card card-pad" style="margin-bottom:1.25rem;">
     <h3 style="font-size:1rem;margin-bottom:1rem;">Dane firmy</h3>

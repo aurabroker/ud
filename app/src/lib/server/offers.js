@@ -355,10 +355,12 @@ async function regenerateSummary(sb, offerId) {
       const bytes = new Uint8Array(pdf.buffer);
       const { error: upErr } = await sb.storage.from(BUCKET).upload(path, bytes, { contentType: 'application/pdf', upsert: true });
       if (!upErr) {
+        const surname = String(offer?.client_name || '').trim().split(/\s+/).filter(Boolean).pop() || '';
+        const summaryName = (surname ? `${surname} - podsumowanie oferty` : 'Podsumowanie oferty') + '.pdf';
         await sb.from('ud_offer_files').insert({
           offer_id: offerId,
           file_type: 'summary',
-          file_name: 'Podsumowanie oferty.pdf',
+          file_name: summaryName,
           storage_bucket: BUCKET,
           storage_path: path,
           size_bytes: bytes.byteLength

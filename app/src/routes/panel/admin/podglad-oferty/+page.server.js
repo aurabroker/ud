@@ -54,11 +54,12 @@ export async function load({ locals }) {
   ];
 
   const files = [
-    { id: 'f1', file_type: 'owu', file_name: 'OWU LW046.pdf' },
-    { id: 'f2', file_type: 'owu', file_name: 'OWU LW048 (HIV/WZW).pdf' },
-    { id: 'f3', file_type: 'owu', file_name: 'Karta produktowa.pdf' },
     { id: 'f4', file_type: 'offer_pdf', file_name: 'Oferta Leadenhall.pdf' },
-    { id: 'f5', file_type: 'offer_pdf', file_name: 'Oferta CEU.pdf' }
+    { id: 'f5', file_type: 'offer_pdf', file_name: 'Oferta CEU.pdf' },
+    { id: 'f6', file_type: 'summary', file_name: 'Porównanie ofert (rekomendacja).pdf' },
+    { id: 'f1', file_type: 'owu', file_name: 'OWU LW047.pdf' },
+    { id: 'f2', file_type: 'owu', file_name: 'OWU LW049 (HIV/WZW).pdf' },
+    { id: 'f3', file_type: 'owu', file_name: 'Karta produktowa.pdf' }
   ];
 
   return {
@@ -74,6 +75,6 @@ export async function load({ locals }) {
     documents,
     files,
     conditionsHtml: OFFER_CONDITIONS_HTML,
-    distributor: { name: 'Aura Expert sp. z o.o.' }
+    distributorPdf: { name: 'Informacja o dystrybutorze — Aura Expert.pdf' }
   };
 }

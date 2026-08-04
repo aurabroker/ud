@@ -52,6 +52,8 @@ export async function load({ params, cookies }) {
     documents: documents || [],
     files: files || [],
     conditionsHtml: OFFER_CONDITIONS_HTML,
-    distributor: { name: settings.company_name || 'Aura Expert sp. z o.o.' }
+    distributorPdf: settings.distributor_pdf_path
+      ? { name: settings.distributor_pdf_name || 'Informacja o dystrybutorze.pdf' }
+      : null
   };
 }
