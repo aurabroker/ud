@@ -119,11 +119,12 @@
         </div>
       {/if}
 
-      <div class="ov-group">
-        <span class="ov-gl">Warunki ubezpieczenia i dokumenty</span>
-        {#each owuFiles as f}<a class="ov-doc" href={dlHref(f)} target="_blank" rel="noopener">📖 {f.file_name}</a>{/each}
-        {#if owuFiles.length === 0}<span class="ov-empty">dołączymy do oferty</span>{/if}
-      </div>
+      {#if owuFiles.length}
+        <div class="ov-group">
+          <span class="ov-gl">Warunki ubezpieczenia i dokumenty</span>
+          {#each owuFiles as f}<a class="ov-doc" href={dlHref(f)} target="_blank" rel="noopener">📖 {f.file_name}</a>{/each}
+        </div>
+      {/if}
 
       {#if distributorPdf}
         <div class="ov-group">

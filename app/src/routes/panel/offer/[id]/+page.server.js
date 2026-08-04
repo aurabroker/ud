@@ -1,6 +1,6 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { createAdminClient } from '$lib/server/supabase.js';
-import { sendOfferToClient, deleteOffer, deleteOfferDocument, addDocumentsToOffer } from '$lib/server/offers.js';
+import { sendOfferToClient, deleteOffer, deleteOfferDocument, addDocumentsToOffer, refreshOfferDocuments } from '$lib/server/offers.js';
 import { clientBaseUrl } from '$lib/server/appUrl.js';
 
 export async function load({ params, locals }) {
@@ -84,6 +84,17 @@ export const actions = {
       return { saved: true, added: res.added };
     } catch (e) {
       return fail(400, { error: e?.message || 'Błąd dodawania wariantów' });
+    }
+  },
+
+  refreshOwu: async ({ params, locals }) => {
+    const { user } = await locals.safeGetSession();
+    if (!user) throw redirect(303, '/login');
+    try {
+      const res = await refreshOfferDocuments(params.id);
+      return { saved: true, refreshed: res };
+    } catch (e) {
+      return fail(400, { error: e?.message || 'Błąd odświeżania OWU' });
     }
   },
 

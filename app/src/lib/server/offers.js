@@ -316,6 +316,78 @@ export async function addDocumentsToOffer(offerId, files, password) {
   return { ok: true, added: newDocs.length };
 }
 
+/**
+ * Odświeża ofertę: ponownie parsuje zapisane PDF-y (hasłem oferty), aktualizuje
+ * owu_symbol/parsed_raw i podpina brakujące OWU (baza + Karta + rider HIV/WZW),
+ * następnie regeneruje podsumowanie. Naprawia stare oferty bez podpiętych OWU.
+ */
+export async function refreshOfferDocuments(offerId) {
+  const sb = createAdminClient();
+  const { data: offer } = await sb.from('ud_offers').select('access_code').eq('id', offerId).single();
+  const password = offer?.access_code || undefined;
+
+  const { data: docs } = await sb.from('ud_offer_documents').select('*').eq('offer_id', offerId).order('sort_order');
+  const documents = [];
+  let reparsed = 0;
+
+  for (const doc of docs || []) {
+    const { data: pdfFile } = await sb
+      .from('ud_offer_files')
+      .select('storage_bucket, storage_path')
+      .eq('offer_id', offerId)
+      .eq('document_id', doc.id)
+      .eq('file_type', 'offer_pdf')
+      .maybeSingle();
+
+    let merged = doc;
+    if (pdfFile?.storage_path) {
+      try {
+        const { data: blob } = await sb.storage.from(pdfFile.storage_bucket || BUCKET).download(pdfFile.storage_path);
+        if (blob) {
+          const bytes = new Uint8Array(await blob.arrayBuffer());
+          const { offer: parsed, insurer_type } = await parseOfferPdf(bytes, { password });
+          await sb.from('ud_offer_documents')
+            .update({ owu_symbol: parsed.owu_symbol, parsed_raw: parsed.parsed_raw, insurer_type })
+            .eq('id', doc.id);
+          merged = { ...doc, owu_symbol: parsed.owu_symbol, parsed_raw: parsed.parsed_raw, insurer_type };
+          reparsed++;
+        }
+      } catch { /* pomiń wariant, którego nie da się odczytać */ }
+    }
+    documents.push(merged);
+  }
+
+  // Podepnij brakujące OWU (dedup względem już podpiętych).
+  const { data: existingOwu } = await sb.from('ud_offer_files').select('storage_path').eq('offer_id', offerId).eq('file_type', 'owu');
+  const attached = new Set((existingOwu || []).map((r) => r.storage_path));
+  const owuCache = {};
+  let addedOwu = 0;
+  for (const doc of documents) {
+    if (!owuCache[doc.insurer_type]) {
+      const { data } = await sb.from('ud_owu_library').select('*').eq('insurer_type', doc.insurer_type).eq('active', true);
+      owuCache[doc.insurer_type] = data || [];
+    }
+    for (const owu of resolveOwus(owuCache[doc.insurer_type], doc)) {
+      if (attached.has(owu.storage_path)) continue;
+      attached.add(owu.storage_path);
+      await sb.from('ud_offer_files').insert({
+        offer_id: offerId,
+        document_id: doc.id,
+        file_type: 'owu',
+        file_name: owu.file_name || `OWU ${owu.title}.pdf`,
+        storage_bucket: owu.storage_bucket,
+        storage_path: owu.storage_path,
+        insurer_type: doc.insurer_type,
+        size_bytes: owu.size_bytes || null
+      });
+      addedOwu++;
+    }
+  }
+
+  await regenerateSummary(sb, offerId);
+  return { ok: true, reparsed, addedOwu };
+}
+
 /** Regeneruje podsumowanie PDF z wszystkich wariantów oferty (usuwa stare). */
 async function regenerateSummary(sb, offerId) {
   try {

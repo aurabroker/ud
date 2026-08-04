@@ -7,6 +7,7 @@
   let copied = $state(false);
   let editing = $state(false);
   let adding = $state(false);
+  let refreshing = $state(false);
 
   const statusLabel = { draft: 'Szkic', sent: 'Wysłana', viewed: 'Otwarta', chosen: 'Wybrana', rejected: 'Rezygnacja' };
   const choice = data.offer.client_choice;
@@ -144,7 +145,14 @@
 
 <!-- Porównanie wariantów -->
 <div class="card card-pad" style="margin-bottom:1.25rem;">
-  <h3 style="font-size:1rem;margin-bottom:1rem;">Warianty do porównania ({data.documents.length})</h3>
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
+    <h3 style="font-size:1rem;margin:0;">Warianty do porównania ({data.documents.length})</h3>
+    <form method="POST" action="?/refreshOwu" use:enhance={() => { refreshing = true; return async ({ update }) => { await update(); refreshing = false; }; }}>
+      <button class="btn btn-ghost" type="submit" disabled={refreshing} title="Ponownie czyta PDF-y i podpina właściwe OWU / Kartę produktową">
+        {refreshing ? 'Odświeżam…' : '↻ Odśwież OWU/dane'}
+      </button>
+    </form>
+  </div>
   {#if data.documents.length}
     <OfferComparison documents={data.documents} />
     {#if editing}

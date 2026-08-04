@@ -29,16 +29,25 @@ export function pickOwu(candidates, offerSymbol) {
   return candidates.length === 1 ? candidates[0] : null;
 }
 
-/** Znajduje OWU, którego symbol zawiera podany prefiks (np. "LW048"). */
-export function findOwuBySymbol(candidates, sym) {
+/** Znajduje WSZYSTKIE dokumenty biblioteczne pasujące do symbolu (OWU + Karta produktowa dzielą symbol). */
+export function findOwusBySymbol(candidates, sym) {
   const target = normSym(sym);
-  if (!target) return null;
-  return (
-    candidates.find((c) => {
-      const s = normSym(c.symbol);
-      return s && (s === target || s.includes(target) || target.includes(s));
-    }) || null
-  );
+  if (!target) return [];
+  return candidates.filter((c) => {
+    const s = normSym(c.symbol);
+    return s && (s === target || s.includes(target) || target.includes(s));
+  });
+}
+
+/** Pierwszy pasujący dokument (zgodność wstecz). */
+export function findOwuBySymbol(candidates, sym) {
+  return findOwusBySymbol(candidates, sym)[0] || null;
+}
+
+/** Prefiks bazowy (LW044/LW046/LW047) z symbolu oferty. */
+function baseFromSymbol(sym) {
+  const m = String(sym || '').match(/LW0\d{2}/i);
+  return m ? m[0].toUpperCase() : null;
 }
 
 /**
@@ -53,17 +62,22 @@ export function findOwuBySymbol(candidates, sym) {
 export function resolveOwus(candidates, doc) {
   if (!candidates || candidates.length === 0) return [];
   const raw = (doc && doc.parsed_raw) || {};
-  const base = raw.owu_base || null;
+  // owu_base z parsera; dla starszych ofert (bez flagi) wyprowadzamy z owu_symbol.
+  const base = raw.owu_base || baseFromSymbol(doc && doc.owu_symbol);
 
   if (base) {
     const out = [];
-    const baseOwu = findOwuBySymbol(candidates, base) || pickOwu(candidates, doc.owu_symbol);
-    if (baseOwu) out.push(baseOwu);
-    const baseAllowsRiders = /LW04[67]/i.test(base); // LW046 lub LW047
+    const push = (r) => { if (r && !out.some((x) => x.storage_path === r.storage_path)) out.push(r); };
+
+    // Baza: WSZYSTKIE dokumenty pasujące do symbolu bazowego (OWU + Karta produktowa).
+    let baseMatches = findOwusBySymbol(candidates, base);
+    if (baseMatches.length === 0) { const one = pickOwu(candidates, doc.owu_symbol); if (one) baseMatches = [one]; }
+    baseMatches.forEach(push);
+
+    // HIV/WZW: rider (LW048/LW049) tylko gdy oferta obejmuje ryzyko i baza to LW046/LW047.
+    const baseAllowsRiders = /LW04[67]/i.test(base);
     if (raw.covers_hiv_wzw && baseAllowsRiders) {
-      const riderSym = raw.hiv_owu_symbol || 'LW048';
-      const rider = findOwuBySymbol(candidates, riderSym);
-      if (rider && !out.includes(rider)) out.push(rider);
+      findOwusBySymbol(candidates, raw.hiv_owu_symbol || 'LW048').forEach(push);
     }
     return out;
   }
