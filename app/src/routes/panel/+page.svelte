@@ -1,6 +1,7 @@
 <script>
   import { enhance } from '$app/forms';
-  let { data } = $props();
+  let { data, form } = $props();
+  let refreshingAll = $state(false);
   const statusLabel = { draft: 'Szkic', sent: 'Wysłana', viewed: 'Otwarta', chosen: 'Wybrana', rejected: 'Rezygnacja' };
   function fmtDate(s) { return s ? new Date(s).toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—'; }
 </script>
@@ -12,8 +13,22 @@
     <h1 style="font-size:1.5rem;">Oferty z PDF</h1>
     <p class="muted">Wgraj PDF Leadenhall/CEU, wyślij link klientowi</p>
   </div>
-  <a class="btn btn-primary" href="/panel/new">+ Nowa oferta</a>
+  <div style="display:flex;gap:.5rem;">
+    <form method="POST" action="?/refreshAll" use:enhance={() => { refreshingAll = true; return async ({ update }) => { await update(); refreshingAll = false; }; }}
+      onsubmit={(e) => { if (!confirm('Zastosować aktualne reguły do wszystkich ofert? Ponownie odczyta PDF-y i wygeneruje podsumowania.')) e.preventDefault(); }}>
+      <button class="btn btn-ghost" type="submit" disabled={refreshingAll} title="Ponowny odczyt PDF-ów i regeneracja podsumowań we wszystkich ofertach">
+        {refreshingAll ? 'Odświeżam…' : '↻ Odśwież wszystkie'}
+      </button>
+    </form>
+    <a class="btn btn-primary" href="/panel/new">+ Nowa oferta</a>
+  </div>
 </div>
+
+{#if form?.refreshedAll}
+  <div class="ok-box" style="margin-bottom:1rem;">
+    Zaktualizowano oferty: {form.refreshedAll.ok}/{form.refreshedAll.total}{#if form.refreshedAll.failed} · nie udało się: {form.refreshedAll.failed}{/if}
+  </div>
+{/if}
 
 <div class="card">
   {#if data.offers.length === 0}

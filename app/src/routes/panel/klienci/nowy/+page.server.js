@@ -1,5 +1,6 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { createAdminClient } from '$lib/server/supabase.js';
+import { HEALTH_SURVEY_ITEMS, surveyRequired } from '$lib/healthSurvey.js';
 
 // Pola tekstowe (jak w formularzu self-service)
 const TEXT_FIELDS = [
@@ -47,6 +48,32 @@ export const actions = {
       if (v) row[f] = v;
     }
     for (const f of BOOL_FIELDS) row[f] = form.get(f) === 'on';
+
+    // Okresowa niezdolność to ryzyko PODSTAWOWE — nie można wybrać samej „Trwałej".
+    if (row.risk_perm_incapacity && !row.risk_temp_incapacity) {
+      return fail(400, {
+        error: 'Nie można wybrać wyłącznie „Trwałej niezdolności". Polisy nie da się zawrzeć bez „Okresowej niezdolności" — to ryzyko podstawowe.',
+        values: Object.fromEntries(form)
+      });
+    }
+
+    // Ankieta medyczna wymagana, gdy suma „trwałej" przekracza 1 mln zł.
+    if (surveyRequired(row.perm_incapacity_sum)) {
+      const survey = {};
+      for (const it of HEALTH_SURVEY_ITEMS) {
+        const ans = String(form.get('hs_' + it.key) ?? '').trim().toLowerCase();
+        if (ans !== 'tak' && ans !== 'nie') {
+          return fail(400, { error: `Ankieta medyczna: brak odpowiedzi na pytanie „${it.label}".`, values: Object.fromEntries(form) });
+        }
+        const details = String(form.get('hsd_' + it.key) ?? '').trim();
+        if (ans === 'tak' && !details) {
+          return fail(400, { error: `Ankieta medyczna: przy odpowiedzi TAK podaj szczegóły — „${it.label}".`, values: Object.fromEntries(form) });
+        }
+        survey[it.key] = { answer: ans, details: ans === 'tak' ? details : '' };
+        if (it.col) row[it.col] = ans === 'tak'; // odpowiedzi ankiety mają pierwszeństwo
+      }
+      row.form_data = { ...row.form_data, health_survey: survey };
+    }
 
     const sb = createAdminClient();
     const { data, error } = await sb.from('ud_clients').insert(row).select('id').single();

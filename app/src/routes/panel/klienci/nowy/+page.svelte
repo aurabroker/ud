@@ -1,15 +1,40 @@
 <script>
   import { enhance } from '$app/forms';
+  import { HEALTH_SURVEY_GROUPS, HEALTH_SURVEY_COLS, surveyRequired } from '$lib/healthSurvey.js';
   let { form } = $props();
   let saving = $state(false);
   const v = form?.values || {};
 
-  const zdrowieChk = [
+  // Ryzyka: „Okresowa niezdolność" jest PODSTAWOWA — nie można wybrać samej „Trwałej".
+  let riskTemp = $state(v.risk_temp_incapacity === 'on');
+  let riskPerm = $state(v.risk_perm_incapacity === 'on');
+  function onPermChange(e) {
+    riskPerm = e.currentTarget.checked;
+    if (riskPerm) riskTemp = true; // trwała wymaga okresowej
+  }
+  function onTempChange(e) {
+    // Przy wybranej „Trwałej" nie można odznaczyć „Okresowej" — przywracamy stan pola.
+    if (!e.currentTarget.checked && riskPerm) {
+      e.currentTarget.checked = true;
+      riskTemp = true;
+      return;
+    }
+    riskTemp = e.currentTarget.checked;
+  }
+
+  // Ankieta medyczna wymagana przy sumie „trwałej" powyżej 1 mln zł.
+  let permSum = $state(v.perm_incapacity_sum || '');
+  const needSurvey = $derived(surveyRequired(permSum));
+  let answers = $state({}); // key -> 'tak' | 'nie'
+
+  const zdrowieChkAll = [
     ['med_heart', 'Serce/krążenie'], ['med_diabetes', 'Cukrzyca'], ['med_bones', 'Kości/stawy'],
     ['med_stomach', 'Żołądek'], ['med_neuro', 'Neurologia'], ['med_surgery', 'Operacje'], ['med_aids', 'HIV/AIDS'],
     ['takes_meds', 'Bierze leki'], ['pending_diagnosis', 'Diagnostyka w toku'], ['disability_congenital', 'Wada wrodzona'],
     ['event_hospitalization', 'Hospitalizacja'], ['event_sick_leave_30', 'L4 > 30 dni'], ['event_further_diagnosis', 'Dalsza diagnostyka']
   ];
+  // Przy aktywnej ankiecie chowamy chipy, które ankieta pokrywa (bez duplikowania pytań).
+  const zdrowieChk = $derived(needSurvey ? zdrowieChkAll.filter(([n]) => !HEALTH_SURVEY_COLS.includes(n)) : zdrowieChkAll);
   const sportyChk = [
     ['risk_balloon', 'Balon'], ['risk_sailing', 'Żeglarstwo'], ['risk_skiing', 'Narty'], ['risk_skydiving', 'Spadochron'],
     ['risk_diving', 'Nurkowanie'], ['risk_caving', 'Speleologia'], ['risk_aviation', 'Lotnictwo'],
@@ -49,10 +74,14 @@
       <label>Waga (kg)<input class="input" name="weight" value={v.weight || ''} /></label>
       <label>Ręczność<select class="input" name="handedness"><option value="">—</option><option value="prawy">prawy</option><option value="lewy">lewy</option></select></label>
     </div>
-    <div class="chips">
-      <label><input type="checkbox" name="smoker" /> Pali</label>
-      <label><input type="checkbox" name="weight_change" /> Zmiana wagi</label>
-    </div>
+    {#if !needSurvey}
+      <div class="chips">
+        <label><input type="checkbox" name="smoker" /> Pali</label>
+        <label><input type="checkbox" name="weight_change" /> Zmiana wagi</label>
+      </div>
+    {:else}
+      <p class="hint">Palenie i zmiana wagi — patrz ankieta medyczna poniżej.</p>
+    {/if}
   </div>
 
   <!-- Zatrudnienie -->
@@ -78,16 +107,42 @@
     <h3>Parametry do oferty</h3>
     <div class="chips">
       <label><input type="checkbox" name="risk_death_invalidity" /> Śmierć / inwalidztwo</label>
-      <label><input type="checkbox" name="risk_temp_incapacity" /> Przejściowa niezdolność</label>
-      <label><input type="checkbox" name="risk_perm_incapacity" /> Trwała niezdolność</label>
+      <label><input type="checkbox" name="risk_temp_incapacity" checked={riskTemp} onchange={onTempChange} /> Okresowa niezdolność (podstawowe)</label>
+      <label><input type="checkbox" name="risk_perm_incapacity" checked={riskPerm} onchange={onPermChange} /> Trwała niezdolność</label>
       <label><input type="checkbox" name="nw_permanent_damage" /> Trwały uszczerbek</label>
     </div>
+    {#if riskPerm}
+      <p class="hint">Okresowa niezdolność to ryzyko podstawowe — polisy nie można zawrzeć bez niej, dlatego pozostaje zaznaczona.</p>
+    {/if}
     <div class="grid" style="margin-top:.5rem;">
       <label>Suma — przejściowa (zł/mies.)<input class="input" name="temp_incapacity_sum" value={v.temp_incapacity_sum || ''} /></label>
-      <label>Suma — trwała (zł)<input class="input" name="perm_incapacity_sum" value={v.perm_incapacity_sum || ''} /></label>
+      <label>Suma — trwała (zł)<input class="input" name="perm_incapacity_sum" bind:value={permSum} /></label>
       {#each nwTxt as [name, label]}<label>{label}<input class="input" {name} value={v[name] || ''} /></label>{/each}
     </div>
   </div>
+
+  <!-- Ankieta medyczna — wymagana przy sumie „trwałej" powyżej 1 mln zł -->
+  {#if needSurvey}
+    <div class="card card-pad survey">
+      <h3>Ankieta medyczna (suma trwałej niezdolności powyżej 1 mln zł)</h3>
+      <p class="hint">Odpowiedz na każde pytanie. Przy odpowiedzi <strong>TAK</strong> podaj szczegóły.</p>
+      {#each HEALTH_SURVEY_GROUPS as g}
+        <h4 class="sgrp">{g.title}</h4>
+        {#each g.items as it}
+          <div class="qrow">
+            <span class="q">{it.label}</span>
+            <span class="ans">
+              <label><input type="radio" name={'hs_' + it.key} value="tak" bind:group={answers[it.key]} required /> TAK</label>
+              <label><input type="radio" name={'hs_' + it.key} value="nie" bind:group={answers[it.key]} required /> NIE</label>
+            </span>
+            {#if answers[it.key] === 'tak'}
+              <textarea class="input det" name={'hsd_' + it.key} rows="2" placeholder="Podaj szczegóły…" required></textarea>
+            {/if}
+          </div>
+        {/each}
+      {/each}
+    </div>
+  {/if}
 
   <!-- Zdrowie -->
   <div class="card card-pad">
@@ -121,6 +176,13 @@
 <style>
   .addcli { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; align-items: start; }
   .addcli > button { grid-column: 1 / -1; justify-self: start; }
+  .hint { font-size: .78rem; color: var(--slate-500); margin: .4rem 0 0; }
+  .survey { grid-column: 1 / -1; }
+  .survey .sgrp { font-size: .85rem; margin: .8rem 0 .35rem; color: var(--slate-700); }
+  .qrow { display: grid; grid-template-columns: 1fr auto; gap: .35rem .75rem; align-items: start; padding: .35rem 0; border-top: 1px solid var(--slate-100); }
+  .qrow .q { font-size: .8rem; line-height: 1.35; }
+  .qrow .ans { display: flex; gap: .6rem; font-size: .8rem; white-space: nowrap; }
+  .qrow .det { grid-column: 1 / -1; font-size: .8rem; }
   @media (max-width: 720px) { .addcli { grid-template-columns: 1fr; } }
   .addcli :global(.card) { padding: 0.7rem 0.9rem !important; }
   .addcli :global(h3) { font-size: 0.9rem; margin: 0 0 0.5rem; border-bottom: 2px solid var(--slate-200); padding-bottom: 0.35rem; }

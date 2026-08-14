@@ -37,9 +37,12 @@ export function parseLeadenhall(text) {
   o.wait_illness = matchInt(text, /Okres\s+wyczekiwania\s*\(choroba\)\s+(\d+)\s*dni/i);
   o.wait_accident = matchInt(text, /Okres\s+wyczekiwania\s*\(wypadek\)\s+(\d+)\s*dni/i);
 
-  // Pozycja C — Całkowita trwała niezdolność do pracy
+  // Pozycja C — Całkowita trwała niezdolność do pracy.
+  // Kwotę bierzemy WYŁĄCZNIE z sekcji Pozycji C. Linia „Łączne świadczenie w przypadku
+  // Całkowitej trwałej niezdolności do pracy" jest celowo pomijana (nie jest sumą z Pozycji C).
   o.perm_incapacity_covered = isCovered(firstMatch(text, /Pozycja\s+C\s*-\s*(Nie\s+objęta|Objęta)/i));
-  o.perm_sum_insured = matchAmount(text, /Całkowitej\s+trwałej\s+niezdolności\s+do\s+pracy\s*-\s*([\d  ]+)\s*zł/i);
+  const posC = firstMatch(text, /Pozycja\s+C\s*([\s\S]*?)(?=Łączne\s+świadczenie|\n\s*6\.\s|$)/i);
+  o.perm_sum_insured = posC ? matchAmount(posC, /([\d  ]+)\s*zł/) : null;
 
   // Maksymalna suma świadczeń
   o.max_benefit = /(\d+)-\s*krotności\s+Przychodu\s+rocznego/i.test(text)

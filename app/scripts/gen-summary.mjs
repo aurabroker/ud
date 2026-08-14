@@ -22,12 +22,10 @@ const ROWS = [
   ['Śmierć / inwalidztwo (NW)', (d) => yesNo(d.death_covered)],
   ['Okresowa niezdolność do pracy', (d) => tempIncap(d)],
   ['— świadczenie miesięczne', (d) => money(d.temp_monthly_benefit)],
-  ['— suma ubezpieczenia', (d) => money(d.temp_sum_insured)],
   ['Trwała niezdolność do pracy', (d) => yesNo(d.perm_incapacity_covered)],
-  ['— suma ubezpieczenia', (d) => money(d.perm_sum_insured)],
   ['Okres odszkodowawczy', (d) => d.indemnity_period || '—'],
-  ['Wyczekiwanie (wypadek)', (d) => (d.wait_accident != null ? d.wait_accident + ' dni' : '—')],
-  ['Wyczekiwanie (choroba)', (d) => (d.wait_illness != null ? d.wait_illness + ' dni' : '—')]
+  ['Okres wyczekiwania (wypadek)', (d) => (d.wait_accident != null ? d.wait_accident + ' dni' : '—')],
+  ['Okres wyczekiwania (choroba)', (d) => (d.wait_illness != null ? d.wait_illness + ' dni' : '—')]
 ];
 
 function buildHtml(documents, clientName, employmentType, offerNumber) {
@@ -37,7 +35,7 @@ function buildHtml(documents, clientName, employmentType, offerNumber) {
   const cols = documents.map((d) => `<th>${esc(insurerLabel(d.insurer_type))}</th>`).join('');
   const cell = (v) => (v && v.green ? `<span style="color:#15803d;font-weight:700">${esc(v.text)}</span>` : esc(v));
   const rows = ROWS.map(([l, fn]) => `<tr><td class="lbl">${esc(l)}</td>${documents.map((d) => `<td>${cell(fn(d))}</td>`).join('')}</tr>`).join('');
-  const premium = `<tr class="premium"><td class="lbl">Składka roczna (łącznie)</td>${documents.map((d)=>`<td><strong>${esc(money(d.premium_total))}</strong></td>`).join('')}</tr><tr class="premium"><td class="lbl">Rata miesięczna</td>${documents.map((d)=>`<td>${esc(money(d.premium_monthly))}</td>`).join('')}</tr>`;
+  const premium = `<tr class="premium"><td class="lbl">Składka roczna (łącznie)</td>${documents.map((d)=>`<td><strong>${esc(money(d.premium_total))}</strong></td>`).join('')}</tr><tr class="premium"><td class="lbl">Rata miesięczna</td>${documents.map((d)=> d.premium_monthly != null ? `<td><span style="text-decoration:underline;font-weight:700">${esc(money(d.premium_monthly))}</span></td>` : '<td>—</td>').join('')}</tr>`;
   return `<!doctype html><html lang="pl"><head><meta charset="utf-8"><style>
     *{box-sizing:border-box}body{font-family:'Helvetica Neue',Arial,sans-serif;color:#1e293b;margin:0;padding:28px;font-size:12px}
     .brand{font-size:22px;font-weight:800}.brand span{color:#38bdf8}.title{font-size:16px;font-weight:800;margin-top:4px}

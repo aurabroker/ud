@@ -34,7 +34,9 @@ function check(label, actual, expected) {
   check('wait_illness', offer.wait_illness, 21);
   check('wait_accident', offer.wait_accident, 14);
   check('perm_incapacity_covered', offer.perm_incapacity_covered, false);
-  check('perm_sum_insured', offer.perm_sum_insured, 240000);
+  // Pozycja C „Nie objęta" i bez własnej kwoty → null.
+  // Linia „Łączne świadczenie … 240 000 zł" jest z założenia pomijana.
+  check('perm_sum_insured', offer.perm_sum_insured, null);
   check('premium_total', offer.premium_total, 3036);
   check('distribution_fee', offer.distribution_fee, 276);
   check('installments', offer.installments, 12);
