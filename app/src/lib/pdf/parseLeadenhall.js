@@ -11,6 +11,19 @@ import {
  * @param {string} text - pełny tekst PDF (z unpdf)
  * @returns {import('./model.js').NormalizedOffer}
  */
+/**
+ * Status pokrycia dla Pozycji A/B/C. Leadenhall drukuje etykietę w dwóch układach:
+ *   „Pozycja C - Nie objęta ubezpieczeniem”  (etykieta PO oznaczeniu pozycji)
+ *   „- Objęta ubezpieczeniemPozycja C”       (etykieta PRZED oznaczeniem pozycji)
+ * @returns {boolean|null}
+ */
+function coveredForPosition(text, letter) {
+  const after = firstMatch(text, new RegExp(`Pozycja\\s+${letter}\\s*-\\s*(Nie\\s+objęta|Objęta)`, 'i'));
+  if (after != null) return isCovered(after);
+  const before = firstMatch(text, new RegExp(`(Nie\\s+objęta|Objęta)\\s*ubezpieczeniem\\s*Pozycja\\s+${letter}\\b`, 'i'));
+  return before != null ? isCovered(before) : null;
+}
+
 export function parseLeadenhall(text) {
   const o = emptyOffer('leadenhall');
 
@@ -27,10 +40,10 @@ export function parseLeadenhall(text) {
 
   // --- Świadczenia ---
   // Pozycja A — Śmierć i Inwalidztwo
-  o.death_covered = isCovered(firstMatch(text, /Pozycja\s+A\s*-\s*(Nie\s+objęta|Objęta)/i));
+  o.death_covered = coveredForPosition(text, 'A');
 
   // Pozycja B — Całkowita okresowa niezdolność do pracy
-  o.temp_incapacity_covered = isCovered(firstMatch(text, /Pozycja\s+B\s*-\s*(Nie\s+objęta|Objęta)/i));
+  o.temp_incapacity_covered = coveredForPosition(text, 'B');
   o.temp_monthly_benefit = matchAmount(text, /([\d  ]+)\s*zł,\s*nie\s+więcej\s+jednak\s+niż/i);
   o.temp_monthly_pct = matchInt(text, /nie\s+więcej\s+jednak\s+niż\s+(\d+)\s*%/i);
   o.indemnity_period = firstMatch(text, /Okres\s+odszkodowawczy\s+(\d+\s*miesi[a-ząćęłńóśźż]+)/i);
@@ -40,7 +53,7 @@ export function parseLeadenhall(text) {
   // Pozycja C — Całkowita trwała niezdolność do pracy.
   // Kwotę bierzemy WYŁĄCZNIE z sekcji Pozycji C. Linia „Łączne świadczenie w przypadku
   // Całkowitej trwałej niezdolności do pracy" jest celowo pomijana (nie jest sumą z Pozycji C).
-  o.perm_incapacity_covered = isCovered(firstMatch(text, /Pozycja\s+C\s*-\s*(Nie\s+objęta|Objęta)/i));
+  o.perm_incapacity_covered = coveredForPosition(text, 'C');
   const posC = firstMatch(text, /Pozycja\s+C\s*([\s\S]*?)(?=Łączne\s+świadczenie|\n\s*6\.\s|$)/i);
   o.perm_sum_insured = posC ? matchAmount(posC, /([\d  ]+)\s*zł/) : null;
 
