@@ -11,7 +11,11 @@ import { extractText, getDocumentProxy } from 'unpdf';
  * @returns {Promise<{ totalPages: number, text: string, pages: string[] }>}
  */
 export async function extractPdfText(data, password) {
-  const buf = data instanceof Uint8Array ? data : new Uint8Array(data);
+  // WAŻNE: pdf.js przejmuje (odłącza) przekazany bufor — po parsowaniu tablica
+  // wywołującego miałaby 0 bajtów. Dlatego zawsze parsujemy KOPIĘ, żeby oryginał
+  // nadal nadawał się do zapisania w storage.
+  const src = data instanceof Uint8Array ? data : new Uint8Array(data);
+  const buf = new Uint8Array(src);
   const options = password ? { password: String(password) } : undefined;
   const pdf = await getDocumentProxy(buf, options);
   const { totalPages, text } = await extractText(pdf, { mergePages: false });
