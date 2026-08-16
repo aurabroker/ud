@@ -448,6 +448,8 @@ async function regenerateSummary(sb, offerId) {
       .eq('id', offerId)
       .single();
     const { data: documents } = await sb.from('ud_offer_documents').select('*').eq('offer_id', offerId).order('sort_order');
+    // Bez wariantów nie ma czego porównywać — pomijamy kosztowne wywołanie PDFShift.
+    if (!documents || documents.length === 0) return;
 
     let employmentType = '';
     if (offer?.client_id) {
