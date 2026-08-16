@@ -8,6 +8,17 @@ import { env } from '$env/dynamic/private';
  * @param {{ to: string|string[], subject: string, html: string, replyTo?: string }} opts
  * @returns {Promise<{ sent: boolean, stub?: boolean, id?: string, error?: string }>}
  */
+/** Konfiguracja wysyłki do diagnostyki — bez ujawniania klucza. */
+export function emailConfig() {
+  const key = env.RESEND_API_KEY || env.RESEND_API;
+  return {
+    hasKey: !!key,
+    keyHint: key ? `${String(key).slice(0, 6)}…(${String(key).length} zn.)` : '',
+    from: env.RESEND_FROM || 'Utrata Dochodu <onboarding@resend.dev>',
+    fromIsDefault: !env.RESEND_FROM
+  };
+}
+
 export async function sendEmail({ to, subject, html, replyTo }) {
   const key = env.RESEND_API_KEY || env.RESEND_API;
   const from = env.RESEND_FROM || 'Utrata Dochodu <onboarding@resend.dev>';

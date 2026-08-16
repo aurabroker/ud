@@ -2,6 +2,7 @@
   import { enhance } from '$app/forms';
   let { data, form } = $props();
   const s = data.settings;
+  let testing = $state(false);
 </script>
 
 <svelte:head><title>Ustawienia — Panel</title></svelte:head>
@@ -71,6 +72,41 @@
       (ok. 600×600 px) daje dokument ~50 KB. Logo ważące 2 MB powiększy każdy PDF do ok. 2 MB.
     </p>
   </form>
+</div>
+
+<!-- Test wysyłki e-mail -->
+<div class="card card-pad" style="margin-bottom:1.25rem;">
+  <h3 style="font-size:1rem;margin-bottom:.5rem;">Test wysyłki e-mail</h3>
+  <p class="muted" style="margin:0 0 .75rem;font-size:.82rem;">
+    Wysyła wiadomość próbną i pokazuje dokładną odpowiedź Resend. Wynik trafia też do zakładki <a href="/panel/logi">Wysyłki</a>.
+  </p>
+  <form method="POST" action="?/testEmail" use:enhance={() => { testing = true; return async ({ update }) => { await update({ reset: false }); testing = false; }; }}>
+    <div style="display:flex;gap:.75rem;align-items:flex-end;flex-wrap:wrap;">
+      <div class="field" style="margin:0;flex:1;min-width:240px;">
+        <label class="label" for="testTo">Adres e-mail (domyślnie Twój)</label>
+        <input class="input" id="testTo" name="testTo" type="email" placeholder="np. biuro@utratadochodu.com" />
+      </div>
+      <button class="btn btn-primary" type="submit" disabled={testing}>{testing ? 'Wysyłam…' : 'Wyślij próbny e-mail'}</button>
+    </div>
+  </form>
+
+  {#if form?.testResult}
+    {@const r = form.testResult}
+    <div class="{r.sent ? 'ok-box' : 'error-box'}" style="margin-top:.75rem;">
+      {#if r.sent}
+        ✓ Wysłano na <strong>{r.to}</strong>{#if r.id} · ID Resend: <code>{r.id}</code>{/if}
+      {:else if r.stub}
+        ⚠ <strong>Nic nie wysłano — brak klucza RESEND_API_KEY</strong> w zmiennych środowiskowych Cloudflare.
+        Dlatego w panelu Resend nie ma żadnych wpisów.
+      {:else}
+        ✗ <strong>Resend odrzucił wysyłkę:</strong> {r.error}
+      {/if}
+      <div class="muted" style="margin-top:.4rem;font-size:.8rem;">
+        Klucz: {r.hasKey ? `jest (${r.keyHint})` : 'BRAK'} · Nadawca: <code>{r.from}</code>
+        {#if r.fromIsDefault}<br />Używany jest domyślny nadawca <code>onboarding@resend.dev</code> — Resend pozwala nim wysyłać wyłącznie na adres właściciela konta. Aby wysyłać do klientów, ustaw <code>RESEND_FROM</code> na adres w zweryfikowanej domenie.{/if}
+      </div>
+    </div>
+  {/if}
 </div>
 
 <!-- Informacja o dystrybutorze (PDF) -->

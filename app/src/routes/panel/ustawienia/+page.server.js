@@ -3,6 +3,7 @@ import { createAdminClient } from '$lib/server/supabase.js';
 import { getSettings } from '$lib/server/settings.js';
 import { runHealthChecks } from '$lib/server/health.js';
 import { regenerateSamplePdf } from '$lib/server/offers.js';
+import { sendEmail, emailConfig } from '$lib/server/email.js';
 
 const PUBLIC_BUCKET = 'ud-public';
 
@@ -68,6 +69,39 @@ export const actions = {
     await setSetting(sb, 'logo_path', '');
     await regenerateSamplePdf().catch(() => {}); // odśwież wzorzec PDF bez logo
     return { ok: true };
+  },
+
+  // Próbna wysyłka e-maila — pokazuje pełną odpowiedź Resend i zapisuje ją w logu.
+  testEmail: async ({ request, locals }) => {
+    const sb = await requireAdmin(locals);
+    const { user } = await locals.safeGetSession();
+    const form = await request.formData();
+    const to = String(form.get('testTo') || '').trim() || user?.email || '';
+    if (!to) return fail(400, { error: 'Podaj adres e-mail do testu.' });
+
+    const cfg = emailConfig();
+    const res = await sendEmail({
+      to,
+      subject: 'UtrataDochodu — e-mail próbny',
+      html: `<p>To jest wiadomość próbna z panelu UtrataDochodu.</p>
+             <p>Jeśli ją widzisz, wysyłka e-mail działa poprawnie.</p>
+             <p style="color:#64748b;font-size:12px">Nadawca: ${cfg.from}</p>`
+    });
+
+    await sb
+      .from('ud_send_log')
+      .insert({
+        offer_id: null,
+        user_id: user?.id || null,
+        channel: 'email',
+        recipient: to,
+        status: res.sent ? 'sent' : res.stub ? 'stub' : 'error',
+        provider_id: res.id || null,
+        error: res.error || null
+      })
+      .then(() => {}, () => {});
+
+    return { testResult: { to, from: cfg.from, fromIsDefault: cfg.fromIsDefault, hasKey: cfg.hasKey, keyHint: cfg.keyHint, ...res } };
   },
 
   uploadDistributor: async ({ request, locals }) => {
