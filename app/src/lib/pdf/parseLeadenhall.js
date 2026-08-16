@@ -24,6 +24,17 @@ function coveredForPosition(text, letter) {
   return before != null ? isCovered(before) : null;
 }
 
+/**
+ * Fragment tekstu należący do danej Pozycji — do początku następnej pozycji.
+ * Dla Pozycji C kończymy przed „Łączne świadczenie…”, bo ta linia nie należy do Pozycji C.
+ */
+function sectionForPosition(text, letter, nextLetter) {
+  const re = nextLetter
+    ? new RegExp(`Pozycja\\s+${letter}([\\s\\S]*?)(?=Pozycja\\s+${nextLetter}|$)`, 'i')
+    : new RegExp(`Pozycja\\s+${letter}([\\s\\S]*?)(?=Łączne\\s+świadczenie|\\n\\s*6\\.\\s|$)`, 'i');
+  return firstMatch(text, re);
+}
+
 export function parseLeadenhall(text) {
   const o = emptyOffer('leadenhall');
 
@@ -41,6 +52,9 @@ export function parseLeadenhall(text) {
   // --- Świadczenia ---
   // Pozycja A — Śmierć i Inwalidztwo
   o.death_covered = coveredForPosition(text, 'A');
+  // Kwota z Pozycji A (brak kolumny w bazie → trzymamy w parsed_raw).
+  const secA = sectionForPosition(text, 'A', 'B');
+  const deathSum = secA ? matchAmount(secA, /([\d  ]+)\s*zł/) : null;
 
   // Pozycja B — Całkowita okresowa niezdolność do pracy
   o.temp_incapacity_covered = coveredForPosition(text, 'B');
@@ -54,7 +68,7 @@ export function parseLeadenhall(text) {
   // Kwotę bierzemy WYŁĄCZNIE z sekcji Pozycji C. Linia „Łączne świadczenie w przypadku
   // Całkowitej trwałej niezdolności do pracy" jest celowo pomijana (nie jest sumą z Pozycji C).
   o.perm_incapacity_covered = coveredForPosition(text, 'C');
-  const posC = firstMatch(text, /Pozycja\s+C\s*([\s\S]*?)(?=Łączne\s+świadczenie|\n\s*6\.\s|$)/i);
+  const posC = sectionForPosition(text, 'C');
   o.perm_sum_insured = posC ? matchAmount(posC, /([\d  ]+)\s*zł/) : null;
 
   // Maksymalna suma świadczeń
@@ -105,7 +119,8 @@ export function parseLeadenhall(text) {
     installments: o.installments,
     owu_base: owuBase ? owuBase.toUpperCase() : null,
     covers_hiv_wzw: coversHivWzw,
-    hiv_owu_symbol: hivOwuSymbol
+    hiv_owu_symbol: hivOwuSymbol,
+    death_sum_insured: deathSum
   };
 
   return o;

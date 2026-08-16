@@ -19,7 +19,8 @@ const ROWS = [
   ['Ubezpieczyciel', () => insurerRow()],
   ['Numer oferty (ubezpieczyciel)', (d) => d.offer_number || '—'],
   ['Okres ubezpieczenia', (d) => d.insurance_period || '—'],
-  ['Śmierć / inwalidztwo (NW)', (d) => yesNo(d.death_covered)],
+  // Kwota z Pozycji A (parsed_raw); gdy ryzyko nieobjęte — Tak/Nie/—
+  ['Śmierć / inwalidztwo (NW)', (d) => (d.parsed_raw?.death_sum_insured != null ? money(d.parsed_raw.death_sum_insured) : yesNo(d.death_covered))],
   ['Okresowa niezdolność do pracy', (d) => tempIncap(d)],
   ['— świadczenie miesięczne', (d) => money(d.temp_monthly_benefit)],
   ['Trwała niezdolność do pracy', (d) => (d.perm_sum_insured != null ? money(d.perm_sum_insured) : yesNo(d.perm_incapacity_covered))],

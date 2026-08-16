@@ -64,25 +64,6 @@ export async function createOfferFromPdfs(p) {
   const sb = createAdminClient();
   const shareToken = generateShareToken();
 
-  // 0) Najpierw sparsuj WSZYSTKIE pliki (z hasłem) — zanim cokolwiek zapiszemy.
-  //    Dzięki temu błąd hasła nie zostawia osieroconej oferty.
-  const parsedFiles = [];
-  for (const f of p.files) {
-    let res;
-    try {
-      res = await parseOfferPdf(f.bytes, { password: p.password || f.password });
-    } catch (e) {
-      const name = e?.name || '';
-      if (name === 'PasswordException' || /password/i.test(e?.message || '')) {
-        throw new Error(
-          `Plik „${f.name}" jest zabezpieczony hasłem${p.password ? ', a podane hasło jest błędne' : ' — podaj 4-cyfrowe hasło'}.`
-        );
-      }
-      throw new Error(`Nie udało się odczytać „${f.name}": ${e?.message || e}`);
-    }
-    parsedFiles.push({ file: f, parsed: res.offer, insurer_type: res.insurer_type });
-  }
-
   // Kod dostępu = hasło PDF (jeśli podane) albo losowy 4-cyfrowy.
   // Ten sam kod odblokowuje link do oferty i otwiera pobrane pliki PDF.
   const accessCode = (p.password && /^\d{4,}$/.test(p.password)) ? p.password : generatePin();
@@ -113,9 +94,24 @@ export async function createOfferFromPdfs(p) {
   const documents = [];
   const insurerTypes = new Set();
 
-  // 2) Każdy PDF: zapis -> upload -> ud_offer_documents + ud_offer_files
-  for (let i = 0; i < parsedFiles.length; i++) {
-    const { file: f, parsed, insurer_type } = parsedFiles[i];
+  // 2) Każdy PDF osobno: parsowanie -> zapis -> upload -> zwolnienie bajtów.
+  //    Trzymanie wszystkich PDF-ów naraz przekraczało limit pamięci Workera (503).
+  for (let i = 0; i < p.files.length; i++) {
+    const f = p.files[i];
+    let res;
+    try {
+      res = await parseOfferPdf(f.bytes, { password: p.password || f.password });
+    } catch (e) {
+      await deleteOffer(offer.id).catch(() => {}); // nie zostawiaj osieroconej oferty
+      const name = e?.name || '';
+      if (name === 'PasswordException' || /password/i.test(e?.message || '')) {
+        throw new Error(
+          `Plik „${f.name}" jest zabezpieczony hasłem${p.password ? ', a podane hasło jest błędne' : ' — podaj 4-cyfrowe hasło'}.`
+        );
+      }
+      throw new Error(`Nie udało się odczytać „${f.name}": ${e?.message || e}`);
+    }
+    const { offer: parsed, insurer_type } = res;
     insurerTypes.add(insurer_type);
 
     const { data: doc, error: docErr } = await sb
@@ -144,6 +140,7 @@ export async function createOfferFromPdfs(p) {
     });
 
     documents.push({ ...doc, storage_path: storagePath, insurer_type });
+    f.bytes = null; // zwolnij pamięć przed kolejnym plikiem
   }
 
   // 3) Podepnij właściwe OWU do każdego wariantu — dopasowanie po symbolu.
@@ -231,8 +228,20 @@ export async function addDocumentsToOffer(offerId, files, password) {
   const { data: offer, error } = await sb.from('ud_offers').select('*').eq('id', offerId).single();
   if (error || !offer) throw new Error('Oferta nie znaleziona');
 
-  // Parsuj wszystkie przed zapisem (błąd hasła nie zostawia śmieci).
-  const parsedFiles = [];
+  // Następny sort_order
+  const { data: last } = await sb
+    .from('ud_offer_documents')
+    .select('sort_order')
+    .eq('offer_id', offerId)
+    .order('sort_order', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  let sort = (last?.sort_order ?? -1) + 1;
+
+  // Przetwarzamy plik po pliku: parsowanie -> zapis -> upload -> zwolnienie bajtów.
+  // Trzymanie wszystkich PDF-ów i wyników parsowania naraz przekraczało limit
+  // pamięci Workera przy większej liczbie wariantów (błąd 503).
+  const newDocs = [];
   for (const f of files) {
     let res;
     try {
@@ -244,21 +253,8 @@ export async function addDocumentsToOffer(offerId, files, password) {
       }
       throw new Error(`Nie udało się odczytać „${f.name}": ${e?.message || e}`);
     }
-    parsedFiles.push({ file: f, parsed: res.offer, insurer_type: res.insurer_type });
-  }
+    const { offer: parsed, insurer_type } = res;
 
-  // Następny sort_order
-  const { data: last } = await sb
-    .from('ud_offer_documents')
-    .select('sort_order')
-    .eq('offer_id', offerId)
-    .order('sort_order', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  let sort = (last?.sort_order ?? -1) + 1;
-
-  const newDocs = [];
-  for (const { file: f, parsed, insurer_type } of parsedFiles) {
     const { data: doc, error: docErr } = await sb
       .from('ud_offer_documents')
       .insert({ offer_id: offerId, sort_order: sort++, source_filename: f.name, ...parsed })
@@ -267,7 +263,11 @@ export async function addDocumentsToOffer(offerId, files, password) {
     if (docErr) throw new Error('Zapis dokumentu: ' + docErr.message);
 
     const storagePath = `${offerId}/${doc.id}.pdf`;
-    await sb.storage.from(BUCKET).upload(storagePath, f.bytes, { contentType: 'application/pdf', upsert: true });
+    const { error: upErr } = await sb.storage
+      .from(BUCKET)
+      .upload(storagePath, f.bytes, { contentType: 'application/pdf', upsert: true });
+    if (upErr) throw new Error(`Upload „${f.name}": ${upErr.message}`);
+
     await sb.from('ud_offer_documents').update({ storage_path: storagePath }).eq('id', doc.id);
     await sb.from('ud_offer_files').insert({
       offer_id: offerId,
@@ -280,6 +280,7 @@ export async function addDocumentsToOffer(offerId, files, password) {
       size_bytes: f.bytes.byteLength
     });
     newDocs.push({ ...doc, insurer_type });
+    f.bytes = null; // zwolnij pamięć przed kolejnym plikiem
   }
 
   // OWU dla nowych wariantów (dedup względem już podpiętych).
