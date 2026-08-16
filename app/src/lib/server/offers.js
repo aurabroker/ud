@@ -346,10 +346,12 @@ export async function refreshOfferDocuments(offerId) {
         if (blob) {
           const bytes = new Uint8Array(await blob.arrayBuffer());
           const { offer: parsed, insurer_type } = await parseOfferPdf(bytes, { password });
-          await sb.from('ud_offer_documents')
-            .update({ owu_symbol: parsed.owu_symbol, parsed_raw: parsed.parsed_raw, insurer_type })
-            .eq('id', doc.id);
-          merged = { ...doc, owu_symbol: parsed.owu_symbol, parsed_raw: parsed.parsed_raw, insurer_type };
+          // Zapisujemy WSZYSTKIE sparsowane pola (pokrycia, sumy, składki, OWU),
+          // tak samo jak przy pierwszym imporcie — inaczej stare wartości zostają w bazie.
+          // `parsed` zawiera wyłącznie kolumny modelu oferty, więc nie nadpisuje
+          // offer_id / sort_order / source_filename / storage_path.
+          await sb.from('ud_offer_documents').update({ ...parsed }).eq('id', doc.id);
+          merged = { ...doc, ...parsed, insurer_type };
           reparsed++;
         }
       } catch { /* pomiń wariant, którego nie da się odczytać */ }
