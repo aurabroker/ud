@@ -10,6 +10,7 @@
     { href: '/panel/klienci', label: 'Klienci' },
     { href: '/panel', label: 'Oferty', exact: true },
     { href: '/panel/owu', label: 'Biblioteka OWU' },
+    { href: '/panel/logi', label: 'Wysyłki' },
     ...(isAdmin ? [{ href: '/panel/admin', label: 'Panel Admina' }] : []),
     ...(isAdmin ? [{ href: '/panel/ustawienia', label: 'Ustawienia' }] : [])
   ];

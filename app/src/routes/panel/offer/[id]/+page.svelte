@@ -132,11 +132,27 @@
   </div>
 {/if}
 {#if form?.sent}
-  <div class="ok-box">
-    Oferta wysłana.
-    {#if form.sms?.sent}SMS z kodem dostarczony.{:else if form.sms?.stub}SMS — tryb testowy (brak SMSPlanet).{/if}
-    {#if form.email?.sent}Email wysłany.{:else if form.email?.stub}Email — tryb testowy (brak Resend).{/if}
-    {#if form.pinDev}<br /><strong>PIN testowy: {form.pinDev}</strong> (widoczny tylko bez realnej wysyłki).{/if}
+  {@const anySent = form.sms?.sent || form.email?.sent}
+  <div class="{anySent ? 'ok-box' : 'error-box'}">
+    {anySent ? 'Oferta wysłana.' : 'Nie udało się nic wysłać — oferta NIE została oznaczona jako wysłana.'}
+    <ul style="margin:.35rem 0 0;padding-left:1.1rem;">
+      <li>
+        SMS:
+        {#if form.sms?.sent}dostarczony ✓
+        {:else if form.sms?.stub}tryb testowy (brak konfiguracji SMSPlanet)
+        {:else if form.sms?.error}<span style="color:var(--red-700);">błąd — {form.sms.error}</span>
+        {:else}brak numeru telefonu klienta{/if}
+      </li>
+      <li>
+        Email:
+        {#if form.email?.sent}wysłany ✓{#if form.email.id} <span class="muted">(ID: {form.email.id})</span>{/if}
+        {:else if form.email?.stub}tryb testowy (brak konfiguracji Resend)
+        {:else if form.email?.error}<span style="color:var(--red-700);">błąd — {form.email.error}</span>
+        {:else}brak adresu email klienta{/if}
+      </li>
+    </ul>
+    {#if form.pinDev}<strong>PIN testowy: {form.pinDev}</strong> (widoczny tylko bez realnej wysyłki).<br />{/if}
+    <a href="/panel/logi">Historia wysyłek →</a>
   </div>
 {/if}
 

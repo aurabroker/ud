@@ -524,12 +524,30 @@ export async function sendOfferToClient(offerId) {
 
   const link = `${clientBaseUrl()}/offer/${offer.share_token}`;
 
+  // Każda próba wysyłki trafia do ud_send_log — także nieudana.
+  const logSend = async (channel, recipient, res) => {
+    const status = res?.sent ? 'sent' : res?.stub ? 'stub' : 'error';
+    await sb
+      .from('ud_send_log')
+      .insert({
+        offer_id: offerId,
+        user_id: offer.user_id || null,
+        channel,
+        recipient: recipient || null,
+        status,
+        provider_id: res?.id || null,
+        error: res?.error || null
+      })
+      .then(() => {}, () => {}); // log nie może wywrócić wysyłki
+  };
+
   let sms = { sent: false };
   if (offer.client_phone) {
     sms = await sendSms(
       offer.client_phone,
       `Haslo do oferty: ${pin} (otwiera link i pliki PDF, wazne ${ttlHours}h). Otworz: ${link}`
     );
+    await logSend('sms', offer.client_phone, sms);
   }
 
   let email = { sent: false };
@@ -539,12 +557,17 @@ export async function sendOfferToClient(offerId) {
       subject: 'Twoja oferta ubezpieczenia utraty dochodu',
       html: offerLinkEmail({ clientName: offer.client_name, link, ttlHours })
     });
+    await logSend('email', offer.client_email, email);
   }
 
-  await sb
-    .from('ud_offers')
-    .update({ status: 'sent', sent_at: new Date().toISOString() })
-    .eq('id', offerId);
+  // Status „Wysłana" tylko wtedy, gdy cokolwiek faktycznie wyszło — inaczej
+  // oferta wyglądałaby na wysłaną mimo odrzucenia przez Resend/SMSPlanet.
+  if (sms.sent || email.sent) {
+    await sb
+      .from('ud_offers')
+      .update({ status: 'sent', sent_at: new Date().toISOString() })
+      .eq('id', offerId);
+  }
 
   // Po wysyłce upewnij się, że PDF podsumowania jest wygenerowany (do pobrania).
   await ensureSummaryUrl(offerId).catch(() => {});
