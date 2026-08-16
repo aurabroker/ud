@@ -52,8 +52,9 @@ const ROWS = [
 
 /** Nagłówek: logo (jeśli udało się pobrać) albo napis UtrataDochodu. */
 function brandNode(logo) {
-  if (logo?.kind === 'image') return { image: logo.data, height: 42, fit: [180, 42], margin: [0, 0, 0, 2] };
-  if (logo?.kind === 'svg') return { svg: logo.data, height: 42, margin: [0, 0, 0, 2] };
+  // Tylko `fit` — podanie równocześnie height/fit potrafi popsuć skalowanie w pdfmake.
+  if (logo?.kind === 'image') return { image: logo.data, fit: [170, 44], margin: [0, 0, 0, 4] };
+  if (logo?.kind === 'svg') return { svg: logo.data, fit: [170, 44], margin: [0, 0, 0, 4] };
   return {
     text: [
       { text: 'Utrata', color: SLATE_900 },

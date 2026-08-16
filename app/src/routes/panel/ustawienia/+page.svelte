@@ -65,7 +65,11 @@
       </div>
       <button class="btn btn-primary" type="submit">Wgraj logo</button>
     </div>
-    <p class="muted" style="margin-top:.5rem;font-size:.8rem;">Najlepiej kwadratowe logo na przezroczystym/białym tle.</p>
+    <p class="muted" style="margin-top:.5rem;font-size:.8rem;">
+      Najlepiej kwadratowe logo na przezroczystym/białym tle.
+      <strong>Rozmiar pliku ma znaczenie:</strong> logo jest osadzane w każdym PDF-cie, więc plik do ~300 KB
+      (ok. 600×600 px) daje dokument ~50 KB. Logo ważące 2 MB powiększy każdy PDF do ok. 2 MB.
+    </p>
   </form>
 </div>
 

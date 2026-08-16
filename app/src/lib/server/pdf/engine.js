@@ -54,8 +54,12 @@ export async function loadLogo(sb, settings) {
   const path = settings?.logo_path || '';
   const url = settings?.logo_url || '';
 
+  // Limit jest zabezpieczeniem przed wklejaniem ogromnych plików do każdego PDF.
+  // Uwaga: logo tej wielkości powiększa dokument — w Ustawieniach jest o tym podpowiedź.
+  const MAX_LOGO_BYTES = 4_000_000;
+
   const fromBytes = (buf, hint) => {
-    if (!buf?.byteLength || buf.byteLength > 1_500_000) return null;
+    if (!buf?.byteLength || buf.byteLength > MAX_LOGO_BYTES) return null;
     const isPng = buf[0] === 0x89 && buf[1] === 0x50; // sygnatura PNG
     const isJpg = buf[0] === 0xff && buf[1] === 0xd8; // sygnatura JPEG
     if (!isPng && !isJpg) {
