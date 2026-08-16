@@ -24,7 +24,7 @@ export async function sendSms(phone, message) {
   const body = new URLSearchParams({ from: sender, to, msg: message });
   if (env.SMSPLANET_TEST === '1') body.set('test', '1'); // tryb testowy SMSPlanet (nie wysyła realnie)
 
-  let res, data;
+  let res, raw, data;
   try {
     res = await fetch('https://api2.smsplanet.pl/sms', {
       method: 'POST',
@@ -34,14 +34,26 @@ export async function sendSms(phone, message) {
       },
       body
     });
-    data = await res.json().catch(() => null);
+    // Czytamy jako tekst — SMSPlanet przy błędach potrafi zwrócić HTML/plain,
+    // a sam kod HTTP nie mówi, czy to zły token, czy np. brak środków.
+    raw = await res.text().catch(() => '');
+    try { data = raw ? JSON.parse(raw) : null; } catch { data = null; }
   } catch (e) {
     return { sent: false, error: 'SMSPlanet: ' + (e?.message || e) };
   }
 
-  // Sukces: obecny messageId. Błąd: errorCode/errorMsg.
+  // Sukces: obecny messageId. Błąd: errorCode/errorMsg albo treść odpowiedzi.
   if (!res.ok || (data && (data.errorCode || data.errorMsg))) {
-    return { sent: false, error: data?.errorMsg || `SMSPlanet HTTP ${res.status}` };
+    const detail = data?.errorMsg
+      || String(raw || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 300);
+    const code = data?.errorCode ? ` (kod ${data.errorCode})` : '';
+    const hint = res.status === 403
+      ? ' — 403 zwykle oznacza odrzucone uwierzytelnienie (zły/wygasły token, nieautoryzowany nadawca lub IP), a nie wyczerpany limit'
+      : '';
+    return {
+      sent: false,
+      error: `SMSPlanet HTTP ${res.status}${code}${detail ? `: ${detail}` : ''}${hint}`
+    };
   }
   const id = data?.messageId ?? (Array.isArray(data?.messageId) ? data.messageId[0] : undefined);
   return { sent: true, id: id != null ? String(id) : undefined };
