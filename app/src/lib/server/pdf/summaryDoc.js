@@ -2,7 +2,7 @@
  * summaryDoc.js — definicja dokumentu pdfmake dla podsumowania oferty.
  * Odpowiednik summaryHtml.js, ale bez HTML i bez zewnętrznego API.
  */
-import { money, yesNo, insurerLabel, insurerRow } from '$lib/format.js';
+import { money, yesNo, insurerLabel, insurerRow, offerNoDisplay } from '$lib/format.js';
 import { conditionsContent } from './conditionsDoc.js';
 
 const SLATE_900 = '#0f172a';
@@ -35,7 +35,7 @@ function tempIncap(d) {
 
 const ROWS = [
   ['Ubezpieczyciel', () => ({ text: insurerRow() })],
-  ['Numer oferty (ubezpieczyciel)', (d) => ({ text: d.offer_number || '—' })],
+  ['Numer oferty (ubezpieczyciel)', (d) => ({ text: offerNoDisplay(d.offer_number) })],
   ['Okres ubezpieczenia', (d) => ({ text: d.insurance_period || '—' })],
   ['Śmierć / inwalidztwo (NW)', (d) => ({
     text: d.parsed_raw?.death_sum_insured != null ? money(d.parsed_raw.death_sum_insured) : yesNo(d.death_covered)
@@ -97,11 +97,20 @@ export function buildSummaryDocDefinition(p) {
     margin: [0, 10, 0, 6]
   };
 
-  // Tabela porównania
-  const header = [
-    { text: "przedstawiciel Lloyd's", style: 'cmpHeadFirst' },
-    ...documents.map((d) => ({ text: insurerLabel(d.insurer_type), style: 'cmpHead' }))
-  ];
+  // Tabela porównania. Gdy wszystkie oferty są od tego samego ubezpieczyciela,
+  // nagłówek jest jeden, wspólny dla wszystkich kolumn.
+  const sameInsurer =
+    documents.length > 1 && documents.every((d) => d.insurer_type === documents[0].insurer_type);
+  const header = sameInsurer
+    ? [
+        { text: "przedstawiciel Lloyd's", style: 'cmpHeadFirst' },
+        { text: insurerLabel(documents[0].insurer_type), style: 'cmpHead', colSpan: documents.length },
+        ...Array.from({ length: documents.length - 1 }, () => ({}))
+      ]
+    : [
+        { text: "przedstawiciel Lloyd's", style: 'cmpHeadFirst' },
+        ...documents.map((d) => ({ text: insurerLabel(d.insurer_type), style: 'cmpHead' }))
+      ];
   const body = [header];
   for (const [label, fn] of ROWS) {
     body.push([{ text: label, style: 'cmpLabel' }, ...documents.map((d) => ({ ...fn(d), style: 'cmpCell' }))]);
@@ -127,17 +136,25 @@ export function buildSummaryDocDefinition(p) {
 
   return {
     pageSize: 'A4',
-    pageMargins: [28, 28, 28, 34],
+    pageMargins: [28, 28, 28, 30],
     defaultStyle: { font: 'Roboto', fontSize: 9, color: SLATE_800, lineHeight: 1.2 },
+    // W stopce trzymamy tylko krótką notę i numer strony — długi tekst prawny
+    // z ustawień nie mieści się w stopce i był ucinany; jest na końcu dokumentu.
     footer: (page, total) => ({
       columns: [
         {
-          text: p.footerText || 'Dokument informacyjny. Wiążące są Ogólne Warunki Ubezpieczenia (OWU) oraz oferty ubezpieczycieli.',
-          fontSize: 7,
+          text: 'Dokument informacyjny. Wiążące są OWU oraz oferty ubezpieczycieli.',
+          fontSize: 6.5,
           color: '#94a3b8',
-          margin: [28, 0, 0, 0]
+          margin: [28, 6, 0, 0]
         },
-        { text: `${page}/${total}`, fontSize: 7, color: '#94a3b8', alignment: 'right', margin: [0, 0, 28, 0] }
+        {
+          text: `${page} / ${total}`,
+          fontSize: 6.5,
+          color: '#94a3b8',
+          alignment: 'right',
+          margin: [0, 6, 28, 0]
+        }
       ]
     }),
     content: [
@@ -150,17 +167,18 @@ export function buildSummaryDocDefinition(p) {
         margin: [0, 2, 0, 12]
       },
       cmpTable,
-      ...conditionsContent()
+      ...conditionsContent(p.footerText)
     ],
     styles: {
       title: { fontSize: 13, bold: true, color: SLATE_900, margin: [0, 2, 0, 0] },
       recKey: { bold: true, fillColor: '#f1f5f9', color: '#334155', margin: [4, 3, 4, 3] },
       recVal: { margin: [4, 3, 4, 3] },
       clause: { fontSize: 9, margin: [6, 5, 6, 5] },
-      cmpHead: { bold: true, color: '#ffffff', fillColor: SLATE_800, margin: [4, 4, 4, 4] },
+      cmpHead: { bold: true, color: '#ffffff', fillColor: SLATE_800, margin: [4, 4, 4, 4], alignment: 'center' },
       cmpHeadFirst: { bold: true, color: '#ffffff', fillColor: SLATE_900, margin: [4, 4, 4, 4] },
       cmpLabel: { bold: true, color: '#334155', fillColor: SLATE_50, margin: [4, 3, 4, 3] },
-      cmpCell: { margin: [4, 3, 4, 3] },
+      // Komórki z danymi ofert — wyśrodkowane.
+      cmpCell: { margin: [4, 3, 4, 3], alignment: 'center' },
       ocH2: { fontSize: 11.5, bold: true, color: SLATE_900 },
       ocH3: { fontSize: 9.5, bold: true, color: SLATE_900, margin: [0, 10, 0, 4] },
       ocSub: { fontSize: 8.5, bold: true, margin: [0, 4, 0, 2] },

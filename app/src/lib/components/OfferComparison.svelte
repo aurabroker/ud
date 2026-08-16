@@ -1,6 +1,12 @@
 <script>
-  import { money, yesNo, insurerLabel, insurerRow } from '$lib/format.js';
+  import { money, yesNo, insurerLabel, insurerRow, offerNoDisplay } from '$lib/format.js';
   let { documents = [], selectable = false, onchoose = null, chosenId = null } = $props();
+
+  // Gdy wszystkie porównywane oferty są od tego samego ubezpieczyciela,
+  // nagłówek jest jeden, wspólny dla wszystkich kolumn.
+  const sameInsurer = $derived(
+    documents.length > 1 && documents.every((d) => d.insurer_type === documents[0].insurer_type)
+  );
 
   // Okresowa niezdolność „z oferty": gdy pokrycie faktycznie jest — TAK na zielono zamiast „—".
   function tempIncap(d) {
@@ -11,7 +17,7 @@
 
   const rows = [
     ['Ubezpieczyciel', () => insurerRow()],
-    ['Numer oferty', (d) => d.offer_number || '—'],
+    ['Numer oferty', (d) => offerNoDisplay(d.offer_number)],
     ['Okres ubezpieczenia', (d) => d.insurance_period || '—'],
     // Kwota z Pozycji A (parsed_raw); gdy ryzyko nieobjęte — Tak/Nie/—
     ['Śmierć / inwalidztwo (NW)', (d) => (d.parsed_raw?.death_sum_insured != null ? money(d.parsed_raw.death_sum_insured) : yesNo(d.death_covered))],
@@ -30,9 +36,13 @@
     <thead>
       <tr>
         <th class="lbl-col">przedstawiciel Lloyd's</th>
-        {#each documents as d}
-          <th><div class="ins">{insurerLabel(d.insurer_type)}</div></th>
-        {/each}
+        {#if sameInsurer}
+          <th colspan={documents.length}><div class="ins">{insurerLabel(documents[0].insurer_type)}</div></th>
+        {:else}
+          {#each documents as d}
+            <th><div class="ins">{insurerLabel(d.insurer_type)}</div></th>
+          {/each}
+        {/if}
       </tr>
     </thead>
     <tbody>
@@ -76,7 +86,9 @@
 <style>
   .cmp-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--slate-400); }
   table.cmp { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
-  table.cmp th, table.cmp td { padding: 10px 14px; border-bottom: 1px solid var(--slate-300); border-right: 1px solid var(--slate-200); text-align: left; vertical-align: middle; }
+  table.cmp th, table.cmp td { padding: 10px 14px; border-bottom: 1px solid var(--slate-300); border-right: 1px solid var(--slate-200); text-align: center; vertical-align: middle; }
+  /* Kolumna etykiet do lewej; dane ofert wyśrodkowane. */
+  table.cmp td.lbl, table.cmp th.lbl-col { text-align: left; }
   table.cmp thead th { background: var(--slate-800); color: #fff; border-bottom: none; min-width: 170px; }
   table.cmp thead th.lbl-col { background: var(--slate-900); min-width: 210px; }
   table.cmp .ins { font-weight: 700; font-size: 0.92rem; }

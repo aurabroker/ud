@@ -26,6 +26,16 @@ export function insurerRow() {
   return 'Lloyd’s';
 }
 
+/**
+ * Numer oferty do prezentacji: z Leadenhall ucinamy prefiks literowy
+ * („LHQ3187346/1" -> „3187346/1"). Obsługuje przyszłe warianty LHX.
+ */
+export function offerNoDisplay(n) {
+  const s = String(n ?? '').trim();
+  if (!s) return '—';
+  return s.replace(/^LH[A-Z]?/i, '').trim() || s;
+}
+
 export function dateP(s) {
   return s ? new Date(s).toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—';
 }

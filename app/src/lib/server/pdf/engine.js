@@ -33,30 +33,59 @@ function init() {
   ready = true;
 }
 
+function bytesToBase64(buf) {
+  let bin = '';
+  const CHUNK = 8192; // porcjami, żeby nie przepełnić stosu przy większych plikach
+  for (let i = 0; i < buf.length; i += CHUNK) {
+    bin += String.fromCharCode.apply(null, buf.subarray(i, i + CHUNK));
+  }
+  return btoa(bin);
+}
+
 /**
- * Pobiera logo z URL i zwraca postać nadającą się do osadzenia w PDF.
+ * Wczytuje logo do postaci osadzalnej w PDF.
+ * Najpierw ze storage (pewniejsze niż publiczny URL), potem z URL jako zapas.
  * Błąd/nieobsługiwany format → null (dokument użyje napisu „UtrataDochodu").
+ * @param {object} sb - klient Supabase (service_role)
+ * @param {{logo_path?: string, logo_url?: string}} settings
  * @returns {Promise<{kind:'image'|'svg', data:string}|null>}
  */
-export async function fetchLogo(url) {
-  if (!url) return null;
-  try {
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 5000);
-    const res = await fetch(url, { signal: ctrl.signal }).finally(() => clearTimeout(timer));
-    if (!res.ok) return null;
-    const type = (res.headers.get('content-type') || '').toLowerCase();
-    if (type.includes('svg')) return { kind: 'svg', data: await res.text() };
-    if (!/png|jpe?g/.test(type)) return null;
-    const buf = new Uint8Array(await res.arrayBuffer());
-    if (buf.byteLength > 1_500_000) return null; // nie pakujemy ogromnych plików do PDF
-    let bin = '';
-    for (let i = 0; i < buf.length; i++) bin += String.fromCharCode(buf[i]);
-    const mime = type.includes('png') ? 'image/png' : 'image/jpeg';
-    return { kind: 'image', data: `data:${mime};base64,${btoa(bin)}` };
-  } catch {
-    return null;
+export async function loadLogo(sb, settings) {
+  const path = settings?.logo_path || '';
+  const url = settings?.logo_url || '';
+
+  const fromBytes = (buf, hint) => {
+    if (!buf?.byteLength || buf.byteLength > 1_500_000) return null;
+    const isPng = buf[0] === 0x89 && buf[1] === 0x50; // sygnatura PNG
+    const isJpg = buf[0] === 0xff && buf[1] === 0xd8; // sygnatura JPEG
+    if (!isPng && !isJpg) {
+      if (/svg/i.test(hint || '')) {
+        try { return { kind: 'svg', data: new TextDecoder().decode(buf) }; } catch { return null; }
+      }
+      return null;
+    }
+    return { kind: 'image', data: `data:image/${isPng ? 'png' : 'jpeg'};base64,${bytesToBase64(buf)}` };
+  };
+
+  if (sb && path) {
+    try {
+      const { data: blob, error } = await sb.storage.from('ud-public').download(path);
+      if (!error && blob) {
+        const out = fromBytes(new Uint8Array(await blob.arrayBuffer()), path);
+        if (out) return out;
+      }
+    } catch { /* spróbujemy przez URL */ }
   }
+
+  if (url) {
+    try {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 5000);
+      const res = await fetch(url, { signal: ctrl.signal }).finally(() => clearTimeout(timer));
+      if (res.ok) return fromBytes(new Uint8Array(await res.arrayBuffer()), res.headers.get('content-type') || url);
+    } catch { /* brak logo — napis zastępczy */ }
+  }
+  return null;
 }
 
 /**

@@ -10,7 +10,7 @@ import { sendEmail } from './email.js';
 import { offerLinkEmail } from './templates.js';
 import { resolveOwus } from './owuMatch.js';
 import { buildSummaryDocDefinition } from './pdf/summaryDoc.js';
-import { renderPdf, fetchLogo } from './pdf/engine.js';
+import { renderPdf, loadLogo } from './pdf/engine.js';
 import { getSettings } from './settings.js';
 import { clientBaseUrl } from './appUrl.js';
 import { env } from '$env/dynamic/private';
@@ -185,7 +185,7 @@ export async function createOfferFromPdfs(p) {
     const docDef = buildSummaryDocDefinition({
       clientName: p.clientName,
       documents,
-      logo: await fetchLogo(settings.logo_url || ''),
+      logo: await loadLogo(sb, settings),
       footerText: settings.pdf_footer || '',
       employmentType,
       offerNumber
@@ -467,7 +467,7 @@ async function regenerateSummary(sb, offerId) {
     const docDef = buildSummaryDocDefinition({
       clientName: offer?.client_name,
       documents: documents || [],
-      logo: await fetchLogo(settings.logo_url || ''),
+      logo: await loadLogo(sb, settings),
       footerText: settings.pdf_footer || '',
       employmentType,
       offerNumber: offer?.offer_number || ''
@@ -634,7 +634,7 @@ export async function regenerateSamplePdf() {
   const docDef = buildSummaryDocDefinition({
     clientName: 'Jan Kowalski (wzór)',
     documents: SAMPLE_DOCS,
-    logo: await fetchLogo(settings.logo_url || ''),
+    logo: await loadLogo(sb, settings),
     footerText: settings.pdf_footer || '',
     employmentType: 'uop',
     offerNumber: 'UD/2026/AD/00042/Kowalski'

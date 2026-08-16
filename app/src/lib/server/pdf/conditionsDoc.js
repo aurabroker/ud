@@ -79,8 +79,11 @@ export const COMPANY_FOOTER =
   'Rejestru Pośredników Ubezpieczeniowych pod numerem 11229690/A.\n' +
   'ul. Bolkowska 2A/28, 01-466 Warszawa | REGON 363673048 | NIP 5242793544';
 
-/** Treść sekcji warunków (tablica elementów pdfmake). */
-export function conditionsContent() {
+/**
+ * Treść sekcji warunków (tablica elementów pdfmake).
+ * @param {string} [footerText] - stopka z ustawień; gdy pusta, używamy domyślnej.
+ */
+export function conditionsContent(footerText) {
   return [
     { text: 'Istotne informacje o warunkach oferty', style: 'ocH2', margin: [0, 16, 0, 8] },
     {
@@ -97,6 +100,6 @@ export function conditionsContent() {
       style: 'ocP'
     },
     ul(EXTRA),
-    { text: COMPANY_FOOTER, style: 'ocCompany', margin: [0, 12, 0, 0] }
+    { text: String(footerText || '').trim() || COMPANY_FOOTER, style: 'ocCompany', margin: [0, 12, 0, 0] }
   ];
 }
