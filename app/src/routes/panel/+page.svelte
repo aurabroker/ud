@@ -25,8 +25,16 @@
 </div>
 
 {#if form?.refreshedAll}
-  <div class="ok-box" style="margin-bottom:1rem;">
-    Zaktualizowano oferty: {form.refreshedAll.ok}/{form.refreshedAll.total}{#if form.refreshedAll.failed} · nie udało się: {form.refreshedAll.failed}{/if}
+  <div class="{form.refreshedAll.errors?.length ? 'error-box' : 'ok-box'}" style="margin-bottom:1rem;">
+    Oferty: {form.refreshedAll.ok}/{form.refreshedAll.total} ·
+    ponownie odczytane PDF-y: {form.refreshedAll.reparsed}/{form.refreshedAll.docs} ·
+    podpięte OWU: {form.refreshedAll.addedOwu}
+    {#if form.refreshedAll.errors?.length}
+      <br /><strong>Problemy:</strong>
+      <ul style="margin:.3rem 0 0;padding-left:1.1rem;">
+        {#each form.refreshedAll.errors as e}<li>{e}</li>{/each}
+      </ul>
+    {/if}
   </div>
 {/if}
 

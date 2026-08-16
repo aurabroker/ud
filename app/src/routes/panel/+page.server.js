@@ -27,16 +27,23 @@ export const actions = {
       .limit(200);
 
     let ok = 0;
-    const failed = [];
+    let reparsed = 0;
+    let docs = 0;
+    let addedOwu = 0;
+    const errors = [];
     for (const o of offers || []) {
       try {
-        await refreshOfferDocuments(o.id);
+        const r = await refreshOfferDocuments(o.id);
         ok++;
+        reparsed += r.reparsed || 0;
+        docs += r.docs || 0;
+        addedOwu += r.addedOwu || 0;
+        for (const e of r.errors || []) errors.push(e);
       } catch (e) {
-        failed.push(o.id);
+        errors.push(`Oferta ${o.id}: ${e?.message || 'błąd'}`);
       }
     }
-    return { refreshedAll: { ok, failed: failed.length, total: (offers || []).length } };
+    return { refreshedAll: { ok, total: (offers || []).length, reparsed, docs, addedOwu, errors: errors.slice(0, 20) } };
   },
 
   delete: async ({ request, locals }) => {

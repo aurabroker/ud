@@ -328,6 +328,7 @@ export async function refreshOfferDocuments(offerId) {
 
   const { data: docs } = await sb.from('ud_offer_documents').select('*').eq('offer_id', offerId).order('sort_order');
   const documents = [];
+  const errors = [];
   let reparsed = 0;
 
   for (const doc of docs || []) {
@@ -340,21 +341,30 @@ export async function refreshOfferDocuments(offerId) {
       .maybeSingle();
 
     let merged = doc;
-    if (pdfFile?.storage_path) {
+    const nazwa = doc.source_filename || doc.id;
+    if (!pdfFile?.storage_path) {
+      errors.push(`${nazwa}: brak zapisanego pliku PDF oferty`);
+    } else {
       try {
-        const { data: blob } = await sb.storage.from(pdfFile.storage_bucket || BUCKET).download(pdfFile.storage_path);
-        if (blob) {
-          const bytes = new Uint8Array(await blob.arrayBuffer());
-          const { offer: parsed, insurer_type } = await parseOfferPdf(bytes, { password });
-          // Zapisujemy WSZYSTKIE sparsowane pola (pokrycia, sumy, składki, OWU),
-          // tak samo jak przy pierwszym imporcie — inaczej stare wartości zostają w bazie.
-          // `parsed` zawiera wyłącznie kolumny modelu oferty, więc nie nadpisuje
-          // offer_id / sort_order / source_filename / storage_path.
-          await sb.from('ud_offer_documents').update({ ...parsed }).eq('id', doc.id);
-          merged = { ...doc, ...parsed, insurer_type };
-          reparsed++;
-        }
-      } catch { /* pomiń wariant, którego nie da się odczytać */ }
+        const { data: blob, error: dlErr } = await sb.storage
+          .from(pdfFile.storage_bucket || BUCKET)
+          .download(pdfFile.storage_path);
+        if (dlErr || !blob) throw new Error('nie udało się pobrać pliku ze storage');
+
+        const bytes = new Uint8Array(await blob.arrayBuffer());
+        const { offer: parsed, insurer_type } = await parseOfferPdf(bytes, { password });
+        // Zapisujemy WSZYSTKIE sparsowane pola (pokrycia, sumy, składki, OWU),
+        // tak samo jak przy pierwszym imporcie — inaczej stare wartości zostają w bazie.
+        // `parsed` zawiera wyłącznie kolumny modelu oferty, więc nie nadpisuje
+        // offer_id / sort_order / source_filename / storage_path.
+        const { error: upErr } = await sb.from('ud_offer_documents').update({ ...parsed }).eq('id', doc.id);
+        if (upErr) throw new Error('zapis do bazy: ' + upErr.message);
+
+        merged = { ...doc, ...parsed, insurer_type };
+        reparsed++;
+      } catch (e) {
+        errors.push(`${nazwa}: ${e?.message || 'błąd odczytu PDF'}`);
+      }
     }
     documents.push(merged);
   }
@@ -387,7 +397,7 @@ export async function refreshOfferDocuments(offerId) {
   }
 
   await regenerateSummary(sb, offerId);
-  return { ok: true, reparsed, addedOwu };
+  return { ok: true, docs: (docs || []).length, reparsed, addedOwu, errors };
 }
 
 /** Regeneruje podsumowanie PDF z wszystkich wariantów oferty (usuwa stare). */

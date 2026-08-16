@@ -52,7 +52,19 @@
 </div>
 
 {#if form?.error}<div class="error-box">{form.error}</div>{/if}
-{#if form?.saved}<div class="ok-box">Zapisano.</div>{/if}
+{#if form?.saved && !form?.refreshed}<div class="ok-box">Zapisano.</div>{/if}
+{#if form?.refreshed}
+  <div class="{form.refreshed.errors?.length ? 'error-box' : 'ok-box'}">
+    Odświeżono: przeczytano ponownie {form.refreshed.reparsed}/{form.refreshed.docs} plików PDF,
+    podpięto OWU: {form.refreshed.addedOwu}.
+    {#if form.refreshed.errors?.length}
+      <br /><strong>Problemy:</strong>
+      <ul style="margin:.3rem 0 0;padding-left:1.1rem;">
+        {#each form.refreshed.errors as e}<li>{e}</li>{/each}
+      </ul>
+    {/if}
+  </div>
+{/if}
 
 <!-- Edycja oferty -->
 {#if editing}
