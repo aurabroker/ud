@@ -1,6 +1,7 @@
 <script>
   import { enhance } from '$app/forms';
   import OfferComparison from '$lib/components/OfferComparison.svelte';
+  import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
   import { dateP } from '$lib/format.js';
   let { data, form } = $props();
   let sending = $state(false);
@@ -8,6 +9,12 @@
   let editing = $state(false);
   let adding = $state(false);
   let refreshing = $state(false);
+
+  // Usuwanie wariantu — własne okno potwierdzenia (bez confirm() przeglądarki)
+  let delDoc = $state(null);
+  let delForm = $state(null);
+  let delBusy = $state(false);
+  const docLabel = (d) => d?.source_filename || d?.offer_number || d?.insurer_type || 'wariant';
 
   const statusLabel = { draft: 'Szkic', sent: 'Wysłana', viewed: 'Otwarta', chosen: 'Wybrana', rejected: 'Rezygnacja' };
   const choice = data.offer.client_choice;
@@ -171,12 +178,9 @@
       <div style="margin-top:1rem;display:flex;flex-direction:column;gap:.4rem;">
         {#each data.documents as d}
           <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;font-size:.85rem;border-top:1px solid var(--slate-100);padding-top:.4rem;">
-            <span>{d.source_filename || d.offer_number || d.insurer_type}</span>
-            <form method="POST" action="?/deleteDoc" use:enhance={() => ({ update }) => update()}
-              onsubmit={(e) => { if (!confirm('Usunąć ten wariant?')) e.preventDefault(); }}>
-              <input type="hidden" name="documentId" value={d.id} />
-              <button class="btn btn-ghost" style="padding:.25rem .6rem;font-size:.78rem;color:var(--red-600);">Usuń wariant</button>
-            </form>
+            <span>{docLabel(d)}</span>
+            <button type="button" class="btn btn-ghost" style="padding:.25rem .6rem;font-size:.78rem;color:var(--red-600);"
+              onclick={() => (delDoc = d)}>Usuń wariant</button>
           </div>
         {/each}
       </div>
@@ -237,3 +241,22 @@
     {/each}
   </div>
 {/if}
+
+<!-- Usuwanie wariantu: ukryty formularz + własne okno potwierdzenia -->
+<form method="POST" action="?/deleteDoc" bind:this={delForm} style="display:none;"
+  use:enhance={() => { delBusy = true; return async ({ update }) => { await update(); delBusy = false; delDoc = null; }; }}>
+  <input type="hidden" name="documentId" value={delDoc?.id ?? ''} />
+</form>
+
+<ConfirmDialog
+  open={!!delDoc}
+  danger
+  title="Usunąć ten wariant?"
+  message="Wariant zostanie usunięty z porównania wraz z jego plikiem oferty. Tej operacji nie można cofnąć."
+  detail={delDoc ? docLabel(delDoc) : ''}
+  confirmLabel="Usuń wariant"
+  busyLabel="Usuwam…"
+  busy={delBusy}
+  onconfirm={() => delForm?.requestSubmit()}
+  oncancel={() => (delDoc = null)}
+/>

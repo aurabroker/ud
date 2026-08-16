@@ -39,7 +39,8 @@ const ROWS = [
   ['Śmierć / inwalidztwo (NW)', (d) => yesNo(d.death_covered)],
   ['Okresowa niezdolność do pracy', (d) => tempIncap(d)],
   ['— świadczenie miesięczne', (d) => money(d.temp_monthly_benefit)],
-  ['Trwała niezdolność do pracy', (d) => yesNo(d.perm_incapacity_covered)],
+  // Kwota z Pozycji C; gdy oferta nie obejmuje tego ryzyka — Tak/Nie/—
+  ['Trwała niezdolność do pracy', (d) => (d.perm_sum_insured != null ? money(d.perm_sum_insured) : yesNo(d.perm_incapacity_covered))],
   ['Okres odszkodowawczy', (d) => d.indemnity_period || '—'],
   ['Okres wyczekiwania (wypadek)', (d) => (d.wait_accident != null ? d.wait_accident + ' dni' : '—')],
   ['Okres wyczekiwania (choroba)', (d) => (d.wait_illness != null ? d.wait_illness + ' dni' : '—')]
