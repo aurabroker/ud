@@ -22,8 +22,7 @@ export async function GET({ cookies }) {
       PIN_COOKIE_SECRET: present(env.PIN_COOKIE_SECRET),
       SMS_TOKEN: present(env.SMSPLANET_TOKEN || env.SMSTOKEN || env.SMS_TOKEN),
       SMS_SENDER: present(env.SMSPLANET_SENDER || env.SMSSENDER || env.SMS_SENDER),
-      RESEND: present(env.RESEND_API_KEY || env.RESEND_API),
-      PDFSHIFT: present(env.PDFSHIFT_API_KEY || env.PDFSHIFT_API)
+      RESEND: present(env.RESEND_API_KEY || env.RESEND_API)
     };
     // pokaż początek URL, by wykryć literówki/spacje (bez pełnej wartości)
     out.urlPreview = (pubEnv.PUBLIC_SUPABASE_URL || '').slice(0, 34);

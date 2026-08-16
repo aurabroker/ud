@@ -38,9 +38,8 @@ export async function runHealthChecks() {
   const resend = env.RESEND_API_KEY || env.RESEND_API;
   add('Email (Resend)', resend ? 'ok' : 'warn', resend ? '' : 'Brak klucza — maile nie będą wysyłane');
 
-  // --- PDF (PDFShift) ---
-  const pdfshift = env.PDFSHIFT_API_KEY || env.PDFSHIFT_API;
-  add('PDF podsumowania (PDFShift)', pdfshift ? 'ok' : 'warn', pdfshift ? '' : 'Brak klucza — PDF nie będzie generowany');
+  // --- PDF (pdfmake, generowanie lokalne) ---
+  add('PDF podsumowania (pdfmake)', 'ok', 'Generowane lokalnie — bez zewnętrznego API i bez limitów');
 
   // --- Runtime ---
   const webcrypto = typeof crypto?.subtle !== 'undefined';

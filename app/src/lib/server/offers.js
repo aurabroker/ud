@@ -9,8 +9,8 @@ import { sendSms } from './sms.js';
 import { sendEmail } from './email.js';
 import { offerLinkEmail } from './templates.js';
 import { resolveOwus } from './owuMatch.js';
-import { buildOfferSummaryHtml } from './summaryHtml.js';
-import { htmlToPdf } from './pdfshift.js';
+import { buildSummaryDocDefinition } from './pdf/summaryDoc.js';
+import { renderPdf, fetchLogo } from './pdf/engine.js';
 import { getSettings } from './settings.js';
 import { clientBaseUrl } from './appUrl.js';
 import { env } from '$env/dynamic/private';
@@ -173,7 +173,7 @@ export async function createOfferFromPdfs(p) {
     }
   }
 
-  // 4) Brandowane podsumowanie PDF (PDFShift) — do pobrania przez klienta.
+  // 4) Brandowane podsumowanie PDF (pdfmake) — do pobrania przez klienta.
   //    Odporne: brak klucza / błąd nie przerywa tworzenia oferty.
   try {
     const settings = await getSettings();
@@ -182,16 +182,15 @@ export async function createOfferFromPdfs(p) {
       const { data: cl } = await sb.from('ud_clients').select('employment_type').eq('id', p.clientId).maybeSingle();
       employmentType = cl?.employment_type || '';
     }
-    const html = buildOfferSummaryHtml({
+    const docDef = buildSummaryDocDefinition({
       clientName: p.clientName,
-      offerName: p.offerName,
       documents,
-      logoUrl: settings.logo_url || '',
+      logo: await fetchLogo(settings.logo_url || ''),
       footerText: settings.pdf_footer || '',
       employmentType,
       offerNumber
     });
-    const pdf = await htmlToPdf(html);
+    const pdf = await renderPdf(docDef);
     if (pdf.ok && pdf.buffer) {
       const path = `${offer.id}/podsumowanie.pdf`;
       const bytes = new Uint8Array(pdf.buffer);
@@ -210,7 +209,7 @@ export async function createOfferFromPdfs(p) {
       }
     }
   } catch (e) {
-    console.warn('[pdfshift] podsumowanie nie wygenerowane:', e?.message || e);
+    console.warn('[pdf] podsumowanie nie wygenerowane:', e?.message || e);
   }
 
   return { offerId: offer.id, shareToken, documents };
@@ -448,7 +447,7 @@ async function regenerateSummary(sb, offerId) {
       .eq('id', offerId)
       .single();
     const { data: documents } = await sb.from('ud_offer_documents').select('*').eq('offer_id', offerId).order('sort_order');
-    // Bez wariantów nie ma czego porównywać — pomijamy kosztowne wywołanie PDFShift.
+    // Bez wariantów nie ma czego porównywać — pomijamy generowanie PDF.
     if (!documents || documents.length === 0) return;
 
     let employmentType = '';
@@ -465,16 +464,15 @@ async function regenerateSummary(sb, offerId) {
     }
 
     const settings = await getSettings();
-    const html = buildOfferSummaryHtml({
+    const docDef = buildSummaryDocDefinition({
       clientName: offer?.client_name,
-      offerName: offer?.name,
       documents: documents || [],
-      logoUrl: settings.logo_url || '',
+      logo: await fetchLogo(settings.logo_url || ''),
       footerText: settings.pdf_footer || '',
       employmentType,
       offerNumber: offer?.offer_number || ''
     });
-    const pdf = await htmlToPdf(html);
+    const pdf = await renderPdf(docDef);
     if (pdf.ok && pdf.buffer) {
       const path = `${offerId}/podsumowanie.pdf`;
       const bytes = new Uint8Array(pdf.buffer);
@@ -493,7 +491,7 @@ async function regenerateSummary(sb, offerId) {
       }
     }
   } catch (e) {
-    console.warn('[pdfshift] regeneracja podsumowania:', e?.message || e);
+    console.warn('[pdf] regeneracja podsumowania:', e?.message || e);
   }
 }
 
@@ -590,7 +588,7 @@ export async function deleteOfferDocument(offerId, documentId) {
 /**
  * Zwraca signed URL do PDF podsumowania. ZAWSZE regeneruje, żeby PDF
  * odzwierciedlał aktualne ustawienia (stopka, logo).
- * @returns {Promise<string|null>} null gdy nie da się wygenerować (brak PDFShift)
+ * @returns {Promise<string|null>} null gdy nie da się wygenerować
  */
 export async function ensureSummaryUrl(offerId) {
   const sb = createAdminClient();
@@ -633,16 +631,15 @@ const SAMPLE_DOCS = [
 export async function regenerateSamplePdf() {
   const sb = createAdminClient();
   const settings = await getSettings();
-  const html = buildOfferSummaryHtml({
+  const docDef = buildSummaryDocDefinition({
     clientName: 'Jan Kowalski (wzór)',
-    offerName: 'Wzór oferty',
     documents: SAMPLE_DOCS,
-    logoUrl: settings.logo_url || '',
+    logo: await fetchLogo(settings.logo_url || ''),
     footerText: settings.pdf_footer || '',
     employmentType: 'uop',
     offerNumber: 'UD/2026/AD/00042/Kowalski'
   });
-  const pdf = await htmlToPdf(html);
+  const pdf = await renderPdf(docDef);
   if (!pdf.ok || !pdf.buffer) return null;
 
   const path = 'wzorzec.pdf';

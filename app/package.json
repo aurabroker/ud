@@ -21,6 +21,7 @@
   "dependencies": {
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.45.0",
+    "pdfmake": "^0.3.11",
     "unpdf": "^0.12.1"
   }
 }

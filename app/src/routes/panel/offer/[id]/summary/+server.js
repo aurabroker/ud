@@ -16,7 +16,7 @@ export async function GET({ params, locals }) {
   const { data: offer } = await sb.from('ud_offers').select('client_name').eq('id', params.id).maybeSingle();
 
   const url = await ensureSummaryUrl(params.id);
-  if (!url) throw error(400, 'PDF niedostępny — sprawdź klucz PDFShift (PDFSHIFT_API).');
+  if (!url) throw error(400, 'Nie udało się wygenerować PDF podsumowania.');
 
   // Strumieniujemy przez naszą domenę — link Supabase nie jest ujawniany.
   const res = await fetch(url);
