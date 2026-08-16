@@ -32,7 +32,7 @@ export async function POST({ params, request, cookies }) {
       to: agentEmail,
       replyTo: clientEmail || undefined,
       subject: `Pytanie od klienta — ${offer.name}`,
-      html: clientQuestionEmail({ clientName: offer.client_name, offerName: offer.name, question: text, clientEmail })
+      ...(() => { const t = clientQuestionEmail({ clientName: offer.client_name, offerName: offer.name, question: text, clientEmail }); return { html: t.html, text: t.text }; })()
     });
     notified = !!res.sent;
   }

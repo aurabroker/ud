@@ -552,10 +552,19 @@ export async function sendOfferToClient(offerId) {
 
   let email = { sent: false };
   if (offer.client_email) {
+    const settings = await getSettings();
+    const tpl = offerLinkEmail({
+      clientName: offer.client_name,
+      link,
+      ttlHours,
+      logoUrl: settings.logo_url || '',
+      footerText: settings.pdf_footer || ''
+    });
     email = await sendEmail({
       to: offer.client_email,
       subject: 'Twoja oferta ubezpieczenia utraty dochodu',
-      html: offerLinkEmail({ clientName: offer.client_name, link, ttlHours })
+      html: tpl.html,
+      text: tpl.text
     });
     await logSend('email', offer.client_email, email);
   }

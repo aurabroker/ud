@@ -4,8 +4,11 @@
  */
 import { env } from '$env/dynamic/private';
 
+/** Domyślny nadawca — wymaga zweryfikowanej domeny utratadochodu.pl w Resend. */
+const DEFAULT_FROM = 'UtrataDochodu <info@utratadochodu.pl>';
+
 /**
- * @param {{ to: string|string[], subject: string, html: string, replyTo?: string }} opts
+ * @param {{ to: string|string[], subject: string, html: string, text?: string, replyTo?: string }} opts
  * @returns {Promise<{ sent: boolean, stub?: boolean, id?: string, error?: string }>}
  */
 /** Konfiguracja wysyłki do diagnostyki — bez ujawniania klucza. */
@@ -14,14 +17,14 @@ export function emailConfig() {
   return {
     hasKey: !!key,
     keyHint: key ? `${String(key).slice(0, 6)}…(${String(key).length} zn.)` : '',
-    from: env.RESEND_FROM || 'Utrata Dochodu <onboarding@resend.dev>',
+    from: env.RESEND_FROM || DEFAULT_FROM,
     fromIsDefault: !env.RESEND_FROM
   };
 }
 
-export async function sendEmail({ to, subject, html, replyTo }) {
+export async function sendEmail({ to, subject, html, text, replyTo }) {
   const key = env.RESEND_API_KEY || env.RESEND_API;
-  const from = env.RESEND_FROM || 'Utrata Dochodu <onboarding@resend.dev>';
+  const from = env.RESEND_FROM || DEFAULT_FROM;
 
   if (!key) {
     console.warn('[email] RESEND_API_KEY brak — tryb stub. Do:', to, 'temat:', subject);
@@ -39,6 +42,7 @@ export async function sendEmail({ to, subject, html, replyTo }) {
       to: Array.isArray(to) ? to : [to],
       subject,
       html,
+      ...(text ? { text } : {}),
       ...(replyTo ? { reply_to: replyTo } : {})
     })
   });
