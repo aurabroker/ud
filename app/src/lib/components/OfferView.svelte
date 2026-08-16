@@ -15,6 +15,7 @@
   const owuFiles = $derived(files.filter((f) => f.file_type === 'owu'));
   const offerPdfs = $derived(files.filter((f) => f.file_type === 'offer_pdf'));
   const summaryFile = $derived(files.find((f) => f.file_type === 'summary') || null);
+  const attachments = $derived(files.filter((f) => f.file_type === 'attachment'));
   const dlHref = (f) => (preview ? '#' : `/offer/${token}/download/${f.id}`);
   const distHref = preview ? '#' : '/dystrybutor';
 
@@ -123,6 +124,13 @@
         <div class="ov-group">
           <span class="ov-gl">Warunki ubezpieczenia i dokumenty</span>
           {#each owuFiles as f}<a class="ov-doc" href={dlHref(f)} target="_blank" rel="noopener">📖 {f.file_name}</a>{/each}
+        </div>
+      {/if}
+
+      {#if attachments.length}
+        <div class="ov-group">
+          <span class="ov-gl">Dokumenty dodatkowe</span>
+          {#each attachments as f}<a class="ov-doc" href={dlHref(f)} target="_blank" rel="noopener">📎 {f.file_name}</a>{/each}
         </div>
       {/if}
 

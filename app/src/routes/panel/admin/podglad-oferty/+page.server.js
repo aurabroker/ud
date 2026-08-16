@@ -66,7 +66,8 @@ export async function load({ locals }) {
     { id: 'f6', file_type: 'summary', file_name: 'Porównanie ofert (rekomendacja).pdf' },
     { id: 'f1', file_type: 'owu', file_name: 'OWU LW047.pdf' },
     { id: 'f2', file_type: 'owu', file_name: 'OWU LW049 (HIV/WZW).pdf' },
-    { id: 'f3', file_type: 'owu', file_name: 'Karta produktowa.pdf' }
+    { id: 'f3', file_type: 'owu', file_name: 'Karta produktowa.pdf' },
+    { id: 'f7', file_type: 'attachment', file_name: 'Dodatkowe wyliczenie składki.pdf' }
   ];
 
   return {

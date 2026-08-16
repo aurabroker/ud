@@ -9,6 +9,7 @@
   let editing = $state(false);
   let adding = $state(false);
   let refreshing = $state(false);
+  let addingFile = $state(false);
 
   // Usuwanie wariantu — własne okno potwierdzenia (bez confirm() przeglądarki)
   let delDoc = $state(null);
@@ -59,7 +60,8 @@
 </div>
 
 {#if form?.error}<div class="error-box">{form.error}</div>{/if}
-{#if form?.saved && !form?.refreshed}<div class="ok-box">Zapisano.</div>{/if}
+{#if form?.saved && !form?.refreshed && !form?.filesAdded}<div class="ok-box">Zapisano.</div>{/if}
+{#if form?.filesAdded}<div class="ok-box">Dodano plików do oferty: {form.filesAdded}.</div>{/if}
 {#if form?.refreshed}
   <div class="{form.refreshed.errors?.length ? 'error-box' : 'ok-box'}">
     Odświeżono: przeczytano ponownie {form.refreshed.reparsed}/{form.refreshed.docs} plików PDF,
@@ -225,8 +227,31 @@
 <div class="card card-pad" style="margin-bottom:1.25rem;">
   <h3 style="font-size:1rem;margin-bottom:.75rem;">Pliki ({data.files.length})</h3>
   <ul class="muted" style="margin:0;padding-left:1.2rem;">
-    {#each data.files as f}<li>{f.file_type === 'owu' ? '📖' : '📄'} {f.file_name} <span style="opacity:.6;">({f.file_type})</span></li>{/each}
+    {#each data.files as f}
+      <li>
+        {f.file_type === 'owu' ? '📖' : f.file_type === 'attachment' ? '📎' : '📄'} {f.file_name}
+        <span style="opacity:.6;">({f.file_type})</span>
+      </li>
+    {/each}
   </ul>
+
+  <!-- Dodatkowy plik do oferty (bez parsowania) -->
+  <div style="margin-top:1rem;border-top:1px dashed var(--slate-200);padding-top:1rem;">
+    <h4 style="font-size:.92rem;margin-bottom:.6rem;">📎 Dodaj plik do oferty</h4>
+    <p class="muted" style="margin:0 0 .6rem;font-size:.8rem;">
+      Dowolny PDF (np. dodatkowe warunki, pismo, wyliczenie). Nie jest parsowany jako wariant — trafia do dokumentów klienta.
+    </p>
+    <form method="POST" action="?/addFiles" enctype="multipart/form-data"
+      use:enhance={() => { addingFile = true; return async ({ update }) => { await update({ reset: true }); addingFile = false; }; }}>
+      <div style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:flex-end;">
+        <div class="field" style="margin:0;flex:1;min-width:240px;">
+          <label class="label" for="extraFiles">Plik(i) PDF — można kilka naraz</label>
+          <input class="input" type="file" id="extraFiles" name="files" accept="application/pdf" multiple required />
+        </div>
+        <button class="btn btn-primary" type="submit" disabled={addingFile}>{addingFile ? 'Wgrywam…' : 'Dodaj plik'}</button>
+      </div>
+    </form>
+  </div>
 </div>
 
 <!-- Pytania klienta -->

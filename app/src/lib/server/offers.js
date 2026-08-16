@@ -317,6 +317,44 @@ export async function addDocumentsToOffer(offerId, files, password) {
 }
 
 /**
+ * Dodaje do oferty dowolny plik PDF (załącznik) — bez parsowania.
+ * Trafia do dokumentów widocznych dla klienta jako file_type='attachment'.
+ * @param {string} offerId
+ * @param {Array<{name: string, bytes: Uint8Array}>} files
+ */
+export async function addAttachmentsToOffer(offerId, files) {
+  const sb = createAdminClient();
+  const { data: offer, error } = await sb.from('ud_offers').select('id').eq('id', offerId).single();
+  if (error || !offer) throw new Error('Oferta nie znaleziona');
+
+  let added = 0;
+  for (const f of files) {
+    const safe = String(f.name || 'zalacznik.pdf')
+      .replace(/\.pdf$/i, '')
+      .replace(/[^a-zA-Z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ._-]+/g, '_')
+      .slice(0, 60) || 'zalacznik';
+    const storagePath = `${offerId}/zalaczniki/${Date.now()}-${safe}.pdf`;
+
+    const { error: upErr } = await sb.storage
+      .from(BUCKET)
+      .upload(storagePath, f.bytes, { contentType: 'application/pdf', upsert: false });
+    if (upErr) throw new Error(`Upload „${f.name}": ${upErr.message}`);
+
+    const { error: insErr } = await sb.from('ud_offer_files').insert({
+      offer_id: offerId,
+      file_type: 'attachment',
+      file_name: f.name || 'Załącznik.pdf',
+      storage_bucket: BUCKET,
+      storage_path: storagePath,
+      size_bytes: f.bytes.byteLength
+    });
+    if (insErr) throw new Error(`Zapis „${f.name}": ${insErr.message}`);
+    added++;
+  }
+  return { ok: true, added };
+}
+
+/**
  * Odświeża ofertę: ponownie parsuje zapisane PDF-y (hasłem oferty), aktualizuje
  * owu_symbol/parsed_raw i podpina brakujące OWU (baza + Karta + rider HIV/WZW),
  * następnie regeneruje podsumowanie. Naprawia stare oferty bez podpiętych OWU.
