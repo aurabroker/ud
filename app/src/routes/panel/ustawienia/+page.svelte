@@ -32,9 +32,11 @@
           <span title={label[c.status]} class="hz-dot" style="background:{dot[c.status]};box-shadow:0 0 0 3px {dot[c.status]}22;"></span>
           <div class="hz-body">
             <div class="hz-label">{c.label}</div>
-            <div class="hz-detail" style="color:{c.status === 'error' ? 'var(--red-700)' : c.status === 'warn' ? '#92400e' : 'var(--slate-500)'};">
-              {c.detail || (c.status === 'ok' ? '✓' : '')}
-            </div>
+            {#if c.detail}
+              <div class="hz-detail" style="color:{c.status === 'error' ? 'var(--red-700)' : c.status === 'warn' ? '#92400e' : 'var(--slate-500)'};">
+                {c.detail}
+              </div>
+            {/if}
           </div>
         </div>
       {/each}
