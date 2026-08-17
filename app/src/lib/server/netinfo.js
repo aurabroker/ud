@@ -5,27 +5,42 @@
  * zgłoszeń u dostawców, którzy filtrują ruch po adresie (np. SMSPlanet).
  */
 
+async function probe(url, pick) {
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 5000);
+    const res = await fetch(url, { signal: ctrl.signal }).finally(() => clearTimeout(timer));
+    if (!res.ok) return null;
+    const v = pick(await res.text());
+    return v ? String(v).trim() : null;
+  } catch {
+    return null;
+  }
+}
+
+const asJson = (t) => {
+  try { return JSON.parse(t)?.ip; } catch { return null; }
+};
+const asText = (t) => String(t || '').trim();
+
 /**
- * @returns {Promise<{ ip: string|null, source: string, error?: string }>}
+ * Adresy wyjściowe aplikacji. Sprawdzamy osobno IPv4 i IPv6, bo Workers
+ * najczęściej wychodzą po IPv6, a dostawcy filtrujący ruch pytają o oba.
+ * @returns {Promise<{ ip: string|null, ipv4: string|null, ipv6: string|null, error?: string }>}
  */
 export async function outboundIp() {
-  const probes = [
-    { url: 'https://api.ipify.org?format=json', pick: (t) => JSON.parse(t)?.ip },
-    { url: 'https://api64.ipify.org?format=json', pick: (t) => JSON.parse(t)?.ip },
-    { url: 'https://icanhazip.com', pick: (t) => String(t || '').trim() }
-  ];
+  const [ipv4, ipv6] = await Promise.all([
+    probe('https://api4.ipify.org?format=json', asJson).then((v) => v || probe('https://ipv4.icanhazip.com', asText)),
+    probe('https://api6.ipify.org?format=json', asJson).then((v) => v || probe('https://ipv6.icanhazip.com', asText))
+  ]);
 
-  for (const p of probes) {
-    try {
-      const ctrl = new AbortController();
-      const timer = setTimeout(() => ctrl.abort(), 5000);
-      const res = await fetch(p.url, { signal: ctrl.signal }).finally(() => clearTimeout(timer));
-      if (!res.ok) continue;
-      const ip = p.pick(await res.text());
-      if (ip) return { ip: String(ip), source: new URL(p.url).host };
-    } catch {
-      /* następna próba */
-    }
-  }
-  return { ip: null, source: '', error: 'Nie udało się ustalić adresu wyjściowego.' };
+  // Adres faktycznie użyty przy połączeniu — gdy dostępne oba, ruch idzie zwykle po IPv6.
+  const ip = ipv6 || ipv4 || (await probe('https://api.ipify.org?format=json', asJson));
+
+  return {
+    ip: ip || null,
+    ipv4: ipv4 || null,
+    ipv6: ipv6 || null,
+    ...(ip ? {} : { error: 'Nie udało się ustalić adresu wyjściowego.' })
+  };
 }

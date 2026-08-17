@@ -131,7 +131,7 @@ export const actions = {
       })
       .then(() => {}, () => {});
 
-    return { smsResult: { to, ...cfg, ...res, outIp: net.ip, outIpError: net.error || '' } };
+    return { smsResult: { to, ...cfg, ...res, outIp: net.ip, outIpv4: net.ipv4, outIpv6: net.ipv6, outIpError: net.error || '' } };
   },
 
   uploadDistributor: async ({ request, locals }) => {

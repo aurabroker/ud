@@ -42,10 +42,13 @@ export async function runHealthChecks() {
   // --- Adres wyjściowy (dostawcy filtrujący po IP, np. SMSPlanet) ---
   try {
     const net = await outboundIp();
+    const parts = [];
+    if (net.ipv6) parts.push(`IPv6: ${net.ipv6}`);
+    if (net.ipv4) parts.push(`IPv4: ${net.ipv4}`);
     add(
       'Adres wyjściowy (IP)',
       net.ip ? 'ok' : 'warn',
-      net.ip ? `${net.ip} — pula Cloudflare, adres może się zmieniać` : 'Nie udało się ustalić'
+      net.ip ? `${parts.join(' · ')} — pula Cloudflare, adres może się zmieniać` : 'Nie udało się ustalić'
     );
   } catch {
     add('Adres wyjściowy (IP)', 'warn', 'Nie udało się ustalić');
