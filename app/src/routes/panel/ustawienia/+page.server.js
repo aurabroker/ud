@@ -4,7 +4,7 @@ import { getSettings } from '$lib/server/settings.js';
 import { runHealthChecks } from '$lib/server/health.js';
 import { regenerateSamplePdf } from '$lib/server/offers.js';
 import { sendEmail, emailConfig } from '$lib/server/email.js';
-import { sendSms, smsConfig } from '$lib/server/sms.js';
+import { sendSms, smsConfig, smsDiagnostics } from '$lib/server/sms.js';
 import { outboundIp } from '$lib/server/netinfo.js';
 
 const PUBLIC_BUCKET = 'ud-public';
@@ -132,6 +132,15 @@ export const actions = {
       .then(() => {}, () => {});
 
     return { smsResult: { to, ...cfg, ...res, outIp: net.ip, outIpv4: net.ipv4, outIpv6: net.ipv6, outIpError: net.error || '' } };
+  },
+
+  // Diagnostyka SMSPlanet — odpytuje getBalance i getSenderFields.
+  // Nic nie wysyła i nic nie kosztuje; rozdziela blokadę IP od problemu konta.
+  smsDiag: async ({ locals }) => {
+    await requireAdmin(locals);
+    const net = await outboundIp();
+    const diag = await smsDiagnostics();
+    return { smsDiag: { ...diag, ...smsConfig(), outIpv4: net.ipv4, outIpv6: net.ipv6 } };
   },
 
   uploadDistributor: async ({ request, locals }) => {

@@ -4,6 +4,7 @@
   const s = data.settings;
   let testing = $state(false);
   let testingSms = $state(false);
+  let diagRunning = $state(false);
 </script>
 
 <svelte:head><title>Ustawienia — Panel</title></svelte:head>
@@ -144,6 +145,55 @@
       </div>
     </div>
   {/if}
+
+  <!-- Diagnostyka: odpytuje API bez wysyłania wiadomości -->
+  <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--slate-200);">
+    <p class="muted" style="margin:0 0 .6rem;font-size:.82rem;">
+      Diagnostyka odpytuje SMSPlanet metodami <code>getBalance</code> i <code>getSenderFields</code>.
+      <strong>Nic nie wysyła i nic nie kosztuje.</strong> Rozdziela blokadę adresu IP od problemu z kontem lub nadawcą.
+    </p>
+    <form method="POST" action="?/smsDiag" use:enhance={() => { diagRunning = true; return async ({ update }) => { await update({ reset: false }); diagRunning = false; }; }}>
+      <button class="btn btn-ghost" type="submit" disabled={diagRunning}>{diagRunning ? 'Sprawdzam…' : 'Diagnostyka SMSPlanet'}</button>
+    </form>
+
+    {#if form?.smsDiag}
+      {@const d = form.smsDiag}
+      {#if !d.configured}
+        <div class="error-box" style="margin-top:.75rem;">Brak poświadczeń SMSPlanet — nie ma czego sprawdzać.</div>
+      {:else}
+        {@const bothBlocked = !d.balance.ok && !d.senders.ok && d.balance.status === 403 && d.senders.status === 403}
+        <div class="{d.balance.ok && d.senders.ok ? 'ok-box' : 'error-box'}" style="margin-top:.75rem;">
+          <div>
+            <strong>Stan konta (getBalance):</strong>
+            {#if d.balance.ok}✓ odpowiedź OK{#if d.balance.value != null} · saldo: <code>{d.balance.value}</code>{/if}
+            {:else}✗ {d.balance.error}{/if}
+          </div>
+          <div style="margin-top:.35rem;">
+            <strong>Pola nadawcy (getSenderFields):</strong>
+            {#if d.senders.ok}
+              ✓ odpowiedź OK · zatwierdzone: {#if d.senders.list.length}{#each d.senders.list as f, i}<code>{f}</code>{#if i < d.senders.list.length - 1}, {/if}{/each}{:else}<em>lista pusta</em>{/if}
+              <br />Nadawca ustawiony w aplikacji: <code>{d.sender}</code> —
+              {#if d.senders.matches}✓ jest na liście zatwierdzonych.{:else}<strong>✗ NIE MA GO na liście</strong> — SMSPlanet odrzuci wysyłkę. Ustaw <code>SMSPLANET_SENDER</code> dokładnie na jedną z nazw powyżej.{/if}
+            {:else}✗ {d.senders.error}{/if}
+          </div>
+          <div class="muted" style="margin-top:.5rem;font-size:.8rem;">
+            {#if bothBlocked}
+              <strong>Wniosek:</strong> obie metody — które niczego nie wysyłają — zwracają 403.
+              Blokada jest przed autoryzacją, na warstwie sieciowej SMSPlanet, i nie zależy od konta ani nadawcy.
+              Do zgłoszenia podaj adres wyjściowy:
+              {#if d.outIpv6}IPv6 <code>{d.outIpv6}</code>{/if}{#if d.outIpv4}{#if d.outIpv6} · {/if}IPv4 <code>{d.outIpv4}</code>{:else}{#if d.outIpv6} (brak IPv4 — ruch wychodzi wyłącznie po IPv6){/if}{/if}.
+            {:else if d.balance.ok || d.senders.ok}
+              <strong>Wniosek:</strong> API odpowiada poprawnie na tych poświadczeniach, więc adres IP nie jest zablokowany.
+              Jeśli sama wysyłka nadal kończy się błędem, przyczyna leży w parametrach wiadomości (nadawca, numer, treść).
+            {:else}
+              <strong>Wniosek:</strong> obie metody zwracają błąd, ale nie jest to 403 — sprawdź treść komunikatów powyżej.
+            {/if}
+            <br />Uwierzytelnianie: <code>{d.authMode}</code>{#if d.hasToken} ({d.tokenHint}){/if}
+          </div>
+        </div>
+      {/if}
+    {/if}
+  </div>
 </div>
 
 <!-- Informacja o dystrybutorze (PDF) -->
