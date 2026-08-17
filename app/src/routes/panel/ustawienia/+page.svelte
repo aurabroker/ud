@@ -26,21 +26,19 @@
         {label[data.health.summary]} · {data.health.version}
       </span>
     </div>
-    <table style="margin-top:.75rem;">
-      <tbody>
-        {#each data.health.checks as c}
-          <tr>
-            <td style="width:20px;">
-              <span title={label[c.status]} style="width:12px;height:12px;border-radius:50%;background:{dot[c.status]};display:inline-block;box-shadow:0 0 0 3px {dot[c.status]}22;"></span>
-            </td>
-            <td style="font-weight:600;">{c.label}</td>
-            <td style="text-align:right;color:{c.status === 'error' ? 'var(--red-700)' : c.status === 'warn' ? '#92400e' : 'var(--slate-500)'};font-size:.83rem;">
+    <div class="hz-grid">
+      {#each data.health.checks as c}
+        <div class="hz-item">
+          <span title={label[c.status]} class="hz-dot" style="background:{dot[c.status]};box-shadow:0 0 0 3px {dot[c.status]}22;"></span>
+          <div class="hz-body">
+            <div class="hz-label">{c.label}</div>
+            <div class="hz-detail" style="color:{c.status === 'error' ? 'var(--red-700)' : c.status === 'warn' ? '#92400e' : 'var(--slate-500)'};">
               {c.detail || (c.status === 'ok' ? '✓' : '')}
-            </td>
-          </tr>
-        {/each}
-      </tbody>
-    </table>
+            </div>
+          </div>
+        </div>
+      {/each}
+    </div>
     <p class="muted" style="margin-top:.6rem;font-size:.78rem;">🟢 OK · 🟠 ostrzeżenie/konflikt (funkcja może nie działać) · 🔴 błąd (do naprawy)</p>
   </div>
 {/if}
@@ -138,7 +136,7 @@
         ✗ <strong>SMSPlanet odrzucił wysyłkę:</strong> {r.error}
       {/if}
       <div class="muted" style="margin-top:.4rem;font-size:.8rem;">
-        Token: {r.hasToken ? `jest (${r.tokenHint})` : 'BRAK'} · Nadawca: <code>{r.sender}</code>{#if r.testMode} · tryb próbny: WŁĄCZONY{/if}
+        Uwierzytelnianie: <code>{r.authMode}</code> {r.hasToken ? `(${r.tokenHint})` : '— BRAK poświadczeń'} · Nadawca: <code>{r.sender}</code>{#if r.testMode} · tryb próbny: WŁĄCZONY{/if}
         <br />Adres wyjściowy tego żądania: {#if r.outIp}{#if r.outIpv6}IPv6 <code>{r.outIpv6}</code>{/if}{#if r.outIpv4}{#if r.outIpv6} · {/if}IPv4 <code>{r.outIpv4}</code>{/if} — te adresy podaj dostawcy przy zgłoszeniu blokady. Uwaga: Cloudflare korzysta z puli, więc kolejne żądania mogą wychodzić z innych adresów.{:else}<span style="color:var(--red-700);">nie udało się ustalić {r.outIpError}</span>{/if}
         {#if r.senderIsDefault}<br />Używany jest domyślny nadawca <code>Info</code> — SMSPlanet odrzuca pola nadawcy niezatwierdzone na koncie. Ustaw <code>SMSPLANET_SENDER</code> na zatwierdzoną nazwę.{/if}
       </div>
@@ -208,3 +206,13 @@
 
   <button class="btn btn-primary btn-lg" type="submit">Zapisz ustawienia</button>
 </form>
+
+<style>
+  .hz-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .3rem .9rem; margin-top: .75rem; }
+  .hz-item { display: flex; gap: .5rem; align-items: flex-start; padding: .35rem 0; border-top: 1px solid var(--slate-100); }
+  .hz-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex: none; margin-top: .32rem; }
+  .hz-body { min-width: 0; }
+  .hz-label { font-weight: 600; font-size: .84rem; line-height: 1.25; }
+  .hz-detail { font-size: .78rem; line-height: 1.3; overflow-wrap: anywhere; }
+  @media (max-width: 720px) { .hz-grid { grid-template-columns: 1fr; } }
+</style>
