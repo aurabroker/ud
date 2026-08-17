@@ -139,6 +139,7 @@
       {/if}
       <div class="muted" style="margin-top:.4rem;font-size:.8rem;">
         Token: {r.hasToken ? `jest (${r.tokenHint})` : 'BRAK'} · Nadawca: <code>{r.sender}</code>{#if r.testMode} · tryb próbny: WŁĄCZONY{/if}
+        <br />Adres wyjściowy (IP) tego żądania: {#if r.outIp}<code>{r.outIp}</code> — ten adres podaj dostawcy przy zgłoszeniu blokady. Uwaga: Cloudflare korzysta z puli adresów, więc kolejne żądania mogą wychodzić z innego IP.{:else}<span style="color:var(--red-700);">nie udało się ustalić {r.outIpError}</span>{/if}
         {#if r.senderIsDefault}<br />Używany jest domyślny nadawca <code>Info</code> — SMSPlanet odrzuca pola nadawcy niezatwierdzone na koncie. Ustaw <code>SMSPLANET_SENDER</code> na zatwierdzoną nazwę.{/if}
       </div>
     </div>

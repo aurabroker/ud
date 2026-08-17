@@ -5,6 +5,7 @@ import { runHealthChecks } from '$lib/server/health.js';
 import { regenerateSamplePdf } from '$lib/server/offers.js';
 import { sendEmail, emailConfig } from '$lib/server/email.js';
 import { sendSms, smsConfig } from '$lib/server/sms.js';
+import { outboundIp } from '$lib/server/netinfo.js';
 
 const PUBLIC_BUCKET = 'ud-public';
 
@@ -114,6 +115,7 @@ export const actions = {
     if (!to) return fail(400, { error: 'Podaj numer telefonu do testu (np. 48601234567).' });
 
     const cfg = smsConfig();
+    const net = await outboundIp();
     const res = await sendSms(to, 'UtrataDochodu - wiadomosc probna z panelu. Jesli ja widzisz, wysylka SMS dziala.');
 
     await sb
@@ -129,7 +131,7 @@ export const actions = {
       })
       .then(() => {}, () => {});
 
-    return { smsResult: { to, ...cfg, ...res } };
+    return { smsResult: { to, ...cfg, ...res, outIp: net.ip, outIpError: net.error || '' } };
   },
 
   uploadDistributor: async ({ request, locals }) => {

@@ -38,6 +38,19 @@ export async function runHealthChecks() {
   const resend = env.RESEND_API_KEY || env.RESEND_API;
   add('Email (Resend)', resend ? 'ok' : 'warn', resend ? '' : 'Brak klucza — maile nie będą wysyłane');
 
+  // --- Adres wyjściowy (dostawcy filtrujący po IP, np. SMSPlanet) ---
+  try {
+    const { outboundIp } = await import('./netinfo.js');
+    const net = await outboundIp();
+    add(
+      'Adres wyjściowy (IP)',
+      net.ip ? 'ok' : 'warn',
+      net.ip ? `${net.ip} — pula Cloudflare, adres może się zmieniać` : 'Nie udało się ustalić'
+    );
+  } catch {
+    add('Adres wyjściowy (IP)', 'warn', 'Nie udało się ustalić');
+  }
+
   // --- PDF (pdfmake, generowanie lokalne) ---
   add('PDF podsumowania (pdfmake)', 'ok', 'Generowane lokalnie — bez zewnętrznego API i bez limitów');
 
