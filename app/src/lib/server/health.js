@@ -5,6 +5,7 @@
 import { env } from '$env/dynamic/private';
 import { env as pubEnv } from '$env/dynamic/public';
 import { APP_VERSION } from '$lib/version.js';
+import { outboundIp } from './netinfo.js';
 
 export async function runHealthChecks() {
   const checks = [];
@@ -40,7 +41,6 @@ export async function runHealthChecks() {
 
   // --- Adres wyjściowy (dostawcy filtrujący po IP, np. SMSPlanet) ---
   try {
-    const { outboundIp } = await import('./netinfo.js');
     const net = await outboundIp();
     add(
       'Adres wyjściowy (IP)',
