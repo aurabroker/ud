@@ -3,6 +3,7 @@
   let { data, form } = $props();
   const s = data.settings;
   let testing = $state(false);
+  let testingSms = $state(false);
 </script>
 
 <svelte:head><title>Ustawienia — Panel</title></svelte:head>
@@ -104,6 +105,41 @@
       <div class="muted" style="margin-top:.4rem;font-size:.8rem;">
         Klucz: {r.hasKey ? `jest (${r.keyHint})` : 'BRAK'} · Nadawca: <code>{r.from}</code>
         {#if r.fromIsDefault}<br />Używany jest domyślny nadawca <code>onboarding@resend.dev</code> — Resend pozwala nim wysyłać wyłącznie na adres właściciela konta. Aby wysyłać do klientów, ustaw <code>RESEND_FROM</code> na adres w zweryfikowanej domenie.{/if}
+      </div>
+    </div>
+  {/if}
+</div>
+
+<!-- Test wysyłki SMS -->
+<div class="card card-pad" style="margin-bottom:1.25rem;">
+  <h3 style="font-size:1rem;margin-bottom:.5rem;">Test wysyłki SMS</h3>
+  <p class="muted" style="margin:0 0 .75rem;font-size:.82rem;">
+    Wysyła wiadomość próbną i pokazuje dokładną odpowiedź SMSPlanet. Wynik trafia też do zakładki <a href="/panel/logi">Wysyłki</a>.
+  </p>
+  <form method="POST" action="?/testSms" use:enhance={() => { testingSms = true; return async ({ update }) => { await update({ reset: false }); testingSms = false; }; }}>
+    <div style="display:flex;gap:.75rem;align-items:flex-end;flex-wrap:wrap;">
+      <div class="field" style="margin:0;flex:1;min-width:240px;">
+        <label class="label" for="testPhone">Numer telefonu (z numerem kierunkowym)</label>
+        <input class="input" id="testPhone" name="testPhone" inputmode="numeric" placeholder="48601234567" />
+      </div>
+      <button class="btn btn-primary" type="submit" disabled={testingSms}>{testingSms ? 'Wysyłam…' : 'Wyślij próbny SMS'}</button>
+    </div>
+  </form>
+
+  {#if form?.smsResult}
+    {@const r = form.smsResult}
+    <div class="{r.sent ? 'ok-box' : 'error-box'}" style="margin-top:.75rem;">
+      {#if r.sent}
+        ✓ Wysłano na <strong>{r.to}</strong>{#if r.id} · ID wiadomości: <code>{r.id}</code>{/if}
+        {#if r.testMode}<br />⚠ Tryb próbny SMSPlanet jest włączony (SMSPLANET_TEST=1) — wiadomość nie dotarła realnie.{/if}
+      {:else if r.stub}
+        ⚠ <strong>Nic nie wysłano — brak SMSPLANET_TOKEN</strong> w zmiennych środowiskowych Cloudflare.
+      {:else}
+        ✗ <strong>SMSPlanet odrzucił wysyłkę:</strong> {r.error}
+      {/if}
+      <div class="muted" style="margin-top:.4rem;font-size:.8rem;">
+        Token: {r.hasToken ? `jest (${r.tokenHint})` : 'BRAK'} · Nadawca: <code>{r.sender}</code>{#if r.testMode} · tryb próbny: WŁĄCZONY{/if}
+        {#if r.senderIsDefault}<br />Używany jest domyślny nadawca <code>Info</code> — SMSPlanet odrzuca pola nadawcy niezatwierdzone na koncie. Ustaw <code>SMSPLANET_SENDER</code> na zatwierdzoną nazwę.{/if}
       </div>
     </div>
   {/if}

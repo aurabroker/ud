@@ -4,6 +4,7 @@ import { getSettings } from '$lib/server/settings.js';
 import { runHealthChecks } from '$lib/server/health.js';
 import { regenerateSamplePdf } from '$lib/server/offers.js';
 import { sendEmail, emailConfig } from '$lib/server/email.js';
+import { sendSms, smsConfig } from '$lib/server/sms.js';
 
 const PUBLIC_BUCKET = 'ud-public';
 
@@ -102,6 +103,33 @@ export const actions = {
       .then(() => {}, () => {});
 
     return { testResult: { to, from: cfg.from, fromIsDefault: cfg.fromIsDefault, hasKey: cfg.hasKey, keyHint: cfg.keyHint, ...res } };
+  },
+
+  // Próbna wysyłka SMS — pokazuje pełną odpowiedź SMSPlanet i zapisuje ją w logu.
+  testSms: async ({ request, locals }) => {
+    const sb = await requireAdmin(locals);
+    const { user } = await locals.safeGetSession();
+    const form = await request.formData();
+    const to = String(form.get('testPhone') || '').replace(/[^\d]/g, '');
+    if (!to) return fail(400, { error: 'Podaj numer telefonu do testu (np. 48601234567).' });
+
+    const cfg = smsConfig();
+    const res = await sendSms(to, 'UtrataDochodu - wiadomosc probna z panelu. Jesli ja widzisz, wysylka SMS dziala.');
+
+    await sb
+      .from('ud_send_log')
+      .insert({
+        offer_id: null,
+        user_id: user?.id || null,
+        channel: 'sms',
+        recipient: to,
+        status: res.sent ? 'sent' : res.stub ? 'stub' : 'error',
+        provider_id: res.id || null,
+        error: res.error || null
+      })
+      .then(() => {}, () => {});
+
+    return { smsResult: { to, ...cfg, ...res } };
   },
 
   uploadDistributor: async ({ request, locals }) => {

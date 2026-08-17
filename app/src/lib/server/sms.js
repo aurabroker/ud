@@ -6,6 +6,18 @@
  */
 import { env } from '$env/dynamic/private';
 
+/** Konfiguracja wysyłki SMS do diagnostyki — bez ujawniania tokenu. */
+export function smsConfig() {
+  const token = env.SMSPLANET_TOKEN || env.SMSTOKEN || env.SMS_TOKEN;
+  return {
+    hasToken: !!token,
+    tokenHint: token ? `${String(token).slice(0, 6)}…(${String(token).length} zn.)` : '',
+    sender: env.SMSPLANET_SENDER || env.SMSSENDER || env.SMS_SENDER || 'Info',
+    senderIsDefault: !(env.SMSPLANET_SENDER || env.SMSSENDER || env.SMS_SENDER),
+    testMode: env.SMSPLANET_TEST === '1'
+  };
+}
+
 /**
  * @param {string} phone - numer (dowolny format; nie-cyfry są usuwane)
  * @param {string} message
