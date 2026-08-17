@@ -139,7 +139,7 @@
       {/if}
       <div class="muted" style="margin-top:.4rem;font-size:.8rem;">
         Uwierzytelnianie: <code>{r.authMode}</code> {r.hasToken ? `(${r.tokenHint})` : '— BRAK poświadczeń'} · Nadawca: <code>{r.sender}</code>{#if r.testMode} · tryb próbny: WŁĄCZONY{/if}
-        <br />Adres wyjściowy tego żądania: {#if r.outIp}{#if r.outIpv6}IPv6 <code>{r.outIpv6}</code>{/if}{#if r.outIpv4}{#if r.outIpv6} · {/if}IPv4 <code>{r.outIpv4}</code>{/if} — te adresy podaj dostawcy przy zgłoszeniu blokady. Uwaga: Cloudflare korzysta z puli, więc kolejne żądania mogą wychodzić z innych adresów.{:else}<span style="color:var(--red-700);">nie udało się ustalić {r.outIpError}</span>{/if}
+        <br />Adres wyjściowy tego żądania: {#if r.outIp}{#if r.outIpv6}IPv6 <code>{r.outIpv6}</code>{/if}{#if r.outIpv4}{#if r.outIpv6} · {/if}IPv4 <code>{r.outIpv4}</code>{:else}{#if r.outIpv6} · brak adresu IPv4 — ruch wychodzi wyłącznie po IPv6{/if}{/if} — ten adres podaj dostawcy przy zgłoszeniu blokady. Uwaga: Cloudflare korzysta z puli, więc kolejne żądania mogą wychodzić z innych adresów.{:else}<span style="color:var(--red-700);">nie udało się ustalić {r.outIpError}</span>{/if}
         {#if r.senderIsDefault}<br />Używany jest domyślny nadawca <code>Info</code> — SMSPlanet odrzuca pola nadawcy niezatwierdzone na koncie. Ustaw <code>SMSPLANET_SENDER</code> na zatwierdzoną nazwę.{/if}
       </div>
     </div>

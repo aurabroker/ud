@@ -45,6 +45,7 @@ export async function runHealthChecks() {
     const parts = [];
     if (net.ipv6) parts.push(`IPv6: ${net.ipv6}`);
     if (net.ipv4) parts.push(`IPv4: ${net.ipv4}`);
+    else if (net.ipv6) parts.push('brak IPv4');
     add(
       'Adres wyjściowy (IP)',
       net.ip ? 'ok' : 'warn',

@@ -28,19 +28,27 @@ const asText = (t) => String(t || '').trim();
  * najczęściej wychodzą po IPv6, a dostawcy filtrujący ruch pytają o oba.
  * @returns {Promise<{ ip: string|null, ipv4: string|null, ipv6: string|null, error?: string }>}
  */
+const isV4 = (a) => /^\d{1,3}(\.\d{1,3}){3}$/.test(String(a || ''));
+const isV6 = (a) => String(a || '').includes(':');
+
 export async function outboundIp() {
-  const [ipv4, ipv6] = await Promise.all([
+  const [a4, a6] = await Promise.all([
     probe('https://api4.ipify.org?format=json', asJson).then((v) => v || probe('https://ipv4.icanhazip.com', asText)),
     probe('https://api6.ipify.org?format=json', asJson).then((v) => v || probe('https://ipv6.icanhazip.com', asText))
   ]);
 
-  // Adres faktycznie użyty przy połączeniu — gdy dostępne oba, ruch idzie zwykle po IPv6.
-  const ip = ipv6 || ipv4 || (await probe('https://api.ipify.org?format=json', asJson));
+  // Usługi „v4" potrafią odpowiedzieć adresem IPv6, gdy połączenie i tak poszło
+  // po IPv6 — bez sprawdzenia formatu ten sam adres trafiłby do obu pól.
+  const ipv4 = isV4(a4) ? a4 : isV4(a6) ? a6 : null;
+  const ipv6 = isV6(a6) ? a6 : isV6(a4) ? a4 : null;
+
+  // Ruch wychodzi tym adresem, którym faktycznie nawiązano połączenie.
+  const ip = ipv6 || ipv4 || null;
 
   return {
-    ip: ip || null,
-    ipv4: ipv4 || null,
-    ipv6: ipv6 || null,
+    ip,
+    ipv4,
+    ipv6,
     ...(ip ? {} : { error: 'Nie udało się ustalić adresu wyjściowego.' })
   };
 }
