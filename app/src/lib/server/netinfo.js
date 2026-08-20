@@ -2,7 +2,7 @@
  * netinfo.js — informacje o połączeniu wychodzącym.
  * Cloudflare Workers nie mają stałego IP: adres pochodzi ze współdzielonej puli
  * i może się różnić między żądaniami oraz lokalizacjami. Odczyt służy do
- * zgłoszeń u dostawców, którzy filtrują ruch po adresie (np. SMSPlanet).
+ * zgłoszeń u dostawców, którzy filtrują ruch po adresie.
  */
 
 async function probe(url, pick) {

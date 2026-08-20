@@ -139,7 +139,7 @@
       <li>
         SMS:
         {#if form.sms?.sent}dostarczony ✓
-        {:else if form.sms?.stub}tryb testowy (brak konfiguracji SMSPlanet)
+        {:else if form.sms?.stub}tryb testowy (brak konfiguracji SMSAPI)
         {:else if form.sms?.error}<span style="color:var(--red-700);">błąd — {form.sms.error}</span>
         {:else}brak numeru telefonu klienta{/if}
       </li>

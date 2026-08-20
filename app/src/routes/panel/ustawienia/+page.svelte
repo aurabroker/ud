@@ -115,7 +115,7 @@
 <div class="card card-pad" style="margin-bottom:1.25rem;">
   <h3 style="font-size:1rem;margin-bottom:.5rem;">Test wysyłki SMS</h3>
   <p class="muted" style="margin:0 0 .75rem;font-size:.82rem;">
-    Wysyła wiadomość próbną i pokazuje dokładną odpowiedź SMSPlanet. Wynik trafia też do zakładki <a href="/panel/logi">Wysyłki</a>.
+    Wysyła wiadomość próbną i pokazuje dokładną odpowiedź SMSAPI. Wynik trafia też do zakładki <a href="/panel/logi">Wysyłki</a>.
   </p>
   <form method="POST" action="?/testSms" use:enhance={() => { testingSms = true; return async ({ update }) => { await update({ reset: false }); testingSms = false; }; }}>
     <div style="display:flex;gap:.75rem;align-items:flex-end;flex-wrap:wrap;">
@@ -132,16 +132,16 @@
     <div class="{r.sent ? 'ok-box' : 'error-box'}" style="margin-top:.75rem;">
       {#if r.sent}
         ✓ Wysłano na <strong>{r.to}</strong>{#if r.id} · ID wiadomości: <code>{r.id}</code>{/if}
-        {#if r.testMode}<br />⚠ Tryb próbny SMSPlanet jest włączony (SMSPLANET_TEST=1) — wiadomość nie dotarła realnie.{/if}
+        {#if r.testMode}<br />⚠ Tryb próbny SMSAPI jest włączony (SMSAPI_TEST=1) — wiadomość nie dotarła realnie.{/if}
       {:else if r.stub}
-        ⚠ <strong>Nic nie wysłano — brak SMSPLANET_TOKEN</strong> w zmiennych środowiskowych Cloudflare.
+        ⚠ <strong>Nic nie wysłano — brak SMSAPI_TOKEN</strong> w zmiennych środowiskowych Cloudflare.
       {:else}
-        ✗ <strong>SMSPlanet odrzucił wysyłkę:</strong> {r.error}
+        ✗ <strong>SMSAPI odrzucił wysyłkę:</strong> {r.error}
       {/if}
       <div class="muted" style="margin-top:.4rem;font-size:.8rem;">
-        Uwierzytelnianie: <code>{r.authMode}</code> {r.hasToken ? `(${r.tokenHint})` : '— BRAK poświadczeń'} · Nadawca: <code>{r.sender}</code>{#if r.testMode} · tryb próbny: WŁĄCZONY{/if}
+        Dostawca: <code>{r.provider}</code> · Uwierzytelnianie: <code>{r.authMode}</code> {r.hasToken ? `(${r.tokenHint})` : '— BRAK tokenu'} · Nadawca: <code>{r.sender}</code>{#if r.testMode} · tryb próbny: WŁĄCZONY{/if}
         <br />Adres wyjściowy tego żądania: {#if r.outIp}{#if r.outIpv6}IPv6 <code>{r.outIpv6}</code>{/if}{#if r.outIpv4}{#if r.outIpv6} · {/if}IPv4 <code>{r.outIpv4}</code>{:else}{#if r.outIpv6} · brak adresu IPv4 — ruch wychodzi wyłącznie po IPv6{/if}{/if} — ten adres podaj dostawcy przy zgłoszeniu blokady. Uwaga: Cloudflare korzysta z puli, więc kolejne żądania mogą wychodzić z innych adresów.{:else}<span style="color:var(--red-700);">nie udało się ustalić {r.outIpError}</span>{/if}
-        {#if r.senderIsDefault}<br />Używany jest domyślny nadawca <code>Info</code> — SMSPlanet odrzuca pola nadawcy niezatwierdzone na koncie. Ustaw <code>SMSPLANET_SENDER</code> na zatwierdzoną nazwę.{/if}
+        {#if r.senderIsDefault}<br />Używany jest domyślny nadawca <code>Info</code> — SMSAPI odrzuca nazwy nadawcy niezatwierdzone na koncie. Ustaw <code>SMSAPI_SENDER</code> na zatwierdzoną nazwę.{/if}
       </div>
     </div>
   {/if}
@@ -149,46 +149,43 @@
   <!-- Diagnostyka: odpytuje API bez wysyłania wiadomości -->
   <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--slate-200);">
     <p class="muted" style="margin:0 0 .6rem;font-size:.82rem;">
-      Diagnostyka odpytuje SMSPlanet metodami <code>getBalance</code> i <code>getSenderFields</code>.
-      <strong>Nic nie wysyła i nic nie kosztuje.</strong> Rozdziela blokadę adresu IP od problemu z kontem lub nadawcą.
+      Diagnostyka odpytuje SMSAPI metodami <code>/profile</code> (stan konta) i <code>/sms/sendernames</code> (nazwy nadawcy).
+      <strong>Nic nie wysyła i nic nie kosztuje.</strong> Sprawdza token i to, czy nadawca jest zatwierdzony.
     </p>
     <form method="POST" action="?/smsDiag" use:enhance={() => { diagRunning = true; return async ({ update }) => { await update({ reset: false }); diagRunning = false; }; }}>
-      <button class="btn btn-ghost" type="submit" disabled={diagRunning}>{diagRunning ? 'Sprawdzam…' : 'Diagnostyka SMSPlanet'}</button>
+      <button class="btn btn-ghost" type="submit" disabled={diagRunning}>{diagRunning ? 'Sprawdzam…' : 'Diagnostyka SMSAPI'}</button>
     </form>
 
     {#if form?.smsDiag}
       {@const d = form.smsDiag}
       {#if !d.configured}
-        <div class="error-box" style="margin-top:.75rem;">Brak poświadczeń SMSPlanet — nie ma czego sprawdzać.</div>
+        <div class="error-box" style="margin-top:.75rem;">Brak <code>SMSAPI_TOKEN</code> — nie ma czego sprawdzać.</div>
       {:else}
-        {@const bothBlocked = !d.balance.ok && !d.senders.ok && d.balance.status === 403 && d.senders.status === 403}
         <div class="{d.balance.ok && d.senders.ok ? 'ok-box' : 'error-box'}" style="margin-top:.75rem;">
           <div>
-            <strong>Stan konta (getBalance):</strong>
-            {#if d.balance.ok}✓ odpowiedź OK{#if d.balance.value != null} · saldo: <code>{d.balance.value}</code>{/if}
+            <strong>Stan konta (/profile):</strong>
+            {#if d.balance.ok}✓ odpowiedź OK{#if d.balance.value != null} · punkty: <code>{d.balance.value}</code>{/if}
             {:else}✗ {d.balance.error}{/if}
           </div>
           <div style="margin-top:.35rem;">
-            <strong>Pola nadawcy (getSenderFields):</strong>
+            <strong>Nazwy nadawcy (/sms/sendernames):</strong>
             {#if d.senders.ok}
               ✓ odpowiedź OK · zatwierdzone: {#if d.senders.list.length}{#each d.senders.list as f, i}<code>{f}</code>{#if i < d.senders.list.length - 1}, {/if}{/each}{:else}<em>lista pusta</em>{/if}
               <br />Nadawca ustawiony w aplikacji: <code>{d.sender}</code> —
-              {#if d.senders.matches}✓ jest na liście zatwierdzonych.{:else}<strong>✗ NIE MA GO na liście</strong> — SMSPlanet odrzuci wysyłkę. Ustaw <code>SMSPLANET_SENDER</code> dokładnie na jedną z nazw powyżej.{/if}
+              {#if d.senders.matches}✓ jest na liście zatwierdzonych.{:else}<strong>✗ NIE MA GO na liście</strong> — SMSAPI odrzuci wysyłkę. Ustaw <code>SMSAPI_SENDER</code> dokładnie na jedną z nazw powyżej.{/if}
             {:else}✗ {d.senders.error}{/if}
           </div>
           <div class="muted" style="margin-top:.5rem;font-size:.8rem;">
-            {#if bothBlocked}
-              <strong>Wniosek:</strong> obie metody — które niczego nie wysyłają — zwracają 403.
-              Blokada jest przed autoryzacją, na warstwie sieciowej SMSPlanet, i nie zależy od konta ani nadawcy.
-              Do zgłoszenia podaj adres wyjściowy:
-              {#if d.outIpv6}IPv6 <code>{d.outIpv6}</code>{/if}{#if d.outIpv4}{#if d.outIpv6} · {/if}IPv4 <code>{d.outIpv4}</code>{:else}{#if d.outIpv6} (brak IPv4 — ruch wychodzi wyłącznie po IPv6){/if}{/if}.
-            {:else if d.balance.ok || d.senders.ok}
-              <strong>Wniosek:</strong> API odpowiada poprawnie na tych poświadczeniach, więc adres IP nie jest zablokowany.
+            {#if d.balance.ok && d.senders.ok}
+              <strong>Wniosek:</strong> token działa, a połączenie z SMSAPI jest drożne.
               Jeśli sama wysyłka nadal kończy się błędem, przyczyna leży w parametrach wiadomości (nadawca, numer, treść).
+            {:else if d.balance.status === 401 || d.senders.status === 401}
+              <strong>Wniosek:</strong> API odrzuca token (401). Sprawdź, czy <code>SMSAPI_TOKEN</code> jest tokenem OAuth
+              z odpowiednimi uprawnieniami i czy nie wkradła się spacja przy wklejaniu.
             {:else}
-              <strong>Wniosek:</strong> obie metody zwracają błąd, ale nie jest to 403 — sprawdź treść komunikatów powyżej.
+              <strong>Wniosek:</strong> zapytania nie doszły do skutku — sprawdź treść komunikatów powyżej.
             {/if}
-            <br />Uwierzytelnianie: <code>{d.authMode}</code>{#if d.hasToken} ({d.tokenHint}){/if}
+            <br />Adres API: <code>{d.base}</code> · uwierzytelnianie: <code>{d.authMode}</code>{#if d.hasToken} ({d.tokenHint}){/if}
           </div>
         </div>
       {/if}

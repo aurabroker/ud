@@ -1,99 +1,102 @@
 /**
- * sms.js — wysyłka SMS przez SMSPlanet (https://smsplanet.pl).
- * Endpoint: POST https://api2.smsplanet.pl/<metoda> (form-urlencoded)
- * Uwierzytelnianie zgodne z oficjalną biblioteką smsplanet-java-lib:
- *   parametry `key` + `password`. Wariant `Authorization: Bearer <token>`
- *   pozostaje jako zapasowy, gdy skonfigurowano wyłącznie token.
- * Parametry wiadomości: from, to, msg.
- * Bez poświadczeń działa w trybie stub (loguje, nie wysyła).
+ * sms.js — wysyłka SMS przez SMSAPI (https://smsapi.pl).
+ * Uwierzytelnianie: token OAuth w nagłówku `Authorization: Bearer <token>`.
+ * Wysyłka:    POST {base}/sms.do  (form-urlencoded: to, from, message, format, encoding)
+ * Diagnostyka: GET {base}/profile          — stan konta (punkty)
+ *              GET {base}/sms/sendernames  — zatwierdzone nazwy nadawcy
+ * Bez tokenu działa w trybie stub (loguje, nie wysyła).
+ *
+ * Poprzedni dostawca (SMSPlanet) został usunięty: jego API stoi za Cloudflare,
+ * a ruch z Workerów wychodzi adresem z puli Cloudflare, który mieli na stałe
+ * zablokowanym („IP banned and reported") — bez możliwości obejścia po naszej stronie.
  */
 import { env } from '$env/dynamic/private';
 
-const API = 'https://api2.smsplanet.pl';
-
-/**
- * Workers domyślnie nie wysyłają nagłówka User-Agent, a filtry WAF potrafią
- * odrzucać takie żądania generycznym 403. Podajemy się jawnie.
- */
+/** Workers nie wysyłają User-Agent domyślnie; część filtrów odrzuca takie żądania. */
 const UA = 'UtrataDochodu/1.0 (+https://app.utratadochodu.pl)';
 
-/** Poświadczenia: oficjalna biblioteka SMSPlanet używa pary key+password. */
-function credentials() {
-  // Sekrety wklejane w panelu Cloudflare bywają z końcową spacją lub nowym
-  // wierszem — bez przycięcia poświadczenie jest ciche i błędne.
-  const t = (v) => String(v || '').trim();
-  const key = t(env.SMSPLANET_KEY) || t(env.SMSPLANET_API_KEY);
-  const password = t(env.SMSPLANET_PASSWORD);
-  const token = t(env.SMSPLANET_TOKEN) || t(env.SMSTOKEN) || t(env.SMS_TOKEN);
-  return { key, password, token, mode: key && password ? 'key+password' : token ? 'bearer' : 'brak' };
+const trim = (v) => String(v || '').trim();
+
+/** Adres API: konta polskie — api.smsapi.pl, międzynarodowe — api.smsapi.com. */
+function baseUrl() {
+  return (trim(env.SMSAPI_BASE) || 'https://api.smsapi.pl').replace(/\/+$/, '');
 }
 
-/** Nazwa nadawcy (pole nadawcy zatwierdzone u operatora). */
+function token() {
+  // Sekrety wklejane w panelu Cloudflare bywają z końcową spacją lub nowym
+  // wierszem — bez przycięcia poświadczenie jest ciche i błędne.
+  return trim(env.SMSAPI_TOKEN) || trim(env.SMSAPI_ACCESS_TOKEN);
+}
+
 function senderName() {
-  const t = (v) => String(v || '').trim();
-  return t(env.SMSPLANET_SENDER) || t(env.SMSSENDER) || t(env.SMS_SENDER) || 'Info';
+  return trim(env.SMSAPI_SENDER) || trim(env.SMS_SENDER) || 'Info';
 }
 
 /** Konfiguracja wysyłki SMS do diagnostyki — bez ujawniania poświadczeń. */
 export function smsConfig() {
-  const c = credentials();
-  const secret = c.mode === 'key+password' ? c.key : c.token;
+  const t = token();
   return {
-    authMode: c.mode,
-    hasToken: c.mode !== 'brak',
-    tokenHint: secret ? `${String(secret).slice(0, 6)}…(${String(secret).length} zn.)` : '',
+    provider: 'SMSAPI',
+    base: baseUrl(),
+    authMode: t ? 'bearer' : 'brak',
+    hasToken: !!t,
+    tokenHint: t ? `${t.slice(0, 6)}…(${t.length} zn.)` : '',
     sender: senderName(),
-    senderIsDefault: !(env.SMSPLANET_SENDER || env.SMSSENDER || env.SMS_SENDER),
-    testMode: env.SMSPLANET_TEST === '1'
+    senderIsDefault: !(env.SMSAPI_SENDER || env.SMS_SENDER),
+    testMode: env.SMSAPI_TEST === '1'
   };
 }
 
 /**
- * Wspólne wywołanie API SMSPlanet.
+ * Wspólne wywołanie API SMSAPI.
  * @returns {Promise<{ ok: boolean, status: number, raw: string, data: any, error?: string }>}
  */
-async function call(path, params) {
-  const cred = credentials();
-  const body = new URLSearchParams(params);
-  if (cred.mode === 'key+password') {
-    body.set('key', cred.key);
-    body.set('password', cred.password);
-  }
-
-  let res, raw;
+async function call(path, { method = 'GET', params = null } = {}) {
+  const t = token();
+  let res;
   try {
-    res = await fetch(`${API}/${path}`, {
-      method: 'POST',
+    res = await fetch(`${baseUrl()}${path}`, {
+      method,
       headers: {
-        ...(cred.mode === 'bearer' ? { Authorization: `Bearer ${cred.token}` } : {}),
-        'Content-Type': 'application/x-www-form-urlencoded',
+        Authorization: `Bearer ${t}`,
         Accept: 'application/json',
-        'User-Agent': UA
+        'User-Agent': UA,
+        ...(params ? { 'Content-Type': 'application/x-www-form-urlencoded' } : {})
       },
-      body
+      ...(params ? { body: new URLSearchParams(params) } : {})
     });
   } catch (e) {
-    return { ok: false, status: 0, raw: '', data: null, error: 'SMSPlanet: ' + (e?.message || e) };
+    return { ok: false, status: 0, raw: '', data: null, error: 'SMSAPI: ' + (e?.message || e) };
   }
 
-  // Czytamy jako tekst — SMSPlanet przy błędach potrafi zwrócić HTML/plain,
-  // a sam kod HTTP nie mówi, czy to zły token, czy np. brak środków.
-  raw = await res.text().catch(() => '');
+  // Czytamy jako tekst — przy błędach bramy odpowiedź bywa HTML-em, a sam kod
+  // HTTP nie mówi, czy to zły token, czy np. brak środków na koncie.
+  const raw = await res.text().catch(() => '');
   let data = null;
   try { data = raw ? JSON.parse(raw) : null; } catch { data = null; }
   return { ok: res.ok, status: res.status, raw, data };
 }
 
-/** Czytelny opis błędu z odpowiedzi API. */
-function describeError(r) {
+/**
+ * SMSAPI sygnalizuje błąd polem `error` w JSON-ie, nawet przy HTTP 200.
+ * Kod 101 = zła autoryzacja, 103 = brak punktów, 104 = nieistniejąca nazwa nadawcy.
+ */
+function failure(r) {
   if (r.error) return r.error;
-  const detail = r.data?.errorMsg
+  const code = r.data?.error;
+  if (code == null && r.ok) return null;
+
+  const msg = r.data?.message
     || String(r.raw || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 300);
-  const code = r.data?.errorCode ? ` (kod ${r.data.errorCode})` : '';
-  const hint = r.status === 403
-    ? ' — 403 zwykle oznacza odrzucone uwierzytelnienie (zły/wygasły token, nieautoryzowany nadawca lub IP), a nie wyczerpany limit'
-    : '';
-  return `SMSPlanet HTTP ${r.status}${code}${detail ? `: ${detail}` : ''}${hint}`;
+  const hints = {
+    101: 'zły lub wygasły token OAuth',
+    103: 'brak punktów na koncie',
+    104: 'nazwa nadawcy nie istnieje lub nie jest zatwierdzona',
+    105: 'błędny numer odbiorcy',
+    203: 'zbyt wiele żądań w krótkim czasie'
+  };
+  const hint = code != null && hints[code] ? ` — ${hints[code]}` : '';
+  return `SMSAPI${code != null ? ` błąd ${code}` : ` HTTP ${r.status}`}${msg ? `: ${msg}` : ''}${hint}`;
 }
 
 /**
@@ -102,66 +105,74 @@ function describeError(r) {
  * @returns {Promise<{ sent: boolean, stub?: boolean, id?: string, error?: string }>}
  */
 export async function sendSms(phone, message) {
-  const cred = credentials();
   const to = String(phone).replace(/[^\d]/g, '');
 
-  if (cred.mode === 'brak') {
-    console.warn('[sms] Brak poświadczeń SMSPlanet — tryb stub. Do:', to, 'msg:', message);
+  if (!token()) {
+    console.warn('[sms] Brak SMSAPI_TOKEN — tryb stub. Do:', to, 'msg:', message);
     return { sent: false, stub: true };
   }
 
-  const params = { from: senderName(), to, msg: message };
-  if (env.SMSPLANET_TEST === '1') params.test = '1'; // tryb testowy SMSPlanet (nie wysyła realnie)
+  const params = {
+    to,
+    from: senderName(),
+    message,
+    format: 'json',
+    encoding: 'utf-8'
+  };
+  if (env.SMSAPI_TEST === '1') params.test = '1'; // tryb testowy SMSAPI (nie wysyła realnie)
 
-  const r = await call('sms', params);
-  // Sukces: obecny messageId. Błąd: errorCode/errorMsg albo treść odpowiedzi.
-  if (!r.ok || r.error || (r.data && (r.data.errorCode || r.data.errorMsg))) {
-    return { sent: false, error: describeError(r) };
-  }
-  const id = r.data?.messageId ?? (Array.isArray(r.data?.messageId) ? r.data.messageId[0] : undefined);
-  return { sent: true, id: id != null ? String(id) : undefined };
+  const r = await call('/sms.do', { method: 'POST', params });
+  const err = failure(r);
+  if (err) return { sent: false, error: err };
+
+  const first = Array.isArray(r.data?.list) ? r.data.list[0] : null;
+  return { sent: true, id: first?.id != null ? String(first.id) : undefined };
 }
 
 /**
- * Diagnostyka bez wysyłania wiadomości. Odpytuje dwie metody z oficjalnej
- * biblioteki — żadna nic nie wysyła i nie kosztuje:
- *  - getBalance      → te same poświadczenia, inna ścieżka. Gdy i tu jest 403,
- *                      blokada jest na warstwie HTTP (IP/WAF), nie na koncie.
- *  - getSenderFields → lista zatwierdzonych pól nadawcy na koncie.
+ * Diagnostyka bez wysyłania wiadomości — sprawdza token i nazwy nadawcy.
+ * Żadne z wywołań nic nie wysyła i nie kosztuje punktów.
  */
 export async function smsDiagnostics() {
-  const cred = credentials();
-  if (cred.mode === 'brak') return { configured: false };
+  if (!token()) return { configured: false };
 
-  const [bal, snd] = await Promise.all([
-    call('getBalance', { product: 'SMS' }),
-    call('getSenderFields', { product: 'SMS' })
-  ]);
+  // Lista nadawców: najpierw ścieżka REST, a gdy konto jej nie udostępnia —
+  // starsze `sender.do`, które zwraca to samo w innym formacie.
+  const [prof, sndRest] = await Promise.all([call('/profile'), call('/sms/sendernames')]);
+  const snd = failure(sndRest) ? await call('/sender.do?list=1&format=json') : sndRest;
 
-  const balanceOk = bal.ok && !bal.error && !(bal.data?.errorCode || bal.data?.errorMsg);
-  const sendersOk = snd.ok && !snd.error && !(snd.data?.errorCode || snd.data?.errorMsg);
+  const profErr = failure(prof);
+  const sndErr = failure(snd);
 
-  const list = String(snd.data?.senderFields || '')
-    .split(',')
-    .map((s) => s.trim())
-    .filter(Boolean);
+  const list = [];
+  const push = (v) => { const s = trim(v); if (s && !list.includes(s)) list.push(s); };
+  const collection = Array.isArray(snd.data)
+    ? snd.data
+    : Array.isArray(snd.data?.collection)
+      ? snd.data.collection
+      : Array.isArray(snd.data?.list)
+        ? snd.data.list
+        : [];
+  for (const item of collection) push(typeof item === 'string' ? item : item?.sender || item?.name);
+
   const sender = senderName();
+  const points = prof.data?.points ?? prof.data?.credits ?? null;
 
   return {
     configured: true,
     sender,
     balance: {
-      ok: balanceOk,
-      status: bal.status,
-      value: balanceOk ? (bal.data?.balance ?? null) : null,
-      error: balanceOk ? '' : describeError(bal)
+      ok: !profErr,
+      status: prof.status,
+      value: profErr ? null : points,
+      error: profErr || ''
     },
     senders: {
-      ok: sendersOk,
+      ok: !sndErr,
       status: snd.status,
       list,
       matches: list.some((s) => s.toLowerCase() === sender.toLowerCase()),
-      error: sendersOk ? '' : describeError(snd)
+      error: sndErr || ''
     }
   };
 }

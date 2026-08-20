@@ -27,19 +27,19 @@ export async function runHealthChecks() {
   else if (/pages\.dev/i.test(appUrl)) add('Adres aplikacji', 'warn', `PUBLIC_APP_URL wskazuje na ${appUrl} — linki i tak użyją app.utratadochodu.pl`);
   else add('Adres aplikacji', 'ok', appUrl);
 
-  // --- SMS (SMSPlanet) ---
-  const smsTok = env.SMSPLANET_TOKEN || env.SMSTOKEN || env.SMS_TOKEN;
-  const smsSnd = env.SMSPLANET_SENDER || env.SMSSENDER || env.SMS_SENDER;
-  if (smsTok && smsSnd) add('SMS (SMSPlanet)', 'ok');
-  else if (!smsTok && !smsSnd) add('SMS (SMSPlanet)', 'warn', 'Brak tokenu i nadawcy — SMS nie będą wysyłane');
-  else if (smsTok && !smsSnd) add('SMS (SMSPlanet)', 'warn', 'Jest token, brak nazwy nadawcy (SMSSENDER)');
-  else add('SMS (SMSPlanet)', 'warn', 'Jest nadawca, brak tokenu (SMSTOKEN)');
+  // --- SMS (SMSAPI) ---
+  const smsTok = env.SMSAPI_TOKEN || env.SMSAPI_ACCESS_TOKEN;
+  const smsSnd = env.SMSAPI_SENDER || env.SMS_SENDER;
+  if (smsTok && smsSnd) add('SMS (SMSAPI)', 'ok');
+  else if (!smsTok && !smsSnd) add('SMS (SMSAPI)', 'warn', 'Brak tokenu i nadawcy — SMS nie będą wysyłane');
+  else if (smsTok && !smsSnd) add('SMS (SMSAPI)', 'warn', 'Jest token, brak nazwy nadawcy (SMSAPI_SENDER)');
+  else add('SMS (SMSAPI)', 'warn', 'Jest nadawca, brak tokenu (SMSAPI_TOKEN)');
 
   // --- Email (Resend) ---
   const resend = env.RESEND_API_KEY || env.RESEND_API;
   add('Email (Resend)', resend ? 'ok' : 'warn', resend ? '' : 'Brak klucza — maile nie będą wysyłane');
 
-  // --- Adres wyjściowy (dostawcy filtrujący po IP, np. SMSPlanet) ---
+  // --- Adres wyjściowy (dostawcy filtrujący ruch po adresie IP) ---
   try {
     const net = await outboundIp();
     const parts = [];

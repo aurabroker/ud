@@ -28,9 +28,8 @@ Dla środowiska **Production** (i **Preview**, jeśli chcesz testować):
 | Nazwa | Skąd |
 |---|---|
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase → Project Settings → API → `service_role` |
-| `SMSPLANET_TOKEN` | Panel SMSPlanet → panel.smsplanet.pl/s/api |
+| `SMSAPI_TOKEN` | Panel SMSAPI → Ustawienia → Tokeny OAuth |
 | `RESEND_API_KEY` | resend.com → API Keys |
-| `PDFSHIFT_API_KEY` | pdfshift.io → API |
 | `PIN_COOKIE_SECRET` | dowolny losowy ciąg (mamy wygenerowany w `.env`) |
 
 ### 📄 Plaintext
@@ -39,7 +38,7 @@ Dla środowiska **Production** (i **Preview**, jeśli chcesz testować):
 | `PUBLIC_SUPABASE_URL` | `https://kukvgsjrmrqtzhkszzum.supabase.co` |
 | `PUBLIC_SUPABASE_ANON_KEY` | (klucz anon — jak w `.env`) |
 | `PUBLIC_APP_URL` | `https://twoja-domena.pl` (adres produkcyjny) |
-| `SMSPLANET_SENDER` | zatwierdzona nazwa nadawcy w SMSPlanet |
+| `SMSAPI_SENDER` | zatwierdzona nazwa nadawcy w SMSAPI |
 | `RESEND_FROM` | np. `Utrata Dochodu <oferty@twoja-domena.pl>` |
 | `PIN_TTL_HOURS` | `48` |
 
@@ -49,7 +48,7 @@ Alternatywnie z terminala:
 ```bash
 cd app
 npx wrangler pages secret put SUPABASE_SERVICE_ROLE_KEY
-npx wrangler pages secret put SMSPLANET_TOKEN
+npx wrangler pages secret put SMSAPI_TOKEN
 # itd.
 ```
 
@@ -58,7 +57,7 @@ npx wrangler pages secret put SMSPLANET_TOKEN
 ## C) Konfiguracja usług zewnętrznych
 
 - **Resend:** zweryfikuj domenę nadawcy (DNS: SPF/DKIM), inaczej maile nie wyjdą.
-- **SMSPlanet:** wygeneruj token (panel.smsplanet.pl/s/api), dodaj i zatwierdź **nazwę nadawcy** (pole „from"); numery klientów w formacie `48XXXXXXXXX`.
+- **SMSAPI:** wygeneruj token OAuth w panelu SMSAPI, dodaj i zatwierdź **nazwę nadawcy** (pole „from"); numery klientów w formacie `48XXXXXXXXX`.
 - **Supabase Auth:** konta agentów (już są w `ud_user_profiles`). Nowych agentów dodaje się
   w Supabase → Authentication → Users (email+hasło), a profil w `ud_user_profiles` (rola `user`/`admin`).
 - **Supabase Storage:** buckety `ud-offers` i `ud-owu` już utworzone (prywatne).

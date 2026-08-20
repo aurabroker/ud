@@ -570,7 +570,7 @@ export async function sendOfferToClient(offerId) {
   }
 
   // Status „Wysłana" tylko wtedy, gdy cokolwiek faktycznie wyszło — inaczej
-  // oferta wyglądałaby na wysłaną mimo odrzucenia przez Resend/SMSPlanet.
+  // oferta wyglądałaby na wysłaną mimo odrzucenia przez Resend/SMSAPI.
   if (sms.sent || email.sent) {
     await sb
       .from('ud_offers')

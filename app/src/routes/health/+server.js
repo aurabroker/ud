@@ -20,8 +20,8 @@ export async function GET({ cookies }) {
       PUBLIC_APP_URL: present(pubEnv.PUBLIC_APP_URL),
       SUPABASE_SERVICE_ROLE_KEY: present(env.SUPABASE_SERVICE_ROLE_KEY),
       PIN_COOKIE_SECRET: present(env.PIN_COOKIE_SECRET),
-      SMS_TOKEN: present(env.SMSPLANET_TOKEN || env.SMSTOKEN || env.SMS_TOKEN),
-      SMS_SENDER: present(env.SMSPLANET_SENDER || env.SMSSENDER || env.SMS_SENDER),
+      SMSAPI_TOKEN: present(env.SMSAPI_TOKEN || env.SMSAPI_ACCESS_TOKEN),
+      SMSAPI_SENDER: present(env.SMSAPI_SENDER || env.SMS_SENDER),
       RESEND: present(env.RESEND_API_KEY || env.RESEND_API)
     };
     // pokaż początek URL, by wykryć literówki/spacje (bez pełnej wartości)

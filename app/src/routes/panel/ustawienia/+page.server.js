@@ -106,7 +106,7 @@ export const actions = {
     return { testResult: { to, from: cfg.from, fromIsDefault: cfg.fromIsDefault, hasKey: cfg.hasKey, keyHint: cfg.keyHint, ...res } };
   },
 
-  // Próbna wysyłka SMS — pokazuje pełną odpowiedź SMSPlanet i zapisuje ją w logu.
+  // Próbna wysyłka SMS — pokazuje pełną odpowiedź SMSAPI i zapisuje ją w logu.
   testSms: async ({ request, locals }) => {
     const sb = await requireAdmin(locals);
     const { user } = await locals.safeGetSession();
@@ -134,7 +134,7 @@ export const actions = {
     return { smsResult: { to, ...cfg, ...res, outIp: net.ip, outIpv4: net.ipv4, outIpv6: net.ipv6, outIpError: net.error || '' } };
   },
 
-  // Diagnostyka SMSPlanet — odpytuje getBalance i getSenderFields.
+  // Diagnostyka SMSAPI — odpytuje /profile i /sms/sendernames.
   // Nic nie wysyła i nic nie kosztuje; rozdziela blokadę IP od problemu konta.
   smsDiag: async ({ locals }) => {
     await requireAdmin(locals);
