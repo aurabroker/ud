@@ -161,7 +161,7 @@
       {#if !d.configured}
         <div class="error-box" style="margin-top:.75rem;">Brak <code>SMSAPI_TOKEN</code> — nie ma czego sprawdzać.</div>
       {:else}
-        <div class="{d.balance.ok && d.senders.ok ? 'ok-box' : 'error-box'}" style="margin-top:.75rem;">
+        <div class="{d.balance.ok && (d.senders.ok || d.senders.denied) ? 'ok-box' : 'error-box'}" style="margin-top:.75rem;">
           <div>
             <strong>Stan konta (/profile):</strong>
             {#if d.balance.ok}✓ odpowiedź OK{#if d.balance.value != null} · punkty: <code>{d.balance.value}</code>{/if}
@@ -173,15 +173,21 @@
               ✓ odpowiedź OK · zatwierdzone: {#if d.senders.list.length}{#each d.senders.list as f, i}<code>{f}</code>{#if i < d.senders.list.length - 1}, {/if}{/each}{:else}<em>lista pusta</em>{/if}
               <br />Nadawca ustawiony w aplikacji: <code>{d.sender}</code> —
               {#if d.senders.matches}✓ jest na liście zatwierdzonych.{:else}<strong>✗ NIE MA GO na liście</strong> — SMSAPI odrzuci wysyłkę. Ustaw <code>SMSAPI_SENDER</code> dokładnie na jedną z nazw powyżej.{/if}
+            {:else if d.senders.denied}
+              ⚠ token nie ma zakresu uprawnień do odczytu nazw nadawcy — nie da się sprawdzić listy.
+              <strong>To nie blokuje wysyłki SMS.</strong> Nadawca ustawiony w aplikacji: <code>{d.sender}</code> — zweryfikuj go ręcznie w panelu SMSAPI.
             {:else}✗ {d.senders.error}{/if}
           </div>
           <div class="muted" style="margin-top:.5rem;font-size:.8rem;">
             {#if d.balance.ok && d.senders.ok}
               <strong>Wniosek:</strong> token działa, a połączenie z SMSAPI jest drożne.
               Jeśli sama wysyłka nadal kończy się błędem, przyczyna leży w parametrach wiadomości (nadawca, numer, treść).
-            {:else if d.balance.status === 401 || d.senders.status === 401}
-              <strong>Wniosek:</strong> API odrzuca token (401). Sprawdź, czy <code>SMSAPI_TOKEN</code> jest tokenem OAuth
-              z odpowiednimi uprawnieniami i czy nie wkradła się spacja przy wklejaniu.
+            {:else if d.balance.ok && d.senders.denied}
+              <strong>Wniosek:</strong> token działa i połączenie jest drożne — brakuje mu tylko zakresu na odczyt nazw nadawcy.
+              Możesz to zignorować albo dodać ten zakres tokenowi w panelu SMSAPI, żeby diagnostyka była pełna.
+            {:else if d.balance.denied || d.senders.denied}
+              <strong>Wniosek:</strong> SMSAPI odpowiada, ale token nie ma uprawnień do metod diagnostycznych.
+              Uzupełnij zakresy tokenu w panelu SMSAPI (profil oraz nazwy nadawcy).
             {:else}
               <strong>Wniosek:</strong> zapytania nie doszły do skutku — sprawdź treść komunikatów powyżej.
             {/if}

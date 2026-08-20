@@ -93,7 +93,10 @@ function failure(r) {
     103: 'brak punktów na koncie',
     104: 'nazwa nadawcy nie istnieje lub nie jest zatwierdzona',
     105: 'błędny numer odbiorcy',
-    203: 'zbyt wiele żądań w krótkim czasie'
+    203: 'zbyt wiele żądań w krótkim czasie',
+    // 401 „Access forbidden" przy poprawnym tokenie oznacza brak zakresu
+    // uprawnień dla tej metody — token wystawiono bez dostępu do niej.
+    401: 'token nie ma uprawnienia (zakresu) do tej metody — uzupełnij zakresy tokenu w panelu SMSAPI'
   };
   const hint = code != null && hints[code] ? ` — ${hints[code]}` : '';
   return `SMSAPI${code != null ? ` błąd ${code}` : ` HTTP ${r.status}`}${msg ? `: ${msg}` : ''}${hint}`;
@@ -137,12 +140,17 @@ export async function smsDiagnostics() {
   if (!token()) return { configured: false };
 
   // Lista nadawców: najpierw ścieżka REST, a gdy konto jej nie udostępnia —
-  // starsze `sender.do`, które zwraca to samo w innym formacie.
+  // starsze `sender.do`, które zwraca to samo w innym formacie. Przy 401/403
+  // nie ponawiamy: to brak uprawnienia tokenu, więc druga próba tylko dołoży
+  // wpis do dziennika błędów SMSAPI, nic nie zmieniając.
   const [prof, sndRest] = await Promise.all([call('/profile'), call('/sms/sendernames')]);
-  const snd = failure(sndRest) ? await call('/sender.do?list=1&format=json') : sndRest;
+  const restErr = failure(sndRest);
+  const restDenied = sndRest.status === 401 || sndRest.status === 403 || sndRest.data?.error === 401;
+  const snd = restErr && !restDenied ? await call('/sender.do?list=1&format=json') : sndRest;
 
   const profErr = failure(prof);
   const sndErr = failure(snd);
+  const sendersDenied = snd.status === 401 || snd.status === 403 || snd.data?.error === 401;
 
   const list = [];
   const push = (v) => { const s = trim(v); if (s && !list.includes(s)) list.push(s); };
@@ -163,12 +171,16 @@ export async function smsDiagnostics() {
     sender,
     balance: {
       ok: !profErr,
+      denied: !!profErr && (prof.status === 401 || prof.status === 403 || prof.data?.error === 401),
       status: prof.status,
       value: profErr ? null : points,
       error: profErr || ''
     },
     senders: {
       ok: !sndErr,
+      // Brak zakresu uprawnień to nie awaria integracji — wysyłka może działać,
+      // tylko nie da się odczytać listy nadawców do porównania.
+      denied: !!sndErr && sendersDenied,
       status: snd.status,
       list,
       matches: list.some((s) => s.toLowerCase() === sender.toLowerCase()),
