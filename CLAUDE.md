@@ -99,3 +99,38 @@ obie muszą być wymienione osobno.
 - **Storage bucket:** `article-images`
 - **Filtr platformy:** `.contains('platforms', ['UtrataDochodu.pl'])`
 - **Filtr statusu:** `.eq('status', 'published')`
+
+---
+
+## Modal awarii (`awaria.js`)
+
+Gdy coś się wysypie, użytkownik dostaje modal z prośbą o telefon
+(**504 400 901**) i o zgłoszenie błędu e-mailem na `info@utratadochodu.pl`.
+
+Zasady:
+
+- Skrypt jest **samodzielny** — własny CSS, zero zależności od Tailwinda.
+  To celowe: ma działać także wtedy, gdy awaria polega na niewczytaniu CDN-a.
+- Ładowany **jako pierwszy w `<head>`, bez `defer`** — inaczej nie złapie błędu
+  skryptu, który wysypie się wcześniej.
+- Ręcznie: `Awaria.pokaz({ kod: 'MOJ_KOD', szczegoly: err })`.
+- Automatycznie: nieobsłużone błędy skryptów **z naszej domeny** (raz na
+  wczytanie strony). Błędy z GTM-a, Pixela czy Turnstile'a są ignorowane —
+  nie psują strony użytkownikowi, a modal tylko by straszył.
+- Podpięty w: `style.js` (wniosek), `app.js` (szybki kontakt),
+  `opinia.html` (opinie). Nową ścieżkę wysyłki podpinaj tak samo.
+- Test: `NODE_PATH=$(npm root -g) node tests/awaria-test.js`.
+
+## `<meta charset>` musi być w pierwszym 1 KB pliku
+
+Przeglądarka skanuje w poszukiwaniu deklaracji kodowania tylko pierwszy
+1024 bajty. W `index.html` i `formularz.html` wpis wylądował za długim
+skryptem Meta Pixela (bajt 1812 / 1162) i był ignorowany — polskie znaki
+ratował wyłącznie nagłówek `charset=utf-8` od Cloudflare.
+
+**`<meta charset="UTF-8">` ma być pierwszą linią po `<head>`.** Przy dodawaniu
+czegokolwiek na początek `<head>` sprawdź, czy nie wypycha deklaracji poza 1 KB:
+
+```
+python3 -c "import re;d=open('index.html','rb').read();print(re.search(rb'<meta[^>]*charset',d).start())"
+```

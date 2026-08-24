@@ -170,6 +170,16 @@ async function initRandomBlogPost() {
 /* ──────────────────────────────────────────
    SZYBKI KONTAKT — zapis do udochodu_contacts
 ────────────────────────────────────────── */
+/* Modal awarii z prośbą o telefon; bez awaria.js zostaje czerwony tekst
+   pod formularzem (ma ten sam numer). */
+function pokazBladSzybkiegoKontaktu(kod, szczegoly) {
+  if (window.Awaria) {
+    window.Awaria.pokaz({ kod: kod, szczegoly: szczegoly });
+  } else {
+    document.getElementById('quick-error')?.classList.remove('hidden');
+  }
+}
+
 function initQuickForm() {
   const form = document.getElementById('quick-form');
   if (!form) return;
@@ -207,10 +217,10 @@ function initQuickForm() {
         form.classList.add('hidden');
         document.getElementById('quick-success').classList.remove('hidden');
       } else {
-        document.getElementById('quick-error').classList.remove('hidden');
+        pokazBladSzybkiegoKontaktu('SZYBKI_KONTAKT_ODPOWIEDZ', 'HTTP ' + res.status);
       }
-    } catch {
-      document.getElementById('quick-error').classList.remove('hidden');
+    } catch (err) {
+      pokazBladSzybkiegoKontaktu('SZYBKI_KONTAKT_SIEC', err);
     } finally {
       btn.textContent = origTxt;
       btn.disabled = false;

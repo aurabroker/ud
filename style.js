@@ -186,6 +186,20 @@ function showErrorModal(message) {
   document.getElementById('error-modal').classList.remove('hidden');
 }
 
+/* Nieudana wysyłka wniosku = stracony klient — pokazujemy modal awarii
+   z prośbą o telefon. Gdy awaria.js się nie wczytał, zostaje stary modal. */
+function showAwariaModal(kod, message, szczegoly) {
+  if (window.Awaria) {
+    window.Awaria.pokaz({
+      kod: kod,
+      opis: message || undefined,
+      szczegoly: szczegoly,
+    });
+  } else {
+    showErrorModal(message);
+  }
+}
+
 function initFormSubmit() {
   const form = document.getElementById('insurance-form');
   if (!form) return;
@@ -212,11 +226,11 @@ function initFormSubmit() {
       if (mainRes.status === 'success') {
         showSuccessModal(form);
       } else {
-        showErrorModal(mainRes.message);
+        showAwariaModal('WNIOSEK_ODRZUCONY', mainRes.message, mainRes);
       }
     } catch (err) {
       console.error('Błąd sieci:', err);
-      showErrorModal();
+      showAwariaModal('WNIOSEK_SIEC', null, err);
     } finally {
       btn.innerText = origTxt;
       btn.disabled  = false;

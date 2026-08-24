@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="pl" class="scroll-smooth">
 <head>
+<!-- Monitor awarii — ładowany jako pierwszy, żeby wychwycić błędy pozostałych skryptów -->
+<script src="/awaria.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Wystaw opinię | UtrataDochodu.pl</title>
@@ -248,12 +250,22 @@
     btn.disabled = true;
     btn.textContent = 'Wysyłanie…';
 
-    const res = await fetch(`${SB_URL}/functions/v1/review-submit`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', apikey: SB_KEY },
-      body: JSON.stringify({ name, city, zawod: zawod || null, rating, comment: comment || null, 'cf-turnstile-response': turnstileToken }),
-    });
-    const result = await res.json().catch(() => ({}));
+    let res, result;
+    try {
+      res = await fetch(`${SB_URL}/functions/v1/review-submit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', apikey: SB_KEY },
+        body: JSON.stringify({ name, city, zawod: zawod || null, rating, comment: comment || null, 'cf-turnstile-response': turnstileToken }),
+      });
+      result = await res.json().catch(() => ({}));
+    } catch (err) {
+      if (window.Awaria) window.Awaria.pokaz({ kod: 'OPINIA_SIEC', szczegoly: err });
+      document.getElementById('form-err').textContent = 'Błąd wysyłania. Spróbuj ponownie.';
+      document.getElementById('form-err').classList.remove('hidden');
+      btn.disabled = false;
+      btn.textContent = 'Wyślij opinię';
+      return;
+    }
 
     if (!res.ok || result.status === 'error') {
       document.getElementById('form-err').textContent = result.message || 'Błąd wysyłania. Spróbuj ponownie.';
