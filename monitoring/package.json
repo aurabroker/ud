@@ -1,0 +1,14 @@
+{
+  "name": "ud-monitor",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "node test/monitor-test.js",
+    "baza": "wrangler d1 execute ud-monitor --remote --file=schema.sql"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

@@ -1,0 +1,27 @@
+name = "ud-monitor"
+main = "src/index.js"
+compatibility_date = "2026-08-01"
+
+# Sprawdzanie co minutę. Który test faktycznie się wykona, decyduje
+# pole `interwal` w src/checks.js.
+[triggers]
+crons = ["* * * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "ud-monitor"
+database_id = "UZUPELNIJ-PO-npx-wrangler-d1-create-ud-monitor"
+
+[vars]
+STATUS_PAGE_PUBLIC = "false"                       # "true" = status page bez tokenu
+ALERT_EMAIL_FROM   = "monitor@utratadochodu.pl"    # domena musi być zweryfikowana w Resend
+SMSAPI_NADAWCA     = "Info"                        # zatwierdzone pole nadawcy w SMSAPI
+DOZWOLONE_ZRODLO   = "https://utratadochodu.pl"
+
+# Sekrety (NIE tutaj — wgrywane osobno):
+#   npx wrangler secret put RESEND_API_KEY
+#   npx wrangler secret put SMSAPI_TOKEN
+#   npx wrangler secret put ALERT_EMAIL       # np. info@utratadochodu.pl
+#   npx wrangler secret put ALERT_SMS         # np. 48504400901
+#   npx wrangler secret put STATUS_TOKEN      # dowolny długi losowy ciąg
+#   npx wrangler secret put SUPABASE_ANON_KEY # opcjonalnie, do sprawdzeń REST
