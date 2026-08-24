@@ -671,7 +671,6 @@ HTML_TEMPLATE = """\
     gtag('js', new Date());
     gtag('config', 'AW-18020137303');
   </script>
-  <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{{"token": "PASTE_CF_SITE_TAG_HERE"}}'></script>
 </head>
 <body class="bg-white text-slate-800">
 

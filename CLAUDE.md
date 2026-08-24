@@ -63,6 +63,33 @@ Obecna konfiguracja w `blog.html` (poprawna):
 img-src 'self' data: https:;
 ```
 
+### Gdzie żyje polityka CSP
+
+Polityka jest zdefiniowana w **dwóch miejscach i musi być w nich identyczna** —
+przeglądarka egzekwuje **część wspólną** wszystkich polityk, więc brak domeny
+w którymkolwiek z nich = zablokowany zasób:
+
+1. `_headers` — nagłówek dla całej domeny (jedyna polityka na podstronach zawodów,
+   `formularz.html`, `opinia.html`).
+2. `<meta http-equiv="Content-Security-Policy">` w: `index.html`, `blog.html`,
+   `polityka-cookies.html`, `regulamin.html`.
+
+Różnica: `frame-ancestors` działa tylko w nagłówku (w `<meta>` jest ignorowane
+i generuje ostrzeżenie w konsoli) — dlatego występuje wyłącznie w `_headers`.
+
+Domeny wymagane przez zewnętrzne skrypty:
+
+| Usługa | Dyrektywy |
+|---|---|
+| Cloudflare Turnstile | `script-src` + `frame-src` + `connect-src`: `https://challenges.cloudflare.com` |
+| GTM / GA4 / Google Ads | `script-src`: `https://*.googletagmanager.com`, `https://*.googleadservices.com`, `https://*.doubleclick.net`; `connect-src`: dodatkowo `https://*.analytics.google.com`, `https://*.doubleclick.net`, `https://google.com`, `https://*.google.com`, `https://google.pl`, `https://*.google.pl` |
+| Meta Pixel | `script-src` + `connect-src`: `https://connect.facebook.net`, `https://*.facebook.com` |
+| Cloudflare Insights | `script-src` + `connect-src`: `https://*.cloudflareinsights.com`, `https://cloudflareinsights.com` |
+| Tailwind CDN / AOS | `script-src` + `style-src`: `https://cdn.tailwindcss.com`, `https://unpkg.com`, `https://cdn.jsdelivr.net` |
+
+Uwaga: `https://*.google.com` **nie** obejmuje gołej domeny `https://google.com` —
+obie muszą być wymienione osobno.
+
 ---
 
 ## Struktura Supabase
