@@ -1,0 +1,112 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+  <style>
+    body { margin: 0; font-family: "Public Sans", ui-sans-serif, system-ui, sans-serif; background: #F2F4F2; color: #0E1514; }
+    a { color: #014A4E; text-decoration: none; }
+    a:hover { color: #01696F; }
+    .serif { font-family: "Newsreader", Georgia, "Times New Roman", serif; }
+    .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  </style>
+</helmet>
+
+<div style="width: 390px; background: #F2F4F2;">
+
+  <!-- ── Nagłówek ─────────────────────────────────── -->
+  <div style="background: #FFFFFF; border-bottom: 1px solid #D8E0DD; height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 18px;">
+    <div style="display: flex; align-items: center; gap: 9px;">
+      <div style="width: 30px; height: 30px; background: #01696F; display: flex; align-items: center; justify-content: center;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.8-7 9-4-1.2-7-4.5-7-9V6z"></path></svg>
+      </div>
+      <span style="font-size: 17px; font-weight: 700; letter-spacing: -0.02em;">Utrata<span style="color: #01696F;">Dochodu</span></span>
+    </div>
+    <div style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0E1514" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>
+    </div>
+  </div>
+
+  <!-- ── Hero ─────────────────────────────────────── -->
+  <div style="position: relative; background: linear-gradient(155deg, #182220 0%, #26312D 34%, #4A544E 56%, #212B29 82%, #141B1A 100%); padding: 34px 18px 30px;">
+    <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(9,14,13,0.62) 0%, rgba(9,14,13,0.88) 62%, rgba(9,14,13,0.95) 100%);"></div>
+    <div style="position: relative; display: flex; flex-direction: column; gap: 16px;">
+      <div class="mono" style="font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: #7FD4CB;">Prywatne L4 dla samozatrudnionych</div>
+      <h1 class="serif" style="margin: 0; font-size: 38px; line-height: 1.08; font-weight: 500; color: #FFFFFF; letter-spacing: -0.02em; text-wrap: balance;">Ubezpieczenie utraty dochodu</h1>
+      <p style="margin: 0; font-size: 16.5px; line-height: 1.55; color: #C9D5D2;">Na B2B zasiłek z ZUS liczy się od zadeklarowanej podstawy, nie od tego, co realnie zarabiasz.</p>
+      <div style="background: #C8862A; color: #17140D; text-align: center; padding: 17px 0; font-weight: 700; font-size: 16px; margin-top: 6px;">Policz swoją składkę</div>
+      <div style="border: 1px solid #6C7C78; color: #FFFFFF; text-align: center; padding: 16px 0; font-weight: 600; font-size: 16px;">Zobacz, co nie jest objęte</div>
+    </div>
+  </div>
+
+  <!-- ── Luka: mobilnie jako karty, nie tabela ────── -->
+  <div style="background: #FFFFFF; padding: 34px 18px; border-bottom: 1px solid #D8E0DD;">
+    <h2 class="serif" style="margin: 0 0 10px; font-size: 27px; line-height: 1.15; font-weight: 500; letter-spacing: -0.015em; text-wrap: balance;">Ile realnie dostaniesz z ZUS?</h2>
+    <p style="margin: 0 0 22px; font-size: 16px; line-height: 1.55; color: #52625F;">Zasiłek to 80% podstawy wymiaru składek — nie 80% Twojego dochodu.</p>
+
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <div style="border: 1px solid #D8E0DD; padding: 18px 18px;">
+        <div class="mono" style="font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: #8A9793; font-weight: 600; margin-bottom: 10px;">Tylko ZUS</div>
+        <div class="mono" style="font-size: 26px; font-weight: 600; color: #A62016; margin-bottom: 6px;">[KWOTA ZUS]</div>
+        <div style="font-size: 14.5px; color: #52625F;">Po 30 dniach wyczekiwania</div>
+      </div>
+      <div style="border: 1px solid #01696F; background: #F2F7F6; padding: 18px 18px;">
+        <div class="mono" style="font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: #01696F; font-weight: 600; margin-bottom: 10px;">ZUS + polisa</div>
+        <div class="mono" style="font-size: 26px; font-weight: 600; color: #01696F; margin-bottom: 6px;">14 400 zł</div>
+        <div style="font-size: 14.5px; color: #0E1514; font-weight: 600;">Od 1. dnia niezdolności</div>
+      </div>
+    </div>
+    <div style="font-size: 12.5px; color: #8A9793; margin-top: 14px; line-height: 1.45;">Przykład dla dochodu 18 000 zł netto i świadczenia na poziomie 80%.</div>
+  </div>
+
+  <!-- ── Kalkulator ───────────────────────────────── -->
+  <div style="padding: 34px 18px;">
+    <div style="background: #FFFFFF; border: 1px solid #C6D1CD; padding: 22px 18px 24px;">
+      <div class="mono" style="font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: #01696F; font-weight: 600;">Kalkulator składki</div>
+      <div style="height: 1px; background: #D8E0DD; margin: 13px 0 18px;"></div>
+
+      <div style="font-size: 14px; font-weight: 600; color: #52625F; margin-bottom: 8px;">Twój zawód</div>
+      <div style="border: 1px solid #C6D1CD; padding: 14px; font-size: 15.5px; display: flex; justify-content: space-between; align-items: center;">
+        <span>Lekarz</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#52625F" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"></path></svg>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 18px; margin-bottom: 8px;">
+        <span style="font-size: 14px; font-weight: 600; color: #52625F;">Dochód miesięczny</span>
+        <span class="mono" style="font-size: 15px; font-weight: 600;">18 000 zł</span>
+      </div>
+      <div style="height: 4px; background: #E3E9E7; position: relative;">
+        <div style="position: absolute; left: 0; top: 0; height: 4px; width: 26%; background: #01696F;"></div>
+        <div style="position: absolute; left: 26%; top: -8px; width: 20px; height: 20px; background: #01696F; margin-left: -10px;"></div>
+      </div>
+
+      <div style="background: #F2F4F2; border-left: 3px solid #01696F; padding: 16px; margin-top: 26px; display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; justify-content: space-between; align-items: baseline;">
+          <span style="font-size: 14px; color: #52625F;">Świadczenie</span>
+          <span class="mono" style="font-size: 19px; font-weight: 600;">14 400 zł</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: baseline;">
+          <span style="font-size: 14px; color: #52625F;">Składka</span>
+          <span class="mono" style="font-size: 19px; font-weight: 600; color: #01696F;">[STAWKA]</span>
+        </div>
+      </div>
+
+      <div style="background: #0E1514; color: #FFFFFF; text-align: center; padding: 16px 0; font-weight: 700; font-size: 16px; margin-top: 18px;">Przejdź do wniosku</div>
+    </div>
+  </div>
+
+  <!-- ── Pasek kontaktu przyklejony do dołu ───────── -->
+  <div style="background: #01696F; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between;">
+    <div style="color: #CBE7E5; font-size: 14px;">Wolisz rozmowę?</div>
+    <div style="background: #FFFFFF; color: #01696F; padding: 12px 20px; font-weight: 700; font-size: 15px;">504 400 901</div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>
