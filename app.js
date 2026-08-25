@@ -180,6 +180,15 @@ function pokazBladSzybkiegoKontaktu(kod, szczegoly) {
   }
 }
 
+/* Token Turnstile jest jednorazowy — po nieudanej próbie trzeba go odświeżyć,
+   inaczej kolejne kliknięcie „Wyślij" poleci ze zużytym tokenem. */
+function resetTurnstile(form) {
+  const widget = form.querySelector('.cf-turnstile');
+  if (widget && window.turnstile) {
+    try { window.turnstile.reset(widget); } catch { /* widget jeszcze nieaktywny */ }
+  }
+}
+
 function initQuickForm() {
   const form = document.getElementById('quick-form');
   if (!form) return;
@@ -203,24 +212,34 @@ function initQuickForm() {
     btn.disabled = true;
 
     try {
-      const res = await fetch(`${_SB_URL}/rest/v1/udochodu_contacts`, {
+      /* Przez edge function, nie prosto do PostgREST: token Turnstile musi
+         zweryfikować serwer, a PostgREST odrzuciłby payload z polem
+         'cf-turnstile-response' (nie ma takiej kolumny → PGRST204). */
+      const res = await fetch(`${_SB_URL}/functions/v1/contact-submit`, {
         method: 'POST',
         headers: {
           apikey: _SB_KEY,
+          Authorization: `Bearer ${_SB_KEY}`,
           'Content-Type': 'application/json',
-          Prefer: 'return=minimal',
         },
         body: JSON.stringify({ name, email, phone, 'cf-turnstile-response': turnstileToken }),
       });
 
-      if (res.ok) {
+      const wynik = await res.json().catch(() => ({}));
+
+      if (res.ok && wynik.status === 'success') {
         form.classList.add('hidden');
         document.getElementById('quick-success').classList.remove('hidden');
       } else {
-        pokazBladSzybkiegoKontaktu('SZYBKI_KONTAKT_ODPOWIEDZ', 'HTTP ' + res.status);
+        pokazBladSzybkiegoKontaktu(
+          'SZYBKI_KONTAKT_ODPOWIEDZ',
+          'HTTP ' + res.status + (wynik.message ? ' — ' + wynik.message : ''),
+        );
+        resetTurnstile(form);
       }
     } catch (err) {
       pokazBladSzybkiegoKontaktu('SZYBKI_KONTAKT_SIEC', err);
+      resetTurnstile(form);
     } finally {
       btn.textContent = origTxt;
       btn.disabled = false;

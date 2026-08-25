@@ -59,12 +59,45 @@ async function verifyTurnstile(token: string, ip: string): Promise<boolean> {
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
 
+  const clientIp = req.headers.get('CF-Connecting-IP') ?? '';
+  let raw = '';
+
   try {
-    const body = await req.json();
+    /* Ciało czytamy jako tekst, nie przez req.json().
+       Powód: przy pustym lub uciętym żądaniu req.json() rzucał
+       "SyntaxError: Unexpected end of JSON input", który lądował w ud_errors
+       bez śladu, co właściwie przyszło (6 wystąpień, ostatnie 18.08.2026).
+       Teraz surowe ciało trafia do kontekstu błędu i da się dojść do przyczyny. */
+    raw = await req.text();
+    if (!raw.trim()) {
+      await logError('form-submit', 'Puste ciało żądania', {
+        contentLength: req.headers.get('content-length'),
+        contentType: req.headers.get('content-type'),
+        userAgent: req.headers.get('user-agent'),
+      }, clientIp);
+      return new Response(
+        JSON.stringify({ status: 'error', message: 'Brak danych formularza. Odśwież stronę i spróbuj ponownie.' }),
+        { status: 400, headers: { ...CORS, 'Content-Type': 'application/json' } },
+      );
+    }
+
+    let body: Record<string, unknown>;
+    try {
+      body = JSON.parse(raw);
+    } catch (e) {
+      await logError('form-submit', `Niepoprawny JSON: ${e}`, {
+        raw: raw.substring(0, 1000),
+        length: raw.length,
+        userAgent: req.headers.get('user-agent'),
+      }, clientIp);
+      return new Response(
+        JSON.stringify({ status: 'error', message: 'Nieprawidłowy format danych. Odśwież stronę i spróbuj ponownie.' }),
+        { status: 400, headers: { ...CORS, 'Content-Type': 'application/json' } },
+      );
+    }
 
     /* Turnstile verification */
     const turnstileToken = String(body['cf-turnstile-response'] ?? '').trim();
-    const clientIp = req.headers.get('CF-Connecting-IP') ?? '';
     if (!turnstileToken || !(await verifyTurnstile(turnstileToken, clientIp))) {
       return new Response(
         JSON.stringify({ status: 'error', message: 'Weryfikacja bezpieczeństwa nie powiodła się. Odśwież stronę i spróbuj ponownie.' }),
@@ -203,8 +236,7 @@ serve(async (req) => {
       { headers: { ...CORS, 'Content-Type': 'application/json' } },
     );
   } catch (err) {
-    const ip = req.headers.get('CF-Connecting-IP') ?? undefined;
-    await logError('form-submit', String(err), undefined, ip);
+    await logError('form-submit', String(err), { raw: raw.substring(0, 1000) }, clientIp);
     console.error('Unhandled error:', err);
     return new Response(
       JSON.stringify({ status: 'error', message: 'Nieoczekiwany błąd serwera.' }),
