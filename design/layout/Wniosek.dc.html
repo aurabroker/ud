@@ -1,0 +1,586 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+  <style>
+    body { margin: 0; font-family: "Public Sans", ui-sans-serif, system-ui, sans-serif; background: #FFFFFF; color: #0F2E40; }
+    a { color: #0E96D0; text-decoration: none; }
+    a:hover { color: #0B7CAF; }
+    .serif { font-family: "Newsreader", Georgia, "Times New Roman", serif; }
+    .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+    .lab { font-size: 13.5px; font-weight: 600; color: #4E6D7D; margin-bottom: 7px; }
+    .inp { border: 1px solid #BEDFF0; padding: 13px 14px; font-size: 15px; color: #8AA3AF; background: #FFFFFF; }
+    .inp-fill { border: 1px solid #BEDFF0; padding: 13px 14px; font-size: 15px; color: #0F2E40; background: #FFFFFF; }
+    .steptag { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #0E96D0; font-weight: 600; }
+    .yn { display: flex; gap: 0; flex-shrink: 0; }
+    .yn-on { padding: 9px 20px; font-size: 14px; font-weight: 700; background: #0E96D0; color: #FFFFFF; }
+    .yn-off { padding: 9px 20px; font-size: 14px; font-weight: 500; border: 1px solid #BEDFF0; border-left: none; color: #4E6D7D; background: #FFFFFF; }
+    .yn-off-l { padding: 9px 20px; font-size: 14px; font-weight: 500; border: 1px solid #BEDFF0; color: #4E6D7D; background: #FFFFFF; }
+  </style>
+</helmet>
+
+<div style="width: 1440px; background: #F4FBFE;">
+
+  <!-- ── Nawigacja ────────────────────────────────── -->
+  <div style="background: #FFFFFF; border-bottom: 1px solid #D3E9F4;">
+    <div style="max-width: 1200px; margin: 0 auto; height: 74px; display: flex; align-items: center; justify-content: space-between;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <svg width="34" height="34" viewBox="0 0 80 94">
+          <polygon points="10,8 28,8 19,26" fill="#8FD5F3"></polygon>
+          <polygon points="10,8 19,26 10,32" fill="#B3E3F8"></polygon>
+          <polygon points="28,8 19,26 28,32" fill="#29ADE4"></polygon>
+          <polygon points="10,32 19,26 28,32" fill="#5CC6EF"></polygon>
+          <polygon points="10,32 28,32 19,50" fill="#8FD5F3"></polygon>
+          <polygon points="10,32 19,50 10,56" fill="#B3E3F8"></polygon>
+          <polygon points="28,32 19,50 28,56" fill="#1697CE"></polygon>
+          <polygon points="10,56 19,50 28,56" fill="#5CC6EF"></polygon>
+          <polygon points="52,8 70,8 61,26" fill="#5CC6EF"></polygon>
+          <polygon points="52,8 61,26 52,32" fill="#8FD5F3"></polygon>
+          <polygon points="70,8 61,26 70,32" fill="#1697CE"></polygon>
+          <polygon points="52,32 61,26 70,32" fill="#29ADE4"></polygon>
+          <polygon points="52,32 70,32 61,50" fill="#5CC6EF"></polygon>
+          <polygon points="52,32 61,50 52,56" fill="#8FD5F3"></polygon>
+          <polygon points="70,32 61,50 70,56" fill="#0E86BC"></polygon>
+          <polygon points="52,56 61,50 70,56" fill="#1697CE"></polygon>
+          <polygon points="10,56 14,71 28,56" fill="#B3E3F8"></polygon>
+          <polygon points="14,71 29.6,62 28,56" fill="#8FD5F3"></polygon>
+          <polygon points="14,71 25,82 29.6,62" fill="#5CC6EF"></polygon>
+          <polygon points="25,82 34,66.4 29.6,62" fill="#8FD5F3"></polygon>
+          <polygon points="25,82 40,86 34,66.4" fill="#29ADE4"></polygon>
+          <polygon points="40,86 40,68 34,66.4" fill="#5CC6EF"></polygon>
+          <polygon points="40,86 55,82 40,68" fill="#1697CE"></polygon>
+          <polygon points="55,82 46,66.4 40,68" fill="#29ADE4"></polygon>
+          <polygon points="55,82 66,71 46,66.4" fill="#0E86BC"></polygon>
+          <polygon points="66,71 50.4,62 46,66.4" fill="#1697CE"></polygon>
+          <polygon points="66,71 70,56 50.4,62" fill="#1697CE"></polygon>
+          <polygon points="70,56 52,56 50.4,62" fill="#29ADE4"></polygon>
+        </svg>
+        <span style="font-size: 20px; font-weight: 700; letter-spacing: -0.02em;">Utrata<span style="color: #1BAEE5;">Dochodu</span></span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 20px; font-size: 15px; color: #4E6D7D;">
+        <span>Masz pytanie w trakcie?</span>
+        <span style="font-weight: 700; color: #0F2E40;">504 400 901</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Nagłówek wniosku + pasek kroków ──────────── -->
+  <div style="background: #FFFFFF; border-bottom: 1px solid #D3E9F4;">
+    <div style="max-width: 1160px; margin: 0 auto; padding: 34px 0 0;">
+      <h1 class="serif" style="margin: 0 0 8px; font-size: 38px; line-height: 1.1; font-weight: 500; letter-spacing: -0.02em;">Wniosek o ubezpieczenie utraty dochodu</h1>
+      <p style="margin: 0 0 26px; font-size: 17px; color: #4E6D7D; max-width: 46em;">Cztery kroki, około 8 minut. Zbieramy wszystko, czego ubezpieczyciel potrzebuje do wyceny — dzięki temu dostaniesz konkretną ofertę, a nie widełki.</p>
+
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0;">
+        <div style="border-bottom: 3px solid #0E96D0; padding-bottom: 14px;">
+          <div class="mono" style="font-size: 11px; letter-spacing: 0.12em; color: #0E96D0; font-weight: 600;">KROK 1</div>
+          <div style="font-size: 15.5px; font-weight: 700; margin-top: 5px;">Dane podstawowe</div>
+        </div>
+        <div style="border-bottom: 3px solid #D3E9F4; padding-bottom: 14px;">
+          <div class="mono" style="font-size: 11px; letter-spacing: 0.12em; color: #8AA3AF; font-weight: 600;">KROK 2</div>
+          <div style="font-size: 15.5px; font-weight: 500; color: #4E6D7D; margin-top: 5px;">Zakres ochrony</div>
+        </div>
+        <div style="border-bottom: 3px solid #D3E9F4; padding-bottom: 14px;">
+          <div class="mono" style="font-size: 11px; letter-spacing: 0.12em; color: #8AA3AF; font-weight: 600;">KROK 3</div>
+          <div style="font-size: 15.5px; font-weight: 500; color: #4E6D7D; margin-top: 5px;">Stan zdrowia</div>
+        </div>
+        <div style="border-bottom: 3px solid #D3E9F4; padding-bottom: 14px;">
+          <div class="mono" style="font-size: 11px; letter-spacing: 0.12em; color: #8AA3AF; font-weight: 600;">KROK 4</div>
+          <div style="font-size: 15.5px; font-weight: 500; color: #4E6D7D; margin-top: 5px;">Zgody i kontakt</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="max-width: 1160px; margin: 0 auto; padding: 36px 0 60px; display: flex; gap: 36px; align-items: flex-start;">
+
+    <!-- ══ KOLUMNA FORMULARZA ══ -->
+    <div style="width: 780px; display: flex; flex-direction: column; gap: 24px;">
+
+      <!-- ── KROK 1 ─────────────────────────────── -->
+      <div style="background: #FFFFFF; border: 1px solid #BEDFF0; padding: 30px 32px 32px;">
+        <div class="steptag">Krok 1 z 4</div>
+        <h2 class="serif" style="margin: 10px 0 24px; font-size: 27px; font-weight: 500; letter-spacing: -0.015em;">Dane podstawowe</h2>
+
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px;">
+          <div>
+            <div class="lab">Imię i nazwisko</div>
+            <div class="inp-fill">Anna Kowalska</div>
+          </div>
+          <div>
+            <div class="lab">PESEL</div>
+            <div style="border: 1px solid #1BAEE5; padding: 13px 14px; font-size: 15px; background: #FFFFFF; display: flex; justify-content: space-between; align-items: center;">
+              <span class="mono">85062411347</span>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1B8A5A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"></path></svg>
+            </div>
+            <div style="font-size: 12.5px; color: #1B8A5A; margin-top: 6px;">Suma kontrolna poprawna · wiek 41 lat</div>
+          </div>
+          <div>
+            <div class="lab">Forma zatrudnienia</div>
+            <div class="inp-fill" style="display: flex; justify-content: space-between; align-items: center;">
+              <span>Jednoosobowa działalność (B2B)</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4E6D7D" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"></path></svg>
+            </div>
+          </div>
+          <div>
+            <div class="lab">Dokładny zawód</div>
+            <div class="inp-fill" style="display: flex; justify-content: space-between; align-items: center;">
+              <span>Lekarz — kardiolog</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4E6D7D" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"></path></svg>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; margin-top: 18px;">
+          <div>
+            <div class="lab">Waga (kg)</div>
+            <div class="inp-fill mono">64</div>
+          </div>
+          <div>
+            <div class="lab">Wzrost (cm)</div>
+            <div class="inp-fill mono">168</div>
+          </div>
+          <div>
+            <div class="lab">Ręczność</div>
+            <div class="inp-fill" style="display: flex; justify-content: space-between; align-items: center;">
+              <span>Prawa</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4E6D7D" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"></path></svg>
+            </div>
+          </div>
+          <div>
+            <div class="lab">Forma opodatkowania</div>
+            <div class="inp-fill" style="display: flex; justify-content: space-between; align-items: center;">
+              <span>Liniowy</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4E6D7D" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"></path></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- sekcja warunkowa -->
+        <div style="margin-top: 28px; border-left: 3px solid #A6DFF7; padding-left: 22px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px;">
+            <div>
+              <h3 style="margin: 0 0 3px; font-size: 18px; font-weight: 700;">Szczegóły działalności</h3>
+              <p style="margin: 0; font-size: 14px; color: #4E6D7D;">Rozwija się po wybraniu formy B2B — dla umowy o pracę te pola się nie pokazują.</p>
+            </div>
+            <div class="yn">
+              <div class="yn-on">Zatrudniam</div>
+              <div class="yn-off">Nie zatrudniam</div>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px;">
+            <div><div class="lab">Data rozpoczęcia</div><div class="inp-fill mono">2016-03-01</div></div>
+            <div><div class="lab">Branża</div><div class="inp-fill">Ochrona zdrowia</div></div>
+            <div><div class="lab">Charakter działalności</div><div class="inp">Opisowo</div></div>
+            <div><div class="lab">Obszar działalności</div><div class="inp-fill">Polska</div></div>
+            <div><div class="lab">Pracownicy 2024</div><div class="inp-fill mono">3</div></div>
+            <div><div class="lab">Aktualna liczba pracowników</div><div class="inp-fill mono">4</div></div>
+          </div>
+
+          <div style="margin-top: 16px;">
+            <div class="lab">Mój wkład w przychód firmy</div>
+            <div style="display: flex; align-items: center; gap: 16px;">
+              <div style="flex-grow: 1; height: 5px; background: #DFF2FC; position: relative;">
+                <div style="position: absolute; left: 0; top: 0; height: 5px; width: 80%; background: #1BAEE5;"></div>
+                <div style="position: absolute; left: 80%; top: -6px; width: 17px; height: 17px; background: #0E96D0; margin-left: -8px;"></div>
+              </div>
+              <span class="mono" style="font-size: 16px; font-weight: 600; width: 52px; text-align: right;">80%</span>
+            </div>
+          </div>
+
+          <div style="margin-top: 16px;">
+            <div class="lab">Opis roli (opcjonalnie)</div>
+            <div class="inp" style="height: 62px;">Czym dokładnie zajmujesz się w firmie</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── KROK 2: ZAKRES OCHRONY ─────────────── -->
+      <div style="background: #FFFFFF; border: 1px solid #D3E9F4; padding: 30px 32px 32px;">
+        <div class="steptag" style="color: #8AA3AF;">Krok 2 z 4</div>
+        <h2 class="serif" style="margin: 10px 0 6px; font-size: 27px; font-weight: 500; letter-spacing: -0.015em;">Zakres ochrony</h2>
+        <p style="margin: 0 0 22px; font-size: 15.5px; color: #4E6D7D;">Wybierz ryzyka i sumy. Po prawej na bieżąco widzisz, jak zmienia się szacowana składka.</p>
+
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+
+          <div style="border: 1.5px solid #1BAEE5; background: #F4FBFE; padding: 20px 22px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 20px;">
+              <div>
+                <div style="font-size: 17px; font-weight: 700;">Śmierć / inwalidztwo w wyniku NW</div>
+                <div style="font-size: 14px; color: #4E6D7D; margin-top: 3px;">Jednorazowe świadczenie</div>
+              </div>
+              <div class="yn"><div class="yn-on">Włączone</div><div class="yn-off">Wyłączone</div></div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 16px; margin-top: 16px;">
+              <span class="lab" style="margin: 0; width: 170px;">Suma ubezpieczenia</span>
+              <div class="inp-fill mono" style="flex-grow: 1;">500 000 zł</div>
+            </div>
+          </div>
+
+          <div style="border: 1.5px solid #1BAEE5; background: #F4FBFE; padding: 20px 22px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 20px;">
+              <div>
+                <div style="font-size: 17px; font-weight: 700;">Okresowa niezdolność do pracy</div>
+                <div style="font-size: 14px; color: #4E6D7D; margin-top: 3px;">Miesięczne świadczenie — do 80% dochodu</div>
+              </div>
+              <div class="yn"><div class="yn-on">Włączone</div><div class="yn-off">Wyłączone</div></div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 16px; margin-top: 16px;">
+              <span class="lab" style="margin: 0; width: 170px;">Kwota miesięczna</span>
+              <div class="inp-fill mono" style="flex-grow: 1;">17 600 zł</div>
+            </div>
+          </div>
+
+          <div style="border: 1.5px solid #1BAEE5; background: #F4FBFE; padding: 20px 22px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 20px;">
+              <div>
+                <div style="font-size: 17px; font-weight: 700;">Trwała niezdolność do pracy</div>
+                <div style="font-size: 14px; color: #4E6D7D; margin-top: 3px;">Jednorazowe świadczenie</div>
+              </div>
+              <div class="yn"><div class="yn-on">Włączone</div><div class="yn-off">Wyłączone</div></div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 16px; margin-top: 16px;">
+              <span class="lab" style="margin: 0; width: 170px;">Suma ubezpieczenia</span>
+              <div style="flex-grow: 1; border: 1.5px solid #0E96D0; padding: 12px 14px; font-size: 15px; background: #FFFFFF;" class="mono">1 500 000 zł</div>
+            </div>
+            <div style="display: flex; gap: 12px; align-items: flex-start; margin-top: 14px; background: #FFFFFF; border-left: 3px solid #0E96D0; padding: 13px 16px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0E96D0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 1px;"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5M12 16.5v.01"></path></svg>
+              <div style="font-size: 14px; line-height: 1.55; color: #0F2E40;">Suma przekracza <strong>1 000 000 zł</strong> — w kroku 3 dojdzie rozszerzona ankieta medyczna wymagana przez ubezpieczyciela. Poniżej tego progu wystarczy siedem pytań podstawowych.</div>
+            </div>
+          </div>
+        </div>
+
+        <h3 style="margin: 28px 0 6px; font-size: 18px; font-weight: 700;">Dodatkowe klauzule w ramach NW</h3>
+        <p style="margin: 0 0 16px; font-size: 14.5px; color: #4E6D7D;">Sześć klauzul do wyboru, każda z własną sumą.</p>
+        <div style="border-top: 1px solid #E6F4FA;">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 13px 0; border-bottom: 1px solid #E6F4FA;">
+            <span style="font-size: 15px;">a) Świadczenie pogrzebowe</span>
+            <div style="display: flex; gap: 12px; align-items: center;"><div class="inp-fill mono" style="padding: 8px 12px; width: 120px; text-align: right;">20 000 zł</div><div style="width: 19px; height: 19px; background: #0E96D0;"></div></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 13px 0; border-bottom: 1px solid #E6F4FA;">
+            <span style="font-size: 15px;">b) Dostosowanie do życia w niepełnosprawności</span>
+            <div style="display: flex; gap: 12px; align-items: center;"><div class="inp" style="padding: 8px 12px; width: 120px; text-align: right;">—</div><div style="width: 19px; height: 19px; border: 1.5px solid #BEDFF0;"></div></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 13px 0; border-bottom: 1px solid #E6F4FA;">
+            <span style="font-size: 15px;">c) Dzienne świadczenie szpitalne</span>
+            <div style="display: flex; gap: 12px; align-items: center;"><div class="inp-fill mono" style="padding: 8px 12px; width: 120px; text-align: right;">200 zł</div><div style="width: 19px; height: 19px; background: #0E96D0;"></div></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 13px 0; border-bottom: 1px solid #E6F4FA;">
+            <span style="font-size: 15px;">d) Świadczenie do kosztów medycznych</span>
+            <div style="display: flex; gap: 12px; align-items: center;"><div class="inp" style="padding: 8px 12px; width: 120px; text-align: right;">—</div><div style="width: 19px; height: 19px; border: 1.5px solid #BEDFF0;"></div></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 13px 0; border-bottom: 1px solid #E6F4FA;">
+            <span style="font-size: 15px;">e) Tygodniowe świadczenie z tytułu stanu nieprzytomności</span>
+            <div style="display: flex; gap: 12px; align-items: center;"><div class="inp" style="padding: 8px 12px; width: 120px; text-align: right;">—</div><div style="width: 19px; height: 19px; border: 1.5px solid #BEDFF0;"></div></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 13px 0;">
+            <span style="font-size: 15px;">f) Trwałe uszczerbki (5% SU śmierci i inwalidztwa w NW)</span>
+            <div style="display: flex; gap: 12px; align-items: center;"><div class="inp" style="padding: 8px 12px; width: 120px; text-align: right;">—</div><div style="width: 19px; height: 19px; border: 1.5px solid #BEDFF0;"></div></div>
+          </div>
+        </div>
+
+        <h3 style="margin: 28px 0 6px; font-size: 18px; font-weight: 700;">Styl życia i ryzyko</h3>
+        <p style="margin: 0 0 16px; font-size: 14.5px; color: #4E6D7D;">Zaznacz to, co uprawiasz. Nie wyklucza z ubezpieczenia — wpływa na wycenę.</p>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 11px; border: 1px solid #BEDFF0; padding: 12px 14px;"><div style="width: 18px; height: 18px; border: 1.5px solid #BEDFF0;"></div><span style="font-size: 14.5px;">Eksploracja jaskiń</span></div>
+          <div style="display: flex; align-items: center; gap: 11px; border: 1px solid #BEDFF0; padding: 12px 14px;"><div style="width: 18px; height: 18px; border: 1.5px solid #BEDFF0;"></div><span style="font-size: 14.5px;">Wspinaczka wysokogórska</span></div>
+          <div style="display: flex; align-items: center; gap: 11px; border: 1px solid #BEDFF0; padding: 12px 14px;"><div style="width: 18px; height: 18px; border: 1.5px solid #BEDFF0;"></div><span style="font-size: 14.5px;">Kolarstwo grawitacyjne / rafting</span></div>
+          <div style="display: flex; align-items: center; gap: 11px; border: 1px solid #BEDFF0; padding: 12px 14px;"><div style="width: 18px; height: 18px; border: 1.5px solid #BEDFF0;"></div><span style="font-size: 14.5px;">Ryzykowne nurkowanie</span></div>
+          <div style="display: flex; align-items: center; gap: 11px; border: 1px solid #BEDFF0; padding: 12px 14px;"><div style="width: 18px; height: 18px; border: 1.5px solid #BEDFF0;"></div><span style="font-size: 14.5px;">Żeglarstwo (załoga)</span></div>
+          <div style="display: flex; align-items: center; gap: 11px; border: 1.5px solid #1BAEE5; background: #F4FBFE; padding: 12px 14px;"><div style="width: 18px; height: 18px; background: #0E96D0;"></div><span style="font-size: 14.5px; font-weight: 600;">Jazda / skoki konne</span></div>
+          <div style="display: flex; align-items: center; gap: 11px; border: 1px solid #BEDFF0; padding: 12px 14px;"><div style="width: 18px; height: 18px; border: 1.5px solid #BEDFF0;"></div><span style="font-size: 14.5px;">Narciarstwo poza trasami</span></div>
+          <div style="display: flex; align-items: center; gap: 11px; border: 1px solid #BEDFF0; padding: 12px 14px;"><div style="width: 18px; height: 18px; border: 1.5px solid #BEDFF0;"></div><span style="font-size: 14.5px;">Łowiectwo z użyciem broni</span></div>
+        </div>
+      </div>
+
+      <!-- ── KROK 3: STAN ZDROWIA ───────────────── -->
+      <div style="background: #FFFFFF; border: 1px solid #D3E9F4; padding: 30px 32px 32px;">
+        <div class="steptag" style="color: #8AA3AF;">Krok 3 z 4</div>
+        <h2 class="serif" style="margin: 10px 0 6px; font-size: 27px; font-weight: 500; letter-spacing: -0.015em;">Stan zdrowia</h2>
+        <p style="margin: 0 0 22px; font-size: 15.5px; color: #4E6D7D;">Odpowiedz szczerze — każda odpowiedź TAK wymaga krótkiego opisu poniżej. Zatajenie choroby to najczęstszy powód odmowy wypłaty.</p>
+
+        <div style="border-top: 1px solid #E6F4FA;">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 15px 0; border-bottom: 1px solid #E6F4FA;">
+            <span style="font-size: 15.5px;">1. Problemy z sercem, nadciśnienie, bóle w klatce piersiowej?</span>
+            <div class="yn"><div class="yn-off-l">Tak</div><div class="yn-on" style="background: #4E6D7D;">Nie</div></div>
+          </div>
+          <div style="padding: 15px 0; border-bottom: 1px solid #E6F4FA;">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 24px;">
+              <span style="font-size: 15.5px;">2. Cukrzyca, problemy z nerkami, prostatą lub układem moczowym?</span>
+              <div class="yn"><div class="yn-on">Tak</div><div class="yn-off">Nie</div></div>
+            </div>
+            <div style="margin-top: 12px; border-left: 3px solid #1BAEE5; padding-left: 16px;">
+              <div class="lab" style="margin-bottom: 6px;">Opisz krótko — kiedy, jakie leczenie, jaki stan obecnie</div>
+              <div class="inp" style="height: 54px;">Wymagane przy odpowiedzi TAK</div>
+            </div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 15px 0; border-bottom: 1px solid #E6F4FA;">
+            <span style="font-size: 15.5px;">3. Problemy z kręgosłupem, stawami, układem kostnym?</span>
+            <div class="yn"><div class="yn-off-l">Tak</div><div class="yn-on" style="background: #4E6D7D;">Nie</div></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 15px 0; border-bottom: 1px solid #E6F4FA;">
+            <span style="font-size: 15.5px;">4. Choroby żołądka, jelit, wątroby lub trzustki?</span>
+            <div class="yn"><div class="yn-off-l">Tak</div><div class="yn-on" style="background: #4E6D7D;">Nie</div></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 15px 0; border-bottom: 1px solid #E6F4FA;">
+            <span style="font-size: 15.5px;">5. Choroby neurologiczne, psychiczne lub zaburzenia lękowe?</span>
+            <div class="yn"><div class="yn-off-l">Tak</div><div class="yn-on" style="background: #4E6D7D;">Nie</div></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 15px 0; border-bottom: 1px solid #E6F4FA;">
+            <span style="font-size: 15.5px;">6. Operacje chirurgiczne lub stałe leki?</span>
+            <div class="yn"><div class="yn-off-l">Tak</div><div class="yn-on" style="background: #4E6D7D;">Nie</div></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 15px 0; border-bottom: 1px solid #E6F4FA;">
+            <span style="font-size: 15.5px;">7. Testy w związku z AIDS/HIV?</span>
+            <div class="yn"><div class="yn-off-l">Tak</div><div class="yn-on" style="background: #4E6D7D;">Nie</div></div>
+          </div>
+        </div>
+
+        <!-- ankieta rozszerzona -->
+        <div style="margin-top: 26px; background: #F4FBFE; border: 1px solid #BEDFF0; padding: 22px 24px;">
+          <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0E96D0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 2px;"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5M12 16.5v.01"></path></svg>
+            <div>
+              <div style="font-size: 16px; font-weight: 700; margin-bottom: 3px;">Ankieta rozszerzona</div>
+              <div style="font-size: 14.5px; line-height: 1.55; color: #4E6D7D;">Widzisz ją, bo w kroku 2 wpisałaś <strong>1 500 000 zł</strong> sumy trwałej niezdolności — powyżej progu 1 000 000 zł ubezpieczyciel wymaga pełnego wywiadu. Obniż sumę poniżej progu, a ten blok zniknie i zostanie siedem pytań podstawowych.</div>
+            </div>
+          </div>
+          <div style="margin-top: 18px;">
+            <div style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px;">
+              <span style="font-size: 14.5px; font-weight: 700;">Informacje ogólne</span>
+              <span class="mono" style="font-size: 11.5px; color: #8AA3AF;">5 pytań</span>
+            </div>
+            <div style="border-top: 1px solid #DFF2FC;"></div>
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 11px 0; border-bottom: 1px solid #DFF2FC;">
+              <span style="font-size: 14.5px; line-height: 1.45;">Zmiana wagi ciała ponad 5 kg w ciągu ostatniego roku (niezwiązana z ciążą lub porodem)</span>
+              <div class="yn"><div class="yn-off-l" style="padding: 6px 15px; font-size: 13px;">Tak</div><div class="yn-off" style="padding: 6px 15px; font-size: 13px;">Nie</div></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 11px 0; border-bottom: 1px solid #DFF2FC;">
+              <span style="font-size: 14.5px; line-height: 1.45;">Przyjmowanie na stałe leków przepisanych przez lekarza</span>
+              <div class="yn"><div class="yn-off-l" style="padding: 6px 15px; font-size: 13px;">Tak</div><div class="yn-off" style="padding: 6px 15px; font-size: 13px;">Nie</div></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 11px 0; border-bottom: 1px solid #DFF2FC;">
+              <span style="font-size: 14.5px; line-height: 1.45;">Trwająca diagnostyka, oczekiwanie na wyniki, zabieg lub planowana wizyta z powodu odczuwanych objawów</span>
+              <div class="yn"><div class="yn-off-l" style="padding: 6px 15px; font-size: 13px;">Tak</div><div class="yn-off" style="padding: 6px 15px; font-size: 13px;">Nie</div></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 11px 0; border-bottom: 1px solid #DFF2FC;">
+              <span style="font-size: 14.5px; line-height: 1.45;">Trwałe ograniczenie sprawności lub wady wrodzone</span>
+              <div class="yn"><div class="yn-off-l" style="padding: 6px 15px; font-size: 13px;">Tak</div><div class="yn-off" style="padding: 6px 15px; font-size: 13px;">Nie</div></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 11px 0;">
+              <span style="font-size: 14.5px; line-height: 1.45;">Palenie papierosów lub innych wyrobów tytoniowych</span>
+              <div class="yn"><div class="yn-off-l" style="padding: 6px 15px; font-size: 13px;">Tak</div><div class="yn-off" style="padding: 6px 15px; font-size: 13px;">Nie</div></div>
+            </div>
+          </div>
+          <div style="margin-top: 18px;">
+            <div style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px;">
+              <span style="font-size: 14.5px; font-weight: 700;">Zdarzenia medyczne</span>
+              <span class="mono" style="font-size: 11.5px; color: #8AA3AF;">3 pytań</span>
+            </div>
+            <div style="border-top: 1px solid #DFF2FC;"></div>
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 11px 0; border-bottom: 1px solid #DFF2FC;">
+              <span style="font-size: 14.5px; line-height: 1.45;">Miała miejsce hospitalizacja</span>
+              <div class="yn"><div class="yn-off-l" style="padding: 6px 15px; font-size: 13px;">Tak</div><div class="yn-off" style="padding: 6px 15px; font-size: 13px;">Nie</div></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 11px 0; border-bottom: 1px solid #DFF2FC;">
+              <span style="font-size: 14.5px; line-height: 1.45;">Otrzymano zwolnienie lekarskie dłuższe niż 30 dni</span>
+              <div class="yn"><div class="yn-off-l" style="padding: 6px 15px; font-size: 13px;">Tak</div><div class="yn-off" style="padding: 6px 15px; font-size: 13px;">Nie</div></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 11px 0;">
+              <span style="font-size: 14.5px; line-height: 1.45;">Po konsultacji lub badaniach lekarz zalecił dalszą diagnostykę albo leczenie</span>
+              <div class="yn"><div class="yn-off-l" style="padding: 6px 15px; font-size: 13px;">Tak</div><div class="yn-off" style="padding: 6px 15px; font-size: 13px;">Nie</div></div>
+            </div>
+          </div>
+          <div style="margin-top: 18px;">
+            <div style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px;">
+              <span style="font-size: 14.5px; font-weight: 700;">Choroby i układy</span>
+              <span class="mono" style="font-size: 11.5px; color: #8AA3AF;">12 pytań</span>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; border: 1px solid #DFF2FC; background: #FFFFFF; padding: 10px 12px;">
+                <span style="font-size: 14px; line-height: 1.35;">Układ sercowo-naczyniowy</span>
+                <div class="yn"><div class="yn-off-l" style="padding: 5px 12px; font-size: 12.5px;">Tak</div><div class="yn-off" style="padding: 5px 12px; font-size: 12.5px;">Nie</div></div>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; border: 1px solid #DFF2FC; background: #FFFFFF; padding: 10px 12px;">
+                <span style="font-size: 14px; line-height: 1.35;">Układ nerwowy, wzrok, słuch</span>
+                <div class="yn"><div class="yn-off-l" style="padding: 5px 12px; font-size: 12.5px;">Tak</div><div class="yn-off" style="padding: 5px 12px; font-size: 12.5px;">Nie</div></div>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; border: 1px solid #DFF2FC; background: #FFFFFF; padding: 10px 12px;">
+                <span style="font-size: 14px; line-height: 1.35;">Tarczyca</span>
+                <div class="yn"><div class="yn-off-l" style="padding: 5px 12px; font-size: 12.5px;">Tak</div><div class="yn-off" style="padding: 5px 12px; font-size: 12.5px;">Nie</div></div>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; border: 1px solid #DFF2FC; background: #FFFFFF; padding: 10px 12px;">
+                <span style="font-size: 14px; line-height: 1.35;">Układ moczowy</span>
+                <div class="yn"><div class="yn-off-l" style="padding: 5px 12px; font-size: 12.5px;">Tak</div><div class="yn-off" style="padding: 5px 12px; font-size: 12.5px;">Nie</div></div>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; border: 1px solid #DFF2FC; background: #FFFFFF; padding: 10px 12px;">
+                <span style="font-size: 14px; line-height: 1.35;">Układ pokarmowy</span>
+                <div class="yn"><div class="yn-off-l" style="padding: 5px 12px; font-size: 12.5px;">Tak</div><div class="yn-off" style="padding: 5px 12px; font-size: 12.5px;">Nie</div></div>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; border: 1px solid #DFF2FC; background: #FFFFFF; padding: 10px 12px;">
+                <span style="font-size: 14px; line-height: 1.35;">Układ ruchu, dna moczanowa</span>
+                <div class="yn"><div class="yn-off-l" style="padding: 5px 12px; font-size: 12.5px;">Tak</div><div class="yn-off" style="padding: 5px 12px; font-size: 12.5px;">Nie</div></div>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; border: 1px solid #DFF2FC; background: #FFFFFF; padding: 10px 12px;">
+                <span style="font-size: 14px; line-height: 1.35;">Układ oddechowy</span>
+                <div class="yn"><div class="yn-off-l" style="padding: 5px 12px; font-size: 12.5px;">Tak</div><div class="yn-off" style="padding: 5px 12px; font-size: 12.5px;">Nie</div></div>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; border: 1px solid #DFF2FC; background: #FFFFFF; padding: 10px 12px;">
+                <span style="font-size: 14px; line-height: 1.35;">Choroby onkologiczne, guzy, narośla</span>
+                <div class="yn"><div class="yn-off-l" style="padding: 5px 12px; font-size: 12.5px;">Tak</div><div class="yn-off" style="padding: 5px 12px; font-size: 12.5px;">Nie</div></div>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; border: 1px solid #DFF2FC; background: #FFFFFF; padding: 10px 12px;">
+                <span style="font-size: 14px; line-height: 1.35;">Zwyrodnienia i dolegliwości kręgosłupa lub stawów</span>
+                <div class="yn"><div class="yn-off-l" style="padding: 5px 12px; font-size: 12.5px;">Tak</div><div class="yn-off" style="padding: 5px 12px; font-size: 12.5px;">Nie</div></div>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; border: 1px solid #DFF2FC; background: #FFFFFF; padding: 10px 12px;">
+                <span style="font-size: 14px; line-height: 1.35;">Alergia (inna niż katar sienny)</span>
+                <div class="yn"><div class="yn-off-l" style="padding: 5px 12px; font-size: 12.5px;">Tak</div><div class="yn-off" style="padding: 5px 12px; font-size: 12.5px;">Nie</div></div>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; border: 1px solid #DFF2FC; background: #FFFFFF; padding: 10px 12px;">
+                <span style="font-size: 14px; line-height: 1.35;">Cukrzyca</span>
+                <div class="yn"><div class="yn-off-l" style="padding: 5px 12px; font-size: 12.5px;">Tak</div><div class="yn-off" style="padding: 5px 12px; font-size: 12.5px;">Nie</div></div>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; border: 1px solid #DFF2FC; background: #FFFFFF; padding: 10px 12px;">
+                <span style="font-size: 14px; line-height: 1.35;">Inna, niewymieniona choroba</span>
+                <div class="yn"><div class="yn-off-l" style="padding: 5px 12px; font-size: 12.5px;">Tak</div><div class="yn-off" style="padding: 5px 12px; font-size: 12.5px;">Nie</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── KROK 4 ─────────────────────────────── -->
+      <div style="background: #FFFFFF; border: 1px solid #D3E9F4; padding: 30px 32px 32px;">
+        <div class="steptag" style="color: #8AA3AF;">Krok 4 z 4</div>
+        <h2 class="serif" style="margin: 10px 0 22px; font-size: 27px; font-weight: 500; letter-spacing: -0.015em;">Zgody i kontakt</h2>
+
+        <div style="background: #F4FBFE; border: 1px solid #BEDFF0; padding: 20px 22px; margin-bottom: 22px;">
+          <div style="font-size: 16px; font-weight: 700; margin-bottom: 8px;">Informacja dla ubezpieczonego</div>
+          <p style="margin: 0 0 12px; font-size: 14.5px; line-height: 1.6; color: #4E6D7D;">Pełna treść klauzuli informacyjnej — kto jest administratorem danych, w jakim celu je przetwarzamy, komu przekazujemy i jakie masz prawa. Przewijana ramka, żeby zgoda była świadoma, a nie odklikana w ciemno.</p>
+          <span style="font-size: 14px; color: #0E96D0; font-weight: 600; border-bottom: 1.5px solid #A6DFF7; padding-bottom: 2px;">Pobierz jako PDF</span>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 24px;">
+          <div style="display: flex; gap: 12px; align-items: flex-start;">
+            <div style="width: 20px; height: 20px; background: #0E96D0; flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"></path></svg>
+            </div>
+            <span style="font-size: 15px; line-height: 1.55;">Zapoznałam się z <strong>wyłączeniami odpowiedzialności</strong> i przyjmuję je do wiadomości.</span>
+          </div>
+          <div style="display: flex; gap: 12px; align-items: flex-start;">
+            <div style="width: 20px; height: 20px; background: #0E96D0; flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"></path></svg>
+            </div>
+            <span style="font-size: 15px; line-height: 1.55;">Potwierdzam prawdziwość podanych danych i zapoznanie się z <strong>klauzulą informacyjną</strong>.</span>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px;">
+          <div>
+            <div class="lab">Adres e-mail</div>
+            <div class="inp-fill">a.kowalska@example.com</div>
+          </div>
+          <div>
+            <div class="lab">Telefon kontaktowy</div>
+            <div class="inp-fill mono">601 234 567</div>
+          </div>
+        </div>
+
+        <div style="background: #F4FBFE; border: 1px solid #D3E9F4; padding: 14px 16px; margin-top: 18px; display: flex; align-items: center; gap: 12px;">
+          <div style="width: 21px; height: 21px; border: 1.5px solid #7FD4F5; background: #FFFFFF;"></div>
+          <span style="font-size: 13.5px; color: #4E6D7D;">Nie jestem robotem</span>
+        </div>
+      </div>
+
+      <!-- ── Nawigacja kroków ───────────────────── -->
+      <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 4px;">
+        <div style="border: 1.5px solid #BEDFF0; background: #FFFFFF; color: #4E6D7D; padding: 15px 30px; font-weight: 600; font-size: 16px;">Wstecz</div>
+        <div style="display: flex; align-items: center; gap: 18px;">
+          <span style="font-size: 14px; color: #8AA3AF;">Zapisujemy postęp — możesz wrócić później</span>
+          <div style="background: #0E96D0; color: #FFFFFF; padding: 16px 36px; font-weight: 700; font-size: 16px;">Dalej — zakres ochrony</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PODSUMOWANIE ══ -->
+    <div style="width: 344px; flex-shrink: 0;">
+      <div style="background: #FFFFFF; border: 1px solid #BEDFF0; box-shadow: 0 14px 36px -18px rgba(15,46,64,0.18); padding: 24px 26px 26px;">
+        <div class="steptag">Twoja oferta</div>
+        <div style="height: 1px; background: #D3E9F4; margin: 14px 0 18px;"></div>
+
+        <div style="display: flex; flex-direction: column; gap: 13px;">
+          <div style="display: flex; justify-content: space-between; align-items: baseline;">
+            <span style="font-size: 14px; color: #4E6D7D;">Zawód</span>
+            <span style="font-size: 14.5px; font-weight: 600;">Kardiolog</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: baseline;">
+            <span style="font-size: 14px; color: #4E6D7D;">Forma</span>
+            <span style="font-size: 14.5px; font-weight: 600;">B2B</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: baseline;">
+            <span style="font-size: 14px; color: #4E6D7D;">Wiek</span>
+            <span class="mono" style="font-size: 14.5px; font-weight: 600;">41</span>
+          </div>
+        </div>
+
+        <div style="height: 1px; background: #E6F4FA; margin: 18px 0;"></div>
+
+        <div style="display: flex; flex-direction: column; gap: 13px;">
+          <div style="display: flex; justify-content: space-between; align-items: baseline;">
+            <span style="font-size: 14px; color: #4E6D7D;">Świadczenie miesięczne</span>
+            <span class="mono" style="font-size: 16px; font-weight: 600;">17 600 zł</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: baseline;">
+            <span style="font-size: 14px; color: #4E6D7D;">Śmierć / inwalidztwo</span>
+            <span class="mono" style="font-size: 16px; font-weight: 600;">500 000 zł</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: baseline;">
+            <span style="font-size: 14px; color: #4E6D7D;">Trwała niezdolność</span>
+            <span class="mono" style="font-size: 16px; font-weight: 600;">1 500 000 zł</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: baseline;">
+            <span style="font-size: 14px; color: #4E6D7D;">Klauzule NW</span>
+            <span class="mono" style="font-size: 16px; font-weight: 600;">2 z 6</span>
+          </div>
+        </div>
+
+        <div style="background: #F4FBFE; border-left: 3px solid #1BAEE5; padding: 16px 18px; margin-top: 20px;">
+          <div style="font-size: 13.5px; color: #4E6D7D; margin-bottom: 6px;">Szacowana składka miesięczna</div>
+          <div class="mono" style="font-size: 26px; font-weight: 600; color: #0E96D0;">[STAWKA]</div>
+        </div>
+
+        <div style="margin-top: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
+            <span style="font-size: 13.5px; color: #4E6D7D;">Uzupełnione</span>
+            <span class="mono" style="font-size: 13.5px; font-weight: 600; color: #0E96D0;">31%</span>
+          </div>
+          <div style="height: 5px; background: #DFF2FC;">
+            <div style="height: 5px; width: 31%; background: #1BAEE5;"></div>
+          </div>
+        </div>
+
+        <div style="font-size: 12.5px; color: #8AA3AF; margin-top: 18px; line-height: 1.5;">Wyliczenie szacunkowe. Ostateczna składka po ocenie ryzyka przez ubezpieczyciela — Leadenhall lub CEU.</div>
+      </div>
+
+      <div style="border: 1px solid #D3E9F4; background: #FFFFFF; padding: 20px 22px; margin-top: 18px;">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1BAEE5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 4.5h3.6l1.8 4.5-2.2 1.3a12 12 0 006 6l1.3-2.2 4.5 1.8v3.6a1.5 1.5 0 01-1.6 1.5A16.5 16.5 0 013 6.1a1.5 1.5 0 011.5-1.6z"></path></svg>
+          <span style="font-size: 15px; font-weight: 700;">Utknąłeś na którymś polu?</span>
+        </div>
+        <p style="margin: 0 0 10px; font-size: 14px; line-height: 1.55; color: #4E6D7D;">Zadzwoń — przejdziemy przez wniosek razem, telefonicznie.</p>
+        <span style="font-size: 17px; font-weight: 700; color: #0F2E40;">504 400 901</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

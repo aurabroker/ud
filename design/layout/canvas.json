@@ -9,9 +9,17 @@
       "h": 5100
     },
     {
+      "file": "Wniosek.dc.html",
+      "title": "Wniosek — 4 kroki",
+      "x": 1560,
+      "y": 0,
+      "w": 1440,
+      "h": 4300
+    },
+    {
       "file": "Zawod.dc.html",
       "title": "Strona zawodu — lekarz",
-      "x": 1560,
+      "x": 3120,
       "y": 0,
       "w": 1440,
       "h": 2850
@@ -19,7 +27,7 @@
     {
       "file": "Mobile.dc.html",
       "title": "Mobile 390",
-      "x": 3120,
+      "x": 4680,
       "y": 0,
       "w": 390,
       "h": 2000
@@ -27,7 +35,7 @@
     {
       "file": "System.dc.html",
       "title": "System wizualny",
-      "x": 3640,
+      "x": 5200,
       "y": 0,
       "w": 1080,
       "h": 2620
@@ -49,15 +57,22 @@
       "text": "Nowa sekcja: BAZA WIEDZY (blog).\nTrzy kafelki na stronie głównej, pasek artykułów powiązanych na stronie zawodu i lista na mobile.\nZdjęcie kafelka idzie z preview_image_url, a przy jego braku z thumbnail_url — dopiero przy obu pustych wchodzi znak zastępczy, jak w trzeciej karcie."
     },
     {
-      "id": "odmiana",
+      "id": "wniosek",
       "x": 1560,
+      "y": -250,
+      "w": 430,
+      "text": "Wniosek — brakowało go w pierwszej wersji. Wszystkie pola ze starego formularza, w czterech krokach.\nKolejność zmieniona względem oryginału: zakres ochrony idzie PRZED stanem zdrowia, bo to suma trwałej niezdolności decyduje, czy dojdzie ankieta rozszerzona. W starym układzie wyzwalacz był po ankiecie.\nNa kanwie kroki są rozwinięte jeden pod drugim — w aplikacji widoczny jest tylko jeden naraz."
+    },
+    {
+      "id": "odmiana",
+      "x": 3120,
       "y": -250,
       "w": 430,
       "text": "Najważniejsza zmiana SEO widoczna w H1: „Ubezpieczenie utraty dochodu dla lekarza\", nie „dla Lekarz\".\nUkład treści: H2 jest pytaniem, pierwszy akapit odpowiada w dwóch zdaniach — to struktura, którą modele AI cytują najchętniej."
     },
     {
       "id": "kwoty",
-      "x": 3120,
+      "x": 4680,
       "y": -250,
       "w": 430,
       "text": "Wszystko w nawiasach kwadratowych czeka na Wasze dane: stawki składek z tabel ubezpieczycieli, kwota zasiłku ZUS przy minimalnej podstawie oraz tytuły i zajawki artykułów z aura_articles.\nNie zmyślam liczb, na których klient ma oprzeć decyzję."

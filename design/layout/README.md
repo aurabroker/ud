@@ -6,10 +6,26 @@ Z nich składana jest kanwa projektowa; edycja = zmiana tych plików i ponowne z
 | Plik | Co przedstawia |
 |---|---|
 | `Main.dc.html` | Strona główna, 1440 px |
+| `Wniosek.dc.html` | Wniosek ubezpieczeniowy, cztery kroki, 1440 px |
 | `Zawod.dc.html` | Strona zawodowa (lekarz), 1440 px |
 | `Mobile.dc.html` | Widok mobilny, 390 px |
 | `System.dc.html` | System wizualny: paleta, znak, ikony, typografia, przyciski, fotografia |
 | `canvas.json` | Rozmieszczenie artboardów i notatki |
+
+## Wniosek — kolejność kroków
+
+W oryginale ankieta medyczna była przed wyborem sum. To błąd: ankietę
+rozszerzoną wyzwala **suma trwałej niezdolności powyżej 1 000 000 zł**
+(`HEALTH_SURVEY_THRESHOLD` w `healthSurvey.js`), więc wyzwalacz przychodził
+po ankiecie. W nowym układzie:
+
+1. Dane podstawowe — dane osobowe, PESEL, forma zatrudnienia, zawód, parametry, szczegóły działalności
+2. **Zakres ochrony** — ryzyka, sumy, klauzule NW, styl życia
+3. **Stan zdrowia** — 7 pytań podstawowych, a powyżej progu dodatkowo ankieta rozszerzona (20 pytań w 3 grupach)
+4. Zgody i kontakt — klauzula informacyjna, zgody, e-mail, telefon
+
+Na kanwie wszystkie kroki są rozwinięte jeden pod drugim, żeby dało się je
+przejrzeć naraz. W aplikacji widoczny jest tylko jeden.
 
 ## Kolorystyka
 
