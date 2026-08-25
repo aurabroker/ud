@@ -1,0 +1,623 @@
+<title>Zgody i klauzule RODO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<style>
+  :root {
+    --ground:  #F4FBFE;
+    --surface: #FFFFFF;
+    --surface-2:#EAF6FC;
+    --ink:     #0F2E40;
+    --muted:   #4E6D7D;
+    --faint:   #8AA3AF;
+    --rule:    #D3E9F4;
+    --rule-2:  #BEDFF0;
+    --cyan:    #1BAEE5;
+    --cyan-d:  #0E96D0;
+    --cyan-dd: #0B7CAF;
+    --req:     #C0392B;
+    --req-bg:  #FCEEEC;
+    --opt:     #11785A;
+    --opt-bg:  #E6F5F0;
+    --warn:    #8A5A00;
+    --warn-bg: #FBF1DD;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:  #0B1620;
+      --surface: #12212C;
+      --surface-2:#182B38;
+      --ink:     #E4F1F8;
+      --muted:   #9DB6C4;
+      --faint:   #7391A2;
+      --rule:    #22394A;
+      --rule-2:  #2C4759;
+      --cyan:    #4BC3EE;
+      --cyan-d:  #6FD0F2;
+      --cyan-dd: #8DDBF5;
+      --req:     #F08B7E;
+      --req-bg:  #331A18;
+      --opt:     #6FCBAA;
+      --opt-bg:  #122B24;
+      --warn:    #DDB05F;
+      --warn-bg: #2C2413;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:  #0B1620;
+    --surface: #12212C;
+    --surface-2:#182B38;
+    --ink:     #E4F1F8;
+    --muted:   #9DB6C4;
+    --faint:   #7391A2;
+    --rule:    #22394A;
+    --rule-2:  #2C4759;
+    --cyan:    #4BC3EE;
+    --cyan-d:  #6FD0F2;
+    --cyan-dd: #8DDBF5;
+    --req:     #F08B7E;
+    --req-bg:  #331A18;
+    --opt:     #6FCBAA;
+    --opt-bg:  #122B24;
+    --warn:    #DDB05F;
+    --warn-bg: #2C2413;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: "Public Sans", ui-sans-serif, system-ui, sans-serif;
+    font-size: 16.5px; line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+    margin: 0;
+  }
+  .wrap { max-width: 60rem; margin: 0 auto; padding: 0 1.5rem 6rem; }
+
+  nav.toc { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--ground) 90%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--rule); margin-bottom: 2.5rem; }
+  nav.toc ol { max-width: 60rem; margin: 0 auto; padding: .55rem 1.5rem; display: flex; gap: 1.3rem; list-style: none; overflow-x: auto; scrollbar-width: none; font-family: "IBM Plex Mono", monospace; font-size: .68rem; letter-spacing: .07em; text-transform: uppercase; }
+  nav.toc ol::-webkit-scrollbar { display: none; }
+  nav.toc a { color: var(--muted); text-decoration: none; white-space: nowrap; padding: .2rem 0; border-bottom: 1.5px solid transparent; }
+  nav.toc a:hover { color: var(--cyan-d); border-bottom-color: var(--cyan); }
+
+  header.doc { padding: 3rem 0 2rem; }
+  .eyebrow { font-family: "IBM Plex Mono", monospace; font-size: .7rem; letter-spacing: .16em; text-transform: uppercase; color: var(--cyan-d); margin: 0 0 1rem; font-weight: 600; }
+  h1 { font-family: "Newsreader", Georgia, serif; font-weight: 500; font-size: clamp(2.3rem, 6vw, 3.4rem); line-height: 1.06; letter-spacing: -.018em; text-wrap: balance; margin: 0 0 1rem; }
+  .standfirst { font-size: 1.14rem; line-height: 1.55; color: var(--muted); max-width: 44rem; margin: 0 0 1.6rem; }
+  .standfirst strong { color: var(--ink); font-weight: 600; }
+
+  section { padding-top: 3.2rem; scroll-margin-top: 4rem; }
+  h2 { font-family: "Newsreader", Georgia, serif; font-weight: 500; font-size: clamp(1.55rem, 3.4vw, 2.05rem); line-height: 1.18; letter-spacing: -.012em; text-wrap: balance; margin: 0 0 .3rem; padding-bottom: .65rem; border-bottom: 2px solid var(--ink); }
+  h2 .num { font-family: "IBM Plex Mono", monospace; font-size: .72rem; color: var(--cyan-d); letter-spacing: .1em; display: block; margin-bottom: .45rem; font-weight: 600; }
+  h3 { font-size: 1.02rem; font-weight: 700; letter-spacing: -.005em; margin: 2.2rem 0 .6rem; }
+  h4 { font-family: "IBM Plex Mono", monospace; font-size: .72rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); margin: 1.9rem 0 .7rem; }
+  p { max-width: 44rem; margin: 0 0 1rem; }
+  a { color: var(--cyan-dd); text-underline-offset: .18em; }
+  ul, ol { max-width: 44rem; padding-left: 1.15rem; margin: 0 0 1.1rem; }
+  li { margin-bottom: .4rem; }
+  li::marker { color: var(--faint); }
+  code, .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: .855em; }
+  p code, li code, td code, .cb-body code { background: var(--surface-2); padding: .1em .34em; border-radius: 3px; }
+
+  /* ── blok do skopiowania ── */
+  .cb { background: var(--surface); border: 1px solid var(--rule-2); border-left: 3px solid var(--cyan); margin: 1.1rem 0 1.5rem; }
+  .cb-head { display: flex; align-items: center; gap: .7rem; flex-wrap: wrap; padding: .7rem 1.15rem; border-bottom: 1px solid var(--rule); background: var(--surface-2); }
+  .cb-name { font-family: "IBM Plex Mono", monospace; font-size: .68rem; letter-spacing: .11em; text-transform: uppercase; font-weight: 600; color: var(--muted); }
+  .cb-body { padding: 1.15rem 1.25rem; font-size: 1rem; line-height: 1.62; }
+  .cb-body p { margin: 0 0 .8rem; max-width: none; }
+  .cb-body p:last-child { margin-bottom: 0; }
+  .cb-note { padding: .7rem 1.25rem; border-top: 1px solid var(--rule); font-size: .84rem; color: var(--muted); line-height: 1.5; background: color-mix(in srgb, var(--surface-2) 45%, transparent); }
+  .cb.sms .cb-body { font-family: "IBM Plex Mono", monospace; font-size: .92rem; }
+
+  .tag { display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: .62rem; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; padding: .16rem .5rem; border-radius: 2px; white-space: nowrap; }
+  .tag.req { background: var(--req-bg); color: var(--req); border: 1px solid color-mix(in srgb, var(--req) 32%, transparent); }
+  .tag.opt { background: var(--opt-bg); color: var(--opt); border: 1px solid color-mix(in srgb, var(--opt) 32%, transparent); }
+  .tag.info{ background: var(--surface-2); color: var(--cyan-dd); border: 1px solid var(--rule-2); }
+  .tag.w   { background: var(--warn-bg); color: var(--warn); border: 1px solid color-mix(in srgb, var(--warn) 32%, transparent); }
+
+  .alert { background: var(--req-bg); border: 1px solid color-mix(in srgb, var(--req) 34%, transparent); padding: 1.4rem 1.5rem; margin: 1.8rem 0; }
+  .alert-label { font-family: "IBM Plex Mono", monospace; font-size: .68rem; letter-spacing: .14em; text-transform: uppercase; color: var(--req); font-weight: 600; margin: 0 0 .65rem; }
+  .alert h3 { margin: 0 0 .5rem; font-size: 1.08rem; }
+  .alert p { margin: 0 0 .6rem; max-width: 46rem; }
+  .alert p:last-child { margin-bottom: 0; }
+
+  .callout { background: var(--surface); border: 1px solid var(--rule); border-left: 3px solid var(--cyan); padding: 1.25rem 1.4rem; margin: 1.6rem 0; }
+  .callout p:last-child, .callout ul:last-child { margin-bottom: 0; }
+
+  .tw { overflow-x: auto; margin: 1.4rem 0 1.9rem; border: 1px solid var(--rule); background: var(--surface); }
+  table { width: 100%; border-collapse: collapse; font-size: .87rem; min-width: 38rem; }
+  thead th { text-align: left; font-family: "IBM Plex Mono", monospace; font-size: .65rem; font-weight: 600; letter-spacing: .11em; text-transform: uppercase; color: var(--faint); padding: .78rem .9rem; border-bottom: 1px solid var(--rule-2); background: var(--surface-2); white-space: nowrap; }
+  tbody td { padding: .8rem .9rem; border-bottom: 1px solid var(--rule); vertical-align: top; line-height: 1.48; }
+  tbody tr:last-child td { border-bottom: none; }
+  td.k { font-weight: 600; min-width: 11rem; }
+  td.d { color: var(--muted); font-size: .84rem; }
+
+  hr.rule { border: none; border-top: 1px solid var(--rule); margin: 2.8rem 0 0; }
+  footer.doc { margin-top: 3.5rem; padding-top: 1.4rem; border-top: 2px solid var(--ink); font-family: "IBM Plex Mono", monospace; font-size: .74rem; color: var(--faint); line-height: 1.6; }
+
+  :focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+</style>
+
+<nav class="toc">
+  <ol>
+    <li><a href="#pilne">Do naprawy</a></li>
+    <li><a href="#zasady">Zasady</a></li>
+    <li><a href="#punkty">Punkty styku</a></li>
+    <li><a href="#zgody">Zgody</a></li>
+    <li><a href="#klauzula">Klauzula</a></li>
+    <li><a href="#sms">SMS</a></li>
+    <li><a href="#email">E-mail</a></li>
+    <li><a href="#oferta">Oferta</a></li>
+    <li><a href="#kod">Mapowanie</a></li>
+    <li><a href="#prawnik">Dla prawnika</a></li>
+  </ol>
+</nav>
+
+<div class="wrap">
+
+<header class="doc">
+  <p class="eyebrow">UtrataDochodu.pl · Aura Expert Sp. z o.o.</p>
+  <h1>Zgody i klauzule RODO</h1>
+  <p class="standfirst">
+    Gotowe treści do wklejenia — zgody przy formularzach, klauzula informacyjna, SMS-y, e-maile i widok oferty.
+    <strong>To projekt roboczy, nie opinia prawna.</strong> Przed publikacją musi go zatwierdzić Wasz prawnik lub osoba odpowiedzialna za zgodność — zwłaszcza w części o roli administratora, bo tu agent ubezpieczeniowy ma nietypową sytuację.
+  </p>
+  <div class="callout">
+    <p style="margin:0">Same teksty nie wystarczą. W kodzie są <strong>trzy rzeczy, które trzeba naprawić razem z nimi</strong> — opisane w §01. Bez nich najlepiej napisana zgoda niczego nie załatwi.</p>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════ -->
+<section id="pilne">
+  <h2><span class="num">01 — Najpierw kod</span>Trzy rzeczy do naprawy niezależnie od treści</h2>
+
+  <div class="alert">
+    <p class="alert-label">Znalezione w kodzie produkcyjnym</p>
+    <h3>Dane klientów lecą do CallMeBot — darmowego serwisu bez umowy powierzenia</h3>
+    <p>
+      <code>send-confirmation-email</code> wysyła pod <code>api.callmebot.com</code> wiadomość WhatsApp o treści
+      <em>„Nowy kontakt! Imię: X / Tel: X / Email: X"</em>. CallMeBot to bezpłatna usługa hobbystyczna — nie macie z nią umowy powierzenia przetwarzania (art. 28 RODO), nie wiadomo, gdzie trzyma dane ani jak długo.
+    </p>
+    <p>
+      To transfer danych osobowych do nieustalonego podmiotu przy każdym zgłoszeniu. <strong>Żadna klauzula tego nie legalizuje</strong> — trzeba zmienić kanał powiadomień doradcy: WhatsApp Business API z umową, SMS przez SMSAPI (już macie), Slack lub zwykły e-mail.
+    </p>
+  </div>
+
+  <div class="alert">
+    <p class="alert-label">Znalezione w kodzie produkcyjnym</p>
+    <h3>Wniosek zbiera dane o zdrowiu bez zgody wymaganej przez art. 9 RODO</h3>
+    <p>
+      Formularz zbiera siedem pytań medycznych, a przy sumie powyżej miliona złotych kolejnych dwadzieścia. To <strong>szczególna kategoria danych</strong> (art. 9 ust. 1 RODO) — wymaga zgody <em>wyraźnej</em>, odrębnej od pozostałych.
+    </p>
+    <p>
+      Jedyna zgoda w formularzu brzmi dziś: <em>„Wyrażam zgodę na przetwarzanie danych przez spółkę Aura Expert sp. z o.o., operatora marki UtrataDochodu w celu przygotowania oferty."</em> — jedno zdanie, bez słowa o zdrowiu, bez wskazania ubezpieczycieli, bez informacji o cofnięciu. To za mało na art. 9. Treść w §04.
+    </p>
+  </div>
+
+  <div class="alert">
+    <p class="alert-label">Znalezione w bazie produkcyjnej</p>
+    <h3>34 kontakty zapisane z <code>rodo_consent = false</code></h3>
+    <p>
+      Kolumna <code>rodo_consent</code> w <code>udochodu_contacts</code> ma domyślnie <code>false</code>, a formularz szybkiego kontaktu <strong>nie ma żadnego pola zgody</strong> — nigdy nie wysyłał tej wartości. Wszystkie 34 rekordy mają zatem zapisane, że zgody nie było.
+    </p>
+    <p>
+      Do rozstrzygnięcia z prawnikiem: czy te kontakty można dalej przetwarzać (patrz §02 — prośba o kontakt to art. 6 ust. 1 lit. b, nie zgoda), czy trzeba je wyczyścić.
+    </p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ -->
+<section id="zasady">
+  <h2><span class="num">02 — Zanim wybierzecie checkboxy</span>Trzy zasady, które oszczędzą Wam kłopotów</h2>
+
+  <h3>Zgoda to nie jest domyślna podstawa prawna — i nadmiar zgód szkodzi</h3>
+  <p>
+    Kiedy ktoś sam prosi o wycenę, przetwarzanie jego danych opiera się na <strong>art. 6 ust. 1 lit. b RODO</strong> — działania na żądanie osoby przed zawarciem umowy. Zgoda nie jest do tego potrzebna.
+  </p>
+  <p>
+    To istotna różnica praktyczna: <strong>zgodę można cofnąć w każdej chwili</strong>, a podstawy umownej nie. Jeśli oprzecie całą wycenę na zgodzie, klient wycofa ją i zostaniecie bez podstawy do dokończenia sprawy. Dlatego zgód powinno być mało i tylko tam, gdzie przepis ich wymaga.
+  </p>
+
+  <div class="callout">
+    <p><strong>Gdzie zgoda jest naprawdę konieczna:</strong></p>
+    <ul style="margin-bottom:0">
+      <li><strong>Dane o zdrowiu</strong> — art. 9 ust. 2 lit. a RODO. Zgoda wyraźna, odrębna, bez niej nie ma oferty.</li>
+      <li><strong>Marketing e-mailem, SMS-em i telefonem</strong> — art. 398 Prawa komunikacji elektronicznej. Od 10.11.2024 jedna zgoda zamiast dawnych dwóch (UŚUDE + Prawo telekomunikacyjne). Bez niej nie wolno wysłać ani jednej wiadomości handlowej — także takiej, która dopiero prosi o zgodę.</li>
+    </ul>
+  </div>
+
+  <h3>Osobny checkbox na każdy cel i każdy kanał</h3>
+  <p>
+    Jedna zgoda „na wszystko" jest nieważna — RODO wymaga, by była <em>konkretna</em>. Rozdzielcie: dane o zdrowiu osobno, e-mail osobno, telefon i SMS osobno. Klient ma móc zaznaczyć jedno bez drugiego.
+  </p>
+  <p>
+    Żadne pole nie może być <strong>zaznaczone domyślnie</strong> — to wprost przesądzone w RODO i w orzecznictwie TSUE. Zgoda ma być czynnością, a nie brakiem reakcji.
+  </p>
+
+  <h3>Oświadczenie ≠ zgoda ≠ obowiązek informacyjny</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Typ</th><th>Co to jest</th><th>Czy potrzebuje checkboxa</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="k"><span class="tag req">Zgoda</span></td>
+          <td>Dobrowolne pozwolenie na przetwarzanie (zdrowie, marketing)</td>
+          <td class="d">Tak — odrębny, niezaznaczony, z możliwością cofnięcia</td>
+        </tr>
+        <tr>
+          <td class="k"><span class="tag info">Oświadczenie</span></td>
+          <td>Potwierdzenie faktu przez klienta (prawdziwość danych, znajomość wyłączeń)</td>
+          <td class="d">Tak, ale to nie jest zgoda RODO — nie da się jej „cofnąć"</td>
+        </tr>
+        <tr>
+          <td class="k"><span class="tag info">Klauzula</span></td>
+          <td>Obowiązek informacyjny z art. 13 RODO — Wy informujecie, klient przyjmuje do wiadomości</td>
+          <td class="d">Nie. Musi być <em>widoczna i dostępna</em>, nie „odklikana". Checkbox jest dopuszczalny jako dowód, ale nie zastępuje wyświetlenia treści</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ -->
+<section id="punkty">
+  <h2><span class="num">03 — Gdzie i co</span>Trzy punkty styku z klientem</h2>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Miejsce</th><th>Jakie dane</th><th>Podstawa</th><th>Co pokazać</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="k">Szybki kontakt<br><span class="mono" style="font-size:.78rem;color:var(--faint)">strona główna, strona zawodu</span></td>
+          <td>Imię, e-mail, telefon</td>
+          <td class="d">art. 6 ust. 1 lit. b — prośba o kontakt</td>
+          <td class="d">Skrót klauzuli + link do pełnej. Zgoda marketingowa dobrowolnie</td>
+        </tr>
+        <tr>
+          <td class="k">Wniosek<br><span class="mono" style="font-size:.78rem;color:var(--faint)">4 kroki</span></td>
+          <td>Dane osobowe, PESEL, dochód, <strong>dane o zdrowiu</strong></td>
+          <td class="d">art. 6 ust. 1 lit. b + <strong>art. 9 ust. 2 lit. a</strong></td>
+          <td class="d">Zgoda na zdrowie (obowiązkowa), dwa oświadczenia, klauzula, marketing dobrowolnie</td>
+        </tr>
+        <tr>
+          <td class="k">Widok oferty<br><span class="mono" style="font-size:.78rem;color:var(--faint)">link + PIN z SMS</span></td>
+          <td>Dane już zebrane, wybór wariantu, pytania do agenta</td>
+          <td class="d">art. 6 ust. 1 lit. b — wykonanie umowy</td>
+          <td class="d">Klauzula w stopce. Nowych zgód nie trzeba</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ -->
+<section id="zgody">
+  <h2><span class="num">04 — Do wklejenia</span>Treści zgód przy formularzach</h2>
+
+  <h3>A. Szybki kontakt — trzy pozycje</h3>
+
+  <div class="cb">
+    <div class="cb-head"><span class="tag req">Obowiązkowe</span><span class="cb-name">Prośba o kontakt</span></div>
+    <div class="cb-body">
+      <p>Proszę o kontakt w sprawie oferty ubezpieczenia utraty dochodu — telefonicznie, SMS-em lub e-mailem, na dane podane w formularzu.</p>
+    </div>
+    <div class="cb-note">To nie jest zgoda marketingowa, tylko potwierdzenie prośby. Zaznaczenie warunkuje wysłanie formularza. Zapis do <code>udochodu_contacts.rodo_consent</code>.</div>
+  </div>
+
+  <div class="cb">
+    <div class="cb-head"><span class="tag opt">Dobrowolne</span><span class="cb-name">Marketing — e-mail</span></div>
+    <div class="cb-body">
+      <p>Chcę otrzymywać e-mailem informacje handlowe od Aura Expert sp. z o.o. — poradniki, zmiany w przepisach i oferty ubezpieczeń. Zgodę mogę cofnąć w każdej chwili, klikając link w stopce wiadomości lub pisząc na biuro@utratadochodu.com.</p>
+    </div>
+    <div class="cb-note">Art. 398 Prawa komunikacji elektronicznej. Bez tego pola nie wolno wysłać newslettera ani wpisać kontaktu do GetResponse w celach marketingowych.</div>
+  </div>
+
+  <div class="cb">
+    <div class="cb-head"><span class="tag opt">Dobrowolne</span><span class="cb-name">Marketing — telefon i SMS</span></div>
+    <div class="cb-body">
+      <p>Chcę otrzymywać te informacje także telefonicznie i SMS-em. Zgodę mogę cofnąć w każdej chwili, odpowiadając STOP na SMS lub pisząc na biuro@utratadochodu.com.</p>
+    </div>
+    <div class="cb-note">Osobno od e-maila — klient ma móc zgodzić się na jedno, a odmówić drugiego.</div>
+  </div>
+
+  <div class="cb" style="border-left-color: var(--faint)">
+    <div class="cb-head"><span class="tag info">Bez checkboxa</span><span class="cb-name">Skrót klauzuli pod formularzem</span></div>
+    <div class="cb-body">
+      <p>Administratorem Twoich danych jest Aura Expert sp. z o.o. Podajesz je, żebyśmy mogli przygotować dla Ciebie ofertę i skontaktować się w tej sprawie. Masz prawo dostępu do danych, ich sprostowania, usunięcia i sprzeciwu. <a href="#">Pełna klauzula informacyjna</a></p>
+    </div>
+    <div class="cb-note">Ma być widoczna od razu, nie chowana za rozwijaniem. Link prowadzi do treści z §05.</div>
+  </div>
+
+  <h3>B. Wniosek — krok 4</h3>
+
+  <div class="cb">
+    <div class="cb-head"><span class="tag req">Obowiązkowe</span><span class="cb-name">Dane o zdrowiu — art. 9 ust. 2 lit. a RODO</span></div>
+    <div class="cb-body">
+      <p>Wyrażam wyraźną zgodę na przetwarzanie moich danych dotyczących zdrowia, podanych w tym wniosku, przez Aura Expert sp. z o.o. oraz przez ubezpieczycieli: Leadenhall Insurance SA i CEU sp. z o.o. — w celu oceny ryzyka ubezpieczeniowego, przygotowania oferty i zawarcia umowy ubezpieczenia utraty dochodu.</p>
+      <p>Wiem, że podanie tych danych jest dobrowolne, ale bez nich przygotowanie oferty nie jest możliwe. Zgodę mogę cofnąć w każdej chwili, pisząc na biuro@utratadochodu.com — cofnięcie nie wpływa na zgodność z prawem przetwarzania, którego dokonano wcześniej.</p>
+    </div>
+    <div class="cb-note">
+      Musi stać <strong>osobno</strong>, nie w jednym rzędzie z pozostałymi. Zapis w <code>ud_clients</code> — potrzebna nowa kolumna, np. <code>health_consent</code> + <code>health_consent_at</code>. Nazwy ubezpieczycieli podajemy wprost, bo art. 13 wymaga wskazania odbiorców danych.
+    </div>
+  </div>
+
+  <div class="cb">
+    <div class="cb-head"><span class="tag req">Obowiązkowe</span><span class="cb-name">Oświadczenie o prawdziwości</span></div>
+    <div class="cb-body">
+      <p>Oświadczam, że dane podane we wniosku, w tym odpowiedzi na pytania o stan zdrowia, są prawdziwe i kompletne. Przyjmuję do wiadomości, że zatajenie okoliczności, o które pytano, może zwolnić ubezpieczyciela z odpowiedzialności.</p>
+    </div>
+    <div class="cb-note">To oświadczenie woli, nie zgoda RODO. Mapuje się na istniejące <code>informed_accepted</code>.</div>
+  </div>
+
+  <div class="cb">
+    <div class="cb-head"><span class="tag req">Obowiązkowe</span><span class="cb-name">Wyłączenia odpowiedzialności</span></div>
+    <div class="cb-body">
+      <p>Zapoznałem się z wyłączeniami odpowiedzialności ubezpieczyciela — w tym z tym, że ochroną nie są objęte wypalenie zawodowe, choroby psychiczne, częściowa niezdolność do pracy oraz schorzenia leczone w ciągu 24 miesięcy przed zawarciem umowy — i przyjmuję je do wiadomości.</p>
+    </div>
+    <div class="cb-note">Mapuje się na <code>exclusions_accepted</code>. Wymienienie wyłączeń wprost w treści zgody jest mocniejsze dowodowo niż sam odnośnik.</div>
+  </div>
+
+  <p style="margin-top:1.4rem">Pod nimi <strong>te same dwie zgody marketingowe co w punkcie A</strong> — dobrowolne, osobne, niezaznaczone.</p>
+</section>
+
+<!-- ══════════════════════════════════════════ -->
+<section id="klauzula">
+  <h2><span class="num">05 — Art. 13 RODO</span>Klauzula informacyjna</h2>
+
+  <p>Pełna treść na osobną podstronę <code>/klauzula-informacyjna</code>, z linkami przy każdym formularzu i w stopce każdego e-maila.</p>
+
+  <div class="cb">
+    <div class="cb-head"><span class="cb-name">Klauzula informacyjna — treść</span></div>
+    <div class="cb-body">
+      <p><strong>Kto przetwarza Twoje dane</strong><br>
+      Administratorem jest Aura Expert sp. z o.o. z siedzibą w [ADRES], wpisana do KRS pod numerem [KRS], NIP [NIP], agent ubezpieczeniowy wpisany do rejestru pośredników ubezpieczeniowych KNF pod numerem [NUMER RAU]. Kontakt: biuro@utratadochodu.com, tel. +48 504 400 901.</p>
+
+      <p><strong>Po co i na jakiej podstawie</strong></p>
+      <p>— Przygotowanie oferty i kontakt w tej sprawie: art. 6 ust. 1 lit. b RODO (działania na Twoje żądanie przed zawarciem umowy).<br>
+      — Ocena ryzyka ubezpieczeniowego na podstawie danych o zdrowiu: art. 9 ust. 2 lit. a RODO (Twoja wyraźna zgoda).<br>
+      — Obowiązki wynikające z ustawy o dystrybucji ubezpieczeń i przepisów podatkowych: art. 6 ust. 1 lit. c RODO.<br>
+      — Marketing własnych usług: art. 6 ust. 1 lit. a RODO (Twoja zgoda) w związku z art. 398 Prawa komunikacji elektronicznej.<br>
+      — Dochodzenie i obrona roszczeń: art. 6 ust. 1 lit. f RODO (nasz prawnie uzasadniony interes).</p>
+
+      <p><strong>Komu przekazujemy dane</strong><br>
+      Ubezpieczycielom, u których szukamy dla Ciebie ochrony: Leadenhall Insurance SA i CEU sp. z o.o. Ponadto dostawcom, którzy przetwarzają dane na nasze zlecenie: [LISTA — patrz tabela poniżej]. Nie sprzedajemy danych i nie przekazujemy ich nikomu poza tym kręgiem.</p>
+
+      <p><strong>Jak długo</strong><br>
+      Jeśli nie dojdzie do zawarcia umowy — [OKRES] od ostatniego kontaktu. Jeśli umowa zostanie zawarta — przez czas jej trwania i okres przedawnienia roszczeń. Dane przetwarzane na podstawie zgody — do jej cofnięcia. Dane, których wymagają przepisy podatkowe — 5 lat od końca roku rozliczeniowego.</p>
+
+      <p><strong>Twoje prawa</strong><br>
+      Masz prawo dostępu do danych, ich sprostowania, usunięcia, ograniczenia przetwarzania, przenoszenia oraz wniesienia sprzeciwu wobec przetwarzania opartego na naszym uzasadnionym interesie. Zgody możesz cofnąć w każdej chwili — nie wpływa to na zgodność z prawem tego, co zrobiliśmy wcześniej. Możesz też złożyć skargę do Prezesa Urzędu Ochrony Danych Osobowych, ul. Stawki 2, 00-193 Warszawa.</p>
+
+      <p><strong>Czy musisz podać dane</strong><br>
+      Podanie danych jest dobrowolne, ale bez imienia, telefonu i adresu e-mail nie skontaktujemy się z Tobą, a bez danych o zdrowiu i dochodzie ubezpieczyciel nie oceni ryzyka i nie przygotuje oferty.</p>
+
+      <p><strong>Automatyczne decyzje</strong><br>
+      [DO ROZSTRZYGNIĘCIA — patrz §10]</p>
+    </div>
+    <div class="cb-note">Nawiasy kwadratowe to miejsca, których nie wypełniam z głowy: adres, KRS, NIP, numer w rejestrze KNF i okresy retencji muszą podać Państwo.</div>
+  </div>
+
+  <h4>Dostawcy przetwarzający dane na Wasze zlecenie</h4>
+  <p>Wyciągnięte z kodu — z każdym z nich potrzebna jest umowa powierzenia (art. 28 RODO):</p>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Dostawca</th><th>Do czego</th><th>Gdzie dane</th><th>Uwaga</th></tr></thead>
+      <tbody>
+        <tr><td class="k">Supabase</td><td class="d">Baza, uwierzytelnianie, pliki ofert</td><td class="d">Irlandia (eu-west-1)</td><td class="d">Spółka amerykańska, region UE</td></tr>
+        <tr><td class="k">Cloudflare</td><td class="d">Hosting, Turnstile, panel</td><td class="d">Globalnie</td><td class="d">Sprawdzić podstawę transferu</td></tr>
+        <tr><td class="k">Resend</td><td class="d">E-maile do klientów</td><td class="d">USA</td><td class="d"><span class="tag w">Transfer poza EOG</span> — potrzebna podstawa (DPF lub SCC)</td></tr>
+        <tr><td class="k">SMSAPI</td><td class="d">SMS z kodem do oferty</td><td class="d">Polska</td><td class="d">—</td></tr>
+        <tr><td class="k">GetResponse</td><td class="d">Lista mailingowa</td><td class="d">Polska</td><td class="d">Tylko dla osób ze zgodą marketingową</td></tr>
+        <tr><td class="k">Google, Meta</td><td class="d">Analityka i reklama</td><td class="d">USA</td><td class="d">Zależne od zgody w banerze cookies</td></tr>
+        <tr><td class="k">CallMeBot</td><td class="d">Powiadomienie WhatsApp do doradcy</td><td class="d">Nieustalone</td><td class="d"><span class="tag req">Do usunięcia</span> — §01</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ -->
+<section id="sms">
+  <h2><span class="num">06 — SMS</span>Treści wiadomości</h2>
+
+  <div class="callout">
+    <p style="margin:0"><strong>Uwaga techniczna:</strong> polskie znaki diakrytyczne przełączają SMS z GSM-7 na UCS-2 i skracają limit ze 160 do 70 znaków — jedna wiadomość staje się trzema i kosztuje trzy razy więcej. Dlatego treści poniżej są <strong>celowo bez ogonków</strong>. Jeśli wolicie poprawną polszczyznę, trzeba przyjąć wyższy koszt.</p>
+  </div>
+
+  <div class="cb sms">
+    <div class="cb-head"><span class="tag info">Transakcyjny</span><span class="cb-name">Kod dostępu do oferty</span></div>
+    <div class="cb-body">UtrataDochodu.pl: kod dostepu do Twojej oferty: 1234. Wazny 48h, nie przekazuj go nikomu.</div>
+    <div class="cb-note">88 znaków, mieści się w jednym SMS-ie. <strong>Nie wymaga zgody marketingowej</strong> — to realizacja umowy, klient sam poprosił o ofertę. Nadawca <code>SMSAPI_SENDER</code> identyfikuje Was, więc nazwy spółki w treści nie trzeba.</div>
+  </div>
+
+  <div class="cb sms">
+    <div class="cb-head"><span class="tag info">Transakcyjny</span><span class="cb-name">Przypomnienie o wygasającym kodzie</span></div>
+    <div class="cb-body">UtrataDochodu.pl: Twoja oferta czeka jeszcze 12h. Kod: 1234. Pomoc: 504 400 901.</div>
+    <div class="cb-note">Na granicy — przypomnienie o zamówionej ofercie mieści się w wykonaniu umowy, ale jeśli dojdzie do niego zachęta do zakupu, staje się marketingiem i wymaga zgody. Bezpieczniej trzymać się suchego faktu.</div>
+  </div>
+
+  <div class="cb sms">
+    <div class="cb-head"><span class="tag req">Wymaga zgody</span><span class="cb-name">SMS marketingowy</span></div>
+    <div class="cb-body">UtrataDochodu.pl: od 2027 zmieniaja sie zasady zasilku dla firm. Sprawdz, co to znaczy dla Ciebie: [LINK]. Rezygnacja: STOP</div>
+    <div class="cb-note">
+      Wolno wysłać <strong>wyłącznie</strong> do osób z zaznaczoną zgodą na telefon i SMS (§04). Musi zawierać: identyfikację nadawcy i sposób rezygnacji. Odpowiedź STOP ma natychmiast wyłączać dalsze wysyłki — potrzebna obsługa po stronie kodu, sam tekst nie wystarczy.
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ -->
+<section id="email">
+  <h2><span class="num">07 — E-mail</span>Treści i obowiązkowa stopka</h2>
+
+  <div class="cb">
+    <div class="cb-head"><span class="tag info">Transakcyjny</span><span class="cb-name">Potwierdzenie — szybki kontakt</span></div>
+    <div class="cb-body">
+      <p><strong>Temat:</strong> Dziękujemy za zgłoszenie — odezwiemy się w ciągu 24 godzin</p>
+      <p>Dzień dobry [IMIĘ],</p>
+      <p>otrzymaliśmy Twoje zgłoszenie. Doradca odezwie się w ciągu 24 godzin roboczych na numer [TELEFON], żeby ustalić zakres ochrony i przygotować wycenę.</p>
+      <p>Jeśli chcesz przyspieszyć sprawę, możesz od razu wypełnić pełny wniosek — wtedy przygotujemy konkretną ofertę, a nie widełki: [LINK]</p>
+      <p>Pozdrawiamy,<br>zespół UtrataDochodu.pl</p>
+    </div>
+    <div class="cb-note">Nie jest informacją handlową — to odpowiedź na zgłoszenie. Można wysłać bez zgody marketingowej. Nie wolno tu wciskać ofert produktów, o które klient nie pytał.</div>
+  </div>
+
+  <div class="cb">
+    <div class="cb-head"><span class="tag info">Transakcyjny</span><span class="cb-name">Potwierdzenie — wniosek</span></div>
+    <div class="cb-body">
+      <p><strong>Temat:</strong> Wniosek przyjęty — co dalej</p>
+      <p>Dzień dobry [IMIĘ],</p>
+      <p>Twój wniosek trafił do nas. Dalej dzieje się to:</p>
+      <p>1. Sprawdzamy kompletność danych — 1 dzień roboczy.<br>
+      2. Przekazujemy wniosek do ubezpieczycieli: Leadenhall Insurance SA i CEU sp. z o.o.<br>
+      3. Dostajesz od nas porównanie ofert — zwykle w 1–2 dni robocze.</p>
+      <p>Dane o Twoim zdrowiu przetwarzamy na podstawie zgody, którą zaznaczyłeś we wniosku. Możesz ją cofnąć w każdej chwili, odpisując na tę wiadomość — wtedy przerwiemy przygotowanie oferty.</p>
+      <p>Pozdrawiamy,<br>zespół UtrataDochodu.pl</p>
+    </div>
+    <div class="cb-note">Przypomnienie o możliwości cofnięcia zgody w pierwszej wiadomości po jej udzieleniu to dobra praktyka — bardzo ułatwia obronę w razie skargi.</div>
+  </div>
+
+  <div class="cb">
+    <div class="cb-head"><span class="tag info">Transakcyjny</span><span class="cb-name">Wysyłka oferty</span></div>
+    <div class="cb-body">
+      <p><strong>Temat:</strong> Twoje porównanie ofert jest gotowe</p>
+      <p>Dzień dobry [IMIĘ],</p>
+      <p>przygotowaliśmy porównanie ofert ubezpieczenia utraty dochodu. Otwórz je tutaj: [PRZYCISK]</p>
+      <p>Dostęp zabezpieczyliśmy kodem — wysłaliśmy go SMS-em na numer kończący się [XXX]. Link i kod są ważne 48 godzin.</p>
+      <p>Masz pytania do wariantów? Możesz je zadać bezpośrednio w widoku oferty albo zadzwonić: 504 400 901.</p>
+      <p>Pozdrawiamy,<br>zespół UtrataDochodu.pl</p>
+    </div>
+    <div class="cb-note">Numer telefonu maskowany do trzech ostatnich cyfr — pełny numer w treści e-maila to niepotrzebne ryzyko przy przekierowaniu skrzynki.</div>
+  </div>
+
+  <h4>Stopka — obowiązkowa w każdej wiadomości</h4>
+  <div class="cb">
+    <div class="cb-head"><span class="cb-name">Stopka e-mail</span></div>
+    <div class="cb-body">
+      <p style="font-size:.92rem;color:var(--muted)">
+        Aura Expert sp. z o.o., [ADRES], KRS [KRS], NIP [NIP].<br>
+        Agent ubezpieczeniowy wpisany do rejestru pośredników ubezpieczeniowych prowadzonego przez Komisję Nadzoru Finansowego pod numerem [NUMER RAU]. Rejestr dostępny na rpu.knf.gov.pl.<br>
+        Administratorem Twoich danych jest Aura Expert sp. z o.o. — <a href="#">klauzula informacyjna</a>.
+      </p>
+    </div>
+    <div class="cb-note">Do wiadomości <strong>handlowych</strong> dochodzi jeszcze jedna linia — poniżej.</div>
+  </div>
+
+  <div class="cb">
+    <div class="cb-head"><span class="tag req">Tylko w handlowych</span><span class="cb-name">Dodatkowa linia stopki</span></div>
+    <div class="cb-body">
+      <p style="font-size:.92rem;color:var(--muted)">Otrzymujesz tę wiadomość, bo zgodziłeś się na kontakt handlowy [DATA ZGODY]. <a href="#">Zrezygnuj z otrzymywania wiadomości</a> — jednym kliknięciem, bez logowania.</p>
+    </div>
+    <div class="cb-note">Rezygnacja musi działać od razu i bez logowania. Podanie daty zgody nie jest wymagane, ale bardzo pomaga, gdy klient twierdzi, że zgody nie było.</div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ -->
+<section id="oferta">
+  <h2><span class="num">08 — Widok oferty</span>Co pokazać klientowi po wpisaniu kodu</h2>
+
+  <p>Tu nie zbieracie nowych danych — klient ogląda to, o co sam poprosił. Nowe zgody nie są potrzebne. Potrzebne są trzy elementy informacyjne.</p>
+
+  <div class="cb">
+    <div class="cb-head"><span class="cb-name">Nad porównaniem wariantów</span></div>
+    <div class="cb-body">
+      <p>Poniższe warianty przygotowaliśmy na podstawie danych z Twojego wniosku. To propozycja ubezpieczycieli, a nie ostateczna decyzja — ostateczne warunki potwierdza ubezpieczyciel przy zawarciu umowy.</p>
+    </div>
+  </div>
+
+  <div class="cb">
+    <div class="cb-head"><span class="cb-name">Przy wyborze wariantu</span></div>
+    <div class="cb-body">
+      <p>Wybranie wariantu oznacza, że przekazujemy Twój wniosek do wskazanego ubezpieczyciela w celu zawarcia umowy. Nie jest to jeszcze zawarcie umowy ani zobowiązanie do zapłaty składki.</p>
+    </div>
+    <div class="cb-note">Ważne rozgraniczenie — bez niego kliknięcie „wybieram" może być odczytane jako oświadczenie woli o zawarciu umowy.</div>
+  </div>
+
+  <div class="cb">
+    <div class="cb-head"><span class="cb-name">Stopka widoku oferty</span></div>
+    <div class="cb-body">
+      <p style="font-size:.92rem;color:var(--muted)">Ta strona jest dostępna wyłącznie dla Ciebie i wygasa [DATA]. Aura Expert sp. z o.o., agent ubezpieczeniowy w rejestrze KNF nr [NUMER RAU]. <a href="#">Klauzula informacyjna</a> · <a href="#">Kontakt</a></p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <p style="margin:0">
+      <strong>Osobno, nie treścią:</strong> w §01 dokumentu o przebudowie opisałem, że funkcja bazodanowa <code>ud_offer_by_token</code> pozwala pobrać pełną ofertę wraz z e-mailem i telefonem klienta <em>bez podania PIN-u</em>, przez publiczne API. Klauzula tego nie naprawi — to zadanie do wykonania w bazie.
+    </p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ -->
+<section id="kod">
+  <h2><span class="num">09 — Dla programisty</span>Gdzie co zapisać</h2>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Zgoda</th><th>Tabela i kolumna</th><th>Stan</th></tr></thead>
+      <tbody>
+        <tr><td class="k">Prośba o kontakt</td><td class="mono" style="font-size:.82rem">udochodu_contacts.rodo_consent</td><td class="d"><span class="tag w">Kolumna jest, formularz nie wysyła</span></td></tr>
+        <tr><td class="k">Marketing e-mail</td><td class="mono" style="font-size:.82rem">udochodu_contacts.marketing_email + _at</td><td class="d"><span class="tag req">Do dodania</span></td></tr>
+        <tr><td class="k">Marketing telefon i SMS</td><td class="mono" style="font-size:.82rem">udochodu_contacts.marketing_phone + _at</td><td class="d"><span class="tag req">Do dodania</span></td></tr>
+        <tr><td class="k">Dane o zdrowiu</td><td class="mono" style="font-size:.82rem">ud_clients.health_consent + _at</td><td class="d"><span class="tag req">Do dodania</span></td></tr>
+        <tr><td class="k">Prawdziwość danych</td><td class="mono" style="font-size:.82rem">ud_clients.informed_accepted</td><td class="d"><span class="tag opt">Jest</span></td></tr>
+        <tr><td class="k">Wyłączenia</td><td class="mono" style="font-size:.82rem">ud_clients.exclusions_accepted</td><td class="d"><span class="tag opt">Jest</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout">
+    <p><strong>Zapisujcie moment, nie tylko fakt.</strong> Sama wartość <code>true</code> nie jest dowodem — przy skardze do PUODO trzeba wykazać, <em>kiedy</em> i <em>na jaką treść</em> klient się zgodził. Dlatego przy każdej zgodzie druga kolumna <code>_at</code> ze znacznikiem czasu, a dodatkowo pole z wersją treści zgody, np. <code>consents_version = '2026-08-25'</code>.</p>
+    <p style="margin-bottom:0">Kiedy zmienicie brzmienie którejkolwiek zgody — podbijacie wersję. Wtedy zawsze wiadomo, pod czym dokładnie podpisał się dany klient.</p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ -->
+<section id="prawnik">
+  <h2><span class="num">10 — Do rozstrzygnięcia</span>Pytania, których nie rozstrzygnę za Was</h2>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Pytanie</th><th>Dlaczego to ważne</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="k">Jesteście administratorem czy podmiotem przetwarzającym?</td>
+          <td class="d">Agent działający wyłącznie na rzecz jednego zakładu bywa <em>procesorem</em> — wtedy klauzulę wystawia ubezpieczyciel, nie Wy. Wy pracujecie z dwoma zakładami i prowadzicie własną bazę oraz marketing, więc najpewniej jesteście <strong>odrębnym administratorem dla własnych celów</strong> i procesorem dla danych wniosku. To przesądza, czyja klauzula ma się wyświetlić. <strong>Bez tego rozstrzygnięcia cała reszta stoi na piasku.</strong></td>
+        </tr>
+        <tr>
+          <td class="k">Czy wyznaczyliście inspektora ochrony danych?</td>
+          <td class="d">Przetwarzanie danych o zdrowiu na dużą skalę może rodzić taki obowiązek (art. 37 RODO). Jeśli IOD jest — jego dane muszą znaleźć się w klauzuli.</td>
+        </tr>
+        <tr>
+          <td class="k">Czy kalkulator to zautomatyzowane podejmowanie decyzji?</td>
+          <td class="d">Naszym zdaniem nie — pokazuje szacunek, a decyzję podejmuje człowiek u ubezpieczyciela. Ale ocena ryzyka po stronie zakładu może już nim być, a wtedy art. 22 RODO wymaga osobnej informacji.</td>
+        </tr>
+        <tr>
+          <td class="k">Jakie okresy retencji?</td>
+          <td class="d">W klauzuli zostawiłem <code>[OKRES]</code>. Zależy od Waszej polityki i przepisów o dystrybucji ubezpieczeń — nie zgaduję.</td>
+        </tr>
+        <tr>
+          <td class="k">Co z 34 istniejącymi kontaktami?</td>
+          <td class="d">Zapisane z <code>rodo_consent = false</code>. Jeśli podstawą była prośba o kontakt, a nie zgoda — prawdopodobnie można je przetwarzać. Ale marketingu do nich wysyłać nie wolno.</td>
+        </tr>
+        <tr>
+          <td class="k">Czy Resend ma podstawę transferu do USA?</td>
+          <td class="d">Sprawdzić, czy dostawca jest na liście Data Privacy Framework albo czy macie podpisane standardowe klauzule umowne.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout">
+    <p style="margin:0">Kiedy prawnik odeśle poprawki, wchodzę z tym w kod: nowe kolumny w bazie, checkboxy w obu formularzach, podstrona z klauzulą, stopki w szablonach e-mail, obsługa STOP w SMS-ach i wypięcie CallMeBota.</p>
+  </div>
+</section>
+
+<hr class="rule">
+
+<footer class="doc">
+  Projekt roboczy z 25 sierpnia 2026, przygotowany na podstawie kodu repozytoriów aurabroker/ud i aurabroker/udapp oraz stanu bazy produkcyjnej.<br>
+  Podstawy prawne: RODO, ustawa z 12 lipca 2024 r. Prawo komunikacji elektronicznej (art. 398, w mocy od 10.11.2024), ustawa o dystrybucji ubezpieczeń.<br>
+  Nie jest opinią prawną. Wymaga zatwierdzenia przez prawnika przed publikacją.
+</footer>
+
+</div>
