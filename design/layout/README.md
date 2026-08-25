@@ -8,8 +8,31 @@ Z nich składana jest kanwa projektowa; edycja = zmiana tych plików i ponowne z
 | `Main.dc.html` | Strona główna, 1440 px |
 | `Zawod.dc.html` | Strona zawodowa (lekarz), 1440 px |
 | `Mobile.dc.html` | Widok mobilny, 390 px |
-| `System.dc.html` | System wizualny: paleta, typografia, komponenty, kierunek fotografii |
+| `System.dc.html` | System wizualny: paleta, znak, ikony, typografia, przyciski, fotografia |
 | `canvas.json` | Rozmieszczenie artboardów i notatki |
+
+## Kolorystyka
+
+Jasny cyjan wzięty z zestawu ikon Klienta (2026-08-25). Zasada nadrzędna:
+**ciemny zostaje wyłącznie tekst** — żadnych czarnych sekcji.
+
+| Token | Hex | Zastosowanie |
+|---|---|---|
+| Cyjan marki | `#1BAEE5` | znak, pasek zaufania, akcenty |
+| Cyjan głębszy | `#0E96D0` | przyciski, linki, etykiety |
+| Błękit jasny | `#A6DFF7` | fasety ikon, podkreślenia |
+| Biel z cyjanem | `#F4FBFE` | tło co drugiej sekcji, stopka |
+| Granat tekstu | `#0F2E40` | wyłącznie pismo |
+| Linia | `#D3E9F4` | ramki, separatory |
+
+## Znak i ikony
+
+Fasetowana litera U oraz pięć ikon (dokument z %, teczka, ludzie, rozeta,
+koło zębate) narysowane jako wielokąty SVG w kilku odcieniach cyjanu.
+
+**To odrysy z podglądów rastrowych przysłanych przez Klienta.**
+Oryginalne pliki SVG wgrać do `design/brand/` i podmienić odrysy —
+wtedy znak będzie zgodny co do współrzędnej.
 
 ## Style kit w Artlist
 
@@ -19,8 +42,14 @@ Zawiera paletę marki i trzy wytyczne tekstowe: temat i kadr, światło i kolor,
 czego unikać. Wszystkie generacje zdjęć mają przechodzić przez ten kit —
 bez niego kadry rozjeżdżają się stylistycznie.
 
-Zatwierdzone próbki kierunku (2026-08-25, model Seedream 5.0 Pro, 16:9):
-lekarz przy oknie z prześwietleniem oraz programista przy klawiaturze wieczorem.
+Kierunek zdjęć: **wysoki klucz**. Dużo dziennego światła, jasne wnętrza,
+otwarte cienie, chłodna tonacja w stronę błękitu. Najciemniejszy ton w kadrze
+to miękka szarość, nigdy czerń.
+
+Zatwierdzona próbka (2026-08-25, Seedream 5.0 Pro, 16:9): lekarz z tabletem
+w jasnym gabinecie, okno po lewej, cała lewa połowa kadru wolna pod nagłówek.
+
+Wcześniejsza, ciemna wersja kierunku została odrzucona przez Klienta.
 
 ## Wartości w nawiasach kwadratowych
 
