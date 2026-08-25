@@ -27,6 +27,23 @@ po ankiecie. W nowym układzie:
 Na kanwie wszystkie kroki są rozwinięte jeden pod drugim, żeby dało się je
 przejrzeć naraz. W aplikacji widoczny jest tylko jeden.
 
+## Reguły biznesowe sterujące interfejsem
+
+**Limit świadczenia zależy od formy zatrudnienia:**
+
+| Forma | Limit | Przykład dla 18 000 zł |
+|---|---|---|
+| B2B / JDG | 80% dochodu | 14 400 zł |
+| Umowa o pracę | 65% dochodu | 11 700 zł |
+
+Wybór w kroku 1 wniosku ustawia górny zakres suwaka kwoty miesięcznej w kroku 2
+oraz wynik kalkulatora na stronie głównej i mobile. **Żaden tekst na stronie
+nie może mówić „do 80%" bez zastrzeżenia.**
+
+**Próg ankiety rozszerzonej:** suma trwałej niezdolności powyżej
+`1 000 000 zł` (`HEALTH_SURVEY_THRESHOLD` w `healthSurvey.js`) dokłada
+w kroku 3 ankietę rozszerzoną — 20 pytań w trzech grupach.
+
 ## Kolorystyka
 
 Jasny cyjan wzięty z zestawu ikon Klienta (2026-08-25). Zasada nadrzędna:

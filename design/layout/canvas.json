@@ -6,7 +6,7 @@
       "x": 0,
       "y": 0,
       "w": 1440,
-      "h": 5100
+      "h": 6000
     },
     {
       "file": "Wniosek.dc.html",
@@ -14,7 +14,7 @@
       "x": 1560,
       "y": 0,
       "w": 1440,
-      "h": 4300
+      "h": 4500
     },
     {
       "file": "Zawod.dc.html",
@@ -30,7 +30,7 @@
       "x": 4680,
       "y": 0,
       "w": 390,
-      "h": 2000
+      "h": 2120
     },
     {
       "file": "System.dc.html",
@@ -38,7 +38,7 @@
       "x": 5200,
       "y": 0,
       "w": 1080,
-      "h": 2620
+      "h": 3040
     }
   ],
   "annotations": [
@@ -54,14 +54,14 @@
       "x": 470,
       "y": -250,
       "w": 430,
-      "text": "Nowa sekcja: BAZA WIEDZY (blog).\nTrzy kafelki na stronie głównej, pasek artykułów powiązanych na stronie zawodu i lista na mobile.\nZdjęcie kafelka idzie z preview_image_url, a przy jego braku z thumbnail_url — dopiero przy obu pustych wchodzi znak zastępczy, jak w trzeciej karcie."
+      "text": "Dwie sekcje dołożone po Waszych uwagach: BAZA WIEDZY (blog) i FAQ.\nFAQ było w starym index.html razem ze schematem FAQPage — wypadło mi przy przepisywaniu. Wróciło z tymi samymi dziesięcioma pytaniami, dwa pierwsze rozwinięte.\nKafelek bloga bierze zdjęcie z preview_image_url, przy braku z thumbnail_url."
     },
     {
       "id": "wniosek",
       "x": 1560,
       "y": -250,
       "w": 430,
-      "text": "Wniosek — brakowało go w pierwszej wersji. Wszystkie pola ze starego formularza, w czterech krokach.\nKolejność zmieniona względem oryginału: zakres ochrony idzie PRZED stanem zdrowia, bo to suma trwałej niezdolności decyduje, czy dojdzie ankieta rozszerzona. W starym układzie wyzwalacz był po ankiecie.\nNa kanwie kroki są rozwinięte jeden pod drugim — w aplikacji widoczny jest tylko jeden naraz."
+      "text": "Wniosek — wszystkie pola ze starego formularza w czterech krokach.\nKolejność zmieniona: zakres ochrony PRZED stanem zdrowia, bo suma trwałej niezdolności powyżej 1 mln zł wyzwala ankietę rozszerzoną.\nForma zatrudnienia z kroku 1 ustawia limit świadczenia: 80% na B2B, 65% na umowie o pracę. To samo w kalkulatorze na stronie głównej i mobile."
     },
     {
       "id": "odmiana",

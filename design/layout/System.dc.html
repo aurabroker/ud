@@ -254,6 +254,46 @@
     </div>
   </div>
 
+  <!-- ── Reguły biznesowe ─────────────────────────── -->
+  <div style="margin-bottom: 46px;">
+    <div class="lbl" style="margin-bottom: 16px;">Reguły biznesowe sterujące interfejsem</div>
+    <div style="border: 1px solid #D3E9F4;">
+
+      <div style="padding: 24px 28px; border-bottom: 1px solid #E6F4FA;">
+        <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 10px;">
+          <span style="font-size: 17px; font-weight: 700;">Limit świadczenia zależy od formy zatrudnienia</span>
+          <span class="mono" style="font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; background: #EAF6FC; color: #0E96D0; padding: 3px 9px; font-weight: 600;">Kalkulator + wniosek</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-bottom: 12px;">
+          <div style="border: 1.5px solid #1BAEE5; background: #F4FBFE; padding: 16px 18px;">
+            <div class="mono" style="font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #0E96D0; font-weight: 600; margin-bottom: 8px;">B2B / JDG</div>
+            <div class="mono" style="font-size: 30px; font-weight: 600; color: #0E96D0;">80%</div>
+            <div style="font-size: 13.5px; color: #4E6D7D; margin-top: 4px;">dochodu — maksymalne świadczenie</div>
+          </div>
+          <div style="border: 1px solid #BEDFF0; padding: 16px 18px;">
+            <div class="mono" style="font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #4E6D7D; font-weight: 600; margin-bottom: 8px;">Umowa o pracę</div>
+            <div class="mono" style="font-size: 30px; font-weight: 600; color: #0F2E40;">65%</div>
+            <div style="font-size: 13.5px; color: #4E6D7D; margin-top: 4px;">dochodu — maksymalne świadczenie</div>
+          </div>
+        </div>
+        <div style="font-size: 14px; line-height: 1.6; color: #4E6D7D; max-width: 56em;">Wybór formy zatrudnienia w kroku 1 ustawia górny zakres suwaka kwoty miesięcznej w kroku 2 i wynik kalkulatora na stronie głównej. Dla 18 000 zł dochodu: 14 400 zł na B2B, 11 700 zł na etacie. <strong>Żaden tekst na stronie nie może mówić „do 80%" bez zastrzeżenia</strong> — dla połowy odbiorców byłoby to nieprawdą.</div>
+      </div>
+
+      <div style="padding: 24px 28px;">
+        <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 10px;">
+          <span style="font-size: 17px; font-weight: 700;">Próg ankiety rozszerzonej</span>
+          <span class="mono" style="font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; background: #EAF6FC; color: #0E96D0; padding: 3px 9px; font-weight: 600;">Wniosek, krok 2 → 3</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 18px; margin-bottom: 12px;">
+          <div class="mono" style="font-size: 30px; font-weight: 600; color: #0E96D0;">1 000 000 zł</div>
+          <div style="font-size: 14px; line-height: 1.5; color: #4E6D7D;">suma <strong>trwałej niezdolności</strong> — powyżej tej kwoty w kroku 3 dochodzi ankieta rozszerzona: 20 pytań w trzech grupach.</div>
+        </div>
+        <div style="font-size: 14px; line-height: 1.6; color: #4E6D7D; max-width: 56em;">Stała <span class="mono" style="font-size: 13px;">HEALTH_SURVEY_THRESHOLD</span> w <span class="mono" style="font-size: 13px;">healthSurvey.js</span>. Dlatego zakres ochrony musi iść <strong>przed</strong> stanem zdrowia — inaczej wyzwalacz pojawia się po ankiecie, którą ma wyzwolić.</div>
+      </div>
+
+    </div>
+  </div>
+
   <!-- ── Fotografia ───────────────────────────────── -->
   <div>
     <div class="lbl" style="margin-bottom: 16px;">Fotografia — style kit Artlist, wysoki klucz</div>

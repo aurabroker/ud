@@ -110,7 +110,7 @@
       <div style="width: 620px; display: flex; flex-direction: column; gap: 20px;">
         <div class="mono" style="font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: #0E96D0; font-weight: 600;">Prywatne L4 dla samozatrudnionych</div>
         <h1 class="serif" style="margin: 0; font-size: 58px; line-height: 1.05; font-weight: 500; color: #0F2E40; letter-spacing: -0.02em; text-wrap: balance;">Ubezpieczenie utraty dochodu</h1>
-        <p style="margin: 0; font-size: 19px; line-height: 1.55; color: #4E6D7D; max-width: 30em;">Na B2B zasiłek z ZUS liczy się od zadeklarowanej podstawy, nie od tego, co realnie zarabiasz. Polisa wypłaca do 80% Twojego dochodu — od pierwszego dnia niezdolności do pracy.</p>
+        <p style="margin: 0; font-size: 19px; line-height: 1.55; color: #4E6D7D; max-width: 30em;">Na B2B zasiłek z ZUS liczy się od zadeklarowanej podstawy, nie od tego, co realnie zarabiasz. Polisa wypłaca do 80% dochodu na B2B i do 65% na umowie o pracę — od pierwszego dnia niezdolności.</p>
         <div style="display: flex; gap: 12px; align-items: center; margin-top: 8px;">
           <div style="background: #0E96D0; color: #FFFFFF; padding: 16px 30px; font-weight: 700; font-size: 16px;">Policz swoją składkę</div>
           <div style="border: 1.5px solid #1BAEE5; color: #0E96D0; background: #FFFFFF; padding: 14.5px 28px; font-weight: 600; font-size: 16px;">Zobacz, co nie jest objęte</div>
@@ -148,6 +148,14 @@
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 18px;">
+          <div style="font-size: 14px; font-weight: 600; color: #4E6D7D;">Forma zatrudnienia</div>
+          <div style="display: flex; gap: 0;">
+            <div style="flex-grow: 1; text-align: center; padding: 11px 0; font-size: 14.5px; font-weight: 700; background: #1BAEE5; color: #FFFFFF;">B2B / JDG</div>
+            <div style="flex-grow: 1; text-align: center; padding: 11px 0; font-size: 14.5px; font-weight: 500; border: 1px solid #BEDFF0; border-left: none; color: #4E6D7D;">Umowa o pracę</div>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 18px;">
           <div style="display: flex; justify-content: space-between; align-items: baseline;">
             <span style="font-size: 14px; font-weight: 600; color: #4E6D7D;">Miesięczny dochód netto</span>
             <span class="mono" style="font-size: 15px; font-weight: 600;">18 000 zł</span>
@@ -171,7 +179,10 @@
 
         <div style="background: #F4FBFE; border-left: 3px solid #1BAEE5; padding: 16px 18px; margin-top: 22px; display: flex; flex-direction: column; gap: 10px;">
           <div style="display: flex; justify-content: space-between; align-items: baseline;">
-            <span style="font-size: 14px; color: #4E6D7D;">Świadczenie miesięczne</span>
+            <div>
+              <div style="font-size: 14px; color: #4E6D7D;">Świadczenie miesięczne</div>
+              <div class="mono" style="font-size: 11px; color: #0E96D0; letter-spacing: 0.06em; margin-top: 2px;">80% DOCHODU — LIMIT DLA B2B</div>
+            </div>
             <span class="mono" style="font-size: 20px; font-weight: 600; color: #0F2E40;">14 400 zł</span>
           </div>
           <div style="display: flex; justify-content: space-between; align-items: baseline;">
@@ -181,7 +192,7 @@
         </div>
 
         <div style="background: #0B7CAF; color: #FFFFFF; text-align: center; padding: 16px 0; font-weight: 700; font-size: 16px; margin-top: 18px;">Przejdź do wniosku</div>
-        <div style="font-size: 12px; color: #8AA3AF; text-align: center; margin-top: 12px; line-height: 1.45;">Wyliczenie szacunkowe. Ostateczna składka po ocenie ryzyka przez ubezpieczyciela.</div>
+        <div style="font-size: 12px; color: #8AA3AF; text-align: center; margin-top: 12px; line-height: 1.45;">Na umowie o pracę limit świadczenia wynosi 65% dochodu. Wyliczenie szacunkowe — ostateczna składka po ocenie ryzyka.</div>
       </div>
     </div>
   </div>
@@ -250,7 +261,7 @@
           <div class="mono" style="padding: 21px 24px; font-size: 20px; font-weight: 600; color: #0E96D0;">86 400 zł</div>
         </div>
       </div>
-      <div style="font-size: 13px; color: #8AA3AF; margin-top: 14px;">Wyliczenie dla dochodu 18 000 zł netto i świadczenia na poziomie 80%. Kwoty ZUS zależą od zadeklarowanej podstawy składek.</div>
+      <div style="font-size: 13px; color: #8AA3AF; margin-top: 14px;">Wyliczenie dla dochodu 18 000 zł netto na B2B, gdzie limit świadczenia to 80%. Na umowie o pracę limit wynosi 65%, czyli 11 700 zł. Kwoty ZUS zależą od zadeklarowanej podstawy składek.</div>
     </div>
   </div>
 
@@ -369,6 +380,72 @@
             <div style="font-size: 15px; color: #4E6D7D; margin-top: 3px;">Dotyczy 24 miesięcy wstecz — chyba że zgłosisz je i ubezpieczyciel zaakceptuje.</div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ── FAQ ──────────────────────────────────────── -->
+  <div style="background: #FFFFFF; padding: 84px 0; border-bottom: 1px solid #D3E9F4;">
+    <div style="max-width: 1200px; margin: 0 auto; display: flex; gap: 72px; align-items: flex-start;">
+
+      <div style="width: 340px; flex-shrink: 0;">
+        <div class="mono" style="font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: #0E96D0; font-weight: 600; margin-bottom: 16px;">Pytania i odpowiedzi</div>
+        <h2 class="serif" style="margin: 0 0 16px; font-size: 38px; line-height: 1.12; font-weight: 500; letter-spacing: -0.015em; text-wrap: balance;">Najczęściej pytacie o to</h2>
+        <p style="margin: 0 0 22px; font-size: 17px; line-height: 1.6; color: #4E6D7D;">Dziesięć pytań, które klienci zadają przed zakupem. Odpowiedź zaczyna się od konkretu, a nie od wstępu — tak buduje się treść, którą modele AI cytują.</p>
+        <div style="background: #F4FBFE; border: 1px solid #BEDFF0; padding: 16px 18px;">
+          <div class="mono" style="font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: #0E96D0; font-weight: 600; margin-bottom: 7px;">Schema.org</div>
+          <div style="font-size: 14px; line-height: 1.55; color: #4E6D7D;">Cała sekcja idzie w kodzie jako <span class="mono" style="font-size: 13px;">FAQPage</span> — w źródle HTML, nie doklejana JavaScriptem. Dziś ma to strona główna, ale <strong>0 z 228 stron zawodowych</strong>.</div>
+        </div>
+      </div>
+
+      <div style="flex-grow: 1; border-top: 1px solid #D3E9F4;">
+          <div style="padding: 21px 0; border-bottom: 1px solid #E6F4FA;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; margin-bottom: 9px;">
+              <h3 style="margin: 0; font-size: 18.5px; font-weight: 700; line-height: 1.35;">Czym różni się ubezpieczenie od utraty dochodu od ZUS?</h3>
+              <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#0E96D0" stroke-width="2" stroke-linecap="round" style="flex-shrink: 0; margin-top: 3px;"><path d="M6 9l6 6 6-6"></path></svg>
+            </div>
+            <p style="margin: 0; font-size: 16px; line-height: 1.65; color: #4E6D7D; max-width: 52em;">ZUS wypłaca zasiłek chorobowy w wysokości 80% <strong>podstawy wymiaru składek</strong>, która u przedsiębiorcy jest zwykle znacznie niższa od realnych zarobków. Polisa liczy świadczenie od Twojego udokumentowanego dochodu — do 80% na B2B i do 65% na umowie o pracę.</p>
+          </div>
+          <div style="padding: 21px 0; border-bottom: 1px solid #E6F4FA;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; margin-bottom: 9px;">
+              <h3 style="margin: 0; font-size: 18.5px; font-weight: 700; line-height: 1.35;">Ile kosztuje ubezpieczenie od utraty dochodu?</h3>
+              <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#0E96D0" stroke-width="2" stroke-linecap="round" style="flex-shrink: 0; margin-top: 3px;"><path d="M6 9l6 6 6-6"></path></svg>
+            </div>
+            <p style="margin: 0; font-size: 16px; line-height: 1.65; color: #4E6D7D; max-width: 52em;">Składka zależy od wieku, zawodu, formy zatrudnienia i wybranej sumy ubezpieczenia. Orientacyjnie mieści się w przedziale [WIDEŁKI DO POTWIERDZENIA] miesięcznego dochodu, który chcesz zabezpieczyć. Dokładną kwotę policzysz w kalkulatorze.</p>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 21px 0; border-bottom: 1px solid #E6F4FA;">
+            <h3 style="margin: 0; font-size: 18.5px; font-weight: 700; line-height: 1.35;">Czy ubezpieczenie działa na L4?</h3>
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#8AA3AF" stroke-width="2" stroke-linecap="round" style="flex-shrink: 0;"><path d="M12 6v12M6 12h12"></path></svg>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 21px 0; border-bottom: 1px solid #E6F4FA;">
+            <h3 style="margin: 0; font-size: 18.5px; font-weight: 700; line-height: 1.35;">Dla kogo jest to ubezpieczenie?</h3>
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#8AA3AF" stroke-width="2" stroke-linecap="round" style="flex-shrink: 0;"><path d="M12 6v12M6 12h12"></path></svg>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 21px 0; border-bottom: 1px solid #E6F4FA;">
+            <h3 style="margin: 0; font-size: 18.5px; font-weight: 700; line-height: 1.35;">Co to jest luka dochodowa i jak ją obliczyć?</h3>
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#8AA3AF" stroke-width="2" stroke-linecap="round" style="flex-shrink: 0;"><path d="M12 6v12M6 12h12"></path></svg>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 21px 0; border-bottom: 1px solid #E6F4FA;">
+            <h3 style="margin: 0; font-size: 18.5px; font-weight: 700; line-height: 1.35;">Czy składka jest kosztem uzyskania przychodu?</h3>
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#8AA3AF" stroke-width="2" stroke-linecap="round" style="flex-shrink: 0;"><path d="M12 6v12M6 12h12"></path></svg>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 21px 0; border-bottom: 1px solid #E6F4FA;">
+            <h3 style="margin: 0; font-size: 18.5px; font-weight: 700; line-height: 1.35;">Od jakich ubezpieczycieli pochodzi polisa?</h3>
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#8AA3AF" stroke-width="2" stroke-linecap="round" style="flex-shrink: 0;"><path d="M12 6v12M6 12h12"></path></svg>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 21px 0; border-bottom: 1px solid #E6F4FA;">
+            <h3 style="margin: 0; font-size: 18.5px; font-weight: 700; line-height: 1.35;">Czy lekarz na kontrakcie B2B potrzebuje takiej polisy?</h3>
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#8AA3AF" stroke-width="2" stroke-linecap="round" style="flex-shrink: 0;"><path d="M12 6v12M6 12h12"></path></svg>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 21px 0; border-bottom: 1px solid #E6F4FA;">
+            <h3 style="margin: 0; font-size: 18.5px; font-weight: 700; line-height: 1.35;">Czy programista na B2B może się ubezpieczyć?</h3>
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#8AA3AF" stroke-width="2" stroke-linecap="round" style="flex-shrink: 0;"><path d="M12 6v12M6 12h12"></path></svg>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 21px 0;">
+            <h3 style="margin: 0; font-size: 18.5px; font-weight: 700; line-height: 1.35;">Co to jest ubezpieczenie od utraty dochodu?</h3>
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#8AA3AF" stroke-width="2" stroke-linecap="round" style="flex-shrink: 0;"><path d="M12 6v12M6 12h12"></path></svg>
+          </div>
       </div>
     </div>
   </div>
