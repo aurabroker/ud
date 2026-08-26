@@ -1,6 +1,6 @@
 # Deployment — Cloudflare Pages
 
-Aplikacja (`app/`) buduje się przez `@sveltejs/adapter-cloudflare` do katalogu
+Aplikacja (`apps/panel/`) buduje się przez `@sveltejs/adapter-cloudflare` do katalogu
 `.svelte-kit/cloudflare` i wdraża jako **Cloudflare Pages**.
 
 ---
@@ -8,10 +8,10 @@ Aplikacja (`app/`) buduje się przez `@sveltejs/adapter-cloudflare` do katalogu
 ## A) Podłączenie repo do Cloudflare Pages (raz)
 
 1. `dash.cloudflare.com` → **Workers & Pages** → **Create** → **Pages** → **Connect to Git**
-2. Wybierz repo `aurabroker/udapp`, branch produkcyjny (np. `main`)
+2. Wybierz repo `aurabroker/ud`, branch produkcyjny (np. `main`)
 3. Ustawienia builda:
-   - **Root directory (advanced):** `app`
-   - **Build command:** `npm run build`
+   - **Root directory (advanced):** `apps/panel`
+   - **Build command:** `pnpm install --frozen-lockfile && pnpm --filter @ud/panel build`
    - **Build output directory:** `.svelte-kit/cloudflare`
 4. **Compatibility flags:** dodaj `nodejs_compat` (Settings → Functions → Compatibility flags),
    dla środowiska **Production** i **Preview**. Bez tego unpdf/Web Crypto nie zadziała.

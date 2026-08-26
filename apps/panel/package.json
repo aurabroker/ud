@@ -1,5 +1,5 @@
 {
-  "name": "udapp",
+  "name": "@ud/panel",
   "version": "1.0.0",
   "private": true,
   "type": "module",
