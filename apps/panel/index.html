@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Ofertowania — UtrataDochodu</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%231e293b'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-family='sans-serif' font-size='18' font-weight='800'>U</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    /* PDF export mode — legacy, kept for safety */
+    body.pdf-mode .no-pdf,
+    body.pdf-mode .app-header,
+    body.pdf-mode .mobile-nav,
+    body.pdf-mode .editor-topbar,
+    body.pdf-mode .variant-tabs-bar { display: none !important; }
+    body.pdf-mode .app-main { padding: 0 !important; margin: 0 !important; }
+    body.pdf-mode .card { border: 1px solid #e2e8f0 !important; box-shadow: none !important; }
+    body.pdf-mode #exportContent { background: #fff; }
+    body.pdf-mode .matrix-wrap { overflow: visible !important; }
+  </style>
+</head>
+<body>
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- LOGIN -->
+  <div id="loginScreen" class="login-wrapper">
+    <div class="login-card">
+      <div class="login-logo"><div class="login-logo-icon">U</div><div class="login-logo-text">Utrata<span>Dochodu</span></div></div>
+      <p class="login-subtitle">Panel Ofertowania — Zaloguj się</p>
+      <div id="loginError" class="login-error hidden"></div>
+      <form id="loginForm" autocomplete="on">
+        <div class="form-group"><label class="form-label" for="loginEmail">Email</label><input class="form-input" type="email" id="loginEmail" required autocomplete="email" placeholder="twoj@email.pl"></div>
+        <div class="form-group"><label class="form-label" for="loginPassword">Hasło</label><input class="form-input" type="password" id="loginPassword" required autocomplete="current-password" placeholder="Hasło"></div>
+        <button type="submit" class="btn btn-primary btn-full btn-lg" id="loginBtn">Zaloguj się</button>
+      </form>
+      <p style="text-align:center;font-size:0.7rem;color:var(--slate-400);margin-top:1.25rem;">Aura Expert sp. z o.o. &middot; Panel wewnętrzny</p>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <div id="appScreen" class="app-wrapper hidden">
+    <header class="app-header no-pdf no-client">
+      <div class="header-left">
+        <div class="header-logo"><div class="header-logo-icon">U</div>Utrata<span>Dochodu</span></div>
+        <nav class="header-nav" id="headerNav">
+          <button class="header-nav-btn active" data-view="dashboard">Oferty</button>
+          <button class="header-nav-btn" data-view="admin" id="navAdminBtn">Admin</button>
+        </nav>
+      </div>
+      <div class="header-right">
+        <div class="header-user">
+          <div class="header-user-avatar" id="userAvatar">M</div>
+          <div><div class="header-user-name" id="userName">—</div><div class="header-user-role" id="userRole">user</div></div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="App.logout()">Wyloguj</button>
+      </div>
+    </header>
+
+    <div class="mobile-nav no-pdf no-client" id="mobileNav">
+      <button class="header-nav-btn active" data-view="dashboard">Oferty</button>
+      <button class="header-nav-btn" data-view="admin" id="mobileAdminBtn">Admin</button>
+    </div>
+
+    <header class="client-header hidden" id="clientHeader">
+      <div class="client-header-logo">Utrata<span>Dochodu</span></div>
+      <div class="client-header-title" id="clientHeaderTitle">Rekomendacja Ofertowa</div>
+    </header>
+
+    <main class="app-main">
+      <!-- DASHBOARD -->
+      <div id="viewDashboard">
+        <div class="dashboard-header">
+          <div>
+            <h1 class="dashboard-title">Twoje Oferty</h1>
+            <p class="dashboard-subtitle">Zarządzaj i twórz nowe kalkulacje</p>
+          </div>
+          <div id="dashboardActions">
+            <button class="btn btn-primary" onclick="App.createNewOffer()">+ Nowa Oferta</button>
+          </div>
+        </div>
+        <div id="dashboardTabsBar" style="display:flex;gap:0.25rem;margin-bottom:1rem;border-bottom:1px solid var(--slate-200,#e2e8f0);padding-bottom:0;"></div>
+        <div id="offersListContainer"><div class="empty-state"><div class="spinner spinner-lg"></div></div></div>
+
+        <!-- Nowe zgłoszenia z formularza -->
+        <div class="card" style="margin-top:1.5rem;" id="recentClientsCard">
+          <div class="card-header" style="justify-content:space-between;">
+            <div class="card-title">🆕 Ostatnie zgłoszenia z formularza</div>
+            <button class="btn btn-ghost btn-sm" style="font-size:0.78rem;" onclick="App.navigateTo('admin')">Zobacz wszystkie →</button>
+          </div>
+          <div id="recentClientsWidget" style="padding:0.5rem 1rem 1rem;">
+            <div class="spinner"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EDITOR -->
+      <div id="viewEditor" class="hidden">
+        <div class="editor-topbar no-client">
+          <div style="display:flex;align-items:flex-start;gap:0.75rem;flex:1;min-width:0;">
+            <button class="editor-back no-pdf" onclick="App.navigateTo('dashboard')">← Wróć</button>
+            <div class="editor-title-group">
+              <input type="text" class="editor-title-input" id="editorOfferName" placeholder="Nazwa oferty">
+              <input type="text" class="editor-client-input" id="editorClientName" placeholder="Imię i nazwisko klienta">
+            </div>
+          </div>
+          <div class="editor-actions no-pdf">
+            <button class="btn btn-primary btn-sm" onclick="App.saveOffer(false)" id="btnSaveOffer">💾 Zapisz</button>
+            <button id="btnSendEmail" onclick="App.sendOfferByEmail()" class="btn btn-primary no-pdf hidden"> 📧 Wyślij na email</button>
+ 
+            <button class="btn btn-success btn-sm hidden" onclick="App.saveOffer(true)" id="btnClientLink">🔗 Link</button>
+            <button class="btn btn-outline btn-sm" onclick="App.exportPDF()" id="btnExportPdf">📄 PDF</button>
+          </div>
+        </div>
+
+        <!-- Client greeting -->
+        <div id="clientGreeting" class="hidden" style="margin-bottom:1rem;"></div>
+
+        <!-- Broker message -->
+        <div class="card no-client" style="margin-bottom:1rem;" id="brokerMessageSection">
+          <div class="card-body-padded">
+            <label class="form-label">💬 Notatka (widoczna dla klienta)</label>
+            <textarea class="broker-message-textarea" id="brokerMessage" placeholder="Wiadomość do klienta..."></textarea>
+          </div>
+        </div>
+        <div id="clientMessageSection" class="hidden" style="margin-bottom:1rem;">
+          <div class="client-message-display" id="clientMessageDisplay"></div>
+        </div>
+        <div id="clientParamsSection" class="hidden" style="margin-bottom:1rem;"></div>
+
+        <!-- Variant tabs -->
+        <div id="variantTabs" class="variant-tabs-bar" style="margin-bottom:0.5rem;"></div>
+
+        <!-- ===== PDF Export Container START ===== -->
+        <div id="exportContent">
+
+        <!-- Matrix -->
+        <div class="card" style="margin-bottom:1.25rem;" id="matrixCard">
+          <div class="card-header">
+            <div class="card-title">📊 Matryca Porównawcza</div>
+            <div class="no-pdf no-client" style="display:flex;gap:0.5rem;">
+              <button class="btn btn-outline btn-sm" onclick="App.openRiskPicker()">+ Ryzyko</button>
+              <button class="btn btn-outline btn-sm" onclick="App.openInsurerPicker()">+ Ubezpieczyciel</button>
+            </div>
+          </div>
+          <div class="card-body"><div class="matrix-wrap"><table class="matrix-table" id="matrixTable"><thead><tr id="matrixHeader"></tr></thead><tbody id="matrixBody"></tbody></table></div></div>
+        </div>
+
+        <!-- Wait periods -->
+        <div class="card hidden" style="margin-bottom:1.25rem;" id="waitPeriodsSection"></div>
+
+        <!-- Scoring -->
+        <div class="card" style="margin-bottom:1.25rem;">
+          <div class="card-header"><div class="card-title">🏆 Rekomendacja</div></div>
+          <div class="card-body-padded">
+            <div id="scoringResults" class="scoring-rows"></div>
+          </div>
+        </div>
+
+        <!-- Client exclusions -->
+        <div id="clientExclusionsSection" class="hidden"></div>
+
+        </div>
+        <!-- ===== PDF Export Container END ===== -->
+      </div>
+
+      <!-- ADMIN -->
+      <div id="viewAdmin" class="hidden">
+        <div class="dashboard-header">
+          <div><h1 class="dashboard-title">Panel Administracyjny</h1></div>
+          <button class="btn btn-primary" onclick="Admin.openNewUserModal()">+ Dodaj użytkownika</button>
+        </div>
+
+        <!-- Admin Tabs -->
+        <div class="admin-tabs" style="display:flex;gap:0.35rem;margin-bottom:1.25rem;border-bottom:1px solid var(--slate-200,#e2e8f0);padding-bottom:0;">
+          <button class="admin-tab-btn active" data-tab="clients" onclick="Admin.switchTab('clients')">
+            📋 Klienci z formularza
+            <span class="admin-tab-badge" id="clientsTabBadge" style="display:none;">0</span>
+          </button>
+          <button class="admin-tab-btn" data-tab="users" onclick="Admin.switchTab('users')">👥 Users</button>
+          <button class="admin-tab-btn" data-tab="stats" onclick="Admin.switchTab('stats')">📊 Statystyki</button>
+          <button class="admin-tab-btn" data-tab="reflinks" onclick="Admin.switchTab('reflinks')">🔗 Ref-linki</button>
+        </div>
+
+        <!-- TAB: Klienci z formularza -->
+        <div class="admin-tab-content" id="adminClientsSection">
+          <div class="card">
+            <div class="card-header" style="justify-content:space-between;">
+              <div class="card-title" style="display:flex;align-items:center;gap:0.5rem;">
+                Klienci z formularza
+                <span style="font-size:0.7rem;font-weight:700;display:inline-flex;align-items:center;gap:0.25rem;">
+                  <span style="background:var(--slate-200,#e2e8f0);color:var(--slate-700,#334155);padding:2px 8px;border-radius:100px;" id="clientsTotalCount">0</span>
+                  <span style="background:var(--blue-100,#dbeafe);color:var(--blue-700,#1d4ed8);padding:2px 8px;border-radius:100px;display:none;" id="clientsNewCount">0 nowych</span>
+                </span>
+              </div>
+              <div style="display:flex;gap:0.5rem;align-items:center;">
+                <input type="text" class="form-input" placeholder="Szukaj klienta..." id="adminClientSearch" style="width:200px;padding:6px 10px;font-size:0.8rem;" oninput="Admin.filterClients(this.value)">
+              </div>
+            </div>
+            <div class="card-body" style="max-height:65vh;overflow-y:auto;">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Imię i nazwisko</th>
+                    <th>Email</th>
+                    <th>Telefon</th>
+                    <th>Przypisany do</th>
+                    <th>Źródło (ref)</th>
+                    <th>Data</th>
+                    <th style="width:44px;"></th>
+                  </tr>
+                </thead>
+                <tbody id="adminClientsList"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: Users -->
+        <div class="admin-tab-content hidden" id="adminUsersSection">
+          <!-- Team cards rendered dynamically when Admin.renderTeamCards() is called -->
+        
+
+          <div id="teamCardsContainer" class="hidden" style="display:none;grid-template-columns:repeat(4,1fr);gap:1rem;"></div>
+          <!-- Fallback flat table — used by existing admin.js until team cards are wired -->
+          <div class="card" id="adminUsersFallback">
+                    
+              <div class="card-title">👥 Użytkownicy</div>
+            </div>
+            <div class="card-body" style="max-height:65vh;overflow-y:auto;">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Nazwa</th>
+                    <th>Rola</th>
+                    <th>Status</th>
+                    <th style="text-align:center;">Klienci</th>
+                    <th>ID Ref</th>
+                    <th style="width:80px;">Akcje</th>
+                  </tr>
+                </thead>
+                <tbody id="adminUsersList"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: Statystyki -->
+        <div class="admin-tab-content hidden" id="adminStatsSection">
+          <!-- Metric cards row -->
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.75rem;margin-bottom:1.25rem;" class="stats-metrics-grid">
+            <div class="stats-metric-card">
+              <div class="stats-metric-label">Odsłony (30d)</div>
+              <div class="stats-metric-value" id="statPageviews">—</div>
+              <div class="stats-metric-change positive" id="statPageviewsChange"></div>
+            </div>
+            <div class="stats-metric-card">
+              <div class="stats-metric-label">Unikalni (30d)</div>
+              <div class="stats-metric-value" id="statUniques">—</div>
+              <div class="stats-metric-change" id="statUniquesChange"></div>
+            </div>
+            <div class="stats-metric-card">
+              <div class="stats-metric-label">Formularze (30d)</div>
+              <div class="stats-metric-value" id="statForms">—</div>
+              <div class="stats-metric-change" id="statFormsChange"></div>
+            </div>
+            <div class="stats-metric-card">
+              <div class="stats-metric-label">Konwersja</div>
+              <div class="stats-metric-value" id="statConversion">—</div>
+              <div class="stats-metric-change" id="statConversionChange"></div>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:2fr 1fr;gap:1rem;" class="stats-charts-grid">
+            <!-- Chart: Odsłony w czasie -->
+            <div class="card">
+              <div class="card-header"><div class="card-title">Odsłony w czasie</div></div>
+              <div class="card-body-padded">
+                <canvas id="statsChartPageviews" height="220"></canvas>
+                <p style="font-size:0.7rem;color:var(--slate-400,#94a3b8);margin-top:0.5rem;text-align:center;" id="statsChartNoData">Połącz z analytics, aby zobaczyć dane</p>
+              </div>
+            </div>
+            <!-- Ranking: Top ref-linki -->
+            <div class="card">
+              <div class="card-header"><div class="card-title">Top ref-linki</div></div>
+              <div class="card-body" style="max-height:280px;overflow-y:auto;">
+                <table class="admin-table" style="font-size:0.8rem;">
+                  <thead><tr><th>Ref ID</th><th>User</th><th style="text-align:right;">Klienci</th></tr></thead>
+                  <tbody id="statsTopRefs"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: Ref-linki -->
+        <div class="admin-tab-content hidden" id="adminRefLinksSection">
+          <div class="card" style="margin-bottom:1rem;">
+            <div class="card-header"><div class="card-title">Generator linków referencyjnych</div></div>
+            <div class="card-body-padded">
+              <p style="font-size:0.85rem;color:var(--slate-500,#64748b);margin-bottom:1rem;">Każdy użytkownik ma unikalny link. Klient wchodzący z tego linku jest automatycznie przypisany do danego użytkownika.</p>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;" class="reflinks-grid">
+                <div>
+                  <label class="form-label">Domena</label>
+                  <select class="form-input" id="refLinkDomain">
+                    <option value="utratadochodu.pl">utratadochodu.pl</option>
+                    <option value="grupowe.pro">grupowe.pro</option>
+                    <option value="gwarancje.pro">gwarancje.pro</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="form-label">Użytkownik</label>
+                  <select class="form-input" id="refLinkUser"></select>
+                </div>
+              </div>
+              <div style="margin-top:0.75rem;display:flex;align-items:center;gap:0.5rem;">
+                <input class="form-input" type="text" id="refLinkOutput" readonly style="flex:1;font-family:monospace;font-size:0.85rem;background:var(--slate-50,#f8fafc);" value="utratadochodu.pl/?ref=0019">
+                <button class="btn btn-primary btn-sm" onclick="Admin.copyRefLink()">📋 Kopiuj</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><div class="card-title">Struktura zespołów</div></div>
+            <div class="card-body-padded" id="refTeamTree">
+              <p style="font-size:0.8rem;color:var(--slate-400);">Ładowanie struktury...</p>
+            </div>
+          </div>
+        </div>
+
+        <style>
+          .admin-tabs { flex-wrap: wrap; }
+          .admin-tab-btn {
+            padding: 10px 16px; border: none; background: none; cursor: pointer;
+            font-size: 0.85rem; font-weight: 600; color: var(--slate-400,#94a3b8);
+            border-bottom: 2px solid transparent; transition: 0.2s; position: relative;
+            display: inline-flex; align-items: center; gap: 6px;
+          }
+          .admin-tab-btn:hover { color: var(--slate-700,#334155); }
+          .admin-tab-btn.active { color: var(--blue-600,#2563eb); border-bottom-color: var(--blue-600,#2563eb); }
+          .admin-tab-badge {
+            font-size: 0.65rem; font-weight: 800; background: var(--blue-600,#2563eb); color: #fff;
+            padding: 1px 7px; border-radius: 100px; min-width: 18px; text-align: center;
+          }
+
+          .stats-metric-card {
+            background: var(--slate-50,#f8fafc); border-radius: 12px; padding: 1rem 1.25rem;
+          }
+          .stats-metric-label { font-size: 0.75rem; font-weight: 600; color: var(--slate-400,#94a3b8); text-transform: uppercase; letter-spacing: 0.5px; }
+          .stats-metric-value { font-size: 1.75rem; font-weight: 800; color: var(--slate-900,#0f172a); margin: 4px 0 2px; }
+          .stats-metric-change { font-size: 0.75rem; font-weight: 600; }
+          .stats-metric-change.positive { color: var(--emerald-600,#059669); }
+          .stats-metric-change.negative { color: var(--red-600,#dc2626); }
+
+          .ref-id-cell {
+            font-family: 'Fira Code', 'SF Mono', monospace; font-size: 0.75rem; font-weight: 600;
+            color: var(--blue-600, #2563eb); background: var(--blue-50, #eff6ff);
+            padding: 2px 8px; border-radius: 6px; display: inline-block;
+            cursor: pointer; user-select: all;
+          }
+          .ref-id-cell:hover { background: var(--blue-100, #dbeafe); }
+
+          .recent-client-row {
+            display: flex; align-items: center; gap: 0.75rem; padding: 0.55rem 0;
+            border-bottom: 1px solid var(--slate-100, #f1f5f9); cursor: pointer;
+            transition: background 0.15s; border-radius: 6px; padding-left: 0.25rem;
+          }
+          .recent-client-row:last-child { border-bottom: none; }
+          .recent-client-row:hover { background: var(--slate-50, #f8fafc); }
+
+          @media (max-width: 768px) {
+            .stats-metrics-grid { grid-template-columns: 1fr 1fr !important; }
+            .stats-charts-grid { grid-template-columns: 1fr !important; }
+            .reflinks-grid { grid-template-columns: 1fr !important; }
+          }
+
+          /* Team card color system — each leader gets a unique ramp */
+          .team-card { border-radius: 16px; overflow: hidden; border: 1px solid; transition: 0.3s; }
+          .team-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+          .team-card-header { padding: 14px 16px; display: flex; align-items: center; gap: 12px; }
+          .team-card-avatar { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; flex-shrink: 0; }
+          .team-card-info { flex: 1; min-width: 0; }
+          .team-card-name { font-weight: 700; font-size: 0.9rem; }
+          .team-card-meta { font-size: 0.75rem; margin-top: 1px; }
+          .team-card-role { font-size: 0.7rem; font-weight: 700; padding: 3px 10px; border-radius: 100px; }
+          .team-card table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+          .team-card thead td { padding: 8px 14px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; }
+          .team-card tbody tr { background: rgba(255,255,255,0.5); }
+          .team-card tbody td { padding: 10px 14px; }
+          .team-card-empty { padding: 14px 16px; font-size: 0.8rem; opacity: 0.6; text-align: center; }
+
+          /* Color ramps for teams */
+          .team-purple { background: #EEEDFE; border-color: #AFA9EC; }
+          .team-purple .team-card-header { border-bottom: 1px solid rgba(83,74,183,0.15); }
+          .team-purple .team-card-avatar { background: #534AB7; color: #EEEDFE; }
+          .team-purple .team-card-name { color: #3C3489; }
+          .team-purple .team-card-meta { color: #534AB7; }
+          .team-purple .team-card-role { background: rgba(83,74,183,0.12); color: #3C3489; }
+          .team-purple thead td { color: #534AB7; }
+          .team-purple tbody td { color: #3C3489; }
+          .team-purple tbody tr { border-top: 1px solid rgba(83,74,183,0.1); }
+          .team-purple .ref-id-cell { background: rgba(83,74,183,0.1); color: #3C3489; }
+
+          .team-teal { background: #E1F5EE; border-color: #5DCAA5; }
+          .team-teal .team-card-header { border-bottom: 1px solid rgba(15,110,86,0.15); }
+          .team-teal .team-card-avatar { background: #0F6E56; color: #E1F5EE; }
+          .team-teal .team-card-name { color: #085041; }
+          .team-teal .team-card-meta { color: #0F6E56; }
+          .team-teal .team-card-role { background: rgba(15,110,86,0.12); color: #085041; }
+          .team-teal thead td { color: #0F6E56; }
+          .team-teal tbody td { color: #085041; }
+          .team-teal tbody tr { border-top: 1px solid rgba(15,110,86,0.1); }
+          .team-teal .ref-id-cell { background: rgba(15,110,86,0.1); color: #085041; }
+
+          .team-coral { background: #FAECE7; border-color: #F0997B; }
+          .team-coral .team-card-header { border-bottom: 1px solid rgba(153,60,29,0.15); }
+          .team-coral .team-card-avatar { background: #993C1D; color: #FAECE7; }
+          .team-coral .team-card-name { color: #712B13; }
+          .team-coral .team-card-meta { color: #993C1D; }
+          .team-coral .team-card-role { background: rgba(153,60,29,0.12); color: #712B13; }
+          .team-coral thead td { color: #993C1D; }
+          .team-coral tbody td { color: #712B13; }
+          .team-coral tbody tr { border-top: 1px solid rgba(153,60,29,0.1); }
+          .team-coral .ref-id-cell { background: rgba(153,60,29,0.1); color: #712B13; }
+
+          .team-blue { background: #E6F1FB; border-color: #85B7EB; }
+          .team-blue .team-card-header { border-bottom: 1px solid rgba(24,95,165,0.15); }
+          .team-blue .team-card-avatar { background: #185FA5; color: #E6F1FB; }
+          .team-blue .team-card-name { color: #0C447C; }
+          .team-blue .team-card-meta { color: #185FA5; }
+          .team-blue .team-card-role { background: rgba(24,95,165,0.12); color: #0C447C; }
+          .team-blue thead td { color: #185FA5; }
+          .team-blue tbody td { color: #0C447C; }
+          .team-blue tbody tr { border-top: 1px solid rgba(24,95,165,0.1); }
+          .team-blue .ref-id-cell { background: rgba(24,95,165,0.1); color: #0C447C; }
+
+          .team-pink { background: #FBEAF0; border-color: #ED93B1; }
+          .team-pink .team-card-header { border-bottom: 1px solid rgba(153,53,86,0.15); }
+          .team-pink .team-card-avatar { background: #993556; color: #FBEAF0; }
+          .team-pink .team-card-name { color: #72243E; }
+          .team-pink .team-card-meta { color: #993556; }
+          .team-pink .team-card-role { background: rgba(153,53,86,0.12); color: #72243E; }
+          .team-pink thead td { color: #993556; }
+          .team-pink tbody td { color: #72243E; }
+          .team-pink tbody tr { border-top: 1px solid rgba(153,53,86,0.1); }
+          .team-pink .ref-id-cell { background: rgba(153,53,86,0.1); color: #72243E; }
+
+          .team-amber { background: #FAEEDA; border-color: #FAC775; }
+          .team-amber .team-card-header { border-bottom: 1px solid rgba(133,79,11,0.15); }
+          .team-amber .team-card-avatar { background: #854F0B; color: #FAEEDA; }
+          .team-amber .team-card-name { color: #633806; }
+          .team-amber .team-card-meta { color: #854F0B; }
+          .team-amber .team-card-role { background: rgba(133,79,11,0.12); color: #633806; }
+          .team-amber thead td { color: #854F0B; }
+          .team-amber tbody td { color: #633806; }
+          .team-amber tbody tr { border-top: 1px solid rgba(133,79,11,0.1); }
+          .team-amber .ref-id-cell { background: rgba(133,79,11,0.1); color: #633806; }
+        </style>
+      </div>
+    </main>
+
+    <footer class="app-footer">
+      Aura Expert spółka z ograniczoną odpowiedzialnością &middot; ul. Bolkowska 2A/28, Warszawa &middot; KRS 0000426835 &middot; KNF 1972/13<br>
+      <a href="https://www.perplexity.ai/computer" target="_blank" rel="noopener noreferrer" style="opacity:0.5;">Created with Perplexity Computer</a>
+    </footer>
+  </div>
+
+  <!-- MODALS -->
+  <div id="riskPickerModal" class="modal-overlay hidden"><div class="modal-box modal-box-lg"><div class="modal-header"><div class="modal-title">Wybierz Ryzyka</div><button class="modal-close" onclick="App.closeModal('riskPickerModal')">✕</button></div><div class="modal-body" id="riskPickerBody"></div><div class="modal-footer"><button class="btn btn-outline" onclick="App.closeModal('riskPickerModal')">Zamknij</button></div></div></div>
+
+  <div id="insurerPickerModal" class="modal-overlay hidden"><div class="modal-box"><div class="modal-header"><div class="modal-title">Wybierz Ubezpieczyciela</div><button class="modal-close" onclick="App.closeModal('insurerPickerModal')">✕</button></div><div class="modal-body" id="insurerPickerBody"></div><div class="modal-footer"><button class="btn btn-outline" onclick="App.closeModal('insurerPickerModal')">Zamknij</button></div></div></div>
+
+      <div id="newUserModal" class="modal-overlay hidden">
+          <div class="modal-box">
+      <div class="modal-header"><div class="modal-title">Dodaj Użytkownika</div><button class="modal-close" onclick="App.closeModal('newUserModal')">✕</button></div>
+            <div class="modal-body">
+        <form id="addUserForm" onsubmit="App.addUser(event)">
+          <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" id="newUserEmail" required></div>
+          <div class="form-group"><label class="form-label">Imię i nazwisko</label><input class="form-input" type="text" id="newUserName" required></div>
+          <div class="form-group"><label class="form-label">Hasło (min. 8)</label><input class="form-input" type="password" id="newUserPassword" required minlength="8"></div>
+          <div class="form-group"><label class="form-label">Rola</label>
+            <select class="form-input" id="newUserRole">
+              <option value="user">Użytkownik</option>
+              <option value="leader">Lider zespołu</option>
+              <option value="admin">Administrator</option>
+            </select>
+          </div>
+          <div class="form-group" id="leaderSelectGroup">
+            <label class="form-label">Przypisz do lidera</label>
+            <select class="form-input" id="newUserLeader">
+              <option value="">— Brak (jest samodzielny / jest liderem)</option>
+            </select>
+            <p style="font-size:0.7rem;color:var(--slate-400,#94a3b8);margin-top:0.25rem;">Jeśli wybierzesz lidera, system automatycznie nada ref ID typu <strong style="font-family:monospace;">0019.03</strong></p>
+          </div>
+          <div class="form-group">
+            <label class="form-label">ID Referencyjne</label>
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+              <input class="form-input" type="text" id="newUserRefId" placeholder="auto" maxlength="8" style="flex:1;font-family:monospace;letter-spacing:1px;" readonly>
+              <button type="button" class="btn btn-outline btn-sm" onclick="Admin.generateRefId()" title="Generuj">🔄</button>
+            </div>
+            <p style="font-size:0.7rem;color:var(--slate-400,#94a3b8);margin-top:0.25rem;">Generowane automatycznie na podstawie roli i lidera.</p>
+          </div>
+        
+        <button type="button" class="btn btn-primary btn-full" id="newUserSubmitBtn" onclick="Admin.submitNewUser()">Utwórz użytkownika</button>
+        </form>
+      
+      </div>
+    </div>
+
+            </div>
+
+  <div id="confirmModal" class="modal-overlay hidden"><div class="modal-box" style="max-width:380px;"><div class="modal-header"><div class="modal-title" id="confirmTitle">Potwierdź</div><button class="modal-close" onclick="App.closeModal('confirmModal')">✕</button></div><div class="modal-body"><p style="font-size:0.85rem;color:var(--slate-600);" id="confirmMessage"></p></div><div class="modal-footer"><button class="btn btn-outline" onclick="App.closeModal('confirmModal')">Anuluj</button><button class="btn btn-danger" id="confirmActionBtn">Usuń</button></div></div></div>
+
+  <!-- Client Detail Modal (Admin) -->
+  <div id="clientDetailModal" class="modal-overlay hidden">
+    <div class="modal-box modal-box-lg" style="max-width:720px;">
+      <div class="modal-header"><div class="modal-title" id="clientDetailTitle">Klient</div><button class="modal-close" onclick="App.closeModal('clientDetailModal')">✕</button></div>
+      <div class="modal-body" id="clientDetailBody" style="max-height:65vh;overflow-y:auto;"></div>
+    </div>
+  </div>
+
+  <!-- Exclusions Accept Modal (Client) -->
+  <div id="exclusionsAcceptModal" class="modal-overlay hidden">
+    <div class="modal-box modal-box-lg">
+      <div class="modal-header"><div class="modal-title" style="color:var(--red-700);">⚠️ Informacja o wyłączeniach</div><button class="modal-close" onclick="App.closeModal('exclusionsAcceptModal')">✕</button></div>
+      <div class="modal-body" id="exclusionsModalBody" style="max-height:350px;overflow-y:auto;font-size:0.8rem;color:var(--slate-600);line-height:1.7;"></div>
+      <div style="padding:0.75rem 1.25rem;text-align:center;font-size:0.7rem;color:var(--amber-600);font-weight:600;" id="exclusionsScrollHint">↓ Przewiń do końca, aby kontynuować ↓</div>
+      <div class="hidden" id="exclusionsCheckboxArea" style="padding:0.75rem 1.25rem;border-top:1px solid var(--slate-200);">
+        <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;font-size:0.8rem;color:var(--slate-700);">
+          <input type="checkbox" id="exclusionsCheckbox" style="margin-top:0.2rem;">
+          <span>Zapoznałem/am się z wyłączeniami odpowiedzialności i otrzymałem/am dokument <strong>Karta Produktu</strong>.</span>
+        </label>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="App.closeModal('exclusionsAcceptModal')">Anuluj</button>
+        <button class="btn btn-success" id="exclusionsAcceptBtn" disabled onclick="ClientView.confirmChoice()">Potwierdzam wybór</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/matrix.js"></script>
+  <script src="js/scoring.js"></script>
+  <script src="js/admin.js"></script>
+  <script src="js/client.js"></script>
+  <script src="js/app.js"></script>
+
+  <script>
+  /* ============================================================
+     TEAM CARDS + Event Listeners
+     (Admin.switchTab, filterClients, generateRefId, copyRefLink
+      are all handled by admin.js v3.0 — NOT duplicated here)
+     ============================================================ */
+  (function() {
+
+    // Event listeners for ref link preview
+    const refDomain = document.getElementById('refLinkDomain');
+    const refUser = document.getElementById('refLinkUser');
+    const refOutput = document.getElementById('refLinkOutput');
+    function updateRefLink() {
+      if (refDomain && refUser && refOutput) {
+        refOutput.value = refDomain.value + '/?ref=' + (refUser.value || '0000');
+      }
+    }
+    if (refDomain) refDomain.addEventListener('change', updateRefLink);
+    if (refUser) refUser.addEventListener('change', updateRefLink);
+
+    // Auto-generate ref ID when role or leader changes in add-user modal
+    const roleSelect = document.getElementById('newUserRole');
+    const leaderSelect = document.getElementById('newUserLeader');
+    if (roleSelect) roleSelect.addEventListener('change', function() { if (Admin.generateRefId) Admin.generateRefId(); });
+    if (leaderSelect) leaderSelect.addEventListener('change', function() { if (Admin.generateRefId) Admin.generateRefId(); });
+
+    /* ============================================================
+       TEAM CARDS — kolorowe karty zespołów (przyszły upgrade)
+       Wywoływane przez Admin.loadUsers() gdy userzy mają ref_id
+       ============================================================ */
+    const TEAM_COLORS = ['team-purple', 'team-teal', 'team-coral', 'team-blue', 'team-pink', 'team-amber'];
+
+    function getInitials(name) {
+      if (!name) return '?';
+      return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+    }
+
+    function statusBadge(status) {
+      const isActive = status === 'active' || status === 'aktywny';
+      return '<span style="font-size:0.7rem;font-weight:600;padding:2px 6px;border-radius:4px;' +
+        (isActive ? 'background:#E1F5EE;color:#085041;">aktywny' : 'background:#FCEBEB;color:#791F1F;">nieaktywny') + '</span>';
+    }
+
+    Admin.renderTeamCards = function(users) {
+      const container = document.getElementById('teamCardsContainer');
+      if (!container) return;
+
+      var fallback = document.getElementById('adminUsersFallback');
+      if (fallback) fallback.style.display = 'none';
+      container.classList.remove('hidden');
+      container.style.display = 'flex';
+
+      var leaders = users.filter(function(u) { return !u.leader_id || u.role === 'admin' || u.role === 'leader'; });
+      var members = users.filter(function(u) { return u.leader_id && u.role !== 'admin' && u.role !== 'leader'; });
+
+      var html = '';
+      leaders.forEach(function(leader, idx) {
+        var color = TEAM_COLORS[idx % TEAM_COLORS.length];
+        var teamMembers = members.filter(function(m) { return m.leader_id === leader.id || m.leader_ref === leader.ref_id; });
+        var totalClients = (leader.client_count || 0) + teamMembers.reduce(function(sum, m) { return sum + (m.client_count || 0); }, 0);
+
+        html += '<div class="team-card ' + color + '">';
+        html += '<div class="team-card-header">';
+        html += '<div class="team-card-avatar">' + getInitials(leader.full_name || leader.name || leader.email) + '</div>';
+        html += '<div class="team-card-info">';
+        html += '<div class="team-card-name">' + (leader.full_name || leader.name || leader.email) + '</div>';
+        html += '<div class="team-card-meta">' + (leader.role === 'admin' ? 'Admin' : 'Lider') +
+          ' &middot; ref: ' + (leader.ref_id || '—') +
+          ' &middot; ' + totalClients + ' klientów' +
+          (teamMembers.length > 0 ? ' &middot; ' + teamMembers.length + ' w zespole' : '') + '</div>';
+        html += '</div>';
+        html += '<span class="team-card-role">' + (leader.role || 'leader') + '</span>'; html += '<button class="btn btn-sm" style="margin-left:auto;font-size:0.72rem;padding:3px 10px;" onclick="Admin.openNewUserModal(\'' + leader.id + '\')">+ Subuser</button>';;
+        html += '</div>';
+
+        if (teamMembers.length > 0) {
+          html += '<table><thead><tr>';
+          html += '<td>Członek zespołu</td><td>Status</td><td style="text-align:center;">Klienci</td><td>ID Ref</td><td style="width:70px;">Akcje</td>';
+          html += '</tr></thead><tbody>';
+          teamMembers.forEach(function(m) {
+            html += '<tr>';
+            html += '<td style="font-weight:600;">' + (m.full_name || m.name || m.email) + '</td>';
+            html += '<td>' + statusBadge(m.status || (m.active !== false ? 'active' : 'inactive')) + '</td>';
+            html += '<td style="text-align:center;font-weight:700;">' + (m.client_count || 0) + '</td>';
+            html += '<td><span class="ref-id-cell">' + (m.ref_id || '—') + '</span></td>';
+            html += '<td style="font-size:0.75rem;">—</td>';
+            html += '</tr>';
+          });
+          html += '</tbody></table>';
+        } else {
+          html += '<div class="team-card-empty">Brak członków zespołu</div>';
+        }
+        html += '</div>';
+      });
+
+      var solo = users.filter(function(u) { return u.leader_id == null && u.role !== 'admin' && u.role !== 'leader'; });
+      solo.forEach(function(u, idx) {
+        var color = TEAM_COLORS[(leaders.length + idx) % TEAM_COLORS.length];
+        html += '<div class="team-card ' + color + '">';
+        html += '<div class="team-card-header">';
+        html += '<div class="team-card-avatar">' + getInitials(u.full_name || u.name || u.email) + '</div>';
+        html += '<div class="team-card-info">';
+        html += '<div class="team-card-name">' + (u.full_name || u.name || u.email) + '</div>';
+        html += '<div class="team-card-meta">Samodzielny &middot; ref: ' + (u.ref_id || '—') + ' &middot; ' + (u.client_count || 0) + ' klientów</div>';
+        html += '</div>';
+        html += '<span class="team-card-role">user</span>';
+        html += statusBadge(u.status || (u.active !== false ? 'active' : 'inactive'));
+        html += '</div></div>';
+      });
+
+      if (!html) html = '<div class="empty-state" style="padding:2rem;text-align:center;">Brak użytkowników</div>';
+      container.innerHTML = html;
+    };
+  })();
+  </script>
+  
+  <!-- Send Email Modal -->
+  <div id="sendEmailModal" class="modal-overlay hidden">
+    <div class="modal-box" style="max-width:400px;">
+      <div class="modal-header">
+        <div class="modal-title">📧 Wyślij ofertę klientowi</div>
+        <button class="modal-close" onclick="App.closeModal('sendEmailModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:0.85rem;color:var(--slate-500);margin-bottom:1rem;">Klient otrzyma link z ofertą i możliwością wyboru ubezpieczyciela.</p>
+        <div class="form-group">
+          <label class="form-label">Email klienta</label>
+          <input class="form-input" type="email" id="sendEmailInput" placeholder="klient@example.com" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="App.closeModal('sendEmailModal')">Anuluj</button>
+        <button class="btn btn-primary" id="sendEmailBtn" onclick="App.sendOfferByEmailConfirm()">Wyślij</button>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
