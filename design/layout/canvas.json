@@ -6,7 +6,7 @@
       "x": 0,
       "y": 0,
       "w": 1440,
-      "h": 6000
+      "h": 6060
     },
     {
       "file": "Wniosek.dc.html",
@@ -22,12 +22,20 @@
       "x": 3120,
       "y": 0,
       "w": 1440,
-      "h": 2850
+      "h": 2880
+    },
+    {
+      "file": "Dokumenty.dc.html",
+      "title": "Dokumenty i OWU",
+      "x": 4680,
+      "y": 0,
+      "w": 1440,
+      "h": 3260
     },
     {
       "file": "Mobile.dc.html",
       "title": "Mobile 390",
-      "x": 4680,
+      "x": 6240,
       "y": 0,
       "w": 390,
       "h": 2120
@@ -35,10 +43,10 @@
     {
       "file": "System.dc.html",
       "title": "System wizualny",
-      "x": 5200,
+      "x": 6760,
       "y": 0,
       "w": 1080,
-      "h": 3320
+      "h": 3520
     }
   ],
   "annotations": [
@@ -71,11 +79,25 @@
       "text": "Najważniejsza zmiana SEO widoczna w H1: „Ubezpieczenie utraty dochodu dla lekarza\", nie „dla Lekarz\".\nUkład treści: H2 jest pytaniem, pierwszy akapit odpowiada w dwóch zdaniach — to struktura, którą modele AI cytują najchętniej."
     },
     {
-      "id": "kwoty",
+      "id": "dokumenty",
       "x": 4680,
       "y": -250,
       "w": 430,
+      "text": "Nowa strona po Waszej uwadze: dokumenty z UDAPP wychodzą na portal.\nSiedem plików czyta się z tabeli ud_owu_library — te same rekordy, które panel podpina do oferty. Grupowanie odwzorowuje resolveOwus(): baza LW044/LW046/LW047 plus warunki HIV/WZW LW048/LW049 tylko przy wariantach medycznych.\n\nDWIE LUKI, widoczne od razu po zajrzeniu do bazy:\n— CEU nie ma w bibliotece ani jednego pliku, a panel oczekuje dwóch ubezpieczycieli. Oferty CEU wychodzą bez OWU.\n— LW044 nie ma karty produktu (IPID). Pozostałe dwa warianty mają.\n\nJAK SERWOWAĆ PLIKI — bucket ud-owu jest prywatny, panel sięga po niego kluczem serwisowym, którego statyczny portal mieć nie może. Proponuję kopiować aktywne pliki do publicznego ud-public pod czytelnymi ścieżkami (/dokumenty/leadenhall-medicare-owu.pdf), wyzwalane webhookiem na ud_owu_library. Powód jest wprost SEO-owy: link podpisany wygasa po 5 minutach, więc Google i modele językowe nigdy go nie zaindeksują, a stały adres owszem. Prywatny zostaje ud-offers — tam leżą dokumenty klientów.\nDecyzja Wasza, nie ruszam produkcyjnych uprawnień bez zgody."
+    },
+    {
+      "id": "kwoty",
+      "x": 6240,
+      "y": -250,
+      "w": 430,
       "text": "Kwoty w kalkulatorze to SYMULACJA według wzoru z Calculator.js: suma = dochod x limit, skladka = suma x 1,5% (1,8% z klauzula HIV/WZW, x1,1 przy 24 miesiacach).\nNie pochodza z tabel ubezpieczycieli — realna skladke wylicza system ubezpieczyciela po ocenie ryzyka.\nDlatego przy kazdej kwocie stoi slowo „symulacja\" i zastrzezenie, ze to nie jest oferta."
+    },
+    {
+      "id": "ikony",
+      "x": 6760,
+      "y": -250,
+      "w": 430,
+      "text": "Druga paczka ikon wpięta: tarcza (zakres ochrony), kłódka (zgody i dokumenty), błyskawica (oferta w 1–2 dni), słuchawki (kontakt). Koło zębate poszło pod „Bazę wiedzy\".\nSłuchawki zastąpiły konturową ikonę telefonu w kroku 4 wniosku i na stronie zawodu — była jedynym elementem spoza fasetowego języka.\nWszystkie dziewięć to nadal odrysy z podglądów rastrowych. Oryginalne SVG do design/brand/."
     }
   ],
   "launch": {
