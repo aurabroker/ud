@@ -121,7 +121,7 @@
   "przerwa": "Miesiąc nieobecności rozbija bazę stałych klientek, budowaną latami. Fryzjerstwo to zawód, w którym relacja z konkretną osobą jest całym kapitałem firmy — a ta relacja nie przenosi się na zmiennika. Po powrocie kalendarz trzeba zapełniać od nowa, przy czym koszty stanowiska i produktów biegły przez cały czas.",
   "ryzyka": [
    {
-    "tytul": "Alergiczne kontaktowe zapalenie skóry rąk",
+    "tytul": "Wyprysk kontaktowy od farb i utleniaczy",
     "opis": "Farby, utleniacze, preparaty do trwałej. Uczulenie na parafenylenodiaminę albo persiarczany rozwija się po latach ekspozycji i jest nieodwracalne — po jego wystąpieniu praca z tymi preparatami przestaje być możliwa, nawet w rękawicach."
    },
    {
@@ -227,7 +227,7 @@
    },
    {
     "pytanie": "Pracuję na umowę zlecenie w restauracji — jaki mam limit?",
-    "odpowiedz": "Przy umowie zlecenia limit wynosi 65% udokumentowanego dochodu, tak samo jak przy umowie o pracę. Pełne 80% dotyczy wyłącznie samozatrudnienia i kontraktu B2B."
+    "odpowiedz": "Przy umowie zlecenia limit wynosi 65% udokumentowanego dochodu — tyle samo, co przy umowie o pracę. Do osiemdziesięciu procent dochodzą wyłącznie osoby na samozatrudnieniu albo kontrakcie B2B, a wielu kucharzy prowadzi działalność właśnie w tej formie."
    }
   ]
  },
@@ -257,6 +257,876 @@
    {
     "pytanie": "Mam uprawnienia SEP — czy ich utrata jest zdarzeniem objętym polisą?",
     "odpowiedz": "Sama utrata uprawnień nie jest zdarzeniem ubezpieczeniowym. Objęty jest stan zdrowia, który powoduje niezdolność do wykonywania zawodu — a jeśli ten stan zdrowia jest zarazem przyczyną nieprzedłużenia uprawnień, świadczenie się należy."
+   }
+  ]
+ },
+ "ortodonta": {
+  "wstep": "Leczenie ortodontyczne trwa dwa lata i wymaga wizyty co sześć tygodni. Ortodonta, który wypada z pracy na kwartał, zostawia kilkuset pacjentów z aparatem, którego nikt nie aktywuje — a nieregulowany aparat potrafi cofnąć efekt zamiast go poprawiać.",
+  "dochod": "Przychód opiera się na abonamentach rozłożonych na cały okres leczenia. To jedyna gałąź stomatologii, w której pieniądze wpływają regularnie niezależnie od dnia, ale też jedyna, w której przerwa oznacza zwrot części opłat, a nie tylko brak nowych.",
+  "przerwa": "Pacjent w trakcie leczenia nie może po prostu poczekać. Przejęcie go przez innego ortodontę oznacza zwykle rozpoczęcie planu od nowa, bo mechanika aparatu jest indywidualną decyzją lekarza prowadzącego. Trzy miesiące nieobecności to realne ryzyko roszczeń o zwrot za niedokończone leczenie i utratę całego rocznika pacjentów.",
+  "ryzyka": [
+   {
+    "tytul": "Przeciążenie stawu nadgarstkowego przy pracy drutem",
+    "opis": "Wyginanie łuków i zakładanie ligatur wymaga siły w bardzo małym zakresie ruchu. Zapalenie pochewki ścięgna prostownika kciuka, znane jako zespół de Quervaina, jest tu chorobą typową i wyklucza z pracy na kilka tygodni po każdym nawrocie."
+   },
+   {
+    "tytul": "Ograniczenie widzenia stereoskopowego",
+    "opis": "Ortodoncja to praca w trzech wymiarach na dystansie kilkudziesięciu centymetrów. Utrata widzenia obuocznego, choćby po urazie jednego oka, kończy pracę przy aparatach stałych, mimo zachowanej ostrości widzenia w drugim oku."
+   },
+   {
+    "tytul": "Zmiany zwyrodnieniowe odcinka szyjnego",
+    "opis": "Głowa pochylona i skręcona, godzinami, przy jednoczesnym unieruchomieniu ramion. Efektem są ucisk korzeni nerwowych i drętwienie rąk, które przy precyzji wymaganej w tym zawodzie oznacza natychmiastową przerwę."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy roszczenia pacjentów o zwrot za przerwane leczenie są objęte polisą?",
+    "odpowiedz": "Nie — to jest zakres OC zawodowego, nie ubezpieczenia utraty dochodu. Ta polisa wypłaca świadczenie za sam fakt niezdolności do pracy, bez względu na to, jakie roszczenia zgłaszają pacjenci."
+   },
+   {
+    "pytanie": "Prowadzę gabinet w dwóch miastach — czy to komplikuje wniosek?",
+    "odpowiedz": "Nie, ale trzeba to zgłosić. Ubezpieczyciel liczy łączny udokumentowany dochód ze wszystkich miejsc, a nie z jednego, i właśnie od niego wyznacza maksymalną sumę."
+   }
+  ]
+ },
+ "endodontolog": {
+  "wstep": "Endodoncja to praca pod mikroskopem na strukturach o średnicy dziesiątych części milimetra. Endodontolog z drżeniem rąk albo pogorszonym widzeniem nie może wykonywać zawodu w ogóle, choćby w każdej innej roli był sprawny.",
+  "dochod": "Leczenie kanałowe rozlicza się za pojedynczą procedurę, zwykle kilkugodzinną. Endodontolog przyjmuje mniej pacjentów niż stomatolog ogólny, ale każdy z nich wart jest wielokrotnie więcej — dochód jest wysoki i zarazem skrajnie wrażliwy na liczbę godzin przy fotelu.",
+  "przerwa": "Zabieg endodontyczny bywa rozłożony na dwie albo trzy wizyty z opatrunkiem między nimi. Przerwa w połowie leczenia to nie tylko utracone honorarium, ale ryzyko powikłania u pacjenta, który czeka z otwartym systemem kanałowym. Do tego dochodzi rata mikroskopu, sprzętu wartego tyle, co dobry samochód, i tomografu, jeśli gabinet ma własny.",
+  "ryzyka": [
+   {
+    "tytul": "Drżenie samoistne rąk",
+    "opis": "U większości ludzi jest niedogodnością. Przy pracy narzędziami o średnicy sześciu setnych milimetra wyklucza z zawodu całkowicie, a leczenie farmakologiczne rzadko przywraca precyzję na poziomie wymaganym przy mikroskopie."
+   },
+   {
+    "tytul": "Pogorszenie widzenia i utrata akomodacji",
+    "opis": "Mikroskop kompensuje wiele, ale nie wszystko. Zaćma, zwyrodnienie plamki albo nawet znaczna presbiopia sprawiają, że lokalizacja ujścia kanału przestaje być możliwa w rozsądnym czasie."
+   },
+   {
+    "tytul": "Statyczne przeciążenie mięśni karku",
+    "opis": "Praca przy mikroskopie wymusza pozycję, w której głowa i tułów są nieruchome przez dwie godziny. Przewlekły zespół bólowy karku u endodontologów pojawia się wcześniej niż w pozostałych specjalnościach stomatologicznych."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy suma ubezpieczenia może objąć wartość mikroskopu w leasingu?",
+    "odpowiedz": "Suma liczy się od udokumentowanego dochodu, nie od wartości sprzętu. Ale świadczenie jest wypłacane bez wskazania celu, więc raty leasingowe da się z niego pokryć — po prostu nie są osobną pozycją we wniosku."
+   },
+   {
+    "pytanie": "Czy drżenie rąk będzie uznane za niezdolność do pracy?",
+    "odpowiedz": "Ubezpieczyciel ocenia niezdolność do wykonywania konkretnego zawodu, a nie do jakiejkolwiek pracy. Właśnie dlatego wniosek pyta o dokładną specjalizację — endodoncja i stomatologia ogólna mają inny próg sprawności manualnej."
+   }
+  ]
+ },
+ "periodontolog": {
+  "wstep": "Periodontolog leczy przyzębie, czyli tkanki, które trzymają zęby w kości. To zabiegi chirurgiczne wykonywane w polu operacyjnym wielkości paznokcia, wymagające pełnej sprawności obu rąk i nieprzerwanej koncentracji przez półtorej godziny.",
+  "dochod": "Przychód pochodzi z zabiegów płatnych w całości prywatnie — regeneracja kości, przeszczep tkanki łącznej, chirurgia płatowa. Kontrakt z NFZ pokrywa w periodontologii niewiele, więc praktycznie cały dochód jest bezpośrednio zależny od liczby wykonanych zabiegów.",
+  "przerwa": "Pacjent po zabiegu regeneracyjnym wymaga kontroli po tygodniu, dwóch i sześciu. Niezrealizowane kontrole to powikłania, a powikłania w periodontologii oznaczają utratę efektu zabiegu, za który pacjent już zapłacił. Dwumiesięczna przerwa zostawia kilkudziesięciu pacjentów w fazie gojenia bez nadzoru.",
+  "ryzyka": [
+   {
+    "tytul": "Uszkodzenie nerwów obwodowych kończyny górnej",
+    "opis": "Długotrwały ucisk i powtarzalne ruchy przy pracy narzędziami ręcznymi. Neuropatia nerwu łokciowego objawia się osłabieniem chwytu w palcach czwartym i piątym — dokładnie tych, które stabilizują lusterko i ssak."
+   },
+   {
+    "tytul": "Ekspozycja na aerozol biologiczny",
+    "opis": "Skaling ultradźwiękowy i praca turbiną rozpylają materiał zakaźny w postaci aerozolu. Przewlekłe zapalenie zatok i nawracające infekcje dróg oddechowych są w tej specjalności częstsze niż w populacji ogólnej."
+   },
+   {
+    "tytul": "Zespół bólowy odcinka piersiowego",
+    "opis": "Wymuszone pochylenie z jednoczesnym uniesieniem ramion, utrzymywane przez cały zabieg. Skutkiem bywa przykurcz i ból promieniujący do klatki piersiowej, mylony bywa z dolegliwościami kardiologicznymi."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy przewlekła infekcja dróg oddechowych to podstawa do wypłaty?",
+    "odpowiedz": "Sama infekcja nie, ale jej następstwa mogą nią być, jeśli powodują orzeczoną niezdolność do wykonywania zawodu. Kluczowe jest to, czy schorzenie było leczone przed zawarciem umowy — choroby leczone w ciągu 24 miesięcy przed polisą są wyłączone."
+   },
+   {
+    "pytanie": "Wykonuję zabiegi w kilku gabinetach jako podwykonawca — czy to problem?",
+    "odpowiedz": "Nie. Ubezpieczyciel patrzy na łączny udokumentowany dochód, a nie na liczbę miejsc, w których jest osiągany. Wszystkie źródła trzeba jednak wykazać, bo to od ich sumy zależy maksymalna suma ubezpieczenia."
+   }
+  ]
+ },
+ "protetyk": {
+  "wstep": "Protetyk odtwarza to, czego pacjent już nie ma — koronami, mostami, protezami na implantach. Praca dzieli się między fotel a etap laboratoryjny, a oba wymagają precyzji, której nie da się nadrobić doświadczeniem, gdy zabraknie sprawności rąk.",
+  "dochod": "Prace protetyczne mają najwyższą wartość jednostkową w stomatologii i najdłuższy cykl realizacji. Pacjent płaci zwykle w dwóch albo trzech transzach rozłożonych na kilka miesięcy, więc przerwa zatrzymuje nie tylko nowe przychody, ale i te już zakontraktowane.",
+  "przerwa": "Praca protetyczna w toku to konkretny pacjent z oszlifowanymi zębami i koroną tymczasową, która ma wytrzymać dwa tygodnie, a nie dwa miesiące. Przerwa oznacza powikłania, konieczność wykonania pracy od nowa i zwrot kosztów. Do tego biegną zobowiązania wobec laboratorium protetycznego, które wykonało już swoją część.",
+  "ryzyka": [
+   {
+    "tytul": "Utrata precyzji chwytu pęsetowego",
+    "opis": "Osadzenie korony wymaga kontroli siły w zakresie kilku gramów. Choroba zwyrodnieniowa stawów palców, częsta po pięćdziesiątce, zabiera tę kontrolę wcześniej niż jakąkolwiek inną funkcję ręki."
+   },
+   {
+    "tytul": "Alergia kontaktowa na metakrylany",
+    "opis": "Materiały kompozytowe i akrylowe używane codziennie, przez lata. Uczulenie na metakrylany jest u protetyków dobrze udokumentowane i nieodwracalne — po jego wystąpieniu praca tymi materiałami przestaje być możliwa."
+   },
+   {
+    "tytul": "Ubytek słuchu od turbiny i mikrosilnika",
+    "opis": "Ekspozycja na hałas o częstotliwości powyżej czterech kiloherców przez kilka godzin dziennie. Ubytek narasta bezobjawowo i ujawnia się dopiero, gdy pacjent na fotelu przestaje być zrozumiały."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Mam własne laboratorium i dwóch techników — jak to wpływa na wniosek?",
+    "odpowiedz": "To jest przypadek działalności z pracownikami, więc wniosek zapyta o Twój wkład w przychód firmy. Jeśli technicy mogą wykonywać prace bez Ciebie, część przychodu firmy zostaje mimo Twojej nieobecności i suma ubezpieczenia będzie odpowiednio niższa."
+   },
+   {
+    "pytanie": "Czy uczulenie na metakrylany zostanie uznane, skoro rozwijało się latami?",
+    "odpowiedz": "Decyduje moment rozpoznania i to, czy schorzenie było leczone przed zawarciem umowy. Uczulenie rozpoznane po zawarciu polisy jest objęte; leczone w ciągu 24 miesięcy przed jej zawarciem — wyłączone."
+   }
+  ]
+ },
+ "farmaceuta": {
+  "wstep": "Apteka nie otworzy się bez farmaceuty. Prawo wymaga obecności osoby z prawem wykonywania zawodu przez cały czas pracy placówki, więc nieobecność kierownika apteki oznacza albo zastępstwo za stawkę rynkową, albo zamknięte drzwi.",
+  "dochod": "Farmaceuta prowadzący własną aptekę żyje z marży, która w Polsce jest ustawowo ograniczona na lekach refundowanych. Margines jest wąski, koszty stałe wysokie, a każdy dzień bez sprzedaży odejmuje się od tej samej, niewielkiej różnicy.",
+  "przerwa": "Zamknięta apteka traci pacjentów na rzecz sąsiedniej w ciągu dni, nie miesięcy — recepta jest ważna w każdej placówce. Do tego dochodzą zobowiązania wobec hurtowni z terminami płatności liczonymi od dostawy, a nie od sprzedaży, oraz czynsz, który przy lokalizacji przyaptecznej bywa jedną z największych pozycji kosztowych.",
+  "ryzyka": [
+   {
+    "tytul": "Ekspozycja na substancje uczulające przy recepturze",
+    "opis": "Sporządzanie leków recepturowych oznacza kontakt z surowcami w postaci proszków i maści. Uczulenie kontaktowe albo astma zawodowa u farmaceuty receptariusza kończy pracę przy recepturze, choć nie musi kończyć pracy w aptece."
+   },
+   {
+    "tytul": "Przewlekłe zapalenie krtani",
+    "opis": "Kilkaset rozmów z pacjentami dziennie, często przez szybę i w hałasie. Utrata głosu wyklucza z pracy w ekspedycji skuteczniej niż większość dolegliwości fizycznych, bo obowiązek udzielania informacji o leku jest ustawowy."
+   },
+   {
+    "tytul": "Żylaki kończyn dolnych",
+    "opis": "Praca stojąca za pierwszym stołem przez całą zmianę, bez rotacji stanowisk. Zaawansowana niewydolność żylna wymaga zabiegu i kilku tygodni bez stania — czyli bez ekspedycji."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Jestem kierownikiem apteki na etacie — czy limit to 65%?",
+    "odpowiedz": "Tak. Umowa o pracę oznacza limit 65% udokumentowanego dochodu. Pełne 80% dotyczy wyłącznie samozatrudnienia i kontraktu B2B — a wielu kierowników aptek pracuje właśnie w tej drugiej formie."
+   },
+   {
+    "pytanie": "Czy koszt zastępstwa farmaceuty można zgłosić do wypłaty?",
+    "odpowiedz": "Nie jako osobna pozycja. Świadczenie jest ryczałtowe i wypłacane bez rozliczania celu, więc zastępstwo pokrywa się z niego tak samo jak czynsz czy raty — po prostu nie jest wyliczane osobno."
+   }
+  ]
+ },
+ "farmaceuta-aptekarz": {
+  "wstep": "Aptekarz przy pierwszym stole jest ostatnim filtrem między receptą a pacjentem. Ta odpowiedzialność nie znika, gdy jest się chorym, więc praca w niepełnej sprawności bywa tu nie tyle niewygodna, co ryzykowna.",
+  "dochod": "Zatrudnienie w aptece sieciowej albo na kontrakcie rozlicza się za godziny dyżuru w ekspedycji. Stawki są przewidywalne, ale nie ma tu żadnego składnika, który wpływałby dalej po zaprzestaniu pracy — dochód urywa się co do dnia.",
+  "przerwa": "Nieobecność w aptece sieciowej wypełnia zmiennik, więc miejsce pracy zwykle nie znika. Znikają za to godziny, a przy zatrudnieniu na kontrakcie także dodatki za dyżury nocne i weekendowe, które bywają jedną trzecią miesięcznego wynagrodzenia. Przy dłuższym zwolnieniu kontrakt bywa po prostu nieprzedłużony na kolejny okres.",
+  "ryzyka": [
+   {
+    "tytul": "Przeciążenie kręgosłupa przy obsłudze dostaw",
+    "opis": "Rozpakowanie i wprowadzenie dostawy to kilkadziesiąt kartonów podnoszonych z posadzki, zwykle przed otwarciem apteki. Uraz odcinka lędźwiowego przy dostawie jest najczęstszą przyczyną nagłej niezdolności w tym zawodzie."
+   },
+   {
+    "tytul": "Przewlekłe infekcje górnych dróg oddechowych",
+    "opis": "Kontakt z kilkuset osobami dziennie, w tym z chorymi, którzy przyszli po lek. Ekspozycja jest porównywalna z placówką medyczną, ale bez środków ochrony stosowanych w gabinecie."
+   },
+   {
+    "tytul": "Zespół cieśni nadgarstka od skanowania i kasy",
+    "opis": "Powtarzalny ruch nadgarstka kilkaset razy na zmianę. Objawy nocnego drętwienia palców narastają miesiącami i kończą się zabiegiem oraz sześciotygodniową przerwą."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Pracuję w dwóch aptekach na dwóch umowach — jak liczyć dochód?",
+    "odpowiedz": "Sumuje się wszystkie udokumentowane źródła. Limit procentowy zależy od formy zatrudnienia dominującej w tym dochodzie — przy mieszance etatu i B2B trzeba to zaznaczyć we wniosku, bo wpływa na maksymalną sumę."
+   },
+   {
+    "pytanie": "Czy dyżury nocne wliczają się do podstawy?",
+    "odpowiedz": "Tak, o ile są udokumentowane. Dodatki za dyżury bywają istotną częścią dochodu aptekarza i pominięcie ich we wniosku zaniża sumę ubezpieczenia poniżej realnej straty."
+   }
+  ]
+ },
+ "diagnosta": {
+  "wstep": "Diagnosta laboratoryjny podpisuje wynik, na podstawie którego lekarz podejmuje decyzję o leczeniu. To autoryzacja imienna i nieprzenoszalna — bez diagnosty laboratorium może pracować, ale nie może wydać ani jednego wyniku.",
+  "dochod": "Laboratorium prywatne rozlicza się za liczbę wykonanych i autoryzowanych oznaczeń. Diagnosta na kontrakcie zarabia proporcjonalnie do przepracowanych zmian, a przy własnym laboratorium — proporcjonalnie do liczby badań, które da się zamknąć podpisem.",
+  "przerwa": "Laboratorium bez diagnosty autoryzującego wstrzymuje wydawanie wyników w ciągu jednego dnia. Zleceniodawcy, głównie przychodnie i szpitale, przenoszą materiał do konkurencji natychmiast, bo pacjent nie może czekać na morfologię tydzień. Odzyskanie umowy z placówką medyczną po takim epizodzie bywa niemożliwe przez cały okres jej kontraktu.",
+  "ryzyka": [
+   {
+    "tytul": "Zakażenie materiałem biologicznym",
+    "opis": "Krew, mocz, płyn mózgowo-rdzeniowy, hodowle bakteryjne. Zakłucie albo rozszczelnienie probówki w wirówce to ekspozycja na wirusowe zapalenie wątroby i HIV — ryzyko objęte polisą wyłącznie z osobną klauzulą HIV/WZW."
+   },
+   {
+    "tytul": "Zaburzenia widzenia barw i ostrości",
+    "opis": "Mikroskopia i ocena preparatów barwionych wymagają rozróżniania odcieni. Nabyte zaburzenia widzenia barw, na przykład po leczeniu farmakologicznym, wykluczają z hematologii i mikrobiologii, mimo pełnej ostrości wzroku."
+   },
+   {
+    "tytul": "Astma i alergie zawodowe na odczynniki",
+    "opis": "Formalina, ksylen, barwniki. Ekspozycja jest niska, ale codzienna, przez dekady. Astma zawodowa rozpoznana u diagnosty oznacza konieczność zmiany pracowni albo zawodu."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy zakłucie w laboratorium jest traktowane jak u lekarza?",
+    "odpowiedz": "Tak — pod warunkiem, że oferta zawiera klauzulę HIV/WZW. Bez niej ryzyko zakażenia zawodowego jest wyłączone, niezależnie od tego, w jakim zawodzie medycznym doszło do ekspozycji."
+   },
+   {
+    "pytanie": "Prowadzę własne laboratorium — czy to zmienia sumę?",
+    "odpowiedz": "Tak, bo dochodzi pytanie o zatrudnianych pracowników i o Twój wkład w przychód. Jeśli inni diagności mogą autoryzować wyniki pod Twoją nieobecność, część przychodu firmy zostaje i suma będzie niższa."
+   }
+  ]
+ },
+ "technik-farmaceutyczny": {
+  "wstep": "Technik farmaceutyczny wykonuje większość codziennej pracy w aptece, ale z ustawowo ograniczonymi uprawnieniami — nie wyda leku bardzo silnie działającego ani nie zastąpi farmaceuty przy autoryzacji. Jego nieobecność nie zamyka apteki, za to natychmiast przenosi cały ciężar na magistra.",
+  "dochod": "Wynagrodzenie technika jest niższe niż farmaceuty i rzadko zawiera składniki zmienne. Oznacza to prostszy rachunek strat, ale też mniejszy bufor: przy dochodzie bliskim średniej krajowej dwumiesięczna przerwa zjada oszczędności całego roku.",
+  "przerwa": "Technik na umowie zlecenie albo na kontrakcie nie ma płatnego zwolnienia w takiej formie, jak pracownik etatowy. Apteka obsadza zmianę kimś innym, a przy dłuższej nieobecności po prostu nie przedłuża umowy — rynek techników jest na tyle płynny, że wakat zapełnia się w tydzień.",
+  "ryzyka": [
+   {
+    "tytul": "Uraz kręgosłupa przy przyjmowaniu dostaw",
+    "opis": "Technik zwykle odpowiada za rozpakowanie i wprowadzenie towaru. To kilkadziesiąt kartonów dziennie, podnoszonych z posadzki w pośpiechu przed otwarciem placówki — najczęstsza przyczyna nagłej niezdolności w tej roli."
+   },
+   {
+    "tytul": "Przewlekła ekspozycja na aerozole lekowe",
+    "opis": "Sporządzanie leków recepturowych i przesypywanie substancji sypkich bez pełnej ochrony. Uczulenia na antybiotyki, zwłaszcza beta-laktamowe, są u pracowników aptek dobrze udokumentowane i nieodwracalne."
+   },
+   {
+    "tytul": "Przeciążenie stawów kończyny górnej",
+    "opis": "Sięganie do wysokich regałów i praca w wymuszonej pozycji nad szufladami. Konflikt podbarkowy rozwija się latami, a wyłącza z pracy naraz i na kilka miesięcy."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Zarabiam poniżej średniej — czy polisa ma dla mnie sens?",
+    "odpowiedz": "Sens polisy nie zależy od wysokości dochodu, tylko od tego, czy jego utrata jest do udźwignięcia. Przy niższych dochodach składka też jest niższa, bo liczy się procentowo od sumy, a suma od dochodu."
+   },
+   {
+    "pytanie": "Czy uczulenie na antybiotyk oznacza koniec pracy w aptece?",
+    "odpowiedz": "Niekoniecznie w aptece, ale zwykle przy recepturze. Dla ubezpieczyciela liczy się orzeczenie o niezdolności do wykonywania zawodu — jeśli praca w ekspedycji jest nadal możliwa, świadczenie może nie przysługiwać w pełnej wysokości."
+   }
+  ]
+ },
+ "szef-kuchni": {
+  "wstep": "Szef kuchni odpowiada za kartę, zamówienia, obsadę i za to, co wychodzi z okna. Jego nieobecność nie zatrzymuje lokalu, ale zatrzymuje wszystko, co odróżnia ten lokal od sąsiedniego.",
+  "dochod": "Wynagrodzenie szefa kuchni to zwykle stała kwota kontraktowa plus udział w obrocie albo premia od foodcostu. Składnik zmienny bywa istotny i znika jako pierwszy, bo liczony jest od wyników, na które nieobecny szef nie ma wpływu.",
+  "przerwa": "Restauracja bez szefa jedzie na powtarzalnej karcie i traci to, po co przychodzą stali goście. Przy autorskim lokalu z nazwiskiem w nazwie dwumiesięczna przerwa to spadek obrotu, którego nie odrabia się w kwartał. Przy kontrakcie w cudzym lokalu — ryzyko, że właściciel awansuje sous chefa i już go nie cofnie.",
+  "ryzyka": [
+   {
+    "tytul": "Oparzenia i urazy termiczne przedramion",
+    "opis": "Praca przy piecu konwekcyjnym i frytkownicy w tempie serwisu. Rozległe oparzenie wyklucza z pracy przy żywności na kilka tygodni z powodów sanitarnych, nawet gdy goi się bez powikłań."
+   },
+   {
+    "tytul": "Przewlekłe przeciążenie stawów kolanowych i skokowych",
+    "opis": "Dwanaście godzin na twardej posadzce, w butach roboczych, z częstymi zwrotami. Zmiany zwyrodnieniowe u szefów kuchni pojawiają się o dekadę wcześniej niż w populacji ogólnej i są nieodwracalne."
+   },
+   {
+    "tytul": "Zaburzenia snu i choroby układu krążenia",
+    "opis": "Serwis kończy się po północy, dostawa przychodzi o siódmej. Przewlekły deficyt snu przy wysokim poziomie kortyzolu daje nadciśnienie i zaburzenia rytmu wcześniej, niż wskazywałby wiek."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Mam udział w zysku lokalu — czy to liczy się do dochodu?",
+    "odpowiedz": "Tak, o ile jest udokumentowany. Udział w zysku i premie od obrotu wchodzą do podstawy tak samo jak część stała, ale trzeba je wykazać wyciągami albo rozliczeniem rocznym."
+   },
+   {
+    "pytanie": "Prowadzę własną restaurację i zatrudniam kucharzy — co to zmienia?",
+    "odpowiedz": "Wniosek zapyta o Twój wkład w przychód. Restauracja, która pracuje dalej bez Ciebie, generuje przychód mimo Twojej nieobecności — suma ubezpieczenia będzie wtedy liczona od tej części, która realnie znika."
+   }
+  ]
+ },
+ "cukiernik": {
+  "wstep": "Cukiernictwo to praca zaczynająca się o trzeciej nad ranem i rozliczana w gramach. Cukiernik z urazem ręki nie wykona dekoracji, a to właśnie dekoracja odróżnia wyrób rzemieślniczy od marketowego.",
+  "dochod": "Pracownia cukiernicza żyje z zamówień na konkretne daty — wesela, komunie, święta. Kalendarz jest zapełniony z kilkumiesięcznym wyprzedzeniem, a niewykonane zamówienie to nie tylko brak przychodu, ale zwrot zaliczki i utrata rekomendacji.",
+  "przerwa": "Sezon weselny trwa od maja do września i generuje większość rocznego obrotu. Przerwa w tym czasie kosztuje wielokrotnie więcej niż w lutym, bo terminów nie da się przesunąć — para młoda nie przełoży wesela. Do tego dochodzą koszty surowców zakupionych na zamówienia, które nie zostaną zrealizowane.",
+  "ryzyka": [
+   {
+    "tytul": "Astma piekarnicza",
+    "opis": "Uczulenie na alfa-amylazę i mąkę pszenną to najlepiej udokumentowana choroba zawodowa w tej branży. Rozwija się latami i po rozpoznaniu wyklucza z pracy w pomieszczeniu, gdzie jest pył mączny — czyli z każdej pracowni cukierniczej."
+   },
+   {
+    "tytul": "Uraz dłoni przy sprzęcie",
+    "opis": "Miesiarka, wałkarka, krajalnica. Urazy zgnieceniowe i amputacje urazowe palców zdarzają się w cukiernictwie częściej niż w większości zawodów spożywczych, a skutkiem jest trwała utrata precyzji przy dekorowaniu."
+   },
+   {
+    "tytul": "Przeciążenie kręgosłupa przy dźwiganiu",
+    "opis": "Worki mąki po dwadzieścia pięć kilogramów, blachy z pieca, kadzie. Uraz krążka międzykręgowego u cukiernika oznacza kilka miesięcy bez podnoszenia — czyli bez pracy."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy astma piekarnicza będzie uznana za podstawę wypłaty?",
+    "odpowiedz": "Jeśli powoduje orzeczoną niezdolność do wykonywania zawodu — tak, o ile nie była leczona w ciągu 24 miesięcy przed zawarciem umowy. Ten warunek jest szczególnie istotny przy schorzeniach rozwijających się latami."
+   },
+   {
+    "pytanie": "Realizuję zamówienia sezonowo — czy nierówny dochód to problem?",
+    "odpowiedz": "Nie. Ubezpieczyciel bierze średnioroczny przychód, a nie miesiąc szczytu. Sezonowość działa więc na korzyść tylko wtedy, gdy udokumentujesz cały rok, a nie same miesiące weselne."
+   }
+  ]
+ },
+ "barista": {
+  "wstep": "Barista pracuje przy ekspresie ciśnieniowym, młynku i spieniaczu przez całą zmianę, w tempie kilkudziesięciu kaw na godzinę. To zawód, w którym jakość zależy od powtarzalności ruchu — a powtarzalność jest dokładnie tym, co niszczy nadgarstek.",
+  "dochod": "Wynagrodzenie to stawka godzinowa powiększona o napiwki, które w dobrej kawiarni bywają jedną czwartą realnego dochodu i nie figurują w żadnej umowie. Przy wniosku liczy się tylko to, co udokumentowane, więc realna strata bywa wyższa niż wykazana podstawa.",
+  "przerwa": "Kawiarnia obsadza zmianę w ciągu dnia, więc miejsce pracy nie znika, ale godziny — tak. Przy umowie zlecenia albo B2B nie ma płatnego zwolnienia, a przy dłuższej nieobecności umowa zwykle nie jest przedłużana. Barista z własnym lokalem traci dodatkowo czynsz i raty za ekspres, który przy sprzęcie profesjonalnym kosztuje jak używany samochód.",
+  "ryzyka": [
+   {
+    "tytul": "Zapalenie pochewek ścięgnistych nadgarstka",
+    "opis": "Ubijanie kawy w kolbie wymaga siły przyłożonej pod stałym kątem, kilkaset razy na zmianę. Zapalenie pochewki jest tu chorobą typową, a przy nawrotach wymaga zabiegu i sześciu tygodni bez obciążania ręki."
+   },
+   {
+    "tytul": "Oparzenia parą wodną",
+    "opis": "Dysza spieniacza wyrzuca parę o temperaturze przekraczającej sto trzydzieści stopni. Oparzenie dłoni albo przedramienia wyklucza z pracy przy żywności do czasu pełnego wygojenia."
+   },
+   {
+    "tytul": "Niewydolność żylna i przeciążenie stóp",
+    "opis": "Cała zmiana w pozycji stojącej, na małej przestrzeni za barem, bez możliwości zmiany pozycji. Żylaki i zapalenie rozcięgna podeszwowego to w tym zawodzie standard po kilku latach."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Napiwki to duża część moich dochodów — czy da się je wykazać?",
+    "odpowiedz": "Tylko wtedy, gdy przechodzą przez rozliczenie i są opodatkowane. Napiwki gotówkowe nieujęte w księgach nie wejdą do podstawy — ubezpieczyciel liczy wyłącznie dochód udokumentowany."
+   },
+   {
+    "pytanie": "Jestem na umowie zlecenie — jaki mam limit?",
+    "odpowiedz": "65% udokumentowanego dochodu, tak samo jak przy umowie o pracę. Pełne 80% dotyczy wyłącznie samozatrudnienia i kontraktu B2B."
+   }
+  ]
+ },
+ "menedzer-restauracji": {
+  "wstep": "Menedżer restauracji trzyma w rękach grafik, dostawy, rozliczenia i sanepid. Kuchnia ugotuje bez niego, kelnerzy podadzą, ale po tygodniu okaże się, że nikt nie zamówił mięsa i nie zgłosił wymiany filtra w okapie.",
+  "dochod": "Wynagrodzenie łączy część stałą z premią od obrotu albo od foodcostu i labour costu. Ta druga część potrafi być jedną trzecią dochodu i znika natychmiast, bo premia liczy się od wyników okresu, w którym menedżera nie było.",
+  "przerwa": "Restauracja bez zarządzania traci marżę cicho: rosną straty magazynowe, sypie się grafik, spada dyscyplina kosztowa. Właściciel widzi to w rachunku wyników po miesiącu i najczęściej reaguje zatrudnieniem kogoś na stałe, a nie na zastępstwo. Menedżer wraca do zdrowia i do lokalu, w którym jego stanowisko jest już zajęte.",
+  "ryzyka": [
+   {
+    "tytul": "Choroby układu krążenia na tle obciążenia",
+    "opis": "Praca w godzinach otwarcia lokalu, czyli do późna, siedem dni w tygodniu w sezonie, przy stałej odpowiedzialności finansowej. Nadciśnienie i zaburzenia rytmu pojawiają się w tej roli wcześnie i bywają pierwszym sygnałem po czterdziestce."
+   },
+   {
+    "tytul": "Zaburzenia snu i ich następstwa",
+    "opis": "Zamknięcie lokalu po północy, rozliczenie kasy, dostawa o siódmej. Chroniczny deficyt snu podnosi ryzyko chorób metabolicznych i obniża odporność — nie jest to jedno zdarzenie, tylko powolne wyczerpanie."
+   },
+   {
+    "tytul": "Uraz przy pracy na sali i w magazynie",
+    "opis": "Menedżer w małym lokalu wchodzi wszędzie: nosi skrzynki, wchodzi do chłodni, wspina się po zapasy. Upadek na mokrej posadzce albo uraz barku przy dostawie zdarza się tu równie często jak w kuchni."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Premia od obrotu jest zmienna — jak liczyć podstawę?",
+    "odpowiedz": "Ubezpieczyciel bierze średnią z ostatnich dwunastu miesięcy, a nie z najlepszego miesiąca. Przy silnej sezonowości warto przygotować rozliczenie za pełny rok, bo to ono wyznacza sumę."
+   },
+   {
+    "pytanie": "Jestem menedżerem i wspólnikiem — jak to zgłosić?",
+    "odpowiedz": "Jako działalność z zatrudnianiem pracowników. Wniosek zapyta o Twój wkład w przychód, bo lokal, który zarabia bez Ciebie, oznacza mniejszą realną stratę i niższą sumę ubezpieczenia."
+   }
+  ]
+ },
+ "technolog-zywnosci": {
+  "wstep": "Technolog żywności odpowiada za to, żeby produkt był bezpieczny, powtarzalny i zgodny z deklaracją na etykiecie. Podpisuje dokumentację HACCP, więc jego nieobecność zatrzymuje wdrożenia i audyty, choć linia produkcyjna jedzie dalej.",
+  "dochod": "Technolog na kontrakcie obsługuje zwykle kilku producentów naraz, rozliczając się za wdrożenie, audyt albo stałą opiekę technologiczną. Kilka źródeł nie chroni przed przerwą, bo przyczyna jest jedna i wycina wszystkie równocześnie.",
+  "przerwa": "Wdrożenie nowego produktu ma termin wyznaczony przez sieć handlową, a nie przez producenta. Technolog, który wypada w trakcie, zostawia zakład bez dokumentacji na czas — i zwykle bez listingu w sieci, o który starano się przez pół roku. Takie zlecenie nie wraca po powrocie do zdrowia.",
+  "ryzyka": [
+   {
+    "tytul": "Astma i alergie zawodowe na składniki",
+    "opis": "Praca w hali produkcyjnej z pyłem mącznym, aerozolami przypraw i enzymami. Uczulenie na alfa-amylazę albo białka mleka rozwija się latami ekspozycji i wyklucza z pracy w konkretnych zakładach na stałe."
+   },
+   {
+    "tytul": "Uraz w hali produkcyjnej",
+    "opis": "Linie pakujące, przenośniki, mroźnie. Technolog wchodzi na halę codziennie, ale bez rutyny operatora — a to właśnie brak rutyny odpowiada za sporą część urazów w zakładach spożywczych."
+   },
+   {
+    "tytul": "Skutki pracy w niskich temperaturach",
+    "opis": "Kontrola w chłodni i mroźni oznacza wielokrotne przejścia między dwudziestoma a minus osiemnastoma stopniami. Przewlekłe zapalenie zatok i dolegliwości stawowe są tu następstwem, które narasta niepostrzeżenie."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Pracuję dla kilku zakładów na fakturę — jak wykazać dochód?",
+    "odpowiedz": "Sumujesz przychody ze wszystkich umów. Właśnie w takiej konfiguracji polisa ma największy sens, bo ZUS liczy zasiłek od jednej zadeklarowanej podstawy, a stracisz przychód ze wszystkich zleceń naraz."
+   },
+   {
+    "pytanie": "Czy uczulenie na składnik wyklucza mnie z ochrony na przyszłość?",
+    "odpowiedz": "Uczulenie rozpoznane po zawarciu polisy jest objęte. Rozpoznane i leczone w ciągu 24 miesięcy przed jej zawarciem — wyłączone, chyba że ubezpieczyciel zaakceptuje je indywidualnie po ocenie ryzyka."
+   }
+  ]
+ },
+ "radca-prawny": {
+  "wstep": "Radca prawny obsługujący spółki pracuje w rytmie cudzych terminów: zgromadzenia, transakcje, postępowania. Klient korporacyjny nie czeka na powrót pełnomocnika — przekazuje sprawę do kancelarii, która ma zastępstwo w strukturze.",
+  "dochod": "Przewagą tego zawodu jest stała obsługa na ryczałcie, przewagą pozorną — bo ryczałt płaci się za gotowość, a klient wypowiada umowę, gdy tej gotowości zabraknie. Dochód z godzin doradczych i z transakcji urywa się natychmiast.",
+  "przerwa": "Kwartał nieobecności przy obsłudze kilkunastu spółek oznacza, że każda z nich znalazła w tym czasie inne rozwiązanie. Umowy o stałą obsługę mają zwykle miesięczne wypowiedzenie i to wystarczy, żeby po powrocie zostać z pustym kalendarzem. Składka na izbę radcowską i obowiązkowe OC biegną niezależnie.",
+  "ryzyka": [
+   {
+    "tytul": "Zespół cieśni nadgarstka od pracy z klawiaturą",
+    "opis": "Pisanie pism procesowych i opinii to kilkanaście tysięcy znaków dziennie przez lata. Neuropatia nerwu pośrodkowego kończy się zabiegiem i sześcioma tygodniami, w których pisanie jest niemożliwe."
+   },
+   {
+    "tytul": "Nadciśnienie i zaburzenia rytmu serca",
+    "opis": "Odpowiedzialność za transakcje o wartości liczonej w milionach, przy terminach, których nie da się przesunąć. To ryzyko rozłożone na dekadę, ujawniające się jednym zdarzeniem."
+   },
+   {
+    "tytul": "Choroby narządu wzroku",
+    "opis": "Analiza dokumentacji na ekranie przez dziesięć godzin dziennie. Zespół suchego oka i zaburzenia akomodacji nie brzmią groźnie, dopóki po czterech godzinach umowa przestaje być czytelna."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Pracuję w kancelarii na kontrakcie, nie na etacie — jaki mam limit?",
+    "odpowiedz": "Kontrakt B2B daje limit 80% udokumentowanego dochodu. To najczęstsza forma współpracy radców z kancelariami i jednocześnie ta, w której zabezpieczenie z ZUS jest najsłabsze."
+   },
+   {
+    "pytanie": "Czy ubezpieczenie OC radcy pokrywa moją niezdolność do pracy?",
+    "odpowiedz": "Nie. Obowiązkowe OC chroni klienta przed skutkami błędu radcy. Utrata dochodu chroni radcę przed sytuacją, w której nie może pracować — te zakresy nie mają części wspólnej."
+   }
+  ]
+ },
+ "notariusz": {
+  "wstep": "Czynności notarialnych nie wykonuje kancelaria, tylko konkretny notariusz wpisany na listę. Zastępstwo wymaga wyznaczenia przez radę izby, a to procedura, nie telefon — do czasu jej zakończenia kancelaria po prostu nie może działać.",
+  "dochod": "Notariusz zarabia z taksy notarialnej, której stawki maksymalne są ustalone rozporządzeniem. Dochód zależy więc wprost od liczby czynności, a ta od liczby dni, w które kancelaria jest czynna.",
+  "przerwa": "Akt notarialny ma wyznaczony termin, bo za nim stoi transakcja z terminem — kredyt, umowa przedwstępna, dziedziczenie. Odwołany akt oznacza, że strony pójdą do innej kancelarii i już tam zostaną, bo zaufanie do notariusza buduje się na jednej udanej transakcji. Kancelaria w tym czasie płaci za lokal, pracowników i archiwum, którego przechowywanie jest ustawowym obowiązkiem.",
+  "ryzyka": [
+   {
+    "tytul": "Choroby narządu wzroku",
+    "opis": "Weryfikacja dokumentów, ksiąg wieczystych i pełnomocnictw wymaga czytania drobnego druku przez większość dnia. Pogorszenie widzenia u notariusza nie jest niedogodnością, tylko ryzykiem błędu, za który odpowiada osobiście."
+   },
+   {
+    "tytul": "Choroby układu krążenia na tle odpowiedzialności",
+    "opis": "Notariusz odpowiada majątkiem osobistym za skutki czynności. Ta odpowiedzialność, utrzymywana latami, przekłada się na nadciśnienie i zaburzenia rytmu wcześniej niż przeciętnie."
+   },
+   {
+    "tytul": "Zespoły przeciążeniowe kręgosłupa",
+    "opis": "Praca siedząca, przy jednoczesnym przenoszeniu i porządkowaniu akt, które w kancelarii notarialnej mają wagę mierzoną w kilogramach na sprawę."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy wyznaczenie zastępcy przez izbę wpływa na wypłatę?",
+    "odpowiedz": "Nie wpływa. Świadczenie należy się za niezdolność do wykonywania zawodu, niezależnie od tego, czy kancelaria działa przez zastępcę. Ubezpieczyciel nie bada, kto w tym czasie sporządzał akty."
+   },
+   {
+    "pytanie": "Zatrudniam pięć osób w kancelarii — jak to zgłosić?",
+    "odpowiedz": "Jako działalność z pracownikami. Wniosek zapyta o Twój wkład w przychód — a przy notariacie jest on z natury bardzo wysoki, bo czynności nie wykona nikt poza Tobą."
+   }
+  ]
+ },
+ "komornik": {
+  "wstep": "Komornik jest funkcjonariuszem publicznym prowadzącym własną kancelarię na własny rachunek. Ta dwoistość oznacza, że obowiązki ustawowe biegną dalej, gdy przychodu nie ma — sprawy nie zostają zawieszone, bo komornik zachorował.",
+  "dochod": "Przychodem są opłaty egzekucyjne pobierane od wyegzekwowanych kwot. To dochód opóźniony i zależny od skuteczności czynności terenowych, których nikt nie wykona zamiast komornika bez wyznaczenia zastępcy.",
+  "przerwa": "Kancelaria komornicza ma ustawowe terminy na czynności i podlega nadzorowi prezesa sądu. Kilkumiesięczna nieobecność bez wyznaczonego zastępcy oznacza skargi na przewlekłość, a te przekładają się na postępowanie dyscyplinarne. Równolegle biegną pensje pracowników, którzy w kancelarii komorniczej stanowią największą pozycję kosztową.",
+  "ryzyka": [
+   {
+    "tytul": "Uraz podczas czynności terenowych",
+    "opis": "Zajęcie ruchomości i eksmisja odbywają się w miejscu zamieszkania dłużnika, często wbrew jego woli. Agresja fizyczna wobec komorników jest udokumentowanym zjawiskiem, a jej skutkiem bywa kilkumiesięczna niezdolność."
+   },
+   {
+    "tytul": "Zaburzenia lękowe i stres pourazowy",
+    "opis": "To ryzyko realne i jednocześnie wyłączone z ochrony. Choroby psychiczne nie są objęte żadnym z wariantów polisy — trzeba to wiedzieć przed podpisaniem, a nie po zdarzeniu."
+   },
+   {
+    "tytul": "Choroby układu krążenia",
+    "opis": "Praca w konflikcie, pod presją terminów ustawowych i nadzoru. Nadciśnienie i choroba niedokrwienna serca pojawiają się w tej grupie zawodowej wcześnie."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy napaść podczas czynności to nieszczęśliwy wypadek?",
+    "odpowiedz": "Tak — zdarzenie nagłe, zewnętrzne i niezależne od woli poszkodowanego spełnia definicję wypadku. Objęte jest ryzyko następstw urazu; ewentualne skutki psychiczne pozostają poza zakresem."
+   },
+   {
+    "pytanie": "Mam nieregularny dochód z opłat egzekucyjnych — co przyjąć za podstawę?",
+    "odpowiedz": "Średnią z ostatnich dwunastu miesięcy, wynikającą z rozliczenia rocznego. Wahania miesięczne są w tym zawodzie normą i nie obniżają sumy, o ile rok jako całość jest udokumentowany."
+   }
+  ]
+ },
+ "prawnik": {
+  "wstep": "Prawnik bez uprawnień adwokackich czy radcowskich pracuje najczęściej jako doradca w firmie albo we własnej działalności, bez ograniczeń korporacyjnych, ale też bez zaplecza izby. Nikt nie wyznaczy mu zastępcy — jeśli nie pracuje, sprawy stoją.",
+  "dochod": "Doradztwo prawne rozlicza się za godziny albo za projekt: umowę, opinię, due diligence. Nie ma tu składnika, który wpływa dalej po zaprzestaniu pracy, więc przychód spada do zera w tempie zamykania bieżących zleceń.",
+  "przerwa": "Projekt prawny ma zwykle harmonogram powiązany z transakcją klienta. Wypadnięcie w połowie due diligence to nie tylko utrata honorarium za ten projekt, ale i wykreślenie z listy doradców, do której klient wraca przy kolejnej transakcji. Odbudowa portfela zleceń zajmuje w tym zawodzie od pół roku do roku.",
+  "ryzyka": [
+   {
+    "tytul": "Zespoły przeciążeniowe kończyny górnej",
+    "opis": "Praca wyłącznie przy klawiaturze, przez dziesięć godzin dziennie w okresach transakcyjnych. Zapalenie nadkłykcia bocznego i neuropatia nadgarstka to typowe następstwa, wykluczające z pisania na tygodnie."
+   },
+   {
+    "tytul": "Zaburzenia snu i wyczerpanie",
+    "opis": "Zamknięcie transakcji potrafi oznaczać kilka dób pracy niemal bez przerwy. Skutki kumulują się latami i przekładają na choroby metaboliczne oraz obniżoną odporność."
+   },
+   {
+    "tytul": "Pogorszenie widzenia bliskiego",
+    "opis": "Kilkaset stron dokumentacji dziennie, na ekranie i papierze. Zaburzenia akomodacji przy tym obciążeniu ujawniają się wcześniej niż wynikałoby to z wieku."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Nie mam uprawnień korporacyjnych — czy to przeszkoda?",
+    "odpowiedz": "Nie. Ubezpieczyciel patrzy na faktycznie wykonywany zawód i udokumentowany dochód, a nie na wpis na listę. Wpis ma znaczenie tylko wtedy, gdy to on warunkuje możliwość zarobkowania."
+   },
+   {
+    "pytanie": "Pracuję na etacie w firmie i dorabiam na działalności — jak to wykazać?",
+    "odpowiedz": "Wykazujesz oba źródła. Limit procentowy zależy od formy, w której osiągasz większość dochodu, więc przy przewadze etatu wyniesie 65%, a przy przewadze działalności — 80%."
+   }
+  ]
+ },
+ "mediator": {
+  "wstep": "Mediator zarabia na tym, że strony chcą z nim rozmawiać. To zawód oparty w całości na osobistej obecności przy stole — nie ma tu dokumentu, który mógłby powstać pod nieobecność autora.",
+  "dochod": "Wynagrodzenie pochodzi z posiedzeń mediacyjnych, rozliczanych za spotkanie albo za postępowanie. Mediacje sądowe mają stawki ograniczone rozporządzeniem, prywatne są wyższe, ale obie znikają razem z pierwszym odwołanym terminem.",
+  "przerwa": "Postępowanie mediacyjne ma termin wyznaczony przez sąd i zwykle nieprzekraczalny. Mediator, który nie stawi się na posiedzenie, zostaje zastąpiony przez innego z listy, a sprawa nie wraca. Przy dłuższej przerwie wypada się z list stałych mediatorów przy sądach okręgowych, na które wchodzi się w rocznych naborach.",
+  "ryzyka": [
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Ośmiogodzinne posiedzenia prowadzone głosem, często w emocjach i przy podniesionym tonie stron. Guzki fałdów głosowych i przewlekłe zapalenie krtani wyłączają z pracy do czasu wyleczenia, a nawroty są częste."
+   },
+   {
+    "tytul": "Ubytek słuchu",
+    "opis": "Mediacja wymaga wychwytywania niuansów w wypowiedzi, także tych mówionych półgłosem. Niedosłuch, który w innym zawodzie byłby niedogodnością, tutaj uniemożliwia prowadzenie posiedzenia."
+   },
+   {
+    "tytul": "Wyczerpanie i jego następstwa somatyczne",
+    "opis": "Praca w cudzym konflikcie, przez wiele godzin, z obowiązkiem zachowania bezstronności. Objawy somatyczne wyprzedzają tu zwykle wszystko inne; sama diagnoza wypalenia pozostaje poza zakresem ochrony."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Prowadzę mediacje online — czy to zmienia ocenę ryzyka?",
+    "odpowiedz": "Nie w istotnym stopniu. Ubezpieczyciel ocenia zawód i formę zatrudnienia, a nie kanał kontaktu. Zgłosić trzeba natomiast dłuższy pobyt poza Polską, jeśli praca zdalna oznacza wyjazd."
+   },
+   {
+    "pytanie": "Mediacje to część moich dochodów, reszta to doradztwo — jak to ująć?",
+    "odpowiedz": "Wykazujesz łączny dochód z działalności. We wniosku podajesz zawód, który jest dominujący, bo od niego zależy ocena ryzyka zawodowego — a doradztwo i mediacje mają zbliżony profil."
+   }
+  ]
+ },
+ "rzecznik-patentowy": {
+  "wstep": "Rzecznik patentowy działa w terminach, które są nieprzywracalne. Zgłoszenie wynalazku spóźnione o dzień oznacza utratę pierwszeństwa na zawsze — i odpowiedzialność wobec klienta, który stracił prawo do własnego rozwiązania.",
+  "dochod": "Przychód pochodzi ze zgłoszeń, opłat okresowych za utrzymanie praw i z postępowań spornych. Opłaty okresowe płyną dalej niezależnie od obecności, ale zgłoszenia i spory — czyli wyższa marża — urywają się natychmiast.",
+  "przerwa": "Terminy w postępowaniach przed Urzędem Patentowym i EPO są zawite. Rzecznik nieobecny przez dwa miesiące zostawia klientów z terminami, których nikt nie pilnuje, a odpowiedzialność zawodowa za ich uchybienie jest osobista i objęta obowiązkowym OC. Praktycznie każda dłuższa nieobecność wymaga przekazania portfela innemu rzecznikowi — i rzadko wraca on w całości.",
+  "ryzyka": [
+   {
+    "tytul": "Zaburzenia widzenia przy analizie dokumentacji technicznej",
+    "opis": "Rysunki, schematy i opisy patentowe czytane godzinami, często w językach obcych. Pogorszenie ostrości widzenia bliskiego jest tu ograniczeniem zawodowym, nie kosmetycznym."
+   },
+   {
+    "tytul": "Zespoły przeciążeniowe kręgosłupa szyjnego",
+    "opis": "Praca siedząca z głową pochyloną nad dokumentacją, po osiem godzin. Dyskopatia szyjna z promieniowaniem do ręki wyklucza z pisania na kilka tygodni po każdym zaostrzeniu."
+   },
+   {
+    "tytul": "Choroby układu krążenia na tle presji terminów",
+    "opis": "Terminy zawite, których uchybienie kosztuje klienta prawo wyłączne. Ten rodzaj presji, utrzymywany latami, jest w tym zawodzie stałym elementem, a nie okresowym."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy odpowiedzialność za uchybiony termin obejmuje ta polisa?",
+    "odpowiedz": "Nie. Za szkodę wyrządzoną klientowi odpowiada obowiązkowe OC rzecznika patentowego. Ta polisa wypłaca świadczenie za sam fakt niezdolności do pracy — bez związku z tym, jakie roszczenia zgłasza klient."
+   },
+   {
+    "pytanie": "Prowadzę kancelarię z drugim rzecznikiem — czy to obniża sumę?",
+    "odpowiedz": "Może obniżyć, jeśli wspólnik może prowadzić Twoje sprawy. Wniosek pyta o wkład w przychód firmy właśnie po to, żeby suma odpowiadała realnej stracie, a nie całemu obrotowi kancelarii."
+   }
+  ]
+ },
+ "syndyk": {
+  "wstep": "Syndyk jest wyznaczany przez sąd do konkretnego postępowania i odpowiada za majątek upadłego. Postanowienia sądu nie zawieszają się na czas choroby — a wierzyciele mają prawo składać skargi na bezczynność.",
+  "dochod": "Wynagrodzenie syndyka ustala sąd, zwykle jako procent od kwot wypłaconych wierzycielom, i wypłacane jest po zakończeniu etapów postępowania. To dochód nieregularny i odroczony, przez co przerwa w pracy przekłada się na wpływy z opóźnieniem kilku miesięcy.",
+  "przerwa": "Postępowanie upadłościowe ma harmonogram czynności: spis inwentarza, plan likwidacyjny, sprzedaż składników masy. Kilkumiesięczna bezczynność syndyka kończy się wnioskiem wierzycieli o jego odwołanie, a odwołany syndyk traci nie tylko to postępowanie, ale i pozycję przy wyznaczeniach do następnych.",
+  "ryzyka": [
+   {
+    "tytul": "Uraz przy czynnościach na majątku upadłego",
+    "opis": "Spis inwentarza odbywa się w halach produkcyjnych, magazynach i na placach — nie przy biurku. Upadek, uraz przy oględzinach maszyn i wypadki w terenie są w tej roli realnym ryzykiem."
+   },
+   {
+    "tytul": "Konfrontacje z upadłym i wierzycielami",
+    "opis": "Zajęcie majątku wywołuje reakcje. Agresja fizyczna zdarza się rzadziej niż u komorników, ale zdarza się — a skutki urazu są takie same."
+   },
+   {
+    "tytul": "Choroby układu krążenia",
+    "opis": "Odpowiedzialność cywilna za czynności wobec masy upadłości, w postępowaniach ciągnących się latami. Ekspozycja na stres jest tu długotrwała, a nie epizodyczna."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Wynagrodzenie dostaję nieregularnie — jak wyliczyć podstawę?",
+    "odpowiedz": "Bierze się średnią z pełnego roku, a nie z miesiąca wypłaty. Przy dochodzie odroczonym warto przygotować rozliczenie za dwa lata, bo pojedynczy rok może wypaść nietypowo."
+   },
+   {
+    "pytanie": "Czy prowadzę działalność, czy jestem funkcjonariuszem?",
+    "odpowiedz": "Dla ubezpieczyciela liczy się forma rozliczania. Syndycy działają zwykle na własny rachunek w ramach działalności gospodarczej — a to oznacza limit 80% udokumentowanego dochodu."
+   }
+  ]
+ },
+ "detektyw": {
+  "wstep": "Detektyw pracuje w terenie, sam, często w nocy i wobec osób, które nie życzą sobie obserwacji. To zawód, w którym zdarzenie kończące karierę może nastąpić w ciągu sekundy, bez żadnego wcześniejszego sygnału.",
+  "dochod": "Zlecenia rozlicza się za sprawę albo za dobę obserwacji, plus koszty. Portfel zleceń jest zbudowany na kontaktach z kancelariami i firmami ubezpieczeniowymi, które przy braku dostępności przechodzą do innego detektywa i zwykle tam zostają.",
+  "przerwa": "Obserwacja przerwana w połowie jest bezwartościowa — materiał dowodowy musi być ciągły, żeby miał znaczenie w postępowaniu. Detektyw wypadający w trakcie sprawy nie tylko traci honorarium, ale i wiarygodność u zleceniodawcy. Licencja detektywa wymaga też okresowych badań, w tym psychologicznych, których negatywny wynik odbiera prawo wykonywania zawodu.",
+  "ryzyka": [
+   {
+    "tytul": "Napaść i uraz podczas obserwacji",
+    "opis": "Ujawnienie obserwatora bywa gwałtowne. Urazy głowy, złamania i uszkodzenia stawów zdarzają się w tym zawodzie częściej niż w jakiejkolwiek pracy biurowej, a bez świadków bywają trudne do udokumentowania."
+   },
+   {
+    "tytul": "Utrata licencji po badaniach okresowych",
+    "opis": "Wpis na listę kwalifikowanych pracowników wymaga orzeczenia lekarskiego i psychologicznego. Ich negatywny wynik kończy pracę w zawodzie, niezależnie od tego, jak dobrze się czujesz."
+   },
+   {
+    "tytul": "Skutki pracy w rytmie nocnym",
+    "opis": "Obserwacje prowadzi się wtedy, kiedy dzieje się to, co ma być udokumentowane — czyli często nocą. Wieloletnie odwrócenie rytmu dobowego podnosi ryzyko chorób sercowo-naczyniowych i metabolicznych."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy pobicie podczas obserwacji jest objęte polisą?",
+    "odpowiedz": "Tak, jako nieszczęśliwy wypadek — zdarzenie nagłe i zewnętrzne. Objęte są następstwa urazu fizycznego; ewentualne skutki psychiczne pozostają poza zakresem, tak jak we wszystkich wariantach."
+   },
+   {
+    "pytanie": "Utrata licencji po badaniach — czy to podstawa wypłaty?",
+    "odpowiedz": "Podstawą jest orzeczona niezdolność do wykonywania zawodu z przyczyn zdrowotnych. Jeśli to właśnie stan zdrowia jest powodem nieprzedłużenia licencji, świadczenie się należy; sama formalna utrata dokumentu z innych przyczyn — nie."
+   }
+  ]
+ },
+ "kryminolog": {
+  "wstep": "Kryminolog łączy pracę badawczą z opiniowaniem dla sądów i organów ścigania. Opinia biegłego jest imienna, a termin jej złożenia wyznacza sąd — nie da się jej przekazać koledze z zakładu.",
+  "dochod": "Dochód pochodzi z opinii dla sądów, ekspertyz dla firm i pracy dydaktycznej. Stawki za opinie sądowe są ustalane rozporządzeniem i wypłacane po zakończeniu sprawy, więc realny przepływ pieniędzy jest opóźniony o miesiące.",
+  "przerwa": "Sąd wyznaczający biegłego nie czeka — po bezskutecznym upływie terminu powołuje kolejnego. Kryminolog wypadający na kwartał traci nie tylko bieżące zlecenia, ale i pozycję na liście biegłych sądowych, na którą wpisuje się na pięcioletnie kadencje. Utrata wpisu oznacza przerwę w zawodzie znacznie dłuższą niż sama choroba.",
+  "ryzyka": [
+   {
+    "tytul": "Obciążenie materiałem dowodowym",
+    "opis": "Analiza akt spraw o przestępstwa przeciwko życiu i wolności seksualnej, wraz z dokumentacją fotograficzną. Następstwa tej ekspozycji są udokumentowane, ale mieszczą się w kategorii chorób psychicznych — a te są z ochrony wyłączone."
+   },
+   {
+    "tytul": "Uraz przy oględzinach i wizjach lokalnych",
+    "opis": "Praca biegłego bywa terenowa: miejsce zdarzenia, obiekt, teren otwarty. Upadek albo uraz podczas oględzin jest zdarzeniem nagłym i objętym ochroną."
+   },
+   {
+    "tytul": "Pogorszenie wzroku przy analizie materiału",
+    "opis": "Ocena zapisu z monitoringu, fotografii i dokumentacji technicznej przez wiele godzin. Zaburzenia akomodacji przy tej pracy ujawniają się wcześnie i utrudniają wydawanie opinii w terminie."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Wynagrodzenie za opinie dostaję po roku — co przyjąć za dochód?",
+    "odpowiedz": "Rozliczenie roczne, a nie bieżące wpływy. Przy dochodzie tak mocno odroczonym warto pokazać dwa lata, żeby ubezpieczyciel widział średnią, a nie przypadkową lukę."
+   },
+   {
+    "pytanie": "Łączę pracę na uczelni z opiniowaniem — jaki mam limit?",
+    "odpowiedz": "Zależy od tego, która forma dominuje. Etat na uczelni daje 65%, działalność gospodarcza przy opiniach — 80%. Przy mieszance liczy się źródło większej części dochodu."
+   }
+  ]
+ },
+ "kosmetyczka": {
+  "wstep": "Kosmetyczka pracuje na skórze klientki narzędziami, które przy drżeniu ręki przestają być bezpieczne. To zawód, w którym granica między sprawnością a jej brakiem jest ostra i widoczna od pierwszego zabiegu.",
+  "dochod": "Gabinet kosmetyczny rozlicza się za pojedyncze zabiegi, zapisywane w kalendarzu na tygodnie do przodu. Karnety i pakiety, popularne w tej branży, są opłacone z góry — a niewykonany zabieg z karnetu to zobowiązanie, nie przychód.",
+  "przerwa": "Miesiąc przerwy oznacza kilkadziesiąt odwołanych zabiegów, w tym serie, których nie da się przerwać bez utraty efektu — peelingi chemiczne czy zabiegi złuszczające prowadzi się w ściśle określonych odstępach. Klientka w połowie serii pójdzie ją dokończyć gdzie indziej. Czynsz za gabinet i raty za urządzenia biegną przez cały czas.",
+  "ryzyka": [
+   {
+    "tytul": "Uczulenie na kwasy i konserwanty zabiegowe",
+    "opis": "Preparaty do zabiegów, konserwanty, żywice akrylowe, kwasy. Uczulenie kontaktowe u kosmetyczek jest częste i nieodwracalne — po jego wystąpieniu praca danym preparatem przestaje być możliwa, także w rękawicach nitrylowych."
+   },
+   {
+    "tytul": "Zespoły przeciążeniowe nadgarstka i kciuka",
+    "opis": "Masaż twarzy, oczyszczanie manualne, praca pincetą. Zapalenie pochewki ścięgna prostownika kciuka wyklucza z większości zabiegów na tygodnie i wraca przy każdym powrocie do pełnego obciążenia."
+   },
+   {
+    "tytul": "Zmiany zwyrodnieniowe odcinka szyjnego",
+    "opis": "Praca z głową pochyloną nad twarzą klientki leżącej na fotelu, przez większość dnia. Ucisk korzeni nerwowych daje drętwienie rąk, które przy zabiegach precyzyjnych jest dyskwalifikujące."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Mam karnety opłacone z góry — czy to problem przy wypłacie?",
+    "odpowiedz": "Nie wpływa na wypłatę, bo świadczenie liczy się od dochodu, a nie od zobowiązań. Warto natomiast pamiętać, że przy niewykonanych karnetach realna strata jest wyższa niż sam brak przychodu — bo dochodzi zwrot."
+   },
+   {
+    "pytanie": "Uczulenie na kwasy zawodowe — czy będzie objęte?",
+    "odpowiedz": "Objęte jest uczulenie rozpoznane po zawarciu polisy. Schorzenia leczone w ciągu 24 miesięcy przed jej zawarciem są wyłączone, chyba że ubezpieczyciel zaakceptuje je indywidualnie po ocenie ryzyka."
+   }
+  ]
+ },
+ "kosmetolog": {
+  "wstep": "Kosmetolog wykonuje zabiegi z pogranicza medycyny estetycznej: mezoterapię, laseroterapię, zabiegi z użyciem urządzeń o realnym potencjale uszkodzenia tkanki. Odpowiedzialność jest większa niż w kosmetyce klasycznej, a próg sprawności — wyższy.",
+  "dochod": "Zabiegi aparaturowe mają wysoką wartość jednostkową i wymagają serii, więc przychód jest zaplanowany na kwartał do przodu. Gabinet kosmetologiczny to też zwykle sprzęt w leasingu, którego wartość liczy się w setkach tysięcy złotych.",
+  "przerwa": "Seria zabiegów laserowych ma wyznaczone odstępy wynikające z cyklu regeneracji skóry. Przerwana w połowie traci sens i zwykle kończy się roszczeniem o zwrot za cały pakiet. Dwa miesiące nieobecności to także dwa miesiące rat leasingowych za urządzenia, które stoją nieużywane.",
+  "ryzyka": [
+   {
+    "tytul": "Uszkodzenie wzroku przy pracy z laserem",
+    "opis": "Nawet przy stosowaniu okularów ochronnych ekspozycja na rozproszone promieniowanie jest wieloletnia. Uszkodzenie siatkówki wyklucza z pracy aparaturą laserową całkowicie i nieodwracalnie."
+   },
+   {
+    "tytul": "Uczulenie na preparaty iniekcyjne i znieczulające",
+    "opis": "Kwas hialuronowy, koktajle mezoterapeutyczne, lidokaina w kremach. Reakcja kontaktowa u operatora rozwija się przy codziennej ekspozycji i po rozpoznaniu wyklucza z części zabiegów na stałe."
+   },
+   {
+    "tytul": "Przeciążenie kończyny górnej przy pracy głowicą",
+    "opis": "Głowice aparatów RF i laserowych waży się w kilogramach i trzyma pod stałym kątem przez cały zabieg. Konflikt podbarkowy jest tu następstwem typowym i wyłącza z pracy na kilka miesięcy."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Sprzęt mam w leasingu — czy to podnosi sumę ubezpieczenia?",
+    "odpowiedz": "Nie bezpośrednio, bo suma liczy się od dochodu. Ale wysokie koszty stałe są dobrym argumentem, żeby wybrać sumę bliską maksimum dopuszczalnemu przy Twoim dochodzie, a nie minimalną."
+   },
+   {
+    "pytanie": "Czy wykonywanie zabiegów iniekcyjnych zmienia ocenę ryzyka?",
+    "odpowiedz": "Tak, bo zmienia charakter pracy. We wniosku warto opisać dokładnie zakres zabiegów — kosmetologia aparaturowa i iniekcyjna są oceniane inaczej niż kosmetyka pielęgnacyjna."
+   }
+  ]
+ },
+ "masazysta": {
+  "wstep": "Masażysta pracuje własnym ciałem — rękami, barkami, kręgosłupem. To jedyne narzędzie, jakie ma, i jednocześnie to, które zużywa się najszybciej.",
+  "dochod": "Rozliczenie idzie za pojedynczy masaż albo za pakiet. Liczba zabiegów dziennie jest fizycznie ograniczona wytrzymałością masażysty, więc dochód ma twardy sufit i żadnego bufora na dni gorszej formy.",
+  "przerwa": "Klient masażu leczniczego przychodzi regularnie, często dwa razy w tygodniu, i przy przerwie znajdzie innego masażystę w ciągu tygodnia. Ta relacja rzadko wraca, bo skuteczność masażu jest odczuwalna od razu i klient nie widzi powodu do zmiany. Przy wynajmowanym gabinecie czynsz biegnie od pierwszego dnia nieobecności.",
+  "ryzyka": [
+   {
+    "tytul": "Choroba zwyrodnieniowa stawów rąk",
+    "opis": "Ucisk kciukiem i nasadą dłoni z siłą kilkudziesięciu kilogramów, powtarzany tysiące razy dziennie. Zmiany w stawach śródręczno-paliczkowych są u masażystów regułą po dekadzie pracy i nie cofają się."
+   },
+   {
+    "tytul": "Uszkodzenie krążka międzykręgowego",
+    "opis": "Praca w pochyleniu z przenoszeniem ciężaru ciała na ręce, przy jednoczesnym skręcie tułowia. Wypadnięcie krążka lędźwiowego u masażysty oznacza minimum kilka miesięcy bez pracy, a często konieczność zmiany techniki na mniej obciążającą i gorzej płatną."
+   },
+   {
+    "tytul": "Zespół cieśni nadgarstka",
+    "opis": "Ucisk nerwu pośrodkowego przy powtarzalnym wyproście nadgarstka pod obciążeniem. Objawy nocne narastają miesiącami, a zabieg wyklucza z pracy na sześć do ośmiu tygodni."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Moje ręce to całe narzędzie pracy — czy jest wariant na ich uszkodzenie?",
+    "odpowiedz": "Uszkodzenie rąk mieści się w ryzyku trwałej niezdolności i w ryzyku następstw nieszczęśliwych wypadków. Przy tym zawodzie warto rozważyć wyższą sumę trwałej niezdolności — powyżej miliona złotych, co uruchamia rozszerzoną ankietę medyczną."
+   },
+   {
+    "pytanie": "Zmiany zwyrodnieniowe narastają latami — czy będą objęte?",
+    "odpowiedz": "Decyduje moment rozpoznania i leczenia. Schorzenia leczone w ciągu 24 miesięcy przed zawarciem polisy są wyłączone, więc przy dolegliwościach rozwijających się latami warto ubezpieczyć się zanim pierwsze wizyty trafią do dokumentacji."
+   }
+  ]
+ },
+ "tatuazysta": {
+  "wstep": "Tatuażysta zostawia na skórze klienta ślad, którego nie da się poprawić drżącą ręką. Precyzja jest tu warunkiem wykonywania zawodu, a nie przewagą konkurencyjną.",
+  "dochod": "Sesje rezerwowane są z kilkumiesięcznym wyprzedzeniem, zwykle za zadatkiem. Kalendarz zapełniony na pół roku wygląda jak bezpieczeństwo, a jest zobowiązaniem — odwołana sesja oznacza zwrot zadatku i wypadnięcie z kolejki, w której miejsca były rozchwytywane.",
+  "przerwa": "Duży projekt wykonuje się w kilku sesjach rozłożonych na miesiące. Przerwa w połowie zostawia klienta z niedokończonym wzorem, którego inny tatuażysta zwykle nie chce kontynuować — style są rozpoznawalne i nikt nie chce firmować cudzej pracy. Do tego dochodzi czynsz studia, który przy dobrej lokalizacji jest znaczną pozycją.",
+  "ryzyka": [
+   {
+    "tytul": "Przeciążenie nadgarstka i przedramienia",
+    "opis": "Maszynka trzymana pod stałym kątem, z napięciem, przez sesje trwające po sześć godzin. Zapalenie pochewek ścięgnistych i neuropatia nadgarstka to w tym zawodzie następstwo typowe, a każdy nawrót to kilka tygodni przerwy."
+   },
+   {
+    "tytul": "Zakażenie materiałem biologicznym",
+    "opis": "Praca z krwią przy uszkodzonej barierze skórnej klienta. Zakłucie igłą to ryzyko zakażenia wirusowym zapaleniem wątroby i HIV — objęte polisą wyłącznie przy osobnej klauzuli HIV/WZW."
+   },
+   {
+    "tytul": "Pogorszenie widzenia bliskiego",
+    "opis": "Praca na dystansie trzydziestu centymetrów, przy silnym świetle punktowym, przez cały dzień. Utrata zdolności akomodacji kończy pracę przy drobnych detalach, które w tatuażu decydują o cenie sesji."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy zakłucie igłą jest u mnie traktowane jak w zawodach medycznych?",
+    "odpowiedz": "Mechanizm ekspozycji jest ten sam i tak samo wymaga klauzuli HIV/WZW. Warto o nią zapytać przy wniosku — bez niej zakażenie zawodowe jest wyłączone, niezależnie od zawodu."
+   },
+   {
+    "pytanie": "Mam zadatki od klientów na pół roku do przodu — czy to dochód?",
+    "odpowiedz": "Dochodem jest to, co zostało rozliczone i opodatkowane, a nie zadatki na przyszłe sesje. Podstawą będzie więc przychód z ostatnich dwunastu miesięcy, nie stan kalendarza."
+   }
+  ]
+ },
+ "wizazysta": {
+  "wstep": "Wizażysta pracuje pod presją terminu, którego nikt nie przesunie — ślub, sesja, plan zdjęciowy. To zawód, w którym niedostępność w konkretnym dniu jest równoznaczna z utratą zlecenia w całości.",
+  "dochod": "Przychód pochodzi z pojedynczych zleceń, rezerwowanych z dużym wyprzedzeniem i skoncentrowanych w sezonie. Wesela i sesje wypadają głównie od maja do września, więc rok ma dwa różne oblicza i tylko jedno z nich zarabia.",
+  "przerwa": "Odwołanie w dniu ślubu to nie tylko brak wynagrodzenia, ale trwała szkoda wizerunkowa — w tej branży rekomendacje krążą w zamkniętych grupach i jedno odwołanie potrafi zamknąć dopływ zleceń na sezon. Przerwa w szczycie sezonu kosztuje wielokrotnie więcej niż zimą, bo terminów nie da się odzyskać.",
+  "ryzyka": [
+   {
+    "tytul": "Uczulenie kontaktowe na kosmetyki kolorowe",
+    "opis": "Codzienna ekspozycja na pigmenty, konserwanty i kleje do rzęs. Uczulenie u wizażysty oznacza reakcję na własne narzędzia pracy i po rozpoznaniu wyklucza z części zabiegów na stałe."
+   },
+   {
+    "tytul": "Przeciążenie obręczy barkowej i nadgarstka",
+    "opis": "Praca z uniesionymi rękami przy twarzy klientki, przez kilka godzin, często w niewygodnej pozycji na planie. Konflikt podbarkowy wyłącza z pracy na dwa do czterech miesięcy."
+   },
+   {
+    "tytul": "Pogorszenie widzenia barw i ostrości",
+    "opis": "Dobór odcienia podkładu wymaga rozróżniania niuansów barwy przy zmiennym oświetleniu. Nabyte zaburzenia widzenia barw kończą pracę w tym zawodzie skuteczniej niż jakikolwiek uraz."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Pracuję sezonowo — czy zimowe miesiące zaniżą mi sumę?",
+    "odpowiedz": "Nie, bo liczy się średnia roczna z udokumentowanego przychodu. Sezonowość nie jest problemem, o ile wykażesz pełny rok, a nie same miesiące szczytu."
+   },
+   {
+    "pytanie": "Czy odwołanie zlecenia z powodu choroby rodzi odpowiedzialność?",
+    "odpowiedz": "To zależy od umowy z klientem, nie od polisy. Ubezpieczenie wypłaca świadczenie za niezdolność do pracy — ewentualne kary umowne wobec klienta pokrywasz z tego świadczenia albo z OC, jeśli je masz."
+   }
+  ]
+ },
+ "stylista": {
+  "wstep": "Stylista buduje dochód na obecności przy kliencie i na dostępie do rzeczy — showroomów, wypożyczalni, marek. Przerwa odcina jedno i drugie, bo relacje w tej branży utrzymuje się bieżącą pracą, a nie historią.",
+  "dochod": "Zlecenia rozliczane są za sesję, kampanię albo stałą współpracę z marką. Ten ostatni składnik bywa najbardziej stabilny i jednocześnie najłatwiejszy do utraty — kontrakty ambasadorskie mają krótkie wypowiedzenia.",
+  "przerwa": "Kampania ma harmonogram produkcyjny, do którego dopasowane są wynajmy studia, ekipa i modele. Stylista, który wypada na tydzień przed zdjęciami, zostaje zastąpiony natychmiast i przy kolejnej kampanii już nie jest pytany. Przy dłuższej przerwie znika też z obiegu informacji o nadchodzących projektach, co w tej branży jest podstawowym kanałem pozyskiwania zleceń.",
+  "ryzyka": [
+   {
+    "tytul": "Uraz kręgosłupa przy transporcie garderoby",
+    "opis": "Wieszaki, kufry i skrzynie z ubraniami przenoszone na plan i z planu, zwykle bez pomocy. Przeciążenie odcinka lędźwiowego jest w tym zawodzie najczęstszą przyczyną nagłej niezdolności."
+   },
+   {
+    "tytul": "Przeciążenie kończyn dolnych",
+    "opis": "Dwanaście godzin na planie zdjęciowym, w ruchu, na twardym podłożu. Zapalenie rozcięgna podeszwowego i przeciążenia stawów kolanowych to następstwo powtarzalne i nawracające."
+   },
+   {
+    "tytul": "Zaburzenia widzenia barw",
+    "opis": "Dobór zestawień kolorystycznych przy zmiennym oświetleniu planu. Nabyte zaburzenia rozróżniania barw uniemożliwiają wykonywanie zawodu, mimo pełnej ostrości widzenia."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Rozliczam się z kilkoma markami na fakturę — jak wykazać dochód?",
+    "odpowiedz": "Sumujesz wszystkie faktury z ostatnich dwunastu miesięcy. Wielość źródeł jest tu argumentem za polisą, bo ZUS liczy zasiłek od jednej podstawy, a stracisz przychód ze wszystkich umów naraz."
+   },
+   {
+    "pytanie": "Czy praca za granicą przy kampaniach jest objęta?",
+    "odpowiedz": "Krótkie wyjazdy służbowe tak. Dłuższy pobyt poza Polską wymaga zgłoszenia ubezpieczycielowi — niezgłoszony może być podstawą odmowy wypłaty."
+   }
+  ]
+ },
+ "nail-artist": {
+  "wstep": "Nail artist pracuje frezarką i pędzlem na powierzchni kilku milimetrów kwadratowych, przez osiem godzin dziennie. Utrata precyzji w tym zawodzie nie oznacza gorszej jakości — oznacza uszkodzenie płytki paznokciowej klientki.",
+  "dochod": "Stylizacja rozliczana jest za pojedynczą wizytę, a klientki wracają co trzy do czterech tygodni. To rytm, który tworzy stabilny kalendarz i jednocześnie sprawia, że jedna opuszczona kolejka wystarcza, by klientka trafiła do kogoś innego i tam została.",
+  "przerwa": "Miesiąc nieobecności to jedna pełna rotacja wszystkich stałych klientek — czyli praktycznie cała baza. Odbudowa zajmuje kwartał, bo terminy u nowego stylisty klientka rezerwuje z wyprzedzeniem i nie zmienia ich z dnia na dzień. Czynsz za stanowisko i raty za frezarkę oraz lampy biegną nieprzerwanie.",
+  "ryzyka": [
+   {
+    "tytul": "Astma i uczulenie na akrylany",
+    "opis": "Opary metakrylanów i pył z frezowania, wdychane przez całą zmianę w niewielkim pomieszczeniu. Astma zawodowa i uczulenie kontaktowe na akrylany są w tym zawodzie dobrze udokumentowane i po rozpoznaniu wykluczają z pracy tymi materiałami."
+   },
+   {
+    "tytul": "Zespół wibracyjny i neuropatia palców",
+    "opis": "Frezarka przenosi drgania na palce przez kilka godzin dziennie. Objawy zaczynają się od mrowienia i bielenia opuszków, a kończą trwałym upośledzeniem czucia, które przy tej pracy jest dyskwalifikujące."
+   },
+   {
+    "tytul": "Wymuszona pozycja i zmiany w odcinku szyjnym",
+    "opis": "Głowa pochylona nad dłonią klientki, przy unieruchomionych barkach, przez cały dzień. Dyskopatia szyjna z drętwieniem rąk jest tu następstwem, nie chorobą wieku."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy astma od akrylanów będzie objęta?",
+    "odpowiedz": "Jeśli zostanie rozpoznana po zawarciu polisy i spowoduje orzeczoną niezdolność do wykonywania zawodu — tak. Schorzenia leczone w ciągu 24 miesięcy przed zawarciem umowy są wyłączone."
+   },
+   {
+    "pytanie": "Wynajmuję stanowisko w salonie — czy to działalność gospodarcza?",
+    "odpowiedz": "Zwykle tak, i wtedy obowiązuje limit 80% udokumentowanego dochodu. Jeśli pracujesz na umowie zlecenie z salonem, limit spada do 65%, więc warto sprawdzić, jaka jest faktyczna podstawa współpracy."
+   }
+  ]
+ },
+ "terapeuta": {
+  "wstep": "Terapeuta prowadzący gabinet pracuje w relacji, która nie przenosi się na zmiennika. Przerwa w terapii nie jest przerwą techniczną — bywa momentem, w którym proces się kończy, a klient nie wraca.",
+  "dochod": "Sesje rozliczane są pojedynczo albo w pakietach, z częstotliwością cotygodniową. Kalendarz jest przewidywalny, ale bez żadnego bufora: brak sesji to brak przychodu tego samego tygodnia.",
+  "przerwa": "Proces terapeutyczny przerwany na dwa miesiące zwykle nie wraca do punktu, w którym się zatrzymał. Część klientów znajdzie w tym czasie innego terapeutę, część po prostu zrezygnuje. Odbudowa pełnego grafiku po dłuższej nieobecności trwa w tym zawodzie kilka miesięcy, bo nowi klienci przychodzą z polecenia, a polecenia biorą się z bieżącej pracy.",
+  "ryzyka": [
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Sześć do ośmiu sesji dziennie, każda po pięćdziesiąt minut mówienia. Przewlekłe zapalenie krtani i niedomykalność fałdów głosowych wykluczają z pracy do czasu wyleczenia, a nawracają przy powrocie do pełnego obciążenia."
+   },
+   {
+    "tytul": "Obciążenie wtórne materiałem klientów",
+    "opis": "Kontakt z cudzą traumą przez wiele godzin dziennie ma udokumentowane następstwa. Trzeba powiedzieć wprost: mieszczą się one w kategorii chorób psychicznych, a te są wyłączone z ochrony we wszystkich wariantach."
+   },
+   {
+    "tytul": "Skutki pracy siedzącej",
+    "opis": "Osiem godzin w fotelu, w pozycji otwartej wobec klienta, bez możliwości zmiany. Zespoły bólowe odcinka lędźwiowego są tu następstwem typowym i wyłączają z pracy na tygodnie."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy wypalenie zawodowe jest objęte polisą?",
+    "odpowiedz": "Nie. Wypalenie jako samodzielna diagnoza jest wyłączone we wszystkich wariantach, podobnie jak choroby psychiczne. Objęte są natomiast następstwa somatyczne, jeśli mają odrębne rozpoznanie."
+   },
+   {
+    "pytanie": "Prowadzę sesje online — czy to zmienia ochronę?",
+    "odpowiedz": "Nie, o ile pracujesz z Polski. Forma kontaktu z klientem nie wpływa na ocenę ryzyka; wpływa na nią dłuższy pobyt za granicą, który trzeba zgłosić."
    }
   ]
  }
