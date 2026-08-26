@@ -1129,5 +1129,440 @@
     "odpowiedz": "Nie, o ile pracujesz z Polski. Forma kontaktu z klientem nie wpływa na ocenę ryzyka; wpływa na nią dłuższy pobyt za granicą, który trzeba zgłosić."
    }
   ]
+ },
+ "pilot": {
+  "wstep": "Pilot traci prawo do wykonywania zawodu w dniu, w którym lekarz orzecznik nie przedłuży orzeczenia klasy pierwszej. Nie potrzeba do tego wypadku ani choroby obłożnej — wystarczy wynik badania, który w każdym innym zawodzie byłby bez znaczenia.",
+  "dochod": "Wynagrodzenie łączy część stałą z dodatkiem za wylatane godziny i diety. Składnik zmienny bywa połową dochodu i znika natychmiast po zawieszeniu uprawnień, bo nie ma godzin bez ważnego orzeczenia.",
+  "przerwa": "Zawieszenie orzeczenia lotniczo-lekarskiego oznacza nie tylko brak lotów, ale i utratę ważności uprawnień na typ, jeśli przerwa przekroczy określony czas. Powrót wymaga wtedy przeszkolenia i sprawdzianu w symulatorze, za które płaci się z własnej kieszeni albo odpracowuje kontraktem. Sama choroba trwa krócej niż jej konsekwencje zawodowe.",
+  "ryzyka": [
+   {
+    "tytul": "Utrata orzeczenia lotniczo-lekarskiego klasy pierwszej",
+    "opis": "Kryteria są ostrzejsze niż w jakimkolwiek innym zawodzie: rytm serca, ciśnienie, wzrok, słuch, metabolizm. Rozpoznanie, które w pracy biurowej nie zmienia niczego, tutaj kończy karierę z dnia na dzień."
+   },
+   {
+    "tytul": "Zaburzenia rytmu okołodobowego",
+    "opis": "Loty przez strefy czasowe, nocne rotacje, nieregularne odpoczynki. Skutkiem są zaburzenia snu i metaboliczne, które kumulują się latami i same w sobie bywają przyczyną niezaliczenia badań."
+   },
+   {
+    "tytul": "Ubytek słuchu i szumy uszne",
+    "opis": "Ekspozycja na hałas w kabinie i w słuchawkach przez tysiące godzin. Ubytek narasta bezobjawowo, a wykrywa go dopiero audiogram przy badaniu okresowym — i wtedy jest już nieodwracalny."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy zawieszenie orzeczenia to podstawa do wypłaty świadczenia?",
+    "odpowiedz": "Liczy się to, czy orzecznik lotniczo-lekarski stwierdził stan zdrowia wykluczający latanie. Jeśli to stan zdrowia jest powodem niedopuszczenia do latania, świadczenie się należy — decyduje przyczyna medyczna, a nie sam fakt utraty dokumentu."
+   },
+   {
+    "pytanie": "Latam na kontrakcie przez własną spółkę — jaki mam limit?",
+    "odpowiedz": "Rozliczenie fakturą przez własną spółkę oznacza limit osiemdziesięciu procent udokumentowanego dochodu. To najczęstsza forma zatrudnienia pilotów w liniach niskokosztowych i jednocześnie ta, w której zabezpieczenie państwowe jest najsłabsze."
+   }
+  ]
+ },
+ "taksowkarz": {
+  "wstep": "Taksówkarz zarabia wyłącznie wtedy, gdy siedzi za kierownicą. Nie ma tu żadnego składnika, który pracuje bez niego — samochód stojący pod domem generuje raty i ubezpieczenie, a nie kursy.",
+  "dochod": "Przychód powstaje z pojedynczych kursów, rozliczanych tego samego dnia, po odjęciu prowizji aplikacji i paliwa. Marża jest cienka, więc każdy dzień postoju odejmuje się od niewielkiej różnicy między obrotem a kosztami.",
+  "przerwa": "Licencja na przewóz osób wymaga ważnych badań lekarskich i psychologicznych, a te podlegają okresowej weryfikacji. Miesiąc bez pracy to miesiąc rat leasingowych, OC, przeglądu i abonamentu aplikacji — kosztów, które nie zależą od przejechanych kilometrów. Przy pracy przez aplikację dochodzi utrata rankingu, który po powrocie odbudowuje się tygodniami.",
+  "ryzyka": [
+   {
+    "tytul": "Wypadek komunikacyjny",
+    "opis": "Kilkadziesiąt tysięcy kilometrów rocznie w ruchu miejskim to ekspozycja nieporównywalna z kierowcą prywatnym. Uraz kręgosłupa szyjnego przy uderzeniu w tył jest najczęstszym następstwem i wyłącza z pracy na tygodnie."
+   },
+   {
+    "tytul": "Napaść ze strony pasażera",
+    "opis": "Praca nocna, sam na sam z nieznaną osobą, z gotówką w samochodzie. To ryzyko, którego nie da się zredukować doświadczeniem, a jego następstwa fizyczne są objęte polisą jako nieszczęśliwy wypadek."
+   },
+   {
+    "tytul": "Choroby wynikające z pozycji siedzącej",
+    "opis": "Dziesięć godzin dziennie w jednej pozycji, przy wibracjach i bez ruchu. Żylaki, zespoły bólowe lędźwiowe i choroby metaboliczne pojawiają się u taksówkarzy wcześniej niż w populacji ogólnej."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Jeżdżę przez aplikację na własnej działalności — czy to B2B?",
+    "odpowiedz": "Tak, jeśli rozliczasz się fakturą z operatorem albo z partnerem flotowym. Wtedy obowiązuje limit 80%. Przy umowie zlecenia z firmą flotową limit spada do 65%."
+   },
+   {
+    "pytanie": "Czy prowizja aplikacji obniża moją podstawę?",
+    "odpowiedz": "Ubezpieczyciel liczy dochód, a nie obrót — więc po odjęciu prowizji i kosztów. Warto przygotować rozliczenie roczne, a nie zestawienie kursów, bo to ono pokazuje faktyczną podstawę."
+   }
+  ]
+ },
+ "kurier": {
+  "wstep": "Kurier wykonuje sto pięćdziesiąt zatrzymań dziennie, z których każde oznacza wysiadanie, dźwiganie i wchodzenie po schodach. To praca fizyczna udająca pracę kierowcy.",
+  "dochod": "Rozliczenie idzie za doręczoną paczkę, nie za przepracowany dzień. Stawka za sztukę jest niska, więc dochód buduje się liczbą, a liczba wymaga pełnej sprawności — kurier z ograniczeniem dźwigania nie zarobi mniej, tylko nie zarobi wcale.",
+  "przerwa": "Trasa kuriera jest przypisana na stałe i przy nieobecności przechodzi do kogoś innego. Odzyskanie jej po powrocie nie jest oczywiste, bo firma kurierska optymalizuje obszary, a nie relacje. Przy własnym busie w leasingu dochodzą raty i ubezpieczenie pojazdu, który stoi.",
+  "ryzyka": [
+   {
+    "tytul": "Uraz kręgosłupa przy dźwiganiu",
+    "opis": "Kilkaset przesyłek dziennie, część powyżej trzydziestu kilogramów, podnoszonych z podłogi busa w skręcie. Wypadnięcie krążka lędźwiowego jest w tym zawodzie najczęstszą przyczyną trwałej zmiany pracy."
+   },
+   {
+    "tytul": "Urazy stawu skokowego i kolanowego",
+    "opis": "Wysiadanie i wsiadanie sto pięćdziesiąt razy dziennie, bieg po schodach, oblodzone chodniki zimą. Skręcenia i uszkodzenia więzadeł powtarzają się i kumulują niestabilność stawu."
+   },
+   {
+    "tytul": "Wypadek komunikacyjny przy pracy w pośpiechu",
+    "opis": "Presja czasu wynikająca z rozliczenia za sztukę przekłada się na styl jazdy. Kolizje przy manewrowaniu i wypadki przy wysiadaniu na jezdnię są w tej pracy zdarzeniem regularnym."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Rozliczam się za paczkę — jak wykazać dochód?",
+    "odpowiedz": "Przez rozliczenie roczne z działalności, po odjęciu kosztów paliwa i pojazdu. Zestawienie doręczeń pokazuje obrót, a podstawą sumy ubezpieczenia jest dochód."
+   },
+   {
+    "pytanie": "Czy uraz kręgosłupa przy dźwiganiu to wypadek?",
+    "odpowiedz": "Nagłe wypadnięcie krążka przy podnoszeniu ciężaru zwykle tak. Zmiany zwyrodnieniowe narastające latami — nie; te obejmuje ryzyko niezdolności do pracy, a nie ryzyko następstw nieszczęśliwych wypadków."
+   }
+  ]
+ },
+ "spedytor": {
+  "wstep": "Spedytor nie prowadzi ciężarówki, tylko utrzymuje w ruchu kilkadziesiąt zleceń naraz, z których każde ma termin, kierowcę i klienta po drugiej stronie. Jego nieobecność nie zatrzymuje pojazdów — zatrzymuje decyzje.",
+  "dochod": "Wynagrodzenie łączy podstawę z prowizją od marży na zorganizowanych transportach. Prowizja bywa większą częścią dochodu, a liczy się od wyników okresu, więc nieobecność zeruje ją całkowicie.",
+  "przerwa": "Relacje z przewoźnikami i klientami są osobiste i pilnowane bieżącym kontaktem. Miesiąc bez telefonu oznacza, że stały klient znalazł innego spedytora, a przewoźnik podpisał się pod cudzym zleceniem. Po powrocie portfel trzeba budować od nowa, przy czym rynek nie czekał.",
+  "ryzyka": [
+   {
+    "tytul": "Nadciśnienie od pracy w trybie ciągłej gotowości",
+    "opis": "Praca w trybie ciągłej gotowości, z telefonem odbieranym w nocy przy awariach na trasie. Nadciśnienie i zaburzenia rytmu są w tej roli wcześniejsze i częstsze niż w innych zawodach biurowych."
+   },
+   {
+    "tytul": "Zaburzenia snu",
+    "opis": "Transport jedzie dwadzieścia cztery godziny na dobę, więc spedytor bywa dostępny poza godzinami pracy. Przewlekły deficyt snu podnosi ryzyko chorób metabolicznych i obniża odporność."
+   },
+   {
+    "tytul": "Zespoły przeciążeniowe od pracy przy monitorze",
+    "opis": "Dziesięć godzin przy kilku ekranach jednocześnie, przy stałym używaniu myszy i telefonu. Neuropatia nadgarstka i zespoły bólowe karku wykluczają z pracy na tygodnie."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Prowizja jest zmienna — co przyjąć za podstawę?",
+    "odpowiedz": "Średnią z pełnych dwunastu miesięcy. Przy silnych wahaniach sezonowych warto pokazać dwa lata, żeby suma nie została wyliczona z przypadkowo słabego okresu."
+   },
+   {
+    "pytanie": "Pracuję na etacie w spedycji — czy polisa ma sens?",
+    "odpowiedz": "Ma, choć limit wynosi wtedy 65%. Zasiłek chorobowy z etatu liczy się od podstawy składek, która przy dochodzie z prowizji bywa znacznie niższa niż realne zarobki."
+   }
+  ]
+ },
+ "logistyk": {
+  "wstep": "Logistyk projektuje przepływ towaru: magazyn, trasy, zapasy, terminy. Jego praca ujawnia się dopiero wtedy, gdy jej zabraknie — po tygodniu bez decyzji zaczynają się braki na półkach i przestoje na produkcji.",
+  "dochod": "Zatrudnienie bywa mieszane: etat w firmie albo kontrakt doradczy przy wdrożeniach systemów magazynowych. Ta druga forma płaci lepiej i urywa się szybciej, bo projekt wdrożeniowy ma harmonogram, którego nikt nie przesunie.",
+  "przerwa": "Wdrożenie systemu magazynowego albo przeniesienie centrum dystrybucji to projekt rozpisany na kwartały, z karami umownymi za opóźnienie. Logistyk wypadający w środku zostaje zastąpiony przez firmę zewnętrzną, a jego rola w projekcie już nie wraca. Przy pracy kontraktowej oznacza to utratę całego przychodu z tego wdrożenia.",
+  "ryzyka": [
+   {
+    "tytul": "Uraz w magazynie podczas audytu",
+    "opis": "Logistyk wchodzi między regały wysokiego składowania, gdzie porusza się sprzęt. Potrącenie przez wózek widłowy i upadek z podestu to zdarzenia rzadkie, ale o poważnych następstwach."
+   },
+   {
+    "tytul": "Skutki pracy w chłodni i mroźni",
+    "opis": "Logistyka żywności oznacza wielokrotne przejścia między temperaturą pokojową a minus osiemnastoma stopniami. Przewlekłe zapalenie zatok i dolegliwości stawowe narastają latami."
+   },
+   {
+    "tytul": "Choroby układu krążenia",
+    "opis": "Odpowiedzialność za ciągłość dostaw przy stałej presji kosztowej. To obciążenie rozłożone na dekady, ujawniające się jednym incydentem sercowym po czterdziestce."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Prowadzę wdrożenia jako doradca — czy to zawód techniczny?",
+    "odpowiedz": "Dla oceny ryzyka liczy się to, ile czasu spędzasz na hali, a nie sama nazwa stanowiska. Warto opisać to we wniosku, bo praca wyłącznie biurowa i praca z regularnymi audytami magazynowymi mają inny profil."
+   },
+   {
+    "pytanie": "Łączę etat z doradztwem — jak liczyć limit?",
+    "odpowiedz": "Decyduje forma, w której osiągasz większość dochodu. Przewaga etatu oznacza 65%, przewaga działalności — 80%. Oba źródła trzeba wykazać, bo suma liczy się od całości."
+   }
+  ]
+ },
+ "dyspozytor": {
+  "wstep": "Dyspozytor podejmuje decyzje w czasie rzeczywistym, mając niepełne informacje i ludzi czekających po drugiej stronie łącza. W transporcie decyduje o trasach, w ratownictwie — o kolejności wyjazdów.",
+  "dochod": "Praca zmianowa rozliczana za dyżury, z dodatkami za noce i święta. Te dodatki bywają jedną trzecią wynagrodzenia i znikają w całości, bo nieobecność wycina całe dyżury, a nie ich część.",
+  "przerwa": "Grafik dyżurów układa się z miesięcznym wyprzedzeniem i obsadza natychmiast. Miejsce pracy zwykle nie znika, ale przy zatrudnieniu na kontrakcie dłuższa nieobecność kończy się nieprzedłużeniem umowy na kolejny okres — obsada dyspozytorni musi być pewna, a nie prawdopodobna.",
+  "ryzyka": [
+   {
+    "tytul": "Ubytek słuchu",
+    "opis": "Kilkanaście godzin dziennie w słuchawkach, przy stałym poziomie głośności podnoszonym w hałasie. Ubytek w zakresie wysokich częstotliwości narasta bezobjawowo i wyklucza z pracy przy łączności."
+   },
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Kilkaset rozmów na dyżurze, prowadzonych podniesionym głosem przy złej jakości łącza. Przewlekłe zapalenie krtani i guzki fałdów głosowych są tu następstwem typowym."
+   },
+   {
+    "tytul": "Zaburzenia snu przy pracy zmianowej",
+    "opis": "Dyżury dwunastogodzinne w rotacji dzień–noc przez lata. Skutki metaboliczne i sercowo-naczyniowe pracy zmianowej są dobrze udokumentowane i nie cofają się po zmianie trybu."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Dodatki za dyżury nocne — czy wchodzą do podstawy?",
+    "odpowiedz": "Tak, o ile są udokumentowane. Przy pracy zmianowej stanowią istotną część dochodu i ich pominięcie zaniża sumę ubezpieczenia poniżej realnej straty."
+   },
+   {
+    "pytanie": "Czy niedosłuch będzie podstawą wypłaty?",
+    "odpowiedz": "Jeśli powoduje orzeczoną niezdolność do wykonywania zawodu — tak. Kluczowe jest to, czy schorzenie nie było leczone w ciągu 24 miesięcy przed zawarciem umowy; ubytki narastające latami warto ubezpieczyć wcześnie."
+   }
+  ]
+ },
+ "agent-celny": {
+  "wstep": "Agent celny odpowiada za zgłoszenia, które przechodzą przez systemy administracji skarbowej pod jego numerem. Odpowiedzialność jest osobista i nieprzenoszalna, więc pod jego nieobecność odprawy po prostu stoją.",
+  "dochod": "Rozliczenie idzie za zgłoszenie celne albo za stałą obsługę importera. Marża na pojedynczej odprawie jest niewielka, więc dochód buduje wolumen — a wolumen wymaga codziennej obecności przy systemie.",
+  "przerwa": "Towar czekający na odprawę generuje koszty składowania w magazynie czasowym, liczone za dobę. Importer, którego kontener stoi, zmienia agencję w ciągu jednego dnia i już nie wraca, bo koszt postoju jest natychmiastowy i policzalny. Dwa tygodnie nieobecności potrafią rozbić portfel klientów budowany latami.",
+  "ryzyka": [
+   {
+    "tytul": "Uraz podczas rewizji celnej",
+    "opis": "Obecność przy kontroli towaru oznacza pracę w magazynie, przy rozładunku i przy otwieranych kontenerach. Upadek, przygniecenie i uraz przy przenoszeniu są tu ryzykiem realnym, choć rzadko kojarzonym z tym zawodem."
+   },
+   {
+    "tytul": "Obciążenie sercowo-naczyniowe od ryzyka finansowego",
+    "opis": "Błąd w klasyfikacji taryfowej albo w wartości celnej oznacza postępowanie i odpowiedzialność finansową. Ta presja jest w tym zawodzie stała, a nie okresowa."
+   },
+   {
+    "tytul": "Zespoły przeciążeniowe od pracy przy systemach",
+    "opis": "Zgłoszenia wprowadza się ręcznie, w systemie o niewygodnym interfejsie, przez większość dnia. Neuropatia nadgarstka i zespół bólowy karku wykluczają z pracy na tygodnie."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy odpowiedzialność za błędne zgłoszenie obejmuje ta polisa?",
+    "odpowiedz": "Nie — to zakres OC zawodowego agencji celnej. Ta polisa wypłaca świadczenie za niezdolność do pracy i nie ma związku z roszczeniami wobec agenta."
+   },
+   {
+    "pytanie": "Prowadzę agencję celną z dwoma agentami — jak to zgłosić?",
+    "odpowiedz": "Jako działalność z pracownikami. Wniosek zapyta o Twój wkład w przychód, bo jeśli pozostali agenci mogą podpisywać zgłoszenia, część przychodu firmy zostaje mimo Twojej nieobecności."
+   }
+  ]
+ },
+ "nauczyciel": {
+  "wstep": "Głos jest u nauczyciela narzędziem pracy, a choroby narządu głosu figurują w wykazie chorób zawodowych właśnie z powodu tej grupy. Nauczyciel bez głosu nie prowadzi lekcji — nie da się tego obejść żadną organizacją pracy.",
+  "dochod": "Nauczyciel na etacie ma zabezpieczenie z ZUS, ale ten sam nauczyciel prowadzący korepetycje albo zajęcia na własnej działalności ma drugie źródło, którego żaden zasiłek nie pokrywa. Właśnie ta druga część znika w całości przy pierwszej chorobie.",
+  "przerwa": "Uczeń przygotowywany do matury nie przerwie kursu na dwa miesiące i nie wróci w maju. Grupa korepetycyjna rozchodzi się po dwóch odwołanych zajęciach, a odbudowa zajmuje cały semestr, bo nabór idzie w rytmie roku szkolnego. Przy własnej szkole językowej albo pracowni dochodzi czynsz i wynagrodzenia lektorów.",
+  "ryzyka": [
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Mówienie przez pięć godzin dziennie w hałasie, często podniesionym głosem. Guzki fałdów głosowych i niedowład strun głosowych to schorzenia figurujące w wykazie chorób zawodowych i najczęstsza przyczyna niezdolności w tym zawodzie."
+   },
+   {
+    "tytul": "Przewlekłe infekcje dróg oddechowych",
+    "opis": "Kontakt z kilkuset osobami dziennie w zamkniętych, słabo wentylowanych pomieszczeniach. Nawracające zapalenia zatok i oskrzeli przekładają się bezpośrednio na stan strun głosowych."
+   },
+   {
+    "tytul": "Żylaki i przeciążenie kręgosłupa",
+    "opis": "Praca w pozycji stojącej, z częstym pochylaniem się nad ławkami. Niewydolność żylna i zespoły bólowe lędźwiowe są u nauczycieli częstsze niż w populacji ogólnej."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Mam etat w szkole i korepetycje — czy oba dochody się liczą?",
+    "odpowiedz": "Tak, sumują się. Limit procentowy zależy od formy dominującej, ale suma ubezpieczenia liczy się od całości udokumentowanego dochodu, a nie tylko od etatu."
+   },
+   {
+    "pytanie": "Czy choroba zawodowa narządu głosu jest objęta?",
+    "odpowiedz": "Objęta jest niezdolność do wykonywania zawodu, niezależnie od tego, czy schorzenie zostało formalnie uznane za zawodowe. Istotne jest tylko to, czy nie było leczone w ciągu 24 miesięcy przed zawarciem umowy."
+   }
+  ]
+ },
+ "wykladowca": {
+  "wstep": "Wykładowca akademicki na umowie cywilnoprawnej rozlicza się za przeprowadzone godziny. Odwołany wykład nie zostaje przełożony na później i nie zostaje zapłacony — po prostu wypada z rozliczenia semestru.",
+  "dochod": "Dochód buduje się z godzin dydaktycznych, grantów badawczych i recenzji. Granty mają harmonogramy z terminami raportowania, więc przerwa dotyka nie tylko dydaktyki, ale i finansowania badań, w których wykładowca jest wykonawcą.",
+  "przerwa": "Semestr ma sztywne ramy, a przedmiot musi być zrealizowany w wyznaczonych godzinach. Dłuższa nieobecność oznacza przekazanie zajęć innej osobie i utratę wynagrodzenia za cały kurs. W grantach nieobecność wykonawcy bywa podstawą do korekty kosztorysu, a przy kierowniku projektu — do wstrzymania finansowania.",
+  "ryzyka": [
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Wykład dla dwustuosobowej auli prowadzi się z projekcją głosu, często bez nagłośnienia. Przewlekłe zapalenie krtani u wykładowców jest następstwem obciążenia, a nie infekcji."
+   },
+   {
+    "tytul": "Zespoły przeciążeniowe od pracy z tekstem",
+    "opis": "Publikacje, recenzje, wnioski grantowe — kilkanaście tysięcy znaków dziennie w okresach raportowania. Neuropatia nadgarstka wyklucza z pisania na tygodnie."
+   },
+   {
+    "tytul": "Pogorszenie ostrości widzenia",
+    "opis": "Analiza literatury, danych i dokumentacji projektowej na ekranie przez większość doby roboczej. Zaburzenia akomodacji ujawniają się wcześniej niż wynikałoby z wieku."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Prowadzę zajęcia na kilku uczelniach — jak wykazać dochód?",
+    "odpowiedz": "Sumujesz wszystkie umowy. Rozproszenie źródeł nie chroni przed przerwą, bo przyczyna jest jedna i wycina wszystkie zajęcia równocześnie — to jeden z lepszych argumentów za polisą w tym zawodzie."
+   },
+   {
+    "pytanie": "Czy wynagrodzenie z grantu wchodzi do podstawy?",
+    "odpowiedz": "Tak, jeśli jest udokumentowane i opodatkowane. Warto je wykazać, bo w budżetach badawczych bywa większą częścią rocznego dochodu niż dydaktyka."
+   }
+  ]
+ },
+ "trener-personalny": {
+  "wstep": "Trener personalny sprzedaje własną sprawność fizyczną. Kontuzja, która u pracownika biurowego oznacza niewygodę, u niego oznacza brak możliwości prowadzenia treningu i utratę wiarygodności wobec klientów.",
+  "dochod": "Przychód to pojedyncze treningi albo pakiety wykupione z góry. Pakiet opłacony i niezrealizowany jest zobowiązaniem, nie przychodem — przy dłuższej przerwie trzeba go zwrócić albo odpracować, gdy kalendarz jest już zapełniony nowymi klientami.",
+  "przerwa": "Klient treningu personalnego trenuje dwa albo trzy razy w tygodniu i po dwóch tygodniach przerwy znajdzie innego trenera w tym samym klubie. Ta relacja rzadko wraca. Do tego dochodzi opłata za wynajem powierzchni albo prowizja klubu, naliczana niezależnie od liczby przeprowadzonych sesji.",
+  "ryzyka": [
+   {
+    "tytul": "Uraz przy asekuracji i demonstracji ćwiczeń",
+    "opis": "Trener podnosi ciężar razem z klientem, często w niekorzystnej pozycji i bez rozgrzewki. Uszkodzenie stożka rotatorów i naderwanie mięśni grzbietu są tu urazami typowymi, a rekonwalescencja trwa miesiące."
+   },
+   {
+    "tytul": "Przeciążenie stawów kolanowych i biodrowych",
+    "opis": "Dziesięć sesji dziennie, każda z demonstracją ćwiczeń. Kumulacja obciążenia bez odpowiedniej regeneracji prowadzi do zmian zwyrodnieniowych wcześniej niż u sportowców amatorów."
+   },
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Instruktaż prowadzony podniesionym głosem, w hałasie siłowni, przez cały dzień. Przewlekłe zapalenie krtani u trenerów jest częste i nawracające."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy uprawianie sportu wyczynowo wpływa na składkę?",
+    "odpowiedz": "Wpływa, i trzeba je zgłosić we wniosku. Sporty podwyższonego ryzyka są w formularzu wymienione osobno — zatajenie ich jest podstawą do odmowy wypłaty przy szkodzie z nimi związanej."
+   },
+   {
+    "pytanie": "Mam pakiety opłacone z góry — czy to problem?",
+    "odpowiedz": "Dla wyliczenia sumy nie, bo liczy się dochód z rozliczenia rocznego. Warto natomiast pamiętać, że realna strata przy przerwie jest wyższa niż sam brak wpływów, bo dochodzi zwrot za niezrealizowane sesje."
+   }
+  ]
+ },
+ "instruktor-jazdy": {
+  "wstep": "Instruktor nauki jazdy siedzi w prawym fotelu, ale odpowiada za pojazd. Utrzymanie uprawnień wymaga ważnych badań lekarskich i psychologicznych — badanie zakończone negatywnie kończy zawód natychmiast, przy pełnym samopoczuciu.",
+  "dochod": "Rozliczenie idzie za godzinę jazdy z kursantem. Kurs ma wyznaczoną liczbę godzin i termin egzaminu, więc kalendarz jest zapełniony na tygodnie, ale bez żadnego bufora na dni bez pracy.",
+  "przerwa": "Kursant, który nie kończy szkolenia w terminie, przenosi się do innego ośrodka i zabiera ze sobą pozostałe godziny. Ośrodek szkolenia kierowców przy dłuższej nieobecności instruktora rozdziela kursantów między pozostałych, a przy własnej działalności dochodzi rata za pojazd szkoleniowy, który stoi z podwójnymi pedałami i nie zarabia.",
+  "ryzyka": [
+   {
+    "tytul": "Wypadek podczas szkolenia",
+    "opis": "Instruktor jeździ z osobami, które dopiero uczą się prowadzić, przez tysiące godzin rocznie. Ekspozycja na kolizję jest nieporównywalna z kierowcą prywatnym, a uraz kręgosłupa szyjnego jest najczęstszym następstwem."
+   },
+   {
+    "tytul": "Niezaliczone badanie sprawności psychofizycznej",
+    "opis": "Badania okresowe dla instruktorów obejmują wzrok, słuch, refleks i sprawność psychofizyczną. Cukrzyca, padaczka albo pogorszenie widzenia zmierzchowego kończą uprawnienia niezależnie od stażu."
+   },
+   {
+    "tytul": "Zespoły bólowe kręgosłupa od pozycji w pojeździe",
+    "opis": "Siedzenie po prawej stronie z ciągłym skrętem tułowia w stronę kursanta, po osiem godzin dziennie. Asymetria obciążenia daje zmiany zwyrodnieniowe szybciej niż zwykła jazda."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy prowadzenie pojazdu z kursantem podnosi składkę?",
+    "odpowiedz": "Wpływa na ocenę ryzyka zawodowego, ale nie wyklucza z ochrony. We wniosku warto opisać dokładny charakter pracy — instruktor kategorii B i instruktor jazdy motocyklem mają inny profil ryzyka."
+   },
+   {
+    "pytanie": "Mam własny pojazd szkoleniowy w leasingu — czy to podnosi sumę?",
+    "odpowiedz": "Rata pojazdu nie zwiększa sumy, bo ta jest pochodną dochodu, a nie zobowiązań. Wysokie koszty stałe są natomiast dobrym powodem, żeby wybrać sumę bliską maksimum, a nie minimalną."
+   }
+  ]
+ },
+ "lektor": {
+  "wstep": "Lektor języka obcego pracuje wyłącznie głosem i obecnością. Nie ma tu produktu, który powstaje raz i sprzedaje się dalej — każda godzina musi zostać przeprowadzona osobiście.",
+  "dochod": "Dochód pochodzi z zajęć indywidualnych i grupowych, rozliczanych za godzinę. Kursy dla firm bywają kontraktowane na semestr, co daje przewidywalność, ale też zobowiązanie do przeprowadzenia wszystkich godzin w wyznaczonym okresie.",
+  "przerwa": "Kurs firmowy ma harmonogram wpisany do umowy i kary za jego niedotrzymanie. Grupa, której zajęcia stoją miesiąc, rozchodzi się, a firma zamawiająca szuka innego wykonawcy przy kolejnym semestrze. Kursanci indywidualni przygotowujący się do egzaminu certyfikującego nie przesuną terminu egzaminu.",
+  "ryzyka": [
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Sześć do ośmiu godzin mówienia dziennie, często w językach wymagających innej pracy aparatu głosowego niż polski. Przewlekłe zapalenie krtani i guzki fałdów głosowych są tu najczęstszą przyczyną niezdolności."
+   },
+   {
+    "tytul": "Ubytek słuchu",
+    "opis": "Praca ze słuchawkami przy zajęciach online i przy materiałach audio, przez większość dnia. Niedosłuch przy nauczaniu wymowy jest ograniczeniem dyskwalifikującym, a nie niedogodnością."
+   },
+   {
+    "tytul": "Skutki pracy w pozycji siedzącej",
+    "opis": "Zajęcia online prowadzone jedne po drugich, bez przerwy na ruch. Zespoły bólowe odcinka lędźwiowego i szyjnego wykluczają z pracy na tygodnie."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Prowadzę zajęcia online dla klientów z zagranicy — czy to zmienia ochronę?",
+    "odpowiedz": "Nie, o ile pracujesz z Polski. Miejsce zamieszkania klienta nie ma znaczenia; znaczenie ma dłuższy pobyt ubezpieczonego poza krajem, który wymaga zgłoszenia."
+   },
+   {
+    "pytanie": "Rozliczam się z kilkoma szkołami językowymi — jaki mam limit?",
+    "odpowiedz": "Jeśli fakturujesz z własnej działalności, limit wynosi 80%. Przy umowach zlecenia ze szkołami spada do 65%, więc warto sprawdzić faktyczną podstawę współpracy przed wypełnieniem wniosku."
+   }
+  ]
+ },
+ "pedagog": {
+  "wstep": "Pedagog pracuje z dzieckiem w procesie rozłożonym na miesiące, w którym ciągłość jest częścią metody. Przerwa nie jest tu tylko luką w kalendarzu — bywa cofnięciem efektów pracy, których nie odzyskuje się szybciej niż powstawały.",
+  "dochod": "Dochód łączy zatrudnienie w placówce z prywatną praktyką terapeutyczną. Ta druga część jest wyżej płatna i pozbawiona jakiegokolwiek zabezpieczenia — nie ma zasiłku za nieodbytą sesję.",
+  "przerwa": "Terapia pedagogiczna prowadzona jest w cyklach tygodniowych, uzgodnionych z rodzicami i często finansowanych z orzeczenia. Przerwa dłuższa niż miesiąc oznacza, że rodzic znajdzie innego specjalistę, bo termin ważności orzeczenia biegnie dalej. Przy własnej poradni dochodzi czynsz i wynagrodzenia współpracowników.",
+  "ryzyka": [
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Praca głosem w bezpośrednim kontakcie, przez większość dnia, często w podniesionym tonie przy dzieciach z trudnościami. Schorzenia strun głosowych figurują dla tej grupy w wykazie chorób zawodowych."
+   },
+   {
+    "tytul": "Uraz przy pracy z dzieckiem w kryzysie",
+    "opis": "Interwencja przy zachowaniach agresywnych bywa fizyczna. Urazy kończyn i głowy zdarzają się w tej pracy, a ich następstwa są objęte polisą jako nieszczęśliwy wypadek."
+   },
+   {
+    "tytul": "Przewlekłe infekcje",
+    "opis": "Bliski kontakt z kilkudziesięciorgiem dzieci dziennie w zamkniętych pomieszczeniach. Nawracające infekcje przekładają się bezpośrednio na stan narządu głosu."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Mam etat w poradni i prywatne sesje — jak to ująć?",
+    "odpowiedz": "Wykazujesz oba źródła. Zasiłek z etatu pokryje część dochodu z placówki, ale prywatna praktyka zostaje bez żadnego zabezpieczenia — i to ona jest właściwym powodem do ubezpieczenia."
+   },
+   {
+    "pytanie": "Czy uraz przy interwencji jest objęty?",
+    "odpowiedz": "Tak. Uderzenie albo upadek w trakcie interwencji spełnia definicję wypadku: jest nagłe, zewnętrzne i niezależne od Twojej woli. Objęte są następstwa fizyczne; ewentualne skutki psychiczne pozostają poza zakresem ochrony."
+   }
+  ]
+ },
+ "coach": {
+  "wstep": "Coach sprzedaje czas w relacji jeden na jeden i reputację, która utrzymuje się bieżącą obecnością. Nie ma tu produktu odtwarzalnego bez autora ani zastępstwa, które klient by zaakceptował.",
+  "dochod": "Sesje rozliczane są pojedynczo albo w programach kilkumiesięcznych, opłacanych z góry. Program wykupiony i nieukończony jest zobowiązaniem, a nie przychodem — przerwa oznacza konieczność odpracowania albo zwrotu.",
+  "przerwa": "Program coachingowy ma rytm i cel wyznaczony na starcie, zwykle powiązany z konkretną zmianą u klienta. Zatrzymanie go na dwa miesiące oznacza w praktyce zakończenie — klient traci tempo i rzadko wraca. Kontrakty korporacyjne z krótkim wypowiedzeniem znikają jeszcze szybciej, bo dział HR rozlicza się z realizacji, nie z intencji.",
+  "ryzyka": [
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Sesje po sześćdziesiąt minut, sześć albo siedem dziennie, prowadzone rozmową. Przewlekłe zapalenie krtani i niedomykalność fałdów głosowych są tu następstwem obciążenia, nie infekcji."
+   },
+   {
+    "tytul": "Skutki pracy siedzącej i wyjazdowej",
+    "opis": "Praca w fotelu przeplatana wielogodzinnymi przejazdami do klientów. Zespoły bólowe lędźwiowe i niewydolność żylna narastają latami i wyłączają z pracy przy zaostrzeniu."
+   },
+   {
+    "tytul": "Wyczerpanie i jego następstwa somatyczne",
+    "opis": "Praca w cudzych problemach, przez wiele godzin, przy obowiązku pełnej uwagi. Same rozpoznania z kręgu chorób psychicznych są wyłączone z ochrony — objęte są wyłącznie następstwa somatyczne z odrębną diagnozą."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Prowadzę programy opłacone z góry — czy to dochód?",
+    "odpowiedz": "Dochodem jest to, co zostało rozliczone i opodatkowane w danym roku. Przedpłaty na programy jeszcze nierealizowane nie wchodzą do podstawy, choć zwiększają realną stratę przy przerwie."
+   },
+   {
+    "pytanie": "Czy praca wyłącznie online zmienia ocenę ryzyka?",
+    "odpowiedz": "Nie w istotnym stopniu — ryzyko zawodowe coacha jest w obu formach zbliżone. Zgłosić trzeba natomiast dłuższy pobyt za granicą, jeśli praca zdalna oznacza wyjazd na miesiące."
+   }
+  ]
+ },
+ "bibliotekarz": {
+  "wstep": "Bibliotekarz w bibliotece naukowej albo firmowej odpowiada za zbiór, do którego inni sięgają na co dzień. Praca wygląda na spokojną, dopóki nie policzy się, ile kilogramów przechodzi dziennie przez ręce przy obsłudze magazynu.",
+  "dochod": "Zatrudnienie jest zwykle etatowe, ale coraz częściej uzupełniane zleceniami: opracowanie zbiorów, digitalizacja, projekty grantowe. Ta dodatkowa część bywa jedną trzecią dochodu i nie ma żadnego zabezpieczenia z ZUS.",
+  "przerwa": "Projekt digitalizacyjny albo opracowanie kolekcji ma harmonogram wynikający z umowy grantowej. Bibliotekarz wypadający w trakcie zostaje zastąpiony, a rozliczenie projektu idzie dalej bez niego. Przy pracy zleconej oznacza to utratę całego wynagrodzenia za etap, który już częściowo wykonał.",
+  "ryzyka": [
+   {
+    "tytul": "Uraz kręgosłupa przy obsłudze zbiorów",
+    "opis": "Przenoszenie i układanie woluminów, praca na drabinie przy wysokich regałach, wózki z książkami. Przeciążenie odcinka lędźwiowego jest tu najczęstszą przyczyną nagłej niezdolności."
+   },
+   {
+    "tytul": "Alergia na pleśnie i kurz z księgozbioru",
+    "opis": "Stare zbiory w magazynach o zmiennej wilgotności są siedliskiem grzybów pleśniowych. Astma i alergiczne zapalenie pęcherzyków płucnych u pracowników archiwów są dobrze udokumentowane i po rozpoznaniu wykluczają z pracy w magazynie."
+   },
+   {
+    "tytul": "Pogorszenie ostrości widzenia",
+    "opis": "Katalogowanie i opracowanie zbiorów to praca z drobnym drukiem i skanami niskiej jakości. Zaburzenia akomodacji przy tym obciążeniu ujawniają się wcześnie."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Mam etat i zlecenia projektowe — czy warto się ubezpieczać?",
+    "odpowiedz": "Zasiłek z etatu pokryje część dochodu, ale zlecenia projektowe zostają bez zabezpieczenia. Suma ubezpieczenia liczy się od łącznego dochodu, więc warto wykazać oba źródła."
+   },
+   {
+    "pytanie": "Czy alergia na pleśnie będzie objęta?",
+    "odpowiedz": "Objęta jest, jeśli zostanie rozpoznana po zawarciu polisy i spowoduje orzeczoną niezdolność do wykonywania zawodu. Jeśli objawy ze strony układu oddechowego były leczone w ciągu dwóch lat poprzedzających umowę, ubezpieczyciel wyłączy je z ochrony."
+   }
+  ]
  }
 }
