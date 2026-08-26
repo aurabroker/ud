@@ -35,7 +35,8 @@ test('błędny PESEL nie przepuszcza, poprawny przepuszcza', async ({ page }) =>
 
   await page.fill('input[name="pesel"]', PESEL);
   await page.getByRole('button', { name: 'Dalej' }).click();
-  await expect(page.getByRole('heading', { name: 'Klauzule dodatkowe' })).toBeVisible();
+  // Kotwicą kroku drugiego jest lista ryzyk, a nie klauzule — te są warunkowe.
+  await expect(page.locator('input[name="riskTempIncapacity"]')).toBeVisible();
 });
 
 test('forma zatrudnienia zmienia limit świadczenia', async ({ page }) => {
@@ -105,4 +106,27 @@ test('zgody są obowiązkowe, a wstecz nie gubi danych', async ({ page }) => {
   for (let i = 0; i < 3; i += 1) await page.getByRole('button', { name: 'Wstecz' }).click();
   await expect(page.locator('input[name="fullName"]')).toHaveValue('Anna Nowak');
   await expect(page.locator('input[name="pesel"]')).toHaveValue(PESEL);
+});
+
+test('klauzule dodatkowe otwierają się dopiero powyżej 300 000 zł', async ({ page }) => {
+  await page.fill('input[name="fullName"]', 'Jan Kowalski');
+  await page.fill('input[name="profession"]', 'Elektryk');
+  await page.fill('input[name="pesel"]', PESEL);
+  await page.getByRole('button', { name: 'Dalej' }).click();
+
+  await page.check('input[name="riskDeathInvalidity"]');
+  await expect(page.getByText(/otwierają się przy sumie/)).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Klauzule dodatkowe' })).toHaveCount(0);
+
+  // Na progu jeszcze zamknięte.
+  await page.fill('input[name="nwDeathSum"]', '300000');
+  await expect(page.getByRole('heading', { name: 'Klauzule dodatkowe' })).toHaveCount(0);
+
+  await page.fill('input[name="nwDeathSum"]', '400000');
+  await expect(page.getByRole('heading', { name: 'Klauzule dodatkowe' })).toBeVisible();
+  await expect(page.locator('select[name="nwFuneral"]')).toBeVisible();
+
+  // Zejście poniżej progu chowa je z powrotem.
+  await page.fill('input[name="nwDeathSum"]', '100000');
+  await expect(page.getByRole('heading', { name: 'Klauzule dodatkowe' })).toHaveCount(0);
 });

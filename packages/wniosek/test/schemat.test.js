@@ -116,3 +116,35 @@ test('doWysylki zachowuje kontrakt Yes/No starego backendu', () => {
   // Pole logiczne, którego użytkownik nie dotknął, musi wyjść jako „No", nie undefined.
   assert.equal(out.smoker, 'No');
 });
+
+test('klauzule dodatkowe otwierają się powyżej progu, nie na progu', async () => {
+  const { klauzuleDostepne, PROG_KLAUZUL_NW } = await import('../src/schemat.js');
+
+  assert.equal(klauzuleDostepne({ nwDeathSum: 500_000 }), false,
+    'bez zaznaczonego ryzyka śmierci i inwalidztwa klauzule są bezprzedmiotowe');
+  assert.equal(klauzuleDostepne({ riskDeathInvalidity: true, nwDeathSum: PROG_KLAUZUL_NW }), false,
+    'na progu jeszcze nie');
+  assert.equal(klauzuleDostepne({ riskDeathInvalidity: true, nwDeathSum: PROG_KLAUZUL_NW + 1 }), true);
+  assert.equal(klauzuleDostepne({ riskDeathInvalidity: true, nwDeathSum: '500 000 zł' }), true,
+    'kwota z formatowaniem też musi się parsować');
+  assert.equal(klauzuleDostepne({}), false);
+});
+
+test('klauzule poniżej progu nie idą do wysyłki', async () => {
+  const { doWysylki } = await import('../src/schemat.js');
+
+  const ponizej = doWysylki({
+    riskDeathInvalidity: true, nwDeathSum: 200_000,
+    nwFuneral: 10_000, nwHospitalDaily: 300, nwAdaptation: 50_000,
+  });
+  assert.equal(ponizej.nwFuneral, 0);
+  assert.equal(ponizej.nwHospitalDaily, 0);
+  assert.equal(ponizej.nwAdaptation, 0);
+
+  const powyzej = doWysylki({
+    riskDeathInvalidity: true, nwDeathSum: 400_000,
+    nwFuneral: 10_000, nwHospitalDaily: 300,
+  });
+  assert.equal(powyzej.nwFuneral, 10_000, 'powyżej progu wybór zostaje');
+  assert.equal(powyzej.nwHospitalDaily, 300);
+});

@@ -15,7 +15,7 @@
     KROKI, RYZYKA, KLAUZULE_NW, PYTANIA_MEDYCZNE, AKTYWNOSCI_RYZYKOWNE,
     FORMY_ZATRUDNIENIA, FORMY_OPODATKOWANIA, LIMIT_DOCHODU,
     HEALTH_SURVEY_GROUPS, HEALTH_SURVEY_THRESHOLD,
-    sprawdzKrok, ankietaRozszerzona, doWysylki,
+    sprawdzKrok, ankietaRozszerzona, doWysylki, klauzuleDostepne, PROG_KLAUZUL_NW,
   } from '@ud/wniosek';
 
   let { zawody = [], zawodPoczatkowy = '', urlFunkcji, kluczTurnstile } = $props();
@@ -44,6 +44,7 @@
   const idKroku = $derived(KROKI[krok].id);
   const rozszerzona = $derived(ankietaRozszerzona(dane));
   const limit = $derived(LIMIT_DOCHODU[dane.employmentType] ?? 0.8);
+  const klauzule = $derived(klauzuleDostepne(dane));
 
   /** Pierwsze pole z błędem — do przewinięcia i ustawienia fokusu. */
   function pokazPierwszyBlad() {
@@ -345,22 +346,34 @@
           </p>
         {/if}
 
-        <h3 class="text-xl mt-10 mb-4">Klauzule dodatkowe</h3>
-        <div class="grid gap-4 sm:grid-cols-2">
-          {#each KLAUZULE_NW as k}
-            <label class="block">
-              <span class="block text-sm font-semibold mb-1.5">{k.etykieta}</span>
-              <select name={k.klucz} bind:value={dane[k.klucz]}
-                      class="w-full border border-linia p-3 bg-tlo focus:border-akcent">
-                {#each k.kwoty as kw}
-                  <option value={kw}>
-                    {kw === 0 ? 'Nie wybieram' : zl(kw) + (k.naDzien ? ' / dzień' : k.naTydzien ? ' / tydzień' : '')}
-                  </option>
-                {/each}
-              </select>
-            </label>
-          {/each}
-        </div>
+        <!-- Klauzule dodatkowe rozszerzają ryzyko „śmierć / inwalidztwo", więc
+             pokazują się dopiero, gdy jego suma przekroczy próg. Wcześniej
+             ubezpieczyciel ich nie oferuje i zebranie wyboru byłoby obietnicą
+             bez pokrycia w ofercie. -->
+        {#if klauzule}
+          <h3 class="text-xl mt-10 mb-4">Klauzule dodatkowe</h3>
+          <div class="grid gap-4 sm:grid-cols-2">
+            {#each KLAUZULE_NW as k}
+              <label class="block">
+                <span class="block text-sm font-semibold mb-1.5">{k.etykieta}</span>
+                <select name={k.klucz} bind:value={dane[k.klucz]}
+                        class="w-full border border-linia p-3 bg-tlo focus:border-akcent">
+                  {#each k.kwoty as kw}
+                    <option value={kw}>
+                      {kw === 0 ? 'Nie wybieram' : zl(kw) + (k.naDzien ? ' / dzień' : k.naTydzien ? ' / tydzień' : '')}
+                    </option>
+                  {/each}
+                </select>
+              </label>
+            {/each}
+          </div>
+        {:else if dane.riskDeathInvalidity}
+          <p class="border-l-2 border-linia-mocna bg-tlo-jasne p-4 mt-10 text-[15px] leading-relaxed text-tekst-drugi m-0">
+            Klauzule dodatkowe — świadczenie pogrzebowe, dostosowanie do niepełnosprawności,
+            świadczenie szpitalne — otwierają się przy sumie śmierci i inwalidztwa powyżej
+            {zl(PROG_KLAUZUL_NW)}. Poniżej tej kwoty ubezpieczyciel ich nie oferuje.
+          </p>
+        {/if}
       </fieldset>
     {/if}
 

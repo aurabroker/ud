@@ -8,6 +8,7 @@
 import wszystkie from '../data/zawody.json' with { type: 'json' };
 
 export { odmien, odmiana, rodzaj, FORMY, MESKI, ZENSKI } from './odmiana.js';
+export { TRESCI, tresc, pokrycieTresci } from './tresc.js';
 
 /** @typedef {typeof wszystkie[number]} Zawod */
 

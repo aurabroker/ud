@@ -12,9 +12,9 @@
  * ankietę medyczną. W starym formularzu było odwrotnie — pytanie wyzwalające
  * padało po tym, co wyzwala.
  */
-import { HEALTH_SURVEY_THRESHOLD, surveyRequired } from './ankieta.js';
+import { HEALTH_SURVEY_THRESHOLD, surveyRequired, parseSum } from './ankieta.js';
 
-export { HEALTH_SURVEY_THRESHOLD, surveyRequired };
+export { HEALTH_SURVEY_THRESHOLD, surveyRequired, parseSum };
 
 /** Maksymalny udział dochodu objęty ochroną — zależy od formy zatrudnienia. */
 export const LIMIT_DOCHODU = {
@@ -83,6 +83,24 @@ export const RYZYKA = [
     podpowiedz: 'Maksymalnie 10× roczne przychody. Zaokrąglana do tysięcy.',
   },
 ];
+
+/**
+ * Próg, powyżej którego ubezpieczyciel udostępnia klauzule dodatkowe.
+ *
+ * Klauzule NW są rozszerzeniem ryzyka „śmierć / inwalidztwo", a nie osobnym
+ * produktem — mają sens dopiero przy sumie, która sama w sobie jest istotna.
+ * Poniżej progu ubezpieczyciel ich nie oferuje, więc formularz nie ma prawa
+ * ich pokazywać: zebranie wyboru, którego nie da się zrealizować, kończy się
+ * ofertą inną niż to, co klient widział na ekranie.
+ */
+export const PROG_KLAUZUL_NW = 300_000;
+
+/** Czy przy obecnym zakresie klauzule dodatkowe są w ogóle dostępne. */
+export function klauzuleDostepne(dane) {
+  if (!dane?.riskDeathInvalidity) return false;
+  const suma = parseSum(dane.nwDeathSum);
+  return suma != null && suma > PROG_KLAUZUL_NW;
+}
 
 /** Klauzule dodatkowe w ramach ubezpieczenia następstw nieszczęśliwych wypadków. */
 export const KLAUZULE_NW = [
@@ -182,6 +200,9 @@ export function sprawdzKrok(krok, dane) {
 
   if (krok === 'zakres') {
     const wybrane = RYZYKA.filter((r) => dane[r.klucz]);
+    // Klauzula wybrana, a potem próg przestał być spełniony — to nie jest błąd
+    // użytkownika, tylko stan, który wyzeruje zerujKlauzule() przed wysyłką.
+
     if (wybrane.length === 0) {
       bledy.ryzyka = 'Zaznacz przynajmniej jedno ryzyko, które ma obejmować polisa.';
     }
@@ -237,6 +258,11 @@ export const POLA_LOGICZNE = [
 /** Zamienia stan formularza na kształt, którego oczekuje funkcja form-submit. */
 export function doWysylki(dane) {
   const out = { ...dane };
+  // Gdy próg nie jest spełniony, klauzule nie mogą pójść dalej z żadną wartością.
+  // Inaczej klient dostałby ofertę bez rozszerzeń, które wcześniej zaznaczył.
+  if (!klauzuleDostepne(dane)) {
+    for (const k of KLAUZULE_NW) out[k.klucz] = 0;
+  }
   for (const pole of POLA_LOGICZNE) {
     const v = dane[pole];
     out[pole] = v === true || v === 'yes' || v === 'Yes' || v === 'on' ? 'Yes' : 'No';
