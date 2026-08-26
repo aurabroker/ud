@@ -84,8 +84,25 @@ w jasnym gabinecie, okno po lewej, cała lewa połowa kadru wolna pod nagłówek
 
 Wcześniejsza, ciemna wersja kierunku została odrzucona przez Klienta.
 
-## Wartości w nawiasach kwadratowych
+## Kwoty w kalkulatorze to symulacja, nie oferta
 
-`[STAWKA]`, `[KWOTA ZUS]`, `[OPINIA KLIENTA]` czekają na dane od Aury Expert —
-stawki z tabel ubezpieczycieli, kwota zasiłku przy minimalnej podstawie ZUS
-i realne opinie klientów. Nie są wymyślone celowo.
+Wzór przeniesiony z `Calculator.js` — **nie pochodzi z tabel ubezpieczycieli**:
+
+```
+suma    = dochód × limit (80% B2B / 65% etat)
+stawka  = 1,5%   ·  1,8% z klauzulą HIV/WZW
+stawka × 1,1 przy okresie wypłaty 24 miesięcy
+składka = suma × stawka
+```
+
+Realną składkę wylicza system ubezpieczyciela po ocenie ryzyka; agent importuje
+ją do panelu z PDF-a oferty. Dlatego przy każdej kwocie w interfejsie stoi słowo
+**symulacja** i zastrzeżenie, że to nie jest oferta — inaczej klient odczyta
+liczbę jako wiążącą propozycję, co jest kwestionowalne na gruncie ustawy
+o dystrybucji ubezpieczeń.
+
+Kwota zasiłku ZUS (2 800 zł) to założenie z `Calculator.js` dla najniższej
+podstawy składek.
+
+W nawiasach kwadratowych zostały już tylko dane pobierane z bazy: tytuły
+i zajawki artykułów z `aura_articles` oraz opinie z `ud_review`.

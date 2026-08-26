@@ -38,7 +38,7 @@
       "x": 5200,
       "y": 0,
       "w": 1080,
-      "h": 3040
+      "h": 3320
     }
   ],
   "annotations": [
@@ -75,7 +75,7 @@
       "x": 4680,
       "y": -250,
       "w": 430,
-      "text": "Wszystko w nawiasach kwadratowych czeka na Wasze dane: stawki składek z tabel ubezpieczycieli, kwota zasiłku ZUS przy minimalnej podstawie oraz tytuły i zajawki artykułów z aura_articles.\nNie zmyślam liczb, na których klient ma oprzeć decyzję."
+      "text": "Kwoty w kalkulatorze to SYMULACJA według wzoru z Calculator.js: suma = dochod x limit, skladka = suma x 1,5% (1,8% z klauzula HIV/WZW, x1,1 przy 24 miesiacach).\nNie pochodza z tabel ubezpieczycieli — realna skladke wylicza system ubezpieczyciela po ocenie ryzyka.\nDlatego przy kazdej kwocie stoi slowo „symulacja\" i zastrzezenie, ze to nie jest oferta."
     }
   ],
   "launch": {

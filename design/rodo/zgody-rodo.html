@@ -162,26 +162,25 @@
   <h1>Zgody i klauzule RODO</h1>
   <p class="standfirst">
     Gotowe treści do wklejenia — zgody przy formularzach, klauzula informacyjna, SMS-y, e-maile i widok oferty.
-    <strong>To projekt roboczy, nie opinia prawna.</strong> Przed publikacją musi go zatwierdzić Wasz prawnik lub osoba odpowiedzialna za zgodność — zwłaszcza w części o roli administratora, bo tu agent ubezpieczeniowy ma nietypową sytuację.
+    <strong>To projekt roboczy, nie opinia prawna</strong> — przed publikacją powinien go przejrzeć prawnik. Rola jest już przesądzona: <strong>Aura Expert występuje jako administrator danych</strong>, więc to Wasza klauzula wyświetla się klientowi i Wy odpowiadacie za podstawy przetwarzania.
   </p>
   <div class="callout">
-    <p style="margin:0">Same teksty nie wystarczą. W kodzie są <strong>trzy rzeczy, które trzeba naprawić razem z nimi</strong> — opisane w §01. Bez nich najlepiej napisana zgoda niczego nie załatwi.</p>
+    <p style="margin:0">Same teksty nie wystarczą. W §01 są trzy rzeczy z kodu i bazy — <strong>pierwsza jest już naprawiona</strong>, dwie czekają.</p>
   </div>
 </header>
 
 <!-- ══════════════════════════════════════════ -->
 <section id="pilne">
-  <h2><span class="num">01 — Najpierw kod</span>Trzy rzeczy do naprawy niezależnie od treści</h2>
+  <h2><span class="num">01 — Najpierw kod</span>Trzy rzeczy z kodu i bazy — jedna już naprawiona</h2>
 
-  <div class="alert">
-    <p class="alert-label">Znalezione w kodzie produkcyjnym</p>
-    <h3>Dane klientów lecą do CallMeBot — darmowego serwisu bez umowy powierzenia</h3>
+  <div class="callout" style="border-left-color: var(--opt); background: var(--opt-bg); border-color: color-mix(in srgb, var(--opt) 30%, transparent)">
+    <p class="alert-label" style="color: var(--opt)">Naprawione — commit w repozytorium</p>
+    <h3 style="margin: 0 0 .5rem; font-size: 1.08rem">Powiadomienia doradcy przeniesione z CallMeBota na SMSAPI</h3>
     <p>
-      <code>send-confirmation-email</code> wysyła pod <code>api.callmebot.com</code> wiadomość WhatsApp o treści
-      <em>„Nowy kontakt! Imię: X / Tel: X / Email: X"</em>. CallMeBot to bezpłatna usługa hobbystyczna — nie macie z nią umowy powierzenia przetwarzania (art. 28 RODO), nie wiadomo, gdzie trzyma dane ani jak długo.
+      <code>send-confirmation-email</code> wysyłał pod <code>api.callmebot.com</code> wiadomość WhatsApp z imieniem, telefonem i e-mailem klienta. To bezpłatna usługa hobbystyczna — bez umowy powierzenia (art. 28 RODO), bez wiedzy, gdzie trafiają dane. Klucz API był przy tym zapisany na sztywno w repozytorium.
     </p>
-    <p>
-      To transfer danych osobowych do nieustalonego podmiotu przy każdym zgłoszeniu. <strong>Żadna klauzula tego nie legalizuje</strong> — trzeba zmienić kanał powiadomień doradcy: WhatsApp Business API z umową, SMS przez SMSAPI (już macie), Slack lub zwykły e-mail.
+    <p style="margin-bottom:0">
+      Zastąpione SMS-em przez <strong>SMSAPI</strong> — polskiego dostawcę, z którym umowa już działa, bo panel ofertowania wysyła przez niego kody PIN. Treść bez emoji i diakrytyków, żeby zmieściła się w jednym SMS-ie. Potrzebne zmienne w Supabase: <code>SMSAPI_TOKEN</code>, <code>SMSAPI_SENDER</code> i opcjonalnie <code>ADVISOR_PHONE</code>.
     </p>
   </div>
 
@@ -372,7 +371,7 @@
     <div class="cb-head"><span class="cb-name">Klauzula informacyjna — treść</span></div>
     <div class="cb-body">
       <p><strong>Kto przetwarza Twoje dane</strong><br>
-      Administratorem jest Aura Expert sp. z o.o. z siedzibą w [ADRES], wpisana do KRS pod numerem [KRS], NIP [NIP], agent ubezpieczeniowy wpisany do rejestru pośredników ubezpieczeniowych KNF pod numerem [NUMER RAU]. Kontakt: biuro@utratadochodu.com, tel. +48 504 400 901.</p>
+      Administratorem Twoich danych jest <strong>Aura Expert spółka z ograniczoną odpowiedzialnością</strong> z siedzibą w Warszawie przy ul. Bolkowskiej 2A lok. 28, wpisana do Krajowego Rejestru Sądowego pod numerem 0000599840 przez Sąd Rejonowy dla m.st. Warszawy, XII Wydział Gospodarczy Krajowego Rejestru Sądowego, REGON 363673048, kapitał zakładowy 5.000 zł, NIP [NIP]. Spółka jest wpisana do Rejestru Pośredników Ubezpieczeniowych pod numerem 11229690/A. Kontakt: biuro@utratadochodu.com, tel. +48 504 400 901.</p>
 
       <p><strong>Po co i na jakiej podstawie</strong></p>
       <p>— Przygotowanie oferty i kontakt w tej sprawie: art. 6 ust. 1 lit. b RODO (działania na Twoje żądanie przed zawarciem umowy).<br>
@@ -396,7 +395,7 @@
       <p><strong>Automatyczne decyzje</strong><br>
       [DO ROZSTRZYGNIĘCIA — patrz §10]</p>
     </div>
-    <div class="cb-note">Nawiasy kwadratowe to miejsca, których nie wypełniam z głowy: adres, KRS, NIP, numer w rejestrze KNF i okresy retencji muszą podać Państwo.</div>
+    <div class="cb-note">Zostały dwa miejsca do uzupełnienia: <strong>NIP</strong> (nie było go w przekazanych danych) oraz <strong>okresy retencji</strong>, których nie zgaduję — zależą od Waszej polityki i przepisów o dystrybucji ubezpieczeń.</div>
   </div>
 
   <h4>Dostawcy przetwarzający dane na Wasze zlecenie</h4>
@@ -408,10 +407,10 @@
         <tr><td class="k">Supabase</td><td class="d">Baza, uwierzytelnianie, pliki ofert</td><td class="d">Irlandia (eu-west-1)</td><td class="d">Spółka amerykańska, region UE</td></tr>
         <tr><td class="k">Cloudflare</td><td class="d">Hosting, Turnstile, panel</td><td class="d">Globalnie</td><td class="d">Sprawdzić podstawę transferu</td></tr>
         <tr><td class="k">Resend</td><td class="d">E-maile do klientów</td><td class="d">USA</td><td class="d"><span class="tag w">Transfer poza EOG</span> — potrzebna podstawa (DPF lub SCC)</td></tr>
-        <tr><td class="k">SMSAPI</td><td class="d">SMS z kodem do oferty</td><td class="d">Polska</td><td class="d">—</td></tr>
+        <tr><td class="k">SMSAPI</td><td class="d">Kod PIN do oferty, powiadomienia doradcy</td><td class="d">Polska</td><td class="d">Umowa jest — dopisać nowy cel</td></tr>
         <tr><td class="k">GetResponse</td><td class="d">Lista mailingowa</td><td class="d">Polska</td><td class="d">Tylko dla osób ze zgodą marketingową</td></tr>
         <tr><td class="k">Google, Meta</td><td class="d">Analityka i reklama</td><td class="d">USA</td><td class="d">Zależne od zgody w banerze cookies</td></tr>
-        <tr><td class="k">CallMeBot</td><td class="d">Powiadomienie WhatsApp do doradcy</td><td class="d">Nieustalone</td><td class="d"><span class="tag req">Do usunięcia</span> — §01</td></tr>
+        <tr><td class="k" style="text-decoration: line-through; opacity:.55">CallMeBot</td><td class="d">Powiadomienie WhatsApp do doradcy</td><td class="d">—</td><td class="d"><span class="tag opt">Wypięte</span> — zastąpione SMSAPI</td></tr>
       </tbody>
     </table>
   </div>
@@ -495,8 +494,8 @@
     <div class="cb-head"><span class="cb-name">Stopka e-mail</span></div>
     <div class="cb-body">
       <p style="font-size:.92rem;color:var(--muted)">
-        Aura Expert sp. z o.o., [ADRES], KRS [KRS], NIP [NIP].<br>
-        Agent ubezpieczeniowy wpisany do rejestru pośredników ubezpieczeniowych prowadzonego przez Komisję Nadzoru Finansowego pod numerem [NUMER RAU]. Rejestr dostępny na rpu.knf.gov.pl.<br>
+        Aura Expert sp. z o.o., ul. Bolkowska 2A lok. 28, Warszawa. KRS 0000599840, REGON 363673048, NIP [NIP], kapitał zakładowy 5.000 zł.<br>
+        Wpisana do Rejestru Pośredników Ubezpieczeniowych pod numerem 11229690/A. Rejestr dostępny na rpu.knf.gov.pl.<br>
         Administratorem Twoich danych jest Aura Expert sp. z o.o. — <a href="#">klauzula informacyjna</a>.
       </p>
     </div>
@@ -536,7 +535,7 @@
   <div class="cb">
     <div class="cb-head"><span class="cb-name">Stopka widoku oferty</span></div>
     <div class="cb-body">
-      <p style="font-size:.92rem;color:var(--muted)">Ta strona jest dostępna wyłącznie dla Ciebie i wygasa [DATA]. Aura Expert sp. z o.o., agent ubezpieczeniowy w rejestrze KNF nr [NUMER RAU]. <a href="#">Klauzula informacyjna</a> · <a href="#">Kontakt</a></p>
+      <p style="font-size:.92rem;color:var(--muted)">Ta strona jest dostępna wyłącznie dla Ciebie i wygasa [DATA]. Aura Expert sp. z o.o., Rejestr Pośredników Ubezpieczeniowych nr 11229690/A. <a href="#">Klauzula informacyjna</a> · <a href="#">Kontakt</a></p>
     </div>
   </div>
 
@@ -580,8 +579,8 @@
       <thead><tr><th>Pytanie</th><th>Dlaczego to ważne</th></tr></thead>
       <tbody>
         <tr>
-          <td class="k">Jesteście administratorem czy podmiotem przetwarzającym?</td>
-          <td class="d">Agent działający wyłącznie na rzecz jednego zakładu bywa <em>procesorem</em> — wtedy klauzulę wystawia ubezpieczyciel, nie Wy. Wy pracujecie z dwoma zakładami i prowadzicie własną bazę oraz marketing, więc najpewniej jesteście <strong>odrębnym administratorem dla własnych celów</strong> i procesorem dla danych wniosku. To przesądza, czyja klauzula ma się wyświetlić. <strong>Bez tego rozstrzygnięcia cała reszta stoi na piasku.</strong></td>
+          <td class="k">Czy symulacja składki na stronie nie zostanie odczytana jako oferta?</td>
+          <td class="d">Kalkulator liczy własnym wzorem (1,5% sumy, 1,8% z klauzulą HIV/WZW), a nie z tabel ubezpieczycieli. Prawnie to nie RODO, tylko <strong>ustawa o dystrybucji ubezpieczeń</strong> — liczba, która wygląda jak oferta, a nią nie jest, bywa kwestionowana. W layoucie przy każdej kwocie stoi słowo „symulacja" i zastrzeżenie, że to nie oferta. Warto, żeby prawnik potwierdził brzmienie.</td>
         </tr>
         <tr>
           <td class="k">Czy wyznaczyliście inspektora ochrony danych?</td>
@@ -608,7 +607,7 @@
   </div>
 
   <div class="callout">
-    <p style="margin:0">Kiedy prawnik odeśle poprawki, wchodzę z tym w kod: nowe kolumny w bazie, checkboxy w obu formularzach, podstrona z klauzulą, stopki w szablonach e-mail, obsługa STOP w SMS-ach i wypięcie CallMeBota.</p>
+    <p style="margin:0">Kiedy prawnik odeśle poprawki, wchodzę z tym w kod: nowe kolumny w bazie, checkboxy w obu formularzach, podstrona z klauzulą, stopki w szablonach e-mail i obsługa STOP w SMS-ach. CallMeBot jest już wypięty.</p>
   </div>
 </section>
 
@@ -616,7 +615,7 @@
 
 <footer class="doc">
   Projekt roboczy z 25 sierpnia 2026, przygotowany na podstawie kodu repozytoriów aurabroker/ud i aurabroker/udapp oraz stanu bazy produkcyjnej.<br>
-  Podstawy prawne: RODO, ustawa z 12 lipca 2024 r. Prawo komunikacji elektronicznej (art. 398, w mocy od 10.11.2024), ustawa o dystrybucji ubezpieczeń.<br>
+  Podstawy prawne: RODO, ustawa z 12 lipca 2024 r. Prawo komunikacji elektronicznej (art. 398, w mocy od 10.11.2024), ustawa o dystrybucji ubezpieczeń.<br>Rola przesądzona przez Klienta: Aura Expert sp. z o.o. występuje jako administrator danych.<br>
   Nie jest opinią prawną. Wymaga zatwierdzenia przez prawnika przed publikacją.
 </footer>
 

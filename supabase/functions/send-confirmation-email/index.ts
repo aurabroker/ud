@@ -4,17 +4,43 @@ const RESEND_API_KEY = Deno.env.get("RESEND2_API_KEY")!;
 const FROM_EMAIL = "UtrataDochodu.pl <noreply@utratadochodu.com>";
 const REPLY_TO = "biuro@utratadochodu.com";
 
-const WA_PHONE  = "48504400901";
-const WA_APIKEY = "5838995";
+/**
+ * Powiadomienie doradcy o nowym zgłoszeniu — SMS przez SMSAPI.
+ *
+ * Zastąpiło CallMeBot. Poprzednio dane klienta (imię, telefon, e-mail) szły
+ * pod api.callmebot.com — darmową usługę hobbystyczną, z którą nie ma umowy
+ * powierzenia przetwarzania (art. 28 RODO) i nie wiadomo, gdzie trzyma dane.
+ * SMSAPI to polski dostawca, z którym umowa już jest — panel ofertowania
+ * wysyła przez niego kody PIN do ofert.
+ */
+const ADVISOR_PHONE = Deno.env.get("ADVISOR_PHONE") ?? "48504400901";
+const SMSAPI_TOKEN  = Deno.env.get("SMSAPI_TOKEN");
+const SMSAPI_SENDER = Deno.env.get("SMSAPI_SENDER");
 
-async function sendWhatsApp(msg: string): Promise<void> {
-  const url = `https://api.callmebot.com/whatsapp.php?phone=${WA_PHONE}&text=${encodeURIComponent(msg)}&apikey=${WA_APIKEY}`;
+async function notifyAdvisor(msg: string): Promise<void> {
+  if (!SMSAPI_TOKEN || !SMSAPI_SENDER) {
+    console.warn("[sms] Brak SMSAPI_TOKEN lub SMSAPI_SENDER — powiadomienie pominięte:", msg);
+    return;
+  }
   try {
-    const res = await fetch(url);
+    const res = await fetch("https://api.smsapi.pl/sms.do", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${SMSAPI_TOKEN}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        to: ADVISOR_PHONE,
+        from: SMSAPI_SENDER,
+        message: msg,
+        format: "json",
+        encoding: "utf-8",
+      }),
+    });
     const body = await res.text();
-    console.log(`CallMeBot [${res.status}]:`, body.substring(0, 300));
+    console.log(`SMSAPI [${res.status}]:`, body.substring(0, 300));
   } catch (err) {
-    console.error("CallMeBot fetch error:", err);
+    console.error("SMSAPI fetch error:", err);
   }
 }
 
@@ -226,12 +252,14 @@ Deno.serve(async (req: Request) => {
   const result = await resendResponse.json();
   console.log(`Email wysłany [${table}]:`, result.id, "→", email);
 
-  const name  = String(record.full_name ?? record.name ?? "—");
-  const phone = String(record.phone ?? "—");
-  const waMsg = isQuick
-    ? `📱 Nowy kontakt!\nImię: ${name}\nTel: ${phone}\nEmail: ${email}`
-    : `📋 Nowy wniosek!\nImię: ${name}\nTel: ${phone}\nEmail: ${email}\nZawód: ${String(record.profession ?? "—")}`;
-  await sendWhatsApp(waMsg);
+  /* Powiadomienie doradcy. Bez emoji i polskich znaków — diakrytyki
+     przelaczaja SMS z GSM-7 na UCS-2 i tna limit ze 160 do 70 znakow. */
+  const name  = String(record.full_name ?? record.name ?? "-");
+  const phone = String(record.phone ?? "-");
+  const smsMsg = isQuick
+    ? `Nowy kontakt: ${name}, tel ${phone}, ${email}`
+    : `Nowy wniosek: ${name}, tel ${phone}, ${email}, zawod: ${String(record.profession ?? "-")}`;
+  await notifyAdvisor(smsMsg);
 
   return new Response(JSON.stringify({ ok: true, id: result.id }), {
     headers: { "Content-Type": "application/json" },

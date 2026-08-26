@@ -4,9 +4,14 @@
 informacyjna z art. 13 RODO, szablony SMS i e-mail, treści w widoku oferty,
 mapowanie na kolumny w bazie.
 
-**Nie jest opinią prawną.** Przed publikacją wymaga zatwierdzenia przez
-prawnika. Miejsca w `[NAWIASACH KWADRATOWYCH]` czekają na dane spółki
-(adres, KRS, NIP, numer w rejestrze KNF) oraz na okresy retencji.
+**Nie jest opinią prawną** — przed publikacją powinien go przejrzeć prawnik.
+
+Rola przesądzona przez Klienta: **Aura Expert sp. z o.o. występuje jako
+administrator danych.** To Wasza klauzula wyświetla się klientowi i Wy
+odpowiadacie za podstawy przetwarzania.
+
+Dane spółki uzupełnione. Do uzupełnienia zostały **NIP** i **okresy
+retencji**.
 
 ## Podstawy prawne przyjęte w dokumencie
 
@@ -24,9 +29,9 @@ telekomunikacyjnego — jedną.
 
 ## Trzy rzeczy do naprawy w kodzie, niezależnie od treści
 
-1. **CallMeBot** — `send-confirmation-email` wysyła imię, telefon i e-mail
-   klienta do `api.callmebot.com`, darmowej usługi bez umowy powierzenia.
-   Zmienić kanał powiadomień doradcy.
+1. ~~**CallMeBot**~~ — **naprawione.** Powiadomienia doradcy przeniesione
+   na SMSAPI. Wymaga ustawienia w Supabase: `SMSAPI_TOKEN`, `SMSAPI_SENDER`,
+   opcjonalnie `ADVISOR_PHONE`.
 2. **Brak zgody na dane o zdrowiu** — wniosek zbiera 7 (a powyżej 1 mln zł
    dodatkowe 20) pytań medycznych. Obecna jednozdaniowa zgoda nie spełnia
    wymogów art. 9 RODO.
