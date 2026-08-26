@@ -1,11 +1,17 @@
 {
   "name": "utratadochodu",
   "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.33.0",
+  "engines": { "node": ">=22" },
   "scripts": {
-    "build:css": "npx @tailwindcss/cli -i src/main.css -o tailwind.css --minify",
-    "watch:css": "npx @tailwindcss/cli -i src/main.css -o tailwind.css --watch"
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "check": "turbo run check",
+    "test": "turbo run test",
+    "lint": "turbo run lint"
   },
   "devDependencies": {
-    "@tailwindcss/cli": "^4.3.0"
+    "turbo": "^2.10.12"
   }
 }

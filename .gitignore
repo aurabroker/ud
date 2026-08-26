@@ -1,4 +1,10 @@
-__pycache__/
-*.pyc
+node_modules/
+.turbo/
 dist/
-node_modules
+.astro/
+.svelte-kit/
+.wrangler/
+.env
+.env.*
+!.env.example
+.DS_Store
