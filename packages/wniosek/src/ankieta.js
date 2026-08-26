@@ -1,8 +1,12 @@
 /**
- * healthSurvey.js — ankieta medyczna wymagana, gdy suma ubezpieczenia dla
+ * ankieta.js — ankieta medyczna wymagana, gdy suma ubezpieczenia dla
  * „Trwałej niezdolności" przekracza 1 000 000 zł.
  * Każde pytanie: odpowiedź TAK/NIE; przy TAK wymagane są szczegóły.
  * `col` = istniejąca kolumna boolean w ud_clients (jeśli jest); reszta trafia do form_data.
+ *
+ * Plik leży w pakiecie, a nie w panelu, bo obie strony muszą widzieć tę samą
+ * ankietę: portal ją zbiera przy wniosku, panel wyświetla i po niej wycenia.
+ * Dwie kopie tej listy rozjechałyby się przy pierwszej zmianie u ubezpieczyciela.
  */
 
 export const HEALTH_SURVEY_THRESHOLD = 1_000_000;

@@ -1,6 +1,6 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { createAdminClient } from '$lib/server/supabase.js';
-import { HEALTH_SURVEY_ITEMS, surveyRequired } from '$lib/healthSurvey.js';
+import { HEALTH_SURVEY_ITEMS, surveyRequired } from '@ud/wniosek/ankieta';
 
 // Pola tekstowe (jak w formularzu self-service)
 const TEXT_FIELDS = [

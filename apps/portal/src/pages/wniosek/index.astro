@@ -1,0 +1,105 @@
+---
+/**
+ * Strona wniosku.
+ *
+ * Cała strona jest statyczna — interaktywny jest wyłącznie kreator, i to
+ * dopiero gdy wejdzie w pole widzenia. Dzięki temu nagłówek i pasek zaufania
+ * są w HTML-u od razu, a JavaScript nie stoi w drodze pierwszemu renderowi.
+ */
+import Baza from '../../layouts/Baza.astro';
+import Wniosek from '../../components/Wniosek.svelte';
+import { ZAWODY } from '@ud/zawody';
+import { graf, organizacja, serwis, strona, okruszki } from '../../lib/seo';
+import { FIRMA } from '../../lib/firma';
+
+const sciezka = '/wniosek/';
+const tytul = 'Wniosek o ubezpieczenie utraty dochodu | UtrataDochodu.pl';
+const opis = 'Wypełnij wniosek online w cztery kroki. Bezpłatna symulacja składki, '
+  + 'oferta w 1–2 dni robocze, bez wychodzenia z domu.';
+
+const sciezkaOkruszkow = [
+  { nazwa: 'Strona główna', url: '/' },
+  { nazwa: 'Wniosek', url: sciezka },
+];
+
+const jsonld = graf([
+  organizacja(),
+  serwis(),
+  okruszki(sciezkaOkruszkow),
+  strona({ url: sciezka, tytul, opis, okruszki: sciezkaOkruszkow }),
+]);
+
+const nazwyZawodow = ZAWODY.map((z) => z.nazwa).sort((a, b) => a.localeCompare(b, 'pl'));
+
+/**
+ * Adres funkcji brzegowej i klucz Turnstile idą z konfiguracji budowania.
+ * Klucz publiczny Turnstile z definicji trafia do przeglądarki — nie jest
+ * sekretem; sekretem jest TURNSTILE_SECRET_KEY po stronie funkcji.
+ */
+const URL_FUNKCJI = `${import.meta.env.PUBLIC_SUPABASE_URL}/functions/v1/form-submit`;
+const KLUCZ_TURNSTILE = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
+---
+<Baza tytul={tytul} opis={opis} sciezka={sciezka} jsonld={jsonld}>
+  <nav aria-label="Okruszki" class="bg-tlo-jasne border-b border-linia-lekka">
+    <ol class="max-w-[1200px] mx-auto px-5 py-3 flex flex-wrap gap-2 items-center text-[13px] text-tekst-trzeci list-none m-0">
+      {sciezkaOkruszkow.map((k, i) => (
+        <li class="flex gap-2 items-center">
+          {i > 0 && <span aria-hidden="true">/</span>}
+          {i === sciezkaOkruszkow.length - 1
+            ? <span class="text-tekst font-semibold" aria-current="page">{k.nazwa}</span>
+            : <a href={k.url} class="hover:text-akcent-ciemny">{k.nazwa}</a>}
+        </li>
+      ))}
+    </ol>
+  </nav>
+
+  <div class="max-w-[1200px] mx-auto px-5 py-14 flex flex-col lg:flex-row gap-14">
+    <div class="lg:w-[52em] min-w-0">
+      <h1 class="text-[clamp(1.9rem,4.5vw,2.8rem)] leading-[1.08] mb-4">Wniosek o ubezpieczenie</h1>
+      <p data-odpowiedz class="text-[1.1rem] leading-relaxed text-tekst-drugi max-w-[38em] mt-0 mb-10">
+        Cztery kroki, około pięciu minut. Na końcu dostajesz symulację składki, a ofertę
+        z realną stawką — w 1–2 dni robocze, po ocenie ryzyka przez ubezpieczyciela.
+      </p>
+
+      <Wniosek
+        client:visible
+        zawody={nazwyZawodow}
+        urlFunkcji={URL_FUNKCJI}
+        kluczTurnstile={KLUCZ_TURNSTILE}
+      />
+    </div>
+
+    <aside class="lg:w-[22em] shrink-0 flex flex-col gap-5">
+      <div class="border border-linia-mocna bg-tlo-jasne p-6">
+        <h2 class="font-mono text-[11px] tracking-[0.12em] uppercase text-akcent-ciemny font-semibold m-0 mb-4">
+          Co dostajesz
+        </h2>
+        <ul class="flex flex-col gap-3 text-[15px] leading-relaxed text-tekst-drugi list-none m-0 p-0">
+          <li>Symulację składki od razu po wypełnieniu.</li>
+          <li>Ofertę od dwóch ubezpieczycieli — Leadenhall i CEU.</li>
+          <li>Komplet dokumentów: OWU i kartę produktu.</li>
+        </ul>
+      </div>
+
+      <div class="border border-linia bg-tlo p-6">
+        <h2 class="text-lg m-0 mb-2">Utknąłeś na którymś polu?</h2>
+        <p class="text-[15px] leading-relaxed text-tekst-drugi m-0 mb-3">
+          Zadzwoń — przejdziemy przez wniosek razem, telefonicznie.
+        </p>
+        <a href={`tel:${FIRMA.telefon}`} class="text-lg font-bold text-tekst hover:text-akcent-ciemny">
+          {FIRMA.telefonWyswietlany}
+        </a>
+      </div>
+
+      <p class="text-[13px] leading-relaxed text-tekst-trzeci m-0">
+        Kwoty pokazywane w kreatorze to symulacja, nie oferta. Realną składkę wylicza
+        system ubezpieczyciela po ocenie ryzyka.
+      </p>
+    </aside>
+  </div>
+
+  <!-- render=explicit: widget powstaje w ostatnim kroku kreatora, więc automatyczne
+       skanowanie DOM-u przy wczytaniu skryptu nigdy by go nie znalazło. -->
+  <script is:inline async defer
+          src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onloadTurnstileCallback"></script>
+</Baza>

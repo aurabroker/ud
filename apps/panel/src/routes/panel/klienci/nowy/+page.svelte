@@ -1,6 +1,6 @@
 <script>
   import { enhance } from '$app/forms';
-  import { HEALTH_SURVEY_GROUPS, HEALTH_SURVEY_COLS, surveyRequired } from '$lib/healthSurvey.js';
+  import { HEALTH_SURVEY_GROUPS, HEALTH_SURVEY_COLS, surveyRequired } from '@ud/wniosek/ankieta';
   let { form } = $props();
   let saving = $state(false);
   const v = form?.values || {};
