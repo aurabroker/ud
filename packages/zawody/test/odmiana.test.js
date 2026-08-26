@@ -143,3 +143,13 @@ test('migawka: zapisane formy zgadzają się z silnikiem', () => {
       'przejrzyj propozycję i przegeneruj: node packages/zawody/scripts/generuj.mjs');
   }
 });
+
+test('slugi nadają się na adresy URL', () => {
+  const zawody = JSON.parse(readFileSync(new URL('../data/zawody.json', import.meta.url), 'utf8'));
+  for (const z of zawody) {
+    assert.match(z.slug, /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+      `slug „${z.slug}" (${z.nazwa}) ma znaki, które w adresie zostaną zakodowane procentowo`);
+  }
+  const duplikaty = zawody.map((z) => z.slug).filter((s, i, a) => a.indexOf(s) !== i);
+  assert.deepEqual(duplikaty, [], 'powtórzone slugi');
+});

@@ -1,0 +1,74 @@
+---
+import { kategorie, wKategorii } from '@ud/zawody';
+import Baza from '../../layouts/Baza.astro';
+import { graf, organizacja, serwis, strona, okruszki } from '../../lib/seo';
+
+export function getStaticPaths() {
+  return kategorie().map((k) => ({ params: { kategoria: k.slug }, props: { kategoria: k } }));
+}
+
+const { kategoria } = Astro.props;
+const zawodyKategorii = wKategorii(kategoria.nazwa);
+
+const sciezka = `/zawody/${kategoria.slug}/`;
+const tytul = `Ubezpieczenie utraty dochodu — ${kategoria.nazwa} | UtrataDochodu.pl`;
+const opis = `${kategoria.liczba} zawodów z branży ${kategoria.nazwa.toLowerCase()}. `
+  + 'Sprawdź, ile wynosi zasiłek ZUS w Twojej grupie i o ile podnosi go polisa.';
+
+const sciezkaOkruszkow = [
+  { nazwa: 'Strona główna', url: '/' },
+  { nazwa: 'Zawody', url: '/zawody/' },
+  { nazwa: kategoria.nazwa, url: sciezka },
+];
+
+const jsonld = graf([
+  organizacja(),
+  serwis(),
+  okruszki(sciezkaOkruszkow),
+  strona({ url: sciezka, tytul, opis, okruszki: sciezkaOkruszkow }),
+  {
+    '@type': 'ItemList',
+    '@id': `https://utratadochodu.pl${sciezka}#lista`,
+    numberOfItems: zawodyKategorii.length,
+    itemListElement: zawodyKategorii.map((z, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: z.nazwa,
+      url: `https://utratadochodu.pl/${z.slug}/`,
+    })),
+  },
+]);
+---
+<Baza tytul={tytul} opis={opis} sciezka={sciezka} jsonld={jsonld}>
+  <nav aria-label="Okruszki" class="bg-tlo-jasne border-b border-linia-lekka">
+    <ol class="max-w-[1200px] mx-auto px-5 py-3 flex flex-wrap gap-2 items-center text-[13px] text-tekst-trzeci list-none m-0">
+      {sciezkaOkruszkow.map((k, i) => (
+        <li class="flex gap-2 items-center">
+          {i > 0 && <span aria-hidden="true">/</span>}
+          {i === sciezkaOkruszkow.length - 1
+            ? <span class="text-tekst font-semibold" aria-current="page">{k.nazwa}</span>
+            : <a href={k.url} class="hover:text-akcent-ciemny">{k.nazwa}</a>}
+        </li>
+      ))}
+    </ol>
+  </nav>
+
+  <div class="max-w-[1200px] mx-auto px-5 py-16">
+    <h1 class="text-[clamp(2rem,5vw,3rem)] leading-[1.06] mb-5">{kategoria.nazwa}</h1>
+    <p data-odpowiedz class="text-[1.12rem] leading-relaxed text-tekst-drugi max-w-[42em] mt-0 mb-12">{opis}</p>
+
+    <ul class="grid gap-4 list-none m-0 p-0 grid-cols-[repeat(auto-fill,minmax(17rem,1fr))]">
+      {zawodyKategorii.map((z) => (
+        <li>
+          <a href={`/${z.slug}/`}
+             class="block border border-linia bg-tlo p-5 h-full hover:border-akcent hover:bg-tlo-jasne">
+            <span class="block font-semibold text-[16.5px] mb-1">{z.nazwa}</span>
+            <span class="block text-[13.5px] text-tekst-trzeci">
+              świadczenie do {new Intl.NumberFormat('pl-PL').format(z.swiadczenieDzienne ?? 0)} zł / dzień
+            </span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</Baza>

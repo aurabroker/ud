@@ -1,0 +1,42 @@
+---
+import Znak from './Znak.astro';
+
+interface Props { sciezka: string }
+const { sciezka } = Astro.props;
+
+const POZYCJE = [
+  { nazwa: 'Jak to działa', url: '/jak-to-dziala/' },
+  { nazwa: 'Kalkulator',    url: '/kalkulator/' },
+  { nazwa: 'Zawody',        url: '/zawody/' },
+  { nazwa: 'Blog',          url: '/blog/' },
+  { nazwa: 'Dokumenty',     url: '/dokumenty/' },
+  { nazwa: 'O nas',         url: '/o-nas/' },
+];
+
+/** Podświetlamy pozycję także na podstronach: /zawody/ dla /lekarz/. */
+const aktywna = (url: string) => sciezka === url || (url !== '/' && sciezka.startsWith(url));
+---
+<header class="bg-tlo border-b border-linia">
+  <nav class="max-w-[1200px] mx-auto px-5 h-[74px] flex items-center justify-between gap-6"
+       aria-label="Główna">
+    <a href="/" class="flex items-center gap-2.5 shrink-0">
+      <Znak wysokosc={28} />
+      <span class="text-xl font-bold tracking-tight">Utrata<span class="text-akcent">Dochodu</span></span>
+    </a>
+
+    <ul class="hidden lg:flex gap-7 items-center text-[15px] font-medium text-tekst-drugi list-none m-0 p-0">
+      {POZYCJE.map((p) => (
+        <li>
+          <a href={p.url}
+             class:list={['hover:text-akcent-ciemny', aktywna(p.url) && 'text-akcent-ciemny font-bold']}
+             aria-current={aktywna(p.url) ? 'page' : undefined}>{p.nazwa}</a>
+        </li>
+      ))}
+    </ul>
+
+    <a href="/wniosek/"
+       class="bg-akcent-ciemny text-white px-6 py-3.5 font-bold text-[15px] shrink-0 hover:bg-akcent-hover">
+      Policz składkę
+    </a>
+  </nav>
+</header>

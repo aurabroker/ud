@@ -1,0 +1,88 @@
+---
+import { FIRMA } from '../lib/firma';
+import Znak from './Znak.astro';
+import { kategorie } from '@ud/zawody';
+
+const KOLUMNY = [
+  {
+    tytul: 'Ubezpieczenie',
+    linki: [
+      { nazwa: 'Jak to działa', url: '/jak-to-dziala/' },
+      { nazwa: 'Kalkulator',    url: '/kalkulator/' },
+      { nazwa: 'Zawody',        url: '/zawody/' },
+      { nazwa: 'Blog',          url: '/blog/' },
+    ],
+  },
+  {
+    tytul: 'Firma',
+    linki: [
+      { nazwa: 'O nas',          url: '/o-nas/' },
+      { nazwa: 'Pracuj z nami',  url: '/pracuj-z-nami/' },
+      { nazwa: 'Kontakt',        url: '/kontakt/' },
+      { nazwa: 'Opinie',         url: '/opinie/' },
+    ],
+  },
+  {
+    tytul: 'Dokumenty',
+    linki: [
+      { nazwa: 'OWU i karty produktu',      url: '/dokumenty/' },
+      { nazwa: 'Klauzula informacyjna RODO',url: '/klauzula-informacyjna/' },
+      { nazwa: 'Regulamin',                 url: '/regulamin/' },
+      { nazwa: 'Polityka prywatności',      url: '/polityka-prywatnosci/' },
+      { nazwa: 'Polityka cookies',          url: '/polityka-cookies/' },
+    ],
+  },
+];
+
+/** Kategorie zawodów w stopce to linkowanie wewnętrzne, nie ozdoba: dają
+ *  robotowi ścieżkę do 228 podstron z każdego miejsca w serwisie. */
+const KATEGORIE = kategorie();
+---
+<footer class="bg-tlo-jasne border-t border-linia mt-20">
+  <div class="max-w-[1200px] mx-auto px-5 py-14">
+    <div class="flex flex-wrap gap-x-16 gap-y-10 justify-between">
+      <div class="max-w-[22em]">
+        <div class="flex items-center gap-2.5 mb-4">
+          <Znak wysokosc={26} />
+          <span class="text-lg font-bold tracking-tight">Utrata<span class="text-akcent">Dochodu</span></span>
+        </div>
+        <p class="text-[14.5px] leading-relaxed text-tekst-drugi m-0">
+          Prywatne ubezpieczenie utraty dochodu dla samozatrudnionych i kontraktowych.
+          Świadczenie od pierwszego dnia niezdolności do pracy.
+        </p>
+        <p class="text-[13.5px] leading-relaxed text-tekst-trzeci mt-4 mb-0">
+          {FIRMA.nazwa} — agent ubezpieczeniowy wpisany do Rejestru Pośredników
+          Ubezpieczeniowych KNF pod numerem
+          <a href={FIRMA.rejestrUrl} rel="noopener" class="font-mono text-tekst-drugi underline decoration-linia-mocna underline-offset-2">{FIRMA.rpu}</a>.
+        </p>
+      </div>
+
+      {KOLUMNY.map((k) => (
+        <nav aria-label={k.tytul}>
+          <h2 class="font-mono text-[11px] tracking-[0.12em] uppercase text-tekst-trzeci mb-3 font-semibold">{k.tytul}</h2>
+          <ul class="flex flex-col gap-2.5 text-[14px] text-tekst-drugi list-none m-0 p-0">
+            {k.linki.map((l) => <li><a href={l.url} class="hover:text-akcent-ciemny">{l.nazwa}</a></li>)}
+          </ul>
+        </nav>
+      ))}
+    </div>
+
+    <nav aria-label="Zawody według branży" class="mt-12 pt-8 border-t border-linia">
+      <h2 class="font-mono text-[11px] tracking-[0.12em] uppercase text-tekst-trzeci mb-3 font-semibold">Zawody według branży</h2>
+      <ul class="flex flex-wrap gap-x-5 gap-y-2 text-[14px] text-tekst-drugi list-none m-0 p-0">
+        {KATEGORIE.map((k) => (
+          <li><a href={`/zawody/${k.slug}/`} class="hover:text-akcent-ciemny">{k.nazwa} <span class="text-tekst-trzeci">({k.liczba})</span></a></li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="flex flex-wrap gap-4 justify-between pt-7 mt-10 border-t border-linia text-[13px] text-tekst-trzeci">
+      <span>© {new Date().getFullYear()} {FIRMA.nazwa} · KRS {FIRMA.krs} · REGON {FIRMA.regon}</span>
+      <span>
+        <a href={`mailto:${FIRMA.email}`} class="hover:text-akcent-ciemny">{FIRMA.email}</a>
+        <span aria-hidden="true"> · </span>
+        <a href={`tel:${FIRMA.telefon}`} class="hover:text-akcent-ciemny">{FIRMA.telefonWyswietlany}</a>
+      </span>
+    </div>
+  </div>
+</footer>

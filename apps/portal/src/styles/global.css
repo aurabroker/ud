@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+/**
+ * Tokeny wzięte wprost z zatwierdzonej kanwy layoutu.
+ * Zasada, którą trzymamy: strona jest jasna, ciemny zostaje wyłącznie tekst.
+ */
+@theme {
+  /* Tła — od bieli do najciemniejszego cyjanu, jakiego używamy pod treścią. */
+  --color-tlo:        #FFFFFF;
+  --color-tlo-jasne:  #F4FBFE;
+  --color-tlo-cyjan:  #EDF7FC;
+  --color-tlo-mocne:  #DDF1FA;
+  --color-tlo-hero:   #CBE9F8;
+
+  /* Akcent — cyjan ze znaku marki. */
+  --color-akcent:        #1BAEE5;
+  --color-akcent-ciemny: #0E96D0;
+  --color-akcent-hover:  #0B7CAF;
+
+  /* Linie. */
+  --color-linia:       #D3E9F4;
+  --color-linia-mocna: #BEDFF0;
+  --color-linia-lekka: #E6F4FA;
+
+  /* Tekst — trzy poziomy ważności. */
+  --color-tekst:       #0F2E40;
+  --color-tekst-drugi: #4E6D7D;
+  --color-tekst-trzeci:#8AA3AF;
+
+  /* Ostrzeżenie — jedyny kolor spoza cyjanu, dla kwot „bez polisy". */
+  --color-alarm: #D6453D;
+
+  /* Fasety ikon — od najjaśniejszej do najciemniejszej. */
+  --color-faseta-1: #B3E3F8;
+  --color-faseta-2: #8FD5F3;
+  --color-faseta-3: #5CC6EF;
+  --color-faseta-4: #29ADE4;
+  --color-faseta-5: #1697CE;
+  --color-faseta-6: #0E86BC;
+
+  /* Kroje. Zmienne pochodzą z konfiguracji fontów Astro. */
+  --font-naglowek: var(--font-naglowek);
+  --font-tekst:    var(--font-tekst);
+  --font-mono:     var(--font-mono);
+
+  /* Zero zaokrągleń — spójnie z kanciastą geometrią ikon. */
+  --radius-none: 0;
+}
+
+/**
+ * Bez zaokrągleń w całym serwisie. Layout tego pilnuje, ale łatwo o wyjątek
+ * wpisany przez pomyłkę, więc wartość domyślna jest zerowa.
+ */
+@layer base {
+  html {
+    font-family: var(--font-tekst);
+    color: var(--color-tekst);
+    background: var(--color-tlo);
+    /* Bez tego przeglądarka na Androidzie sama powiększa tekst po obrocie. */
+    -webkit-text-size-adjust: 100%;
+  }
+
+  h1, h2, h3 {
+    font-family: var(--font-naglowek);
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+
+  /* Akapity nie zostawiają jednego słowa w ostatniej linii. */
+  p { text-wrap: pretty; }
+
+  /* Widoczny focus jest wymogiem dostępności, a domyślny bywa wygaszany. */
+  :focus-visible {
+    outline: 2px solid var(--color-akcent-ciemny);
+    outline-offset: 2px;
+  }
+
+  /* Szanujemy ustawienie systemowe — animacje nie są tu do niczego potrzebne. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

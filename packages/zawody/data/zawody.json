@@ -6897,7 +6897,7 @@
     "rodzaj": "m"
   },
   {
-    "slug": "terapeuta-zajęciowy",
+    "slug": "terapeuta-zajeciowy",
     "nazwa": "Terapeuta Zajęciowy",
     "kategoria": "Pielęgniarstwo",
     "obraz": "medycyna.jpg",
@@ -6927,7 +6927,8 @@
       "mnoga": "Terapeuci Zajęciowi",
       "mnogaDop": "Terapeutów Zajęciowych"
     },
-    "rodzaj": "m"
+    "rodzaj": "m",
+    "staryAdres": "terapeuta-zajęciowy"
   },
   {
     "slug": "terapeuta",

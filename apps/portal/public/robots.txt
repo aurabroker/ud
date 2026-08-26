@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+# Modele językowe czytają ten plik tak samo jak wyszukiwarki. Nie blokujemy
+# ich celowo: widoczność w odpowiedziach asystentów jest jednym z celów serwisu.
+
+Sitemap: https://utratadochodu.pl/sitemap-index.xml

@@ -1,0 +1,236 @@
+---
+/**
+ * Strona zawodu — 228 podstron z jednego szablonu.
+ *
+ * Wszystko, co odróżnia tę stronę od pozostałych 227, stoi na górze: odmieniony
+ * nagłówek, ryzyka zawodowe i kwoty policzone dla tej grupy. Treść wspólna —
+ * wyłączenia, FAQ, opis procesu — jest linkowana, nie kopiowana.
+ *
+ * Powód jest mierzalny. W starym serwisie tylko 22% zdań na przeciętnej
+ * podstronie zawodu występowało na najwyżej trzech stronach; pozostałe 78%
+ * było wspólne dla dziesiątek albo setek podstron. To jest definicja doorway
+ * pages i dokładnie to, co system Helpful Content wyłapuje i degraduje.
+ */
+import { ZAWODY, zawod, pokrewne, slugKategorii } from '@ud/zawody';
+import Baza from '../../layouts/Baza.astro';
+import { symuluj, zl, ZUS_MIESIECZNIE } from '../../lib/symulacja';
+import { graf, organizacja, serwis, strona, okruszki, usluga } from '../../lib/seo';
+import { FIRMA } from '../../lib/firma';
+
+export function getStaticPaths() {
+  return ZAWODY.map((z) => ({ params: { zawod: z.slug }, props: { slug: z.slug } }));
+}
+
+const { slug } = Astro.props;
+const z = zawod(slug)!;
+const o = z.odmiana;
+
+const sciezka = `/${z.slug}/`;
+const tytul = `Ubezpieczenie utraty dochodu dla ${o.dopelniacz.toLowerCase()} | ${'UtrataDochodu.pl'}`;
+const opis = `Ile realnie dostaje ${o.mianownik.toLowerCase()} na zwolnieniu i jak polisa zamyka lukę `
+  + `między zasiłkiem ZUS a dochodem. Wyliczenie składki online, oferta w 1–2 dni robocze.`;
+
+/** Kwoty przykładowe — dochód dobrany do wysokości świadczenia z danych zawodu. */
+const dochodPrzykladowy = Math.max(8000, Math.round((z.swiadczenieDzienne ?? 400) * 30 / 0.8 / 1000) * 1000);
+const wynik = symuluj({ dochod: dochodPrzykladowy, zatrudnienie: 'b2b' });
+
+const sciezkaOkruszkow = [
+  { nazwa: 'Strona główna', url: '/' },
+  { nazwa: 'Zawody', url: '/zawody/' },
+  { nazwa: z.kategoria, url: `/zawody/${slugKategorii(z.kategoria)}/` },
+  { nazwa: o.mianownik, url: sciezka },
+];
+
+const jsonld = graf([
+  organizacja(),
+  serwis(),
+  okruszki(sciezkaOkruszkow),
+  strona({ url: sciezka, tytul, opis, okruszki: sciezkaOkruszkow }),
+  usluga({
+    nazwa: `Ubezpieczenie utraty dochodu dla ${o.dopelniacz.toLowerCase()}`,
+    opis,
+    url: sciezka,
+    grupa: o.mnoga,
+  }),
+]);
+
+const powiazane = pokrewne(z.slug, 10);
+---
+<Baza tytul={tytul} opis={opis} sciezka={sciezka} jsonld={jsonld} obraz={`/img/${z.obraz}`}>
+
+  <nav aria-label="Okruszki" class="bg-tlo-jasne border-b border-linia-lekka">
+    <ol class="max-w-[1200px] mx-auto px-5 py-3 flex flex-wrap gap-2 items-center text-[13px] text-tekst-trzeci list-none m-0">
+      {sciezkaOkruszkow.map((k, i) => (
+        <li class="flex gap-2 items-center">
+          {i > 0 && <span aria-hidden="true">/</span>}
+          {i === sciezkaOkruszkow.length - 1
+            ? <span class="text-tekst font-semibold" aria-current="page">{k.nazwa}</span>
+            : <a href={k.url} class="hover:text-akcent-ciemny">{k.nazwa}</a>}
+        </li>
+      ))}
+    </ol>
+  </nav>
+
+  <!-- ── Nagłówek zawodu ────────────────────────────────────────────────── -->
+  <div class="bg-linear-102 from-tlo via-tlo-cyjan to-tlo-hero border-b border-linia">
+    <div class="max-w-[1200px] mx-auto px-5 py-16 lg:py-20">
+      <p class="font-mono text-xs tracking-[0.16em] uppercase text-akcent-ciemny font-semibold m-0">
+        {z.kategoria} · kontrakt B2B
+      </p>
+      <h1 class="mt-4 mb-5 text-[clamp(2rem,5vw,3.25rem)] leading-[1.06] max-w-[16em]">
+        Ubezpieczenie utraty dochodu dla {o.dopelniacz.toLowerCase()}
+      </h1>
+      <p data-odpowiedz class="text-[clamp(1.05rem,2vw,1.16rem)] leading-relaxed text-tekst-drugi max-w-[32em] m-0">
+        Na kontrakcie zasiłek chorobowy liczy się od zadeklarowanej podstawy ZUS, nie od tego,
+        co {o.mianownik.toLowerCase()} realnie zarabia. Polisa wypłaca do 80% dochodu na B2B
+        i do 65% na umowie o pracę, od pierwszego dnia niezdolności do pracy.
+      </p>
+
+      <div class="flex flex-wrap gap-3 mt-8">
+        <a href={`/wniosek/?zawod=${z.slug}`}
+           class="bg-akcent-ciemny text-white px-7 py-4 font-bold hover:bg-akcent-hover">
+          Wylicz składkę dla {o.dopelniacz.toLowerCase()}
+        </a>
+        <a href="/wylaczenia/"
+           class="border-[1.5px] border-akcent text-akcent-ciemny bg-tlo px-7 py-[14px] font-semibold hover:bg-tlo-jasne">
+          Zobacz, co nie jest objęte
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-[1200px] mx-auto px-5 py-16 lg:py-20 flex flex-col lg:flex-row gap-16">
+    <div class="lg:w-[58em] flex flex-col gap-14 min-w-0">
+
+      <!-- Nagłówek jest pytaniem, pierwszy akapit odpowiada w dwóch zdaniach.
+           To jest układ, który modele językowe cytują najchętniej, bo daje się
+           wyciąć z kontekstu bez utraty sensu. -->
+      <section>
+        <h2 class="text-[clamp(1.5rem,3vw,2rem)] leading-tight mb-3">
+          Czy {o.mianownik.toLowerCase()} na kontrakcie może ubezpieczyć się od utraty dochodu?
+        </h2>
+        <p data-odpowiedz class="text-lg leading-relaxed font-medium text-tekst m-0 mb-3">
+          Tak. Polisa jest przeznaczona dla samozatrudnionych i kontraktowych — czyli dla tej grupy,
+          której ZUS nie zapewnia ochrony proporcjonalnej do dochodu.
+        </p>
+        <p class="text-[17px] leading-relaxed text-tekst-drugi m-0">
+          Warunkiem jest udokumentowany dochód i wypełniona ankieta medyczna. Przy sumie trwałej
+          niezdolności powyżej {zl(1_000_000)} ubezpieczyciel wymaga rozszerzonej ankiety zdrowotnej.
+        </p>
+      </section>
+
+      <!-- Ryzyka są jedyną treścią naprawdę różniącą tę stronę od pozostałych. -->
+      <section>
+        <h2 class="text-[clamp(1.5rem,3vw,2rem)] leading-tight mb-3">
+          Na co choruje {o.mianownik.toLowerCase()}?
+        </h2>
+        <p class="text-[17px] leading-relaxed text-tekst-drugi mt-0 mb-6">
+          Ryzyko w tym zawodzie różni się od biurowego — inna jest ekspozycja i inna długość
+          przerwy w pracy po urazie.
+        </p>
+        <dl class="border-t border-linia m-0">
+          {z.ryzyka.map((r) => (
+            <div class="border-b border-linia py-5 flex flex-col sm:flex-row gap-2 sm:gap-8">
+              <dt class="sm:w-[16em] shrink-0 font-semibold text-[16.5px]">{r.tytul}</dt>
+              <dd class="m-0 text-[16px] leading-relaxed text-tekst-drugi">{r.opis}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+
+      <!-- ── ZUS kontra polisa ────────────────────────────────────────── -->
+      <section>
+        <h2 class="text-[clamp(1.5rem,3vw,2rem)] leading-tight mb-3">
+          Ile {o.mianownik.toLowerCase()} dostanie z ZUS na zwolnieniu?
+        </h2>
+        <p data-odpowiedz class="text-lg leading-relaxed font-medium text-tekst m-0 mb-6">
+          Zasiłek chorobowy to 80% podstawy wymiaru składek, a nie 80% dochodu. Przy najniższej
+          podstawie daje to {zl(wynik.zus)} miesięcznie, niezależnie od tego, ile się zarabia.
+        </p>
+
+        <div class="border border-linia overflow-x-auto">
+          <table class="w-full border-collapse text-left min-w-[36rem]">
+            <caption class="sr-only">
+              Porównanie miesięcznego świadczenia z ZUS i z polisy przy dochodzie {zl(dochodPrzykladowy)}
+            </caption>
+            <thead>
+              <tr class="bg-tlo-jasne border-b border-linia-mocna">
+                <th scope="col" class="font-mono text-[11px] tracking-[0.11em] uppercase font-semibold text-tekst-drugi px-6 py-4">Miesiąc na zwolnieniu</th>
+                <th scope="col" class="font-mono text-[11px] tracking-[0.11em] uppercase font-semibold text-tekst-drugi px-6 py-4">Tylko ZUS</th>
+                <th scope="col" class="font-mono text-[11px] tracking-[0.11em] uppercase font-semibold text-akcent-ciemny px-6 py-4">ZUS + polisa</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-b border-linia-lekka">
+                <th scope="row" class="px-6 py-5 font-semibold text-[16px]">Dochód {zl(dochodPrzykladowy)}, najniższy ZUS</th>
+                <td class="px-6 py-5 font-mono text-xl font-semibold text-alarm">{zl(wynik.zus)}</td>
+                <td class="px-6 py-5 font-mono text-xl font-semibold text-akcent-ciemny">{zl(wynik.zus + wynik.swiadczenie)}</td>
+              </tr>
+              <tr>
+                <th scope="row" class="px-6 py-5 font-semibold text-[16px]">Różnica w skali miesiąca</th>
+                <td class="px-6 py-5 font-mono text-[15px] text-tekst-trzeci">—</td>
+                <td class="px-6 py-5 font-mono text-xl font-semibold text-akcent-ciemny">+{zl(wynik.swiadczenie)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p class="text-[13px] leading-relaxed text-tekst-trzeci mt-4 mb-0">
+          Symulacja, nie oferta. Kwoty policzone dla dochodu {zl(dochodPrzykladowy)} i limitu 80% na B2B;
+          zasiłek ZUS przy podstawie {zl(ZUS_MIESIECZNIE)}. Realną składkę wylicza system ubezpieczyciela
+          po ocenie ryzyka — u nas składka wychodzi ok. {zl(wynik.skladka)} miesięcznie.
+        </p>
+      </section>
+
+      <section class="border border-linia-mocna bg-tlo-jasne p-8">
+        <h2 class="text-[clamp(1.35rem,2.5vw,1.7rem)] leading-tight m-0 mb-3">Zanim złożysz wniosek — sprawdź wyłączenia</h2>
+        <p class="text-[16px] leading-relaxed text-tekst-drugi m-0 mb-5">
+          Wypalenie zawodowe jako samodzielna diagnoza, choroby psychiczne, częściowa niezdolność
+          do pracy i schorzenia leczone w ciągu 24 miesięcy przed zawarciem umowy nie są objęte ochroną.
+        </p>
+        <a href="/wylaczenia/" class="font-semibold text-akcent-ciemny border-b-[1.5px] border-linia-mocna pb-0.5 hover:text-akcent-hover">
+          Pełna lista wyłączeń
+        </a>
+      </section>
+    </div>
+
+    <!-- ── Kolumna boczna ─────────────────────────────────────────────── -->
+    <aside class="lg:w-[24em] shrink-0 flex flex-col gap-5">
+      <div class="border border-linia bg-tlo p-7 shadow-[0_18px_46px_-16px_rgba(15,46,64,0.18)]">
+        <h2 class="text-xl m-0 mb-2">Bezpłatna wycena</h2>
+        <p class="text-[15px] leading-relaxed text-tekst-drugi m-0 mb-5">
+          Zostaw kontakt — odezwiemy się z symulacją dla {o.dopelniacz.toLowerCase()} w 1–2 dni robocze.
+        </p>
+        <a href={`/wniosek/?zawod=${z.slug}`}
+           class="block text-center bg-akcent-ciemny text-white py-4 font-bold hover:bg-akcent-hover">
+          Chcę bezpłatną wycenę
+        </a>
+        <p class="text-[14px] text-tekst-drugi mt-5 pt-4 border-t border-linia-lekka m-0">
+          Wolisz rozmowę? <a href={`tel:${FIRMA.telefon}`} class="font-bold text-tekst hover:text-akcent-ciemny">{FIRMA.telefonWyswietlany}</a>
+        </p>
+      </div>
+
+      {powiazane.length > 0 && (
+        <nav aria-label="Pokrewne zawody" class="border border-linia bg-tlo-jasne p-7">
+          <h2 class="font-mono text-[11px] tracking-[0.12em] uppercase text-tekst-trzeci font-semibold m-0 mb-4">
+            Pokrewne zawody
+          </h2>
+          <ul class="flex flex-wrap gap-2 list-none m-0 p-0">
+            {powiazane.map((p) => (
+              <li>
+                <a href={`/${p.slug}/`}
+                   class="inline-block border border-linia bg-tlo px-3 py-1.5 text-[13.5px] text-tekst-drugi hover:border-akcent hover:text-akcent-ciemny">
+                  {p.nazwa}
+                </a>
+              </li>
+            ))}
+          </ul>
+          <a href={`/zawody/${slugKategorii(z.kategoria)}/`}
+             class="inline-block mt-4 text-[14px] font-semibold text-akcent-ciemny hover:text-akcent-hover">
+            Wszystkie zawody: {z.kategoria} →
+          </a>
+        </nav>
+      )}
+    </aside>
+  </div>
+</Baza>

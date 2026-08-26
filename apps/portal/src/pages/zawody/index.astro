@@ -1,0 +1,76 @@
+---
+/**
+ * Spis zawodów — węzeł linkowania wewnętrznego.
+ *
+ * To stąd robot dociera do 228 podstron. Kolejność alfabetyczna w obrębie
+ * kategorii jest celowo stabilna: zestaw linków zmieniający się między buildami
+ * wygląda dla wyszukiwarki na manipulację.
+ */
+import { kategorie, wKategorii, ZAWODY } from '@ud/zawody';
+import Baza from '../../layouts/Baza.astro';
+import { graf, organizacja, serwis, strona, okruszki } from '../../lib/seo';
+
+const sciezka = '/zawody/';
+const tytul = 'Ubezpieczenie utraty dochodu według zawodu — 228 grup zawodowych | UtrataDochodu.pl';
+const opis = 'Wybierz swój zawód i sprawdź, ile realnie dostaniesz na zwolnieniu oraz ile kosztuje '
+  + 'polisa zamykająca lukę między zasiłkiem ZUS a dochodem.';
+
+const KATEGORIE = kategorie();
+const sciezkaOkruszkow = [
+  { nazwa: 'Strona główna', url: '/' },
+  { nazwa: 'Zawody', url: sciezka },
+];
+
+const jsonld = graf([
+  organizacja(),
+  serwis(),
+  okruszki(sciezkaOkruszkow),
+  strona({ url: sciezka, tytul, opis, okruszki: sciezkaOkruszkow }),
+  {
+    '@type': 'CollectionPage',
+    '@id': `https://utratadochodu.pl${sciezka}#zbior`,
+    name: tytul,
+    numberOfItems: ZAWODY.length,
+  },
+]);
+---
+<Baza tytul={tytul} opis={opis} sciezka={sciezka} jsonld={jsonld}>
+  <div class="bg-linear-102 from-tlo via-tlo-cyjan to-tlo-hero border-b border-linia">
+    <div class="max-w-[1200px] mx-auto px-5 py-16">
+      <p class="font-mono text-xs tracking-[0.16em] uppercase text-akcent-ciemny font-semibold m-0">
+        {ZAWODY.length} grup zawodowych
+      </p>
+      <h1 class="mt-4 mb-5 text-[clamp(2rem,5vw,3rem)] leading-[1.06] max-w-[18em]">
+        Ubezpieczenie utraty dochodu według zawodu
+      </h1>
+      <p data-odpowiedz class="text-[1.15rem] leading-relaxed text-tekst-drugi max-w-[42em] m-0">
+        Ryzyko zawodowe stomatologa różni się od ryzyka kierowcy, a wysokość świadczenia zależy
+        od udokumentowanego dochodu. Wybierz zawód, żeby zobaczyć, jak wygląda luka między
+        zasiłkiem ZUS a realnym zarobkiem w tej grupie.
+      </p>
+    </div>
+  </div>
+
+  <div class="max-w-[1200px] mx-auto px-5 py-16 flex flex-col gap-14">
+    {KATEGORIE.map((k) => (
+      <section aria-labelledby={`kat-${k.slug}`}>
+        <div class="flex flex-wrap items-baseline gap-4 pb-3 mb-6 border-b-2 border-akcent">
+          <h2 id={`kat-${k.slug}`} class="text-[clamp(1.4rem,3vw,1.9rem)] m-0">
+            <a href={`/zawody/${k.slug}/`} class="hover:text-akcent-ciemny">{k.nazwa}</a>
+          </h2>
+          <span class="text-sm text-tekst-trzeci">{k.liczba} zawodów</span>
+        </div>
+        <ul class="grid gap-x-8 gap-y-2.5 list-none m-0 p-0
+                   grid-cols-[repeat(auto-fill,minmax(15rem,1fr))]">
+          {wKategorii(k.nazwa).map((z) => (
+            <li>
+              <a href={`/${z.slug}/`} class="text-[15.5px] text-tekst-drugi hover:text-akcent-ciemny">
+                {z.nazwa}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+  </div>
+</Baza>

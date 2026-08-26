@@ -1,0 +1,161 @@
+---
+import Baza from '../layouts/Baza.astro';
+import { kategorie, ZAWODY } from '@ud/zawody';
+import { symuluj, zl, ZUS_MIESIECZNIE } from '../lib/symulacja';
+import { graf, organizacja, serwis, strona, faq } from '../lib/seo';
+import { FIRMA } from '../lib/firma';
+
+const sciezka = '/';
+const tytul = 'Ubezpieczenie utraty dochodu dla samozatrudnionych | UtrataDochodu.pl';
+const opis = 'Prywatne L4 dla B2B i kontraktowych. Polisa wypłaca do 80% dochodu od pierwszego '
+  + 'dnia niezdolności do pracy, gdy ZUS liczy zasiłek od zadeklarowanej podstawy.';
+
+const PYTANIA = [
+  {
+    pytanie: 'Czym jest ubezpieczenie utraty dochodu?',
+    odpowiedz: 'To polisa, która wypłaca miesięczne świadczenie, gdy choroba lub wypadek uniemożliwiają '
+      + 'wykonywanie zawodu. Świadczenie jest liczone od udokumentowanego dochodu, a nie od podstawy ZUS.',
+  },
+  {
+    pytanie: 'Ile wynosi zasiłek chorobowy z ZUS na kontrakcie B2B?',
+    odpowiedz: 'Zasiłek to 80% podstawy wymiaru składek. Przy najniższej podstawie daje to około '
+      + `${zl(Math.round(ZUS_MIESIECZNIE * 0.8))} miesięcznie, niezależnie od tego, ile się faktycznie zarabia.`,
+  },
+  {
+    pytanie: 'Jaki procent dochodu pokrywa polisa?',
+    odpowiedz: 'Do 80% udokumentowanego dochodu przy samozatrudnieniu i kontrakcie B2B, do 65% przy '
+      + 'umowie o pracę. Limit wynika z zasady, że ubezpieczenie nie może być korzystniejsze niż praca.',
+  },
+  {
+    pytanie: 'Od kiedy wypłacane jest świadczenie?',
+    odpowiedz: 'Od pierwszego dnia niezdolności do pracy, po upływie karencji ustalonej w umowie.',
+  },
+  {
+    pytanie: 'Czego polisa nie obejmuje?',
+    odpowiedz: 'Wypalenia zawodowego jako samodzielnej diagnozy, chorób psychicznych, częściowej '
+      + 'niezdolności do pracy oraz schorzeń leczonych w ciągu 24 miesięcy przed zawarciem umowy.',
+  },
+  {
+    pytanie: 'Czy potrzebne są badania lekarskie?',
+    odpowiedz: 'Przy standardowych sumach wystarczy ankieta medyczna we wniosku. Powyżej miliona '
+      + 'złotych sumy dla trwałej niezdolności ubezpieczyciel wymaga rozszerzonej ankiety zdrowotnej.',
+  },
+];
+
+const przyklad = symuluj({ dochod: 18000, zatrudnienie: 'b2b' });
+
+const jsonld = graf([
+  organizacja(),
+  serwis(),
+  strona({ url: sciezka, tytul, opis }),
+  faq(PYTANIA, sciezka),
+]);
+
+const KATEGORIE = kategorie();
+---
+<Baza tytul={tytul} opis={opis} sciezka={sciezka} jsonld={jsonld}>
+  <div class="bg-linear-102 from-tlo via-tlo-cyjan to-tlo-hero border-b border-linia">
+    <div class="max-w-[1200px] mx-auto px-5 py-20 lg:py-24">
+      <p class="font-mono text-xs tracking-[0.16em] uppercase text-akcent-ciemny font-semibold m-0">
+        Prywatne L4 dla samozatrudnionych
+      </p>
+      <h1 class="mt-4 mb-5 text-[clamp(2.2rem,6vw,3.6rem)] leading-[1.05] max-w-[14em]">
+        Ubezpieczenie utraty dochodu
+      </h1>
+      <p data-odpowiedz class="text-[clamp(1.05rem,2vw,1.2rem)] leading-relaxed text-tekst-drugi max-w-[32em] m-0">
+        Na B2B zasiłek z ZUS liczy się od zadeklarowanej podstawy, nie od tego, co realnie zarabiasz.
+        Polisa wypłaca do 80% dochodu na B2B i do 65% na umowie o pracę — od pierwszego dnia niezdolności.
+      </p>
+      <div class="flex flex-wrap gap-3 mt-9">
+        <a href="/wniosek/" class="bg-akcent-ciemny text-white px-8 py-4 font-bold hover:bg-akcent-hover">
+          Policz swoją składkę
+        </a>
+        <a href="/wylaczenia/" class="border-[1.5px] border-akcent text-akcent-ciemny bg-tlo px-8 py-[14px] font-semibold hover:bg-tlo-jasne">
+          Zobacz, co nie jest objęte
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <section class="max-w-[1200px] mx-auto px-5 py-16 lg:py-20">
+    <h2 class="text-[clamp(1.6rem,4vw,2.5rem)] leading-tight mb-3 max-w-[20em]">
+      Ile realnie dostaniesz z ZUS, gdy zachorujesz?
+    </h2>
+    <p data-odpowiedz class="text-[1.12rem] leading-relaxed text-tekst-drugi max-w-[42em] mt-0 mb-9">
+      Zasiłek chorobowy wynosi 80% podstawy wymiaru składek — nie 80% Twojego dochodu. Przy najniższej
+      podstawie różnica dla specjalisty na kontrakcie sięga kilkunastu tysięcy złotych miesięcznie.
+    </p>
+
+    <div class="border border-linia overflow-x-auto">
+      <table class="w-full border-collapse text-left min-w-[36rem]">
+        <caption class="sr-only">Miesięczne świadczenie z ZUS i z polisy przy dochodzie 18 000 zł</caption>
+        <thead>
+          <tr class="bg-tlo-jasne border-b border-linia-mocna">
+            <th scope="col" class="font-mono text-[11px] tracking-[0.11em] uppercase font-semibold text-tekst-drugi px-6 py-4">Miesiąc na zwolnieniu</th>
+            <th scope="col" class="font-mono text-[11px] tracking-[0.11em] uppercase font-semibold text-tekst-drugi px-6 py-4">Tylko ZUS</th>
+            <th scope="col" class="font-mono text-[11px] tracking-[0.11em] uppercase font-semibold text-akcent-ciemny px-6 py-4">ZUS + polisa</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row" class="px-6 py-5 font-semibold text-[16px]">Dochód {zl(18000)}, najniższy ZUS</th>
+            <td class="px-6 py-5 font-mono text-xl font-semibold text-alarm">{zl(przyklad.zus)}</td>
+            <td class="px-6 py-5 font-mono text-xl font-semibold text-akcent-ciemny">{zl(przyklad.zus + przyklad.swiadczenie)}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="text-[13px] leading-relaxed text-tekst-trzeci mt-4 mb-0">
+      Symulacja, nie oferta. Realną składkę wylicza system ubezpieczyciela po ocenie ryzyka.
+    </p>
+  </section>
+
+  <section class="bg-tlo-jasne border-y border-linia">
+    <div class="max-w-[1200px] mx-auto px-5 py-16">
+      <h2 class="text-[clamp(1.6rem,4vw,2.5rem)] leading-tight mb-3">Dla kogo jest ta polisa</h2>
+      <p class="text-[1.05rem] leading-relaxed text-tekst-drugi max-w-[42em] mt-0 mb-8">
+        {ZAWODY.length} grup zawodowych, dla każdej osobne wyliczenie i osobny opis ryzyka.
+      </p>
+      <ul class="grid gap-3 list-none m-0 p-0 grid-cols-[repeat(auto-fill,minmax(14rem,1fr))]">
+        {KATEGORIE.map((k) => (
+          <li>
+            <a href={`/zawody/${k.slug}/`}
+               class="flex items-baseline justify-between gap-3 border border-linia bg-tlo px-5 py-4 hover:border-akcent hover:text-akcent-ciemny">
+              <span class="font-semibold text-[15.5px]">{k.nazwa}</span>
+              <span class="font-mono text-[13px] text-tekst-trzeci">{k.liczba}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="max-w-[1200px] mx-auto px-5 py-16 lg:py-20">
+    <h2 class="text-[clamp(1.6rem,4vw,2.5rem)] leading-tight mb-8">Najczęstsze pytania</h2>
+    <div class="border-t border-linia max-w-[52em]">
+      {PYTANIA.map((p, i) => (
+        <details class="border-b border-linia group" open={i < 2}>
+          <summary class="cursor-pointer list-none py-5 flex gap-4 items-start justify-between font-semibold text-[17px]">
+            {p.pytanie}
+            <span aria-hidden="true" class="text-akcent-ciemny shrink-0 group-open:rotate-45 transition-transform">+</span>
+          </summary>
+          <p class="text-[16px] leading-relaxed text-tekst-drugi pb-5 mt-0 max-w-[46em]">{p.odpowiedz}</p>
+        </details>
+      ))}
+    </div>
+  </section>
+
+  <section class="bg-tlo-jasne border-t border-linia">
+    <div class="max-w-[1200px] mx-auto px-5 py-14 flex flex-wrap gap-8 justify-between items-center">
+      <div class="max-w-[38em]">
+        <h2 class="text-[clamp(1.4rem,3vw,1.9rem)] leading-tight m-0 mb-2">Wolisz porozmawiać?</h2>
+        <p class="text-[16px] leading-relaxed text-tekst-drugi m-0">
+          Przejdziemy przez wniosek razem, telefonicznie. Bez zobowiązań.
+        </p>
+      </div>
+      <a href={`tel:${FIRMA.telefon}`} class="bg-akcent-ciemny text-white px-8 py-4 font-bold text-lg hover:bg-akcent-hover">
+        {FIRMA.telefonWyswietlany}
+      </a>
+    </div>
+  </section>
+</Baza>

@@ -60,3 +60,14 @@ export function slugKategorii(nazwa) {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '');
 }
+
+/**
+ * Adresy, które zmieniły się względem starego serwisu i wymagają 301.
+ * Bez tego link z indeksu Google trafia w 404, a razem z nim znika cała
+ * wypracowana pozycja podstrony.
+ */
+export function przekierowania() {
+  return ZAWODY
+    .filter((z) => z.staryAdres)
+    .map((z) => ({ z: `/${z.staryAdres}/`, na: `/${z.slug}/` }));
+}

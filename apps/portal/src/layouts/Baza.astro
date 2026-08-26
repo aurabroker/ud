@@ -1,0 +1,90 @@
+---
+/**
+ * Baza.astro — szkielet każdej strony portalu.
+ *
+ * Kolejność w <head> nie jest przypadkowa:
+ * 1. <meta charset> jako pierwszy — przeglądarka szuka deklaracji kodowania
+ *    tylko w pierwszym kilobajcie pliku. W starym index.html wpis wylądował
+ *    za skryptem Meta Pixela, na bajcie 1812, i był ignorowany; polskie znaki
+ *    ratował wyłącznie nagłówek od Cloudflare.
+ * 2. Fonty i CSS — zasoby blokujące render, im wcześniej tym lepszy LCP.
+ * 3. Skrypty analityczne dopiero na końcu <body>, zawsze odroczone.
+ */
+import { SERWIS } from '../lib/firma';
+import Nawigacja from '../components/Nawigacja.astro';
+import Stopka from '../components/Stopka.astro';
+import { Font } from 'astro:assets';
+import '../styles/global.css';
+
+interface Props {
+  tytul: string;
+  opis: string;
+  /** Ścieżka względna, np. „/lekarz/". Kanoniczny adres składamy z niej. */
+  sciezka: string;
+  /** Gotowy JSON-LD (string) — patrz lib/seo.ts. */
+  jsonld?: string;
+  /** Obrazek Open Graph; domyślnie logo. */
+  obraz?: string;
+  /** Wyłącza indeksowanie — dla podziękowania i stron technicznych. */
+  bezIndeksu?: boolean;
+}
+
+const { tytul, opis, sciezka, jsonld, obraz, bezIndeksu = false } = Astro.props;
+const kanoniczny = new URL(sciezka, SERWIS.url).href;
+const ogObraz = new URL(obraz ?? '/og-domyslny.jpg', SERWIS.url).href;
+---
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>{tytul}</title>
+  <meta name="description" content={opis}>
+  <link rel="canonical" href={kanoniczny}>
+  {bezIndeksu
+    ? <meta name="robots" content="noindex, follow">
+    : <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">}
+
+  <Font cssVariable="--font-naglowek" preload />
+  <Font cssVariable="--font-tekst" preload />
+  <Font cssVariable="--font-mono" />
+
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="pl_PL">
+  <meta property="og:site_name" content={SERWIS.nazwa}>
+  <meta property="og:title" content={tytul}>
+  <meta property="og:description" content={opis}>
+  <meta property="og:url" content={kanoniczny}>
+  <meta property="og:image" content={ogObraz}>
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content={tytul}>
+  <meta name="twitter:description" content={opis}>
+  <meta name="twitter:image" content={ogObraz}>
+
+  {jsonld && <script type="application/ld+json" set:html={jsonld} />}
+
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="alternate" type="application/rss+xml" title="Baza wiedzy UtrataDochodu.pl" href="/blog/rss.xml">
+</head>
+
+<body class="bg-tlo text-tekst antialiased">
+  <!-- Wymóg dostępności: pierwszym elementem w kolejności tabulacji musi być
+       skok do treści, inaczej użytkownik klawiatury przechodzi całą nawigację
+       na każdej podstronie z osobna. -->
+  <a href="#tresc"
+     class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50
+            focus:bg-akcent-ciemny focus:text-white focus:px-4 focus:py-2 focus:font-semibold">
+    Przejdź do treści
+  </a>
+
+  <Nawigacja sciezka={sciezka} />
+
+  <main id="tresc">
+    <slot />
+  </main>
+
+  <Stopka />
+</body>
+</html>
