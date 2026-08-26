@@ -153,3 +153,37 @@ test('slugi nadają się na adresy URL', () => {
   const duplikaty = zawody.map((z) => z.slug).filter((s, i, a) => a.indexOf(s) !== i);
   assert.deepEqual(duplikaty, [], 'powtórzone slugi');
 });
+
+test('każde przekierowanie prowadzi na stronę, która istnieje', async () => {
+  const { przekierowania, ZAWODY, kategorie, slugKategorii } =
+    await import('../src/index.js');
+
+  const istniejace = new Set([
+    '/zawody/',
+    ...ZAWODY.map((z) => `/${z.slug}/`),
+    ...kategorie().map((k) => `/zawody/${k.slug}/`),
+  ]);
+
+  for (const r of przekierowania()) {
+    assert.ok(istniejace.has(r.na),
+      `301 z „${r.z}" prowadzi na „${r.na}", a takiej strony build nie generuje`);
+    // Łańcuch przekierowań to dodatkowy skok dla robota i użytkownika;
+    // Cloudflare Pages i tak go domyślnie nie podąża.
+    assert.ok(!istniejace.has(r.z) || r.z === r.na,
+      `„${r.z}" jest jednocześnie stroną i źródłem przekierowania`);
+  }
+});
+
+test('zawody wycofane nie pojawiają się w API pakietu', async () => {
+  const { ZAWODY, WYCOFANE, zawod, kategorie, wKategorii } = await import('../src/index.js');
+
+  for (const w of WYCOFANE) {
+    assert.equal(zawod(w.slug), null, `wycofany „${w.slug}" wciąż zwracany przez zawod()`);
+    assert.ok(!ZAWODY.some((z) => z.slug === w.slug), `wycofany „${w.slug}" w ZAWODY`);
+  }
+  // Kategoria bez ani jednego aktywnego zawodu nie może się pojawić na liście.
+  for (const k of kategorie()) {
+    assert.ok(wKategorii(k.nazwa).length > 0, `pusta kategoria „${k.nazwa}"`);
+    assert.equal(k.liczba, wKategorii(k.nazwa).length, `zła liczba w kategorii „${k.nazwa}"`);
+  }
+});

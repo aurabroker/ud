@@ -1575,7 +1575,7 @@
   {
     "slug": "detektyw",
     "nazwa": "Detektyw",
-    "kategoria": "Bezpieczeństwo",
+    "kategoria": "Prawo",
     "obraz": "bezpieczenstwo.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "~80% podstawy (etat) po 30 dniach; niewystarczające",
@@ -3503,7 +3503,7 @@
   {
     "slug": "kryminolog",
     "nazwa": "Kryminolog",
-    "kategoria": "Bezpieczeństwo",
+    "kategoria": "Prawo",
     "obraz": "bezpieczenstwo.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "~80% podstawy (etat) po 30 dniach; niewystarczające",
@@ -4838,7 +4838,7 @@
     },
     "rodzaj": "m",
     "wycofany": true,
-    "przekierowanieNa": "/zawody/bezpieczenstwo/"
+    "przekierowanieNa": "/zawody/"
   },
   {
     "slug": "okulista",
@@ -5409,7 +5409,7 @@
     },
     "rodzaj": "m",
     "wycofany": true,
-    "przekierowanieNa": "/zawody/bezpieczenstwo/"
+    "przekierowanieNa": "/zawody/"
   },
   {
     "slug": "polozna",
@@ -6642,7 +6642,7 @@
     },
     "rodzaj": "m",
     "wycofany": true,
-    "przekierowanieNa": "/zawody/bezpieczenstwo/"
+    "przekierowanieNa": "/zawody/"
   },
   {
     "slug": "straznik-miejski",
@@ -6677,7 +6677,7 @@
     },
     "rodzaj": "m",
     "wycofany": true,
-    "przekierowanieNa": "/zawody/bezpieczenstwo/"
+    "przekierowanieNa": "/zawody/"
   },
   {
     "slug": "stylista",
