@@ -59,7 +59,16 @@ export function symuluj({ dochod, zatrudnienie, hivWzw = false, miesiecy = 12 }:
   };
 }
 
-/** Formatowanie kwot — spacja jako separator tysięcy, tak jak w polskiej normie. */
+/**
+ * Formatowanie kwot — spacja jako separator tysięcy, tak jak w polskiej normie.
+ *
+ * useGrouping: 'always' jest tu konieczne. Domyślne 'auto' nie grupuje liczb
+ * czterocyfrowych, więc obok „14 400 zł" stawało „2240 zł" — w jednej tabeli,
+ * jedno pod drugim.
+ */
 export function zl(kwota: number): string {
-  return new Intl.NumberFormat('pl-PL', { maximumFractionDigits: 0 }).format(kwota) + ' zł';
+  return new Intl.NumberFormat('pl-PL', {
+    maximumFractionDigits: 0,
+    useGrouping: 'always',
+  }).format(kwota) + ' zł';
 }

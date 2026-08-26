@@ -13,6 +13,7 @@
  */
 import { ZAWODY, zawod, pokrewne, slugKategorii } from '@ud/zawody';
 import Baza from '../../layouts/Baza.astro';
+import Kalkulator from '../../components/Kalkulator.svelte';
 import { symuluj, zl, ZUS_MIESIECZNIE } from '../../lib/symulacja';
 import { graf, organizacja, serwis, strona, okruszki, usluga } from '../../lib/seo';
 import { FIRMA } from '../../lib/firma';
@@ -196,18 +197,15 @@ const powiazane = pokrewne(z.slug, 10);
 
     <!-- ── Kolumna boczna ─────────────────────────────────────────────── -->
     <aside class="lg:w-[24em] shrink-0 flex flex-col gap-5">
-      <div class="border border-linia bg-tlo p-7 shadow-[0_18px_46px_-16px_rgba(15,46,64,0.18)]">
-        <h2 class="text-xl m-0 mb-2">Bezpłatna wycena</h2>
-        <p class="text-[15px] leading-relaxed text-tekst-drugi m-0 mb-5">
-          Zostaw kontakt — odezwiemy się z symulacją dla {o.dopelniacz.toLowerCase()} w 1–2 dni robocze.
+      <Kalkulator client:visible dochodPoczatkowy={dochodPrzykladowy} zawod={o.dopelniacz.toLowerCase()} />
+
+      <div class="border border-linia bg-tlo-jasne p-6">
+        <p class="text-[15px] leading-relaxed text-tekst-drugi m-0">
+          Wolisz rozmowę? Przejdziemy przez wniosek razem, telefonicznie.
         </p>
-        <a href={`/wniosek/?zawod=${z.slug}`}
-           class="block text-center bg-akcent-ciemny text-white py-4 font-bold hover:bg-akcent-hover">
-          Chcę bezpłatną wycenę
+        <a href={`tel:${FIRMA.telefon}`} class="inline-block mt-3 text-lg font-bold text-tekst hover:text-akcent-ciemny">
+          {FIRMA.telefonWyswietlany}
         </a>
-        <p class="text-[14px] text-tekst-drugi mt-5 pt-4 border-t border-linia-lekka m-0">
-          Wolisz rozmowę? <a href={`tel:${FIRMA.telefon}`} class="font-bold text-tekst hover:text-akcent-ciemny">{FIRMA.telefonWyswietlany}</a>
-        </p>
       </div>
 
       {powiazane.length > 0 && (

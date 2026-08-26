@@ -1,5 +1,6 @@
 ---
 import Baza from '../layouts/Baza.astro';
+import Kalkulator from '../components/Kalkulator.svelte';
 import { kategorie, ZAWODY } from '@ud/zawody';
 import { symuluj, zl, ZUS_MIESIECZNIE } from '../lib/symulacja';
 import { graf, organizacja, serwis, strona, faq } from '../lib/seo';
@@ -55,24 +56,37 @@ const KATEGORIE = kategorie();
 ---
 <Baza tytul={tytul} opis={opis} sciezka={sciezka} jsonld={jsonld}>
   <div class="bg-linear-102 from-tlo via-tlo-cyjan to-tlo-hero border-b border-linia">
-    <div class="max-w-[1200px] mx-auto px-5 py-20 lg:py-24">
-      <p class="font-mono text-xs tracking-[0.16em] uppercase text-akcent-ciemny font-semibold m-0">
-        Prywatne L4 dla samozatrudnionych
-      </p>
-      <h1 class="mt-4 mb-5 text-[clamp(2.2rem,6vw,3.6rem)] leading-[1.05] max-w-[14em]">
-        Ubezpieczenie utraty dochodu
-      </h1>
-      <p data-odpowiedz class="text-[clamp(1.05rem,2vw,1.2rem)] leading-relaxed text-tekst-drugi max-w-[32em] m-0">
-        Na B2B zasiłek z ZUS liczy się od zadeklarowanej podstawy, nie od tego, co realnie zarabiasz.
-        Polisa wypłaca do 80% dochodu na B2B i do 65% na umowie o pracę — od pierwszego dnia niezdolności.
-      </p>
-      <div class="flex flex-wrap gap-3 mt-9">
-        <a href="/wniosek/" class="bg-akcent-ciemny text-white px-8 py-4 font-bold hover:bg-akcent-hover">
-          Policz swoją składkę
-        </a>
-        <a href="/wylaczenia/" class="border-[1.5px] border-akcent text-akcent-ciemny bg-tlo px-8 py-[14px] font-semibold hover:bg-tlo-jasne">
-          Zobacz, co nie jest objęte
-        </a>
+    <div class="max-w-[1200px] mx-auto px-5 py-20 lg:py-24 flex flex-col lg:flex-row gap-14 items-start">
+      <div class="lg:flex-1 min-w-0">
+        <p class="font-mono text-xs tracking-[0.16em] uppercase text-akcent-ciemny font-semibold m-0">
+          Prywatne L4 dla samozatrudnionych
+        </p>
+        <h1 class="mt-4 mb-5 text-[clamp(2.2rem,6vw,3.6rem)] leading-[1.05] max-w-[14em]">
+          Ubezpieczenie utraty dochodu
+        </h1>
+        <p data-odpowiedz class="text-[clamp(1.05rem,2vw,1.2rem)] leading-relaxed text-tekst-drugi max-w-[32em] m-0">
+          Na B2B zasiłek z ZUS liczy się od zadeklarowanej podstawy, nie od tego, co realnie zarabiasz.
+          Polisa wypłaca do 80% dochodu na B2B i do 65% na umowie o pracę — od pierwszego dnia niezdolności.
+        </p>
+        <div class="flex flex-wrap gap-3 mt-9">
+          <a href="/wniosek/" class="bg-akcent-ciemny text-white px-8 py-4 font-bold hover:bg-akcent-hover">
+            Policz swoją składkę
+          </a>
+          <a href="/wylaczenia/" class="border-[1.5px] border-akcent text-akcent-ciemny bg-tlo px-8 py-[14px] font-semibold hover:bg-tlo-jasne">
+            Zobacz, co nie jest objęte
+          </a>
+        </div>
+        <ul class="flex flex-wrap gap-x-7 gap-y-2 mt-9 text-[14px] text-tekst-drugi list-none m-0 p-0">
+          <li>Bez wychodzenia z domu</li>
+          <li>Oferta w 1–2 dni robocze</li>
+          <li>Dwóch ubezpieczycieli</li>
+        </ul>
+      </div>
+
+      <!-- Kalkulator hydratuje się dopiero, gdy przeglądarka nie ma nic pilniejszego:
+           jest widoczny od razu, ale nie wchodzi w drogę pierwszemu renderowi. -->
+      <div class="w-full lg:w-[26em] shrink-0">
+        <Kalkulator client:idle />
       </div>
     </div>
   </div>
