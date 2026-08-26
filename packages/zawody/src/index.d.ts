@@ -26,6 +26,10 @@ export interface Zawod {
   rodzaj: 'm' | 'z';
   /** Poprzedni adres, jeśli slug się zmienił — do przekierowania 301. */
   staryAdres?: string;
+  /** Zawód wycofany z serwisu — nie generujemy dla niego podstrony. */
+  wycofany?: true;
+  /** Dokąd kieruje 301 z adresu wycofanego zawodu. */
+  przekierowanieNa?: string;
 }
 
 export interface Kategoria {
@@ -35,6 +39,7 @@ export interface Kategoria {
 }
 
 export const ZAWODY: Zawod[];
+export const WYCOFANE: Zawod[];
 
 export function zawod(slug: string): Zawod | null;
 export function slugi(): string[];

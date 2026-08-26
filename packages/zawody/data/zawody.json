@@ -63,7 +63,9 @@
       "mnoga": "Aplikanci Adwokaccy",
       "mnogaDop": "Aplikantów Adwokackich"
     },
-    "rodzaj": "m"
+    "rodzaj": "m",
+    "wycofany": true,
+    "przekierowanieNa": "/zawody/prawo/"
   },
   {
     "slug": "adwokat",
@@ -294,7 +296,9 @@
       "mnoga": "Aktuariusze",
       "mnogaDop": "Aktuariuszy"
     },
-    "rodzaj": "m"
+    "rodzaj": "m",
+    "wycofany": true,
+    "przekierowanieNa": "/zawody/finanse/"
   },
   {
     "slug": "alergolog",
@@ -459,7 +463,9 @@
       "mnoga": "Analitycy Laboratoryjni",
       "mnogaDop": "Analityków Laboratoryjnych"
     },
-    "rodzaj": "m"
+    "rodzaj": "m",
+    "wycofany": true,
+    "przekierowanieNa": "/zawody/farmacja/"
   },
   {
     "slug": "analityk-naukowy",
@@ -492,7 +498,9 @@
       "mnoga": "Analitycy Naukowi",
       "mnogaDop": "Analityków Naukowych"
     },
-    "rodzaj": "m"
+    "rodzaj": "m",
+    "wycofany": true,
+    "przekierowanieNa": "/zawody/edukacja/"
   },
   {
     "slug": "androlog",
@@ -591,7 +599,9 @@
       "mnoga": "Animatorzy 3D",
       "mnogaDop": "Animatorów 3D"
     },
-    "rodzaj": "m"
+    "rodzaj": "m",
+    "wycofany": true,
+    "przekierowanieNa": "/zawody/sztuka-media/"
   },
   {
     "slug": "animator",
@@ -624,7 +634,9 @@
       "mnoga": "Animatorzy Kultury",
       "mnogaDop": "Animatorów Kultury"
     },
-    "rodzaj": "m"
+    "rodzaj": "m",
+    "wycofany": true,
+    "przekierowanieNa": "/zawody/edukacja/"
   },
   {
     "slug": "architect-it",
@@ -954,7 +966,9 @@
       "mnoga": "Brand Managerzy",
       "mnogaDop": "Brand Managerów"
     },
-    "rodzaj": "m"
+    "rodzaj": "m",
+    "wycofany": true,
+    "przekierowanieNa": "/zawody/biznes/"
   },
   {
     "slug": "business-analyst",
@@ -1020,7 +1034,9 @@
       "mnoga": "Chirurdzy Szczękowo-Twarzowi",
       "mnogaDop": "Chirurgów Szczękowo-Twarzowych"
     },
-    "rodzaj": "m"
+    "rodzaj": "m",
+    "wycofany": true,
+    "przekierowanieNa": "/zawody/stomatologia/"
   },
   {
     "slug": "chirurg",
@@ -1086,7 +1102,9 @@
       "mnoga": "Chirurdzy Naczyniowi",
       "mnogaDop": "Chirurgów Naczyniowych"
     },
-    "rodzaj": "m"
+    "rodzaj": "m",
+    "wycofany": true,
+    "przekierowanieNa": "/zawody/medycyna/"
   },
   {
     "slug": "chirurgia-onkologiczna",
@@ -1119,7 +1137,9 @@
       "mnoga": "Chirurdzy Onkologiczni",
       "mnogaDop": "Chirurgów Onkologicznych"
     },
-    "rodzaj": "m"
+    "rodzaj": "m",
+    "wycofany": true,
+    "przekierowanieNa": "/zawody/medycyna/"
   },
   {
     "slug": "chirurgia-plastyczna",
@@ -1218,7 +1238,9 @@
       "mnoga": "Cieśle",
       "mnogaDop": "Cieśli"
     },
-    "rodzaj": "m"
+    "rodzaj": "m",
+    "wycofany": true,
+    "przekierowanieNa": "/zawody/budownictwo/"
   },
   {
     "slug": "cloud-architect",
@@ -1812,7 +1834,9 @@
       "mnoga": "Doradcy Zawodowi",
       "mnogaDop": "Doradców Zawodowych"
     },
-    "rodzaj": "m"
+    "rodzaj": "m",
+    "wycofany": true,
+    "przekierowanieNa": "/zawody/edukacja/"
   },
   {
     "slug": "dyrektor",
@@ -2109,7 +2133,9 @@
       "mnoga": "Esteci Medyczni",
       "mnogaDop": "Estetów Medycznych"
     },
-    "rodzaj": "m"
+    "rodzaj": "m",
+    "wycofany": true,
+    "przekierowanieNa": "/zawody/beauty-uroda/"
   },
   {
     "slug": "event-manager",
@@ -2604,7 +2630,9 @@
       "mnoga": "Glazurnicy",
       "mnogaDop": "Glazurników"
     },
-    "rodzaj": "m"
+    "rodzaj": "m",
+    "wycofany": true,
+    "przekierowanieNa": "/zawody/budownictwo/"
   },
   {
     "slug": "grafik",
@@ -2802,7 +2830,9 @@
       "mnoga": "Hydraulicy",
       "mnogaDop": "Hydraulików"
     },
-    "rodzaj": "m"
+    "rodzaj": "m",
+    "wycofany": true,
+    "przekierowanieNa": "/zawody/budownictwo/"
   },
   {
     "slug": "ilustrator",
@@ -3099,7 +3129,9 @@
       "mnoga": "Kapitani Statku",
       "mnogaDop": "Kapitanów Statku"
     },
-    "rodzaj": "m"
+    "rodzaj": "m",
+    "wycofany": true,
+    "przekierowanieNa": "/zawody/transport/"
   },
   {
     "slug": "kardiochirurg",
@@ -3198,7 +3230,9 @@
       "mnoga": "Kelnerzy",
       "mnogaDop": "Kelnerów"
     },
-    "rodzaj": "m"
+    "rodzaj": "m",
+    "wycofany": true,
+    "przekierowanieNa": "/zawody/gastronomia/"
   },
   {
     "slug": "key-account-manager",
@@ -3297,7 +3331,9 @@
       "mnoga": "Kierownicy Budowy",
       "mnogaDop": "Kierowników Budowy"
     },
-    "rodzaj": "m"
+    "rodzaj": "m",
+    "wycofany": true,
+    "przekierowanieNa": "/zawody/budownictwo/"
   },
   {
     "slug": "komornik",
@@ -3924,7 +3960,9 @@
       "mnoga": "Maszyniści",
       "mnogaDop": "Maszynistów"
     },
-    "rodzaj": "m"
+    "rodzaj": "m",
+    "wycofany": true,
+    "przekierowanieNa": "/zawody/transport/"
   },
   {
     "slug": "mechanik",
@@ -4023,7 +4061,9 @@
       "mnoga": "Lekarze Medycyny Hiperbarycznej",
       "mnogaDop": "Lekarzy Medycyny Hiperbarycznej"
     },
-    "rodzaj": "m"
+    "rodzaj": "m",
+    "wycofany": true,
+    "przekierowanieNa": "/zawody/medycyna/"
   },
   {
     "slug": "medycyna-pracy",
@@ -4056,7 +4096,9 @@
       "mnoga": "Lekarze Medycyny Pracy",
       "mnogaDop": "Lekarzy Medycyny Pracy"
     },
-    "rodzaj": "m"
+    "rodzaj": "m",
+    "wycofany": true,
+    "przekierowanieNa": "/zawody/medycyna/"
   },
   {
     "slug": "medycyna-ratunkowa",
@@ -4122,7 +4164,9 @@
       "mnoga": "Lekarze Medycyny Rodzinnej",
       "mnogaDop": "Lekarzy Medycyny Rodzinnej"
     },
-    "rodzaj": "m"
+    "rodzaj": "m",
+    "wycofany": true,
+    "przekierowanieNa": "/zawody/medycyna/"
   },
   {
     "slug": "medycyna-sadowa",
@@ -4155,7 +4199,9 @@
       "mnoga": "Lekarze Medycyny Sądowej",
       "mnogaDop": "Lekarzy Medycyny Sądowej"
     },
-    "rodzaj": "m"
+    "rodzaj": "m",
+    "wycofany": true,
+    "przekierowanieNa": "/zawody/medycyna/"
   },
   {
     "slug": "medycyna-sportowa",
@@ -4386,7 +4432,9 @@
       "mnoga": "Murarze",
       "mnogaDop": "Murarzy"
     },
-    "rodzaj": "m"
+    "rodzaj": "m",
+    "wycofany": true,
+    "przekierowanieNa": "/zawody/budownictwo/"
   },
   {
     "slug": "muzyk",
@@ -4518,7 +4566,9 @@
       "mnoga": "Naukowcy",
       "mnogaDop": "Naukowców"
     },
-    "rodzaj": "m"
+    "rodzaj": "m",
+    "wycofany": true,
+    "przekierowanieNa": "/zawody/edukacja/"
   },
   {
     "slug": "nefrolog",
@@ -4683,7 +4733,9 @@
       "mnoga": "Aplikanci Notarialni",
       "mnogaDop": "Aplikantów Notarialnych"
     },
-    "rodzaj": "m"
+    "rodzaj": "m",
+    "wycofany": true,
+    "przekierowanieNa": "/zawody/prawo/"
   },
   {
     "slug": "notariusz",
@@ -4749,7 +4801,9 @@
       "mnoga": "Lekarze Medycyny Nuklearnej",
       "mnogaDop": "Lekarzy Medycyny Nuklearnej"
     },
-    "rodzaj": "m"
+    "rodzaj": "m",
+    "wycofany": true,
+    "przekierowanieNa": "/zawody/medycyna/"
   },
   {
     "slug": "ochroniarz",
@@ -4782,7 +4836,9 @@
       "mnoga": "Pracownicy Ochrony",
       "mnogaDop": "Pracowników Ochrony"
     },
-    "rodzaj": "m"
+    "rodzaj": "m",
+    "wycofany": true,
+    "przekierowanieNa": "/zawody/bezpieczenstwo/"
   },
   {
     "slug": "okulista",
@@ -4848,7 +4904,9 @@
       "mnoga": "Onkolodzy Kliniczni",
       "mnogaDop": "Onkologów Klinicznych"
     },
-    "rodzaj": "m"
+    "rodzaj": "m",
+    "wycofany": true,
+    "przekierowanieNa": "/zawody/medycyna/"
   },
   {
     "slug": "onkolog",
@@ -5046,7 +5104,9 @@
       "mnoga": "Patolodzy",
       "mnogaDop": "Patologów"
     },
-    "rodzaj": "m"
+    "rodzaj": "m",
+    "wycofany": true,
+    "przekierowanieNa": "/zawody/medycyna/"
   },
   {
     "slug": "pedagog",
@@ -5211,7 +5271,9 @@
       "mnoga": "Pielęgniarki Środowiskowe",
       "mnogaDop": "Pielęgniarek Środowiskowych"
     },
-    "rodzaj": "z"
+    "rodzaj": "z",
+    "wycofany": true,
+    "przekierowanieNa": "/zawody/pielegniarstwo/"
   },
   {
     "slug": "pielegniarka",
@@ -5310,7 +5372,9 @@
       "mnoga": "Pisarze",
       "mnogaDop": "Pisarzy"
     },
-    "rodzaj": "m"
+    "rodzaj": "m",
+    "wycofany": true,
+    "przekierowanieNa": "/zawody/sztuka-media/"
   },
   {
     "slug": "policjant",
@@ -5343,7 +5407,9 @@
       "mnoga": "Policjanci",
       "mnogaDop": "Policjantów"
     },
-    "rodzaj": "m"
+    "rodzaj": "m",
+    "wycofany": true,
+    "przekierowanieNa": "/zawody/bezpieczenstwo/"
   },
   {
     "slug": "polozna",
@@ -5574,7 +5640,9 @@
       "mnoga": "Prokuratorzy",
       "mnogaDop": "Prokuratorów"
     },
-    "rodzaj": "m"
+    "rodzaj": "m",
+    "wycofany": true,
+    "przekierowanieNa": "/zawody/prawo/"
   },
   {
     "slug": "protetyk",
@@ -6168,7 +6236,9 @@
       "mnoga": "Scenarzyści",
       "mnogaDop": "Scenarzystów"
     },
-    "rodzaj": "m"
+    "rodzaj": "m",
+    "wycofany": true,
+    "przekierowanieNa": "/zawody/sztuka-media/"
   },
   {
     "slug": "scrum-master",
@@ -6267,7 +6337,9 @@
       "mnoga": "Sędziowie",
       "mnogaDop": "Sędziów"
     },
-    "rodzaj": "m"
+    "rodzaj": "m",
+    "wycofany": true,
+    "przekierowanieNa": "/zawody/prawo/"
   },
   {
     "slug": "seksuolog",
@@ -6333,7 +6405,9 @@
       "mnoga": "Ślusarze",
       "mnogaDop": "Ślusarzy"
     },
-    "rodzaj": "m"
+    "rodzaj": "m",
+    "wycofany": true,
+    "przekierowanieNa": "/zawody/budownictwo/"
   },
   {
     "slug": "solution-architect",
@@ -6399,7 +6473,9 @@
       "mnoga": "Sommelierzy",
       "mnogaDop": "Sommelierów"
     },
-    "rodzaj": "m"
+    "rodzaj": "m",
+    "wycofany": true,
+    "przekierowanieNa": "/zawody/gastronomia/"
   },
   {
     "slug": "spawacz",
@@ -6564,7 +6640,9 @@
       "mnoga": "Strażacy",
       "mnogaDop": "Strażaków"
     },
-    "rodzaj": "m"
+    "rodzaj": "m",
+    "wycofany": true,
+    "przekierowanieNa": "/zawody/bezpieczenstwo/"
   },
   {
     "slug": "straznik-miejski",
@@ -6597,7 +6675,9 @@
       "mnoga": "Strażnicy Miejscy",
       "mnogaDop": "Strażników Miejskich"
     },
-    "rodzaj": "m"
+    "rodzaj": "m",
+    "wycofany": true,
+    "przekierowanieNa": "/zawody/bezpieczenstwo/"
   },
   {
     "slug": "stylista",

@@ -5,28 +5,38 @@
  * zawodowe, wysokość świadczenia i pełna odmiana. Portal buduje z tego 228
  * podstron, nie generując niczego w locie.
  */
-import zawody from '../data/zawody.json' with { type: 'json' };
+import wszystkie from '../data/zawody.json' with { type: 'json' };
 
 export { odmien, odmiana, rodzaj, FORMY, MESKI, ZENSKI } from './odmiana.js';
 
-/** @typedef {typeof zawody[number]} Zawod */
+/** @typedef {typeof wszystkie[number]} Zawod */
 
-export const ZAWODY = zawody;
+/**
+ * Zawody, dla których serwis ma podstronę.
+ *
+ * Rekordy wycofane zostają w pliku, a nie są z niego kasowane — inaczej nie
+ * dałoby się wygenerować przekierowań, a każdy usunięty adres zwracałby 404
+ * i kasował pozycję wypracowaną przez tę podstronę.
+ */
+export const ZAWODY = wszystkie.filter((z) => !z.wycofany);
+
+/** Zawody wycofane z serwisu — wyłącznie do przekierowań. */
+export const WYCOFANE = wszystkie.filter((z) => z.wycofany);
 
 /** Zawód po slugu adresu. */
 export function zawod(slug) {
-  return zawody.find((z) => z.slug === slug) ?? null;
+  return ZAWODY.find((z) => z.slug === slug) ?? null;
 }
 
 /** Wszystkie slugi — do generowania ścieżek statycznych. */
 export function slugi() {
-  return zawody.map((z) => z.slug);
+  return ZAWODY.map((z) => z.slug);
 }
 
 /** Nazwy kategorii w kolejności malejącej liczby zawodów. */
 export function kategorie() {
   const licznik = new Map();
-  for (const z of zawody) licznik.set(z.kategoria, (licznik.get(z.kategoria) ?? 0) + 1);
+  for (const z of ZAWODY) licznik.set(z.kategoria, (licznik.get(z.kategoria) ?? 0) + 1);
   return [...licznik.entries()]
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'pl'))
     .map(([nazwa, liczba]) => ({ nazwa, liczba, slug: slugKategorii(nazwa) }));
@@ -34,7 +44,7 @@ export function kategorie() {
 
 /** Zawody z jednej kategorii, alfabetycznie. */
 export function wKategorii(nazwa) {
-  return zawody
+  return ZAWODY
     .filter((z) => z.kategoria === nazwa)
     .sort((a, b) => a.nazwa.localeCompare(b.nazwa, 'pl'));
 }
@@ -67,7 +77,12 @@ export function slugKategorii(nazwa) {
  * wypracowana pozycja podstrony.
  */
 export function przekierowania() {
-  return ZAWODY
-    .filter((z) => z.staryAdres)
-    .map((z) => ({ z: `/${z.staryAdres}/`, na: `/${z.slug}/` }));
+  return [
+    // Zmiana samego adresu — treść dalej istnieje.
+    ...ZAWODY
+      .filter((z) => z.staryAdres)
+      .map((z) => ({ z: `/${z.staryAdres}/`, na: `/${z.slug}/` })),
+    // Zawód wycofany — kierujemy na kategorię, czyli najbliższą sensowną stronę.
+    ...WYCOFANE.map((z) => ({ z: `/${z.slug}/`, na: z.przekierowanieNa })),
+  ];
 }
