@@ -1,1 +1,263 @@
-{}
+{
+ "lekarz": {
+  "wstep": "Lekarz kontraktowy nie ma etatu, do którego mógłby wrócić po chorobie — ma dyżury, które ktoś inny obejmie, i pacjentów, którzy w międzyczasie zapiszą się gdzie indziej. Umowa z podmiotem leczniczym rozlicza wykonaną pracę, a nie gotowość do niej.",
+  "dochod": "Wynagrodzenie składa się zwykle z kilku źródeł naraz: dyżurów w szpitalu, przyjęć w przychodni i wizyt prywatnych. Każde z nich znika osobno i w innym tempie. Lekarz z trzema miejscami pracy traci trzy razy, a ZUS liczy zasiłek raz — od podstawy, którą zadeklarował.",
+  "przerwa": "Miesiąc niezdolności to nie tylko utracone dyżury. Kontrakt szpitalny z klauzulą o minimalnej liczbie godzin może zostać wypowiedziany, a odbudowa prywatnej praktyki po dłuższej przerwie trwa dłużej niż sama przerwa — pacjenci nie czekają, tylko znajdują innego specjalistę. Do tego dochodzą stałe koszty: składka OC obowiązkowego, izba lekarska, leasing sprzętu w gabinecie.",
+  "ryzyka": [
+   {
+    "tytul": "Ekspozycja zawodowa na HIV i WZW",
+    "opis": "Zakłucie igłą podczas zabiegu albo kontakt z materiałem zakaźnym to ryzyko wpisane w zawód. Serokonwersja oznacza nie tylko chorobę, ale często koniec pracy przy procedurach inwazyjnych. Polisa obejmuje to wyłącznie z osobną klauzulą HIV/WZW — bez niej ryzyko jest wyłączone."
+   },
+   {
+    "tytul": "Uraz dłoni albo kręgosłupa szyjnego",
+    "opis": "Chirurg z uszkodzonym nerwem promieniowym nie operuje, nawet jeśli poza tym jest zdrowy. Wieloletnia praca w pochyleniu nad stołem albo przy aparaturze kończy się dyskopatią szyjną, która wyklucza długie zabiegi."
+   },
+   {
+    "tytul": "Obciążenie dyżurowe i jego skutki",
+    "opis": "Dyżury nocne rozregulowują rytm dobowy i podnoszą ryzyko chorób sercowo-naczyniowych. To jedyne ryzyko z tej trójki, którego skutki narastają latami i nie dają jednego momentu, w którym da się powiedzieć: teraz się zaczęło."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy polisa obejmuje zakażenie HIV lub WZW przy zabiegu?",
+    "odpowiedz": "Tylko wtedy, gdy oferta zawiera klauzulę HIV/WZW. Jest ona osobnym dokumentem (LW048 albo LW049) i dokładanym wyłącznie do wariantów medycznych — Medica i Medicare. Wariant podstawowy LW044 tego ryzyka nie przewiduje w ogóle."
+   },
+   {
+    "pytanie": "Czy obowiązkowe OC lekarza wystarczy zamiast tej polisy?",
+    "odpowiedz": "Nie, bo chroni kogoś innego. OC pokrywa szkody wyrządzone pacjentowi. Utrata dochodu chroni lekarza przed sytuacją, w której to on nie może pracować — te dwa ubezpieczenia nie zastępują się nawzajem w żadnym zakresie."
+   }
+  ]
+ },
+ "stomatolog": {
+  "wstep": "Gabinet stomatologiczny bez stomatologa nadal generuje koszty. Leasing unitu, czynsz, pensje asystentki i higienistki, umowa na sterylizację — wszystko to biegnie dalej, gdy fotel stoi pusty.",
+  "dochod": "Stomatolog rozlicza się za wykonane procedury, nie za czas spędzony w gabinecie. Dochód jest wprost proporcjonalny do liczby przyjętych pacjentów, więc każdy dzień bez pracy to zero po stronie przychodów i pełna kwota po stronie kosztów stałych.",
+  "przerwa": "Trzy tygodnie przerwy oznaczają odwołanie kilkudziesięciu wizyt, z których część była etapem dłuższego leczenia — implantu, endodoncji, protetyki. Pacjent w połowie leczenia kanałowego nie poczeka, tylko pójdzie dokończyć je gdzie indziej i tam zostanie. Odbudowa grafiku po dłuższej nieobecności zajmuje miesiące.",
+  "ryzyka": [
+   {
+    "tytul": "Zespół cieśni nadgarstka i uszkodzenia ścięgien dłoni",
+    "opis": "Praca narzędziami rotacyjnymi w statycznym chwycie, po kilka godzin dziennie, przez lata. Objawy narastają powoli, ale moment, w którym dłoń przestaje utrzymywać precyzję, przychodzi nagle i zwykle jest nieodwracalny."
+   },
+   {
+    "tytul": "Pogorszenie widzenia bliskiego",
+    "opis": "Stomatologia to praca na dystansie kilkudziesięciu centymetrów, przy silnym kontraście światła. Presbiopia, która u kogoś innego oznacza okulary do czytania, tutaj oznacza koniec pracy przy mikroskopie i przy zabiegach wymagających rozróżniania struktur w skali dziesiątych części milimetra."
+   },
+   {
+    "tytul": "Kręgosłup szyjny i lędźwiowy od pozycji wymuszonej",
+    "opis": "Pochylenie i skręt tułowia utrzymywane godzinami, przy jednoczesnym unieruchomieniu głowy. Dyskopatia u stomatologa nie jest chorobą wieku — jest skutkiem geometrii stanowiska pracy."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy polisa pokryje raty leasingu unitu, gdy nie mogę pracować?",
+    "odpowiedz": "Świadczenie jest wypłacane w gotówce, bez wskazania celu — możesz przeznaczyć je na leasing, czynsz albo pensje. Ubezpieczyciel nie wymaga faktur ani rozliczenia z tego, na co poszły pieniądze."
+   },
+   {
+    "pytanie": "Jak udokumentować dochód, jeśli rozliczam się ryczałtem?",
+    "odpowiedz": "Ryczałt nie wyklucza z ubezpieczenia, ale zmienia sposób liczenia podstawy. Ubezpieczyciel bierze wtedy przychód z ewidencji, a nie dochód po kosztach — w praktyce trzeba przygotować ewidencję przychodów za ostatnie dwanaście miesięcy."
+   }
+  ]
+ },
+ "adwokat": {
+  "wstep": "Rozprawa nie czeka na powrót pełnomocnika do zdrowia. Adwokat, który nie może stawić się w sądzie, musi znaleźć substytuta, zapłacić mu z własnej kieszeni i liczyć się z tym, że klient zapyta, dlaczego jego sprawę prowadzi ktoś inny.",
+  "dochod": "Kancelaria indywidualna zarabia z trzech źródeł o różnej wrażliwości na przerwę: ryczałtów za stałą obsługę, honorariów za sprawy jednostkowe i wynagrodzenia z urzędu. Ryczałty spływają jeszcze przez chwilę, sprawy jednostkowe urywają się natychmiast.",
+  "przerwa": "Dwa miesiące nieobecności to nie tylko utracone honoraria. Terminy procesowe nie ulegają zawieszeniu z powodu choroby pełnomocnika, więc każda sprawa wymaga albo substytucji, albo wniosku o odroczenie — a odroczeń sąd nie udziela w nieskończoność. Do tego biegnie czynsz kancelarii, składka na izbę adwokacką i obowiązkowe OC.",
+  "ryzyka": [
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Wystąpienia przed sądem, przesłuchania, wielogodzinne negocjacje. Guzki fałdów głosowych i przewlekłe zapalenie krtani są u prawników procesowych częste, a utrata głosu wyklucza z pracy w sądzie skuteczniej niż większość urazów."
+   },
+   {
+    "tytul": "Zaburzenia lękowe i wypalenie",
+    "opis": "Praca pod presją terminów zawitych i odpowiedzialności za cudzy majątek albo wolność. To jest realne ryzyko w tym zawodzie i jednocześnie ryzyko wyłączone z ochrony — wypalenie zawodowe jako samodzielna diagnoza nie jest objęte żadnym z wariantów."
+   },
+   {
+    "tytul": "Kręgosłup i wzrok od pracy z aktami",
+    "opis": "Kilkaset stron akt dziennie, w pozycji siedzącej, przy sztucznym świetle. Banalne w opisie, kosztowne w skutkach: dyskopatia lędźwiowa potrafi wyłączyć z pracy na kwartał."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy obowiązkowe OC adwokata obejmuje utratę dochodu?",
+    "odpowiedz": "Nie. OC z tytułu wykonywania zawodu pokrywa szkody wyrządzone klientowi wskutek błędu. Nie ma żadnego związku z sytuacją, w której adwokat sam nie może pracować — to dwa różne ubezpieczenia o rozłącznych zakresach."
+   },
+   {
+    "pytanie": "Czy koszty substytucji można wliczyć do sumy ubezpieczenia?",
+    "odpowiedz": "Nie wprost, bo suma liczy się od udokumentowanego dochodu, a nie od przewidywanych kosztów. Ale świadczenie jest wypłacane bez wskazania celu, więc w praktyce pokrywa też wynagrodzenie substytuta."
+   }
+  ]
+ },
+ "programista": {
+  "wstep": "Programista na B2B jest najlepiej opłacanym samozatrudnionym w Polsce i jednocześnie jednym z najsłabiej zabezpieczonych. Kontrakt zwykle przewiduje wynagrodzenie za przepracowane dni — nie za dni choroby.",
+  "dochod": "Rozliczenie idzie za faktycznie przepracowane dni albo za zamknięte etapy prac. Przy stawce dziennej dwutygodniowa niezdolność to około dziesięciu dni bez faktury, a przy najniższej podstawie ZUS zasiłek pokrywa z tego ułamek.",
+  "przerwa": "Klauzula wypowiedzenia w kontraktach B2B bywa krótka — czasem czternaście dni. Dłuższa nieobecność daje zamawiającemu powód do rozwiązania umowy bez konieczności tłumaczenia się, a rekrutacja na nowy kontrakt trwa zwykle od miesiąca do trzech. Programista wraca do zdrowia i dopiero wtedy zaczyna szukać pracy.",
+  "ryzyka": [
+   {
+    "tytul": "Zespoły przeciążeniowe kończyny górnej",
+    "opis": "Nadgarstek, łokieć, obręcz barkowa. Osiem godzin dziennie przy klawiaturze w tej samej pozycji daje zapalenie pochewek ścięgnistych, które przy nawrotach kończy się zabiegiem i kilkutygodniową przerwą od pisania."
+   },
+   {
+    "tytul": "Choroby psychiczne — ryzyko realne, ale wyłączone",
+    "opis": "Depresja i zaburzenia lękowe są w tej branży statystycznie częstsze niż urazy fizyczne. Trzeba to powiedzieć wprost: żaden z wariantów polisy nie obejmuje chorób psychicznych ani wypalenia zawodowego jako samodzielnej diagnozy."
+   },
+   {
+    "tytul": "Pogorszenie ostrości widzenia",
+    "opis": "Praca przy ekranie przez kilkanaście lat nie powoduje ślepoty, ale przyspiesza zmęczenie akomodacji i zespół suchego oka. Przy współistniejącej wadzie potrafi to zejść do poziomu, przy którym praca po ośmiu godzinach przestaje być możliwa."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Kontrakt B2B ma zapis o dostępności — czy polisa to obejmuje?",
+    "odpowiedz": "Polisa nie wypełnia zobowiązań z kontraktu, tylko wypłaca świadczenie za niezdolność do pracy. Jeśli kontrakt przewiduje karę za niedostępność, świadczenie można na nią przeznaczyć, ale ubezpieczyciel nie wchodzi w spór z zamawiającym."
+   },
+   {
+    "pytanie": "Pracuję zdalnie z zagranicy — czy ochrona działa?",
+    "odpowiedz": "To zależy od wariantu i od tego, jak długo trwa pobyt. Przy dłuższych wyjazdach ubezpieczyciel wymaga zgłoszenia zmiany miejsca wykonywania pracy; niezgłoszony pobyt poza Polską może być podstawą do odmowy wypłaty."
+   }
+  ]
+ },
+ "fryzjer": {
+  "wstep": "Fryzjer wynajmujący stanowisko płaci za nie niezależnie od tego, czy przy nim stoi. Czynsz za fotel biegnie w dniach choroby tak samo jak w dniach pracy, a klientka, która nie mogła się umówić, idzie do kogoś innego i zwykle już tam zostaje.",
+  "dochod": "Przychód powstaje z pojedynczych usług, rozliczanych tego samego dnia. Nie ma tu abonamentu ani zaliczek — jest kalendarz, który albo jest zapełniony, albo pusty. Dochód spada do zera z dnia na dzień, bez okresu przejściowego.",
+  "przerwa": "Miesiąc nieobecności rozbija bazę stałych klientek, budowaną latami. Fryzjerstwo to zawód, w którym relacja z konkretną osobą jest całym kapitałem firmy — a ta relacja nie przenosi się na zmiennika. Po powrocie kalendarz trzeba zapełniać od nowa, przy czym koszty stanowiska i produktów biegły przez cały czas.",
+  "ryzyka": [
+   {
+    "tytul": "Alergiczne kontaktowe zapalenie skóry rąk",
+    "opis": "Farby, utleniacze, preparaty do trwałej. Uczulenie na parafenylenodiaminę albo persiarczany rozwija się po latach ekspozycji i jest nieodwracalne — po jego wystąpieniu praca z tymi preparatami przestaje być możliwa, nawet w rękawicach."
+   },
+   {
+    "tytul": "Przewlekła niewydolność żylna kończyn dolnych",
+    "opis": "Osiem godzin w pozycji stojącej, bez możliwości siadania między klientkami. Żylaki i obrzęki to u fryzjerów norma, a nie wyjątek; zaawansowane stadium wymaga zabiegu i kilku tygodni bez stania."
+   },
+   {
+    "tytul": "Przeciążenie obręczy barkowej",
+    "opis": "Ręce uniesione powyżej linii serca przez większość dnia roboczego. Konflikt podbarkowy i uszkodzenia stożka rotatorów wyłączają z pracy na dwa do czterech miesięcy, a nawroty są częste."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Jestem na ryczałcie i wynajmuję stanowisko — czy mogę się ubezpieczyć?",
+    "odpowiedz": "Tak. Forma opodatkowania nie wyklucza z ochrony, wpływa tylko na sposób dokumentowania dochodu. Przy ryczałcie podstawą jest ewidencja przychodów, a nie zeznanie o dochodzie."
+   },
+   {
+    "pytanie": "Czy uczulenie na farby będzie potraktowane jako choroba zawodowa?",
+    "odpowiedz": "Uznanie choroby zawodowej to procedura przed inspekcją sanitarną i nie ma wpływu na wypłatę z polisy. Dla ubezpieczyciela liczy się to, czy niezdolność do wykonywania zawodu jest orzeczona — nie to, czy jej przyczyna została formalnie uznana za zawodową."
+   }
+  ]
+ },
+ "kierowca-zawodowy": {
+  "wstep": "Kierowca zawodowy traci możliwość zarabiania nie wtedy, gdy zachoruje, tylko wtedy, gdy lekarz medycyny pracy odmówi przedłużenia orzeczenia. Cukrzyca insulinozależna, padaczka albo bezdech senny potrafią zamknąć ten zawód na stałe, przy pełnej sprawności w każdym innym.",
+  "dochod": "Wynagrodzenie to zwykle stawka za kilometr albo za kurs, powiększona o ryczałty. Wszystkie składniki znikają razem z pierwszym dniem postoju, a rata za ciągnik siodłowy albo bus biegnie dalej.",
+  "przerwa": "Sześć tygodni bez jazdy przy własnym pojeździe w leasingu to sześć rat zapłaconych z oszczędności. Zleceniodawca w tym czasie przekazuje trasy komuś innemu, a stałe zlecenia rzadko wracają do kierowcy, który raz nie dojechał. Dochodzi jeszcze obowiązek utrzymania ważnych badań i szkoleń okresowych, których terminy nie zatrzymują się na czas choroby.",
+  "ryzyka": [
+   {
+    "tytul": "Utrata orzeczenia lekarskiego i psychologicznego",
+    "opis": "To ryzyko charakterystyczne dla tego zawodu i najmniej intuicyjne. Badania okresowe sprawdzają wzrok, słuch, cukrzycę, choroby układu krążenia i sprawność psychofizyczną. Negatywny wynik oznacza koniec pracy kierowcy, niezależnie od samopoczucia."
+   },
+   {
+    "tytul": "Zespół bólowy kręgosłupa lędźwiowego",
+    "opis": "Wielogodzinne siedzenie połączone z drganiami całego ciała przenoszonymi z podwozia. Dyskopatia u kierowców występuje wcześniej i przebiega ciężej niż u pracowników biurowych, bo dochodzi obciążenie wibracyjne."
+   },
+   {
+    "tytul": "Uraz przy załadunku i rozładunku",
+    "opis": "Wbrew nazwie zawodu spora część urazów nie zdarza się w ruchu, tylko przy naczepie: upadek z platformy, przygniecenie paletą, uraz barku przy plandece. Skutkiem bywa kilkumiesięczna niezdolność."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy polisa zadziała, gdy stracę uprawnienia po badaniach okresowych?",
+    "odpowiedz": "Zadziała, jeśli przyczyną jest stan zdrowia orzeczony jako niezdolność do wykonywania zawodu — a nie sama formalna utrata dokumentu. To rozróżnienie warto sprawdzić w OWU wybranego wariantu przed podpisaniem."
+   },
+   {
+    "pytanie": "Jeżdżę na własnym busie w leasingu — czy to zmienia wycenę?",
+    "odpowiedz": "Sam leasing nie, ale zmienia go forma zatrudnienia i to, czy zatrudniasz innych kierowców. Przy własnej firmie z pracownikami ubezpieczyciel liczy osobno Twój wkład w przychód, bo firma może pracować dalej bez Ciebie."
+   }
+  ]
+ },
+ "ksiegowy": {
+  "wstep": "Księgowy nie może zachorować w marcu. Terminy sprawozdawcze są ustawowe i nie przesuwają się z powodu choroby osoby, która prowadzi księgi — a odpowiedzialność za ich dotrzymanie spoczywa na biurze rachunkowym.",
+  "dochod": "Biuro rachunkowe żyje z miesięcznych ryczałtów za obsługę klientów. To dochód pozornie odporny na przerwę, ale tylko do momentu, w którym klient nie dostanie deklaracji na czas. Wtedy odchodzi, a z nim ryczałt na następne lata.",
+  "przerwa": "Nieobecność w okresie zamknięcia roku ma inną cenę niż w lipcu. Zaległości narastają kumulacyjnie: nieoddany JPK, niezłożony CIT, niewysłane deklaracje ZUS za kilkudziesięciu klientów naraz. Po powrocie trzeba nadrobić wszystko jednocześnie, przy bieżących terminach, które w tym czasie też nadeszły. Do tego dochodzi ryzyko kar, za które biuro odpowiada wobec klienta.",
+  "ryzyka": [
+   {
+    "tytul": "Sezonowa kumulacja obciążenia",
+    "opis": "Styczeń, marzec i kwiecień to miesiące, w których tydzień niezdolności kosztuje więcej niż miesiąc w wakacje. To ryzyko organizacyjne, nie medyczne, ale wpływa na wysokość realnej straty bardziej niż większość chorób."
+   },
+   {
+    "tytul": "Zespół suchego oka i zaburzenia akomodacji",
+    "opis": "Praca z dokumentami i arkuszami po kilkanaście godzin dziennie w okresach szczytu. Nie brzmi groźnie, dopóki nie okaże się, że po czterech godzinach przy ekranie tekst przestaje być czytelny."
+   },
+   {
+    "tytul": "Choroby układu krążenia na tle przewlekłego stresu",
+    "opis": "Odpowiedzialność karno-skarbowa za cudze rozliczenia, kumulowana przez lata. Nadciśnienie i zaburzenia rytmu w tej grupie zawodowej rozwijają się wcześnie i bywają pierwszym sygnałem po czterdziestce."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Mam OC biura rachunkowego — czy to nie wystarczy?",
+    "odpowiedz": "OC pokrywa szkodę wyrządzoną klientowi, na przykład karę za błędne rozliczenie. Nie wypłaci ani złotówki, gdy to Ty nie możesz pracować i biuro stoi. Te dwa ubezpieczenia nie mają wspólnego zakresu."
+   },
+   {
+    "pytanie": "Zatrudniam dwie osoby — czy firma nie poradzi sobie beze mnie?",
+    "odpowiedz": "Właśnie dlatego przy zatrudniających ubezpieczyciel pyta o Twój wkład w przychód firmy. Jeśli pracownicy mogą prowadzić księgi bez Ciebie, suma ubezpieczenia będzie niższa — i to jest uczciwe, bo strata też będzie niższa."
+   }
+  ]
+ },
+ "kucharz": {
+  "wstep": "Kuchnia to jedno z niewielu miejsc pracy, gdzie oparzenie trzeciego stopnia i głębokie skaleczenie są zdarzeniami rutynowymi. Kucharz z zabandażowaną dłonią nie wejdzie na stanowisko — nie dlatego, że boli, tylko dlatego, że nie wolno.",
+  "dochod": "Kucharz na kontrakcie rozlicza się za przepracowane zmiany albo za realizację konkretnego serwisu. Przy pracy w kilku miejscach naraz — restauracja, catering, weekendowe eventy — przerwa wycina wszystkie źródła jednocześnie, bo przyczyna jest jedna.",
+  "przerwa": "Miesiąc bez pracy przy własnym lokalu oznacza wybór między zamknięciem a zatrudnieniem kogoś na zastępstwo za stawkę wyższą niż własna. Przy pracy na kontrakcie oznacza po prostu, że zmiany rozdzielono między innych i po powrocie trzeba się o nie ubiegać na nowo. W obu przypadkach sanepid, czynsz i umowy na dostawy działają bez zmian.",
+  "ryzyka": [
+   {
+    "tytul": "Oparzenia termiczne dłoni i przedramion",
+    "opis": "Tłuszcz o temperaturze dwustu stopni, para z garnka, rozgrzana blacha. Oparzenie obejmujące powierzchnię dłoni wyklucza z pracy przy żywności na kilka tygodni ze względów sanitarnych, nawet gdy goi się prawidłowo."
+   },
+   {
+    "tytul": "Rany cięte i uszkodzenia ścięgien palców",
+    "opis": "Nóż szefa kuchni jest ostry z definicji, a tempo pracy przy serwisie nie sprzyja ostrożności. Przecięcie ścięgna zginacza to zabieg i od sześciu do dwunastu tygodni rehabilitacji, w czasie których chwyt nie wraca do pełnej sprawności."
+   },
+   {
+    "tytul": "Przeciążenie kręgosłupa i stawów kolanowych",
+    "opis": "Dziesięć godzin w pozycji stojącej na twardej posadzce, z dźwiganiem garów i skrzynek. Zmiany zwyrodnieniowe kolan u kucharzy pojawiają się o dekadę wcześniej niż w populacji ogólnej."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy oparzenie w pracy to nieszczęśliwy wypadek w rozumieniu polisy?",
+    "odpowiedz": "Tak, o ile jest zdarzeniem nagłym i zewnętrznym — a oparzenie takie jest. Inaczej wygląda sytuacja przy dolegliwościach narastających latami, jak zwyrodnienie stawów: to nie jest wypadek, tylko choroba, i obejmuje ją ryzyko niezdolności do pracy, nie ryzyko NW."
+   },
+   {
+    "pytanie": "Pracuję na umowę zlecenie w restauracji — jaki mam limit?",
+    "odpowiedz": "Przy umowie zlecenia limit wynosi 65% udokumentowanego dochodu, tak samo jak przy umowie o pracę. Pełne 80% dotyczy wyłącznie samozatrudnienia i kontraktu B2B."
+   }
+  ]
+ },
+ "elektryk": {
+  "wstep": "Elektryk pracuje w zawodzie, w którym jeden błąd nie kończy się bólem pleców na tydzień, tylko migotaniem komór. Do tego dochodzi praca na wysokości, bo instalacje rzadko biegną na wysokości biurka.",
+  "dochod": "Rozliczenie idzie za wykonane zlecenie albo za obmiar. Elektryk z uprawnieniami SEP bierze zlecenia, których nikt bez tych uprawnień nie wykona — i traci je wszystkie naraz, jeśli stan zdrowia uniemożliwi przedłużenie świadectwa kwalifikacyjnego.",
+  "przerwa": "Zlecenie budowlane ma harmonogram i kary umowne za opóźnienie. Elektryk, który wypada z prac w trakcie etapu, zwykle nie tylko nie dostaje wynagrodzenia, ale bywa obciążony kosztem wejścia innego wykonawcy. Przy dłuższej przerwie traci też pozycję na liście podwykonawców generalnego wykonawcy, a na tę listę wraca się latami.",
+  "ryzyka": [
+   {
+    "tytul": "Porażenie prądem i jego następstwa",
+    "opis": "Nawet porażenie bez utraty przytomności potrafi zostawić zaburzenia rytmu serca i uszkodzenia neurologiczne ujawniające się z opóźnieniem. To ryzyko o najkrótszym czasie od zdarzenia do trwałych skutków w całym budownictwie."
+   },
+   {
+    "tytul": "Upadek z wysokości",
+    "opis": "Drabina, rusztowanie, podest. Upadek z trzech metrów wystarcza do złamania kręgosłupa albo miednicy, a rekonwalescencja liczona jest w miesiącach, nie tygodniach."
+   },
+   {
+    "tytul": "Uszkodzenie wzroku przy łuku elektrycznym",
+    "opis": "Zwarcie w rozdzielnicy daje błysk o energii wystarczającej do trwałego uszkodzenia siatkówki. Elektryk z ubytkiem w polu widzenia nie dostanie przedłużenia uprawnień do pracy przy urządzeniach pod napięciem."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy praca na wysokości podnosi składkę?",
+    "odpowiedz": "Wpływa na ocenę ryzyka, ale nie wyklucza z ochrony. Ubezpieczyciel pyta o charakter pracy we wniosku właśnie po to, żeby wycenić ją realnie zamiast stosować jedną stawkę dla wszystkich zawodów budowlanych."
+   },
+   {
+    "pytanie": "Mam uprawnienia SEP — czy ich utrata jest zdarzeniem objętym polisą?",
+    "odpowiedz": "Sama utrata uprawnień nie jest zdarzeniem ubezpieczeniowym. Objęty jest stan zdrowia, który powoduje niezdolność do wykonywania zawodu — a jeśli ten stan zdrowia jest zarazem przyczyną nieprzedłużenia uprawnień, świadczenie się należy."
+   }
+  ]
+ }
+}

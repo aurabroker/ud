@@ -11,11 +11,11 @@
  * było wspólne dla dziesiątek albo setek podstron. To jest definicja doorway
  * pages i dokładnie to, co system Helpful Content wyłapuje i degraduje.
  */
-import { ZAWODY, zawod, pokrewne, slugKategorii } from '@ud/zawody';
+import { ZAWODY, zawod, pokrewne, slugKategorii, tresc } from '@ud/zawody';
 import Baza from '../../layouts/Baza.astro';
 import Kalkulator from '../../components/Kalkulator.svelte';
 import { symuluj, zl, ZUS_MIESIECZNIE } from '../../lib/symulacja';
-import { graf, organizacja, serwis, strona, okruszki, usluga } from '../../lib/seo';
+import { graf, organizacja, serwis, strona, okruszki, usluga, faq } from '../../lib/seo';
 import { FIRMA } from '../../lib/firma';
 
 export function getStaticPaths() {
@@ -25,6 +25,14 @@ export function getStaticPaths() {
 const { slug } = Astro.props;
 const z = zawod(slug)!;
 const o = z.odmiana;
+
+/**
+ * Treść redakcyjna pisana dla tego jednego zawodu. Gdy jej nie ma, strona
+ * renderuje wersję ogólną — 188 tekstów nie powstaje jednego dnia, a serwis
+ * ma działać w trakcie ich dopisywania.
+ */
+const t = tresc(slug);
+const ryzyka = t?.ryzyka ?? z.ryzyka;
 
 const sciezka = `/${z.slug}/`;
 const tytul = `Ubezpieczenie utraty dochodu dla ${o.dopelniacz.toLowerCase()} | ${'UtrataDochodu.pl'}`;
@@ -53,6 +61,9 @@ const jsonld = graf([
     url: sciezka,
     grupa: o.mnoga,
   }),
+  // FAQPage tylko wtedy, gdy pytania są naprawdę na stronie. Schemat opisujący
+  // treść, której nie widać, jest naruszeniem wytycznych Google i grozi karą ręczną.
+  ...(t?.pytania?.length ? [faq(t.pytania.map((p) => ({ pytanie: p.pytanie, odpowiedz: p.odpowiedz })), sciezka)] : []),
 ]);
 
 const powiazane = pokrewne(z.slug, 10);
@@ -81,10 +92,8 @@ const powiazane = pokrewne(z.slug, 10);
       <h1 class="mt-4 mb-5 text-[clamp(2rem,5vw,3.25rem)] leading-[1.06] max-w-[16em]">
         Ubezpieczenie utraty dochodu dla {o.dopelniacz.toLowerCase()}
       </h1>
-      <p data-odpowiedz class="text-[clamp(1.05rem,2vw,1.16rem)] leading-relaxed text-tekst-drugi max-w-[32em] m-0">
-        Na kontrakcie zasiłek chorobowy liczy się od zadeklarowanej podstawy ZUS, nie od tego,
-        co {o.mianownik.toLowerCase()} realnie zarabia. Polisa wypłaca do 80% dochodu na B2B
-        i do 65% na umowie o pracę, od pierwszego dnia niezdolności do pracy.
+      <p data-odpowiedz class="text-[clamp(1.05rem,2vw,1.16rem)] leading-relaxed text-tekst-drugi max-w-[34em] m-0">
+        {t?.wstep ?? `Na kontrakcie zasiłek chorobowy liczy się od zadeklarowanej podstawy ZUS, nie od tego, co ${o.mianownik.toLowerCase()} realnie zarabia. Polisa wypłaca do 80% dochodu na B2B i do 65% na umowie o pracę, od pierwszego dnia niezdolności do pracy.`}
       </p>
 
       <div class="flex flex-wrap gap-3 mt-8">
@@ -108,15 +117,19 @@ const powiazane = pokrewne(z.slug, 10);
            wyciąć z kontekstu bez utraty sensu. -->
       <section>
         <h2 class="text-[clamp(1.5rem,3vw,2rem)] leading-tight mb-3">
-          Czy {o.mianownik.toLowerCase()} na kontrakcie może ubezpieczyć się od utraty dochodu?
+          Jak wygląda dochód w tym zawodzie?
         </h2>
         <p data-odpowiedz class="text-lg leading-relaxed font-medium text-tekst m-0 mb-3">
-          Tak. Polisa jest przeznaczona dla samozatrudnionych i kontraktowych — czyli dla tej grupy,
-          której ZUS nie zapewnia ochrony proporcjonalnej do dochodu.
+          {t?.dochod ?? `Zarobki ${o.dopelniacz.toLowerCase()} na kontrakcie zależą od wykonanej pracy, a nie od gotowości do niej. ZUS liczy zasiłek od zadeklarowanej podstawy składek, więc przy najniższej podstawie różnica sięga kilkunastu tysięcy złotych miesięcznie.`}
         </p>
-        <p class="text-[17px] leading-relaxed text-tekst-drugi m-0">
-          Warunkiem jest udokumentowany dochód i wypełniona ankieta medyczna. Przy sumie trwałej
-          niezdolności powyżej {zl(1_000_000)} ubezpieczyciel wymaga rozszerzonej ankiety zdrowotnej.
+      </section>
+
+      <section>
+        <h2 class="text-[clamp(1.5rem,3vw,2rem)] leading-tight mb-3">
+          Co się dzieje, gdy {o.mianownik.toLowerCase()} nie może pracować?
+        </h2>
+        <p data-odpowiedz class="text-[17px] leading-relaxed text-tekst-drugi m-0">
+          {t?.przerwa ?? `Koszty stałe biegną dalej, a klienci nie czekają. Warunkiem wypłaty jest udokumentowany dochód i wypełniona ankieta medyczna; przy sumie trwałej niezdolności powyżej ${zl(1_000_000)} ubezpieczyciel wymaga rozszerzonej ankiety zdrowotnej.`}
         </p>
       </section>
 
@@ -130,7 +143,7 @@ const powiazane = pokrewne(z.slug, 10);
           przerwy w pracy po urazie.
         </p>
         <dl class="border-t border-linia m-0">
-          {z.ryzyka.map((r) => (
+          {ryzyka.map((r) => (
             <div class="border-b border-linia py-5 flex flex-col sm:flex-row gap-2 sm:gap-8">
               <dt class="sm:w-[16em] shrink-0 font-semibold text-[16.5px]">{r.tytul}</dt>
               <dd class="m-0 text-[16px] leading-relaxed text-tekst-drugi">{r.opis}</dd>
@@ -182,6 +195,25 @@ const powiazane = pokrewne(z.slug, 10);
           po ocenie ryzyka — u nas składka wychodzi ok. {zl(wynik.skladka)} miesięcznie.
         </p>
       </section>
+
+      {t?.pytania && t.pytania.length > 0 && (
+        <section>
+          <h2 class="text-[clamp(1.5rem,3vw,2rem)] leading-tight mb-6">
+            Pytania, które zadaje {o.mianownik.toLowerCase()}
+          </h2>
+          <div class="border-t border-linia">
+            {t.pytania.map((p) => (
+              <details class="border-b border-linia group" open>
+                <summary class="cursor-pointer list-none py-5 flex gap-4 items-start justify-between font-semibold text-[17px]">
+                  {p.pytanie}
+                  <span aria-hidden="true" class="text-akcent-ciemny shrink-0 group-open:rotate-45 transition-transform">+</span>
+                </summary>
+                <p class="text-[16px] leading-relaxed text-tekst-drugi pb-5 mt-0 max-w-[46em]">{p.odpowiedz}</p>
+              </details>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section class="border border-linia-mocna bg-tlo-jasne p-8">
         <h2 class="text-[clamp(1.35rem,2.5vw,1.7rem)] leading-tight m-0 mb-3">Zanim złożysz wniosek — sprawdź wyłączenia</h2>
