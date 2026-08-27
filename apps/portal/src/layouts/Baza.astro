@@ -11,6 +11,7 @@
  * 3. Skrypty analityczne dopiero na końcu <body>, zawsze odroczone.
  */
 import { SERWIS } from '../lib/firma';
+import { TAGI } from '../lib/analityka';
 import Nawigacja from '../components/Nawigacja.astro';
 import Stopka from '../components/Stopka.astro';
 import { Font } from 'astro:assets';
@@ -38,6 +39,25 @@ const ogObraz = new URL(obraz ?? '/og-domyslny.jpg', SERWIS.url).href;
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!--
+    Dwa skrypty muszą wykonać się przed wszystkim innym i dlatego są tu,
+    bez `defer`, przed jakimkolwiek innym zasobem:
+
+    awaria.js — inaczej nie złapie błędu skryptu, który wysypie się wcześniej.
+    zgody.js  — ustawia domyślne odmowy Consent Mode i decyduje, czy tagi
+                w ogóle wolno załadować. Uruchomiony później oznaczałby, że
+                pierwsza odsłona poleci do Google, zanim ktokolwiek się zgodzi.
+
+    Oba są krótkie i lokalne, więc koszt blokowania jest pomijalny —
+    a odwrócenie tej kolejności robi z obu atrapy.
+
+    Uwaga: `<meta charset>` musi zostać w pierwszym kilobajcie pliku.
+    Te dwa wpisy są krótkie i mieszczą się przed nim bez ryzyka.
+  -->
+  <script is:inline define:vars={{ TAGI }}>window.UD_TAGI = TAGI;</script>
+  <script is:inline src="/awaria.js"></script>
+  <script is:inline src="/zgody.js"></script>
 
   <title>{tytul}</title>
   <meta name="description" content={opis}>

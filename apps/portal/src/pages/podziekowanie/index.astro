@@ -6,6 +6,7 @@
  */
 import Baza from '../../layouts/Baza.astro';
 import { FIRMA } from '../../lib/firma';
+import { TAGI } from '../../lib/analityka';
 
 const sciezka = '/podziekowanie/';
 const tytul = 'Wniosek przyjęty | UtrataDochodu.pl';
@@ -74,3 +75,17 @@ const KROKI = [
     </div>
   </div>
 </Baza>
+
+<script is:inline define:vars={{ etykieta: TAGI.konwersjaWniosek }}>
+  /**
+   * Konwersja Google Ads. Idzie przez UDCookies.konwersja(), więc sama
+   * sprawdza zgodę na marketing — bez niej nie wysyła nic. Stara wersja
+   * strony strzelała bezwarunkowo.
+   *
+   * Zdarzenie odpalamy też po późniejszej akceptacji zgód: użytkownik, który
+   * zgodził się dopiero na tej stronie, jest tą samą konwersją.
+   */
+  function zglos() { window.UDCookies?.konwersja?.(etykieta); }
+  zglos();
+  document.addEventListener('ud:zgody', zglos, { once: true });
+</script>

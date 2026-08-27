@@ -134,3 +134,43 @@ czegokolwiek na początek `<head>` sprawdź, czy nie wypycha deklaracji poza 1 K
 ```
 python3 -c "import re;d=open('index.html','rb').read();print(re.search(rb'<meta[^>]*charset',d).start())"
 ```
+
+---
+
+## Zgody na cookies — analityka NIE startuje przed zgodą
+
+W starym serwisie baner zgód był atrapą i nie wolno tego powtórzyć:
+
+- Meta Pixel, GA4 (`G-MGB0RBTCC9`) i Google Ads (`AW-18020137303`) ładowały się
+  **bezwarunkowo w `<head>`**, zanim baner zdążył się wyrenderować.
+- `cookie-consent.js` gatował **inną** właściwość GA4 (`G-D9XHPWP5DE`), z której
+  nic innego nie korzystało.
+- Baner był wpięty tylko w `index.html` i `blog.html`. W `formularz.html` —
+  z ankietą medyczną — nie było go wcale, a Pixel i GA4 działały.
+- Treść banera („analityka uruchamiana wyłącznie po Twojej zgodzie") była
+  nieprawdziwa, na serwisie zbierającym dane o zdrowiu.
+
+Nowy portal (`apps/portal`):
+
+- `public/zgody.js` — ładowany **jako drugi w `<head>`, bez `defer`**, zaraz po
+  `awaria.js`. Uruchomiony później oznacza, że pierwsza odsłona leci do Google,
+  zanim ktokolwiek się zgodzi.
+- Consent Mode v2: `gtag('consent','default', …)` ze wszystkim `denied` przed
+  jakimkolwiek tagiem.
+- Tryb **basic** — przed zgodą nie leci żadne żądanie do Google ani Meta.
+  Przełącznik: stała `TRYB` w `zgody.js`. Zmiana na `advanced` daje modelowanie
+  konwersji w Ads kosztem odsłony wysyłanej do Google od każdego odwiedzającego.
+- Zgoda granularna: analityka i marketing osobno.
+- **Odrzucenie musi być jednym kliknięciem, o tym samym ciężarze wizualnym co
+  akceptacja.** Brak tego jest najczęstszym powodem kar za bannery cookie.
+- Pixel nie startuje na ścieżkach z `TAGI.bezPixela` (`/wniosek/`,
+  `/podziekowanie/`) nawet przy zgodzie na marketing — Meta zabrania danych
+  wrażliwych, a sam adres strony z ankietą medyczną już nim jest.
+- Konwersje wysyłaj przez `window.UDCookies.konwersja(etykieta)`, nigdy przez
+  gołe `gtag('event','conversion', …)` — ta pierwsza sama sprawdza zgodę.
+
+Test: `npx playwright test test/zgody.spec.js`. Sprawdza ruch sieciowy, a nie
+obecność banera — atrapa przechodzi każdy test oparty na DOM-ie.
+
+Do zamknięcia po stronie klienta: druga właściwość GA4 (`G-D9XHPWP5DE`) —
+inaczej historia ruchu zostaje rozbita na dwie niepełne właściwości.
