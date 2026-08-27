@@ -2637,5 +2637,295 @@
     "odpowiedz": "Nagłe uszkodzenie przy utracie równowagi przez pacjenta — tak, to zdarzenie nagłe i zewnętrzne. Zmiany przeciążeniowe narastające latami obejmuje natomiast ryzyko niezdolności do pracy, a nie ryzyko NW."
    }
   ]
+ },
+ "chirurg": {
+  "wstep": "Chirurg operuje rękami, które muszą wykonać ruch o zaplanowanej sile w zaplanowanym miejscu. Uszkodzenie nerwu obwodowego, które u kogoś innego oznacza niewygodę przy zapinaniu guzików, u chirurga kończy pracę przy stole.",
+  "dochod": "Dochód chirurga kontraktowego składa się z dyżurów, zabiegów planowych rozliczanych za procedurę i operacji prywatnych. Zabiegi prywatne płacą najlepiej i znikają najszybciej, bo pacjent umówiony na termin nie przełoży operacji o kwartał.",
+  "przerwa": "Lista operacyjna jest planowana z wyprzedzeniem i przy nieobecności operatora rozdzielana między pozostałych. Pacjenci zakwalifikowani do zabiegu przez konkretnego chirurga przechodzą do kolegów i tam zostają, bo w chirurgii zaufanie do operatora jest podstawą decyzji. Kontrakt szpitalny z klauzulą o minimalnej liczbie godzin bywa przy dłuższej przerwie wypowiedziany.",
+  "ryzyka": [
+   {
+    "tytul": "Uszkodzenie nerwu obwodowego kończyny górnej",
+    "opis": "Wielogodzinne operacje w pozycji z uniesionymi ramionami, przy powtarzalnym chwycie narzędzia. Neuropatia uciskowa nerwu łokciowego osłabia chwyt precyzyjny w sposób, którego nie kompensuje doświadczenie."
+   },
+   {
+    "tytul": "Ekspozycja zawodowa przy zabiegu",
+    "opis": "Skaleczenie ostrzem, przekłucie rękawicy igłą chirurgiczną, kontakt z krwią w polu operacyjnym. Serokonwersja po ekspozycji na HIV lub WZW oznacza zwykle koniec pracy przy procedurach inwazyjnych — a chroni przed tym wyłącznie osobna klauzula."
+   },
+   {
+    "tytul": "Zmiany zwyrodnieniowe odcinka szyjnego",
+    "opis": "Głowa pochylona nad polem operacyjnym przez cały zabieg, przy nieruchomym tułowiu. Ucisk korzeni nerwowych daje drętwienie rąk, które przy operowaniu jest dyskwalifikujące niezależnie od nasilenia bólu."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy zakłucie na sali operacyjnej jest objęte bez klauzuli HIV/WZW?",
+    "odpowiedz": "Nie. Zakażenie zawodowe obejmują wyłącznie warunki szczególne LW048 albo LW049, dokładane do wariantów medycznych Medica i Medicare. Wariant podstawowy LW044 nie przewiduje tego ryzyka w ogóle."
+   },
+   {
+    "pytanie": "Operuję w kilku szpitalach na kontraktach — jak wykazać dochód?",
+    "odpowiedz": "Sumujesz wszystkie kontrakty w rozliczeniu rocznym. To typowa sytuacja w tym zawodzie: jedno zdarzenie zdrowotne wycina wszystkie miejsca pracy naraz, a zasiłek z ZUS liczy się od jednej zadeklarowanej podstawy."
+   }
+  ]
+ },
+ "kardiochirurg": {
+  "wstep": "Kardiochirurgia to operacje trwające po kilkanaście godzin, w krążeniu pozaustrojowym, gdzie pomyłka mierzona jest w minutach niedokrwienia. Wytrzymałość fizyczna jest tu warunkiem wykonywania zawodu na równi ze sprawnością manualną.",
+  "dochod": "Kontrakt z ośrodkiem kardiochirurgicznym plus dyżury i konsultacje. Liczba ośrodków wykonujących te procedury w Polsce jest ograniczona, więc utrata jednego kontraktu nie ma prostego zamiennika w tym samym mieście.",
+  "przerwa": "Pacjenci zakwalifikowani do operacji serca mają wyznaczone terminy wynikające z pilności wskazań. Nieobecność operatora oznacza przesunięcie zabiegów w kolejce, którą ośrodek rozwiązuje wewnętrznie — a kardiochirurg wracający po pół roku wraca do zespołu, który nauczył się pracować bez niego. Odbudowa własnej listy operacyjnej trwa kwartały.",
+  "ryzyka": [
+   {
+    "tytul": "Skutki wielogodzinnej pracy w bezruchu",
+    "opis": "Operacja kardiochirurgiczna to kilkanaście godzin w pozycji stojącej, bez przerwy i bez zmiany pozycji. Niewydolność żylna i zespoły bólowe kręgosłupa rozwijają się w tej specjalizacji szybciej niż w jakiejkolwiek innej dziedzinie zabiegowej."
+   },
+   {
+    "tytul": "Ekspozycja na promieniowanie przy zabiegach hybrydowych",
+    "opis": "Procedury wykonywane pod kontrolą fluoroskopii oznaczają narażenie na promieniowanie jonizujące przy stole. Dawka kumuluje się przez lata, a zaćma popromienna jest jej udokumentowanym następstwem."
+   },
+   {
+    "tytul": "Zaburzenia rytmu okołodobowego",
+    "opis": "Dyżury i operacje w trybie pilnym, w tym w nocy, przez całą karierę. Skutki metaboliczne i sercowo-naczyniowe kumulują się i bywają przyczyną niezdolności wcześniej niż jakikolwiek uraz."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy narażenie na promieniowanie przy zabiegach trzeba zgłaszać?",
+    "odpowiedz": "Warto opisać je we wniosku jako charakter pracy. Zabiegi pod kontrolą fluoroskopii to inny profil ekspozycji niż klasyczna kardiochirurgia, a ubezpieczyciel ocenia faktycznie wykonywaną pracę, nie samą nazwę specjalizacji."
+   },
+   {
+    "pytanie": "Jaką sumę trwałej niezdolności wybrać przy tak wąskiej specjalizacji?",
+    "odpowiedz": "Im węższa specjalizacja, tym trudniej o pracę zastępczą w zawodzie — a to argument za wyższą sumą. Przy kwotach powyżej miliona złotych ubezpieczyciel prosi o dłuższą ankietę zdrowotną; to formalność w formularzu, a nie przeszkoda w zawarciu umowy."
+   }
+  ]
+ },
+ "neurochirurg": {
+  "wstep": "Neurochirurg operuje w polu, gdzie margines błędu liczony jest w milimetrach, a konsekwencją pomyłki bywa trwały deficyt neurologiczny pacjenta. Drżenie rąk, które u innego lekarza nie ma znaczenia, tutaj wyklucza z zawodu.",
+  "dochod": "Kontrakt z oddziałem neurochirurgii, dyżury i zabiegi wykonywane prywatnie, głównie w dziedzinie kręgosłupa. Ta ostatnia część stanowi zwykle znaczącą część dochodu i jest najbardziej wrażliwa na przerwę.",
+  "przerwa": "Pacjent z uciskiem rdzenia albo z guzem ma wskazania czasowe — nie może czekać na powrót konkretnego operatora. Ośrodek przekazuje zabiegi innym, a pacjenci prywatni, kierowani zwykle z polecenia, trafiają do kolejnego neurochirurga i tam zostają. Do tego dochodzi obowiązkowe OC i składka na izbę, biegnące bez przerwy.",
+  "ryzyka": [
+   {
+    "tytul": "Drżenie samoistne rąk",
+    "opis": "U większości osób jest łagodną niedogodnością. Przy operacjach mikrochirurgicznych na strukturach nerwowych wyklucza z zawodu całkowicie, a leczenie farmakologiczne rzadko przywraca precyzję wymaganą pod mikroskopem."
+   },
+   {
+    "tytul": "Zaburzenia widzenia obuocznego",
+    "opis": "Praca pod mikroskopem operacyjnym wymaga sprawnej stereopsji. Utrata widzenia w jednym oku odbiera zdolność oceny głębokości pola operacyjnego, mimo pełnej ostrości widzenia w drugim."
+   },
+   {
+    "tytul": "Statyczne przeciążenie kręgosłupa szyjnego",
+    "opis": "Głowa unieruchomiona w okularach mikroskopu przez wiele godzin. Dyskopatia szyjna z promieniowaniem do ręki jest w tej specjalizacji chorobą zawodową w praktyce, choć nie w orzeczeniu."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy drżenie rąk wyklucza mnie z operowania w rozumieniu polisy?",
+    "odpowiedz": "Ubezpieczyciel ocenia zdolność do wykonywania konkretnego zawodu, nie do jakiejkolwiek pracy. Neurochirurgia ma jeden z najwyższych progów sprawności manualnej w medycynie i warto to precyzyjnie opisać we wniosku."
+   },
+   {
+    "pytanie": "Wykonuję zabiegi prywatne obok kontraktu szpitalnego — co wykazać?",
+    "odpowiedz": "Oba źródła. Zabiegi prywatne nie mają żadnego zabezpieczenia z ZUS, a stanowią zwykle większą część dochodu — pominięcie ich zaniża sumę ubezpieczenia poniżej realnej straty."
+   }
+  ]
+ },
+ "torakochirurg": {
+  "wstep": "Torakochirurg operuje w klatce piersiowej, przy pracującym płucu i w bezpośrednim sąsiedztwie wielkich naczyń. Zabiegi trwają godzinami w pozycji wymuszonej przez dostęp między żebrami.",
+  "dochod": "Kontrakty z oddziałami torakochirurgii, których w Polsce jest niewiele, oraz konsultacje onkologiczne. Wąska specjalizacja daje wysokie stawki i jednocześnie znikomą liczbę alternatywnych miejsc pracy w razie ograniczenia sprawności.",
+  "przerwa": "Kwalifikacja do resekcji miąższu płucnego u chorego onkologicznie ma okno czasowe wynikające z progresji choroby. Zabiegi przechodzą na innych operatorów natychmiast, bo pacjent nie może czekać. Powrót do własnej listy po dłuższej przerwie wymaga odbudowania kierunków od pulmonologów i onkologów, którzy w międzyczasie skierowali pacjentów gdzie indziej.",
+  "ryzyka": [
+   {
+    "tytul": "Przeciążenie obręczy barkowej przy dostępie torakotomijnym",
+    "opis": "Rozwieranie klatki piersiowej i praca w głębokim, wąskim polu wymaga siły przy jednocześnie uniesionych ramionach. Uszkodzenie stożka rotatorów wymaga zabiegu i pół roku poza salą operacyjną."
+   },
+   {
+    "tytul": "Ekspozycja zawodowa na materiał zakaźny",
+    "opis": "Operacje u chorych z gruźlicą, ropniakiem opłucnej i zakażeniami mnogimi. Ryzyko obejmuje zarówno zakażenia przenoszone krwią, jak i drogą oddechową, przy czym tylko te pierwsze objęte są klauzulą szczególną."
+   },
+   {
+    "tytul": "Skutki długich zabiegów w bezruchu",
+    "opis": "Resekcje trwające po sześć godzin w pozycji stojącej, z ograniczoną możliwością zmiany postawy. Niewydolność żylna i zespoły bólowe lędźwiowe narastają latami."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Operuję chorych z gruźlicą — czy zakażenie będzie objęte?",
+    "odpowiedz": "Klauzula szczególna dotyczy HIV i wirusowego zapalenia wątroby, czyli zakażeń przenoszonych krwią. Gruźlica jest chorobą jak każda inna — objęta, o ile powoduje orzeczoną niezdolność i nie była leczona w ciągu 24 miesięcy przed umową."
+   },
+   {
+    "pytanie": "Moja specjalizacja jest wąska — czy to zmienia wycenę?",
+    "odpowiedz": "Zmienia ocenę ryzyka, bo wąska specjalizacja oznacza mniejsze możliwości pracy zastępczej. Warto opisać ją we wniosku dokładnie, zamiast wpisywać samo „chirurg”."
+   }
+  ]
+ },
+ "chirurgia-plastyczna": {
+  "wstep": "Chirurg plastyczny odpowiada za efekt, który pacjent ogląda w lustrze codziennie przez resztę życia. To jedyna dziedzina chirurgii, w której o powodzeniu decyduje nie tylko funkcja, ale i milimetr symetrii.",
+  "dochod": "Praktycznie cały dochód pochodzi z zabiegów prywatnych, rozliczanych za procedurę i płatnych z góry albo w transzach. Nie ma tu składnika kontraktowego, który wpływałby niezależnie od liczby operacji.",
+  "przerwa": "Pacjentka z zaplanowaną operacją wzięła urlop i zorganizowała opiekę nad dziećmi na konkretny termin. Odwołany zabieg oznacza zwrot przedpłaty, a przy zabiegach estetycznych zaufanie do konkretnego operatora jest całym powodem wyboru kliniki — pacjent nie przejdzie do kolegi z sąsiedniego gabinetu, tylko do innej kliniki. Do tego biegnie czynsz sali operacyjnej i leasing sprzętu.",
+  "ryzyka": [
+   {
+    "tytul": "Utrata precyzji ruchu w mikrochirurgii",
+    "opis": "Zespolenia naczyniowe przy płatach wolnych wykonuje się szwem o grubości włosa. Nawet niewielkie osłabienie kontroli ruchu, po urazie albo w przebiegu choroby neurologicznej, wyklucza z rekonstrukcji mikrochirurgicznych."
+   },
+   {
+    "tytul": "Zaburzenia rozróżniania barw i oceny symetrii",
+    "opis": "Ocena ukrwienia płata i planowanie linii cięcia opierają się na widzeniu barwnym i przestrzennym. Nabyte zaburzenia w tym zakresie mają w tej specjalizacji bezpośrednie przełożenie na wynik zabiegu."
+   },
+   {
+    "tytul": "Przeciążenie kręgosłupa przy zabiegach w pochyleniu",
+    "opis": "Operacje twarzy i rekonstrukcje wykonuje się w głębokim pochyleniu nad polem, po kilka godzin. Zmiany zwyrodnieniowe odcinka szyjnego i piersiowego są tu następstwem geometrii pracy."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Mam własną klinikę z salą operacyjną — jak liczyć sumę?",
+    "odpowiedz": "Jako działalność z pracownikami. Wniosek zapyta o Twój wkład w przychód kliniki — jeśli inni operatorzy pracują dalej pod Twoją nieobecność, część przychodu zostaje i suma będzie od niej niższa."
+   },
+   {
+    "pytanie": "Roszczenia pacjentów o efekt zabiegu — czy polisa je pokrywa?",
+    "odpowiedz": "Nie, to zakres obowiązkowego OC lekarza. Ubezpieczenie utraty dochodu wypłaca świadczenie za Twoją niezdolność do pracy i nie ma związku z roszczeniami pacjentów."
+   }
+  ]
+ },
+ "ortopeda": {
+  "wstep": "Ortopeda pracuje przy stole operacyjnym z narzędziami, które w innych zawodach nazwano by warsztatowymi: wiertarką, piłą, młotkiem. To chirurgia wymagająca siły fizycznej, nie tylko precyzji.",
+  "dochod": "Kontrakt szpitalny, zabiegi endoprotezoplastyki rozliczane za procedurę i praktyka prywatna z konsultacjami oraz zabiegami artroskopowymi. Praktyka prywatna daje zwykle większą część dochodu i nie ma żadnego zabezpieczenia.",
+  "przerwa": "Pacjent po urazie ma okno czasowe na rekonstrukcję, po którym wynik zabiegu jest gorszy. Ortopeda nieobecny przez dwa miesiące traci nie tylko te zabiegi, ale i kierowania od lekarzy rodzinnych i fizjoterapeutów, którzy w tym czasie znaleźli innego specjalistę. Odbudowa sieci kierowań zajmuje w tej dziedzinie kwartały.",
+  "ryzyka": [
+   {
+    "tytul": "Ekspozycja na promieniowanie przy zabiegach pod RTG",
+    "opis": "Zespolenia śródszpikowe i repozycje wykonuje się pod kontrolą ramienia C. Dawka na dłonie i soczewki kumuluje się przez lata, a zaćma popromienna jest udokumentowanym następstwem ekspozycji zawodowej ortopedów."
+   },
+   {
+    "tytul": "Przeciążenie kończyny górnej przy pracy narzędziami",
+    "opis": "Wiertarka i piła oscylacyjna przenoszą drgania na nadgarstek i przedramię, przy dużym momencie obrotowym. Neuropatia uciskowa i zapalenie nadkłykcia są tu skutkiem samego narzędzia, nie tylko powtarzalności."
+   },
+   {
+    "tytul": "Uraz kręgosłupa przy repozycji",
+    "opis": "Nastawianie złamań i zwichnięć wymaga siły przykładanej w pozycji wymuszonej, często nagle. Uszkodzenie krążka międzykręgowego u ortopedy zdarza się przy tej właśnie czynności."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy dawka promieniowania z ramienia C ma znaczenie przy wniosku?",
+    "odpowiedz": "Warto opisać ten charakter pracy. Ortopedia zabiegowa z kontrolą radiologiczną to inny profil narażenia niż konsultacje ambulatoryjne, a ubezpieczyciel ocenia faktycznie wykonywaną pracę."
+   },
+   {
+    "pytanie": "Mam gabinet prywatny i kontrakt szpitalny — jaki mam limit?",
+    "odpowiedz": "Jeśli oba rozliczasz w ramach działalności, limit wynosi 80% łącznego dochodu. Kluczowe jest wykazanie obu źródeł, bo praktyka prywatna zwykle przeważa, a to od całości liczy się suma."
+   }
+  ]
+ },
+ "anestezjolog": {
+  "wstep": "Anestezjolog utrzymuje pacjenta przy życiu przez cały zabieg i reaguje w sekundach na zdarzenia, których nikt nie zapowiada. To praca wymagająca nieprzerwanej czujności przez wiele godzin, także w nocy.",
+  "dochod": "Dyżury w bloku operacyjnym i na oddziale intensywnej terapii, znieczulenia rozliczane za procedurę, konsultacje przedoperacyjne. Anestezjolodzy pracują zwykle w kilku placówkach naraz, bo popyt na tę specjalizację znacznie przekracza podaż.",
+  "przerwa": "Blok operacyjny bez anestezjologa nie pracuje w ogóle — to on, a nie chirurg, jest wąskim gardłem harmonogramu. Placówka obsadza dyżury natychmiast i na stałe, bo odwołanie operacji kosztuje więcej niż kontrakt. Przy pracy w czterech szpitalach jedna choroba wycina cztery źródła równocześnie, a każde odbudowuje się osobno.",
+  "ryzyka": [
+   {
+    "tytul": "Skutki pracy w trybie dyżurowym",
+    "opis": "Dyżury dwudziestoczterogodzinne, czasem kilka w tygodniu, przez całą karierę. Zaburzenia rytmu dobowego przekładają się na choroby metaboliczne i sercowo-naczyniowe wcześniej niż w jakiejkolwiek innej specjalizacji lekarskiej."
+   },
+   {
+    "tytul": "Ekspozycja na gazy anestetyczne",
+    "opis": "Przewlekłe narażenie na śladowe stężenia anestetyków wziewnych w bloku operacyjnym. Skutki neurologiczne i wątrobowe są przedmiotem badań, a ich rozpoznanie kończy pracę przy znieczuleniu wziewnym."
+   },
+   {
+    "tytul": "Ekspozycja zawodowa przy dostępach naczyniowych",
+    "opis": "Kaniulacja żył centralnych i tętnic, wielokrotnie na dyżurze, często w pośpiechu przy pacjencie niestabilnym. Zakłucie w takich warunkach jest częstsze niż przy procedurach planowych, a chroni przed nim wyłącznie klauzula HIV/WZW."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Pracuję w czterech szpitalach — czy to komplikuje wniosek?",
+    "odpowiedz": "Nie komplikuje, ale wymaga wykazania wszystkich kontraktów. To najczęstsza sytuacja w tej specjalizacji i najlepszy argument za polisą: jedna choroba wycina cztery źródła, a ZUS liczy zasiłek od jednej podstawy."
+   },
+   {
+    "pytanie": "Czy dyżury nocne wpływają na ocenę ryzyka?",
+    "odpowiedz": "Wpływają na profil zawodowy i warto je opisać. Anestezjologia dyżurowa i anestezjologia ambulatoryjna to różne obciążenia, a ubezpieczyciel ocenia faktycznie wykonywaną pracę."
+   }
+  ]
+ },
+ "radiolog": {
+  "wstep": "Radiolog opisuje badania, na podstawie których inni lekarze podejmują decyzje. Cała jego praca odbywa się przez wzrok — jeden zmysł, którego utrata oznacza koniec zawodu bez żadnej ścieżki zastępczej.",
+  "dochod": "Opisy rozliczane za badanie, dyżury w pracowni oraz teleradiologia, która pozwala pracować zdalnie dla kilku ośrodków naraz. Ta ostatnia forma zwiększa dochód i jednocześnie wydłuża czas przy monitorze.",
+  "przerwa": "Badania czekające na opis mają terminy wynikające z pilności klinicznej, a zaległość rośnie z każdym dniem. Ośrodek przekazuje opisy do firm teleradiologicznych i zwykle już przy nich zostaje, bo raz zbudowany przepływ pracy jest wygodniejszy niż powrót do jednego radiologa. Przy własnej działalności teleradiologicznej dochodzi utrata umów z kilkoma szpitalami naraz.",
+  "ryzyka": [
+   {
+    "tytul": "Pogorszenie ostrości widzenia i widzenia kontrastu",
+    "opis": "Ocena różnic gęstości na monitorze diagnostycznym, przez osiem godzin dziennie, w zaciemnionym pomieszczeniu. Utrata zdolności rozróżniania kontrastu wyklucza z opisywania badań, nawet przy zachowanej ostrości widzenia."
+   },
+   {
+    "tytul": "Zespół suchego oka i zmęczenie akomodacji",
+    "opis": "Praca przy jasnym ekranie w ciemności, przy obniżonej częstotliwości mrugania. Objawy narastają latami i w zaawansowanym stadium ograniczają pracę do kilku godzin dziennie."
+   },
+   {
+    "tytul": "Zespoły przeciążeniowe odcinka szyjnego",
+    "opis": "Nieruchoma pozycja przed dwoma monitorami przez całą zmianę. Dyskopatia szyjna z drętwieniem rąk utrudnia obsługę stacji diagnostycznej i wymusza przerwy."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Pracuję zdalnie w teleradiologii — czy ochrona działa?",
+    "odpowiedz": "Działa, o ile pracujesz z Polski. Praca zdalna nie zmienia oceny ryzyka; zmienia ją dłuższy pobyt za granicą, który trzeba zgłosić ubezpieczycielowi."
+   },
+   {
+    "pytanie": "Czy pogorszenie wzroku będzie uznane za niezdolność?",
+    "odpowiedz": "Przy radiologii ocena obrazu jest jedyną czynnością zawodową, więc utrata zdolności rozróżniania kontrastu jest niezdolnością do wykonywania tego zawodu, choć w wielu innych nie byłaby."
+   }
+  ]
+ },
+ "okulista": {
+  "wstep": "Okulista bada oko przez lampę szczelinową i operuje pod mikroskopem na strukturach o grubości dziesiątych części milimetra. Jego własny wzrok jest w tym zawodzie jednocześnie narzędziem i przedmiotem specjalizacji.",
+  "dochod": "Konsultacje ambulatoryjne, zabiegi zaćmy rozliczane za procedurę, zabiegi laserowe i praktyka prywatna. Zabiegi zaćmy wykonuje się seryjnie, więc dochód jest wprost zależny od liczby dni na sali operacyjnej.",
+  "przerwa": "Kolejka do operacji zaćmy jest planowana z wielomiesięcznym wyprzedzeniem i przy nieobecności operatora przechodzi na pozostałych. Pacjenci prywatni, kierowani z polecenia, trafiają do innego okulisty i tam zostają. Przy własnym gabinecie z lampą szczelinową, tomografem OCT i laserem dochodzą raty leasingowe za sprzęt wart kilkaset tysięcy złotych.",
+  "ryzyka": [
+   {
+    "tytul": "Utrata widzenia obuocznego",
+    "opis": "Chirurgia okulistyczna pod mikroskopem wymaga sprawnej stereopsji. Utrata widzenia w jednym oku odbiera zdolność oceny głębokości w polu operacyjnym i kończy pracę zabiegową, choć nie ambulatoryjną."
+   },
+   {
+    "tytul": "Zaburzenia akomodacji i ostrości widzenia bliskiego",
+    "opis": "Badanie w lampie szczelinowej i praca pod mikroskopem przez cały dzień. Zmiany akomodacyjne u okulisty ujawniają się wcześniej niż wynikałoby to z wieku i mają bezpośrednie przełożenie na możliwość pracy."
+   },
+   {
+    "tytul": "Statyczne przeciążenie odcinka szyjnego",
+    "opis": "Głowa unieruchomiona w podpórce lampy szczelinowej albo w okularach mikroskopu, wielokrotnie w ciągu dnia. Ucisk korzeni nerwowych daje drętwienie rąk, które przy mikrochirurgii jest dyskwalifikujące."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Utrata widzenia w jednym oku — czy to niezdolność częściowa?",
+    "odpowiedz": "Wyklucza z chirurgii okulistycznej, ale nie z pracy ambulatoryjnej — i to jest sytuacja, w której ubezpieczyciel ocenia niezdolność częściową. Warto we wniosku opisać, jaka część dochodu pochodzi z zabiegów, a jaka z konsultacji."
+   },
+   {
+    "pytanie": "Mam gabinet z drogim sprzętem w leasingu — czy to podnosi sumę?",
+    "odpowiedz": "Suma liczy się od dochodu, nie od zobowiązań. Wysokie koszty stałe są natomiast dobrym powodem, żeby wybrać sumę bliską maksimum dopuszczalnemu przy Twoim dochodzie."
+   }
+  ]
+ },
+ "ginekolog": {
+  "wstep": "Ginekolog-położnik pracuje w trybie, w którym poród nie czeka na dyżur zaplanowany, tylko dzieje się wtedy, kiedy się dzieje. Do tego dochodzi chirurgia operacyjna i praktyka ambulatoryjna — trzy różne obciążenia w jednym zawodzie.",
+  "dochod": "Kontrakt szpitalny z dyżurami, porody prowadzone prywatnie, zabiegi operacyjne i gabinet ambulatoryjny. Porody prywatne i gabinet dają zwykle większą część dochodu i są pozbawione jakiegokolwiek zabezpieczenia.",
+  "przerwa": "Pacjentka, która wybrała lekarza do prowadzenia ciąży i porodu, zapłaciła za obecność konkretnej osoby przy porodzie. Nieobecność oznacza zwrot i utratę pacjentki, a w tej dziedzinie polecenia krążą w zamkniętych grupach i jedna nieodebrana ciąża odbija się na dopływie nowych. Zabiegi operacyjne przechodzą na kolegów z oddziału i wracają wolno.",
+  "ryzyka": [
+   {
+    "tytul": "Ekspozycja na płyny ustrojowe przy porodzie i zabiegach",
+    "opis": "Kontakt z krwią i płynem owodniowym jest przy porodzie obfity i trudny do pełnego zabezpieczenia. Ochrona przed zakażeniem zawodowym HIV i WZW wymaga osobnej klauzuli szczególnej."
+   },
+   {
+    "tytul": "Skutki pracy dyżurowej bez przewidywalnego rytmu",
+    "opis": "Porody odbywają się o każdej porze, a dyżur przedłuża się do zakończenia zabiegu. Chroniczny deficyt snu i obciążenie układu krążenia kumulują się przez dekady."
+   },
+   {
+    "tytul": "Przeciążenie kręgosłupa przy zabiegach i asyście",
+    "opis": "Praca w pozycji wymuszonej przy stole ginekologicznym i przy porodzie, z nagłym wysiłkiem przy asyście. Zespoły bólowe lędźwiowe są tu następstwem powtarzalnym."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Prowadzę ciąże prywatnie — czy to wykazuję osobno?",
+    "odpowiedz": "Wykazujesz w łącznym dochodzie z działalności. Prowadzenie ciąż i porody prywatne nie mają żadnego zabezpieczenia z ZUS, więc to one są zwykle głównym powodem, żeby liczyć sumę od całości."
+   },
+   {
+    "pytanie": "Czy ekspozycja przy porodzie jest objęta bez klauzuli?",
+    "odpowiedz": "Nie. Zakażenie zawodowe HIV i WZW obejmują wyłącznie warunki szczególne dokładane do wariantów medycznych. Bez nich ryzyko pozostaje wyłączone, niezależnie od okoliczności ekspozycji."
+   }
+  ]
  }
 }
