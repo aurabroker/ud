@@ -2260,5 +2260,382 @@
     "odpowiedz": "Nie wyklucza, ale musi być zgłoszone. Wniosek zawiera osobną listę aktywności podwyższonego ryzyka — zatajenie ich jest podstawą do odmowy wypłaty przy szkodzie właśnie z nimi związanej."
    }
   ]
+ },
+ "pielegniarka": {
+  "wstep": "Pielęgniarka na kontrakcie nie ma płatnego zwolnienia — ma dyżury, które ktoś obsadzi zamiast niej. Praca łączy odpowiedzialność kliniczną z wysiłkiem fizycznym, którego skala rzadko trafia do opisu tego zawodu.",
+  "dochod": "Kontrakt z podmiotem leczniczym rozlicza się za przepracowane dyżury, często w kilku placówkach naraz. Dodatki za noce i święta bywają jedną trzecią dochodu i znikają w całości, bo nieobecność wycina cały dyżur, a nie jego część.",
+  "przerwa": "Grafik dyżurów układa się na miesiąc do przodu, a placówka obsadza wolne miejsca natychmiast. Przy pracy w trzech miejscach jedna choroba wycina wszystkie trzy źródła równocześnie, a ZUS liczy zasiłek od jednej zadeklarowanej podstawy. Powrót do pełnej liczby dyżurów po dłuższej przerwie zależy od tego, czy grafik zdążył się zapełnić na stałe.",
+  "ryzyka": [
+   {
+    "tytul": "Uraz kręgosłupa przy przemieszczaniu pacjenta",
+    "opis": "Podnoszenie i obracanie osoby ważącej osiemdziesiąt kilogramów, w ciasnej przestrzeni, wielokrotnie na dyżurze. Choroby kręgosłupa lędźwiowego są w tej grupie zawodowej najczęstszą przyczyną trwałego odejścia z zawodu."
+   },
+   {
+    "tytul": "Zakłucie i ekspozycja zawodowa",
+    "opis": "Kaniulacja, pobrania, iniekcje — kilkadziesiąt procedur z ostrym narzędziem na dyżurze. Ryzyko zakażenia HIV i wirusowym zapaleniem wątroby jest objęte wyłącznie przy osobnej klauzuli HIV/WZW."
+   },
+   {
+    "tytul": "Skutki pracy zmianowej",
+    "opis": "Dyżury dwunastogodzinne w rotacji dzień–noc przez dekady. Zaburzenia metaboliczne i choroby sercowo-naczyniowe rozwijają się szybciej i nie cofają po przejściu na jedną zmianę."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Pracuję na kontraktach w trzech szpitalach — jak wykazać dochód?",
+    "odpowiedz": "Sumujesz wszystkie umowy. To najczęstsza sytuacja w tym zawodzie i jednocześnie najlepszy argument za polisą: jedna choroba wycina trzy źródła, a zasiłek liczy się od jednej podstawy."
+   },
+   {
+    "pytanie": "Czy zakłucie igłą jest objęte bez dodatkowej klauzuli?",
+    "odpowiedz": "Nie. Zakażenie zawodowe HIV i WZW obejmują wyłącznie osobne warunki szczególne, dokładane do wariantów medycznych. Warto o nie zapytać przy składaniu wniosku, a nie po ekspozycji."
+   }
+  ]
+ },
+ "pielegniarka-operacyjna": {
+  "wstep": "Pielęgniarka operacyjna stoi przy stole przez cały zabieg, w bezruchu, podając narzędzia w tempie narzuconym przez operatora. Instrumentowanie wymaga sprawności rąk i pamięci sekwencji, których nie da się zastąpić doświadczeniem ogólnym.",
+  "dochod": "Kontrakt na bloku operacyjnym rozlicza się za dyżury, ze stawką wyższą niż na oddziale ze względu na wymagane kwalifikacje. Ta różnica jest jednocześnie ryzykiem — utrata sprawności manualnej oznacza powrót na oddział i spadek stawki.",
+  "przerwa": "Blok operacyjny działa według planu zabiegów ustalanego z tygodniowym wyprzedzeniem. Nieobsadzone stanowisko instrumentariuszki oznacza odwołanie zabiegów, więc placówka wypełnia je natychmiast i na stałe. Przy pracy kontraktowej dłuższa nieobecność kończy się nieprzedłużeniem umowy — blok potrzebuje obsady pewnej, a nie prawdopodobnej.",
+  "ryzyka": [
+   {
+    "tytul": "Skaleczenie ostrym narzędziem w polu operacyjnym",
+    "opis": "Podawanie i odbieranie skalpeli, igieł chirurgicznych i wierteł, dziesiątki razy podczas zabiegu. Ekspozycja na materiał zakaźny jest tu wyższa niż na oddziale, a ochrona zapewniona wyłącznie klauzulą HIV/WZW."
+   },
+   {
+    "tytul": "Przewlekła niewydolność żylna",
+    "opis": "Kilkugodzinne zabiegi w pozycji stojącej, bez możliwości zmiany pozycji ani odciążenia nóg. Zaawansowane żylaki wymagają zabiegu i kilku tygodni bez stania, czyli bez pracy przy stole."
+   },
+   {
+    "tytul": "Alergia na lateks i środki dezynfekcyjne",
+    "opis": "Rękawice zmieniane kilkanaście razy dziennie i preparaty do dezynfekcji rąk przy każdym zabiegu. Uczulenie na lateks u personelu bloku jest częste i po rozpoznaniu wymaga pełnej zmiany procedur, a czasem stanowiska."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy praca na bloku jest inaczej oceniana niż na oddziale?",
+    "odpowiedz": "Tak, i warto to wpisać we wniosku dokładnie. Ekspozycja na ostre narzędzia i obciążenie statyczne są na bloku wyższe, a ubezpieczyciel ocenia zawód po faktycznie wykonywanej pracy, nie po nazwie stanowiska."
+   },
+   {
+    "pytanie": "Uczulenie na lateks — czy to niezdolność do pracy?",
+    "odpowiedz": "Jeśli uniemożliwia pracę przy stole operacyjnym i zostało rozpoznane po zawarciu polisy — tak, przynajmniej w zakresie tej specjalizacji. Schorzenia leczone w ciągu dwóch lat przed umową są wyłączone."
+   }
+  ]
+ },
+ "polozna": {
+  "wstep": "Położna prowadzi poród, którego nie da się przełożyć na inny termin. Dyżur porodowy to praca w gotowości do nagłego wysiłku fizycznego i decyzji w minutach — bez możliwości powiedzenia, że dzisiaj forma jest gorsza.",
+  "dochod": "Kontrakt na sali porodowej, wizyty patronażowe i prywatna praktyka położnicza to trzy różne źródła o różnym rytmie. Wizyty patronażowe finansuje NFZ według stawki za wizytę, więc dochód zależy wprost od liczby odbytych spotkań.",
+  "przerwa": "Kobieta w ciąży pod opieką konkretnej położnej wybrała ją do porodu i do opieki poporodowej. Przerwa oznacza, że opiekę przejmuje ktoś inny, a relacja budowana przez dziewięć miesięcy się kończy. Przy prywatnej praktyce dochodzi utrata poleceń, które w tej dziedzinie są jedynym realnym kanałem pozyskiwania pacjentek.",
+  "ryzyka": [
+   {
+    "tytul": "Uraz przy asyście podczas porodu",
+    "opis": "Podtrzymywanie i przemieszczanie rodzącej, praca w pozycjach wymuszonych, nagły wysiłek. Uszkodzenia odcinka lędźwiowego i stawów barkowych są tu urazami typowymi."
+   },
+   {
+    "tytul": "Ekspozycja na płyny ustrojowe",
+    "opis": "Kontakt z krwią i płynem owodniowym jest przy porodzie stały i obfity. Ochrona przed zakażeniem zawodowym wymaga osobnej klauzuli HIV/WZW, bez niej ryzyko pozostaje wyłączone."
+   },
+   {
+    "tytul": "Skutki dyżurów dwunasto- i dwudziestoczterogodzinnych",
+    "opis": "Poród nie kończy się o godzinie siedemnastej, więc dyżury bywają wydłużane. Chroniczny deficyt snu i przeciążenie układu krążenia to następstwa kumulujące się przez lata."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Prowadzę prywatną praktykę i pracuję na kontrakcie — jak to ująć?",
+    "odpowiedz": "Wykazujesz oba źródła w rozliczeniu rocznym. Prywatna praktyka nie ma żadnego zabezpieczenia z ZUS, więc to właśnie ona jest głównym powodem, żeby liczyć sumę od całości dochodu."
+   },
+   {
+    "pytanie": "Czy wizyty patronażowe wliczają się do dochodu?",
+    "odpowiedz": "Tak, jeśli są rozliczane w ramach działalności. Stawki NFZ za wizytę są udokumentowane w rozliczeniach z płatnikiem, więc nie ma z tym problemu dowodowego."
+   }
+  ]
+ },
+ "ratownik-medyczny": {
+  "wstep": "Ratownik medyczny pracuje w warunkach, których nikt nie przygotował: na jezdni, w rowie, na klatce schodowej bez windy. Nosi pacjenta razem z drugą osobą i sprzętem, po schodach, w każdych warunkach.",
+  "dochod": "Kontrakt z dysponentem zespołów ratownictwa rozlicza się za dyżury dwunastogodzinne, często w kilku podmiotach naraz — w pogotowiu, w transporcie medycznym i przy zabezpieczeniu imprez. Wszystkie znikają razem z pierwszym dniem niezdolności.",
+  "przerwa": "Zespół ratownictwa musi być kompletny, żeby wyjechać, więc dysponent obsadza wolne dyżury natychmiast i na stałe. Przy pracy w kilku miejscach dłuższa nieobecność kończy się utratą wszystkich grafików, a odbudowa oznacza wchodzenie w kolejkę od nowa. Zabezpieczenia imprez masowych, dobrze płatne i sezonowe, przechodzą do innych ratowników na cały sezon.",
+  "ryzyka": [
+   {
+    "tytul": "Uraz kręgosłupa przy transporcie pacjenta",
+    "opis": "Noszenie osoby dorosłej na krześle kardiologicznym po schodach, we dwóch, bez windy. To najczęstsza przyczyna trwałych uszkodzeń kręgosłupa w ratownictwie i główny powód odejść z zawodu przed pięćdziesiątym rokiem życia."
+   },
+   {
+    "tytul": "Wypadek komunikacyjny w akcji",
+    "opis": "Jazda w trybie alarmowym, praca w pasie drogowym przy wypadkach. Ekspozycja jest wielokrotnie wyższa niż u kierowcy cywilnego, a uraz przy zderzeniu w karetce dotyczy zwykle całego zespołu."
+   },
+   {
+    "tytul": "Agresja ze strony pacjenta lub świadków",
+    "opis": "Interwencje u osób pod wpływem substancji i w sytuacjach kryzysowych. Napaść na ratownika jest zjawiskiem udokumentowanym, a jej następstwa fizyczne są objęte jako nieszczęśliwy wypadek."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Pracuję w pogotowiu i zabezpieczam imprezy — czy oba się liczą?",
+    "odpowiedz": "Tak, sumują się w rozliczeniu rocznym. Zabezpieczenia imprez są zwykle rozliczane fakturą, więc wchodzą do dochodu z działalności i podnoszą maksymalną sumę."
+   },
+   {
+    "pytanie": "Czy napaść podczas interwencji jest objęta?",
+    "odpowiedz": "Tak, jako nieszczęśliwy wypadek — zdarzenie nagłe, zewnętrzne i niezależne od Twojej woli. Objęte są następstwa fizyczne; skutki psychiczne pozostają poza zakresem we wszystkich wariantach."
+   }
+  ]
+ },
+ "fizjoterapeuta": {
+  "wstep": "Fizjoterapeuta leczy cudze przeciążenia, obciążając własne. Terapia manualna wymaga siły przenoszonej przez ręce i kręgosłup terapeuty — to zawód, w którym narzędzie pracy i pacjent zużywają się równolegle.",
+  "dochod": "Rozliczenie za pojedynczą wizytę albo za cykl terapeutyczny, prywatnie lub w ramach kontraktu z NFZ. Fizjoterapeuta prowadzący własny gabinet dolicza do tego koszt sprzętu i lokalu, który biegnie niezależnie od liczby pacjentów.",
+  "przerwa": "Cykl fizjoterapii ma sens tylko wtedy, gdy jest ciągły — pacjent po operacji rekonstrukcji więzadła ma protokół z wyznaczonymi tygodniami. Przerwa oznacza, że przejmie go inny terapeuta i zostanie u niego do końca rehabilitacji, czyli przez kolejne pół roku. Przy kontrakcie z NFZ niewykonane świadczenia obniżają rozliczenie z płatnikiem za cały okres.",
+  "ryzyka": [
+   {
+    "tytul": "Uszkodzenie kręgosłupa przy terapii manualnej",
+    "opis": "Mobilizacje i manipulacje wykonuje się z ciężarem własnego ciała przeniesionym na pacjenta, w pochyleniu i skręcie. Dyskopatia lędźwiowa u fizjoterapeutów jest chorobą zawodową w praktyce, choć nie zawsze w orzeczeniu."
+   },
+   {
+    "tytul": "Choroba zwyrodnieniowa stawów rąk i nadgarstków",
+    "opis": "Ucisk kciukiem i nasadą dłoni przy technikach tkanek miękkich, kilkanaście razy dziennie przez lata. Zmiany w stawie nadgarstkowo-śródręcznym kciuka są tu typowe i nieodwracalne."
+   },
+   {
+    "tytul": "Przeciążenie obręczy barkowej",
+    "opis": "Praca z uniesionymi ramionami przy pacjencie na leżance, przy jednoczesnym oporze. Uszkodzenie stożka rotatorów wymaga zabiegu i pół roku bez terapii manualnej."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Ręce i kręgosłup to całe moje narzędzie — jaką sumę wybrać?",
+    "odpowiedz": "Przy zawodach, w których niezdolność częściowa oznacza w praktyce koniec pracy, warto rozważyć wyższą sumę trwałej niezdolności. Powyżej miliona złotych uruchamia się rozszerzona ankieta, ale to formalność, a nie przeszkoda."
+   },
+   {
+    "pytanie": "Mam kontrakt z NFZ i pacjentów prywatnych — jak liczyć?",
+    "odpowiedz": "Sumujesz oba źródła z rozliczenia rocznego. Przy działalności gospodarczej limit wynosi 80% łącznego dochodu, niezależnie od tego, skąd pochodzi jego większa część."
+   }
+  ]
+ },
+ "logopeda": {
+  "wstep": "Logopeda pracuje własnym głosem i słuchem jednocześnie: demonstruje artykulację i wychwytuje w wypowiedzi pacjenta różnice, których nie słychać bez wprawy. Utrata któregokolwiek z tych dwóch narzędzi kończy pracę.",
+  "dochod": "Terapia rozliczana jest za pojedyncze zajęcia, prowadzone zwykle raz albo dwa razy w tygodniu przez wiele miesięcy. To daje przewidywalny kalendarz i zero bufora — brak zajęć oznacza brak przychodu w tym samym tygodniu.",
+  "przerwa": "Terapia logopedyczna u dziecka jest procesem, w którym przerwa dłuższa niż kilka tygodni cofa efekty. Rodzic znajdzie innego specjalistę, bo opóźnienie w terapii ma konsekwencje rozwojowe i nikt nie będzie czekał. Przy własnym gabinecie biegnie czynsz, a przy współpracy z poradnią — grafik przechodzi na innego terapeutę.",
+  "ryzyka": [
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Demonstracja artykulacji wymaga przesadnej, wyraźnej emisji przez wiele godzin dziennie. Guzki fałdów głosowych i niedomykalność są u logopedów następstwem samej metody pracy, a nie infekcji."
+   },
+   {
+    "tytul": "Ubytek słuchu",
+    "opis": "Diagnoza logopedyczna opiera się na wychwyceniu drobnych różnic w realizacji głosek. Niedosłuch w zakresie wysokich częstotliwości uniemożliwia różnicowanie szeregów syczącego i szumiącego — czyli podstawową czynność zawodową."
+   },
+   {
+    "tytul": "Przewlekłe infekcje dróg oddechowych",
+    "opis": "Praca twarzą w twarz z dzieckiem, w bliskiej odległości, przez cały dzień. Nawracające infekcje przekładają się bezpośrednio na stan strun głosowych i przedłużają każdą przerwę."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy niedosłuch będzie uznany za niezdolność w moim zawodzie?",
+    "odpowiedz": "Ubezpieczyciel ocenia zdolność do wykonywania konkretnego zawodu. Przy logopedii różnicowanie słuchowe jest czynnością podstawową, więc jego utrata jest niezdolnością, choć w innym zawodzie by nią nie była."
+   },
+   {
+    "pytanie": "Pracuję w poradni i mam własny gabinet — jaki mam limit?",
+    "odpowiedz": "Liczy się to, skąd pochodzi większa część rocznego przychodu. Etat w poradni oznacza 65%, przewaga własnego gabinetu — 80%. Oba źródła wykazujesz łącznie, niezależnie od proporcji."
+   }
+  ]
+ },
+ "dietetyk": {
+  "wstep": "Dietetyk prowadzi pacjenta przez proces rozłożony na miesiące, w którym regularność kontroli jest częścią metody. To praca oparta na relacji i na danych, których nie przekaże się innemu specjaliście bez utraty ciągłości.",
+  "dochod": "Konsultacje pojedyncze, pakiety wieloetapowe i współprace ze szkołami czy klubami sportowymi. Pakiety opłacone z góry są zobowiązaniem do przeprowadzenia wszystkich kontroli — przy przerwie trzeba je zwrócić albo odpracować.",
+  "przerwa": "Pacjent w trakcie redukcji albo leczenia żywieniowego ma wyznaczone kontrole co dwa lub trzy tygodnie. Opuszczenie dwóch z rzędu zwykle kończy współpracę, bo efekt bez nadzoru się cofa i pacjent traci motywację. Przy współpracy z klubem sportowym harmonogram jest związany z cyklem startowym, którego nie da się przesunąć.",
+  "ryzyka": [
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Osiem konsultacji dziennie po pięćdziesiąt minut rozmowy, często online z podniesionym głosem. Chrypka utrzymująca się tygodniami uniemożliwia prowadzenie wizyt, a leczenie wymaga odciążenia głosu — czyli przerwy w pracy."
+   },
+   {
+    "tytul": "Zespoły przeciążeniowe od pracy przy komputerze",
+    "opis": "Układanie jadłospisów i analiza dzienniczków żywieniowych zajmuje więcej czasu niż same konsultacje. Neuropatia nadgarstka wyklucza z tej części pracy na tygodnie."
+   },
+   {
+    "tytul": "Skutki pracy w pozycji siedzącej",
+    "opis": "Konsultacje prowadzone jedna po drugiej, bez przerwy na ruch, przez cały dzień. Zespoły bólowe odcinka lędźwiowego i niewydolność żylna narastają latami."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Sprzedaję pakiety opłacone z góry — jak to wpływa na sumę?",
+    "odpowiedz": "Na wyliczenie sumy nie wpływa, bo liczy się dochód z rozliczenia rocznego. Wpływa natomiast na realną stratę: przy przerwie dochodzi zwrot za niezrealizowane kontrole, czego sama utrata przychodu nie obejmuje."
+   },
+   {
+    "pytanie": "Prowadzę konsultacje wyłącznie online — czy to zmienia ochronę?",
+    "odpowiedz": "Nie, o ile pracujesz z Polski. Forma kontaktu z pacjentem nie zmienia oceny ryzyka; zmienia ją dłuższy pobyt za granicą, który wymaga zgłoszenia."
+   }
+  ]
+ },
+ "psycholog": {
+  "wstep": "Psycholog prowadzący gabinet jest jedyną osobą, z którą pacjent zbudował relację terapeutyczną. Ta relacja nie przenosi się na zastępstwo — przerwa w terapii bywa jej zakończeniem, a nie zawieszeniem.",
+  "dochod": "Sesje rozliczane pojedynczo, opinie i diagnozy psychologiczne wyceniane osobno, do tego kontrakty z firmami na opiekę psychologiczną dla pracowników. Wszystkie wymagają osobistej obecności psychologa w wyznaczonym czasie.",
+  "przerwa": "Proces terapeutyczny przerwany na dwa miesiące zwykle nie wraca do punktu, w którym się zatrzymał — część pacjentów znajdzie innego terapeutę, część zrezygnuje z terapii w ogóle. Opinie sądowe i diagnozy mają terminy wyznaczone przez sąd albo przez procedurę orzeczniczą i przechodzą do innego biegłego. Odbudowa pełnego grafiku zajmuje kwartały, bo nowi pacjenci przychodzą z polecenia.",
+  "ryzyka": [
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Siedem sesji dziennie po pięćdziesiąt minut rozmowy, przy stałym natężeniu uwagi. Przewlekłe zapalenie krtani i niedomykalność fałdów głosowych są w tym zawodzie następstwem obciążenia."
+   },
+   {
+    "tytul": "Obciążenie wtórne materiałem pacjentów",
+    "opis": "Prowadzenie kilkuset godzin terapii rocznie oznacza stałe zanurzenie w cudzym cierpieniu. Trzeba powiedzieć wprost: następstwa tego obciążenia mieszczą się w kategorii chorób psychicznych, wyłączonej z ochrony we wszystkich wariantach."
+   },
+   {
+    "tytul": "Skutki wielogodzinnej pracy w fotelu",
+    "opis": "Pozycja siedząca utrzymywana przez osiem godzin, bez możliwości zmiany podczas sesji. Zespoły bólowe lędźwiowe i niewydolność żylna wyłączają z pracy przy zaostrzeniu."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy skutki obciążenia psychicznego są objęte?",
+    "odpowiedz": "Nie. Choroby psychiczne i wypalenie zawodowe jako samodzielna diagnoza są wyłączone we wszystkich wariantach. Objęte są wyłącznie następstwa somatyczne, jeśli mają odrębne rozpoznanie."
+   },
+   {
+    "pytanie": "Wydaję opinie sądowe — czy to część dochodu z działalności?",
+    "odpowiedz": "Tak, jeśli rozliczasz je w ramach działalności. Wynagrodzenie biegłego wypłacane jest po zakończeniu sprawy, więc przy wykazywaniu dochodu warto pokazać pełny rok, a nie bieżące wpływy."
+   }
+  ]
+ },
+ "optometrysta": {
+  "wstep": "Optometrysta bada wzrok, więc jego własny wzrok jest jednocześnie narzędziem i przedmiotem tej samej wiedzy. Badanie w lampie szczelinowej i dobór korekcji wymagają widzenia obuocznego i pełnej ostrości.",
+  "dochod": "Rozliczenie za badanie albo prowizja od sprzedaży w salonie optycznym. Przy własnym salonie dochodzi marża na oprawach i soczewkach, ale i koszt sprzętu diagnostycznego, którego wartość liczy się w setkach tysięcy.",
+  "przerwa": "Salon optyczny bez optometrysty może sprzedawać oprawy, ale nie wykona badania — a badanie jest wejściem do całej sprzedaży. Klient, który nie mógł się umówić, pójdzie do sąsiedniego salonu i tam kupi także okulary. Przy własnej działalności biegną rata za autorefraktometr i lampę oraz czynsz w lokalizacji handlowej.",
+  "ryzyka": [
+   {
+    "tytul": "Pogorszenie własnego widzenia obuocznego",
+    "opis": "Badanie w lampie szczelinowej i oftalmoskopia wymagają sprawnego widzenia stereoskopowego. Zaćma, zmiany na siatkówce albo utrata widzenia w jednym oku wykluczają z diagnostyki, choć nie z całej pracy w salonie."
+   },
+   {
+    "tytul": "Zespoły przeciążeniowe odcinka szyjnego",
+    "opis": "Praca przy lampie szczelinowej wymusza pozycję z głową w podpórce i nieruchomym tułowiem, wielokrotnie w ciągu dnia. Zmiany zwyrodnieniowe szyjne rozwijają się wcześnie."
+   },
+   {
+    "tytul": "Przewlekła ekspozycja na infekcje oczu",
+    "opis": "Badanie w bezpośrednim kontakcie z pacjentem, w tym z zapaleniami spojówek o etiologii zakaźnej. Nawracające infekcje własne wykluczają z pracy do czasu wyleczenia ze względów sanitarnych."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy pogorszenie mojego wzroku będzie uznane za niezdolność?",
+    "odpowiedz": "Przy tym zawodzie widzenie obuoczne jest warunkiem wykonywania badań, więc jego utrata jest niezdolnością do wykonywania zawodu. Warto opisać we wniosku, jaka część pracy to diagnostyka, a jaka sprzedaż."
+   },
+   {
+    "pytanie": "Mam własny salon i zatrudniam pracowników — jak liczyć sumę?",
+    "odpowiedz": "Jako działalność z pracownikami. Wniosek zapyta o Twój wkład w przychód — salon, który sprzedaje oprawy bez Ciebie, zarabia dalej, ale bez badań ta sprzedaż spada, i to trzeba w opisie uwzględnić."
+   }
+  ]
+ },
+ "higienistka-stomatologiczna": {
+  "wstep": "Higienistka stomatologiczna wykonuje skaling, piaskowanie i lakierowanie — zabiegi, które w gabinecie są odrębnym źródłem przychodu, a nie dodatkiem do wizyty u lekarza. Jej nieobecność wycina z grafiku całą tę kategorię.",
+  "dochod": "Rozliczenie za zabieg albo prowizja od wykonanych procedur higienizacyjnych. Wizyty są krótkie i liczne, więc dochód zależy wprost od liczby godzin przy fotelu, bez żadnego składnika niezależnego od obecności.",
+  "przerwa": "Pacjenci higienizacji przychodzą w cyklu półrocznym i są zapisani z wyprzedzeniem. Miesiąc nieobecności rozbija cały cykl, a pacjent przełożony na później zwykle po prostu nie przychodzi. Gabinet, który nie ma kto obsłużyć higienizacji, przekazuje ją innej osobie i grafik po powrocie trzeba budować od nowa.",
+  "ryzyka": [
+   {
+    "tytul": "Ekspozycja na aerozol podczas skalingu",
+    "opis": "Skaler ultradźwiękowy i piaskarka rozpylają materiał biologiczny przez cały zabieg. Przewlekłe zapalenie zatok i nawracające infekcje dróg oddechowych są w tej roli częstsze niż u lekarza wykonującego zabiegi bezaerozolowe."
+   },
+   {
+    "tytul": "Zespół cieśni nadgarstka od pracy skalerem",
+    "opis": "Trzymanie wibrującej końcówki w stałym chwycie, kilkanaście razy dziennie. Połączenie ucisku i drgań daje neuropatię wcześniej niż sam powtarzalny ruch."
+   },
+   {
+    "tytul": "Uczulenie na środki dezynfekcyjne i lateks",
+    "opis": "Kontakt z preparatami dezynfekcyjnymi i rękawicami przy każdym pacjencie. Wyprysk kontaktowy rąk u personelu stomatologicznego jest częsty i nawraca przy każdym powrocie do pełnej ekspozycji."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Pracuję na kontrakcie z gabinetem — jaki mam limit?",
+    "odpowiedz": "Rozliczenie fakturą z własnej działalności oznacza limit 80%. Umowa zlecenie z gabinetem obniża go do 65%, więc warto sprawdzić faktyczną podstawę współpracy przed złożeniem wniosku."
+   },
+   {
+    "pytanie": "Czy ekspozycja na aerozol to podstawa do klauzuli HIV/WZW?",
+    "odpowiedz": "Klauzula dotyczy zakażenia zawodowego niezależnie od drogi ekspozycji. Przy pracy z aerozolem i ostrymi narzędziami warto o nią zapytać — bez niej ryzyko zakażenia jest wyłączone."
+   }
+  ]
+ },
+ "technik-rtg": {
+  "wstep": "Technik radiologii pracuje przy źródle promieniowania jonizującego i podlega z tego tytułu kontroli dawki. To zawód, w którym przekroczenie limitu dawki oznacza odsunięcie od pracy niezależnie od samopoczucia.",
+  "dochod": "Kontrakt z pracownią diagnostyczną rozliczany za dyżury, często w kilku placówkach naraz, plus badania wykonywane w prywatnych centrach obrazowania. Dodatki za pracę w warunkach szkodliwych są istotną częścią wynagrodzenia.",
+  "przerwa": "Pracownia diagnostyczna musi mieć obsadę technika, żeby wykonywać badania, więc wolne dyżury obsadza się natychmiast. Przy pracy w kilku miejscach jedna choroba wycina wszystkie równocześnie. Powrót wymaga też aktualnych badań okresowych, które przy pracy w narażeniu na promieniowanie są bardziej szczegółowe niż standardowe.",
+  "ryzyka": [
+   {
+    "tytul": "Skutki narażenia na promieniowanie jonizujące",
+    "opis": "Dawka kumuluje się przez całą karierę i jest rejestrowana w dozymetrii osobistej. Przekroczenie limitu albo rozpoznanie choroby powiązanej z narażeniem oznacza odsunięcie od pracy w warunkach ekspozycji, czyli od zawodu."
+   },
+   {
+    "tytul": "Uraz przy pozycjonowaniu pacjenta",
+    "opis": "Przemieszczanie pacjentów niesamodzielnych na stół diagnostyczny, wielokrotnie na dyżurze. Uszkodzenia kręgosłupa lędźwiowego są tu tak samo częste jak na oddziale."
+   },
+   {
+    "tytul": "Zmiany w soczewce oka",
+    "opis": "Narażenie na rozproszone promieniowanie podczas badań przy łóżku i w radiologii zabiegowej. Zaćma popromienna jest udokumentowanym skutkiem ekspozycji zawodowej i rozwija się z wieloletnim opóźnieniem."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy praca w narażeniu na promieniowanie wyklucza mnie z polisy?",
+    "odpowiedz": "Nie wyklucza, ale musi być zgłoszona. Zawody z narażeniem na czynniki fizyczne są oceniane osobno i zatajenie charakteru pracy jest podstawą do odmowy wypłaty przy szkodzie z nim związanej."
+   },
+   {
+    "pytanie": "Dodatki za warunki szkodliwe — czy wchodzą do podstawy?",
+    "odpowiedz": "Tak, jeśli są udokumentowane. Przy pracy w narażeniu stanowią istotną część dochodu i ich pominięcie zaniża sumę ubezpieczenia poniżej realnej straty."
+   }
+  ]
+ },
+ "technik-elektroradiolog": {
+  "wstep": "Technik elektroradiolog obsługuje tomograf, rezonans i aparaturę do badań elektrofizjologicznych. Praca łączy narażenie fizyczne z odpowiedzialnością za jakość badania, po którym lekarz stawia rozpoznanie.",
+  "dochod": "Dyżury w pracowniach tomografii i rezonansu, często w kilku ośrodkach, plus badania elektrofizjologiczne rozliczane osobno. Stawki są wyższe niż w radiologii klasycznej ze względu na wymagane uprawnienia do obsługi konkretnej aparatury.",
+  "przerwa": "Pracownia rezonansu pracuje w systemie ciągłym, z badaniami zapisanymi na miesiące do przodu. Brak technika oznacza odwołanie badań i przesunięcie kolejki, co ośrodek rozwiązuje obsadą stałą, a nie zastępstwem. Uprawnienia do obsługi konkretnego aparatu bywają związane ze szkoleniem u producenta, którego powtórzenie po dłuższej przerwie jest kosztowne.",
+  "ryzyka": [
+   {
+    "tytul": "Skutki pracy w silnym polu magnetycznym",
+    "opis": "Obsługa rezonansu oznacza codzienną obecność w polu statycznym o dużym natężeniu. Skutki długotrwałej ekspozycji są przedmiotem badań, a przeciwwskazania zdrowotne do pracy w takim polu — na przykład implanty — pojawiają się z wiekiem."
+   },
+   {
+    "tytul": "Narażenie na promieniowanie przy tomografii",
+    "opis": "Dawka kumuluje się przez lata i podlega rejestracji dozymetrycznej. Rozpoznanie choroby powiązanej z ekspozycją kończy pracę w warunkach narażenia."
+   },
+   {
+    "tytul": "Uraz przy transporcie pacjenta na stół badawczy",
+    "opis": "Pacjenci nieprzytomni i niesamodzielni przenoszeni na stół tomografu albo rezonansu. Przeciążenie odcinka lędźwiowego jest tu urazem typowym i nawracającym."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Mam uprawnienia na konkretną aparaturę — czy to warto wpisać?",
+    "odpowiedz": "Warto, bo pokazuje, że utrata możliwości pracy z tą aparaturą oznacza spadek dochodu, a nie tylko zmianę stanowiska. Orzeczenie dotyczy zdolności do pracy w wyuczonej specjalności, a nie do jakiejkolwiek pracy w ochronie zdrowia."
+   },
+   {
+    "pytanie": "Pracuję w dwóch ośrodkach — jak wykazać dochód?",
+    "odpowiedz": "Sumujesz oba kontrakty w rozliczeniu rocznym. Przy pracy w kilku placówkach polisa ma szczególny sens: jedno zdarzenie wycina wszystkie źródła, a zasiłek liczy się od jednej podstawy."
+   }
+  ]
+ },
+ "terapeuta-zajeciowy": {
+  "wstep": "Terapeuta zajęciowy pracuje z osobami po udarach, urazach i z niepełnosprawnościami, prowadząc je przez ćwiczenia wymagające asysty fizycznej. Jego własna sprawność jest warunkiem bezpieczeństwa pacjenta, a nie tylko komfortu pracy.",
+  "dochod": "Zatrudnienie w placówce, warsztatach terapii zajęciowej albo w domu pomocy, coraz częściej na kontrakcie. Do tego dochodzą zajęcia prowadzone prywatnie, wyżej płatne i pozbawione jakiegokolwiek zabezpieczenia.",
+  "przerwa": "Terapia zajęciowa u pacjenta po udarze ma protokół z wyznaczonymi tygodniami i traci skuteczność przy przerwie. Placówka obsadza stanowisko, a pacjenci prywatni przechodzą do innego terapeuty, bo proces nie może stać. Powrót do pełnego grafiku zajmuje miesiące, przy czym nowi pacjenci trafiają z polecenia, które buduje się bieżącą pracą.",
+  "ryzyka": [
+   {
+    "tytul": "Uraz przy asyście i transferze pacjenta",
+    "opis": "Podtrzymywanie osoby z niedowładem przy przesiadaniu i chodzeniu. Uraz kręgosłupa lędźwiowego przy nagłym obciążeniu, gdy pacjent traci równowagę, jest tu zdarzeniem typowym."
+   },
+   {
+    "tytul": "Uraz przy pracy z narzędziami warsztatowymi",
+    "opis": "Zajęcia manualne obejmują pracę z narzędziami stolarskimi, ceramiką i sprzętem, którego pacjenci używają pod nadzorem. Skaleczenia i urazy dłoni zdarzają się terapeucie równie często jak podopiecznym."
+   },
+   {
+    "tytul": "Przewlekłe przeciążenie stawów kończyn górnych",
+    "opis": "Demonstracja ćwiczeń i asysta przy ruchu, wielokrotnie w ciągu dnia. Zapalenie ścięgien i konflikt podbarkowy narastają latami i wyłączają z pracy na miesiące."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Pracuję w placówce i prywatnie — czy oba dochody się liczą?",
+    "odpowiedz": "Tak, sumują się. Zasiłek z etatu pokryje część dochodu z placówki, ale zajęcia prywatne zostają bez zabezpieczenia — i to one są zwykle właściwym powodem do ubezpieczenia."
+   },
+   {
+    "pytanie": "Czy uraz przy podtrzymywaniu pacjenta to wypadek?",
+    "odpowiedz": "Nagłe uszkodzenie przy utracie równowagi przez pacjenta — tak, to zdarzenie nagłe i zewnętrzne. Zmiany przeciążeniowe narastające latami obejmuje natomiast ryzyko niezdolności do pracy, a nie ryzyko NW."
+   }
+  ]
  }
 }
