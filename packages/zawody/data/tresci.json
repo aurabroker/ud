@@ -1564,5 +1564,701 @@
     "odpowiedz": "Objęta jest, jeśli zostanie rozpoznana po zawarciu polisy i spowoduje orzeczoną niezdolność do wykonywania zawodu. Jeśli objawy ze strony układu oddechowego były leczone w ciągu dwóch lat poprzedzających umowę, ubezpieczyciel wyłączy je z ochrony."
    }
   ]
+ },
+ "architekt": {
+  "wstep": "Architekt podpisuje projekt własnym numerem uprawnień i odpowiada za niego przez cały cykl budowy. Ta odpowiedzialność nie kończy się wraz ze złożeniem dokumentacji — nadzór autorski trwa do odbioru, czyli latami po ostatniej fakturze za projekt.",
+  "dochod": "Honorarium za projekt wypłacane jest w transzach powiązanych z etapami: koncepcja, projekt budowlany, wykonawczy. Przerwa w połowie etapu zatrzymuje transzę, a nie tylko opóźnia ją — inwestor płaci za dokumentację odebraną, nie za rozpoczętą.",
+  "przerwa": "Postępowanie o pozwolenie na budowę ma terminy, w których urząd wzywa do uzupełnień. Architekt nieobecny przez dwa miesiące naraża inwestora na umorzenie postępowania i zaczynanie od nowa. Przy większych zleceniach oznacza to kary umowne, a przy dłuższej przerwie — przekazanie projektu innej pracowni, która zaczyna od własnej koncepcji.",
+  "ryzyka": [
+   {
+    "tytul": "Pogorszenie widzenia przestrzennego",
+    "opis": "Praca z modelem trójwymiarowym i rysunkiem technicznym wymaga widzenia obuocznego. Utrata stereopsji po urazie jednego oka odbiera zdolność oceny brył i przekrojów, mimo zachowanej ostrości widzenia."
+   },
+   {
+    "tytul": "Upadek podczas nadzoru autorskiego",
+    "opis": "Wizyta na budowie oznacza rusztowania, stropy bez balustrad i wykopy. Architekt bywa tam rzadziej niż wykonawca, a to właśnie brak rutyny odpowiada za sporą część upadków."
+   },
+   {
+    "tytul": "Zespół cieśni nadgarstka od pracy z CAD",
+    "opis": "Kilkanaście godzin dziennie z myszą i tabletem w okresach oddawania dokumentacji. Neuropatia nerwu pośrodkowego wyklucza z rysowania na sześć do ośmiu tygodni po zabiegu."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy nadzór autorski nad trwającą budową jest problemem przy wypłacie?",
+    "odpowiedz": "Nie. Ubezpieczyciel wypłaca świadczenie za niezdolność do pracy i nie bada, jakie zobowiązania umowne zostały niewykonane. Odpowiedzialność wobec inwestora pokrywa obowiązkowe OC projektanta, nie ta polisa."
+   },
+   {
+    "pytanie": "Prowadzę pracownię z dwoma architektami — jak liczyć sumę?",
+    "odpowiedz": "Jako działalność z pracownikami. Wniosek zapyta o Twój wkład w przychód pracowni, bo projekty, które mogą powstać bez Ciebie, oznaczają mniejszą realną stratę."
+   }
+  ]
+ },
+ "architekt-wnetrz": {
+  "wstep": "Architekt wnętrz zarabia na tym, że jest na miejscu: mierzy, dobiera, pilnuje wykonawców i odbiera prace. Przy realizacji pod klucz jego nieobecność zatrzymuje kilkunastu podwykonawców naraz.",
+  "dochod": "Honorarium dzieli się na projekt i nadzór, a przy realizacjach dochodzi prowizja od wartości zamówionych materiałów i mebli. Ta ostatnia część bywa największa i jest wprost zależna od tego, kto podpisuje zamówienia.",
+  "przerwa": "Realizacja wnętrza ma harmonogram, w którym każda ekipa wchodzi w wyznaczonym tygodniu. Wypadnięcie architekta na miesiąc rozsypuje ten łańcuch: hydraulik nie wejdzie po elektryku, bo nikt nie odebrał poprzedniego etapu. Inwestor ponosi koszty przestoju i zwykle przejmuje koordynację sam albo zatrudnia kogoś innego, a prowizja od materiałów przechodzi wtedy na tę osobę.",
+  "ryzyka": [
+   {
+    "tytul": "Zaburzenia rozróżniania barw",
+    "opis": "Dobór odcieni tynków, tkanin i fornirów przy zmiennym oświetleniu to codzienna praca. Nabyte zaburzenia widzenia barw, na przykład polekowe, kończą pracę w tym zawodzie skuteczniej niż jakikolwiek uraz kończyny."
+   },
+   {
+    "tytul": "Uraz na budowie w trakcie odbiorów",
+    "opis": "Wnętrze w trakcie prac to nierówne posadzki, kable, otwarte instalacje i sprzęt w ruchu. Upadek i uraz stawu skokowego są tu zdarzeniami powtarzalnymi."
+   },
+   {
+    "tytul": "Przeciążenie kręgosłupa przy pomiarach i próbkach",
+    "opis": "Inwentaryzacja wnętrza wymaga pracy w przysiadzie i na drabinie, a próbki materiałów wozi się w kilkunastokilogramowych walizach. Zespół bólowy lędźwiowy wyłącza z pracy w terenie na tygodnie."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Prowizja od materiałów to duża część mojego dochodu — czy się liczy?",
+    "odpowiedz": "Tak, o ile jest udokumentowana i opodatkowana. Warto ją wykazać, bo przy realizacjach pod klucz bywa większa niż honorarium za sam projekt, a to od łącznego dochodu liczy się suma."
+   },
+   {
+    "pytanie": "Czy wizyty na budowie zmieniają ocenę ryzyka?",
+    "odpowiedz": "Zmieniają, i warto je opisać we wniosku. Praca wyłącznie projektowa i praca z regularnym nadzorem na placu budowy mają inny profil, a zatajenie tego drugiego bywa podstawą do sporu przy szkodzie."
+   }
+  ]
+ },
+ "inzynier-budowlany": {
+  "wstep": "Inżynier budownictwa z uprawnieniami wykonawczymi wpisuje się do dziennika budowy imiennie. Bez tego wpisu prace nie mogą być prowadzone legalnie — jego nieobecność zatrzymuje plac budowy, a nie tylko jego własną pracę.",
+  "dochod": "Wynagrodzenie inżyniera to zwykle stała kwota kontraktowa za pełnienie funkcji na konkretnej budowie, czasem na kilku równolegle. Umowy są związane z harmonogramem inwestycji, więc kończą się razem z nią i nie przechodzą na okres choroby.",
+  "przerwa": "Zawieszenie funkcji kierownika budowy wymaga zgłoszenia do nadzoru budowlanego i wskazania następcy. Ten następca przejmuje odpowiedzialność za cały obiekt i rzadko oddaje ją z powrotem w połowie inwestycji. Przy pełnieniu funkcji na trzech budowach naraz jedna choroba oznacza utratę wszystkich trzech kontraktów.",
+  "ryzyka": [
+   {
+    "tytul": "Upadek z wysokości",
+    "opis": "Codzienne wejścia na stropy, rusztowania i konstrukcje w trakcie montażu. To najczęstsza przyczyna ciężkich urazów w budownictwie, a złamanie kręgosłupa albo miednicy oznacza rekonwalescencję liczoną w kwartałach."
+   },
+   {
+    "tytul": "Uraz od spadającego elementu",
+    "opis": "Praca pod pracującym dźwigiem i przy transporcie pionowym. Kask chroni przed częścią następstw, ale nie przed urazem barku, obojczyka czy kończyny."
+   },
+   {
+    "tytul": "Ubytek słuchu od hałasu placu budowy",
+    "opis": "Młoty, piły, wiertnice, agregaty — ekspozycja przez lata, przy niepełnym stosowaniu ochronników. Niedosłuch narasta bezobjawowo i ujawnia się przy badaniach okresowych."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Pełnię funkcję na kilku budowach — jak wykazać dochód?",
+    "odpowiedz": "Sumujesz wynagrodzenia ze wszystkich umów. To jedna z sytuacji, w których polisa ma największy sens: jedna choroba wycina wszystkie kontrakty naraz, a ZUS liczy zasiłek od jednej podstawy."
+   },
+   {
+    "pytanie": "Czy praca na wysokości wyklucza mnie z ubezpieczenia?",
+    "odpowiedz": "Nie wyklucza, ale podnosi ocenę ryzyka. Trzeba ją zgłosić we wniosku — zatajenie charakteru pracy jest podstawą do odmowy wypłaty przy szkodzie związanej właśnie z tym ryzykiem."
+   }
+  ]
+ },
+ "inspektor-nadzoru": {
+  "wstep": "Inspektor nadzoru inwestorskiego reprezentuje inwestora wobec wykonawcy i podpisuje protokoły odbioru. Bez jego podpisu nie ma odbioru, a bez odbioru nie ma płatności dla wykonawcy — jego nieobecność wstrzymuje przepływ pieniędzy na całej inwestycji.",
+  "dochod": "Wynagrodzenie ustalane jest ryczałtowo za pełnienie nadzoru nad konkretną inwestycją, wypłacane miesięcznie albo po etapach. Inspektor prowadzi zwykle kilka inwestycji równolegle, co daje wyższy dochód i zarazem większą jednorazową stratę.",
+  "przerwa": "Odbiory robót zanikających — zbrojenia, izolacji, instalacji przed zakryciem — mają termin wynikający z postępu prac. Niedokonany odbiór oznacza konieczność odkrycia elementu albo badania niszczącego, a koszt tego obciąża inwestora. Po dwóch takich sytuacjach inwestor zmienia inspektora, niezależnie od przyczyny nieobecności.",
+  "ryzyka": [
+   {
+    "tytul": "Uraz podczas odbioru robót zanikających",
+    "opis": "Wejście na zbrojenie stropu, do wykopu albo na dach przed wykonaniem zabezpieczeń. Inspektor bywa tam w najmniej bezpiecznym momencie, bo właśnie wtedy element jest jeszcze odkryty."
+   },
+   {
+    "tytul": "Ekspozycja na pył krzemionkowy i azbest",
+    "opis": "Nadzór nad rozbiórkami i remontami starych obiektów. Pylica i choroby opłucnej rozwijają się dekadami po ekspozycji, a rozpoznane kończą pracę w terenie."
+   },
+   {
+    "tytul": "Zespoły bólowe kręgosłupa od pracy w terenie",
+    "opis": "Kilka inwestycji dziennie oznacza godziny w samochodzie przeplatane wchodzeniem po rusztowaniach. Ta kombinacja obciąża kręgosłup mocniej niż każda z tych czynności osobno."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Nadzoruję cztery inwestycje naraz — czy to zwiększa sumę?",
+    "odpowiedz": "Zwiększa, bo suma liczy się od łącznego udokumentowanego dochodu ze wszystkich umów. Warto wykazać wszystkie, bo choroba wyłącza Cię ze wszystkich jednocześnie."
+   },
+   {
+    "pytanie": "Czy ekspozycja na azbest przy rozbiórkach jest objęta?",
+    "odpowiedz": "Objęta jest niezdolność do pracy wynikająca ze schorzenia, o ile nie było ono leczone w ciągu 24 miesięcy przed zawarciem umowy. Przy chorobach o wieloletnim okresie utajenia liczy się moment rozpoznania, nie moment ekspozycji."
+   }
+  ]
+ },
+ "rzeczoznawca-budowlany": {
+  "wstep": "Rzeczoznawca budowlany wydaje opinie, na których opierają się sądy, ubezpieczyciele i organy nadzoru. Opinia jest imienna i wymaga oględzin — nie da się jej sporządzić zza biurka ani zlecić komuś innemu.",
+  "dochod": "Honorarium ustala się za opinię albo za ekspertyzę, przy czym opinie sądowe wypłacane są po zakończeniu sprawy. Ekspertyzy prywatne płacą szybciej i lepiej, ale wymagają oględzin, czyli obecności w terenie.",
+  "przerwa": "Sąd wyznaczający biegłego ma termin i po jego upływie powołuje kolejnego. Rzeczoznawca nieobecny przez kwartał wypada z bieżących spraw i z pozycji na liście biegłych, na którą wpisuje się kadencyjnie. Ekspertyzy prywatne, zwykle pilne, przechodzą do konkurencji w ciągu dni.",
+  "ryzyka": [
+   {
+    "tytul": "Uraz podczas oględzin obiektu w złym stanie",
+    "opis": "Ekspertyza dotyczy zwykle budynku uszkodzonego: po pożarze, zalaniu albo z uszkodzoną konstrukcją. Wejście na taki obiekt jest z definicji wejściem tam, gdzie coś już zawiodło."
+   },
+   {
+    "tytul": "Ekspozycja na pył i produkty spalania",
+    "opis": "Oględziny po pożarze oznaczają kontakt z sadzą i produktami rozkładu termicznego tworzyw. Skutki oddechowe kumulują się przy wielokrotnej ekspozycji."
+   },
+   {
+    "tytul": "Pogorszenie ostrości widzenia",
+    "opis": "Ocena rysunków wykonawczych, dokumentacji fotograficznej i wyników badań materiałowych. Zaburzenia widzenia bliskiego utrudniają sporządzanie opinii w terminie wyznaczonym przez sąd."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Opinie sądowe płacą po latach — co przyjąć za dochód?",
+    "odpowiedz": "Rozliczenie roczne, nie bieżące wpływy. Przy dochodzie tak mocno odroczonym warto przedstawić dwa lata, żeby suma nie została wyliczona z przypadkowo pustego okresu."
+   },
+   {
+    "pytanie": "Czy oględziny obiektów po pożarze zmieniają wycenę?",
+    "odpowiedz": "Zmieniają ocenę ryzyka i warto to opisać we wniosku. Praca wyłącznie kameralna i praca z regularnymi oględzinami obiektów uszkodzonych to dwa różne profile."
+   }
+  ]
+ },
+ "kosztorysant": {
+  "wstep": "Kosztorysant przygotowuje wycenę, na podstawie której firma składa ofertę przetargową. Termin składania ofert jest nieprzekraczalny — kosztorys niegotowy na czas oznacza, że firma nie startuje w przetargu w ogóle.",
+  "dochod": "Rozliczenie idzie za kosztorys albo za obsługę przetargową, czasem z premią od wygranego postępowania. Praca jest skoncentrowana w kilkudniowych szczytach przed terminami składania ofert.",
+  "przerwa": "Przetargi publiczne mają terminy ogłoszone z góry i nie przesuwają się. Kosztorysant, który wypada na tydzień przed składaniem, kosztuje wykonawcę udział w postępowaniu wartym często kilka milionów. Po jednym takim zdarzeniu firma zatrudnia kogoś na stałe albo przenosi obsługę do biura, które ma zespół.",
+  "ryzyka": [
+   {
+    "tytul": "Zespoły przeciążeniowe kończyny górnej",
+    "opis": "Praca wyłącznie przy klawiaturze i myszy, po kilkanaście godzin w szczytach przetargowych. Neuropatia nadgarstka i zapalenie nadkłykcia wykluczają z pracy dokładnie wtedy, gdy jest jej najwięcej."
+   },
+   {
+    "tytul": "Pogorszenie ostrości widzenia",
+    "opis": "Odczyt przedmiarów z rysunków wykonawczych i weryfikacja pozycji katalogowych. Zaburzenia akomodacji przy tym obciążeniu ujawniają się wcześnie i podnoszą ryzyko błędu w wycenie."
+   },
+   {
+    "tytul": "Choroby układu krążenia od pracy w szczytach",
+    "opis": "Kilka dób ciągłej pracy przed terminem, powtarzane co kilka tygodni. Ten wzorzec obciążenia — długie okresy spokoju przerywane skrajnym natężeniem — jest szczególnie niekorzystny dla układu krążenia."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Pracuję nierówno, w szczytach przetargowych — czy to problem?",
+    "odpowiedz": "Nie, bo ubezpieczyciel bierze średnią roczną. Nierówny rozkład pracy w czasie nie ma znaczenia dla wyliczenia sumy, o ile rok jako całość jest udokumentowany."
+   },
+   {
+    "pytanie": "Premia od wygranych przetargów — czy wchodzi do podstawy?",
+    "odpowiedz": "Wchodzi, jeśli jest udokumentowana. Warto ją wykazać, bo przy dużych postępowaniach bywa większa niż wynagrodzenie za samo sporządzenie kosztorysu."
+   }
+  ]
+ },
+ "geodeta": {
+  "wstep": "Geodeta z uprawnieniami podpisuje operat, który trafia do państwowego zasobu geodezyjnego. Bez tego podpisu nie ma podziału działki, nie ma odbioru budynku i nie ma wpisu do księgi wieczystej.",
+  "dochod": "Zlecenia rozlicza się za konkretne opracowanie: mapę do celów projektowych, inwentaryzację powykonawczą, podział nieruchomości. Każde wymaga pomiaru w terenie, więc dochód jest wprost zależny od liczby dni z możliwością wyjścia w pole.",
+  "przerwa": "Inwestor czekający na inwentaryzację powykonawczą nie odbierze budynku i nie dostanie pozwolenia na użytkowanie. Ten koszt jest natychmiastowy i policzalny, więc zleceniodawca zmienia geodetę po pierwszej nieudanej próbie umówienia terminu. Sezon pomiarowy jest w Polsce ograniczony pogodą, co dodatkowo zawęża okno na nadrobienie zaległości.",
+  "ryzyka": [
+   {
+    "tytul": "Uraz przy pracy w terenie",
+    "opis": "Pomiary prowadzi się na budowach, przy drogach, w wykopach i na nierównym gruncie, przy każdej pogodzie. Skręcenia, złamania i potrącenia w pasie drogowym są tu ryzykiem stałym."
+   },
+   {
+    "tytul": "Skutki pracy w warunkach atmosferycznych",
+    "opis": "Sezon pomiarowy oznacza pracę w mrozie i upale, po kilka godzin bez schronienia. Choroby układu oddechowego i zmiany zwyrodnieniowe stawów narastają latami takiej ekspozycji."
+   },
+   {
+    "tytul": "Pogorszenie wzroku przy pracy z instrumentem",
+    "opis": "Celowanie przez lunetę tachimetru i odczyt na dystansie kilkuset metrów. Pogorszenie ostrości widzenia dalekiego obniża dokładność pomiaru poniżej wymaganych tolerancji."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Praca w pasie drogowym — czy podnosi składkę?",
+    "odpowiedz": "Wpływa na ocenę ryzyka i trzeba ją zgłosić. Pomiary drogowe i kolejowe to inny profil niż praca wyłącznie na terenach zamkniętych, a różnicę widać w wycenie."
+   },
+   {
+    "pytanie": "Sezon pomiarowy trwa pół roku — jak wykazać dochód?",
+    "odpowiedz": "Przez rozliczenie roczne. Sezonowość nie obniża sumy, o ile udokumentujesz pełny rok — problem pojawiłby się dopiero przy pokazaniu samych miesięcy szczytu."
+   }
+  ]
+ },
+ "dekarz": {
+  "wstep": "Dekarz pracuje na wysokości przez cały czas pracy, nie okazjonalnie. To zawód o jednym z najwyższych wskaźników ciężkich urazów w budownictwie i jednocześnie taki, w którym powrót do pełnej sprawności po upadku bywa niemożliwy.",
+  "dochod": "Rozliczenie idzie za metr kwadratowy pokrycia albo za całe zlecenie. Sezon trwa od wiosny do jesieni, a zimowa przerwa jest wliczona w kalkulację roczną — dlatego choroba w sezonie kosztuje wielokrotnie więcej niż w styczniu.",
+  "przerwa": "Dach rozebrany i niedokończony to budynek narażony na zalanie. Inwestor nie czeka — sprowadza inną ekipę, która żąda wyższej stawki za dokończenie cudzej pracy, a różnicę potrąca z rozliczenia. Do tego dochodzi rata za rusztowanie i podnośnik, jeśli są własne, oraz utrata miejsca w kolejce zleceń na cały sezon.",
+  "ryzyka": [
+   {
+    "tytul": "Upadek z dachu",
+    "opis": "To ryzyko definiujące ten zawód. Upadek z wysokości powyżej trzech metrów daje złamania wielomiejscowe, urazy kręgosłupa i głowy, a rekonwalescencja trwa kwartały. Część poszkodowanych nie wraca do pracy na wysokości nigdy."
+   },
+   {
+    "tytul": "Ekspozycja na azbest przy rozbiórkach",
+    "opis": "Wymiana starych pokryć oznacza kontakt z płytami cementowo-azbestowymi. Choroby opłucnej rozwijają się dekadami po ekspozycji i są nieodwracalne."
+   },
+   {
+    "tytul": "Przeciążenie stawów kolanowych i barkowych",
+    "opis": "Praca w klęku na pochyłej połaci, z dźwiganiem materiału po drabinie. Zmiany zwyrodnieniowe kolan są u dekarzy niemal regułą po piętnastu latach pracy."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy praca na dachu wyklucza mnie z ubezpieczenia?",
+    "odpowiedz": "Nie wyklucza, ale jest jednym z zawodów o wyższej ocenie ryzyka. Trzeba to zgłosić wprost we wniosku — zatajenie charakteru pracy jest podstawą do odmowy wypłaty przy szkodzie z tym związanej."
+   },
+   {
+    "pytanie": "Pracuję sezonowo, zimą mam przestój — jak liczyć dochód?",
+    "odpowiedz": "Ubezpieczyciel bierze średnią roczną, więc przestój zimowy jest już w niej uwzględniony. Warto natomiast rozważyć wyższą sumę, bo choroba w szczycie sezonu kosztuje wielokrotnie więcej niż średnia sugeruje."
+   }
+  ]
+ },
+ "spawacz": {
+  "wstep": "Spawacz pracuje z łukiem elektrycznym o temperaturze kilku tysięcy stopni i z oparami metali. Uprawnienia spawalnicze wymagają okresowego potwierdzania, a wzrok jest tym, co w tym zawodzie zużywa się najszybciej.",
+  "dochod": "Rozliczenie idzie za metr spoiny, za dniówkę albo za zlecenie, przy czym stawki dla spawaczy z uprawnieniami na konstrukcje odpowiedzialne są znacznie wyższe. Utrata uprawnień oznacza spadek do stawek podstawowych, nawet przy zachowanej sprawności.",
+  "przerwa": "Kontrakt na montaż konstrukcji ma harmonogram i kary za opóźnienie, a spoiny podlegają badaniom nieniszczącym z określonym terminem. Spawacz wypadający w trakcie montażu zostaje zastąpiony w ciągu dni, bo konstrukcja nie może stać rozłożona. Uprawnienia wymagają też ponownego egzaminu, jeśli przerwa w spawaniu przekroczy określony czas.",
+  "ryzyka": [
+   {
+    "tytul": "Uszkodzenie wzroku przez promieniowanie łuku",
+    "opis": "Zapalenie rogówki po ekspozycji na łuk jest ostre i przemijające, ale powtarzane latami prowadzi do zaćmy i trwałego pogorszenia widzenia. To najczęstsza przyczyna zakończenia pracy w tym zawodzie."
+   },
+   {
+    "tytul": "Choroby układu oddechowego od dymów spawalniczych",
+    "opis": "Tlenki metali, w tym manganu i chromu, wdychane przez lata. Przewlekła obturacyjna choroba płuc i pylica spawaczy są dobrze udokumentowane, a rozpoznanie kończy pracę przy spawaniu."
+   },
+   {
+    "tytul": "Oparzenia i uraz od odprysków",
+    "opis": "Rozpryski stopionego metalu i gorące elementy. Oparzenia dłoni i przedramion są rutynowe, ale głębokie oparzenie ścięgna oznacza kilka miesięcy bez pracy i trwałą utratę zakresu ruchu."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy utrata uprawnień spawalniczych to podstawa wypłaty?",
+    "odpowiedz": "Liczy się przyczyna medyczna, a nie sam brak dokumentu. Jeśli badanie okulistyczne wyklucza Cię z potwierdzenia uprawnień, świadczenie się należy; wygaśnięcie uprawnień z powodu samej przerwy w spawaniu — nie."
+   },
+   {
+    "pytanie": "Pracuję w przestrzeniach zamkniętych — czy to zgłaszać?",
+    "odpowiedz": "Koniecznie. Spawanie w zbiornikach i przestrzeniach zamkniętych to wyższe ryzyko niż praca w hali, a wniosek pyta o charakter pracy właśnie po to, żeby wycenić go realnie."
+   }
+  ]
+ },
+ "mechanik": {
+  "wstep": "Mechanik pracuje rękami w przestrzeni, w której nic nie jest ergonomiczne: pod pojazdem, w komorze silnika, z narzędziem pod nietypowym kątem. Sprawność rąk i kręgosłupa to całe jego wyposażenie.",
+  "dochod": "Warsztat rozlicza się za roboczogodzinę według normy naprawczej albo za wykonaną usługę. Przy własnym warsztacie dochodzi marża na częściach, ale jedno i drugie wymaga obecności — mechanik nie zarabia na tym, że warsztat stoi otwarty.",
+  "przerwa": "Klient z unieruchomionym samochodem nie czeka tygodnia na powrót mechanika, tylko odholowuje pojazd gdzie indziej. Przy własnym warsztacie biegną czynsz, leasing podnośnika i diagnostyki oraz wynagrodzenia pracowników, a przychód spada do zera. Stali klienci flotowi, dający najbardziej przewidywalne obłożenie, przechodzą do konkurencji po pierwszym odmówionym terminie.",
+  "ryzyka": [
+   {
+    "tytul": "Uraz zgnieceniowy dłoni",
+    "opis": "Praca kluczem w ciasnej przestrzeni, przy elementach pod naprężeniem. Zmiażdżenie palców i uszkodzenie ścięgien to najczęstsze urazy w warsztacie, a każdy oznacza tygodnie bez pełnego chwytu."
+   },
+   {
+    "tytul": "Choroby skóry i układu oddechowego od substancji technicznych",
+    "opis": "Oleje, smary, rozpuszczalniki i pył z tarcz hamulcowych. Wyprysk kontaktowy rąk u mechaników jest częsty i po rozwinięciu nawraca przy każdym powrocie do pracy bez pełnej ochrony."
+   },
+   {
+    "tytul": "Przeciążenie kręgosłupa w pozycjach wymuszonych",
+    "opis": "Praca w pochyleniu nad komorą silnika i na leżąco pod pojazdem, po kilka godzin. Dyskopatia lędźwiowa jest tu następstwem geometrii pracy, a nie wieku."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Mam warsztat i dwóch pracowników — jak to wpływa na sumę?",
+    "odpowiedz": "Wniosek zapyta o Twój wkład w przychód. Jeśli mechanicy mogą pracować bez Ciebie, warsztat zarabia dalej i suma będzie liczona od tej części dochodu, która realnie znika."
+   },
+   {
+    "pytanie": "Czy wyprysk kontaktowy rąk będzie uznany?",
+    "odpowiedz": "Jeśli powoduje orzeczoną niezdolność do wykonywania zawodu i nie był leczony w ciągu 24 miesięcy przed zawarciem umowy — tak. Przy schorzeniach skóry rozwijających się latami warto ubezpieczyć się przed pierwszą wizytą u dermatologa."
+   }
+  ]
+ },
+ "instalator": {
+  "wstep": "Instalator montuje instalacje, których awaria zalewa budynek albo zatruwa mieszkańców. Praca łączy wysokość, ciasne przestrzenie i media pod ciśnieniem — trzy rzeczy, które rzadko występują razem w innych zawodach.",
+  "dochod": "Rozliczenie za punkt instalacyjny, za metr albo za całe zlecenie. Instalator z uprawnieniami gazowymi albo do pomp ciepła bierze zlecenia niedostępne dla reszty i traci je w całości, jeśli stan zdrowia uniemożliwi przedłużenie uprawnień.",
+  "przerwa": "Instalacja rozgrzebana w budynku w trakcie budowy blokuje kolejne ekipy: nie ma tynków przed zamknięciem instalacji, nie ma posadzek przed próbą ciśnieniową. Generalny wykonawca sprowadza kogoś innego w ciągu dni i obciąża kosztem różnicy. Sezon montażowy na pompy ciepła i kotły jest krótki i skoncentrowany przed zimą — przerwa w tym okresie kosztuje roczny obrót.",
+  "ryzyka": [
+   {
+    "tytul": "Oparzenie i poparzenie parą przy instalacjach grzewczych",
+    "opis": "Praca przy instalacji pod ciśnieniem, w tym przy uruchamianiu i odpowietrzaniu. Rozszczelnienie gorącego obiegu daje oparzenia rozległe, wymagające leczenia szpitalnego."
+   },
+   {
+    "tytul": "Uraz w przestrzeniach ciasnych i na wysokości",
+    "opis": "Instalacje prowadzi się w szachtach, na poddaszach i przy stropach. Upadek z drabiny i uraz przy pracy w wymuszonej pozycji są tu najczęstszymi przyczynami niezdolności."
+   },
+   {
+    "tytul": "Zatrucie tlenkiem węgla i gazami technicznymi",
+    "opis": "Uruchomienia kotłów i praca przy instalacjach gazowych w pomieszczeniach o słabej wentylacji. Ostre zatrucie ma następstwa neurologiczne, które ujawniają się z opóźnieniem."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Mam uprawnienia gazowe — czy to zmienia ocenę ryzyka?",
+    "odpowiedz": "Zmienia, i trzeba je zgłosić. Praca przy instalacjach gazowych jest oceniana inaczej niż montaż wodno-kanalizacyjny, a wniosek pyta o charakter pracy właśnie po to, żeby nie stosować jednej stawki dla całej branży."
+   },
+   {
+    "pytanie": "Sezon montażowy mam jesienią — czy to obniża sumę?",
+    "odpowiedz": "Nie, bo liczy się średnia roczna z udokumentowanego dochodu. Skoncentrowanie przychodu w kilku miesiącach jest natomiast argumentem za wyższą sumą — przerwa w sezonie kosztuje więcej, niż wynika ze średniej."
+   }
+  ]
+ },
+ "fotograf": {
+  "wstep": "Fotograf ślubny ma w kalendarzu daty, których nikt nie przesunie. Odwołanie w dniu ślubu to jedyne zdarzenie w tym zawodzie, po którym reputacja nie odbudowuje się latami — a wystarczy do niego jedna grypa żołądkowa.",
+  "dochod": "Przychód pochodzi ze zleceń rezerwowanych z rocznym wyprzedzeniem, opłacanych zaliczką i resztą po realizacji. Sezon trwa od maja do października i generuje większość rocznego obrotu — zima to montaż, obróbka i cisza.",
+  "przerwa": "Zlecenie ślubne niezrealizowane oznacza zwrot zaliczki i, w większości umów, karę umowną. Gorsze są skutki pośrednie: w tej branży pary wybierają fotografa z polecenia, a jedno odwołane wesele obiega grupy weselne w tydzień. Miesiąc przerwy w sezonie potrafi wyzerować kalendarz na kolejny rok.",
+  "ryzyka": [
+   {
+    "tytul": "Przeciążenie obręczy barkowej i kręgosłupa",
+    "opis": "Dwanaście godzin z aparatem i obiektywem ważącym łącznie kilka kilogramów, zawieszonym asymetrycznie na jednym ramieniu. Konflikt podbarkowy u fotografów reportażowych jest niemal regułą po dekadzie pracy."
+   },
+   {
+    "tytul": "Pogorszenie ostrości widzenia i widzenia barw",
+    "opis": "Ocena ostrości przez wizjer i obróbka kolorystyczna na monitorze. Zaburzenia widzenia barw wykluczają z pracy przy postprodukcji skuteczniej niż jakikolwiek uraz — a to postprodukcja stanowi połowę czasu pracy."
+   },
+   {
+    "tytul": "Uraz podczas pracy w ruchu",
+    "opis": "Reportaż oznacza chodzenie tyłem, wchodzenie na podwyższenia i pracę w tłumie z ciężkim sprzętem. Skręcenia stawu skokowego i upadki są tu zdarzeniami powtarzalnymi."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Mam zaliczki od par na cały przyszły sezon — czy to dochód?",
+    "odpowiedz": "Dochodem jest to, co rozliczone i opodatkowane w danym roku, a nie zaliczki na przyszłe zlecenia. Warto natomiast pamiętać, że przy przerwie realna strata jest wyższa niż brak wpływów, bo dochodzi zwrot zaliczek i kary umowne."
+   },
+   {
+    "pytanie": "Fotografuję też z drona — czy to trzeba zgłaszać?",
+    "odpowiedz": "Tak, bo zmienia profil ryzyka. Praca z bezzałogowcem, zwłaszcza nad wodą albo z wysokich punktów, jest oceniana inaczej niż fotografia studyjna."
+   }
+  ]
+ },
+ "operator-kamery": {
+  "wstep": "Operator kamery dźwiga sprzęt ważący kilkanaście kilogramów i utrzymuje go w ruchu przez cały ujęcie. To praca fizyczna wykonywana z precyzją, której nie da się osiągnąć zmęczoną ręką.",
+  "dochod": "Rozliczenie idzie za dniówkę zdjęciową albo za cały projekt. Dniówka jest wysoka, ale liczba dni w roku ograniczona — a plan zdjęciowy raz zarezerwowany nie czeka na powrót operatora do formy.",
+  "przerwa": "Produkcja filmowa ma budżet i harmonogram zablokowany razem z ekipą, lokacjami i sprzętem. Operator, który wypada na dzień przed zdjęciami, zostaje zastąpiony natychmiast, bo koszt jednego dnia przestoju całej produkcji przekracza jego honorarium wielokrotnie. Przy dłuższej przerwie znika z obiegu informacji o projektach, a to w tej branży podstawowy kanał zleceń.",
+  "ryzyka": [
+   {
+    "tytul": "Uszkodzenie kręgosłupa od pracy ze steadicamem",
+    "opis": "System stabilizujący przenosi kilkanaście kilogramów na biodra i kręgosłup lędźwiowy, przez godziny, w ruchu. Przepuklina krążka międzykręgowego jest u operatorów steadicamu urazem typowym i często kończy pracę z tym systemem na stałe."
+   },
+   {
+    "tytul": "Uszkodzenie stawu barkowego",
+    "opis": "Kamera na ramieniu przez cały dzień zdjęciowy, z jednostronnym obciążeniem. Uszkodzenie stożka rotatorów wymaga zabiegu i pół roku rehabilitacji, przez które praca z kamerą jest niemożliwa."
+   },
+   {
+    "tytul": "Uraz na planie zdjęciowym",
+    "opis": "Praca na wózku, na podnośniku, w plenerze i przy oświetleniu o dużej mocy. Upadki i porażenia od instalacji oświetleniowej zdarzają się rzadko, ale ich następstwa są ciężkie."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Pracuję na dniówki, nierówno w ciągu roku — jak wykazać dochód?",
+    "odpowiedz": "Przez rozliczenie roczne. Nierówny rozkład dni zdjęciowych nie ma znaczenia dla wyliczenia sumy, o ile rok jako całość jest udokumentowany fakturami."
+   },
+   {
+    "pytanie": "Zdjęcia bywają za granicą — czy ochrona działa?",
+    "odpowiedz": "Krótkie wyjazdy produkcyjne tak. Dłuższy pobyt poza Polską trzeba zgłosić ubezpieczycielowi — niezgłoszony bywa podstawą odmowy wypłaty."
+   }
+  ]
+ },
+ "montazysta": {
+  "wstep": "Montażysta spędza życie zawodowe przy dwóch monitorach, w ciemnym pomieszczeniu, przewijając materiał klatka po klatce. To zawód, w którym całe obciążenie idzie na wzrok, nadgarstek i odcinek szyjny.",
+  "dochod": "Rozliczenie za projekt albo za tydzień montażowy, przy czym terminy emisji i premier są nieprzesuwalne. Montaż długiego metrażu trwa miesiącami, więc jedno zlecenie potrafi być połową rocznego dochodu.",
+  "przerwa": "Materiał zmontowany w połowie jest dla producenta bezużyteczny, a przejęcie projektu przez innego montażystę oznacza zwykle rozpoczęcie od nowa — decyzje montażowe są autorskie i nie da się ich odczytać z osi czasu. Wypadnięcie na miesiąc przed premierą kosztuje produkcję kampanię, a montażystę cały honorarium.",
+  "ryzyka": [
+   {
+    "tytul": "Wysychanie rogówki od pracy w ciemni montażowej",
+    "opis": "Dwanaście godzin przy jasnym monitorze w ciemnym pomieszczeniu, przy obniżonej częstotliwości mrugania. Objawy narastają latami i w zaawansowanym stadium uniemożliwiają pracę dłuższą niż kilka godzin."
+   },
+   {
+    "tytul": "Neuropatia nadgarstka od pracy z myszą i panelem",
+    "opis": "Precyzyjny ruch nadgarstka powtarzany tysiące razy dziennie, przez cały okres montażu. Zespół cieśni wymaga zabiegu i sześciu tygodni bez pracy przy komputerze."
+   },
+   {
+    "tytul": "Ubytek słuchu od pracy w słuchawkach",
+    "opis": "Odsłuch ścieżki dźwiękowej przez wiele godzin, często przy podniesionym poziomie. Ubytek w zakresie wysokich częstotliwości wyklucza z montażu materiałów, w których dźwięk ma znaczenie."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Jedno zlecenie to połowa mojego rocznego dochodu — czy to problem?",
+    "odpowiedz": "Nie dla wyliczenia sumy, bo liczy się rok jako całość. Jest to natomiast argument za wyższą sumą: strata z przerwy w trakcie dużego projektu jest nieproporcjonalna do średniej miesięcznej."
+   },
+   {
+    "pytanie": "Czy zespół suchego oka może być podstawą wypłaty?",
+    "odpowiedz": "Tak, o ile jest udokumentowany i uniemożliwia pracę przy monitorze przez pełną dniówkę montażową. Warunkiem pozostaje, żeby nie był leczony w ciągu 24 miesięcy przed zawarciem umowy — a przy dolegliwościach narastających latami warto ubezpieczyć się wcześnie."
+   }
+  ]
+ },
+ "grafik": {
+  "wstep": "Grafik projektuje to, co inni potem drukują i publikują. Jego praca jest w całości wizualna, więc wzrok i rozróżnianie barw nie są sprawnością pomocniczą, tylko warunkiem wykonywania zawodu.",
+  "dochod": "Zlecenia rozliczane są za projekt, za pakiet materiałów albo w stałej współpracy z agencją. Ta ostatnia daje przewidywalność, ale ma krótkie wypowiedzenia — agencja potrzebuje kogoś dostępnego, a nie kogoś, kto wróci.",
+  "przerwa": "Kampania ma datę startu ustaloną z zakupem mediów, a druk ma termin oddania plików do drukarni. Grafik nieobecny w tym momencie kosztuje klienta cały budżet mediowy, więc agencja przekazuje projekt komuś innemu tego samego dnia. Po dwóch takich sytuacjach stała współpraca się kończy.",
+  "ryzyka": [
+   {
+    "tytul": "Nabyte zaburzenia rozróżniania barw",
+    "opis": "Dobór kolorów w przestrzeni CMYK i kontrola korekty barwnej to codzienna praca. Nabyte zaburzenia widzenia barw, na przykład po leczeniu farmakologicznym albo w przebiegu chorób siatkówki, wykluczają z zawodu całkowicie."
+   },
+   {
+    "tytul": "Zespoły przeciążeniowe nadgarstka i przedramienia",
+    "opis": "Praca tabletem graficznym i myszą, po dziesięć godzin w okresach kampanijnych. Neuropatia nadgarstka i zapalenie nadkłykcia wyłączają z pracy na tygodnie."
+   },
+   {
+    "tytul": "Zespół bólowy odcinka szyjnego",
+    "opis": "Głowa pochylona nad tabletem, wzrok skierowany na monitor obok — pozycja z natury asymetryczna. Zmiany zwyrodnieniowe z promieniowaniem do ręki są u grafików wcześniejsze niż u pozostałych zawodów biurowych."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Pracuję dla kilku agencji na fakturę — jaki mam limit?",
+    "odpowiedz": "Działalność gospodarcza oznacza limit 80% udokumentowanego dochodu. Sumujesz przychody ze wszystkich agencji, bo choroba wycina je wszystkie naraz."
+   },
+   {
+    "pytanie": "Czy zaburzenia widzenia barw będą uznane za niezdolność?",
+    "odpowiedz": "Ubezpieczyciel ocenia niezdolność do wykonywania konkretnego zawodu, nie do jakiejkolwiek pracy. Przy grafice rozróżnianie barw jest warunkiem koniecznym, więc jego utrata jest w tym zawodzie niezdolnością, choć w innym nie byłaby."
+   }
+  ]
+ },
+ "ilustrator": {
+  "wstep": "Ilustrator sprzedaje styl, którego nikt inny nie odtworzy. To zaleta przy pozyskiwaniu zleceń i słabość przy przerwie — nie ma zastępcy, który dokończyłby serię ilustracji w tej samej kresce.",
+  "dochod": "Honorarium za pojedynczą ilustrację, za serię albo za książkę, płatne zwykle po oddaniu całości. Do tego dochodzą tantiemy z licencji, które płyną dalej niezależnie od bieżącej pracy, ale rzadko stanowią większość dochodu.",
+  "przerwa": "Książka ma termin oddania do druku wpisany do umowy wydawniczej i skorelowany z targami albo sezonem sprzedażowym. Ilustrator wypadający w połowie serii zostawia wydawcę z połową materiału, którego nie da się połączyć z cudzą pracą. Umowy wydawnicze przewidują w takiej sytuacji odstąpienie i zwrot zaliczki.",
+  "ryzyka": [
+   {
+    "tytul": "Neuropatia nadgarstka i palców",
+    "opis": "Praca piórem po tablecie albo tradycyjnym narzędziem, z napięciem chwytu, przez osiem godzin dziennie. Zespół cieśni i zapalenie pochewki ścięgna kciuka to następstwa typowe, a każdy nawrót oznacza tygodnie bez rysowania."
+   },
+   {
+    "tytul": "Zaburzenia widzenia barw i ostrości",
+    "opis": "Kolor jest częścią autorskiego stylu, a nie tylko wykonania. Nabyte zaburzenia rozróżniania barw kończą pracę w ilustracji barwnej całkowicie."
+   },
+   {
+    "tytul": "Zmiany zwyrodnieniowe odcinka szyjnego",
+    "opis": "Głowa pochylona nad płaszczyzną rysunku przez cały dzień, przez lata. Ucisk korzeni nerwowych daje drętwienie ręki rysującej — objaw, który przy tej pracy jest dyskwalifikujący."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Mam tantiemy z licencji — czy wliczają się do dochodu?",
+    "odpowiedz": "Tak, jeśli są udokumentowane. Warto je wykazać, bo podnoszą podstawę, choć akurat one płyną dalej mimo przerwy w pracy — a to oznacza, że realna strata jest niższa niż całość dochodu."
+   },
+   {
+    "pytanie": "Pracuję na umowach o dzieło z wydawcami — jaki mam limit?",
+    "odpowiedz": "Umowa o dzieło daje limit 65% udokumentowanego dochodu. Jeśli rozliczasz się fakturą z własnej działalności, limit wynosi 80% — różnica jest na tyle istotna, że warto sprawdzić własną formę przed wnioskiem."
+   }
+  ]
+ },
+ "rezyser": {
+  "wstep": "Reżyser jest jedyną osobą na planie, której nie da się zastąpić bez zmiany filmu. Produkcja może stracić każdego innego członka ekipy i dokończyć zdjęcia — bez reżysera zatrzymuje się cała maszyna.",
+  "dochod": "Honorarium reżyserskie wypłacane jest w transzach: przy podpisaniu, na starcie zdjęć, po montażu. Do tego dochodzą tantiemy z eksploatacji, które płyną latami, ale zaczynają płynąć dopiero po premierze.",
+  "przerwa": "Dzień przestoju produkcji filmowej kosztuje kilkadziesiąt tysięcy złotych: ekipa, sprzęt, lokacje, aktorzy. Przy chorobie reżysera producent ma do wyboru wstrzymać zdjęcia albo dokończyć je bez niego — obie opcje kończą się renegocjacją umowy, a często odstąpieniem. Ubezpieczenie produkcji pokrywa koszty producenta, nie utracone honorarium reżysera.",
+  "ryzyka": [
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Prowadzenie planu odbywa się głosem, przez dwanaście godzin, często w hałasie i w plenerze. Utrata głosu na planie zdjęciowym oznacza przestój, bo komunikacja z ekipą jest w tej roli podstawowym narzędziem."
+   },
+   {
+    "tytul": "Wyczerpanie i zaburzenia snu",
+    "opis": "Zdjęcia trwają tygodniami po dwanaście godzin, z nocnymi zmianami i przygotowaniem po planie. Skutki metaboliczne i sercowo-naczyniowe takiego obciążenia kumulują się przy każdej produkcji."
+   },
+   {
+    "tytul": "Uraz na planie zdjęciowym",
+    "opis": "Praca w plenerze, na podnośnikach, przy scenach kaskaderskich i przy oświetleniu dużej mocy. Reżyser jest na planie wszędzie, a to zwiększa ekspozycję na wszystkie ryzyka jednocześnie."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Produkcja ma własne ubezpieczenie — czy to mnie chroni?",
+    "odpowiedz": "Nie. Ubezpieczenie produkcji pokrywa straty producenta wynikające z przestoju, a nie Twoje utracone honorarium ani tantiemy. To dwa różne ubezpieczenia z rozłącznymi beneficjentami."
+   },
+   {
+    "pytanie": "Dochód mam nierówny, raz na dwa lata duży projekt — jak to ująć?",
+    "odpowiedz": "Warto pokazać trzy lata zamiast jednego. Ubezpieczyciel bierze średnią, a przy tak nierównym rozkładzie pojedynczy rok bez produkcji zaniżyłby sumę poniżej realnych możliwości zarobkowych."
+   }
+  ]
+ },
+ "aktor": {
+  "wstep": "Aktor pracuje ciałem, twarzą i głosem, a każde z nich może zostać wyłączone osobno. Blizna na twarzy, chrypka albo złamana ręka to w tym zawodzie trzy różne rodzaje niezdolności, z których każdy wystarcza.",
+  "dochod": "Dochód składa się z etatu teatralnego, honorariów za role filmowe, dubbingu, reklam i tantiem. Etat daje bezpieczeństwo, ale to pozostałe źródła — nieobjęte żadnym zasiłkiem — stanowią zwykle większość zarobków aktora rozpoznawalnego.",
+  "przerwa": "Rola obsadzona jest po zdjęciach próbnych i zaplanowana w harmonogramie produkcji. Aktor, który wypada przed zdjęciami, zostaje zastąpiony i traci honorarium w całości; wypadający w trakcie kosztuje produkcję dokrętki i zwykle kończy współpracę na złych warunkach. W teatrze rolę przejmuje dubler, a powrót do obsady po dłuższej przerwie nie jest oczywisty.",
+  "ryzyka": [
+   {
+    "tytul": "Uraz twarzy i widoczne blizny",
+    "opis": "To ryzyko specyficzne dla tego zawodu: uszkodzenie, które w każdej innej pracy nie wpływa na zdolność do jej wykonywania, tutaj może zamknąć dostęp do ról filmowych i reklamowych."
+   },
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Praca głosem na scenie bez nagłośnienia, przy projekcji na dużą salę, osiem razy w tygodniu. Guzki fałdów głosowych i niedowład strun głosowych to schorzenia kończące karierę sceniczną."
+   },
+   {
+    "tytul": "Uraz przy scenach ruchowych",
+    "opis": "Sceny walki, upadki, praca z rekwizytem i choreografia sceniczna. Uszkodzenia więzadeł i złamania zdarzają się w teatrze częściej niż na planie, bo spektakl gra się wielokrotnie."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Mam etat w teatrze i role filmowe — czy warto się ubezpieczać?",
+    "odpowiedz": "Właśnie w takiej konfiguracji ma to największy sens. Zasiłek z etatu pokryje część dochodu teatralnego, ale honoraria filmowe, dubbingowe i reklamowe zostają bez żadnego zabezpieczenia."
+   },
+   {
+    "pytanie": "Czy blizna na twarzy będzie uznana za niezdolność do pracy?",
+    "odpowiedz": "Ubezpieczyciel ocenia niezdolność do wykonywania konkretnego zawodu. To jest sytuacja, którą warto omówić przy składaniu wniosku — orzeczenie w takim przypadku zależy od zakresu faktycznie wykonywanej pracy."
+   }
+  ]
+ },
+ "muzyk": {
+  "wstep": "Muzyk instrumentalista buduje sprawność przez dwadzieścia lat i traci ją w jednym urazie. Kontuzja ręki, która u innych oznacza kilka tygodni niewygody, u niego bywa końcem kariery koncertowej.",
+  "dochod": "Dochód składa się z koncertów, sesji nagraniowych, nauczania i tantiem. Koncerty i sesje płacą najlepiej i znikają natychmiast; nauczanie daje stabilność, ale przy niższych stawkach.",
+  "przerwa": "Trasa koncertowa jest zakontraktowana z organizatorami z rocznym wyprzedzeniem, z karami umownymi za odwołanie. Muzyk odwołujący koncerty traci honoraria i płaci kary, a przy dłuższej przerwie wypada z obiegu — organizatorzy planują sezony z wyprzedzeniem i nie zostawiają pustych miejsc. Powrót do formy wykonawczej po przerwie wymaga miesięcy ćwiczeń bez żadnego przychodu.",
+  "ryzyka": [
+   {
+    "tytul": "Dystonia zadaniowa muzyków",
+    "opis": "Zaburzenie kontroli ruchu ujawniające się wyłącznie przy grze na instrumencie. Jest specyficzne dla tego zawodu, słabo poddaje się leczeniu i kończy karierę wykonawczą u części dotkniętych nim muzyków."
+   },
+   {
+    "tytul": "Ubytek słuchu i szumy uszne",
+    "opis": "Ekspozycja na wysokie poziomy dźwięku podczas prób i koncertów, przez dekady. Szum uszny u muzyka nie jest niedogodnością — uniemożliwia pracę z intonacją i barwą."
+   },
+   {
+    "tytul": "Zespoły przeciążeniowe kończyny górnej",
+    "opis": "Wielogodzinne ćwiczenia w wymuszonej pozycji, przy asymetrycznym obciążeniu zależnym od instrumentu. Zapalenie pochewek ścięgnistych i neuropatie uciskowe są u instrumentalistów zjawiskiem powszechnym."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy dystonia zadaniowa będzie uznana za niezdolność do pracy?",
+    "odpowiedz": "Ocena dotyczy niezdolności do wykonywania konkretnego zawodu. Dystonia ujawniająca się tylko przy grze jest właśnie takim przypadkiem — warto opisać charakter pracy we wniosku możliwie dokładnie."
+   },
+   {
+    "pytanie": "Mam koncerty, lekcje i tantiemy — jak wykazać dochód?",
+    "odpowiedz": "Sumujesz wszystkie źródła z rozliczenia rocznego. Tantiemy warto wykazać osobno, bo płyną dalej mimo przerwy — dzięki temu suma odpowiada realnej stracie, a nie całemu dochodowi."
+   }
+  ]
+ },
+ "choreograf": {
+  "wstep": "Choreograf pokazuje ruch własnym ciałem, także wtedy, gdy sam już nie występuje. Praca z zespołem wymaga demonstracji, a demonstracja wymaga sprawności porównywalnej z tancerzem.",
+  "dochod": "Honorarium za przygotowanie choreografii do spektaklu, teledysku albo produkcji, plus stawki za prowadzenie prób. Do tego dochodzą zajęcia w szkołach tańca, dające regularny, choć niższy przychód.",
+  "przerwa": "Choreografia przygotowywana do premiery ma harmonogram prób powiązany z terminem spektaklu. Zespół, który zostaje bez choreografa na trzy tygodnie, traci materiał i tempo, a produkcja zatrudnia kogoś innego, bo daty premiery nie da się przesunąć. Zajęcia w szkołach tańca obsadza się zastępstwem, ale grupa przywiązana do prowadzącego rozchodzi się po dwóch nieobecnościach.",
+  "ryzyka": [
+   {
+    "tytul": "Uszkodzenie więzadeł stawu kolanowego i skokowego",
+    "opis": "Demonstracja ruchu bez pełnej rozgrzewki, wielokrotnie w ciągu próby. Zerwanie więzadła krzyżowego oznacza zabieg i od sześciu do dziewięciu miesięcy poza pracą, a często trwałe ograniczenie zakresu ruchu."
+   },
+   {
+    "tytul": "Zmiany przeciążeniowe kręgosłupa i bioder",
+    "opis": "Kilkanaście lat pracy w skrajnych zakresach ruchu. Zmiany zwyrodnieniowe stawu biodrowego u tancerzy i choreografów pojawiają się o dwie dekady wcześniej niż w populacji ogólnej."
+   },
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Prowadzenie próby oznacza liczenie i instruktaż podniesionym głosem, przy muzyce, przez kilka godzin. Przewlekłe zapalenie krtani jest tu następstwem obciążenia, nie infekcji."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy uprawianie tańca zawodowo podnosi składkę?",
+    "odpowiedz": "Wpływa na ocenę ryzyka i trzeba to zgłosić we wniosku jako charakter pracy. To nie to samo, co sport uprawiany rekreacyjnie — praca zawodowa jest oceniana w części dotyczącej zawodu, a nie aktywności pozazawodowych."
+   },
+   {
+    "pytanie": "Prowadzę zajęcia i choreografie — jaki mam limit?",
+    "odpowiedz": "Zależy od formy rozliczenia. Działalność gospodarcza oznacza 80%, umowy o dzieło ze szkołami tańca — 65%. Jeżeli łączysz obie, decyduje ta, z której pochodzi większa część rocznego przychodu."
+   }
+  ]
+ },
+ "dziennikarz": {
+  "wstep": "Dziennikarz na kontrakcie zarabia na tekstach oddanych, a nie na gotowości do pisania. Tematy, których nie napisze, napisze ktoś inny — informacja ma termin przydatności liczony w godzinach.",
+  "dochod": "Rozliczenie za tekst, za materiał albo w formie stałej współpracy z redakcją. Ta ostatnia daje przewidywalność, ale umowy o współpracę mają krótkie wypowiedzenia, a redakcja potrzebuje osoby dostępnej na dyżurze.",
+  "przerwa": "Miejsce w redakcyjnym obiegu tematów utrzymuje się bieżącą obecnością. Miesiąc bez tekstów oznacza, że działy przekierowują tematy do innych współpracowników, a źródła — najcenniejszy kapitał w tym zawodzie — przestają dzwonić. Odbudowa pozycji zajmuje kwartał, przy czym rynek zleceń dziennikarskich się w tym czasie kurczy, a nie rośnie.",
+  "ryzyka": [
+   {
+    "tytul": "Uraz podczas pracy w terenie",
+    "opis": "Relacje z manifestacji, wypadków i stref konfliktu. Ekspozycja jest nieregularna, ale w momentach, gdy występuje, jest wyższa niż w większości zawodów cywilnych."
+   },
+   {
+    "tytul": "Choroby narządu głosu i słuchu",
+    "opis": "Praca w radiu i telewizji oznacza codzienne obciążenie głosu i wielogodzinny odsłuch w słuchawkach. Oba narządy zużywają się równolegle, a każdy z osobna wystarcza do niezdolności."
+   },
+   {
+    "tytul": "Zespoły przeciążeniowe od pracy z klawiaturą",
+    "opis": "Kilkanaście tysięcy znaków dziennie przy pracy w newsroomie. Neuropatia nadgarstka wyklucza z pisania na tygodnie, a w tym zawodzie pisanie jest jedyną formą wykonywania pracy."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Piszę dla kilku redakcji na fakturę — jaki mam limit?",
+    "odpowiedz": "Działalność gospodarcza oznacza 80% udokumentowanego dochodu. Sumujesz przychody ze wszystkich redakcji, bo jedna choroba wycina je wszystkie równocześnie."
+   },
+   {
+    "pytanie": "Wyjeżdżam na relacje za granicę — czy ochrona działa?",
+    "odpowiedz": "Krótkie wyjazdy tak, ale wyjazdy do stref konfliktu wymagają zgłoszenia i mogą być wyłączone. To warto ustalić przed wyjazdem, a nie po zdarzeniu."
+   }
+  ]
+ },
+ "tlumacz": {
+  "wstep": "Tłumacz przysięgły poświadcza tłumaczenie własną pieczęcią i odpowiada za jego zgodność z oryginałem. Ta pieczęć jest imienna, więc dokument czekający na poświadczenie czeka na konkretną osobę, a nie na dowolnego tłumacza.",
+  "dochod": "Rozliczenie za stronę rozliczeniową albo za godzinę tłumaczenia ustnego. Tłumaczenia przysięgłe dla sądów i prokuratur mają stawki ustalone rozporządzeniem, prywatne są wyższe, a konferencyjne — najwyższe i najbardziej wrażliwe na dostępność.",
+  "przerwa": "Tłumaczenie ustne na rozprawie albo u notariusza ma wyznaczony termin, którego nie da się przesunąć. Tłumacz, który się nie stawi, zostaje zastąpiony kolejnym z listy i zwykle nie wraca do tej sprawy. Przy tłumaczeniach konferencyjnych rezerwacja terminu następuje z miesięcznym wyprzedzeniem i odwołanie oznacza karę umowną.",
+  "ryzyka": [
+   {
+    "tytul": "Ubytek słuchu",
+    "opis": "Tłumaczenie symultaniczne odbywa się w słuchawkach, przy podniesionym poziomie, przez wiele godzin. Niedosłuch w zakresie mowy kończy pracę w kabinie całkowicie, choć nie musi kończyć tłumaczeń pisemnych."
+   },
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Symultanka to mówienie bez przerwy przez trzydziestominutowe zmiany, przez cały dzień konferencji. Przewlekłe zapalenie krtani jest tu następstwem typowym."
+   },
+   {
+    "tytul": "Neuropatia nadgarstka przy terminach tłumaczeń pisemnych",
+    "opis": "Tłumaczenie pisemne to kilkanaście tysięcy znaków dziennie przy terminach liczonych w dniach. Neuropatia nadgarstka wyklucza z pracy dokładnie wtedy, gdy zleceń jest najwięcej."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Jestem tłumaczem przysięgłym — czy to zmienia coś we wniosku?",
+    "odpowiedz": "Zmienia opis wykonywanego zawodu, bo część pracy jest wtedy związana z terminami sądowymi i odpowiedzialnością zawodową. Nie zmienia natomiast limitu procentowego, który zależy wyłącznie od formy zatrudnienia."
+   },
+   {
+    "pytanie": "Robię symultankę i tłumaczenia pisemne — czy stracę oba naraz?",
+    "odpowiedz": "Niedosłuch wyklucza z kabiny, ale niekoniecznie z tłumaczeń pisemnych — i to jest właśnie przypadek, w którym ubezpieczyciel ocenia niezdolność częściową. Warto opisać obie formy pracy we wniosku."
+   }
+  ]
+ },
+ "lektor-radiowy": {
+  "wstep": "Lektor sprzedaje barwę własnego głosu, której nie da się zastąpić ani odtworzyć. Chrypka trwająca tydzień to w tym zawodzie tydzień bez jakiegokolwiek przychodu, bez względu na pozostałą sprawność.",
+  "dochod": "Rozliczenie za nagranie: spot, czytanie audiobooka, dubbing, zapowiedzi stacyjne. Stawki są wysokie, ale sesje krótkie — dochód buduje się liczbą nagrań, a każde wymaga głosu w pełnej formie.",
+  "przerwa": "Kampania reklamowa ma datę emisji ustaloną z zakupem czasu antenowego, więc spot musi być nagrany w konkretnym tygodniu. Lektor niedostępny zostaje zastąpiony innym głosem — a marka, która raz zmieniła lektora, zwykle przy nim zostaje, bo rozpoznawalność głosu buduje się w kampanii. Audiobook nagrany w połowie jednym głosem nie da się dokończyć innym.",
+  "ryzyka": [
+   {
+    "tytul": "Guzki i polipy fałdów głosowych",
+    "opis": "Kilka godzin nagrań dziennie, przy pełnej kontroli emisji. Zmiany na fałdach głosowych wymagają zabiegu i kilkutygodniowego milczenia terapeutycznego — czyli całkowitej przerwy w pracy."
+   },
+   {
+    "tytul": "Refluks krtaniowo-gardłowy",
+    "opis": "Schorzenie rzadko kojarzone z pracą, a u lektorów będące jedną z głównych przyczyn przewlekłej chrypki. Leczenie trwa miesiącami i w tym czasie barwa głosu bywa niestabilna."
+   },
+   {
+    "tytul": "Ubytek słuchu",
+    "opis": "Praca w słuchawkach z odsłuchem własnego głosu, przez lata. Niedosłuch uniemożliwia kontrolę intonacji i wyrównanie poziomu, co w nagraniu jest natychmiast słyszalne."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Głos to całe moje narzędzie pracy — jaką sumę wybrać?",
+    "odpowiedz": "Przy zawodach opartych na jednym, niezastępowalnym narzędziu warto rozważyć wyższą sumę trwałej niezdolności. Powyżej miliona złotych uruchamia się rozszerzona ankieta zdrowotna, ale sam próg nie jest przeszkodą."
+   },
+   {
+    "pytanie": "Czy zabieg na strunach głosowych to niezdolność do pracy?",
+    "odpowiedz": "Okres milczenia terapeutycznego po zabiegu jest niezdolnością do wykonywania tego konkretnego zawodu. Kluczowe jest, żeby schorzenie nie było leczone w ciągu 24 miesięcy przed zawarciem umowy."
+   }
+  ]
+ },
+ "youtuber": {
+  "wstep": "Youtuber żyje z regularności publikacji. Algorytm nie rozróżnia przerwy z powodu choroby od porzucenia kanału — zasięgi spadają tak samo w obu przypadkach, a odbudowa trwa dłużej niż sama nieobecność.",
+  "dochod": "Przychód łączy udział w przychodach z reklam, współprace z markami, sprzedaż własnych produktów i wsparcie od widzów. Współprace są najlepiej płatne i mają terminy publikacji wpisane do umowy.",
+  "przerwa": "Miesiąc bez publikacji oznacza spadek zasięgów, który utrzymuje się długo po powrocie, bo algorytm odbudowuje zaufanie do kanału stopniowo. Kampanie z markami mają wyznaczone daty i przy odwołaniu przechodzą do innych twórców — a marka, która raz przetestowała kogoś innego, wraca rzadko. Subskrypcje wsparcia od widzów wygasają w ciągu jednego cyklu rozliczeniowego.",
+  "ryzyka": [
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Nagrania prowadzone głosem przez wiele godzin, często z podniesioną energią wypowiedzi. Guzki fałdów głosowych są u twórców mówionych następstwem częstym i wymagającym przerwy liczonej w tygodniach."
+   },
+   {
+    "tytul": "Zespoły przeciążeniowe od montażu",
+    "opis": "Postprodukcja zajmuje wielokrotnie więcej czasu niż samo nagranie. Neuropatia nadgarstka i zespół bólowy szyi wynikają z tej niewidocznej części pracy, a nie z występowania przed kamerą."
+   },
+   {
+    "tytul": "Uraz przy nagraniach w terenie",
+    "opis": "Formaty wymagające ruchu, podróży albo aktywności fizycznej. Ekspozycja zależy od tematyki kanału i warto ją opisać we wniosku, bo różnica między kanałem rozmównym a wyprawowym jest zasadnicza."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Dochód mam nierówny i z kilku platform — jak go wykazać?",
+    "odpowiedz": "Przez rozliczenie roczne z działalności, obejmujące wszystkie źródła. Przy silnych wahaniach warto pokazać dwa lata, żeby suma nie została wyliczona z przypadkowo słabego okresu."
+   },
+   {
+    "pytanie": "Kręcę materiały ekstremalne — czy to wyklucza mnie z ochrony?",
+    "odpowiedz": "Nie wyklucza, ale musi być zgłoszone. Wniosek zawiera osobną listę aktywności podwyższonego ryzyka — zatajenie ich jest podstawą do odmowy wypłaty przy szkodzie właśnie z nimi związanej."
+   }
+  ]
  }
 }
