@@ -2927,5 +2927,469 @@
     "odpowiedz": "Nie. Zakażenie zawodowe HIV i WZW obejmują wyłącznie warunki szczególne dokładane do wariantów medycznych. Bez nich ryzyko pozostaje wyłączone, niezależnie od okoliczności ekspozycji."
    }
   ]
+ },
+ "gastroenterolog": {
+  "wstep": "Gastroenterolog spędza większość dnia zabiegowego z endoskopem w ręku, sterując końcówką za pomocą pokręteł obsługiwanych kciukiem lewej dłoni. To jedna z najbardziej obciążających nadgarstek czynności w całej medycynie zabiegowej.",
+  "dochod": "Kolonoskopie i gastroskopie rozliczane za procedurę, w ramach kontraktu i prywatnie, plus konsultacje ambulatoryjne. Pracownia endoskopowa wykonuje kilkanaście badań dziennie, więc dochód jest wprost zależny od liczby dni przy aparacie.",
+  "przerwa": "Pracownia endoskopowa ma plan badań zapisany na tygodnie i przy braku operatora odwołuje wszystkie. Pacjenci w programie badań przesiewowych mają wyznaczone terminy wynikające z zaproszeń, których nie da się przesunąć bez wypadnięcia z programu. Przy własnej pracowni dochodzą raty leasingowe za tor wizyjny i myjnię, których wartość liczy się w setkach tysięcy złotych.",
+  "ryzyka": [
+   {
+    "tytul": "Przeciążenie kciuka i nadgarstka od sterowania endoskopem",
+    "opis": "Utrzymywanie i obracanie pokręteł jednym kciukiem przez kilkanaście badań dziennie. Zapalenie pochewki ścięgna i zmiany zwyrodnieniowe stawu nadgarstkowo-śródręcznego kciuka są w tej specjalizacji opisane jako obciążenie zawodowe."
+   },
+   {
+    "tytul": "Ekspozycja na materiał zakaźny w pracowni",
+    "opis": "Kontakt z treścią przewodu pokarmowego i krwią przy zabiegach terapeutycznych. Ryzyko zakażenia krwiopochodnego objęte jest wyłącznie osobną klauzulą HIV/WZW."
+   },
+   {
+    "tytul": "Zespoły bólowe barku i karku od pozycji przy aparacie",
+    "opis": "Prawa ręka wysunięta i uniesiona przy prowadzeniu endoskopu, głowa skręcona w stronę monitora. Ta asymetria utrzymywana godzinami daje konflikt podbarkowy i dyskopatię szyjną."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy uszkodzenie kciuka wyklucza mnie z pracy endoskopowej?",
+    "odpowiedz": "Sterowanie endoskopem opiera się na kciuku lewej dłoni, więc jego niesprawność wyklucza z zabiegów, choć nie z konsultacji. To sytuacja niezdolności częściowej — warto we wniosku opisać, jaka część dochodu pochodzi z pracowni."
+   },
+   {
+    "pytanie": "Mam własną pracownię endoskopową — jak liczyć sumę?",
+    "odpowiedz": "Jako działalność z pracownikami, jeśli zatrudniasz personel. Wniosek zapyta o Twój wkład w przychód, bo pracownia z drugim endoskopistą pracuje dalej, choć w ograniczonym zakresie."
+   }
+  ]
+ },
+ "kardiolog": {
+  "wstep": "Kardiolog inwazyjny stoi przy stole w kilkunastokilogramowym fartuchu ołowianym, pod lampą rentgenowską, po kilka godzin dziennie. Ciężar ochrony radiologicznej jest tu odrębnym czynnikiem obciążającym, niezależnym od samej procedury.",
+  "dochod": "Kontrakt z pracownią hemodynamiki z dyżurami w programie zawałowym, echokardiografia rozliczana za badanie i gabinet prywatny. Dyżury zawałowe są dobrze płatne i wymagają gotowości o każdej porze.",
+  "przerwa": "Program leczenia zawału działa w trybie ciągłym i wymaga pełnej obsady dyżurowej — placówka uzupełnia grafik natychmiast. Pacjenci gabinetu prywatnego, prowadzeni w chorobie przewlekłej, przechodzą do innego kardiologa i tam zostają, bo kontrola co trzy miesiące nie może stać. Odbudowa listy pacjentów prowadzonych zajmuje kwartały.",
+  "ryzyka": [
+   {
+    "tytul": "Choroby kręgosłupa od fartucha ołowianego",
+    "opis": "Kilkanaście kilogramów zawieszone na barkach i odcinku lędźwiowym, przez kilka godzin dziennie, przez całą karierę. Zmiany zwyrodnieniowe kręgosłupa u kardiologów inwazyjnych są udokumentowanym obciążeniem zawodowym tej specjalizacji."
+   },
+   {
+    "tytul": "Zaćma popromienna i uszkodzenie soczewki",
+    "opis": "Ekspozycja na promieniowanie rozproszone przy stole hemodynamicznym, mimo osłon. Dawka na soczewki kumuluje się przez lata, a zaćma jest jej najlepiej opisanym następstwem w tej grupie zawodowej."
+   },
+   {
+    "tytul": "Przeciążenie nadgarstka przy badaniu echokardiograficznym",
+    "opis": "Głowica trzymana pod stałym kątem, z uciskiem, przez kilkadziesiąt badań tygodniowo. Neuropatia nadgarstka u echokardiografistów rozwija się szybciej niż przy pracy biurowej."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy praca w pracowni hemodynamiki podnosi ocenę ryzyka?",
+    "odpowiedz": "Podnosi, i warto opisać ją we wniosku osobno. Kardiologia inwazyjna to inny profil obciążenia i narażenia niż kardiologia ambulatoryjna, a ubezpieczyciel ocenia faktycznie wykonywaną pracę."
+   },
+   {
+    "pytanie": "Mam dyżury w programie zawałowym — czy wliczają się do dochodu?",
+    "odpowiedz": "Tak, o ile są udokumentowane. Dyżury bywają istotną częścią wynagrodzenia kardiologa i ich pominięcie zaniża sumę poniżej realnej straty."
+   }
+  ]
+ },
+ "urolog": {
+  "wstep": "Urolog łączy chirurgię otwartą, endoskopię i zabiegi pod kontrolą radiologiczną. Trzy różne obciążenia w jednej specjalizacji, z których każde może zostać zamknięte osobnym schorzeniem.",
+  "dochod": "Zabiegi endoskopowe i litotrypsja rozliczane za procedurę, konsultacje ambulatoryjne i praktyka prywatna. Zabiegi prywatne, głównie w zakresie kamicy i przerostu prostaty, dają zwykle najwyższą marżę.",
+  "przerwa": "Pacjent z kamicą zaklinowaną w moczowodzie ma wskazania pilne i trafi do innego urologa tego samego dnia. Zabiegi planowe przechodzą na kolegów z oddziału, a pacjenci prywatni, kierowani z polecenia, zostają tam, gdzie zostali zoperowani. Przy własnym gabinecie z aparatem USG i cystoskopem biegną raty za sprzęt.",
+  "ryzyka": [
+   {
+    "tytul": "Ekspozycja na promieniowanie przy zabiegach endourologicznych",
+    "opis": "Ureterorenoskopia i litotrypsja wykonywane pod kontrolą fluoroskopii, w fartuchu ochronnym. Narażenie na dłonie i soczewki kumuluje się przez lata pracy zabiegowej."
+   },
+   {
+    "tytul": "Przeciążenie kończyny górnej przy endoskopii",
+    "opis": "Prowadzenie giętkiego instrumentu z jednoczesnym operowaniem narzędziem przez kanał roboczy, w niewygodnej pozycji. Neuropatie uciskowe i zapalenie ścięgien są tu następstwem typowym."
+   },
+   {
+    "tytul": "Ekspozycja na materiał zakaźny przy zabiegach",
+    "opis": "Kontakt z moczem i krwią przy zabiegach na drogach moczowych, często u pacjentów z zakażeniami wielolekoopornymi. Zakażenie krwiopochodne obejmuje wyłącznie klauzula szczególna."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Wykonuję zabiegi pod RTG — czy to trzeba zgłosić?",
+    "odpowiedz": "Warto opisać ten charakter pracy we wniosku. Endourologia z kontrolą radiologiczną i urologia wyłącznie ambulatoryjna to dwa różne profile narażenia, a wycena ma je odróżniać."
+   },
+   {
+    "pytanie": "Czy zakażenie od pacjenta jest objęte standardowo?",
+    "odpowiedz": "Zakażenia krwiopochodne HIV i WZW wymagają osobnej klauzuli, dokładanej do wariantów medycznych. Pozostałe zakażenia są objęte na zasadach ogólnych, o ile powodują orzeczoną niezdolność do pracy."
+   }
+  ]
+ },
+ "pulmonolog": {
+  "wstep": "Pulmonolog bada pacjentów kaszlących, wykonuje bronchoskopie i pracuje w oddziałach, gdzie leży gruźlica. Ekspozycja na czynniki przenoszone drogą oddechową jest w tej specjalizacji nie incydentem, tylko warunkiem pracy.",
+  "dochod": "Kontrakt oddziałowy, bronchoskopie rozliczane za procedurę, badania czynnościowe płuc i gabinet prywatny. Bronchoskopia daje najwyższą stawkę jednostkową i najwyższą ekspozycję.",
+  "przerwa": "Pacjent z podejrzeniem nowotworu płuca czeka na bronchoskopię z pobraniem materiału, od której zależy rozpoczęcie leczenia. Terminów nie da się przesunąć bez pogorszenia rokowania, więc pracownia przekazuje badania innym operatorom natychmiast. Pacjenci przewlekli z gabinetu prywatnego, kontrolowani co kwartał, przechodzą do innego pulmonologa.",
+  "ryzyka": [
+   {
+    "tytul": "Zakażenie gruźlicą i innymi patogenami dróg oddechowych",
+    "opis": "Bronchoskopia generuje aerozol z dolnych dróg oddechowych pacjenta. Gruźlica lekooporna u personelu pracowni bronchoskopowych jest zjawiskiem opisanym, a leczenie trwa miesiącami i wyklucza z kontaktu z pacjentami."
+   },
+   {
+    "tytul": "Przeciążenie kończyny górnej przy bronchoskopii",
+    "opis": "Prowadzenie giętkiego bronchoskopu wymaga precyzyjnej pracy kciuka i nadgarstka przy uniesionym ramieniu. Neuropatia uciskowa rozwija się w tej specjalizacji wcześnie."
+   },
+   {
+    "tytul": "Uczulenie na środki dezynfekcyjne do endoskopów",
+    "opis": "Preparaty na bazie aldehydu glutarowego stosowane w myjniach endoskopowych. Astma zawodowa u personelu pracowni endoskopowych jest udokumentowana i po rozpoznaniu wyklucza z pracy w tym pomieszczeniu."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy zakażenie gruźlicą od pacjenta jest objęte polisą?",
+    "odpowiedz": "Gruźlica jest chorobą jak każda inna i podlega zasadom ogólnym — objęta, o ile powoduje orzeczoną niezdolność i nie była leczona w ciągu 24 miesięcy przed umową. Osobnej klauzuli wymagają wyłącznie HIV i wirusowe zapalenie wątroby."
+   },
+   {
+    "pytanie": "Pracuję w oddziale gruźlicy — czy to podnosi składkę?",
+    "odpowiedz": "Wpływa na ocenę ryzyka i warto to opisać. Pulmonologia oddziałowa z gruźlicą i pulmonologia ambulatoryjna to różne profile ekspozycji, a wniosek pyta o charakter pracy właśnie po to."
+   }
+  ]
+ },
+ "onkolog": {
+  "wstep": "Onkolog kliniczny prowadzi chemioterapię, czyli przepisuje i nadzoruje podawanie substancji o działaniu cytotoksycznym. Ekspozycja personelu na te leki jest w tej specjalizacji czynnikiem zawodowym, którego nie ma nigdzie indziej w medycynie zachowawczej.",
+  "dochod": "Kontrakt z oddziałem onkologii, konsultacje kwalifikacyjne do leczenia i gabinet prywatny, w tym opinie do programów lekowych. Dochód jest stabilny, dopóki jest obecność — nie ma tu składnika niezależnego od pracy.",
+  "przerwa": "Chemioterapia ma cykle o wyznaczonych odstępach, których przesunięcie obniża skuteczność leczenia. Pacjenci zostają przypisani innemu onkologowi w ciągu dni i przy nim kończą protokół, bo zmiana lekarza prowadzącego w trakcie leczenia jest dla chorego ryzykowna. Powrót oznacza budowanie listy pacjentów od nowa.",
+  "ryzyka": [
+   {
+    "tytul": "Przewlekła ekspozycja na cytostatyki",
+    "opis": "Kontakt z lekami cytotoksycznymi przy przygotowaniu i nadzorze podawania, mimo procedur ochronnych. Następstwa hematologiczne i wpływ na płodność są przedmiotem badań, a rozpoznanie choroby powiązanej z ekspozycją kończy pracę w tym zakresie."
+   },
+   {
+    "tytul": "Obciążenie prowadzeniem chorych terminalnych",
+    "opis": "Trzeba to powiedzieć wprost: skutki tego obciążenia mieszczą się w kategorii chorób psychicznych, wyłączonej z ochrony we wszystkich wariantach. Objęte są wyłącznie następstwa somatyczne z odrębnym rozpoznaniem."
+   },
+   {
+    "tytul": "Ekspozycja na infekcje u chorych w immunosupresji",
+    "opis": "Praca z pacjentami po chemioterapii oznacza kontakt z zakażeniami oportunistycznymi i szczepami szpitalnymi. Ryzyko dotyczy obu stron kontaktu."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy skutki ekspozycji na cytostatyki będą objęte?",
+    "odpowiedz": "Objęta jest niezdolność do pracy wynikająca ze schorzenia, niezależnie od jego przyczyny — o ile nie było leczone w ciągu 24 miesięcy przed zawarciem umowy. Przy chorobach o długim okresie utajenia liczy się moment rozpoznania."
+   },
+   {
+    "pytanie": "Prowadzę pacjentów w programach lekowych — czy to część dochodu?",
+    "odpowiedz": "Tak, jeśli jest rozliczane w ramach działalności albo kontraktu. Warto wykazać wszystkie źródła, bo suma liczy się od łącznego udokumentowanego dochodu."
+   }
+  ]
+ },
+ "medycyna-ratunkowa": {
+  "wstep": "Lekarz medycyny ratunkowej pracuje w miejscu, gdzie trafiają wszystkie problemy, których nie da się zaplanować. Szpitalny oddział ratunkowy to jedyne miejsce w szpitalu, gdzie ryzyko napaści fizycznej jest elementem codzienności.",
+  "dochod": "Dyżury na oddziale ratunkowym, często w kilku szpitalach naraz, plus zabezpieczenia medyczne imprez i transport medyczny. Stawki dyżurowe są wysokie, ale liczba dyżurów w miesiącu ograniczona wytrzymałością.",
+  "przerwa": "Oddział ratunkowy musi mieć obsadę, więc dyżury obsadza się natychmiast i na stałe. Przy pracy w trzech szpitalach jedna choroba wycina wszystkie grafiki, a wejście z powrotem oznacza czekanie na wolne miejsca w każdym z osobna. Zabezpieczenia imprez masowych, sezonowe i dobrze płatne, przechodzą do innych lekarzy na cały sezon.",
+  "ryzyka": [
+   {
+    "tytul": "Napaść ze strony pacjenta lub osób towarzyszących",
+    "opis": "Interwencje u osób pod wpływem substancji, w pobudzeniu i w kryzysie psychicznym. Agresja wobec personelu oddziałów ratunkowych jest zjawiskiem udokumentowanym, a następstwa fizyczne są objęte jako nieszczęśliwy wypadek."
+   },
+   {
+    "tytul": "Skutki pracy w trybie zmianowym i dyżurowym",
+    "opis": "Dyżury dwunasto- i dwudziestoczterogodzinne w rotacji, przez całą karierę. Zaburzenia metaboliczne i sercowo-naczyniowe rozwijają się w tej specjalizacji szybciej niż w jakiejkolwiek innej."
+   },
+   {
+    "tytul": "Ekspozycja na materiał zakaźny w warunkach nagłych",
+    "opis": "Dostępy naczyniowe, intubacja i procedury inwazyjne wykonywane u pacjenta niestabilnego, w pośpiechu. Zakłucia zdarzają się tu częściej niż przy zabiegach planowych, a chroni przed nimi wyłącznie klauzula HIV/WZW."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy pobicie na dyżurze jest objęte polisą?",
+    "odpowiedz": "Tak. Uderzenie zadane przez pacjenta jest zdarzeniem nagłym i pochodzącym z zewnątrz, więc spełnia definicję wypadku. Wypłata dotyczy urazu ciała; rozstrój psychiczny po takim zajściu nie jest objęty w żadnym z wariantów."
+   },
+   {
+    "pytanie": "Dyżuruję w trzech szpitalach — jak wykazać dochód?",
+    "odpowiedz": "Wykazujesz wszystkie kontrakty łącznie, na podstawie rozliczenia rocznego. Praca w kilku szpitalach nie rozkłada ryzyka — jedno zdarzenie zdrowotne wyłącza Cię z każdego dyżuru równocześnie, a zasiłek z ZUS i tak liczy się od jednej podstawy."
+   }
+  ]
+ },
+ "neonatolog": {
+  "wstep": "Neonatolog resuscytuje pacjentów ważących mniej niż kilogram, zakładając dostępy naczyniowe o średnicy poniżej milimetra. Precyzja wymagana w tej specjalizacji nie ma odpowiednika w medycynie dorosłych.",
+  "dochod": "Kontrakt z oddziałem neonatologii i intensywnej terapii noworodka, z dyżurami w trybie ciągłym, plus konsultacje. Liczba ośrodków z oddziałem trzeciego stopnia referencyjności jest ograniczona, więc alternatywa w tym samym mieście często nie istnieje.",
+  "przerwa": "Oddział intensywnej terapii noworodka pracuje bez przerwy i wymaga pełnej obsady dyżurowej — braki uzupełnia się natychmiast i na stałe. Przy wąskiej specjalizacji powrót po dłuższej przerwie oznacza wejście do zespołu, który przez ten czas przeorganizował grafik. Utrzymanie kompetencji resuscytacyjnych wymaga też ciągłości praktyki.",
+  "ryzyka": [
+   {
+    "tytul": "Utrata precyzji manualnej",
+    "opis": "Kaniulacja żyły pępowinowej i intubacja noworodka skrajnie niedojrzałego wymagają kontroli ruchu w skali milimetrów. Drżenie albo osłabienie chwytu, nieistotne w innych specjalizacjach, wyklucza tu z procedur ratujących życie."
+   },
+   {
+    "tytul": "Skutki pracy dyżurowej w trybie ciągłym",
+    "opis": "Porody i stany nagłe u noworodków zdarzają się o każdej porze, a dyżur nie kończy się przed ustabilizowaniem pacjenta. Chroniczny deficyt snu kumuluje się przez dekady."
+   },
+   {
+    "tytul": "Ekspozycja zawodowa przy zabiegach naczyniowych",
+    "opis": "Dostępy centralne i pobrania u noworodków wykonuje się igłami o bardzo małej średnicy, w polu wielkości dłoni. Zakłucie w takich warunkach jest łatwe, a ochrona wymaga osobnej klauzuli HIV/WZW."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Moja specjalizacja jest bardzo wąska — czy to argument za wyższą sumą?",
+    "odpowiedz": "Tak. Im węższa specjalizacja, tym mniej realna jest praca zastępcza w zawodzie przy ograniczonej sprawności — a suma powinna odpowiadać temu, co faktycznie tracisz."
+   },
+   {
+    "pytanie": "Czy dyżury w trybie ciągłym zmieniają ocenę ryzyka?",
+    "odpowiedz": "Wpływają na profil obciążenia i warto je opisać. Intensywna terapia noworodka i neonatologia ambulatoryjna to różne rodzaje pracy, mimo tej samej nazwy specjalizacji."
+   }
+  ]
+ },
+ "transplantologia": {
+  "wstep": "Transplantolog pracuje w trybie, którego nie da się zaplanować: pobranie narządu następuje wtedy, gdy pojawia się dawca, niezależnie od pory doby i dnia tygodnia. Czas niedokrwienia narządu liczy się w godzinach.",
+  "dochod": "Kontrakt z ośrodkiem transplantacyjnym, zabiegi przeszczepienia rozliczane za procedurę i gotowość do pobrań. Ośrodków wykonujących przeszczepienia jest w Polsce niewiele, co ogranicza możliwość zmiany miejsca pracy.",
+  "przerwa": "Pacjent na liście oczekujących ma wyznaczony ośrodek, a wezwanie do przeszczepienia przychodzi z kilkugodzinnym wyprzedzeniem. Zespół transplantacyjny musi mieć pełną obsadę w gotowości, więc nieobecność uzupełnia się na stałe. Powrót po dłuższej przerwie wymaga odtworzenia praktyki zabiegowej, bo w tej dziedzinie liczba wykonanych procedur jest warunkiem utrzymania kompetencji.",
+  "ryzyka": [
+   {
+    "tytul": "Skutki pracy w gotowości całodobowej",
+    "opis": "Wezwanie do pobrania może przyjść w każdej chwili i oznacza natychmiastowy wyjazd oraz kilkunastogodzinną pracę. Ten wzorzec — długie okresy oczekiwania przerywane skrajnym natężeniem — jest szczególnie obciążający dla układu krążenia."
+   },
+   {
+    "tytul": "Ekspozycja zawodowa przy pobraniu i przeszczepieniu",
+    "opis": "Wielogodzinne operacje z rozległym polem i dużą ilością krwi, często u dawców o nieustalonym pełnym statusie serologicznym. Ochrona przed zakażeniem krwiopochodnym wymaga osobnej klauzuli."
+   },
+   {
+    "tytul": "Przeciążenie kręgosłupa przy długich zabiegach",
+    "opis": "Operacje przeszczepienia trwają po kilkanaście godzin w pozycji stojącej. Zmiany zwyrodnieniowe kręgosłupa lędźwiowego są w tej specjalizacji następstwem samej długości procedur."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy praca w gotowości całodobowej wpływa na wycenę?",
+    "odpowiedz": "Wpływa na profil zawodowy i warto ją opisać we wniosku. Transplantologia różni się obciążeniem od chirurgii planowej, mimo podobnego zakresu procedur."
+   },
+   {
+    "pytanie": "Wyjeżdżam na pobrania do innych ośrodków — czy to objęte?",
+    "odpowiedz": "Wyjazdy służbowe na terenie Polski są objęte bez dodatkowych warunków. Zgłoszenia wymaga dopiero dłuższy pobyt poza krajem."
+   }
+  ]
+ },
+ "nefrolog": {
+  "wstep": "Nefrolog prowadzi pacjentów dializowanych, których leczenie odbywa się trzy razy w tygodniu, bez przerw i bez możliwości odroczenia. To specjalizacja, w której ciągłość opieki nie jest zaletą, tylko warunkiem przeżycia pacjenta.",
+  "dochod": "Kontrakt ze stacją dializ, konsultacje nefrologiczne i kwalifikacje do przeszczepienia. Stacje dializ działają w systemie zmianowym przez sześć dni w tygodniu, więc obłożenie jest stałe i przewidywalne.",
+  "przerwa": "Stacja dializ nie może pracować bez lekarza nadzorującego, więc nieobecność wypełnia się natychmiast. Pacjenci dializowani są przypisani do stacji, a nie do lekarza, więc nie odchodzą — ale kontrakt nefrologa z operatorem stacji przy dłuższej przerwie bywa nieprzedłużony, bo obsada musi być pewna. Konsultacje prywatne przechodzą do innego specjalisty.",
+  "ryzyka": [
+   {
+    "tytul": "Ekspozycja na krew przy zabiegach na dostępach naczyniowych",
+    "opis": "Zakładanie cewników dializacyjnych i interwencje na przetokach oznaczają kontakt z krwią pod ciśnieniem. Populacja dializowana ma podwyższoną częstość zakażeń wirusami hepatotropowymi, co podnosi wagę klauzuli HIV/WZW."
+   },
+   {
+    "tytul": "Zespoły przeciążeniowe od badań ultrasonograficznych",
+    "opis": "Ocena przetok i nerek przeszczepionych wykonywana głowicą trzymaną pod stałym kątem, przy uniesionym ramieniu. Konflikt podbarkowy rozwija się przy tej czynności wcześnie."
+   },
+   {
+    "tytul": "Przewlekłe obciążenie prowadzeniem chorych nieuleczalnie",
+    "opis": "Trzeba to powiedzieć wprost: następstwa tego obciążenia mieszczą się w kategorii chorób psychicznych, wyłączonej z ochrony. Objęte są wyłącznie skutki somatyczne z odrębnym rozpoznaniem."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Populacja dializowana ma więcej zakażeń — czy to ma znaczenie?",
+    "odpowiedz": "Ma, i jest dobrym powodem, żeby zdecydować się na klauzulę HIV/WZW. Bez niej zakażenie zawodowe pozostaje wyłączone, niezależnie od tego, jak wysokie jest ryzyko w danej populacji pacjentów."
+   },
+   {
+    "pytanie": "Pracuję w stacji dializ na kontrakcie — jaki mam limit?",
+    "odpowiedz": "Kontrakt B2B oznacza limit 80% udokumentowanego dochodu. To najczęstsza forma współpracy nefrologów z operatorami stacji i jednocześnie ta bez zabezpieczenia z ZUS."
+   }
+  ]
+ },
+ "reumatolog": {
+  "wstep": "Reumatolog leczy choroby stawów, wykonując przy tym iniekcje dostawowe pod kontrolą ultrasonografii. Ironia zawodu polega na tym, że sam wykonuje przy tym setki powtarzalnych ruchów, które te same stawy u niego niszczą.",
+  "dochod": "Kontrakt oddziałowy albo poradniany, iniekcje dostawowe rozliczane za procedurę, kwalifikacje do programów lekowych i gabinet prywatny. Programy lekowe wymagają regularnych wizyt kontrolnych o wyznaczonych terminach.",
+  "przerwa": "Pacjent w programie lekowym ma wizyty kwalifikacyjne i kontrolne wpisane w harmonogram programu — ich opuszczenie oznacza przerwanie finansowania terapii. Placówka przekazuje pacjentów innemu reumatologowi natychmiast. Chorzy przewlekli, prowadzeni latami, przechodzą wtedy razem z dokumentacją i zwykle już nie wracają.",
+  "ryzyka": [
+   {
+    "tytul": "Zmiany zwyrodnieniowe własnych stawów rąk",
+    "opis": "Iniekcje dostawowe i badanie palpacyjne stawów, kilkadziesiąt razy dziennie, przez lata. Zmiany w stawach śródręczno-paliczkowych ograniczają precyzję iniekcji zanim dadzą wyraźny ból."
+   },
+   {
+    "tytul": "Przeciążenie kończyny górnej przy ultrasonografii",
+    "opis": "Ocena stawów wymaga trzymania głowicy pod kątem, przy jednoczesnym wykonywaniu iniekcji drugą ręką. Ta koordynacja pod obciążeniem daje neuropatie uciskowe wcześniej niż samo badanie."
+   },
+   {
+    "tytul": "Ekspozycja na leki immunosupresyjne i biologiczne",
+    "opis": "Przygotowanie i nadzór podawania leków biologicznych oraz kontakt z pacjentami w immunosupresji. Ryzyko dotyczy zarówno zakażeń, jak i skutków samej ekspozycji na preparaty."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy zwyrodnienie moich stawów będzie uznane za niezdolność?",
+    "odpowiedz": "Jeśli uniemożliwia wykonywanie iniekcji dostawowych, jest niezdolnością do części zawodu — to sytuacja niezdolności częściowej. Warunkiem pozostaje, żeby schorzenie nie było leczone w ciągu 24 miesięcy przed zawarciem umowy."
+   },
+   {
+    "pytanie": "Prowadzę pacjentów w programach lekowych — czy to wykazać?",
+    "odpowiedz": "Tak, jeśli jest rozliczane. Programy lekowe dają regularny, przewidywalny przychód, który przy wyliczaniu sumy liczy się tak samo jak każde inne udokumentowane źródło."
+   }
+  ]
+ },
+ "dermatolog": {
+  "wstep": "Dermatolog rozpoznaje chorobę patrząc — dermatoskopia jest oceną wzrokową struktur o wielkości dziesiątych części milimetra, w kolorze. Utrata rozróżniania barw kończy tę specjalizację skuteczniej niż jakikolwiek uraz.",
+  "dochod": "Konsultacje ambulatoryjne, zabiegi chirurgii dermatologicznej rozliczane za procedurę, dermatologia estetyczna i praktyka prywatna. Ta ostatnia daje zwykle większość dochodu i jest wolna od jakiegokolwiek zabezpieczenia.",
+  "przerwa": "Pacjent z podejrzeniem czerniaka nie czeka na powrót konkretnego lekarza — trafi do pierwszego dostępnego dermatologa i tam zostanie na kontrole. Zabiegi estetyczne, rezerwowane z wyprzedzeniem i płatne z góry, wymagają zwrotu przy odwołaniu. Przy własnym gabinecie z dermatoskopem cyfrowym i laserem biegną raty za sprzęt.",
+  "ryzyka": [
+   {
+    "tytul": "Nabyte zaburzenia rozróżniania barw",
+    "opis": "Ocena zmian barwnikowych w dermatoskopii opiera się na różnicowaniu odcieni brązu, czerni i błękitu. Zaburzenia widzenia barw, na przykład polekowe albo w przebiegu chorób siatkówki, wykluczają z diagnostyki czerniaka całkowicie."
+   },
+   {
+    "tytul": "Zakażenia skórne przenoszone kontaktowo",
+    "opis": "Badanie palpacyjne zmian skórnych, w tym o etiologii zakaźnej i grzybiczej. Zakażenia własne wykluczają z pracy z pacjentami do czasu wyleczenia, ze względów sanitarnych."
+   },
+   {
+    "tytul": "Ekspozycja na promieniowanie przy fototerapii i laseroterapii",
+    "opis": "Praca przy urządzeniach emitujących promieniowanie ultrafioletowe i laserowe. Uszkodzenie siatkówki przy niepełnej ochronie jest nieodwracalne i kończy pracę z aparaturą."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Nie rozróżniam już odcieni w dermatoskopii — co na to ubezpieczyciel?",
+    "odpowiedz": "Przy dermatologii rozróżnianie barw jest podstawą diagnostyki, więc jego utrata jest niezdolnością do wykonywania tego zawodu — choć w wielu innych zawodach medycznych nie byłaby."
+   },
+   {
+    "pytanie": "Prowadzę też dermatologię estetyczną — czy to zmienia wycenę?",
+    "odpowiedz": "Zmienia profil pracy i warto to opisać. Zabiegi laserowe i iniekcyjne są oceniane inaczej niż konsultacje diagnostyczne, a ubezpieczyciel patrzy na faktycznie wykonywane procedury."
+   }
+  ]
+ },
+ "pediatra": {
+  "wstep": "Pediatra bada dziecko, które nie współpracuje, w pozycji dostosowanej do jego wzrostu, a nie do własnego kręgosłupa. Do tego dochodzi kontakt z kilkudziesięciorgiem małych pacjentów dziennie w sezonie infekcyjnym.",
+  "dochod": "Kontrakt z poradnią podstawowej opieki zdrowotnej, dyżury w izbie przyjęć i gabinet prywatny. Poradnia rozlicza się stawką kapitacyjną za pacjenta, więc przychód praktyki zależy od liczby zadeklarowanych dzieci, a nie od liczby przyjęć.",
+  "przerwa": "Sezon infekcyjny od października do marca to okres, w którym poradnia przyjmuje wielokrotnie więcej pacjentów niż latem — i właśnie wtedy nieobecność kosztuje najwięcej. Rodzice, którzy nie mogli dostać się do swojego pediatry przy gorączce dziecka, zmieniają deklarację, a deklaracja kapitacyjna to przychód na cały kolejny rok. Gabinet prywatny traci pacjentów w tym samym tempie.",
+  "ryzyka": [
+   {
+    "tytul": "Nawracające infekcje dróg oddechowych",
+    "opis": "Kilkadziesiąt kontaktów dziennie z dziećmi w ostrej infekcji, przez cały sezon. Ekspozycja jest w tej specjalizacji najwyższa w całej medycynie ambulatoryjnej, a nawroty wykluczają z pracy wielokrotnie w ciągu roku."
+   },
+   {
+    "tytul": "Przeciążenie kręgosłupa od badania w pochyleniu",
+    "opis": "Badanie niemowlęcia na przewijaku i dziecka na kolanach rodzica wymusza pochylenie i skręt tułowia, wielokrotnie w ciągu dnia. Zespoły bólowe lędźwiowe są tu następstwem geometrii pracy."
+   },
+   {
+    "tytul": "Ubytek słuchu i choroby narządu głosu",
+    "opis": "Praca w hałasie płaczu i podniesionym głosem, przez cały dzień. Oba narządy obciążają się równolegle, a osłuchiwanie dziecka wymaga sprawnego słuchu w zakresie niskich częstotliwości."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Mam praktykę kapitacyjną — jak wykazać dochód?",
+    "odpowiedz": "Przez rozliczenia z płatnikiem za pełny rok. Stawka kapitacyjna daje przychód stabilny, ale utrata deklaracji przekłada się na kolejne dwanaście miesięcy — o czym warto pamiętać przy wyborze sumy."
+   },
+   {
+    "pytanie": "Czy nawracające infekcje mogą być podstawą wypłaty?",
+    "odpowiedz": "Pojedyncza infekcja to zwykle za krótka niezdolność, żeby uruchomić świadczenie po karencji. Podstawą są ich następstwa albo schorzenie przewlekłe, o ile powoduje orzeczoną niezdolność do pracy."
+   }
+  ]
+ },
+ "weterynarz": {
+  "wstep": "Weterynarz jest jedynym lekarzem, którego pacjent może go ugryźć, kopnąć albo przygnieść. Do tego dochodzą choroby odzwierzęce — grupa ryzyk, która w medycynie ludzkiej nie istnieje.",
+  "dochod": "Przyjęcia w lecznicy rozliczane za wizytę i zabieg, wyjazdy do zwierząt gospodarskich rozliczane za kilometr i procedurę, plus dyżury całodobowe. Przy własnej lecznicy dochodzi marża na lekach i karmach.",
+  "przerwa": "Lecznica bez lekarza nie przyjmuje, a właściciel chorego zwierzęcia szuka pomocy tego samego dnia i zwykle zostaje tam, gdzie mu pomogli. Przy obsłudze gospodarstw rolnik nie czeka na powrót swojego weterynarza, bo choroba w stadzie kosztuje go codziennie. Do tego biegną raty za sprzęt diagnostyczny, czynsz i pensje techników.",
+  "ryzyka": [
+   {
+    "tytul": "Pogryzienie, kopnięcie i przygniecenie",
+    "opis": "Badanie zwierzęcia w bólu i w stresie, często bez pełnego unieruchomienia. Kopnięcie przez konia albo krowę daje złamania wielomiejscowe, a pogryzienie przez psa uszkadza ścięgna dłoni — narzędzia pracy."
+   },
+   {
+    "tytul": "Choroby odzwierzęce",
+    "opis": "Bruceloza, leptospiroza, wścieklizna, gorączka Q i grzybice odzwierzęce. To grupa ryzyk charakterystyczna wyłącznie dla tego zawodu, a część z nich daje następstwa przewlekłe utrzymujące się latami."
+   },
+   {
+    "tytul": "Uraz kręgosłupa przy pracy ze zwierzętami dużymi",
+    "opis": "Badanie rektalne u bydła, korekcja racic, pomoc przy porodzie. Praca w wymuszonej pozycji z nagłym obciążeniem jest tu codziennością, a uraz lędźwiowy najczęstszą przyczyną przerwy w pracy."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy pogryzienie przez pacjenta to nieszczęśliwy wypadek?",
+    "odpowiedz": "Tak — zdarzenie nagłe, zewnętrzne i niezależne od Twojej woli spełnia definicję wypadku. Objęte są następstwa urazu, w tym uszkodzenia ścięgien i nerwów dłoni."
+   },
+   {
+    "pytanie": "Choroby odzwierzęce — czy są objęte tak jak inne?",
+    "odpowiedz": "Tak, na zasadach ogólnych: liczy się orzeczona niezdolność do pracy, o ile schorzenie nie było leczone w ciągu dwóch lat przed umową. Wyjątkiem pozostają zakażenia krwiopochodne, dla których przewidziano odrębne warunki szczególne."
+   }
+  ]
+ },
+ "infectolog": {
+  "wstep": "Specjalista chorób zakaźnych pracuje z pacjentami, których izoluje się od reszty szpitala. Ekspozycja nie jest tu ryzykiem ubocznym, tylko treścią zawodu — a lista patogenów zmienia się szybciej niż procedury ochronne.",
+  "dochod": "Kontrakt z oddziałem zakaźnym, konsultacje dla innych oddziałów, prowadzenie pacjentów z zakażeniami przewlekłymi w poradni. Poradnia HIV i hepatologiczna daje stały, przewidywalny przychód związany z pacjentami leczonymi latami.",
+  "przerwa": "Pacjent z zakażeniem przewlekłym ma wizyty kontrolne powiązane z wydawaniem leków w programie terapeutycznym. Opuszczenie ich przerywa ciągłość leczenia, więc poradnia przekazuje pacjentów natychmiast innemu specjalistowi. Konsultacje dla innych oddziałów, wymagające dostępności, przechodzą w tym samym czasie.",
+  "ryzyka": [
+   {
+    "tytul": "Zakażenie zawodowe patogenem krwiopochodnym",
+    "opis": "Praca z pacjentami z rozpoznanym HIV i wirusowym zapaleniem wątroby oznacza, że każde zakłucie ma znaną, wysoką wagę. To jedyna specjalizacja, w której klauzula HIV/WZW nie jest zabezpieczeniem na wypadek, tylko odpowiedzią na ryzyko codzienne."
+   },
+   {
+    "tytul": "Zakażenie patogenem przenoszonym drogą powietrzną",
+    "opis": "Gruźlica lekooporna, odra, ospa wietrzna, choroby importowane. Ochrona zależy od procedur, a te bywają wdrażane po rozpoznaniu, nie przed nim."
+   },
+   {
+    "tytul": "Skutki pracy w środkach ochrony indywidualnej",
+    "opis": "Wielogodzinna praca w kombinezonie i masce z filtrem, przy podwyższonej temperaturze i ograniczonej wentylacji. Obciążenie układu krążenia i odwodnienie są tu czynnikiem realnym, choć rzadko opisywanym."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy przy mojej specjalizacji klauzula HIV/WZW jest w ogóle dostępna?",
+    "odpowiedz": "Jest, ale ubezpieczyciel oceni ryzyko indywidualnie i może zaproponować wyższą składkę. Warto ją wykupić mimo to — bez niej zakażenie zawodowe pozostaje wyłączone, a w tej specjalizacji jest najbardziej prawdopodobnym scenariuszem."
+   },
+   {
+    "pytanie": "Pracuję w oddziale izolacyjnym — czy to zmienia wycenę?",
+    "odpowiedz": "Zmienia i musi być zgłoszone. Zatajenie charakteru pracy jest podstawą do odmowy wypłaty przy szkodzie związanej właśnie z tym ryzykiem, a przy tej specjalizacji jest ono oczywiste."
+   }
+  ]
+ },
+ "wenerolog": {
+  "wstep": "Wenerolog bada i leczy zakażenia przenoszone drogą płciową, pracując bezpośrednio na zmianach chorobowych. Zawód łączy diagnostykę wzrokową z procedurami, przy których kontakt z materiałem zakaźnym jest regułą.",
+  "dochod": "Poradnia dermatologiczno-wenerologiczna w ramach kontraktu, konsultacje prywatne i diagnostyka. Pacjenci prywatni stanowią w tej dziedzinie znaczną część, bo część osób woli leczyć się poza obiegiem publicznym.",
+  "przerwa": "Zakażenie przenoszone drogą płciową wymaga leczenia niezwłocznego, także ze względu na dalszą transmisję. Pacjent nie czeka i trafia do innego specjalisty, a przy leczeniu prywatnym zwykle tam kończy terapię. Kontrola po leczeniu, wyznaczana w konkretnych odstępach, odbywa się już u kogoś innego.",
+  "ryzyka": [
+   {
+    "tytul": "Zakażenie zawodowe przy badaniu i pobraniach",
+    "opis": "Kontakt z materiałem od pacjentów z rozpoznanymi zakażeniami, w tym z HIV i kiłą. Ryzyko zakażeń krwiopochodnych objęte jest wyłącznie osobną klauzulą, a w tej specjalizacji jest ono najwyższe w medycynie ambulatoryjnej."
+   },
+   {
+    "tytul": "Nabyte zaburzenia widzenia barw i ostrości",
+    "opis": "Rozpoznanie opiera się na ocenie wyglądu zmian skórnych i błon śluzowych. Pogorszenie widzenia barwnego utrudnia różnicowanie, które w tej dziedzinie jest podstawą rozpoznania."
+   },
+   {
+    "tytul": "Uczulenie na środki dezynfekcyjne i rękawice",
+    "opis": "Dezynfekcja i zmiana rękawic przy każdym pacjencie, kilkadziesiąt razy dziennie. Wyprysk kontaktowy rąk nawraca przy każdym powrocie do pełnej ekspozycji."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy przy tej specjalizacji klauzula HIV/WZW jest konieczna?",
+    "odpowiedz": "Nie jest obowiązkowa, ale bez niej najbardziej prawdopodobne ryzyko zawodowe pozostaje nieobjęte. Warto o nią wystąpić, licząc się z indywidualną oceną i wyższą składką."
+   },
+   {
+    "pytanie": "Prowadzę pacjentów prywatnie — jak to wykazać?",
+    "odpowiedz": "Przez rozliczenie roczne z działalności, łącznie z kontraktem. Praktyka prywatna nie ma zabezpieczenia z ZUS i to zwykle ona jest głównym powodem, żeby liczyć sumę od całości dochodu."
+   }
+  ]
+ },
+ "toksykolog": {
+  "wstep": "Toksykolog kliniczny prowadzi pacjentów po zatruciach — środkami chemicznymi, lekami, grzybami, gazami. Praca odbywa się w trybie nagłym, a stan pacjenta zmienia się szybciej niż w większości dziedzin medycyny wewnętrznej.",
+  "dochod": "Kontrakt z ośrodkiem toksykologii, dyżury w trybie ciągłym oraz konsultacje telefoniczne dla innych szpitali. Ośrodków toksykologicznych w Polsce jest kilka, więc możliwość zmiany pracodawcy w tej specjalizacji jest ograniczona geograficznie.",
+  "przerwa": "Ośrodek toksykologiczny pełni dyżur regionalny i musi mieć obsadę w trybie ciągłym — braki uzupełnia się natychmiast i na stałe. Konsultacje dla innych szpitali wymagają stałej dostępności telefonicznej, którą przy nieobecności przejmuje kto inny. Przy tak nielicznej specjalizacji powrót po dłuższej przerwie oznacza wejście do zespołu, który przeorganizował grafik dyżurowy.",
+  "ryzyka": [
+   {
+    "tytul": "Wtórna ekspozycja na substancje toksyczne",
+    "opis": "Pacjent zatruty środkiem chemicznym przywozi go na ubraniu i skórze, a przy zatruciach gazami — w wydychanym powietrzu. Dekontaminacja bywa niepełna, a ekspozycja personelu jest w tej specjalizacji zjawiskiem opisanym."
+   },
+   {
+    "tytul": "Skutki pracy w trybie dyżuru ciągłego",
+    "opis": "Zatrucia zdarzają się o każdej porze, a dyżur regionalny obejmuje konsultacje dla całego obszaru. Zaburzenia rytmu dobowego kumulują się przez całą karierę."
+   },
+   {
+    "tytul": "Agresja pacjenta w stanie zatrucia",
+    "opis": "Zatrucia substancjami psychoaktywnymi przebiegają często z pobudzeniem i agresją. Napaść na personel jest tu ryzykiem porównywalnym z oddziałem ratunkowym, a jej następstwa fizyczne są objęte jako wypadek."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy wtórna ekspozycja na substancję toksyczną jest objęta?",
+    "odpowiedz": "Objęta jest niezdolność do pracy wynikająca ze schorzenia, niezależnie od jego przyczyny. Nagłe zatrucie o charakterze zdarzenia zewnętrznego może dodatkowo spełniać definicję nieszczęśliwego wypadku."
+   },
+   {
+    "pytanie": "Moja specjalizacja jest bardzo nieliczna — czy to argument za wyższą sumą?",
+    "odpowiedz": "Tak. Nieliczna specjalizacja oznacza mniej alternatyw zawodowych przy ograniczonej sprawności i często konieczność przeprowadzki, żeby w ogóle pracować w zawodzie."
+   }
+  ]
  }
 }
