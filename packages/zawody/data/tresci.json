@@ -4203,5 +4203,324 @@
     "odpowiedz": "Na podstawie rozliczenia rocznego, które te przerwy już uwzględnia. Przy nierównych latach warto pokazać dwa, żeby średnia nie wypadła z przypadkowo słabego okresu."
    }
   ]
+ },
+ "analityk-danych": {
+  "wstep": "Analityk danych pracuje w rytmie zamknięć: miesiąca, kwartału, roku. Przez trzy tygodnie tempo jest zwyczajne, przez czwarty — nie ma znaczenia, jak się człowiek czuje, bo zarząd dostaje raport w wyznaczonym dniu.",
+  "dochod": "Kontrakt B2B albo etat, coraz częściej uzupełnione o projekty wdrożeniowe rozliczane osobno: budowa hurtowni, migracja raportowania, szkolenia z narzędzi analitycznych.",
+  "przerwa": "Raport zarządczy ma datę wynikającą z kalendarza korporacyjnego, a nie z dostępności autora. Firma, która raz nie dostała danych na czas, buduje redundancję — zatrudnia drugą osobę albo kupuje usługę z zewnątrz. Jedno i drugie zostaje na stałe, bo koszt takiej awarii policzono już raz.",
+  "ryzyka": [
+   {
+    "tytul": "Zespół widzenia komputerowego przy pracy z arkuszami",
+    "opis": "Weryfikacja liczb w gęstych tabelach przez kilkanaście godzin w okresie zamknięcia. Zmęczenie akomodacji obniża zdolność wychwytywania błędów dokładnie wtedy, gdy jest ona najbardziej potrzebna."
+   },
+   {
+    "tytul": "Neuropatia nadgarstka od intensywnej pracy z myszą",
+    "opis": "Praca w arkuszach i narzędziach raportowych to tysiące precyzyjnych ruchów dziennie. Objawy narastają skokowo w okresach zamknięcia i cofają się wolniej po każdym kolejnym."
+   },
+   {
+    "tytul": "Skutki cyklicznego przeciążenia pracą",
+    "opis": "Miesiąc dzieli się na trzy tygodnie normalności i jeden tydzień po czternaście godzin. Ten wzorzec, powtarzany latami, obciąża układ krążenia bardziej niż równomierne wysokie tempo."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy okresy zamknięcia mają znaczenie dla wyceny?",
+    "odpowiedz": "Dla wyceny nie, bo ta opiera się na zawodzie i dochodzie. Mają natomiast znaczenie dla wyboru sumy: przerwa w tygodniu zamknięcia kosztuje wielokrotnie więcej niż w tygodniu spokojnym."
+   },
+   {
+    "pytanie": "Prowadzę projekty wdrożeniowe obok stałej pracy — czy sumować?",
+    "odpowiedz": "Tak, w rozliczeniu rocznym. Projekty wdrożeniowe bywają wyżej wyceniane niż praca bieżąca i ich pominięcie zaniża maksymalną sumę ubezpieczenia."
+   }
+  ]
+ },
+ "data-scientist": {
+  "wstep": "Data Scientist buduje modele, których wynik jest niepewny do końca — eksperyment może po trzech miesiącach pokazać, że hipoteza była błędna. Tę niepewność trzeba wytrzymać zawodowo, a nie tylko intelektualnie.",
+  "dochod": "Kontrakt B2B ze stawką dzienną albo miesięczną, czasem z premią za wdrożenie modelu do produkcji. Część specjalistów prowadzi obok szkolenia i konsultacje wyceniane wyżej niż praca projektowa.",
+  "przerwa": "Projekt badawczy nie ma jednej daty odbioru, tylko serię eksperymentów, z których każdy trwa tygodnie. Wypadnięcie w środku oznacza, że kolejna osoba zaczyna od odtworzenia tego, co już zrobiono — bo wyniki są w notatnikach, a decyzje o odrzuceniu podejść nigdzie nie są zapisane. Zamawiający zwykle uznaje wtedy, że taniej jest zacząć od nowa z innym zespołem.",
+  "ryzyka": [
+   {
+    "tytul": "Zespół widzenia komputerowego",
+    "opis": "Analiza wykresów i macierzy wyników przez cały dzień, przy ocenie różnic rzędu procenta. Zaburzenia akomodacji utrudniają tę ocenę bezpośrednio, zanim staną się dolegliwością."
+   },
+   {
+    "tytul": "Zespoły przeciążeniowe kończyny górnej",
+    "opis": "Programowanie eksperymentów i praca w notatnikach obliczeniowych to ta sama geometria stanowiska co przy klasycznym kodowaniu, tylko z dłuższymi sesjami bez przerwy."
+   },
+   {
+    "tytul": "Skutki siedzącego trybu pracy przy długich sesjach",
+    "opis": "Trenowanie modelu trwa godzinami, a analiza wyników przykuwa do biurka. Ryzyko metaboliczne i zatorowo-zakrzepowe rośnie przy sesjach przekraczających kilka godzin bez wstania."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Mój projekt nie ma jednej daty odbioru — co tracę przy przerwie?",
+    "odpowiedz": "Zwykle całość zaangażowania, bo wiedza o odrzuconych podejściach jest nieudokumentowana i przekazanie projektu bywa droższe niż zaczęcie od nowa. To argument, żeby suma odpowiadała pełnemu dochodowi rocznemu."
+   },
+   {
+    "pytanie": "Pracuję zdalnie dla klienta zagranicznego — czy to problem?",
+    "odpowiedz": "Nie, dopóki mieszkasz i pracujesz w Polsce. Zgłoszenia wymaga dopiero dłuższy pobyt za granicą, niezależnie od tego, gdzie ma siedzibę zamawiający."
+   }
+  ]
+ },
+ "ml-engineer": {
+  "wstep": "Machine Learning Engineer odpowiada za to, żeby model działał w produkcji, a nie tylko w notatniku. To rola pomiędzy badaniami a utrzymaniem systemów, z obowiązkami z obu stron i dyżurem, gdy predykcje zaczynają się psuć.",
+  "dochod": "Kontrakt B2B ze stawką dzienną, w firmach z produktem opartym na modelach zwykle z zapisem o dostępności przy awariach. Wdrożenia i optymalizacje infrastruktury bywają rozliczane jako osobne projekty.",
+  "przerwa": "Model w produkcji degraduje się sam, w miarę jak zmieniają się dane wejściowe — i nikt tego nie zauważy, dopóki ktoś nie patrzy na metryki. Zespół bez inżyniera od uczenia maszynowego traci nadzór nad tym procesem i po kilku tygodniach ma system, który podejmuje coraz gorsze decyzje. Firma reaguje zatrudnieniem kogoś na stałe, bo raz doświadczona cicha awaria jest wystarczającym argumentem.",
+  "ryzyka": [
+   {
+    "tytul": "Skutki gotowości przy awariach systemów predykcyjnych",
+    "opis": "Awaria modelu bywa cicha i wykrywana godzinami po fakcie, co oznacza wywołania o nietypowych porach. Fragmentacja snu ma udokumentowany wpływ na metabolizm, nawet przy niewielkiej liczbie wywołań."
+   },
+   {
+    "tytul": "Zespoły przeciążeniowe od pracy przy terminalu",
+    "opis": "Praca łączy programowanie z obsługą infrastruktury, czyli dwa źródła tego samego obciążenia nadgarstka. Neuropatia uciskowa rozwija się przy sumie tych godzin, nie przy jednej z nich."
+   },
+   {
+    "tytul": "Zespół widzenia komputerowego przy analizie metryk",
+    "opis": "Nadzór nad modelami to obserwacja wykresów i rozkładów przez cały dzień. Utrata zdolności wychwytywania drobnych odchyleń ma tu bezpośrednie przełożenie na jakość pracy."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Bywam wywoływany do awarii w nocy — czy to warto zgłosić?",
+    "odpowiedz": "Warto opisać rzeczywisty tryb pracy, a nie tylko nazwę stanowiska. Praca z gotowością do wywołań ma inny profil obciążenia niż stałe godziny i to jest informacja, którą ubezpieczyciel bierze pod uwagę."
+   },
+   {
+    "pytanie": "Rozliczam wdrożenia jako osobne projekty — czy je wykazywać?",
+    "odpowiedz": "Tak, wszystko w rozliczeniu rocznym. Projekty wdrożeniowe podnoszą udokumentowany dochód, a od niego liczy się maksymalna suma ubezpieczenia."
+   }
+  ]
+ },
+ "ai-engineer": {
+  "wstep": "AI Engineer buduje systemy oparte na modelach językowych, w dziedzinie, w której narzędzia zmieniają się co kilka miesięcy. Utrzymanie kompetencji wymaga ciągłej nauki poza godzinami pracy — a to jest czas, którego nikt nie liczy do wynagrodzenia.",
+  "dochod": "Kontrakt B2B ze stawkami należącymi do najwyższych na rynku technicznym, uzupełniony o doradztwo, szkolenia i wystąpienia. Wysoka stawka wynika z krótkiej podaży kompetencji, a ta zmienia się szybciej niż w innych rolach.",
+  "przerwa": "Trzy miesiące poza rynkiem w tej dziedzinie oznaczają zmianę pokolenia narzędzi. Powrót po dłuższej chorobie to nie tylko nowy kontrakt, ale i nadrobienie tego, co przez ten czas przestało być aktualne — a rozmowy rekrutacyjne sprawdzają właśnie bieżącą wiedzę. Wysoka stawka bierze się z aktualności, więc jej utrata odbija się na wynagrodzeniu, a nie tylko na dostępności zleceń.",
+  "ryzyka": [
+   {
+    "tytul": "Skutki pracy w tempie ciągłej nauki",
+    "opis": "Kilkanaście godzin dziennie między pracą a nadrabianiem zmian w narzędziach, bez wyraźnej granicy. Deficyt snu i brak okresów regeneracji kumulują się latami w tej dziedzinie szybciej niż w rolach o stabilnym zakresie."
+   },
+   {
+    "tytul": "Zespoły przeciążeniowe kończyny górnej",
+    "opis": "Praca wyłącznie przy klawiaturze, z sesjami przedłużanymi ze względu na eksperymenty. Zapalenie ścięgien i neuropatia nadgarstka wyłączają z pracy na tygodnie, a w tej dziedzinie tygodnie mają wagę miesięcy."
+   },
+   {
+    "tytul": "Zespół widzenia komputerowego",
+    "opis": "Analiza wyników modeli i praca z długimi kontekstami tekstowymi przez cały dzień. Zmęczenie akomodacji ogranicza czas efektywnej pracy zanim da wyraźne objawy."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Moja stawka wynika z aktualności wiedzy — czy polisa to uwzględnia?",
+    "odpowiedz": "Suma liczy się od dochodu udokumentowanego w ostatnim okresie, więc odzwierciedla stawkę sprzed choroby. To dobra wiadomość: świadczenie nie spada dlatego, że w trakcie przerwy rynek się zmienił."
+   },
+   {
+    "pytanie": "Prowadzę szkolenia i wystąpienia obok kontraktu — jak to ująć?",
+    "odpowiedz": "Sumujesz z resztą przychodów z działalności. Warto je wykazać, bo bywają istotną częścią dochodu, a suma ubezpieczenia liczy się od całości."
+   }
+  ]
+ },
+ "blockchain-developer": {
+  "wstep": "Blockchain Developer pisze kod, którego po wdrożeniu nie da się poprawić — kontrakt raz opublikowany działa tak, jak został napisany, a błąd oznacza utratę środków bez możliwości cofnięcia. Ta nieodwracalność zmienia charakter pracy bardziej niż sama technologia.",
+  "dochod": "Kontrakt B2B, audyty kontraktów rozliczane za projekt oraz nagrody za wykryte podatności. Audyty i nagrody bywają wyższe niż stawka podstawowa, ale są nieregularne z natury.",
+  "przerwa": "Audyt kontraktu ma termin powiązany z datą uruchomienia projektu, a ta z kolei z rundą finansowania. Zespół, któremu audytor wypadł, nie przesunie uruchomienia — znajdzie innego audytora w ciągu dni. Przy pracy nad własnym protokołem przerwa oznacza zatrzymanie wdrożenia, a w tej branży okno rynkowe zamyka się szybciej niż w klasycznym oprogramowaniu.",
+  "ryzyka": [
+   {
+    "tytul": "Skutki pracy pod presją nieodwracalności",
+    "opis": "Błąd w kodzie kontraktu jest ostateczny i publiczny, a jego skutki finansowe natychmiastowe. Ten rodzaj napięcia jest w tej roli stały, a rozpoznania z kręgu psychicznego są z ochrony wyłączone."
+   },
+   {
+    "tytul": "Zespoły przeciążeniowe kończyny górnej",
+    "opis": "Audyt kodu to wielogodzinne czytanie i notowanie, przy stałym korzystaniu z klawiatury i myszy. Neuropatia uciskowa nadgarstka wyklucza z pracy na tygodnie po zabiegu."
+   },
+   {
+    "tytul": "Zaburzenia snu przy pracy w cyklach globalnych",
+    "opis": "Projekty w tej branży działają w kilku strefach czasowych naraz, a uruchomienia bywają planowane na godziny dogodne dla rynków azjatyckich. Nieregularny rytm dobowy kumuluje skutki metaboliczne."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Nagrody za podatności są nieregularne — czy wchodzą do dochodu?",
+    "odpowiedz": "Wchodzą, o ile są rozliczone i opodatkowane w ramach działalności. Przy nieregularnych przychodach warto pokazać dwa lata, żeby średnia nie wypadła z przypadkowo słabego okresu."
+   },
+   {
+    "pytanie": "Czy odpowiedzialność za błąd w kontrakcie jest objęta polisą?",
+    "odpowiedz": "Nie — to zakres ubezpieczenia odpowiedzialności cywilnej, jeśli je posiadasz. Ta polisa wypłaca świadczenie wyłącznie za Twoją własną niezdolność do pracy i nie ma związku z roszczeniami klientów."
+   }
+  ]
+ },
+ "cloud-architect": {
+  "wstep": "Cloud Architect projektuje infrastrukturę, której koszt rośnie sam, gdy nikt nie patrzy. Migracje prowadzi się w oknach serwisowych, czyli nocą i w weekendy, bo w dzień systemy muszą działać.",
+  "dochod": "Kontrakt B2B ze stawką dzienną, projekty migracyjne rozliczane etapami oraz przeglądy architektury i optymalizacje kosztowe wyceniane osobno. Optymalizacja kosztów chmury bywa rozliczana jako udział w oszczędnościach.",
+  "przerwa": "Migracja ma wyznaczone okno serwisowe uzgodnione z biznesem miesiące wcześniej i zarezerwowane zasoby po obu stronach. Wypadnięcie architekta na dzień przed przełączeniem oznacza odwołanie okna i czekanie na następne, a przy systemach o wysokiej dostępności takie okna są rzadkie. Klient, który raz stracił termin, wprowadza wymóg dwóch osób znających plan — i druga zostaje na stałe.",
+  "ryzyka": [
+   {
+    "tytul": "Skutki pracy w oknach serwisowych",
+    "opis": "Migracje prowadzi się nocą i w weekendy, po czym następnego dnia trwa normalna praca. Ten rytm, powtarzany kilkanaście razy w roku, obciąża układ krążenia i metabolizm mimo pozornie biurowego charakteru pracy."
+   },
+   {
+    "tytul": "Zespół widzenia komputerowego",
+    "opis": "Projektowanie i nadzór nad infrastrukturą to praca z konsolami i diagramami przez cały dzień. Zaburzenia akomodacji ograniczają zdolność pracy z gęstą informacją techniczną."
+   },
+   {
+    "tytul": "Neuropatia nadgarstka",
+    "opis": "Praca z terminalem i narzędziami do infrastruktury jako kodu, przez lata, w tej samej pozycji. Zespół cieśni oznacza sześć do ośmiu tygodni bez pracy przy klawiaturze po zabiegu."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Pracuję nocami przy migracjach — czy to zgłaszać?",
+    "odpowiedz": "Warto opisać rzeczywisty tryb, bo praca w oknach serwisowych to inny profil niż stałe godziny biurowe. Ubezpieczyciel ocenia faktyczny charakter pracy, a nie nazwę stanowiska."
+   },
+   {
+    "pytanie": "Rozliczam się z udziału w oszczędnościach — czy to dochód?",
+    "odpowiedz": "Tak, o ile jest udokumentowany fakturą i rozliczony. Przy takim modelu przychody bywają nierówne, więc warto przedstawić dwa pełne lata."
+   }
+  ]
+ },
+ "solution-architect": {
+  "wstep": "Solution Architect spędza więcej czasu w rozmowach niż w edytorze: warsztaty z klientem, prezentacje przedsprzedażowe, uzgodnienia z zespołami. Jego narzędziem pracy jest w praktyce głos, a nie klawiatura.",
+  "dochod": "Kontrakt B2B, często z częścią wynagrodzenia zależną od pozyskanych projektów. Udział w sukcesie sprzedażowym bywa istotną częścią dochodu i wymaga osobistej obecności przy kliencie.",
+  "przerwa": "Postępowanie przetargowe ma termin składania oferty i wymaga obecności architekta na prezentacji przed komisją. Nieobecność w tym momencie oznacza wypadnięcie z postępowania wartego często kilka milionów, więc firma wystawia kogo innego i to on przejmuje relację z klientem. Relacje z decydentami po stronie klienta są w tej roli głównym kapitałem i nie wracają razem ze zdrowiem.",
+  "ryzyka": [
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Warsztaty i prezentacje po kilka godzin dziennie, często dla sali bez nagłośnienia. Przewlekłe zapalenie krtani i niedomykalność fałdów głosowych wykluczają z tej części pracy, która płaci najlepiej."
+   },
+   {
+    "tytul": "Skutki intensywnych podróży służbowych",
+    "opis": "Kilkaset kilometrów tygodniowo między klientami, noclegi w hotelach i nieregularne posiłki. Skutki metaboliczne i zatorowo-zakrzepowe są przy takim trybie realne i narastają latami."
+   },
+   {
+    "tytul": "Zespoły przeciążeniowe od pracy z dokumentacją",
+    "opis": "Projekty architektury i odpowiedzi na wymagania przetargowe to setki stron przygotowywanych w krótkich terminach. Neuropatia nadgarstka rozwija się mimo mniejszej liczby godzin przy klawiaturze niż u programisty."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Część wynagrodzenia zależy od pozyskanych projektów — czy się liczy?",
+    "odpowiedz": "Liczy się to, co udokumentowane w rozliczeniu rocznym. Przy zmiennej części warto pokazać pełne dwa lata, bo pojedynczy rok bez dużego przetargu zaniżyłby średnią."
+   },
+   {
+    "pytanie": "Dużo podróżuję — czy wypadek w podróży służbowej jest objęty?",
+    "odpowiedz": "Jest, tak samo jak każdy inny wypadek komunikacyjny. Nie ma znaczenia, czy do zdarzenia doszło w drodze do klienta, czy prywatnie."
+   }
+  ]
+ },
+ "architect-it": {
+  "wstep": "Architekt IT podejmuje decyzje, których skutki widać dopiero po dwóch latach — a wtedy zmiana kosztuje wielokrotnie więcej niż jej uniknięcie. Jego praca jest w całości poznawcza i nie zostawia po sobie kodu, tylko dokumenty i ustalenia.",
+  "dochod": "Kontrakt B2B ze stawką należącą do wyższych w branży, uzupełniony o przeglądy architektury i opinie techniczne rozliczane osobno. Część architektów prowadzi obok zajęcia na uczelniach i szkolenia branżowe.",
+  "przerwa": "Decyzje architektoniczne są w toku przez miesiące i zapisane tylko częściowo — reszta jest w głowie i w rozmowach. Zespół pozbawiony architekta idzie dalej po swojemu, a po powrocie okazuje się, że system poszedł w kierunku, którego nie da się już zawrócić bez przepisania. Firmy reagują na to zwykle powołaniem stałego zespołu architektonicznego zamiast jednej osoby.",
+  "ryzyka": [
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Uzgodnienia, przeglądy i prezentacje decyzji zajmują większość dnia roboczego. Obciążenie głosu jest tu porównywalne z pracą wykładowcy, a rzadko brane pod uwagę."
+   },
+   {
+    "tytul": "Zespół widzenia komputerowego",
+    "opis": "Praca z dokumentacją, diagramami i kodem cudzych zespołów, po osiem godzin. Zaburzenia akomodacji ograniczają zdolność pracy z gęstą informacją techniczną zanim staną się dolegliwością."
+   },
+   {
+    "tytul": "Choroby układu krążenia od odpowiedzialności długoterminowej",
+    "opis": "Decyzje o skutkach rozłożonych na lata, podejmowane przy niepełnej informacji. Ten rodzaj obciążenia jest w tej roli stały, a diagnozy z kręgu psychicznego pozostają poza ochroną."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Prowadzę też zajęcia i szkolenia — czy to część dochodu?",
+    "odpowiedz": "Wchodzą do dochodu z działalności razem z kontraktem. Zajęcia dydaktyczne dają zwykle niższą stawkę godzinową, ale są stabilne przez cały rok akademicki i podnoszą udokumentowaną podstawę."
+   },
+   {
+    "pytanie": "Moja praca jest wyłącznie umysłowa — czy składka jest niższa?",
+    "odpowiedz": "Zawody biurowe mają niższą ocenę ryzyka wypadkowego niż fizyczne, co przekłada się na wycenę. Nie znaczy to jednak, że ryzyko zdrowotne jest zerowe — statystycznie dominują tu choroby, a nie urazy."
+   }
+  ]
+ },
+ "business-analyst": {
+  "wstep": "Business Analyst tłumaczy potrzebę biznesową na wymaganie, które da się zaprogramować. Robi to na warsztatach z ludźmi, którzy sami nie do końca wiedzą, czego chcą — czyli głosem, przez kilka godzin dziennie.",
+  "dochod": "Kontrakt B2B ze stawką dzienną albo etat, w projektach wdrożeniowych rozliczanych etapami. Analiza przedwdrożeniowa bywa wyceniana osobno i wyżej niż praca w trakcie projektu.",
+  "przerwa": "Wiedza o tym, dlaczego wymaganie brzmi tak, a nie inaczej, jest w połowie w dokumencie i w połowie w pamięci autora. Zespół deweloperski pozbawiony analityka zaczyna zgadywać, a klient dostaje coś innego niż zamawiał. Firma reaguje wtedy uzupełnieniem składu, bo koszt takiego nieporozumienia policzono raz i wystarczy.",
+  "ryzyka": [
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Warsztaty z klientem trwają po kilka godzin i wymagają ciągłego mówienia, dopytywania i podsumowywania. Niedomykalność fałdów głosowych wyklucza z prowadzenia warsztatów, czyli z rdzenia tej pracy."
+   },
+   {
+    "tytul": "Neuropatia nadgarstka od pisania specyfikacji",
+    "opis": "Specyfikacje wymagań to setki stron pisanych w krótkich terminach po każdym warsztacie. Neuropatia nadgarstka wyłącza z tej pracy na tygodnie."
+   },
+   {
+    "tytul": "Ubytek słuchu",
+    "opis": "Warsztaty prowadzone zdalnie, w słuchawkach, przez większość dnia. Niedosłuch utrudnia wychwytywanie niuansów w wypowiedzi klienta, które w tej roli decydują o trafności wymagania."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Prowadzę warsztaty zdalnie — czy to zmienia ryzyko?",
+    "odpowiedz": "Nie zmienia zasadniczo profilu, ale warto wiedzieć, że praca w słuchawkach przez wiele godzin dziennie obciąża słuch, a to bywa pomijane przy takiej roli."
+   },
+   {
+    "pytanie": "Analizę przedwdrożeniową rozliczam osobno — czy ją wykazywać?",
+    "odpowiedz": "Tak, w łącznym dochodzie rocznym. Ta część bywa wyżej wyceniana niż praca bieżąca i jej pominięcie obniża maksymalną sumę ubezpieczenia."
+   }
+  ]
+ },
+ "product-manager": {
+  "wstep": "Product Manager nie ma zespołu podległego, tylko odpowiedzialność za wynik — a to znaczy, że wszystko załatwia rozmową. Dzień składa się z kilkunastu spotkań, w których trzeba mówić, słuchać i pamiętać.",
+  "dochod": "Etat albo kontrakt B2B, coraz częściej z częścią wynagrodzenia powiązaną z wynikami produktu. Ta zmienna część liczy się od rezultatów okresu, w którym menedżera nie było.",
+  "przerwa": "Produkt bez osoby decydującej o priorytetach nie stoi — idzie w kierunku wyznaczonym przez najgłośniejszego interesariusza. Po miesiącu okazuje się, że plan wygląda inaczej, a decyzje, które trzeba było podjąć, zapadły bez udziału menedżera. Organizacje reagują na to powierzeniem produktu komuś innemu, bo powrót do poprzedniego układu oznaczałby cofnięcie tych decyzji.",
+  "ryzyka": [
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Kilkanaście spotkań dziennie, w tym prezentacje dla zarządu i warsztaty z zespołami. Obciążenie głosu jest w tej roli stałe, a jego utrata wyklucza z pracy natychmiast."
+   },
+   {
+    "tytul": "Ubytek słuchu od pracy w słuchawkach",
+    "opis": "Spotkania zdalne przez większość dnia, przy podniesionym poziomie odsłuchu w hałaśliwym otoczeniu. Niedosłuch w paśmie mowy narasta bezobjawowo przez lata."
+   },
+   {
+    "tytul": "Choroby układu krążenia od odpowiedzialności bez uprawnień",
+    "opis": "Odpowiedzialność za wynik przy braku bezpośredniej władzy nad zespołem to układ obciążający szczególnie mocno. Skutki somatyczne są objęte polisą; rozpoznania psychiatryczne — nie."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Część wynagrodzenia zależy od wyników produktu — czy się liczy?",
+    "odpowiedz": "Liczy się to, co zostało wypłacone i udokumentowane. Przy silnie zmiennej części warto przedstawić dwa pełne lata, żeby suma nie została wyliczona ze słabszego okresu."
+   },
+   {
+    "pytanie": "Pracuję na etacie — czy polisa ma sens przy zasiłku z ZUS?",
+    "odpowiedz": "Ma, jeśli Twoje realne wynagrodzenie jest wyższe niż podstawa wymiaru składek albo jeśli premie stanowią istotną część dochodu. Zasiłek liczy się od podstawy, nie od faktycznych zarobków."
+   }
+  ]
+ },
+ "scrum-master": {
+  "wstep": "Scrum Master nie dowozi zadań ani nie pisze kodu — jego pracą jest to, że zespół działa. Efekt tej pracy widać dopiero wtedy, gdy jej zabraknie, i wtedy trudno go już odbudować.",
+  "dochod": "Kontrakt B2B albo etat, zwykle z obsługą jednego albo dwóch zespołów. Część osób w tej roli prowadzi obok szkolenia i warsztaty zwinne rozliczane osobno.",
+  "przerwa": "Zespół pozostawiony bez facylitacji nie przestaje pracować, tylko wraca do przyzwyczajeń — spotkania się rozjeżdżają, blokady przestają być zgłaszane, a konflikty zostają nierozwiązane. Po miesiącu organizacja widzi to w tempie dostarczania i przydziela zespołowi kogoś innego. Ta rola opiera się na zaufaniu zbudowanym z konkretnymi ludźmi i nie przenosi się razem z powrotem do zdrowia.",
+  "ryzyka": [
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Facylitacja spotkań to mówienie i moderowanie przez kilka godzin dziennie, także przy zespołach rozproszonych. Przewlekłe zapalenie krtani jest w tej roli następstwem samego sposobu pracy."
+   },
+   {
+    "tytul": "Ubytek słuchu",
+    "opis": "Spotkania zdalne w słuchawkach przez większość dnia roboczego. Wychwytywanie napięć i niedopowiedzeń w zespole wymaga sprawnego słuchu bardziej niż w rolach technicznych."
+   },
+   {
+    "tytul": "Skutki pracy w konflikcie",
+    "opis": "Rozwiązywanie sporów w zespole i między zespołem a organizacją jest treścią tej pracy. Skutki somatyczne są objęte ochroną; rozpoznania z kręgu psychicznego pozostają poza nią."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Prowadzę szkolenia obok pracy z zespołem — czy to wykazywać?",
+    "odpowiedz": "Tak, sumuje się z resztą przychodów z działalności. Szkolenia bywają wyżej wyceniane niż praca bieżąca i podnoszą udokumentowany dochód roczny."
+   },
+   {
+    "pytanie": "Moja praca to głównie rozmowy — czy głos jest chroniony?",
+    "odpowiedz": "Chroniona jest niezdolność do wykonywania zawodu, niezależnie od tego, co ją powoduje. Jeśli schorzenie krtani uniemożliwia prowadzenie spotkań, jest to niezdolność do pracy w tym zawodzie."
+   }
+  ]
  }
 }
