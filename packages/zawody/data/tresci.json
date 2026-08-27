@@ -3855,5 +3855,353 @@
     "odpowiedz": "Nie, dopóki pracujesz z terytorium Polski. Znaczenie ma dopiero dłuższy pobyt za granicą, o którym trzeba poinformować ubezpieczyciela przed wyjazdem."
    }
   ]
+ },
+ "devops": {
+  "wstep": "DevOps jest osobą, do której dzwoni pager, gdy produkcja leży o trzeciej w nocy. Dyżur pod telefonem to nie dodatek do pracy, tylko jej istota — i jedyny składnik, którego nie da się przekazać na czas choroby bez zmiany grafiku całego zespołu.",
+  "dochod": "Kontrakt B2B ze stawką dzienną, powiększoną o dodatek za gotowość dyżurową i za wywołania poza godzinami. Dodatek za dyżur bywa jedną czwartą wynagrodzenia i znika w całości, bo osoba na zwolnieniu wypada z rotacji.",
+  "przerwa": "Rotacja dyżurowa w zespole ma zwykle czterech, pięciu ludzi — nieobecność jednego oznacza, że reszta dyżuruje częściej. Zamawiający toleruje to przez dwa tygodnie, potem uzupełnia skład i nie wraca do poprzedniego układu w połowie kwartału. Klauzula wypowiedzenia w kontraktach jest krótka, a dostępność jest w tej roli wpisana w przedmiot umowy wprost.",
+  "ryzyka": [
+   {
+    "tytul": "Zaburzenia snu od dyżurów pod telefonem",
+    "opis": "Tydzień dyżuru to siedem nocy przespanych z telefonem przy łóżku, przerywanych wywołaniami. Fragmentacja snu daje skutki metaboliczne i sercowo-naczyniowe porównywalne z pracą zmianową, choć formalnie nikt tu na zmiany nie chodzi."
+   },
+   {
+    "tytul": "Zespoły przeciążeniowe kończyny górnej",
+    "opis": "Praca z terminalem przez cały dzień, w tempie narzuconym przez incydenty. Neuropatia nadgarstka wyklucza z pracy na sześć do ośmiu tygodni po zabiegu, a incydent nie czeka na rekonwalescencję."
+   },
+   {
+    "tytul": "Skutki przewlekłego napięcia przy awarii",
+    "opis": "Odpowiedzialność za systemy, których przestój liczy się w tysiącach złotych na minutę. Nadciśnienie i zaburzenia rytmu pojawiają się w tej roli wcześnie, a diagnozy z kręgu psychicznego są z ochrony wyłączone."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Dodatek za dyżur to duża część mojego wynagrodzenia — czy się liczy?",
+    "odpowiedz": "Liczy się wszystko, co udokumentowane na fakturach. Przy dyżurach warto wykazać pełny rok, bo dodatek bywa nierówny i pojedynczy miesiąc nie oddaje jego rzeczywistej wartości."
+   },
+   {
+    "pytanie": "Pracuję zdalnie dla firmy zagranicznej — czy ochrona działa?",
+    "odpowiedz": "Działa, o ile mieszkasz i pracujesz z Polski. Siedziba zamawiającego nie ma znaczenia; znaczenie ma Twoje miejsce pobytu, a dłuższy wyjazd trzeba zgłosić."
+   }
+  ]
+ },
+ "administrator-sieci": {
+  "wstep": "Administrator sieci ma jedną nogę w pracy biurowej, a drugą w serwerowni — pomieszczeniu o temperaturze osiemnastu stopni, poziomie hałasu jak przy ruchliwej ulicy i szafach, w których sprzęt waży po kilkanaście kilogramów sztuka.",
+  "dochod": "Kontrakt na obsługę infrastruktury, często dla kilku klientów naraz, plus wdrożenia rozliczane za projekt i gotowość serwisowa zapisana w umowie o poziomie usług. Umowy serwisowe wymagają czasu reakcji liczonego w godzinach.",
+  "przerwa": "Umowa o poziomie usług nie zna pojęcia zwolnienia lekarskiego — jest w niej czas reakcji i kary za jego przekroczenie. Klient, u którego padła sieć i nikt nie odebrał telefonu, rozwiązuje umowę i podpisuje z firmą, która ma zespół zamiast jednej osoby. Przy obsłudze kilku klientów jedna choroba narusza wszystkie umowy równocześnie.",
+  "ryzyka": [
+   {
+    "tytul": "Uraz przy montażu sprzętu w szafie",
+    "opis": "Serwer o wadze dwudziestu kilogramów wsuwany na wysokości powyżej głowy, w wąskiej przestrzeni między szafami. Uszkodzenie barku i kręgosłupa przy tej czynności jest w tej pracy zdarzeniem powtarzalnym."
+   },
+   {
+    "tytul": "Ubytek słuchu od hałasu serwerowni",
+    "opis": "Poziom dźwięku w pomieszczeniu z wentylatorami przekracza wartości wymagające ochrony, a nikt tam ochronników nie nosi. Ubytek w wysokich częstotliwościach narasta bezobjawowo przez lata."
+   },
+   {
+    "tytul": "Skutki pracy w niskiej temperaturze",
+    "opis": "Serwerownie utrzymuje się w osiemnastu stopniach przy silnym nawiewie. Wielogodzinne wdrożenia w takich warunkach kończą się przewlekłymi zapaleniami zatok i dolegliwościami stawowymi."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Obsługuję kilku klientów na umowach serwisowych — jak to wykazać?",
+    "odpowiedz": "Sumujesz wszystkie umowy w rozliczeniu rocznym. Ta konfiguracja jest szczególnie warta ubezpieczenia, bo pojedyncza choroba narusza jednocześnie każdą umowę o poziomie usług, którą podpisałeś."
+   },
+   {
+    "pytanie": "Czy praca fizyczna w serwerowni zmienia ocenę ryzyka?",
+    "odpowiedz": "Zmienia, i warto ją opisać. Administrator pracujący wyłącznie zdalnie i taki, który montuje sprzęt w szafach, mają inny profil — a z nazwy stanowiska to nie wynika."
+   }
+  ]
+ },
+ "cybersecurity": {
+  "wstep": "Specjalista cyberbezpieczeństwa pracuje w rytmie, którego nie wyznacza kalendarz, tylko atakujący. Incydent zaczyna się w piątek wieczorem częściej niż w środę rano i trwa tyle, ile trzeba, żeby go domknąć.",
+  "dochod": "Kontrakt w centrum operacji bezpieczeństwa albo w zespole reagowania, testy penetracyjne rozliczane za projekt i audyty. Testy penetracyjne płacą najlepiej, a wymagają pełnej koncentracji przez kilka tygodni z rzędu.",
+  "przerwa": "Test penetracyjny ma termin wynikający z umowy z klientem i z okna, w którym wolno atakować systemy produkcyjne. Wypadnięcie w trakcie oznacza przerwanie testu i konieczność powtórzenia całości przez inny zespół, bo raport musi być spójny. Klient, który raz przeszedł przez taką sytuację, wraca do poprzedniego wykonawcy rzadko.",
+  "ryzyka": [
+   {
+    "tytul": "Skutki pracy w trybie reagowania na incydenty",
+    "opis": "Kilkadziesiąt godzin ciągłej pracy przy poważnym incydencie, powtarzane nieregularnie kilka razy w roku. Ten wzorzec — długie okresy normalności przerywane skrajnym natężeniem — obciąża układ krążenia bardziej niż stałe wysokie tempo."
+   },
+   {
+    "tytul": "Zaburzenia snu i rytmu dobowego",
+    "opis": "Dyżury w centrum operacji obejmują noce, a incydenty nie mają godzin pracy. Przewlekła fragmentacja snu daje następstwa metaboliczne, które kumulują się przez lata."
+   },
+   {
+    "tytul": "Zespoły przeciążeniowe od wielogodzinnej pracy przy ekranie",
+    "opis": "Analiza logów i ruchu sieciowego to praca wzrokowa w napięciu, przez kilkanaście godzin podczas incydentu. Zespół suchego oka i neuropatia nadgarstka są tu następstwem typowym."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Prowadzę testy penetracyjne — czy to zmienia ocenę ryzyka?",
+    "odpowiedz": "Sam charakter pracy jest biurowy, więc profil fizyczny się nie zmienia. Warto natomiast opisać nieregularny tryb pracy, bo obciążenie w trybie incydentowym różni się od stałego rytmu ośmiogodzinnego."
+   },
+   {
+    "pytanie": "Mam kontrakt i projekty audytowe — jak wykazać dochód?",
+    "odpowiedz": "Łącznie, na podstawie rozliczenia rocznego. Projekty audytowe bywają nierówne w czasie, więc przy wahaniach warto przedstawić dwa lata, żeby średnia nie wypadła przypadkowo nisko."
+   }
+  ]
+ },
+ "security-analyst": {
+  "wstep": "Security Analyst siedzi przed ścianą monitorów w centrum operacji, wychwytując z tysięcy zdarzeń te kilka, które są atakiem. To praca wzrokowa o natężeniu, którego nie ma w żadnej innej roli technicznej, wykonywana na zmiany.",
+  "dochod": "Kontrakt z centrum operacji bezpieczeństwa rozliczany za dyżury, z dodatkiem za zmiany nocne i weekendowe. Praca jest zmianowa z definicji, więc dodatki stanowią stałą, znaczącą część wynagrodzenia.",
+  "przerwa": "Centrum operacji pracuje w trybie ciągłym i grafik musi być obsadzony co do godziny — nie da się zostawić zmiany pustej. Zespół uzupełnia skład natychmiast, a kontrakt osoby nieobecnej dłużej niż miesiąc zwykle nie jest przedłużany na kolejny okres rozliczeniowy, bo obsada musi być pewna.",
+  "ryzyka": [
+   {
+    "tytul": "Zespół widzenia komputerowego",
+    "opis": "Kilkanaście godzin dziennie przy wielu ekranach jednocześnie, przy stałym przenoszeniu wzroku między nimi. Zaburzenia akomodacji i zespół suchego oka rozwijają się w tej roli szybciej niż przy pracy z jednym monitorem."
+   },
+   {
+    "tytul": "Skutki pracy zmianowej w trybie ciągłym",
+    "opis": "Rotacja dzień–noc przez lata, w pomieszczeniu bez dostępu światła dziennego. Zaburzenia metaboliczne i sercowo-naczyniowe są tu udokumentowanym następstwem samego trybu, niezależnie od treści pracy."
+   },
+   {
+    "tytul": "Neuropatia nadgarstka od pracy z myszą",
+    "opis": "Analiza zdarzeń w konsoli oznacza tysiące kliknięć i przewinięć na zmianę. Objawy nocnego drętwienia narastają miesiącami i kończą się zabiegiem."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Praca zmianowa — czy wpływa na wycenę?",
+    "odpowiedz": "Wpływa na profil zawodowy i warto ją zaznaczyć we wniosku. Zmianowość ma udokumentowany wpływ na zdrowie i jest oceniana inaczej niż praca w stałych godzinach."
+   },
+   {
+    "pytanie": "Dodatki nocne to jedna trzecia mojej wypłaty — czy się liczą?",
+    "odpowiedz": "Liczą się, o ile są udokumentowane w rozliczeniu. Przy pracy zmianowej to istotna część dochodu i jej pominięcie zaniża sumę poniżej realnej straty."
+   }
+  ]
+ },
+ "game-developer": {
+  "wstep": "Produkcja gry kończy się okresem, w którym zespół pracuje po dwanaście godzin dziennie przez kilka miesięcy, bo data premiery jest ogłoszona i niezmienialna. To zjawisko ma w branży własną nazwę i własne skutki zdrowotne.",
+  "dochod": "Kontrakt B2B ze studiem, czasem z udziałem w zyskach ze sprzedaży tytułu. Udział w zyskach wypłacany jest po premierze i tylko wtedy, gdy gra zarobi — to nie jest zabezpieczenie, tylko loteria z odroczonym rozstrzygnięciem.",
+  "przerwa": "Wypadnięcie w okresie przed premierą jest najkosztowniejszym momentem w całym cyklu produkcyjnym: zespół jest zsynchronizowany na jedną datę, a każdy brakujący człowiek przekłada się na zakres, który wypadnie z gry. Studio uzupełnia skład natychmiast, a kontraktu nie przedłuża po premierze — co jest naturalnym momentem rozstania i nie wymaga tłumaczeń.",
+  "ryzyka": [
+   {
+    "tytul": "Skutki zdrowotne okresu przedpremierowego",
+    "opis": "Kilka miesięcy po dwanaście godzin dziennie, z weekendami, przed każdą premierą. Skutki metaboliczne i sercowo-naczyniowe kumulują się przy każdym cyklu, a odpoczynek między produkcjami rzadko wystarcza na wyrównanie."
+   },
+   {
+    "tytul": "Zespoły przeciążeniowe kończyny górnej",
+    "opis": "Praca z klawiaturą, myszą i padem testowym, w tempie wymuszonym harmonogramem. Zapalenie ścięgien przy nasilonym obciążeniu potrafi wyłączyć z pracy dokładnie w miesiącu, w którym jest jej najwięcej."
+   },
+   {
+    "tytul": "Zaburzenia widzenia od pracy z ruchomym obrazem",
+    "opis": "Testowanie i strojenie gry oznacza wielogodzinne wpatrywanie się w dynamiczny obraz o wysokiej częstotliwości odświeżania. Zmęczenie akomodacji i objawy migrenowe są tu następstwem częstszym niż przy pracy z tekstem."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Mam udział w zyskach z gry — czy to wchodzi do dochodu?",
+    "odpowiedz": "Wchodzi dopiero po wypłacie i rozliczeniu, bo suma liczy się od dochodu udokumentowanego, a nie od oczekiwanego. Przy nierównych latach warto pokazać dwa albo trzy lata, żeby średnia była miarodajna."
+   },
+   {
+    "pytanie": "Kontrakty kończą się razem z projektem — czy to problem?",
+    "odpowiedz": "Nie, dopóki rok jako całość jest udokumentowany fakturami. Przerwy między produkcjami są w tej branży wpisane w cykl wydawniczy i ubezpieczyciel patrzy na sumę roczną, a nie na ciągłość pojedynczej umowy."
+   }
+  ]
+ },
+ "mobile-developer": {
+  "wstep": "Mobile Developer publikuje przez sklepy, które same wyznaczają terminy: proces weryfikacji trwa swoje, a wersja odrzucona wraca do poprawki z własnym zegarem. Nad harmonogramem wydania stoi więc ktoś zupełnie poza zespołem.",
+  "dochod": "Kontrakt B2B ze stawką dzienną, czasem z premią za wydanie w terminie. Aplikacje własne, publikowane na własny rachunek, dają przychód z reklam i zakupów w aplikacji, który płynie dalej niezależnie od bieżącej pracy.",
+  "przerwa": "Awaria w wydanej wersji aplikacji mobilnej jest gorsza niż w serwisie webowym: poprawki nie da się wypchnąć natychmiast, bo czeka na weryfikację sklepu, a użytkownicy w tym czasie zostawiają jednogwiazdkowe oceny. Zamawiający, który przez tydzień nie ma kto poprawić awarii, przenosi utrzymanie aplikacji do software house'u z zespołem i już go nie zabiera.",
+  "ryzyka": [
+   {
+    "tytul": "Zespoły przeciążeniowe kciuka i nadgarstka",
+    "opis": "Testowanie na urządzeniach oznacza godziny obsługi ekranu dotykowego kciukiem, obok pracy z klawiaturą. To dodatkowe obciążenie stawu nadgarstkowo-śródręcznego kciuka, nieobecne przy programowaniu wyłącznie na komputerze."
+   },
+   {
+    "tytul": "Zaburzenia akomodacji od pracy z małym ekranem",
+    "opis": "Praca na urządzeniu trzymanym w odległości trzydziestu centymetrów, przeplatana patrzeniem na monitor. Ciągłe przestawianie ostrości między dwoma dystansami męczy akomodację szybciej niż praca na jednym."
+   },
+   {
+    "tytul": "Presja publicznych ocen — skutki poza zakresem polisy",
+    "opis": "Oceny użytkowników są w tej roli publiczne, natychmiastowe i osobiste. Trzeba powiedzieć wprost: następstwa tego obciążenia mieszczą się w kategorii wyłączonej z ochrony we wszystkich wariantach polisy."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Mam własne aplikacje z przychodem pasywnym — jak to ująć?",
+    "odpowiedz": "Wykazujesz je w łącznym dochodzie, ale warto wiedzieć, że akurat ta część płynie dalej mimo choroby. Realna strata jest więc niższa niż całość dochodu i suma może to uwzględniać."
+   },
+   {
+    "pytanie": "Pracuję dla klienta z innej strefy czasowej — czy to ma znaczenie?",
+    "odpowiedz": "Dla zakresu ochrony nie, o ile pracujesz z Polski. Warto natomiast pamiętać, że praca w cudzych godzinach ma udokumentowany wpływ na sen, a to już przekłada się na zdrowie."
+   }
+  ]
+ },
+ "frontend-developer": {
+  "wstep": "Frontend Developer odpowiada za to, co użytkownik faktycznie widzi — łącznie z kontrastem, czytelnością i tym, czy interfejs da się obsłużyć bez myszy. Ocena tych rzeczy odbywa się wzrokiem i nie ma dla niej narzędzia zastępczego.",
+  "dochod": "Kontrakt B2B ze stawką dzienną albo rozliczenie za etapy. Część frontendowców prowadzi obok tego szkolenia i kursy, które dają przychód odroczony, płynący jeszcze przez jakiś czas po zaprzestaniu pracy.",
+  "przerwa": "Interfejs jest tą częścią systemu, którą widać z zewnątrz — jego awaria jest natychmiast zauważalna dla klienta zamawiającego. Zespół przejmuje zadania w ciągu dni, a przy kontrakcie z krótkim wypowiedzeniem dłuższa nieobecność kończy się zastąpieniem, bo zamawiający potrzebuje ciągłości w warstwie, którą ogląda codziennie.",
+  "ryzyka": [
+   {
+    "tytul": "Nabyte zaburzenia rozróżniania barw i kontrastu",
+    "opis": "Ocena zgodności interfejsu z wymaganiami dostępności opiera się na rozróżnianiu kontrastu i barw. Nabyte zaburzenia w tym zakresie odbierają zdolność do samodzielnej oceny efektu pracy, mimo zachowanej ostrości widzenia."
+   },
+   {
+    "tytul": "Zespół widzenia komputerowego",
+    "opis": "Osiem godzin przy monitorze o wysokiej jasności, z częstym przełączaniem między kodem a podglądem. Zespół suchego oka i zmęczenie akomodacji ograniczają czas pracy zanim dadzą wyraźny ból."
+   },
+   {
+    "tytul": "Neuropatia nadgarstka i zapalenie nadkłykcia",
+    "opis": "Klawiatura i mysz przez cały dzień, przez lata, przy niezmiennej pozycji przedramienia. Zabieg z powodu zespołu cieśni oznacza sześć do ośmiu tygodni bez pisania kodu."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy zaburzenia widzenia barw wykluczą mnie z zawodu?",
+    "odpowiedz": "Ocena dotyczy zdolności do wykonywania konkretnego zawodu. Przy frontendzie kontrola kontrastu i barwy jest częścią pracy, więc jej utrata może stanowić niezdolność częściową — warto opisać we wniosku, jaka część obowiązków tego dotyczy."
+   },
+   {
+    "pytanie": "Prowadzę też kursy — czy ten przychód się liczy?",
+    "odpowiedz": "Liczy się w łącznym dochodzie. Przychód z kursów płynie zwykle dalej mimo przerwy w pracy, więc realna strata bywa niższa niż całość — i o tym warto pamiętać przy wyborze sumy."
+   }
+  ]
+ },
+ "backend-developer": {
+  "wstep": "Backend Developer utrzymuje warstwę, której użytkownik nie widzi, dopóki nie przestanie działać. Awaria bazy albo kolejki nie czeka do poniedziałku, więc gotowość do wejścia w system o nietypowej porze jest tu częścią umowy.",
+  "dochod": "Kontrakt B2B ze stawką dzienną, zwykle z zapisem o dostępności w razie awarii krytycznych. Część backendowców prowadzi obok konsultacje wydajnościowe rozliczane osobno i wyżej.",
+  "przerwa": "Wiedza o tym, dlaczego dany system działa tak, a nie inaczej, siedzi u backendowca w głowie i nie ma jej w dokumentacji. Zespół, który przez miesiąc grzebie w cudzym kodzie bez autora, przestaje ufać tej części systemu i planuje jej przepisanie — a to oznacza, że po powrocie nie ma do czego wracać. Kontrakty w tej roli mają krótkie wypowiedzenia.",
+  "ryzyka": [
+   {
+    "tytul": "Skutki gotowości do reagowania na awarie",
+    "opis": "Zapis o dostępności przy awariach krytycznych oznacza w praktyce telefon przy łóżku. Fragmentacja snu ma udokumentowany wpływ na metabolizm i układ krążenia, nawet jeśli wywołań jest kilka w miesiącu."
+   },
+   {
+    "tytul": "Zespoły przeciążeniowe kończyny górnej",
+    "opis": "Praca z klawiaturą przez cały dzień, przy pozycji przedramienia niezmiennej przez lata. Zapalenie nadkłykcia bocznego i neuropatia nadgarstka to następstwa typowe, wyłączające z pisania na tygodnie."
+   },
+   {
+    "tytul": "Choroby układu krążenia od siedzącego trybu pracy",
+    "opis": "Osiem do dziesięciu godzin w pozycji siedzącej, bez ruchu, przy podwyższonym napięciu w okresach wdrożeniowych. Ryzyko metaboliczne narasta latami i ujawnia się jednym zdarzeniem."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Kontrakt ma zapis o dostępności przy awariach — czy to ryzyko zawodowe?",
+    "odpowiedz": "Dla ubezpieczyciela liczy się faktyczny tryb pracy, a nie zapis w umowie. Jeśli realnie bywasz wywoływany w nocy, warto to opisać — to inny profil obciążenia niż praca w stałych godzinach."
+   },
+   {
+    "pytanie": "Prowadzę konsultacje obok kontraktu — czy sumować?",
+    "odpowiedz": "Tak, wszystko z rozliczenia rocznego. Konsultacje bywają wyżej wycenione niż stawka kontraktowa i ich pominięcie zaniża sumę ubezpieczenia."
+   }
+  ]
+ },
+ "fullstack-developer": {
+  "wstep": "Fullstack Developer jest w małym zespole często jedyną osobą, która rozumie całość — od interfejsu po bazę i wdrożenie. Ta szerokość jest jego przewagą przy negocjowaniu stawki i jego problemem przy chorobie, bo nie ma kogo poprosić o zastępstwo.",
+  "dochod": "Kontrakt B2B, zwykle w małym zespole albo u klienta bez własnego działu technicznego. Stawka jest wyższa niż przy wąskiej specjalizacji właśnie dlatego, że jedna osoba zastępuje dwie albo trzy.",
+  "przerwa": "U klienta, dla którego jesteś jedyną osobą techniczną, nieobecność zatrzymuje wszystko naraz: wydania, poprawki i wdrożenia. Firma reaguje zwykle najszybciej, jak potrafi — podpisuje umowę z software house'em, który daje zespół zamiast jednej osoby. To rozwiązanie raz wprowadzone rzadko się wycofuje, bo eliminuje właśnie ten problem.",
+  "ryzyka": [
+   {
+    "tytul": "Zespoły przeciążeniowe od pracy w kilku rolach",
+    "opis": "Szerokość obowiązków oznacza dłuższy dzień pracy, nie inny jego rodzaj. Kumulacja godzin przy klawiaturze przekłada się na neuropatie uciskowe wcześniej niż przy wąskiej specjalizacji."
+   },
+   {
+    "tytul": "Skutki braku możliwości przekazania zadań",
+    "opis": "Praca bez zastępowalności oznacza pracę także wtedy, gdy człowiek jest chory. Odkładanie leczenia z tego powodu jest w tej roli zjawiskiem realnym i przekłada się na cięższy przebieg tego, co odłożono."
+   },
+   {
+    "tytul": "Zespół widzenia komputerowego",
+    "opis": "Praca przy ekranie przez cały dzień roboczy, z częstym przełączaniem między środowiskami i konsolą. Zaburzenia akomodacji ograniczają wydajność zanim staną się dolegliwością."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Jestem jedyną osobą techniczną u klienta — czy to argument za wyższą sumą?",
+    "odpowiedz": "Jest, bo nie ma zastępstwa i ryzyko utraty kontraktu przy dłuższej przerwie jest wyższe niż w zespole. Suma powinna odpowiadać temu, co realnie tracisz, a nie średniej rynkowej dla stanowiska."
+   },
+   {
+    "pytanie": "Rozliczam się fakturą — jaki mam limit świadczenia?",
+    "odpowiedz": "Kontrakt B2B daje limit osiemdziesięciu procent udokumentowanego dochodu. To najwyższy dostępny próg i dotyczy właśnie tej formy współpracy."
+   }
+  ]
+ },
+ "tester": {
+  "wstep": "Tester oprogramowania wykonuje w ciągu dnia setki powtarzalnych sekwencji: kliknięcie, weryfikacja, zapis wyniku. To praca, w której obciążenie bierze się nie z natężenia, tylko z monotonii ruchu.",
+  "dochod": "Kontrakt B2B albo umowa z software housem, rozliczane za dzień pracy. Testerzy automatyzujący dostają wyższą stawkę niż manualni, ale pracują w tym samym rytmie wydań, którego nie da się przesunąć.",
+  "przerwa": "Testy są ostatnim etapem przed wydaniem i mają najmniej zapasu w harmonogramie — całe opóźnienie z wcześniejszych etapów kumuluje się właśnie tutaj. Nieobecność testera przed wydaniem oznacza albo przesunięcie daty, albo wypuszczenie wersji bez pełnej weryfikacji. Zespół, który raz musiał wybierać, uzupełnia skład i nie wraca do poprzedniego układu.",
+  "ryzyka": [
+   {
+    "tytul": "Neuropatia nadgarstka od powtarzalnych sekwencji",
+    "opis": "Kilkaset kliknięć na godzinę, w tym samym układzie ruchu, przez cały dzień. Zespół cieśni nadgarstka rozwija się przy monotonii szybciej niż przy pracy zmiennej, mimo mniejszej siły."
+   },
+   {
+    "tytul": "Zespół widzenia komputerowego",
+    "opis": "Weryfikacja wizualna wymaga wychwytywania drobnych różnic na ekranie, przez osiem godzin. Zmęczenie akomodacji obniża skuteczność wykrywania błędów zanim da objawy."
+   },
+   {
+    "tytul": "Zespoły bólowe odcinka szyjnego",
+    "opis": "Praca w jednej pozycji, z wzrokiem utkwionym w ekranie i minimalnym ruchem tułowia. Zmiany zwyrodnieniowe szyjne z drętwieniem rąk są tu następstwem samego bezruchu."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Rozliczam się z software housem umową zlecenie — jaki mam limit?",
+    "odpowiedz": "Umowa zlecenie oznacza limit sześćdziesięciu pięciu procent udokumentowanego dochodu. Do osiemdziesięciu procent dochodzą tylko osoby prowadzące działalność i rozliczające się fakturą."
+   },
+   {
+    "pytanie": "Czy zespół cieśni nadgarstka będzie objęty?",
+    "odpowiedz": "Objęty, o ile nie był leczony w ciągu dwóch lat przed zawarciem umowy. Przy dolegliwościach narastających powoli warto ubezpieczyć się zanim pierwsza wizyta u ortopedy trafi do dokumentacji."
+   }
+  ]
+ },
+ "ux-designer": {
+  "wstep": "UX Designer sprawdza, czy interfejs działa dla ludzi, którzy widzą gorzej, słyszą gorzej albo nie używają myszy. Ironia zawodu polega na tym, że sam ocenia to własnym wzrokiem i własną sprawnością.",
+  "dochod": "Kontrakt B2B albo umowa z agencją, rozliczane za projekt lub za dzień. Badania z użytkownikami, warsztaty i audyty dostępności rozlicza się osobno i wyżej niż samo projektowanie.",
+  "przerwa": "Badanie z użytkownikami ma umówionych uczestników, zarezerwowaną salę i harmonogram wpisany do umowy — przesunięcie oznacza rekrutację uczestników od nowa i koszt, który klient policzy. Warsztaty z zespołem klienta rezerwuje się z miesięcznym wyprzedzeniem i przy odwołaniu prowadzi je kto inny, bo terminy całego zespołu już są zablokowane.",
+  "ryzyka": [
+   {
+    "tytul": "Nabyte zaburzenia rozróżniania barw",
+    "opis": "Ocena kontrastu i czytelności zgodnie z wytycznymi dostępności opiera się na rozróżnianiu barw i jasności. Ich utrata odbiera zdolność do samodzielnej weryfikacji efektu pracy, mimo pełnej ostrości widzenia."
+   },
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Warsztaty i badania z użytkownikami to kilka godzin mówienia dziennie, często dla sali. Przewlekłe zapalenie krtani jest tu następstwem obciążenia, nie infekcji, i wyklucza z tej najlepiej płatnej części pracy."
+   },
+   {
+    "tytul": "Zespoły przeciążeniowe od pracy z tabletem i myszą",
+    "opis": "Projektowanie interfejsu to praca w narzędziu graficznym przez cały dzień, przy precyzyjnym ruchu nadgarstka. Neuropatia uciskowa wyklucza z projektowania na tygodnie."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy utrata rozróżniania barw to niezdolność w moim zawodzie?",
+    "odpowiedz": "Przy projektowaniu i audytach dostępności ocena kontrastu jest czynnością zawodową, więc jej utrata może stanowić niezdolność częściową. Warto rozpisać we wniosku, jaka część dochodu pochodzi z audytów, a jaka z innych zadań."
+   },
+   {
+    "pytanie": "Prowadzę warsztaty dla klientów — czy to osobne źródło?",
+    "odpowiedz": "Sumuje się z resztą przychodów z działalności. Warto je wykazać, bo warsztaty i badania są zwykle wyżej wyceniane niż samo projektowanie i podnoszą maksymalną sumę ubezpieczenia."
+   }
+  ]
+ },
+ "developer": {
+  "wstep": "Developer bez wąskiej specjalizacji pracuje tam, gdzie akurat jest potrzeba — raz przy interfejsie, raz przy integracji, raz przy poprawkach w systemie, którego nikt już nie rozumie. Elastyczność jest tu przewagą, dopóki jest zdrowie.",
+  "dochod": "Kontrakt B2B ze stawką dzienną albo miesięczną. Stawki dla developera bez wąskiej specjalizacji są niższe niż dla wyspecjalizowanych ról, ale zleceń jest więcej i łatwiej o kolejne po zakończeniu projektu.",
+  "przerwa": "Projekt informatyczny ma harmonogram uzgodniony z biznesem i budżet rozpisany na miesiące. Osoba, która wypada na dłużej, zostaje zastąpiona kimś z rynku, bo w tej roli zastępowalność jest największą zaletą i największym zagrożeniem naraz. Wejście na nowy kontrakt po powrocie zajmuje zwykle od miesiąca do trzech, licząc rekrutację i okres wypowiedzenia u poprzedniego zleceniodawcy.",
+  "ryzyka": [
+   {
+    "tytul": "Zespoły przeciążeniowe kończyny górnej",
+    "opis": "Klawiatura i mysz przez osiem godzin dziennie, przez lata, przy tej samej geometrii stanowiska. Zapalenie pochewek ścięgnistych nawraca przy każdym powrocie do pełnego obciążenia."
+   },
+   {
+    "tytul": "Zespół widzenia komputerowego",
+    "opis": "Praca wzrokowa na bliskim dystansie przez cały dzień. Zaburzenia akomodacji i zespół suchego oka ograniczają czas efektywnej pracy zanim staną się dolegliwością wymagającą leczenia."
+   },
+   {
+    "tytul": "Choroby metaboliczne od siedzącego trybu życia",
+    "opis": "Osiem godzin bez ruchu, często przedłużanych o wieczorne projekty własne. Ryzyko cukrzycy i chorób sercowo-naczyniowych narasta latami i realizuje się jednym zdarzeniem po czterdziestce."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Znajdę nowy kontrakt szybko — czy potrzebuję ubezpieczenia?",
+    "odpowiedz": "Znajdziesz, dopóki jesteś zdrowy. Polisa dotyczy sytuacji, w której to właśnie zdrowie uniemożliwia szukanie i przyjęcie nowego zlecenia — a wtedy łatwość zmiany pracy przestaje mieć znaczenie."
+   },
+   {
+    "pytanie": "Mam przerwy między kontraktami — jak liczyć dochód?",
+    "odpowiedz": "Na podstawie rozliczenia rocznego, które te przerwy już uwzględnia. Przy nierównych latach warto pokazać dwa, żeby średnia nie wypadła z przypadkowo słabego okresu."
+   }
+  ]
  }
 }
