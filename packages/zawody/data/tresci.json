@@ -174,31 +174,31 @@
   ]
  },
  "ksiegowy": {
-  "wstep": "Księgowy nie może zachorować w marcu. Terminy sprawozdawcze są ustawowe i nie przesuwają się z powodu choroby osoby, która prowadzi księgi — a odpowiedzialność za ich dotrzymanie spoczywa na biurze rachunkowym.",
-  "dochod": "Biuro rachunkowe żyje z miesięcznych ryczałtów za obsługę klientów. To dochód pozornie odporny na przerwę, ale tylko do momentu, w którym klient nie dostanie deklaracji na czas. Wtedy odchodzi, a z nim ryczałt na następne lata.",
-  "przerwa": "Nieobecność w okresie zamknięcia roku ma inną cenę niż w lipcu. Zaległości narastają kumulacyjnie: nieoddany JPK, niezłożony CIT, niewysłane deklaracje ZUS za kilkudziesięciu klientów naraz. Po powrocie trzeba nadrobić wszystko jednocześnie, przy bieżących terminach, które w tym czasie też nadeszły. Do tego dochodzi ryzyko kar, za które biuro odpowiada wobec klienta.",
+  "wstep": "Księgowy prowadzący biuro rachunkowe odpowiada wobec klientów za terminy, których nie da się przesunąć: deklaracje, JPK, składki, zamknięcia. Ustawa nie przewiduje wyjątku na chorobę osoby prowadzącej księgi.",
+  "dochod": "Miesięczne ryczałty za obsługę klientów, rozliczenia roczne wyceniane osobno oraz usługi dodatkowe: kadry, płace, obsługa kontroli. Ryczałty dają stabilność, dopóki klient dostaje deklaracje na czas.",
+  "przerwa": "Terminy podatkowe i składkowe kumulują się: nieoddany JPK w jednym miesiącu nie znika, tylko dokłada się do następnego. Po powrocie trzeba nadrobić wszystko naraz, przy bieżących terminach, które w tym czasie też nadeszły. Klient obciążony karą za spóźnienie ma roszczenie do biura i odchodzi, a ryczałt to przychód na cały kolejny rok.",
   "ryzyka": [
    {
-    "tytul": "Sezonowa kumulacja obciążenia",
-    "opis": "Styczeń, marzec i kwiecień to miesiące, w których tydzień niezdolności kosztuje więcej niż miesiąc w wakacje. To ryzyko organizacyjne, nie medyczne, ale wpływa na wysokość realnej straty bardziej niż większość chorób."
+    "tytul": "Skutki kumulacji terminów ustawowych",
+    "opis": "Dwudziesty i dwudziesty piąty dzień miesiąca oraz okres zamknięcia roku to obciążenie, którego nie da się rozłożyć. Powtarzane co miesiąc przez całą karierę, przekłada się na nadciśnienie i zaburzenia rytmu."
    },
    {
-    "tytul": "Zespół suchego oka i zaburzenia akomodacji",
-    "opis": "Praca z dokumentami i arkuszami po kilkanaście godzin dziennie w okresach szczytu. Nie brzmi groźnie, dopóki nie okaże się, że po czterech godzinach przy ekranie tekst przestaje być czytelny."
+    "tytul": "Zespół widzenia komputerowego przy weryfikacji dokumentów",
+    "opis": "Uzgadnianie sald i sprawdzanie dokumentów źródłowych przez kilkanaście godzin w okresach szczytu. Zmęczenie akomodacji zwiększa ryzyko błędu w momencie, gdy jest on najdroższy."
    },
    {
-    "tytul": "Choroby układu krążenia na tle przewlekłego stresu",
-    "opis": "Odpowiedzialność karno-skarbowa za cudze rozliczenia, kumulowana przez lata. Nadciśnienie i zaburzenia rytmu w tej grupie zawodowej rozwijają się wcześnie i bywają pierwszym sygnałem po czterdziestce."
+    "tytul": "Neuropatia nadgarstka od wprowadzania dokumentów",
+    "opis": "Księgowanie to tysiące powtarzalnych sekwencji na klawiaturze numerycznej dziennie. Zespół cieśni rozwija się przy monotonii ruchu szybciej niż przy pracy zmiennej."
    }
   ],
   "pytania": [
    {
-    "pytanie": "Mam OC biura rachunkowego — czy to nie wystarczy?",
-    "odpowiedz": "OC pokrywa szkodę wyrządzoną klientowi, na przykład karę za błędne rozliczenie. Nie wypłaci ani złotówki, gdy to Ty nie możesz pracować i biuro stoi. Te dwa ubezpieczenia nie mają wspólnego zakresu."
+    "pytanie": "Kto odpowiada za kary klienta, jeśli zachoruję?",
+    "odpowiedz": "Wobec klienta odpowiada biuro, a szkodę pokrywa obowiązkowe OC biura rachunkowego, jeśli je posiadasz. Ta polisa nie ma z tym związku — wypłaca świadczenie za Twoją niezdolność do pracy."
    },
    {
-    "pytanie": "Zatrudniam dwie osoby — czy firma nie poradzi sobie beze mnie?",
-    "odpowiedz": "Właśnie dlatego przy zatrudniających ubezpieczyciel pyta o Twój wkład w przychód firmy. Jeśli pracownicy mogą prowadzić księgi bez Ciebie, suma ubezpieczenia będzie niższa — i to jest uczciwe, bo strata też będzie niższa."
+    "pytanie": "Zatrudniam księgowe — czy firma nie poradzi sobie beze mnie?",
+    "odpowiedz": "Właśnie dlatego wniosek pyta o Twój wkład w przychód. Jeśli pracownice mogą prowadzić księgi samodzielnie, biuro zarabia dalej i suma będzie liczona od tej części dochodu, która realnie znika."
    }
   ]
  },
@@ -4520,6 +4520,499 @@
    {
     "pytanie": "Moja praca to głównie rozmowy — czy głos jest chroniony?",
     "odpowiedz": "Chroniona jest niezdolność do wykonywania zawodu, niezależnie od tego, co ją powoduje. Jeśli schorzenie krtani uniemożliwia prowadzenie spotkań, jest to niezdolność do pracy w tym zawodzie."
+   }
+  ]
+ },
+ "doradca-podatkowy": {
+  "wstep": "Doradca podatkowy podpisuje opinie i pełnomocnictwa własnym numerem wpisu, a jego odpowiedzialność za skutki porady jest osobista i objęta obowiązkowym ubezpieczeniem. Terminy w postępowaniach podatkowych są zawite i nie zatrzymują się na czas choroby pełnomocnika.",
+  "dochod": "Stała obsługa podatkowa na ryczałcie, opinie i interpretacje wyceniane jednostkowo oraz reprezentacja w postępowaniach i przed sądami administracyjnymi. Sprawy sporne płacą najlepiej i wymagają obecności na rozprawach.",
+  "przerwa": "Odwołanie od decyzji ma czternaście dni, skarga do sądu administracyjnego trzydzieści — terminów nie przywraca się z powodu choroby pełnomocnika, tylko strony. Klient, który stracił termin, ma roszczenie do doradcy i jego ubezpieczyciela, a przy stałej obsłudze wypowiada umowę w pierwszym możliwym terminie. Wpis na listę i obowiązkowe OC opłaca się niezależnie.",
+  "ryzyka": [
+   {
+    "tytul": "Choroby układu krążenia od odpowiedzialności finansowej",
+    "opis": "Błąd w opinii podatkowej przekłada się na zobowiązanie klienta liczone czasem w milionach. Ta ekspozycja jest w zawodzie stała, a nie związana z pojedynczą sprawą."
+   },
+   {
+    "tytul": "Przeciążenie nadgarstka od przygotowywania pism",
+    "opis": "Analiza akt postępowania i przygotowanie pism to setki stron miesięcznie, w terminach liczonych w dniach. Neuropatia nadgarstka wyklucza z pisania dokładnie wtedy, gdy termin biegnie."
+   },
+   {
+    "tytul": "Pogorszenie ostrości widzenia bliskiego",
+    "opis": "Praca z dokumentacją księgową i przepisami przez większość dnia, na papierze i ekranie. Zaburzenia akomodacji podnoszą ryzyko przeoczenia szczegółu, który w tej pracy decyduje o wyniku."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy obowiązkowe OC doradcy pokrywa moją niezdolność do pracy?",
+    "odpowiedz": "Nie. OC odpowiada za szkodę wyrządzoną klientowi wskutek błędu. Ta polisa wypłaca świadczenie za sam fakt, że nie możesz pracować — zakresy są rozłączne i jedno nie zastępuje drugiego."
+   },
+   {
+    "pytanie": "Mam stałą obsługę i sprawy sporne — jak wykazać dochód?",
+    "odpowiedz": "Sumujesz obsługę stałą i sprawy sporne na podstawie zeznania rocznego. Reprezentacja w postępowaniach bywa nierówno rozłożona w czasie, więc przy silnych wahaniach warto przedstawić dwa pełne lata zamiast jednego."
+   }
+  ]
+ },
+ "doradca-finansowy": {
+  "wstep": "Doradca finansowy zarabia na zaufaniu, które buduje się latami i przenosi wraz z klientem, a nie z firmą. Przerwa w kontakcie jest tu kosztowniejsza niż w większości zawodów, bo klient szuka wtedy kogoś, kto odbiera telefon.",
+  "dochod": "Prowizje od zawartych umów, wypłacane po ich uruchomieniu, oraz prowizje odnawialne od portfela już obsługiwanego. Ta druga część płynie dalej przez jakiś czas po zaprzestaniu pracy, ale wygasa razem z odejściem klientów.",
+  "przerwa": "Klient z decyzją kredytową albo inwestycyjną w toku ma terminy narzucone przez bank lub instytucję — nie odłoży ich o miesiąc. Przejdzie do innego doradcy i zabierze ze sobą cały portfel, bo relacja jest osobista. Prowizje odnawialne wygasają wtedy w ciągu kilku okresów rozliczeniowych i strata z przerwy ujawnia się dopiero po pół roku.",
+  "ryzyka": [
+   {
+    "tytul": "Skutki intensywnych dojazdów do klientów",
+    "opis": "Spotkania w domach i biurach klientów oznaczają kilkaset kilometrów tygodniowo. Wypadek komunikacyjny jest w tej pracy najbardziej prawdopodobnym zdarzeniem nagłym, a jego następstwa objęte są jako wypadek."
+   },
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Kilka spotkań dziennie prowadzonych rozmową, plus telefony między nimi. Przewlekłe zapalenie krtani jest tu następstwem obciążenia i wyklucza z pracy, która w całości polega na mówieniu."
+   },
+   {
+    "tytul": "Choroby układu krążenia od pracy prowizyjnej",
+    "opis": "Dochód zależny wprost od wyniku miesiąca, bez części stałej, przy zobowiązaniach o stałej wysokości. Ten układ obciąża układ krążenia w sposób udokumentowany, a rozpoznania psychiatryczne są z ochrony wyłączone."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Prowizje odnawialne płyną dalej — czy potrzebuję ubezpieczenia?",
+    "odpowiedz": "Płyną, dopóki klienci zostają. Przy dłuższej nieobecności portfel przechodzi do innego doradcy i ta część wygasa w ciągu kilku okresów — więc strata jest odroczona, a nie żadna."
+   },
+   {
+    "pytanie": "Dochód mam nierówny miesiąc do miesiąca — co przyjąć?",
+    "odpowiedz": "Średnią z pełnego roku, a przy silnych wahaniach z dwóch lat. Pojedynczy słaby miesiąc nie ma znaczenia, ale rok bez dużej transakcji mógłby zaniżyć sumę poniżej realnych możliwości."
+   }
+  ]
+ },
+ "makler": {
+  "wstep": "Makler giełdowy pracuje w godzinach sesji, których nikt nie przesunie, i podejmuje decyzje w tempie zmieniających się notowań. Nieobecność w dniu sesyjnym to nie opóźnienie, tylko utracona możliwość, której nie da się odtworzyć.",
+  "dochod": "Wynagrodzenie łączy część stałą z prowizją od obrotu i wyniku zarządzanych portfeli. Część zmienna dominuje i liczona jest od rezultatów okresu, w którym maklera nie było.",
+  "przerwa": "Klient, którego portfelem nikt nie zarządza w czasie wahań rynkowych, przenosi rachunek do innego domu maklerskiego — decyzja zajmuje mu jeden dzień. Uprawnienia maklerskie wymagają też ciągłości praktyki i wpisu na listę, a dłuższa przerwa w wykonywaniu zawodu rodzi pytania przy powrocie. Część stała wynagrodzenia nie pokrywa w tej roli nawet kosztów utrzymania.",
+  "ryzyka": [
+   {
+    "tytul": "Choroby układu krążenia od pracy w tempie sesji",
+    "opis": "Decyzje o wartości liczonej w setkach tysięcy podejmowane w sekundach, przez kilka godzin dziennie, przez lata. Nadciśnienie i zaburzenia rytmu pojawiają się w tej grupie zawodowej wcześnie i bywają pierwszym sygnałem po czterdziestce."
+   },
+   {
+    "tytul": "Zespół widzenia komputerowego przy pracy z notowaniami",
+    "opis": "Kilka ekranów z danymi w ruchu, obserwowanych bez przerwy przez cały czas trwania sesji. Zmęczenie akomodacji obniża zdolność wychwytywania zmian, na których polega ta praca."
+   },
+   {
+    "tytul": "Zaburzenia snu przy obsłudze rynków zagranicznych",
+    "opis": "Sesje amerykańskie kończą się w nocy polskiego czasu, azjatyckie zaczynają nad ranem. Przewlekłe rozregulowanie rytmu dobowego kumuluje skutki metaboliczne."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Prowizja od wyniku jest zmienna — jak liczyć podstawę?",
+    "odpowiedz": "Na podstawie średniej z dwóch pełnych lat. Przy dochodzie tak silnie zależnym od koniunktury pojedynczy rok bywa niereprezentatywny w obie strony."
+   },
+   {
+    "pytanie": "Pracuję na etacie w domu maklerskim — czy polisa ma sens?",
+    "odpowiedz": "Ma, jeśli premie i prowizje stanowią większość Twojego dochodu. Zasiłek chorobowy liczy się od podstawy wymiaru składek, a ta rzadko odzwierciedla zarobki oparte na części zmiennej."
+   }
+  ]
+ },
+ "analityk-finansowy": {
+  "wstep": "Analityk finansowy przygotowuje modele i rekomendacje, na podstawie których zapadają decyzje inwestycyjne. Praca jest w całości poznawcza, a jej wynik zależy od zdolności utrzymania uwagi na kilkuset liczbach naraz.",
+  "dochod": "Etat albo kontrakt w dziale analiz, z premią roczną powiązaną z wynikami. Część analityków prowadzi obok wyceny i opinie dla podmiotów zewnętrznych, rozliczane jako osobne projekty.",
+  "przerwa": "Model finansowy budowany na potrzeby konkretnej transakcji ma termin wynikający z harmonogramu due diligence, którego strony nie przesuwają. Analityk, który wypada w środku, zostawia arkusz zrozumiały tylko dla siebie — kolejna osoba buduje go od nowa, bo weryfikacja cudzych założeń trwa dłużej niż napisanie własnych. Przy transakcji w toku oznacza to utratę całego zaangażowania.",
+  "ryzyka": [
+   {
+    "tytul": "Zespół widzenia komputerowego przy pracy z modelami",
+    "opis": "Weryfikacja formuł i powiązań w arkuszach o kilkuset wierszach, po kilkanaście godzin w okresach transakcyjnych. Zmęczenie akomodacji bezpośrednio zwiększa ryzyko przeoczenia błędu w modelu."
+   },
+   {
+    "tytul": "Neuropatia nadgarstka od pracy z arkuszem",
+    "opis": "Tysiące precyzyjnych ruchów myszą i skrótów klawiszowych dziennie. Objawy narastają skokowo w okresach dużego obciążenia i cofają się coraz wolniej."
+   },
+   {
+    "tytul": "Skutki nieregularnego, skrajnego obciążenia",
+    "opis": "Praca przy transakcji potrafi oznaczać kilka dób niemal bez snu, po czym wraca zwykły rytm. Ten wzorzec jest dla układu krążenia trudniejszy niż stałe wysokie tempo."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Premia roczna to duża część wynagrodzenia — czy się liczy?",
+    "odpowiedz": "Liczy się to, co wypłacone i udokumentowane. Przy dużym udziale premii warto przedstawić dwa lata, żeby suma nie została wyliczona z roku bez wypłaty bonusu."
+   },
+   {
+    "pytanie": "Robię wyceny dla podmiotów zewnętrznych — czy je wykazywać?",
+    "odpowiedz": "Wykazujesz je razem z podstawowym wynagrodzeniem, o ile są rozliczone fakturą. Wyceny zewnętrzne podnoszą udokumentowaną podstawę, a od niej zależy maksymalna suma."
+   }
+  ]
+ },
+ "analityk-kredytowy": {
+  "wstep": "Analityk kredytowy decyduje, komu bank pożyczy pieniądze i na jakich warunkach. Odpowiedzialność jest realna, bo decyzje podlegają późniejszej weryfikacji, gdy portfel zaczyna się psuć.",
+  "dochod": "Etat w banku albo w firmie finansującej, z premią zależną od jakości portfela, czyli od decyzji podjętych rok albo dwa lata wcześniej. Część analityków prowadzi obok doradztwo dla podmiotów starających się o finansowanie.",
+  "przerwa": "Wniosek kredytowy ma termin rozpatrzenia wynikający z regulacji i z umowy z klientem. Bank przekazuje sprawy innym analitykom natychmiast, więc miejsce pracy nie znika — znika premia, liczona od portfela, który przez ten czas budował kto inny. Przy doradztwie prowadzonym obok etatu klienci przechodzą do konkurencji, bo termin złożenia wniosku jest zwykle powiązany z transakcją.",
+  "ryzyka": [
+   {
+    "tytul": "Zespół widzenia komputerowego przy analizie sprawozdań",
+    "opis": "Ocena sprawozdań finansowych, tabel i dokumentacji zabezpieczeń przez cały dzień. Zaburzenia akomodacji utrudniają wychwytywanie niespójności, które są istotą tej analizy."
+   },
+   {
+    "tytul": "Choroby układu krążenia od odpowiedzialności decyzyjnej",
+    "opis": "Decyzje kredytowe podlegają audytowi wstecznemu i personalnej ocenie jakości. Ta ekspozycja jest ciągła, a nie epizodyczna, i przekłada się na nadciśnienie wcześniej niż w rolach bez uprawnień decyzyjnych."
+   },
+   {
+    "tytul": "Przeciążenie nadgarstka od pracy w systemach scoringowych",
+    "opis": "Wprowadzanie danych i przygotowanie dokumentacji decyzyjnej przez osiem godzin dziennie. Zabieg z powodu zespołu cieśni oznacza sześć do ośmiu tygodni bez pracy przy klawiaturze, a wnioski w tym czasie nie przestają wpływać."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Premia zależy od portfela sprzed dwóch lat — czy to komplikuje wniosek?",
+    "odpowiedz": "Nie, bo liczy się to, co wypłacono w danym roku, niezależnie od tego, czego dotyczyło. Warto natomiast przedstawić dwa lata, żeby średnia obejmowała pełny cykl premiowy."
+   },
+   {
+    "pytanie": "Doradzam też klientom obok etatu — czy oba źródła się sumują?",
+    "odpowiedz": "Sumują się w łącznym dochodzie. Limit procentowy wyznacza forma, z której pochodzi większa część rocznego przychodu — przy przewadze etatu jest to sześćdziesiąt pięć procent."
+   }
+  ]
+ },
+ "audytor": {
+  "wstep": "Biegły rewident podpisuje sprawozdanie z badania własnym nazwiskiem i numerem wpisu, a odpowiedzialność za opinię ciąży na nim osobiście, także po latach. Sezon badań jest skoncentrowany w pierwszym kwartale i nie ma w nim miejsca na nieobecność.",
+  "dochod": "Badania sprawozdań rozliczane za zlecenie, przeglądy śródroczne, audyty projektów unijnych i usługi atestacyjne. Zdecydowana większość przychodu powstaje między styczniem a kwietniem.",
+  "przerwa": "Spółka ma ustawowy termin zatwierdzenia sprawozdania i publikacji, a bez opinii biegłego nie może go dotrzymać. Klient, któremu audytor wypadł w lutym, znajduje innego w ciągu tygodnia, bo alternatywą jest naruszenie terminu ustawowego. Umowy o badanie zawiera się zwykle na kilka lat z góry i utrata jednej oznacza utratę całego cyklu.",
+  "ryzyka": [
+   {
+    "tytul": "Skutki skrajnej sezonowości obciążenia",
+    "opis": "Cztery miesiące po dwanaście godzin dziennie z weekendami, po czym osiem miesięcy normalnego tempa. Ten wzorzec, powtarzany co roku przez całą karierę, obciąża układ krążenia bardziej niż równomierna praca."
+   },
+   {
+    "tytul": "Zespół widzenia komputerowego przy weryfikacji ksiąg",
+    "opis": "Uzgadnianie sald i przeglądanie dokumentacji źródłowej przez kilkanaście godzin w sezonie. Zmęczenie akomodacji podnosi ryzyko przeoczenia dokładnie wtedy, gdy jest ono najbardziej kosztowne."
+   },
+   {
+    "tytul": "Skutki intensywnych wyjazdów w sezonie",
+    "opis": "Badanie odbywa się u klienta, często w innym mieście, przez kilka dni z rzędu. Noclegi, dojazdy i nieregularne posiłki w okresie największego obciążenia potęgują jego skutki."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Cały mój przychód powstaje w cztery miesiące — czy to problem?",
+    "odpowiedz": "Dla wyliczenia sumy nie ma znaczenia, w których miesiącach zarobiłeś — ubezpieczyciel bierze przychód roczny. Jest to natomiast argument za sumą bliższą maksimum: przerwa w lutym kosztuje wielokrotnie więcej niż przerwa w sierpniu."
+   },
+   {
+    "pytanie": "Czy odpowiedzialność za opinię z badania jest objęta polisą?",
+    "odpowiedz": "Nie — to zakres obowiązkowego ubezpieczenia odpowiedzialności cywilnej biegłych rewidentów. Ta polisa dotyczy wyłącznie Twojej własnej niezdolności do pracy."
+   }
+  ]
+ },
+ "ekonomista": {
+  "wstep": "Ekonomista przygotowuje analizy i prognozy, które trafiają do decyzji zarządczych albo publicznych. Jego pozycja zawodowa opiera się na obecności w obiegu — publikacjach, komentarzach, wystąpieniach — a ta wymaga ciągłości.",
+  "dochod": "Etat w instytucji albo dziale analiz, uzupełniony o ekspertyzy zamawiane jednorazowo, wykłady i komentarze medialne. Ta uzupełniająca część bywa istotna i w całości zależy od bieżącej rozpoznawalności.",
+  "przerwa": "Cykl publikacyjny i medialny nie czeka — komentarz do danych, które ukazały się w środę, jest bezwartościowy w piątek. Kilka miesięcy nieobecności oznacza, że redakcje i zamawiający ekspertyzy zwracają się do kogoś innego i przy nim zostają, bo raz zbudowany kontakt jest wygodniejszy. Etat zwykle zostaje, ale to nie on stanowi większość dochodu w tej roli.",
+  "ryzyka": [
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Wystąpienia, wykłady i komentarze medialne to praca głosem w warunkach, które go nie oszczędzają — sale konferencyjne, studia, telefon. Utrata głosu wyklucza z tej najlepiej płatnej części pracy."
+   },
+   {
+    "tytul": "Zespół widzenia komputerowego przy pracy z danymi",
+    "opis": "Analiza szeregów czasowych i tabel przez cały dzień roboczy. Zaburzenia akomodacji ograniczają czas efektywnej pracy z gęstą informacją liczbową."
+   },
+   {
+    "tytul": "Skutki siedzącego trybu pracy",
+    "opis": "Osiem do dziesięciu godzin bez ruchu, często przedłużanych o pracę wieczorną nad publikacjami. Ryzyko metaboliczne narasta latami i realizuje się jednym zdarzeniem."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Ekspertyzy i wykłady to duża część dochodu — czy je wykazywać?",
+    "odpowiedz": "Koniecznie, bo suma liczy się od całości udokumentowanego dochodu. Ta część jest też najbardziej wrażliwa na przerwę, więc jej pominięcie zaniżyłoby ochronę tam, gdzie strata będzie największa."
+   },
+   {
+    "pytanie": "Mam etat i działalność — jaki mam limit świadczenia?",
+    "odpowiedz": "Decyduje forma, z której pochodzi większa część rocznego dochodu. Przy przewadze działalności limit wynosi osiemdziesiąt procent, przy przewadze etatu sześćdziesiąt pięć."
+   }
+  ]
+ },
+ "statystyk": {
+  "wstep": "Statystyk odpowiada za to, czy wniosek z danych jest uprawniony — w badaniach klinicznych, w nauce, w decyzjach publicznych. Błąd metodologiczny nie ujawnia się od razu, tylko wtedy, gdy ktoś próbuje powtórzyć wynik.",
+  "dochod": "Etat w jednostce badawczej albo kontrakt przy projektach, plus konsultacje metodologiczne i analizy zlecane jednorazowo. Analizy do badań klinicznych rozliczane są za projekt i wymagają zachowania ciągłości metodologicznej.",
+  "przerwa": "Plan analizy statystycznej w badaniu klinicznym jest podpisany przed odślepieniem danych i musi być wykonany dokładnie tak, jak zapisano. Statystyk, który wypada przed analizą, zostawia zespół z dokumentem do wykonania przez kogoś, kto nie brał udziału w jego powstaniu — sponsor woli wtedy zlecić całość firmie zewnętrznej. Przy projektach naukowych harmonogram grantu biegnie niezależnie.",
+  "ryzyka": [
+   {
+    "tytul": "Zespół widzenia komputerowego przy analizie wyników",
+    "opis": "Praca z tabelami wyników, wykresami diagnostycznymi i kodem analitycznym przez cały dzień. Zdolność wychwytywania anomalii w rozkładach zależy wprost od jakości widzenia."
+   },
+   {
+    "tytul": "Neuropatia nadgarstka od pracy z kodem i arkuszem",
+    "opis": "Programowanie analiz i weryfikacja wyników to ta sama geometria stanowiska co przy pisaniu oprogramowania, przy dłuższych sesjach bez przerwy."
+   },
+   {
+    "tytul": "Skutki pracy w terminach grantowych i regulacyjnych",
+    "opis": "Terminy raportowania w badaniach klinicznych i w grantach są sztywne, a praca kumuluje się przed nimi. Ten nierównomierny rozkład obciąża układ krążenia bardziej niż stałe tempo."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Pracuję przy badaniach klinicznych — czy to zawód medyczny?",
+    "odpowiedz": "Dla oceny ryzyka nie, bo nie ma tu kontaktu z pacjentem ani z materiałem biologicznym. Profil jest biurowy, mimo że branża jest medyczna — i warto to we wniosku doprecyzować."
+   },
+   {
+    "pytanie": "Mam etat i zlecenia analityczne — jak wykazać dochód?",
+    "odpowiedz": "Sumujesz oba w rozliczeniu rocznym. Zlecenia analityczne bywają wyżej wyceniane niż praca etatowa i podnoszą maksymalną sumę ubezpieczenia."
+   }
+  ]
+ },
+ "controller": {
+  "wstep": "Controller finansowy pilnuje, żeby firma wiedziała, ile naprawdę zarabia — buduje budżety, rozlicza z nich zarząd i tłumaczy odchylenia. Jego praca ma rytm wyznaczony przez kalendarz raportowy, a nie przez zdarzenia.",
+  "dochod": "Etat albo kontrakt B2B w strukturze finansowej firmy, z premią roczną powiązaną z realizacją planu. Część kontrolerów prowadzi obok wdrożenia systemów controllingowych rozliczane jako projekty.",
+  "przerwa": "Zamknięcie miesiąca ma datę wpisaną w kalendarz korporacyjny i skorelowaną z raportowaniem do grupy kapitałowej. Firma, która przez dwa miesiące nie dostała rzetelnego rozliczenia odchyleń, zatrudnia kogoś dodatkowo albo kupuje usługę na zewnątrz — i tego rozwiązania nie wycofuje, bo koszt braku danych do decyzji został już policzony.",
+  "ryzyka": [
+   {
+    "tytul": "Skutki cyklicznego przeciążenia w zamknięciach",
+    "opis": "Pierwszy tydzień miesiąca po czternaście godzin, reszta w zwykłym rytmie. Ten cykl, powtarzany dwanaście razy w roku przez lata, obciąża układ krążenia bardziej niż równomierna praca."
+   },
+   {
+    "tytul": "Zmęczenie akomodacji przy weryfikacji modeli budżetowych",
+    "opis": "Weryfikacja powiązań w modelach budżetowych o kilkuset wierszach, przez cały dzień. Zaburzenia akomodacji obniżają zdolność wychwytywania błędów w formułach."
+   },
+   {
+    "tytul": "Neuropatia nadgarstka od intensywnej pracy w arkuszu",
+    "opis": "Tysiące skrótów klawiszowych i ruchów myszą dziennie, ze szczytem w okresie zamknięcia. Objawy narastają skokowo i cofają się coraz wolniej po każdym cyklu."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Pracuję na kontrakcie B2B w dziale finansów — jaki mam limit?",
+    "odpowiedz": "Kontrakt B2B daje limit osiemdziesięciu procent udokumentowanego dochodu, niezależnie od tego, że pracujesz w strukturze jednej firmy. Decyduje forma rozliczenia, nie miejsce pracy."
+   },
+   {
+    "pytanie": "Prowadzę wdrożenia systemów obok pracy bieżącej — czy sumować?",
+    "odpowiedz": "Tak, w rozliczeniu rocznym. Projekty wdrożeniowe bywają wyceniane wyżej niż praca etatowa i podnoszą maksymalną sumę."
+   }
+  ]
+ },
+ "compliance-officer": {
+  "wstep": "Compliance Officer odpowiada za to, żeby firma nie naruszała przepisów, i osobiście podpisuje raporty do organów nadzoru. W instytucjach finansowych ta funkcja jest obowiązkowa, a jej nieobsadzenie samo w sobie jest naruszeniem.",
+  "dochod": "Etat albo kontrakt w instytucji nadzorowanej, z wynagrodzeniem odzwierciedlającym osobistą odpowiedzialność funkcji. Część specjalistów prowadzi obok szkolenia i audyty zgodności dla innych podmiotów.",
+  "przerwa": "Funkcja zgodności musi być obsadzona nieprzerwanie, bo wymaga tego regulator — instytucja wyznacza zastępstwo natychmiast i zgłasza je do nadzoru. Raz zgłoszona zmiana bywa trwała, bo powrót to kolejne zgłoszenie i kolejna weryfikacja. Terminy raportowania do organów nadzoru biegną niezależnie od tego, kto jest chory.",
+  "ryzyka": [
+   {
+    "tytul": "Choroby układu krążenia od osobistej odpowiedzialności regulacyjnej",
+    "opis": "Naruszenie obowiązków zgodności rodzi odpowiedzialność osobistą, w tym administracyjną. Ta ekspozycja jest ciągła i dotyczy decyzji podejmowanych przez cały czas pełnienia funkcji."
+   },
+   {
+    "tytul": "Zespół widzenia komputerowego przy pracy z regulacjami",
+    "opis": "Analiza przepisów, wytycznych i dokumentacji wewnętrznej przez cały dzień roboczy. Zaburzenia akomodacji ograniczają zdolność pracy z gęstym tekstem prawnym."
+   },
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Szkolenia wewnętrzne, wyjaśnienia dla zespołów i rozmowy z regulatorem zajmują znaczną część tygodnia. Obciążenie głosu jest tu wyższe, niż wynikałoby z opisu stanowiska."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy odpowiedzialność administracyjna za naruszenie jest objęta polisą?",
+    "odpowiedz": "Nie. Ta polisa dotyczy wyłącznie Twojej niezdolności do pracy z przyczyn zdrowotnych i nie ma związku z postępowaniami wobec Ciebie albo instytucji."
+   },
+   {
+    "pytanie": "Prowadzę audyty zgodności dla innych podmiotów — czy je wykazywać?",
+    "odpowiedz": "Tak, sumują się z podstawowym wynagrodzeniem w rozliczeniu rocznym. Podnoszą udokumentowany dochód, a od niego zależy maksymalna suma ubezpieczenia."
+   }
+  ]
+ },
+ "treasury-analyst": {
+  "wstep": "Treasury Analyst pilnuje płynności firmy — tego, żeby pieniądze były tam, gdzie trzeba, i wtedy, kiedy trzeba. Przelew niewykonany na czas nie jest opóźnieniem, tylko niewykonaniem zobowiązania.",
+  "dochod": "Etat albo kontrakt w dziale skarbu, z premią powiązaną z wynikami zarządzania płynnością i ryzykiem walutowym. Wynagrodzenie odzwierciedla skalę środków, którymi się operuje.",
+  "przerwa": "Zarządzanie płynnością jest czynnością codzienną: prognoza przepływów, decyzje o lokatach, zabezpieczenia walutowe zapadające w konkretnych dniach. Firma nie może zostawić tego bez obsady na tydzień, więc przypisuje zadania komuś innemu i rzadko je oddaje. Przy kontrakcie B2B dłuższa nieobecność w tak newralgicznej funkcji kończy się zwykle nieprzedłużeniem umowy.",
+  "ryzyka": [
+   {
+    "tytul": "Choroby układu krążenia od pracy z terminami płatności",
+    "opis": "Decyzje o przepływach liczonych w milionach, podejmowane codziennie, przy nieodwracalności przelewu. To obciążenie stałe i wpisane w rytm dnia, a nie związane z sytuacjami wyjątkowymi."
+   },
+   {
+    "tytul": "Zespół widzenia komputerowego przy pracy z systemami bankowymi",
+    "opis": "Weryfikacja przelewów, sald i pozycji walutowych na kilku ekranach przez cały dzień. Zdolność wychwytywania rozbieżności zależy tu bezpośrednio od jakości widzenia."
+   },
+   {
+    "tytul": "Skutki pracy w rytmie rynków walutowych",
+    "opis": "Zabezpieczenia walutowe zawiera się w godzinach aktywności rynków, także poza polskim dniem roboczym. Nieregularny rytm kumuluje skutki metaboliczne przez lata."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Premia zależy od wyniku zarządzania ryzykiem — czy się liczy?",
+    "odpowiedz": "Podstawę stanowi kwota faktycznie wypłacona i wykazana w rozliczeniu. Przy premiach zależnych od koniunktury warto pokazać dwa lata, żeby suma nie wyszła z roku o nietypowym wyniku."
+   },
+   {
+    "pytanie": "Pracuję na etacie — czy zasiłek z ZUS nie wystarczy?",
+    "odpowiedz": "Zasiłek liczy się od podstawy wymiaru składek, która jest ograniczona i nie obejmuje pełnej wysokości premii. Przy dochodzie opartym na części zmiennej różnica bywa wielokrotna."
+   }
+  ]
+ },
+ "wealth-manager": {
+  "wstep": "Wealth Manager zarządza majątkiem osób, dla których dostępność doradcy jest częścią usługi, za którą płacą. Nieodebrany telefon w tym segmencie jest sygnałem, który klient interpretuje jednoznacznie.",
+  "dochod": "Wynagrodzenie łączy stałą opłatę za zarządzanie, liczoną od wartości aktywów, z premią od wyniku. Opłata za zarządzanie płynie dalej, dopóki klient nie wycofa środków — a wycofuje je, gdy przestaje mieć kontakt.",
+  "przerwa": "Klient zamożny ma zwykle kilku doradców i przenosi środki między nimi bez emocji, kierując się jakością obsługi. Miesiąc bez kontaktu w okresie zawirowań rynkowych wystarcza, żeby przenieść portfel — a razem z nim znika stała opłata za zarządzanie, czyli podstawa dochodu na kolejne lata. Odbudowa portfela klientów w tym segmencie zajmuje lata, nie miesiące.",
+  "ryzyka": [
+   {
+    "tytul": "Choroby układu krążenia od odpowiedzialności za cudzy majątek",
+    "opis": "Zarządzanie aktywami rodzin i osób prywatnych oznacza odpowiedzialność, która nie kończy się wraz z zamknięciem biura. Ekspozycja jest ciągła i utrzymuje się także w okresach dekoniunktury rynkowej."
+   },
+   {
+    "tytul": "Skutki intensywnych podróży i spotkań",
+    "opis": "Obsługa klientów zamożnych odbywa się u nich, nie w oddziale — co oznacza stałe przemieszczanie się i nieregularny tryb dnia. Ryzyko wypadku komunikacyjnego i skutków metabolicznych rośnie razem z liczbą kilometrów."
+   },
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Kilka spotkań dziennie prowadzonych rozmową, plus telefony w czasie dojazdów. Przewlekłe zapalenie krtani wyklucza z pracy, która w całości polega na kontakcie osobistym."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Opłata za zarządzanie płynie dalej — czy potrzebuję ochrony?",
+    "odpowiedz": "Płynie, dopóki aktywa zostają. Przy dłuższej nieobecności klienci przenoszą portfele i ta podstawa dochodu znika — z opóźnieniem, ale trwale, bo odbudowa relacji w tym segmencie trwa latami."
+   },
+   {
+    "pytanie": "Dochód mam zależny od koniunktury — co przyjąć za podstawę?",
+    "odpowiedz": "Średnią z dwóch pełnych lat. Rok hossy i rok bessy dają w tej roli skrajnie różne wyniki i pojedynczy z nich nie odzwierciedla realnych możliwości zarobkowych."
+   }
+  ]
+ },
+ "rzeczoznawca": {
+  "wstep": "Rzeczoznawca majątkowy sporządza operat szacunkowy, czyli dokument o mocy urzędowej, ważny dwanaście miesięcy i podpisany imiennie. Bez oględzin nieruchomości operatu się nie sporządzi — a oględziny wymagają wyjścia w teren.",
+  "dochod": "Wyceny na potrzeby kredytów hipotecznych, rozliczane za operat, wyceny dla sądów i komorników oraz opinie w sprawach spornych. Banki współpracują z rzeczoznawcami z własnych list, na które wchodzi się w naborach.",
+  "przerwa": "Operat do kredytu hipotecznego ma termin wynikający z procesu bankowego, a decyzja kredytowa ma swoją ważność. Bank, który nie dostał wyceny na czas, kieruje kolejne zlecenia do innego rzeczoznawcy z listy — a lista jest kolejką, w której miejsce traci się szybciej niż odzyskuje. Terminy sądowe przy opiniach są zaś wyznaczane bez pytania o dostępność biegłego.",
+  "ryzyka": [
+   {
+    "tytul": "Uraz podczas oględzin nieruchomości",
+    "opis": "Oględziny obejmują budynki w budowie, opuszczone, po pożarze i obiekty przemysłowe. Upadek na nierównym terenie i uraz przy wejściu na strop bez zabezpieczeń są tu ryzykiem realnym, choć rzadko kojarzonym z tym zawodem."
+   },
+   {
+    "tytul": "Skutki intensywnych dojazdów",
+    "opis": "Kilka oględzin dziennie, często w różnych miejscowościach. Kilkaset kilometrów tygodniowo za kierownicą podnosi ryzyko wypadku i obciąża kręgosłup w połączeniu z pracą w terenie."
+   },
+   {
+    "tytul": "Pogorszenie ostrości widzenia",
+    "opis": "Analiza dokumentacji technicznej, ksiąg wieczystych i danych porównawczych stanowi większość czasu pracy. Zaburzenia widzenia bliskiego podnoszą ryzyko błędu w operacie, za który odpowiadasz osobiście."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy uraz podczas oględzin jest objęty polisą?",
+    "odpowiedz": "Jest, jako nieszczęśliwy wypadek — zdarzenie nagłe i zewnętrzne. Objęte są następstwa urazu niezależnie od tego, czy do zdarzenia doszło w pracy, czy poza nią."
+   },
+   {
+    "pytanie": "Jestem na listach kilku banków — czy to zabezpiecza dochód?",
+    "odpowiedz": "Rozprasza źródła, ale nie chroni przed przerwą: jedna choroba wyłącza Cię ze wszystkich list równocześnie. To argument raczej za polisą niż przeciw niej."
+   }
+  ]
+ },
+ "posrednik-nieruchomosci": {
+  "wstep": "Pośrednik w obrocie nieruchomościami zarabia dopiero w dniu podpisania aktu notarialnego — cała praca przed nim jest inwestycją bez gwarancji zwrotu. Transakcja prowadzona przez trzy miesiące i przerwana w ostatnim tygodniu nie płaci nic.",
+  "dochod": "Prowizja od sfinalizowanych transakcji, wypłacana po akcie notarialnym. Nie ma tu części stałej ani zaliczek — dochód jest w całości uzależniony od doprowadzenia sprawy do końca.",
+  "przerwa": "Transakcja ma harmonogram wyznaczony przez umowę przedwstępną, decyzję kredytową i termin u notariusza — wszystkie z własnymi datami ważności. Pośrednik nieobecny w tym czasie oznacza, że strony dogadują się bezpośrednio albo przez innego pośrednika, a prowizja przepada w całości mimo trzech miesięcy pracy. Oferty w toku przechodzą do kolegów z biura i wracają rzadko.",
+  "ryzyka": [
+   {
+    "tytul": "Skutki intensywnych dojazdów i prezentacji",
+    "opis": "Kilka prezentacji dziennie w różnych lokalizacjach, przez cały tydzień, wieczorami i w weekendy. Wypadek komunikacyjny jest w tej pracy najbardziej prawdopodobnym zdarzeniem nagłym."
+   },
+   {
+    "tytul": "Uraz podczas prezentacji nieruchomości",
+    "opis": "Prezentacje obejmują budynki w stanie deweloperskim, poddasza, piwnice i obiekty niezamieszkane. Upadek na nieoświetlonych schodach albo nierównej posadzce jest tu zdarzeniem powtarzalnym."
+   },
+   {
+    "tytul": "Choroby narządu głosu i skutki pracy prowizyjnej",
+    "opis": "Rozmowy z klientami przez cały dzień, w tym telefoniczne, przy dochodzie zależnym wprost od ich rezultatu. Obciążenie krtani i układu krążenia idą tu w parze."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Zarabiam tylko od sfinalizowanych transakcji — jak wykazać dochód?",
+    "odpowiedz": "Na podstawie rozliczenia rocznego, a przy silnych wahaniach z dwóch lat. Przy dochodzie w całości prowizyjnym pojedynczy rok bywa niereprezentatywny w obie strony."
+   },
+   {
+    "pytanie": "Czy przerwana transakcja to szkoda objęta polisą?",
+    "odpowiedz": "Nie w tym sensie — polisa nie pokrywa utraconej prowizji z konkretnej sprawy. Wypłaca świadczenie miesięczne za niezdolność do pracy, liczone od Twojego średniego dochodu."
+   }
+  ]
+ },
+ "agent-nieruchomosci": {
+  "wstep": "Agent nieruchomości buduje portfel ofert i bazę klientów, które utrzymują się wyłącznie bieżącym kontaktem. W tej pracy nie ma niczego, co pracuje pod nieobecność właściciela — ani jednej złotówki przychodu pasywnego.",
+  "dochod": "Prowizja od transakcji, dzielona zwykle z biurem, oraz wynagrodzenie za wyłączności, jeśli agent je pozyskuje. Umowy na wyłączność mają określony czas obowiązywania i wygasają niezależnie od tego, kto choruje.",
+  "przerwa": "Umowa na wyłączność ma zwykle sześć miesięcy i jeśli w tym czasie nieruchomość się nie sprzeda, właściciel jej nie przedłuża. Agent nieobecny przez dwa miesiące traci połowę okresu na sprzedaż każdej oferty z portfela naraz. Klienci kupujący, którzy szukają aktywnie, przechodzą do agenta odbierającego telefon, bo rynek nieruchomości nie czeka na powrót konkretnej osoby.",
+  "ryzyka": [
+   {
+    "tytul": "Wypadek komunikacyjny w trakcie objazdów",
+    "opis": "Kilkanaście prezentacji tygodniowo w różnych częściach miasta i okolic, często w pośpiechu między umówionymi terminami. Ekspozycja na ruch drogowy jest tu wielokrotnie wyższa niż u pracownika biurowego."
+   },
+   {
+    "tytul": "Uraz przy oględzinach nieruchomości do sprzedaży",
+    "opis": "Wejście na działkę, do budynku bez prądu albo na nieukończony strop przy przygotowaniu oferty. Skręcenia i upadki zdarzają się przy tej czynności regularnie."
+   },
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Pozyskiwanie ofert odbywa się przez telefon, po kilkadziesiąt rozmów dziennie, obok prezentacji prowadzonych na żywo. Przewlekłe zapalenie krtani wyklucza z obu tych czynności naraz."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Dzielę prowizję z biurem — co jest moim dochodem?",
+    "odpowiedz": "Ta część, która trafia do Ciebie i jest rozliczona w Twojej działalności albo na umowie. Suma liczy się od Twojego udokumentowanego dochodu, nie od wartości transakcji."
+   },
+   {
+    "pytanie": "Umowy na wyłączność wygasają w czasie choroby — czy to strata objęta?",
+    "odpowiedz": "Polisa nie pokrywa utraconych umów ani prowizji z konkretnych spraw. Wypłaca świadczenie miesięczne za niezdolność do pracy, które ma zastąpić dochód, a nie zrekompensować pojedynczą transakcję."
+   }
+  ]
+ },
+ "zarzadca-nieruchomosci": {
+  "wstep": "Zarządca nieruchomości odpowiada za budynki, w których mieszkają ludzie — awaria instalacji, zalanie albo brak ogrzewania nie czekają na koniec zwolnienia lekarskiego. Umowy o zarządzanie przewidują dostępność i czas reakcji.",
+  "dochod": "Stałe wynagrodzenie za zarządzanie, liczone od metrażu albo od liczby lokali, plus wynagrodzenie za nadzór nad remontami rozliczane od wartości inwestycji. Umowy ze wspólnotami zawiera się na czas nieokreślony, ale wypowiada uchwałą.",
+  "przerwa": "Wspólnota mieszkaniowa, która przez miesiąc nie miała z kim rozmawiać o awarii, zwołuje zebranie i zmienia zarządcę uchwałą — to jedna z niewielu decyzji, które taki podmiot podejmuje szybko. Nadzór nad trwającym remontem przechodzi na kogoś innego wraz z całym wynagrodzeniem, a odbiór prac odbywa się bez Ciebie. Utrata jednej wspólnoty to utrata przychodu na lata.",
+  "ryzyka": [
+   {
+    "tytul": "Uraz podczas oględzin i odbiorów technicznych",
+    "opis": "Kontrole obejmują dachy, kotłownie, piwnice i place budowy podczas remontów. To praca w miejscach o podwyższonym ryzyku, wykonywana bez rutyny zawodowego wykonawcy."
+   },
+   {
+    "tytul": "Skutki interwencji awaryjnych o każdej porze",
+    "opis": "Zalanie albo awaria ogrzewania w nocy oznacza wyjazd na miejsce. Nieregularność i fragmentacja snu kumulują skutki metaboliczne przez lata."
+   },
+   {
+    "tytul": "Choroby układu krążenia od pracy w konflikcie",
+    "opis": "Zebrania wspólnot, spory między mieszkańcami i rozliczenia z wykonawcami. Ekspozycja na konflikt jest w tej roli stała, a diagnozy z kręgu psychicznego pozostają poza ochroną."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Zarządzam kilkunastoma wspólnotami — czy to rozprasza ryzyko?",
+    "odpowiedz": "Nie rozprasza, bo jedna choroba dotyka wszystkich umów naraz. Sumujesz je w rozliczeniu rocznym, a wysoka liczba obsługiwanych podmiotów jest raczej argumentem za wyższą sumą."
+   },
+   {
+    "pytanie": "Czy nadzór nad remontem to inne ryzyko niż zarządzanie?",
+    "odpowiedz": "Tak, i warto to opisać we wniosku. Regularna obecność na placu budowy zmienia profil ryzyka wypadkowego w stosunku do pracy wyłącznie administracyjnej."
+   }
+  ]
+ },
+ "agent-ubezpieczeniowy": {
+  "wstep": "Agent ubezpieczeniowy sprzedaje ochronę na wypadek zdarzeń, które sam też może mieć. Ta symetria bywa krępująca w rozmowie z klientem, ale jest najlepszym argumentem za tym, żeby mieć własną polisę przed sprzedaniem cudzej.",
+  "dochod": "Prowizja od zawartych umów oraz prowizja odnawialna od portfela, wypłacana przy każdej wznowionej polisie. Portfel budowany latami daje przychód, który przez pewien czas płynie niezależnie od bieżącej sprzedaży.",
+  "przerwa": "Wznowienia wymagają kontaktu: klient, do którego nikt nie zadzwonił przed końcem okresu ochrony, porówna oferty i odejdzie do konkurencji albo do porównywarki. Przy przerwie w sezonie wznowieniowym traci się nie jedną prowizję, tylko cały rocznik portfela wraz z jego przyszłymi odnowieniami. Nowa sprzedaż zatrzymuje się w tym samym momencie.",
+  "ryzyka": [
+   {
+    "tytul": "Wypadek komunikacyjny podczas objazdów",
+    "opis": "Spotkania u klientów w domach i firmach oznaczają kilkaset kilometrów tygodniowo, często w porach szczytu. To zdarzenie o najwyższym prawdopodobieństwie w tej pracy."
+   },
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Kilkadziesiąt rozmów telefonicznych i kilka spotkań dziennie, przez cały tydzień. Utrata głosu wyklucza z pracy, która polega wyłącznie na kontakcie z klientem."
+   },
+   {
+    "tytul": "Choroby układu krążenia od dochodu prowizyjnego",
+    "opis": "Wynagrodzenie zależne wprost od wyniku miesiąca, bez części stałej, przy stałych zobowiązaniach. Ten układ ma udokumentowany wpływ na ciśnienie i rytm serca."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Sprzedaję ubezpieczenia — czy dostaję je taniej dla siebie?",
+    "odpowiedz": "Warunki są takie same jak dla każdego klienta, bo składka wynika z oceny ryzyka, a nie z zawodu w rozumieniu przynależności branżowej. Znajomość produktu daje natomiast przewagę przy wyborze zakresu."
+   },
+   {
+    "pytanie": "Prowizja odnawialna płynie sama — czy potrzebuję polisy?",
+    "odpowiedz": "Płynie, dopóki portfel jest odnawiany, a to wymaga kontaktu z klientami. Przy dłuższej przerwie wznowienia przechodzą do konkurencji i ta część dochodu wygasa w ciągu jednego cyklu rocznego."
    }
   ]
  }
