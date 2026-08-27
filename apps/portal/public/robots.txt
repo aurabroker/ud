@@ -3,5 +3,10 @@ Allow: /
 
 # Modele językowe czytają ten plik tak samo jak wyszukiwarki. Nie blokujemy
 # ich celowo: widoczność w odpowiedziach asystentów jest jednym z celów serwisu.
+# To robots.txt, a nie llms.txt, decyduje o dostępie robotów — llms.txt jest
+# streszczeniem serwisu dla modelu, który już go czyta.
 
 Sitemap: https://utratadochodu.pl/sitemap-index.xml
+
+# Indeks treści w formacie llmstxt.org — po jednym pliku na każdą podstronę zawodu.
+# https://utratadochodu.pl/llms.txt
