@@ -2,7 +2,7 @@
 /**
  * Spis zawodów — węzeł linkowania wewnętrznego.
  *
- * To stąd robot dociera do 228 podstron. Kolejność alfabetyczna w obrębie
+ * To stąd robot dociera do wszystkich podstron zawodów. Kolejność alfabetyczna w obrębie
  * kategorii jest celowo stabilna: zestaw linków zmieniający się między buildami
  * wygląda dla wyszukiwarki na manipulację.
  */
@@ -11,7 +11,7 @@ import Baza from '../../layouts/Baza.astro';
 import { graf, organizacja, serwis, strona, okruszki } from '../../lib/seo';
 
 const sciezka = '/zawody/';
-const tytul = 'Ubezpieczenie utraty dochodu według zawodu — 228 grup zawodowych | UtrataDochodu.pl';
+const tytul = `Ubezpieczenie utraty dochodu według zawodu — ${ZAWODY.length} grup zawodowych | UtrataDochodu.pl`;
 const opis = 'Wybierz swój zawód i sprawdź, ile realnie dostaniesz na zwolnieniu oraz ile kosztuje '
   + 'polisa zamykająca lukę między zasiłkiem ZUS a dochodem.';
 

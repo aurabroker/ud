@@ -1,0 +1,115 @@
+---
+/**
+ * Baza wiedzy.
+ *
+ * Poprzednia wersja była jedną stroną z routingiem po hashu (`blog.html#slug`)
+ * i treścią doklejaną przez JavaScript. Dla wyszukiwarki istniał jeden adres,
+ * a dla modelu językowego — pusty kontener. Osiem artykułów było niewidocznych.
+ * Tu każdy ma własny adres i gotowy HTML, a lista jest tylko spisem.
+ */
+import Baza from '../../layouts/Baza.astro';
+import { ARTYKULY, dataPl } from '../../lib/artykuly';
+import { graf, organizacja, serwis, strona, okruszki, abs } from '../../lib/seo';
+
+const sciezka = '/blog/';
+const tytul = 'Baza wiedzy o utracie dochodu i zasiłkach ZUS | UtrataDochodu.pl';
+const opis = 'Ile realnie płaci ZUS na zwolnieniu, kto finansuje L4, co obejmuje '
+  + 'prywatna polisa i gdzie są jej granice. Artykuły bez marketingowej ściemy.';
+
+const sciezkaOkruszkow = [
+  { nazwa: 'Strona główna', url: '/' },
+  { nazwa: 'Baza wiedzy', url: sciezka },
+];
+
+const jsonld = graf([
+  organizacja(),
+  serwis(),
+  okruszki(sciezkaOkruszkow),
+  strona({ url: sciezka, tytul, opis, okruszki: sciezkaOkruszkow }),
+  {
+    '@type': 'Blog',
+    '@id': `https://utratadochodu.pl${sciezka}#blog`,
+    name: 'Baza wiedzy UtrataDochodu.pl',
+    inLanguage: 'pl-PL',
+    publisher: { '@id': 'https://utratadochodu.pl/#organizacja' },
+    blogPost: ARTYKULY.map((a) => ({
+      '@type': 'BlogPosting',
+      '@id': `${abs(`/blog/${a.slug}/`)}#wpis`,
+      headline: a.tytul,
+      datePublished: a.opublikowano,
+      url: abs(`/blog/${a.slug}/`),
+    })),
+  },
+]);
+
+/** Miniatura z transformacją po stronie Supabase — pełne zdjęcie potrafi mieć
+ *  kilkaset kilobajtów, a w kafelku i tak zajmuje 800 px szerokości. */
+const miniatura = (url: string, szerokosc: number) =>
+  `${url.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/')}`
+  + `?width=${szerokosc}&quality=80&format=webp`;
+---
+<Baza tytul={tytul} opis={opis} sciezka={sciezka} jsonld={jsonld}>
+  <div class="bg-tlo-jasne border-b border-linia">
+    <div class="max-w-[1200px] mx-auto px-5 py-14">
+      <nav aria-label="Okruszki" class="mb-5">
+        <ol class="flex flex-wrap gap-2 text-[13px] text-tekst-trzeci list-none m-0 p-0">
+          <li><a href="/" class="hover:text-akcent-ciemny">Strona główna</a></li>
+          <li aria-hidden="true">/</li>
+          <li aria-current="page" class="text-tekst-drugi">Baza wiedzy</li>
+        </ol>
+      </nav>
+      <h1 class="text-[clamp(2rem,5vw,2.9rem)] leading-[1.08] max-w-[16em] m-0">Baza wiedzy</h1>
+      <p data-odpowiedz class="text-[1.12rem] leading-relaxed text-tekst-drugi max-w-[42em] mt-5 mb-0">
+        Ile realnie płaci ZUS na zwolnieniu, kto finansuje L4 w pierwszych dniach
+        choroby i gdzie kończy się zakres prywatnej polisy. Bez obiecywania rzeczy,
+        których ubezpieczenie nie robi.
+      </p>
+      <p class="text-[14px] text-tekst-trzeci mt-5 mb-0">
+        <a href="/blog/rss.xml" class="hover:text-akcent-ciemny">Kanał RSS</a>
+      </p>
+    </div>
+  </div>
+
+  <div class="max-w-[1200px] mx-auto px-5 py-14">
+    {ARTYKULY.length === 0 ? (
+      <p class="border border-dashed border-linia-mocna p-8 text-[15.5px] text-tekst-trzeci text-center m-0">
+        Brak wpisów. Uruchom synchronizację treści przed budowaniem.
+      </p>
+    ) : (
+      <ul class="list-none m-0 p-0 grid gap-7 grid-cols-[repeat(auto-fill,minmax(20rem,1fr))]">
+        {ARTYKULY.map((a, i) => (
+          <li>
+            <article class="border border-linia bg-tlo h-full flex flex-col hover:border-akcent">
+              {a.obraz && (
+                <div class="h-48 overflow-hidden border-b border-linia bg-tlo-cyjan">
+                  <img src={miniatura(a.obraz, 800)}
+                       srcset={`${miniatura(a.obraz, 800)} 800w, ${miniatura(a.obraz, 1200)} 1200w`}
+                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                       alt="" width="800" height="192"
+                       loading={i < 3 ? 'eager' : 'lazy'} decoding="async"
+                       class="w-full h-full object-cover">
+                </div>
+              )}
+              <div class="p-6 flex flex-col flex-grow">
+                {a.tagi.length > 0 && (
+                  <p class="font-mono text-[10.5px] tracking-[0.12em] uppercase text-akcent-ciemny font-semibold m-0 mb-3">
+                    {a.tagi[0]}
+                  </p>
+                )}
+                <h2 class="text-[19px] leading-snug m-0 mb-3">
+                  <a href={`/blog/${a.slug}/`} class="hover:text-akcent-ciemny">{a.tytul}</a>
+                </h2>
+                <p class="text-[14.5px] leading-relaxed text-tekst-drugi m-0 mb-5 flex-grow">{a.zajawka}</p>
+                <p class="flex flex-wrap gap-x-3 justify-between items-baseline pt-4 mt-auto
+                          border-t border-linia text-[12.5px] text-tekst-trzeci m-0">
+                  <time datetime={a.opublikowano}>{dataPl(a.opublikowano)}</time>
+                  <span>{a.minuty} min czytania</span>
+                </p>
+              </div>
+            </article>
+          </li>
+        ))}
+      </ul>
+    )}
+  </div>
+</Baza>

@@ -1,0 +1,146 @@
+---
+/**
+ * Dokumenty — ogólne warunki ubezpieczenia i karty produktu.
+ *
+ * Pliki leżą w prywatnym kubełku `ud-owu`, więc nie da się na nie po prostu
+ * podać linku. Pobieranie idzie przez funkcję `/pobierz/<id>`, która po stronie
+ * serwera podpisuje adres na pięć minut. Skutek uboczny jest istotny:
+ * podpisany adres wygasa, więc ani Google, ani robot modelu językowego nie
+ * zaindeksuje treści PDF-ów. Trwałe rozwiązanie to kopia aktywnych plików
+ * w kubełku publicznym pod stabilnymi adresami — czeka na decyzję.
+ */
+import Baza from '../../layouts/Baza.astro';
+import { graf, organizacja, serwis, strona, okruszki } from '../../lib/seo';
+import { FIRMA } from '../../lib/firma';
+import dane from '../../dane/dokumenty.json';
+
+const sciezka = '/dokumenty/';
+const tytul = 'Dokumenty — OWU i karty produktu | UtrataDochodu.pl';
+const opis = 'Ogólne warunki ubezpieczenia, karty produktu (IPID) i warunki szczególne '
+  + 'HIV/WZW do pobrania. Bez logowania i bez podawania danych.';
+
+const NAZWY_RODZAJU: Record<string, string> = {
+  owu: 'Ogólne warunki ubezpieczenia',
+  ipid: 'Karta produktu (IPID)',
+  'warunki-szczegolne': 'Warunki szczególne',
+};
+
+const NAZWY_UBEZPIECZYCIELA: Record<string, string> = {
+  leadenhall: 'Leadenhall Insurance S.A.',
+  ceu: 'CEU',
+};
+
+/** Grupujemy po ubezpieczycielu — tak, jak klient wybiera ofertę. */
+const grupy = [...new Set(dane.dokumenty.map((d) => d.ubezpieczyciel))].map((u) => ({
+  klucz: u,
+  nazwa: NAZWY_UBEZPIECZYCIELA[u] ?? u,
+  dokumenty: dane.dokumenty.filter((d) => d.ubezpieczyciel === u),
+}));
+
+/** Ubezpieczyciele, z którymi pracujemy, a których dokumentów jeszcze nie ma
+ *  w bibliotece. Pusty stan pokazujemy wprost, zamiast udawać, że go nie ma. */
+const brakujacy = ['ceu'].filter((u) => !grupy.some((g) => g.klucz === u));
+
+const kb = (bajty: number) => `${Math.round(bajty / 1024)} kB`;
+
+const sciezkaOkruszkow = [
+  { nazwa: 'Strona główna', url: '/' },
+  { nazwa: 'Dokumenty', url: sciezka },
+];
+
+const jsonld = graf([
+  organizacja(),
+  serwis(),
+  okruszki(sciezkaOkruszkow),
+  strona({ url: sciezka, tytul, opis, okruszki: sciezkaOkruszkow }),
+  {
+    '@type': 'CollectionPage',
+    '@id': `https://utratadochodu.pl${sciezka}#zbior`,
+    name: tytul,
+    numberOfItems: dane.dokumenty.length,
+  },
+]);
+---
+<Baza tytul={tytul} opis={opis} sciezka={sciezka} jsonld={jsonld}>
+  <div class="bg-tlo-jasne border-b border-linia">
+    <div class="max-w-[1200px] mx-auto px-5 py-14">
+      <nav aria-label="Okruszki" class="mb-5">
+        <ol class="flex flex-wrap gap-2 text-[13px] text-tekst-trzeci list-none m-0 p-0">
+          <li><a href="/" class="hover:text-akcent-ciemny">Strona główna</a></li>
+          <li aria-hidden="true">/</li>
+          <li aria-current="page" class="text-tekst-drugi">Dokumenty</li>
+        </ol>
+      </nav>
+      <h1 class="text-[clamp(2rem,5vw,2.9rem)] leading-[1.08] max-w-[16em] m-0">
+        Dokumenty do pobrania
+      </h1>
+      <p data-odpowiedz class="text-[1.12rem] leading-relaxed text-tekst-drugi max-w-[42em] mt-5 mb-0">
+        Ogólne warunki ubezpieczenia (OWU) opisują dokładny zakres ochrony i wyłączenia.
+        Karta produktu (IPID) to ich streszczenie na dwie strony, ujednolicone w całej
+        Unii. Wszystko pobierzesz bez logowania i bez podawania danych.
+      </p>
+      <p class="text-[15px] leading-relaxed text-tekst-drugi max-w-[42em] mt-4 mb-0">
+        Streszczenie najważniejszych wyłączeń po ludzku znajdziesz na stronie
+        {' '}<a href="/wylaczenia/" class="text-akcent-hover underline decoration-linia-mocna underline-offset-2">czego to ubezpieczenie nie obejmuje</a>.
+      </p>
+    </div>
+  </div>
+
+  <div class="max-w-[1200px] mx-auto px-5 py-14 flex flex-col gap-14">
+    {grupy.map((g) => (
+      <section aria-labelledby={`u-${g.klucz}`}>
+        <h2 id={`u-${g.klucz}`} class="text-[clamp(1.35rem,3vw,1.8rem)] pb-3 mb-6 border-b-2 border-akcent">
+          {g.nazwa}
+        </h2>
+        <ul class="list-none m-0 p-0 grid gap-4 grid-cols-[repeat(auto-fill,minmax(22rem,1fr))]">
+          {g.dokumenty.map((d) => (
+            <li>
+              <a href={`/pobierz/${d.id}`}
+                 class="flex gap-4 items-start border border-linia bg-tlo p-5 h-full
+                        hover:border-akcent hover:bg-tlo-jasne">
+                <span class="font-mono text-[10.5px] tracking-[0.08em] font-semibold text-white
+                             bg-akcent-ciemny px-2 py-1 shrink-0 mt-0.5" aria-hidden="true">PDF</span>
+                <span class="min-w-0">
+                  <span class="block font-semibold text-[16px] leading-snug">{d.tytul}</span>
+                  <span class="block font-mono text-[12px] text-tekst-trzeci mt-1.5 break-all">{d.symbol}</span>
+                  <span class="block text-[13.5px] text-tekst-drugi mt-2">
+                    {NAZWY_RODZAJU[d.rodzaj] ?? d.rodzaj} · {kb(d.bajty)}
+                  </span>
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+
+    {brakujacy.map((u) => (
+      <section aria-labelledby={`u-${u}`}>
+        <h2 id={`u-${u}`} class="text-[clamp(1.35rem,3vw,1.8rem)] pb-3 mb-6 border-b-2 border-linia-mocna text-tekst-drugi">
+          {NAZWY_UBEZPIECZYCIELA[u] ?? u}
+        </h2>
+        <p class="border border-dashed border-linia-mocna p-7 text-[15.5px] leading-relaxed text-tekst-drugi m-0 max-w-[42em]">
+          Dokumentów tego ubezpieczyciela nie ma jeszcze w bibliotece. Dołączamy je do
+          oferty indywidualnie — jeśli potrzebujesz ich wcześniej, napisz na
+          {' '}<a href={`mailto:${FIRMA.email}`} class="text-akcent-hover underline decoration-linia-mocna underline-offset-2">{FIRMA.email}</a>,
+          odeślemy tego samego dnia.
+        </p>
+      </section>
+    ))}
+  </div>
+
+  <section class="bg-tlo-jasne border-t border-linia">
+    <div class="max-w-[1200px] mx-auto px-5 py-12">
+      <h2 class="text-[19px] font-semibold mt-0 mb-3">Który dokument dotyczy mnie</h2>
+      <ul class="text-[15.5px] leading-relaxed text-tekst-drugi max-w-[46em] m-0 pl-5">
+        <li class="mb-2"><strong class="text-tekst">MEDICARE (LW047)</strong> i <strong class="text-tekst">MEDICA (LW046)</strong> — warianty dla zawodów medycznych.</li>
+        <li class="mb-2"><strong class="text-tekst">Utrata Dochodu (LW044)</strong> — pozostałe zawody.</li>
+        <li class="mb-2"><strong class="text-tekst">Warunki szczególne HIV/WZW (LW048, LW049)</strong> — dokupowane wyłącznie do wariantów medycznych.</li>
+      </ul>
+      <p class="text-[14px] leading-relaxed text-tekst-trzeci mt-5 mb-0 max-w-[46em]">
+        Aktualność dokumentów: {new Date(dane.pobrano).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' })}.
+        Wersję obowiązującą dla Twojej polisy wskazuje jej numer — jest w dokumencie polisowym.
+      </p>
+    </div>
+  </section>
+</Baza>

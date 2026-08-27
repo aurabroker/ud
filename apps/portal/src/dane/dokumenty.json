@@ -1,0 +1,69 @@
+{
+  "pobrano": "2026-08-27",
+  "zrodlo": "ud_owu_library (active = true)",
+  "dokumenty": [
+    {
+      "id": "253cd9b5-6dc1-44ed-b725-0f693930ae5b",
+      "ubezpieczyciel": "leadenhall",
+      "symbol": "LW044/AD_D_TTD_PTD/PL/4",
+      "tytul": "Leadenhall Utrata Dochodu",
+      "rodzaj": "owu",
+      "plik": "LW_044_AD_D_TTD_PTD_PL_4.pdf",
+      "bajty": 281030
+    },
+    {
+      "id": "7d4eabb6-9e52-45c2-9fd9-f3fe9ec9c30c",
+      "ubezpieczyciel": "leadenhall",
+      "symbol": "LW046/MEDICA/PL/4",
+      "tytul": "Karta produktu — Leadenhall MEDICA",
+      "rodzaj": "ipid",
+      "plik": "Karta_produktu_LH_Medica_LW_046_v4.pdf",
+      "bajty": 326879
+    },
+    {
+      "id": "6a425447-3c20-4859-9716-2cb6e606a42d",
+      "ubezpieczyciel": "leadenhall",
+      "symbol": "LW046/MEDICA/PL/4",
+      "tytul": "Leadenhall MEDICA",
+      "rodzaj": "owu",
+      "plik": "LW_046_MEDICA_PL_4.pdf",
+      "bajty": 275430
+    },
+    {
+      "id": "56be98a8-8de6-4ee3-b6ae-437a5313b163",
+      "ubezpieczyciel": "leadenhall",
+      "symbol": "LW047/MEDICARE/PL/4",
+      "tytul": "Karta produktu — Leadenhall MEDICARE",
+      "rodzaj": "ipid",
+      "plik": "Karta_produktu_LH_Medicare_LW_047_v4.pdf",
+      "bajty": 327318
+    },
+    {
+      "id": "7ed59d7e-b28e-45d4-9453-7124efa8de18",
+      "ubezpieczyciel": "leadenhall",
+      "symbol": "LW047/MEDICARE/PL/4",
+      "tytul": "Leadenhall MEDICARE",
+      "rodzaj": "owu",
+      "plik": "LW_047_MEDICARE_PL_4.pdf",
+      "bajty": 272698
+    },
+    {
+      "id": "7134d025-4f2a-4f83-83ed-05e62e9774d6",
+      "ubezpieczyciel": "leadenhall",
+      "symbol": "LW048/NS_MEDICA/PL/2",
+      "tytul": "Leadenhall MEDICA — warunki szczególne HIV/WZW",
+      "rodzaj": "warunki-szczegolne",
+      "plik": "LW_048_NS_MEDICA_PL_2.pdf",
+      "bajty": 196271
+    },
+    {
+      "id": "2f015bc0-008d-4b87-811d-4264de1fb57b",
+      "ubezpieczyciel": "leadenhall",
+      "symbol": "LW049/NS_MEDICARE/PL/2",
+      "tytul": "Leadenhall MEDICARE — warunki szczególne HIV/WZW",
+      "rodzaj": "warunki-szczegolne",
+      "plik": "LW_049_NS_MEDICARE_PL_2.pdf",
+      "bajty": 196903
+    }
+  ]
+}

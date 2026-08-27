@@ -1,0 +1,189 @@
+---
+/**
+ * Pojedynczy wpis. Statyczny HTML — treść jest w dokumencie, a nie doklejana
+ * skryptem, więc czyta ją zarówno robot wyszukiwarki, jak i model językowy.
+ */
+import Baza from '../../../layouts/Baza.astro';
+import { ARTYKULY, artykul, powiazane, dataPl } from '../../../lib/artykuly';
+import { graf, organizacja, serwis, strona, okruszki, abs } from '../../../lib/seo';
+import { FIRMA } from '../../../lib/firma';
+
+export function getStaticPaths() {
+  return ARTYKULY.map((a) => ({ params: { slug: a.slug } }));
+}
+
+const { slug } = Astro.params;
+const a = artykul(slug!)!;
+const sciezka = `/blog/${a.slug}/`;
+const tytul = `${a.tytul} | UtrataDochodu.pl`;
+const opis = a.zajawka;
+
+const sciezkaOkruszkow = [
+  { nazwa: 'Strona główna', url: '/' },
+  { nazwa: 'Baza wiedzy', url: '/blog/' },
+  { nazwa: a.tytul, url: sciezka },
+];
+
+const jsonld = graf([
+  organizacja(),
+  serwis(),
+  okruszki(sciezkaOkruszkow),
+  strona({ url: sciezka, tytul: a.tytul, opis, okruszki: sciezkaOkruszkow }),
+  {
+    '@type': 'BlogPosting',
+    '@id': `${abs(sciezka)}#wpis`,
+    headline: a.tytul,
+    description: opis,
+    datePublished: a.opublikowano,
+    dateModified: a.opublikowano,
+    inLanguage: 'pl-PL',
+    // Autorem jest firma, nie osoba — nie mamy imiennych autorów, a wymyślanie
+    // ich to dokładnie ten rodzaj sygnału, który Google traktuje jak oszustwo.
+    author: { '@id': 'https://utratadochodu.pl/#organizacja' },
+    publisher: { '@id': 'https://utratadochodu.pl/#organizacja' },
+    mainEntityOfPage: { '@id': `${abs(sciezka)}#strona` },
+    keywords: a.tagi.join(', ') || undefined,
+    ...(a.obraz ? { image: a.obraz } : {}),
+    isPartOf: { '@id': 'https://utratadochodu.pl/blog/#blog' },
+  },
+]);
+
+const POWIAZANE = powiazane(a.slug);
+/** Spis treści pokazujemy dopiero, gdy jest z czego wybierać. */
+const spis = a.naglowki.filter((n) => n.poziom === 2);
+---
+<Baza tytul={tytul} opis={opis} sciezka={sciezka} jsonld={jsonld} obraz={a.obraz ?? undefined}>
+  <div class="bg-tlo-jasne border-b border-linia">
+    <div class="max-w-[1200px] mx-auto px-5 py-12">
+      <nav aria-label="Okruszki" class="mb-5">
+        <ol class="flex flex-wrap gap-2 text-[13px] text-tekst-trzeci list-none m-0 p-0">
+          <li><a href="/" class="hover:text-akcent-ciemny">Strona główna</a></li>
+          <li aria-hidden="true">/</li>
+          <li><a href="/blog/" class="hover:text-akcent-ciemny">Baza wiedzy</a></li>
+        </ol>
+      </nav>
+      <h1 class="text-[clamp(1.9rem,4.6vw,2.8rem)] leading-[1.1] max-w-[19em] m-0">{a.tytul}</h1>
+      <p class="flex flex-wrap gap-x-4 gap-y-1 items-baseline font-mono text-[12.5px] text-tekst-trzeci mt-5 mb-0">
+        <time datetime={a.opublikowano}>{dataPl(a.opublikowano)}</time>
+        <span aria-hidden="true">·</span>
+        <span>{a.minuty} min czytania</span>
+        {a.tagi.length > 0 && <><span aria-hidden="true">·</span><span>{a.tagi.join(', ')}</span></>}
+      </p>
+    </div>
+  </div>
+
+  <div class="max-w-[1200px] mx-auto px-5 py-12 grid gap-12 lg:grid-cols-[minmax(0,1fr)_17rem] items-start">
+    <article class="wpis max-w-[40em] min-w-0">
+      <p data-odpowiedz class="wstep">{a.zajawka}</p>
+      <Fragment set:html={a.tresc} />
+    </article>
+
+    <aside class="lg:sticky lg:top-8 flex flex-col gap-8">
+      {spis.length >= 3 && (
+        <nav aria-labelledby="spis" class="border border-linia bg-tlo-jasne p-6">
+          <h2 id="spis" class="font-mono text-[11px] tracking-[0.12em] uppercase text-tekst-trzeci font-semibold mt-0 mb-3">
+            W tym artykule
+          </h2>
+          <ol class="list-none m-0 p-0 flex flex-col gap-2.5 text-[14px]">
+            {spis.map((n) => (
+              <li><a href={`#${n.id}`} class="text-tekst-drugi hover:text-akcent-ciemny">{n.tekst}</a></li>
+            ))}
+          </ol>
+        </nav>
+      )}
+
+      <div class="border-l-[3px] border-akcent bg-tlo-jasne p-6">
+        <h2 class="text-[17px] font-semibold mt-0 mb-2 leading-snug">Policz swoją lukę</h2>
+        <p class="text-[14.5px] leading-relaxed text-tekst-drugi mt-0 mb-4">
+          Sprawdź, ile realnie wpłynie na konto, gdy zabraknie Cię w pracy na dłużej.
+        </p>
+        <a href="/kalkulator/" class="inline-block bg-akcent-ciemny text-white px-6 py-3 font-bold text-[14.5px] hover:bg-akcent-hover">
+          Otwórz kalkulator
+        </a>
+        <p class="text-[13px] leading-relaxed text-tekst-trzeci mt-4 mb-0">
+          Wolisz porozmawiać? <a href={`tel:${FIRMA.telefon}`} class="font-semibold text-akcent-hover">{FIRMA.telefonWyswietlany}</a>
+        </p>
+      </div>
+    </aside>
+  </div>
+
+  {POWIAZANE.length > 0 && (
+    <section class="bg-tlo-jasne border-t border-linia">
+      <div class="max-w-[1200px] mx-auto px-5 py-14">
+        <h2 class="text-[clamp(1.4rem,3vw,1.9rem)] leading-tight mt-0 mb-7">Czytaj dalej</h2>
+        <ul class="list-none m-0 p-0 grid gap-5 grid-cols-[repeat(auto-fill,minmax(19rem,1fr))]">
+          {POWIAZANE.map((p) => (
+            <li>
+              <a href={`/blog/${p.slug}/`} class="block border border-linia bg-tlo p-6 h-full hover:border-akcent">
+                <h3 class="text-[17px] leading-snug m-0 mb-2">{p.tytul}</h3>
+                <p class="text-[14px] leading-relaxed text-tekst-drugi m-0">{p.zajawka}</p>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
+</Baza>
+
+<style>
+  .wpis :global(h2) {
+    font-size: clamp(1.3rem, 2.8vw, 1.7rem);
+    line-height: 1.25;
+    margin: 2.8rem 0 0.9rem;
+    scroll-margin-top: 1.5rem;
+  }
+  .wpis :global(h3) {
+    font-size: 1.14rem;
+    line-height: 1.3;
+    margin: 2rem 0 0.6rem;
+    scroll-margin-top: 1.5rem;
+  }
+  .wpis :global(p) {
+    font-size: 1.04rem;
+    line-height: 1.75;
+    color: var(--color-tekst-drugi);
+    margin: 0 0 1.15rem;
+  }
+  /* Zajawka jest streszczeniem, nie pierwszym akapitem tekstu — musi się odcinać. */
+  .wpis :global(.wstep) {
+    font-size: 1.15rem;
+    line-height: 1.65;
+    color: var(--color-tekst);
+    border-left: 3px solid var(--color-akcent);
+    padding-left: 1.25rem;
+    margin-bottom: 2.2rem;
+  }
+  .wpis :global(ul), .wpis :global(ol) {
+    font-size: 1.04rem;
+    line-height: 1.75;
+    color: var(--color-tekst-drugi);
+    margin: 0 0 1.4rem;
+    padding-left: 1.4rem;
+  }
+  .wpis :global(li) { margin-bottom: 0.55rem; }
+  .wpis :global(li)::marker { color: var(--color-akcent); }
+  /* Edytor pakuje treść pozycji listy w akapit — bez tego każda dostaje
+     dolny margines akapitu i lista rozjeżdża się na pół ekranu. */
+  .wpis :global(li > p) { margin: 0; }
+  .wpis :global(a) {
+    color: var(--color-akcent-hover);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    text-decoration-color: var(--color-linia-mocna);
+  }
+  .wpis :global(a:hover) { text-decoration-color: currentColor; }
+  .wpis :global(strong) { color: var(--color-tekst); font-weight: 600; }
+  .wpis :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin: 1.8rem 0;
+    border: 1px solid var(--color-linia);
+  }
+  .wpis :global(hr) {
+    border: 0;
+    border-top: 1px solid var(--color-linia);
+    margin: 2.4rem 0;
+  }
+</style>

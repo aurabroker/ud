@@ -55,3 +55,35 @@ export function rodzaj(nazwa: string): 'm' | 'z';
 export const FORMY: readonly Forma[];
 export const MESKI: 'm';
 export const ZENSKI: 'z';
+
+/* ── Treści redakcyjne ────────────────────────────────────────────────────
+ * Osobny plik danych, bo tekst zmienia się niezależnie od parametrów zawodu
+ * i nie ma po co przebudowywać jednego przy edycji drugiego.
+ */
+
+export interface Pytanie {
+  pytanie: string;
+  odpowiedz: string;
+}
+
+export interface Tresc {
+  /** Akapit otwierający — pierwsze zdanie trafia też do llms.txt. */
+  wstep: string;
+  /** Skąd bierze się dochód w tym zawodzie i jak się go dokumentuje. */
+  dochod: string;
+  /** Co się dzieje, gdy praca się zatrzyma. */
+  przerwa: string;
+  ryzyka: Ryzyko[];
+  pytania: Pytanie[];
+}
+
+export const TRESCI: Record<string, Tresc>;
+
+export function tresc(slug: string): Tresc | null;
+
+/** Ile zawodów ma już własną treść — mierzone w teście pokrycia. */
+export function pokrycieTresci(slugi: string[]): {
+  napisane: number;
+  wszystkie: number;
+  brakujace: string[];
+};

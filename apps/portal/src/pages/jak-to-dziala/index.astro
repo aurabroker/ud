@@ -1,0 +1,216 @@
+---
+import Baza from '../../layouts/Baza.astro';
+import { graf, organizacja, serwis, strona, okruszki, faq, usluga } from '../../lib/seo';
+import { symuluj, zl, ZUS_MIESIECZNIE, LIMIT } from '../../lib/symulacja';
+import { KROKI, PROG_KLAUZUL_NW } from '@ud/wniosek/schemat';
+import { HEALTH_SURVEY_THRESHOLD } from '@ud/wniosek/ankieta';
+import { FIRMA } from '../../lib/firma';
+
+const sciezka = '/jak-to-dziala/';
+const tytul = 'Jak działa ubezpieczenie utraty dochodu — krok po kroku | UtrataDochodu.pl';
+const opis = 'Od czego zależy świadczenie, jak liczy się składkę, co się dzieje po złożeniu '
+  + 'wniosku i ile trwa droga od formularza do polisy.';
+
+const przyklad = symuluj({ dochod: 18000, zatrudnienie: 'b2b' });
+
+const ETAPY = [
+  {
+    tytul: 'Wypełniasz wniosek',
+    czas: 'około 5 minut',
+    opis: `Cztery kroki: ${KROKI.map((k) => k.tytul.toLowerCase()).join(', ')}. `
+      + 'Wszystko online, bez skanowania dokumentów i bez wizyty w oddziale.',
+  },
+  {
+    tytul: 'Sprawdzamy wniosek i dobieramy wariant',
+    czas: 'ten sam dzień',
+    opis: `Porównujemy warunki obu ubezpieczycieli (${FIRMA.ubezpieczyciele.join(' i ')}) `
+      + 'pod kątem Twojego zawodu. Dla zawodów medycznych właściwe są warianty MEDICA '
+      + 'i MEDICARE, dla pozostałych — LW044.',
+  },
+  {
+    tytul: 'Ubezpieczyciel ocenia ryzyko',
+    czas: '1–2 dni robocze',
+    opis: 'To underwriting: ocena zawodu, wieku, wysokości dochodu i ankiety medycznej. '
+      + 'Na tym etapie powstaje realna składka — kalkulator na stronie liczy tylko symulację.',
+  },
+  {
+    tytul: 'Dostajesz ofertę i decydujesz',
+    czas: 'bez zobowiązań',
+    opis: 'Oferta trafia na e-mail razem z ogólnymi warunkami i kartą produktu. '
+      + 'Do momentu podpisania nic Cię nie wiąże.',
+  },
+  {
+    tytul: 'Podpisujesz polisę zdalnie',
+    czas: 'jeden dzień',
+    opis: 'Dokumenty podpisujesz elektronicznie, składkę opłacasz przelewem. '
+      + 'Ochrona rusza zgodnie z datą wskazaną w polisie.',
+  },
+];
+
+const PYTANIA = [
+  {
+    pytanie: 'Ile trwa droga od wniosku do polisy?',
+    odpowiedz: 'Zwykle 2–4 dni robocze. Najdłuższy etap to ocena ryzyka po stronie '
+      + 'ubezpieczyciela, czyli 1–2 dni. Reszta zależy od tego, jak szybko odeślesz decyzję.',
+  },
+  {
+    pytanie: 'Od czego zależy wysokość świadczenia?',
+    odpowiedz: `Od udokumentowanego dochodu i formy zatrudnienia. Limit wynosi `
+      + `${Math.round(LIMIT.b2b * 100)}% dochodu przy samozatrudnieniu i kontrakcie B2B `
+      + `oraz ${Math.round(LIMIT.etat * 100)}% przy umowie o pracę. Ubezpieczenie nie może `
+      + 'być korzystniejsze finansowo niż praca — inaczej zniknąłby bodziec do powrotu.',
+  },
+  {
+    pytanie: 'Czy potrzebne są badania lekarskie?',
+    odpowiedz: `Przy standardowych sumach wystarczy ankieta medyczna we wniosku. Powyżej `
+      + `${zl(HEALTH_SURVEY_THRESHOLD)} sumy dla trwałej niezdolności do pracy uruchamia się `
+      + 'rozszerzona ankieta zdrowotna, a ubezpieczyciel może poprosić o badania.',
+  },
+  {
+    pytanie: 'Jak dokumentuje się dochód przy zgłoszeniu roszczenia?',
+    odpowiedz: 'Przy działalności gospodarczej — PIT za poprzedni rok i wyciągi albo '
+      + 'zestawienie faktur z ostatnich miesięcy. Przy umowie o pracę — zaświadczenie '
+      + 'o zarobkach. Warto trzymać te dokumenty pod ręką, bo od nich zależy tempo wypłaty.',
+  },
+  {
+    pytanie: 'Kiedy dostępne są dodatkowe klauzule NW?',
+    odpowiedz: `Gdy suma ubezpieczenia dla ryzyka śmierci i inwalidztwa przekracza `
+      + `${zl(PROG_KLAUZUL_NW)}. Poniżej tego progu klauzule — świadczenie szpitalne, koszty `
+      + 'medyczne, świadczenie z tytułu nieprzytomności — nie są oferowane.',
+  },
+];
+
+const sciezkaOkruszkow = [
+  { nazwa: 'Strona główna', url: '/' },
+  { nazwa: 'Jak to działa', url: sciezka },
+];
+
+const jsonld = graf([
+  organizacja(),
+  serwis(),
+  okruszki(sciezkaOkruszkow),
+  strona({ url: sciezka, tytul, opis, okruszki: sciezkaOkruszkow }),
+  usluga({
+    nazwa: 'Ubezpieczenie utraty dochodu',
+    opis,
+    url: sciezka,
+    grupa: 'Samozatrudnieni, kontraktowi i wolne zawody',
+  }),
+  faq(PYTANIA, sciezka),
+  {
+    '@type': 'HowTo',
+    '@id': `https://utratadochodu.pl${sciezka}#jak`,
+    name: 'Jak zawrzeć ubezpieczenie utraty dochodu',
+    totalTime: 'P4D',
+    step: ETAPY.map((e, i) => ({
+      '@type': 'HowToStep',
+      position: i + 1,
+      name: e.tytul,
+      text: e.opis,
+    })),
+  },
+]);
+---
+<Baza tytul={tytul} opis={opis} sciezka={sciezka} jsonld={jsonld}>
+  <div class="bg-linear-102 from-tlo via-tlo-cyjan to-tlo-hero border-b border-linia">
+    <div class="max-w-[1200px] mx-auto px-5 py-16">
+      <nav aria-label="Okruszki" class="mb-5">
+        <ol class="flex flex-wrap gap-2 text-[13px] text-tekst-trzeci list-none m-0 p-0">
+          <li><a href="/" class="hover:text-akcent-ciemny">Strona główna</a></li>
+          <li aria-hidden="true">/</li>
+          <li aria-current="page" class="text-tekst-drugi">Jak to działa</li>
+        </ol>
+      </nav>
+      <h1 class="text-[clamp(2rem,5vw,3rem)] leading-[1.07] max-w-[16em] m-0">
+        Jak działa ubezpieczenie utraty dochodu
+      </h1>
+      <p data-odpowiedz class="text-[1.14rem] leading-relaxed text-tekst-drugi max-w-[42em] mt-6 mb-0">
+        Polisa wypłaca miesięczne świadczenie, gdy choroba lub wypadek uniemożliwiają
+        wykonywanie zawodu. Świadczenie liczy się od udokumentowanego dochodu, a nie od
+        podstawy wymiaru składek ZUS — i to jest cała różnica.
+      </p>
+    </div>
+  </div>
+
+  <section class="max-w-[1200px] mx-auto px-5 py-16">
+    <h2 class="text-[clamp(1.6rem,4vw,2.4rem)] leading-tight mb-3">Skąd bierze się luka</h2>
+    <p class="text-[1.08rem] leading-relaxed text-tekst-drugi max-w-[42em] mt-0 mb-8">
+      Zasiłek chorobowy z ZUS to 80% podstawy wymiaru składek. Przy najniższej podstawie
+      daje to {zl(przyklad.zus)} miesięcznie — niezależnie od tego, czy zarabiasz
+      8 000 zł, czy 80 000 zł.
+    </p>
+
+    <div class="border border-linia overflow-x-auto max-w-[52em]">
+      <table class="w-full border-collapse text-left min-w-[34rem]">
+        <caption class="sr-only">Porównanie miesięcznych wpływów na zwolnieniu przy dochodzie 18 000 zł na B2B</caption>
+        <tbody>
+          <tr class="border-b border-linia">
+            <th scope="row" class="px-6 py-4 font-semibold text-[15.5px]">Dochód miesięczny</th>
+            <td class="px-6 py-4 font-mono text-lg">{zl(18000)}</td>
+          </tr>
+          <tr class="border-b border-linia">
+            <th scope="row" class="px-6 py-4 font-semibold text-[15.5px]">Zasiłek z ZUS (najniższa podstawa)</th>
+            <td class="px-6 py-4 font-mono text-lg text-alarm font-semibold">{zl(przyklad.zus)}</td>
+          </tr>
+          <tr class="border-b border-linia">
+            <th scope="row" class="px-6 py-4 font-semibold text-[15.5px]">Świadczenie z polisy ({Math.round(LIMIT.b2b * 100)}%)</th>
+            <td class="px-6 py-4 font-mono text-lg text-akcent-ciemny font-semibold">{zl(przyklad.swiadczenie)}</td>
+          </tr>
+          <tr class="bg-tlo-jasne">
+            <th scope="row" class="px-6 py-5 font-semibold text-[16px]">Razem na zwolnieniu</th>
+            <td class="px-6 py-5 font-mono text-xl font-semibold text-akcent-ciemny">{zl(przyklad.zus + przyklad.swiadczenie)}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="text-[13px] leading-relaxed text-tekst-trzeci mt-4 mb-0 max-w-[42em]">
+      Symulacja przy założeniu najniższej podstawy ZUS ({zl(ZUS_MIESIECZNIE)}) i pełnego
+      limitu świadczenia. Realną składkę i sumę wylicza ubezpieczyciel po ocenie ryzyka.
+    </p>
+  </section>
+
+  <section class="bg-tlo-jasne border-y border-linia">
+    <div class="max-w-[1200px] mx-auto px-5 py-16">
+      <h2 class="text-[clamp(1.6rem,4vw,2.4rem)] leading-tight mb-10">Od wniosku do polisy</h2>
+      <ol class="list-none m-0 p-0 grid gap-px bg-linia border border-linia">
+        {ETAPY.map((e, i) => (
+          <li class="bg-tlo p-7 flex flex-col sm:flex-row gap-5 sm:gap-8">
+            <div class="shrink-0 sm:w-[9rem]">
+              <span class="font-mono text-[2rem] leading-none text-akcent" aria-hidden="true">
+                {String(i + 1).padStart(2, '0')}
+              </span>
+              <p class="font-mono text-[11.5px] tracking-[0.1em] uppercase text-tekst-trzeci mt-2.5 mb-0">{e.czas}</p>
+            </div>
+            <div class="min-w-0">
+              <h3 class="text-[19px] font-semibold m-0 mb-2 leading-snug">{e.tytul}</h3>
+              <p class="text-[15.5px] leading-relaxed text-tekst-drugi m-0 max-w-[44em]">{e.opis}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="max-w-[1200px] mx-auto px-5 py-16">
+    <h2 class="text-[clamp(1.6rem,4vw,2.4rem)] leading-tight mb-8">Najczęstsze pytania</h2>
+    <div class="border-t border-linia max-w-[52em]">
+      {PYTANIA.map((p, i) => (
+        <details class="border-b border-linia group" open={i < 2}>
+          <summary class="cursor-pointer list-none py-5 flex gap-4 items-start justify-between font-semibold text-[17px]">
+            {p.pytanie}
+            <span aria-hidden="true" class="text-akcent-ciemny shrink-0 group-open:rotate-45 transition-transform">+</span>
+          </summary>
+          <p class="text-[16px] leading-relaxed text-tekst-drugi pb-5 mt-0 max-w-[46em]">{p.odpowiedz}</p>
+        </details>
+      ))}
+    </div>
+    <div class="flex flex-wrap gap-3 mt-10">
+      <a href="/wniosek/" class="bg-akcent-ciemny text-white px-8 py-4 font-bold hover:bg-akcent-hover">
+        Wypełnij wniosek
+      </a>
+      <a href="/wylaczenia/" class="border-[1.5px] border-akcent text-akcent-ciemny bg-tlo px-8 py-[14px] font-semibold hover:bg-tlo-jasne">
+        Sprawdź wyłączenia
+      </a>
+    </div>
+  </section>
+</Baza>

@@ -1,0 +1,22 @@
+{
+  "pobrano": "2026-08-27",
+  "zrodlo": "ud_review (approved = true)",
+  "opinie": [
+    {
+      "imie": "Marzena",
+      "miasto": "Gdynia",
+      "zawod": "stomatolog",
+      "ocena": 5,
+      "tresc": "Jestem bardzo zadowolona. Po raz pierwszy ktoś wyjaśnił zasady działania tego ubezpieczenia. Czuję się pewniej z taką polisą.",
+      "data": "2026-08-26T12:13:18Z"
+    },
+    {
+      "imie": "Paweł",
+      "miasto": "Kraków",
+      "zawod": "programista",
+      "ocena": 5,
+      "tresc": "Szukając najlepszego ubezpieczenia utraty dochodu, musicie wybrać UtrataDochodu.pl. Wszystko wyjaśnione, bez obaw odnowiłem w tym roku polisę.",
+      "data": "2026-08-26T12:10:10Z"
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+---
+import Tekst from '../../layouts/Tekst.astro';
+import { FIRMA, SERWIS } from '../../lib/firma';
+
+const sciezka = '/polityka-prywatnosci/';
+const tytul = 'Polityka prywatności | UtrataDochodu.pl';
+const opis = 'Jakie dane zbieramy we wniosku ubezpieczeniowym, na jakiej podstawie prawnej '
+  + 'je przetwarzamy, komu je przekazujemy i jakie prawa Ci przysługują.';
+---
+<Tekst
+  tytul={tytul}
+  naglowek="Polityka prywatności"
+  opis={opis}
+  sciezka={sciezka}
+  zaktualizowano="2026-08-27">
+
+  <p>
+    Ta strona opisuje, co dzieje się z danymi, które zostawiasz w serwisie. Krótszą
+    wersję dotyczącą samego wniosku znajdziesz w
+    {' '}<a href="/klauzula-informacyjna/">klauzuli informacyjnej</a>, a zasady
+    dotyczące ciasteczek — w <a href="/polityka-cookies/">polityce cookies</a>.
+  </p>
+
+  <h2>1. Administrator danych</h2>
+  <p>
+    Administratorem Twoich danych osobowych jest {FIRMA.nazwaPelna} z siedzibą
+    w Warszawie, {FIRMA.adres.ulica}, {FIRMA.adres.kod} {FIRMA.adres.miasto},
+    KRS {FIRMA.krs}, NIP {FIRMA.nip}, REGON {FIRMA.regon}.
+  </p>
+  <p>
+    Kontakt w sprawach ochrony danych:
+    {' '}<a href={`mailto:${FIRMA.email}`}>{FIRMA.email}</a>.
+  </p>
+
+  <h2>2. Jakie dane zbieramy</h2>
+  <ul>
+    <li><strong>Dane identyfikacyjne:</strong> imię, nazwisko, PESEL.</li>
+    <li><strong>Dane kontaktowe:</strong> adres e-mail, numer telefonu.</li>
+    <li><strong>Dane zawodowe:</strong> forma zatrudnienia, zawód, forma opodatkowania, wysokość dochodu.</li>
+    <li><strong>Dane o stanie zdrowia</strong> podane dobrowolnie w ankiecie medycznej we wniosku.</li>
+    <li><strong>Dane techniczne:</strong> adres IP, pliki cookies, informacje o przeglądarce.</li>
+  </ul>
+
+  <h2>3. Cel i podstawa przetwarzania</h2>
+  <ul>
+    <li>Realizacja wniosku ubezpieczeniowego — art. 6 ust. 1 lit. b RODO (działania przed zawarciem umowy).</li>
+    <li>Przekazanie danych do ubezpieczyciela — art. 6 ust. 1 lit. b RODO.</li>
+    <li>Marketing własny — art. 6 ust. 1 lit. f RODO (prawnie uzasadniony interes) albo zgoda.</li>
+    <li>Obowiązki prawne ciążące na agencie ubezpieczeniowym — art. 6 ust. 1 lit. c RODO.</li>
+    <li>Dane dotyczące zdrowia — art. 9 ust. 2 lit. a RODO (wyraźna zgoda udzielona przed złożeniem wniosku).</li>
+  </ul>
+
+  <h2>4. Odbiorcy danych</h2>
+  <p>Twoje dane mogą być przekazywane:</p>
+  <ul>
+    <li>ubezpieczycielom i reasekuratorom: {FIRMA.ubezpieczyciele.join(', ')};</li>
+    <li>dostawcom systemów informatycznych (hosting bazy danych na terenie UE oraz USA, na podstawie standardowych klauzul umownych);</li>
+    <li>dostawcom narzędzi e-mail marketingu;</li>
+    <li>podmiotom świadczącym obsługę prawną i księgową.</li>
+  </ul>
+
+  <h2>5. Okres przechowywania</h2>
+  <p>
+    Dane z wniosku ubezpieczeniowego przechowujemy przez czas trwania umowy ubezpieczenia
+    oraz przez okres wynikający z obowiązków archiwizacyjnych po jej zakończeniu.
+    Dane przetwarzane na podstawie zgody marketingowej — do czasu jej cofnięcia.
+  </p>
+
+  <h2>6. Twoje prawa</h2>
+  <p>Przysługuje Ci prawo do:</p>
+  <ul>
+    <li>dostępu do danych i otrzymania ich kopii,</li>
+    <li>sprostowania nieprawidłowych danych,</li>
+    <li>usunięcia danych („prawo do bycia zapomnianym”),</li>
+    <li>ograniczenia przetwarzania,</li>
+    <li>przenoszenia danych,</li>
+    <li>wniesienia sprzeciwu wobec przetwarzania,</li>
+    <li>cofnięcia zgody w dowolnym momencie, bez wpływu na zgodność z prawem przetwarzania sprzed cofnięcia,</li>
+    <li>wniesienia skargi do Prezesa Urzędu Ochrony Danych Osobowych (ul. Stawki 2, 00-193 Warszawa).</li>
+  </ul>
+
+  <h2>7. Pliki cookies</h2>
+  <p>
+    Serwis korzysta z plików cookies w celu zapewnienia prawidłowego działania strony,
+    analizy ruchu oraz remarketingu. Szczegóły i sposób zarządzania zgodą opisuje
+    {' '}<a href="/polityka-cookies/">polityka cookies</a>.
+  </p>
+
+  <h2>8. Bezpieczeństwo</h2>
+  <p>
+    Stosujemy środki techniczne i organizacyjne chroniące dane przed nieuprawnionym
+    dostępem, utratą lub zniszczeniem, w tym szyfrowanie połączeń (TLS) i kontrolę
+    dostępu do bazy danych.
+  </p>
+
+  <h2>9. Zmiany polityki</h2>
+  <p>
+    Zastrzegamy sobie prawo do zmiany niniejszej polityki. O istotnych zmianach
+    poinformujemy przez serwis lub e-mailem. Aktualna wersja jest zawsze dostępna pod
+    adresem <a href={sciezka}>{SERWIS.url}{sciezka}</a>.
+  </p>
+</Tekst>

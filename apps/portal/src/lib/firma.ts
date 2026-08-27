@@ -9,11 +9,13 @@ export const FIRMA = {
 
   adres: {
     ulica: 'ul. Bolkowska 2A lok. 28',
+    kod: '01-466',
     miasto: 'Warszawa',
     kraj: 'PL',
   },
 
   krs: '0000599840',
+  nip: '5242793544',
   sad: 'Sąd Rejonowy dla m.st. Warszawy, XII Wydział Gospodarczy Krajowego Rejestru Sądowego',
   regon: '363673048',
   kapital: '5 000 zł',

@@ -1,0 +1,137 @@
+---
+import Baza from '../../layouts/Baza.astro';
+import { graf, organizacja, serwis, strona, okruszki } from '../../lib/seo';
+import { FIRMA } from '../../lib/firma';
+import { ZAWODY } from '@ud/zawody';
+
+const sciezka = '/o-nas/';
+const tytul = 'O nas — Aura Expert i nasi partnerzy ubezpieczeniowi | UtrataDochodu.pl';
+const opis = 'Kto stoi za serwisem UtrataDochodu.pl, z jakimi ubezpieczycielami pracujemy '
+  + 'i dlaczego akurat z nimi. Numery rejestrowe do sprawdzenia.';
+
+const PARTNERZY = [
+  {
+    nazwa: 'Leadenhall Insurance S.A.',
+    rola: 'Coverholder rynku Lloyd’s',
+    opis: 'Agencja ubezpieczeniowa i coverholder rynku londyńskiego. Daje dostęp do '
+      + 'pojemności finansowej Lloyd’s, czyli największego rynku ubezpieczeniowego na świecie. '
+      + 'Stąd pochodzą warianty MEDICARE, MEDICA i LW044, na których opiera się nasza oferta.',
+  },
+  {
+    nazwa: 'CEU',
+    rola: 'Coverholder specjalizujący się w wolnych zawodach',
+    opis: 'Coverholder wyspecjalizowany w rozwiązaniach dla wolnych zawodów, branży '
+      + 'medycznej i kontraktów B2B. Prowadzi likwidację szkód na terenie Polski.',
+  },
+];
+const sciezkaOkruszkow = [
+  { nazwa: 'Strona główna', url: '/' },
+  { nazwa: 'O nas', url: sciezka },
+];
+
+const jsonld = graf([
+  organizacja(),
+  serwis(),
+  okruszki(sciezkaOkruszkow),
+  strona({ url: sciezka, tytul, opis, okruszki: sciezkaOkruszkow }),
+  {
+    '@type': 'AboutPage',
+    '@id': `https://utratadochodu.pl${sciezka}#o-nas`,
+    mainEntity: { '@id': 'https://utratadochodu.pl/#organizacja' },
+  },
+]);
+
+/** Numery, które da się zweryfikować w rejestrach — to jest treść E-E-A-T, nie ozdoba. */
+const REJESTRY = [
+  { nazwa: 'KRS', wartosc: FIRMA.krs, gdzie: 'Krajowy Rejestr Sądowy' },
+  { nazwa: 'NIP', wartosc: FIRMA.nip, gdzie: 'Numer identyfikacji podatkowej' },
+  { nazwa: 'REGON', wartosc: FIRMA.regon, gdzie: 'Rejestr GUS' },
+  { nazwa: 'RPU', wartosc: FIRMA.rpu, gdzie: 'Rejestr Pośredników Ubezpieczeniowych KNF' },
+];
+---
+<Baza tytul={tytul} opis={opis} sciezka={sciezka} jsonld={jsonld}>
+  <div class="bg-linear-102 from-tlo via-tlo-cyjan to-tlo-hero border-b border-linia">
+    <div class="max-w-[1200px] mx-auto px-5 py-16">
+      <nav aria-label="Okruszki" class="mb-5">
+        <ol class="flex flex-wrap gap-2 text-[13px] text-tekst-trzeci list-none m-0 p-0">
+          <li><a href="/" class="hover:text-akcent-ciemny">Strona główna</a></li>
+          <li aria-hidden="true">/</li>
+          <li aria-current="page" class="text-tekst-drugi">O nas</li>
+        </ol>
+      </nav>
+      <h1 class="text-[clamp(2rem,5vw,3rem)] leading-[1.07] max-w-[16em] m-0">
+        Kto stoi za UtrataDochodu.pl
+      </h1>
+      <p data-odpowiedz class="text-[1.14rem] leading-relaxed text-tekst-drugi max-w-[42em] mt-6 mb-0">
+        Operatorem marki jest {FIRMA.nazwaPelna} — agent ubezpieczeniowy wpisany do
+        Rejestru Pośredników Ubezpieczeniowych prowadzonego przez Komisję Nadzoru
+        Finansowego pod numerem {FIRMA.rpu}. Nie jesteśmy ubezpieczycielem; polisę
+        wystawia towarzystwo, w którego imieniu działamy.
+      </p>
+    </div>
+  </div>
+
+  <section class="max-w-[1200px] mx-auto px-5 py-16">
+    <h2 class="text-[clamp(1.6rem,4vw,2.3rem)] leading-tight mb-4">Z kim współpracujemy</h2>
+    <p class="text-[1.05rem] leading-relaxed text-tekst-drugi max-w-[44em] mt-0 mb-9">
+      Ubezpieczenie utraty dochodu to produkt niszowy — wymaga zaplecza kapitałowego
+      i doświadczenia w ocenie ryzyka zawodowego. Na polskim rynku pracujemy wyłącznie
+      z autoryzowanymi przedstawicielami (coverholderami).
+    </p>
+    <div class="grid gap-6 grid-cols-[repeat(auto-fit,minmax(20rem,1fr))]">
+      {PARTNERZY.map((p) => (
+        <article class="border border-linia bg-tlo p-7">
+          <p class="font-mono text-[11px] tracking-[0.12em] uppercase text-akcent-ciemny font-semibold m-0 mb-2">{p.rola}</p>
+          <h3 class="text-[20px] font-semibold m-0 mb-3 leading-snug">{p.nazwa}</h3>
+          <p class="text-[15.5px] leading-relaxed text-tekst-drugi m-0">{p.opis}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="bg-tlo-jasne border-y border-linia">
+    <div class="max-w-[1200px] mx-auto px-5 py-16">
+      <h2 class="text-[clamp(1.6rem,4vw,2.3rem)] leading-tight mb-4">Co robimy</h2>
+      <p class="text-[1.05rem] leading-relaxed text-tekst-drugi max-w-[44em] mt-0 mb-9">
+        Zbieramy wniosek, dobieramy wariant do zawodu i prowadzimy sprawę aż do
+        wystawienia polisy. Osobny opis ryzyka i wyliczenie luki dochodowej mamy
+        przygotowane dla {ZAWODY.length} grup zawodowych, bo ryzyko stomatologa
+        wygląda inaczej niż ryzyko kierowcy, a wysokość świadczenia zależy od tego,
+        jak dokumentuje się dochód w danej formie zatrudnienia.
+      </p>
+
+      <h3 class="text-[19px] font-semibold mb-4">Numery do sprawdzenia</h3>
+      <div class="border border-linia bg-tlo overflow-x-auto max-w-[46em]">
+        <table class="w-full border-collapse text-left min-w-[30rem]">
+          <caption class="sr-only">Numery rejestrowe {FIRMA.nazwa}</caption>
+          <tbody>
+            {REJESTRY.map((r) => (
+              <tr class="border-b border-linia last:border-0">
+                <th scope="row" class="px-6 py-4 font-mono text-[12px] tracking-[0.1em] uppercase font-semibold text-tekst-drugi whitespace-nowrap">{r.nazwa}</th>
+                <td class="px-6 py-4 font-mono text-[15.5px] font-semibold whitespace-nowrap">{r.wartosc}</td>
+                <td class="px-6 py-4 text-[14.5px] text-tekst-drugi">{r.gdzie}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p class="text-[14px] leading-relaxed text-tekst-drugi mt-4 mb-0">
+        Wpis agenta zweryfikujesz w wyszukiwarce KNF:
+        {' '}<a href={FIRMA.rejestrUrl} rel="noopener" class="text-akcent-hover underline decoration-linia-mocna underline-offset-2">{FIRMA.rejestrUrl}</a>.
+      </p>
+    </div>
+  </section>
+
+  <section class="max-w-[1200px] mx-auto px-5 py-14 flex flex-wrap gap-8 justify-between items-center">
+    <div class="max-w-[38em]">
+      <h2 class="text-[clamp(1.3rem,3vw,1.8rem)] leading-tight m-0 mb-2">Masz pytanie o naszą rolę w tym procesie?</h2>
+      <p class="text-[16px] leading-relaxed text-tekst-drugi m-0">
+        Odpowiadamy wprost, także na te niewygodne — o prowizję i o to, czego polisa
+        nie obejmuje.
+      </p>
+    </div>
+    <a href="/kontakt/" class="bg-akcent-ciemny text-white px-8 py-4 font-bold hover:bg-akcent-hover">
+      Napisz do nas
+    </a>
+  </section>
+</Baza>

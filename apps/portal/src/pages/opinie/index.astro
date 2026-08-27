@@ -1,0 +1,99 @@
+---
+/**
+ * Opinie klientów.
+ *
+ * Świadomie bez znacznika AggregateRating. Google nie dopuszcza do wyników
+ * rozszerzonych ocen, które firma zbiera sama o sobie („self-serving reviews"),
+ * a przy dwóch opiniach oznaczenie ich schematem to prosta droga do ręcznej kary.
+ * Opinie zostają więc zwykłą treścią strony — wiarygodną, bo widać ich liczbę.
+ */
+import Baza from '../../layouts/Baza.astro';
+import Opinia from '../../components/Opinia.svelte';
+import { graf, organizacja, serwis, strona, okruszki } from '../../lib/seo';
+import dane from '../../dane/opinie.json';
+
+const sciezka = '/opinie/';
+const tytul = 'Opinie klientów | UtrataDochodu.pl';
+const opis = 'Co mówią osoby, które zawarły polisę przez UtrataDochodu.pl. '
+  + 'Wszystkie opinie publikujemy po weryfikacji, bez selekcji ocen.';
+
+const URL_FUNKCJI = `${import.meta.env.PUBLIC_SUPABASE_URL}/functions/v1/review-submit`;
+const KLUCZ_TURNSTILE = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
+
+const OPINIE = dane.opinie;
+const data = (iso: string) =>
+  new Date(iso).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' });
+
+const sciezkaOkruszkow = [
+  { nazwa: 'Strona główna', url: '/' },
+  { nazwa: 'Opinie', url: sciezka },
+];
+
+const jsonld = graf([
+  organizacja(),
+  serwis(),
+  okruszki(sciezkaOkruszkow),
+  strona({ url: sciezka, tytul, opis, okruszki: sciezkaOkruszkow }),
+]);
+---
+<Baza tytul={tytul} opis={opis} sciezka={sciezka} jsonld={jsonld}>
+  <div class="bg-tlo-jasne border-b border-linia">
+    <div class="max-w-[1200px] mx-auto px-5 py-14">
+      <nav aria-label="Okruszki" class="mb-5">
+        <ol class="flex flex-wrap gap-2 text-[13px] text-tekst-trzeci list-none m-0 p-0">
+          <li><a href="/" class="hover:text-akcent-ciemny">Strona główna</a></li>
+          <li aria-hidden="true">/</li>
+          <li aria-current="page" class="text-tekst-drugi">Opinie</li>
+        </ol>
+      </nav>
+      <h1 class="text-[clamp(2rem,5vw,2.9rem)] leading-[1.08] m-0">Opinie klientów</h1>
+      <p data-odpowiedz class="text-[1.12rem] leading-relaxed text-tekst-drugi max-w-[40em] mt-5 mb-0">
+        {OPINIE.length === 0
+          ? 'Zbieramy pierwsze opinie. Jeśli masz u nas polisę, napisz, jak poszło.'
+          : `Publikujemy ${OPINIE.length === 1 ? 'jedną opinię' : `wszystkie ${OPINIE.length} opinie`}, jakie do nas trafiły — bez wybierania tylko tych dobrych. Każda przechodzi weryfikację, żeby nie trafiały tu wpisy od botów.`}
+      </p>
+    </div>
+  </div>
+
+  <div class="max-w-[1200px] mx-auto px-5 py-14 grid gap-14 lg:grid-cols-[1fr_28rem] items-start">
+    <section aria-labelledby="lista">
+      <h2 id="lista" class="sr-only">Lista opinii</h2>
+      {OPINIE.length === 0 ? (
+        <p class="border border-dashed border-linia-mocna p-8 text-[15.5px] text-tekst-trzeci text-center m-0">
+          Nie mamy jeszcze opublikowanych opinii.
+        </p>
+      ) : (
+        <ul class="list-none m-0 p-0 grid gap-5 grid-cols-[repeat(auto-fill,minmax(20rem,1fr))]">
+          {OPINIE.map((o) => (
+            <li class="border border-linia bg-tlo p-6 flex flex-col">
+              <p class="m-0 mb-3 text-[1.3rem] leading-none tracking-[0.08em]">
+                <span class="text-akcent" aria-hidden="true">{'★'.repeat(o.ocena)}</span><span
+                      class="text-linia-mocna" aria-hidden="true">{'★'.repeat(5 - o.ocena)}</span>
+                <span class="sr-only">Ocena {o.ocena} na 5</span>
+              </p>
+              <blockquote class="m-0 flex-grow">
+                <p class="text-[15.5px] leading-relaxed text-tekst-drugi m-0">{o.tresc}</p>
+              </blockquote>
+              <footer class="flex flex-wrap gap-x-3 gap-y-1 justify-between items-baseline
+                             pt-4 mt-5 border-t border-linia text-[13px] text-tekst-trzeci">
+                <span class="font-semibold text-[14px] text-tekst">
+                  {o.imie}{o.zawod ? <span class="font-normal text-tekst-drugi">, {o.zawod}</span> : null}
+                </span>
+                <span>{o.miasto} · <time datetime={o.data}>{data(o.data)}</time></span>
+              </footer>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+
+    <aside class="border border-linia bg-tlo-jasne p-7">
+      <h2 class="text-[20px] font-semibold mt-0 mb-2">Masz u nas polisę?</h2>
+      <p class="text-[15px] leading-relaxed text-tekst-drugi mt-0 mb-6">
+        Napisz, jak wyglądała obsługa. Opinia pojawi się po weryfikacji — także
+        wtedy, gdy jest krytyczna.
+      </p>
+      <Opinia client:visible urlFunkcji={URL_FUNKCJI} kluczTurnstile={KLUCZ_TURNSTILE} />
+    </aside>
+  </div>
+</Baza>

@@ -50,10 +50,18 @@ export default defineConfig({
       /** Wykluczamy adresy techniczne — nie ma po co ich zgłaszać. */
       filter: (page) => !page.includes('/podziekowanie/'),
       serialize(item) {
-        // Strona główna i strony zawodów mają wyższy priorytet niż dokumenty.
+        // Priorytet mówi robotowi, co przeindeksować najpierw, gdy nie ma czasu
+        // na wszystko. Strony prawne są na końcu tej kolejki celowo.
         if (item.url === `${SITE}/`) return { ...item, priority: 1.0, changefreq: EnumChangefreq.WEEKLY };
-        if (/\/(regulamin|polityka-|dokumenty)/.test(item.url)) {
-          return { ...item, priority: 0.3, changefreq: EnumChangefreq.YEARLY };
+        if (/\/(regulamin|polityka-|klauzula-informacyjna)/.test(item.url)) {
+          return { ...item, priority: 0.2, changefreq: EnumChangefreq.YEARLY };
+        }
+        // Baza wiedzy dostaje nowe wpisy — warto zaglądać częściej.
+        if (item.url.includes('/blog/')) {
+          return { ...item, priority: 0.6, changefreq: EnumChangefreq.WEEKLY };
+        }
+        if (/\/(dokumenty|opinie|kontakt|pracuj-z-nami)/.test(item.url)) {
+          return { ...item, priority: 0.4, changefreq: EnumChangefreq.MONTHLY };
         }
         return { ...item, priority: 0.8, changefreq: EnumChangefreq.MONTHLY };
       },

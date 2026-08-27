@@ -1,0 +1,76 @@
+---
+/**
+ * Strona po wysłaniu wniosku. noindex, bo nie ma po co jej indeksować —
+ * a bez tego trafia do wyników jako „Dziękujemy!" bez kontekstu i psuje
+ * statystyki konwersji, gdy ktoś wejdzie na nią prosto z Google.
+ */
+import Baza from '../../layouts/Baza.astro';
+import { FIRMA } from '../../lib/firma';
+
+const sciezka = '/podziekowanie/';
+const tytul = 'Wniosek przyjęty | UtrataDochodu.pl';
+const opis = 'Twój wniosek dotarł. Skontaktujemy się w ciągu 24 godzin roboczych.';
+
+const KROKI = [
+  {
+    tytul: 'Analiza wniosku',
+    opis: `Sprawdzamy dane pod kątem ofert ${FIRMA.ubezpieczyciele.join(' i ')} `
+      + 'i dobieramy wariant do Twojego zawodu.',
+  },
+  {
+    tytul: 'Kontakt w ciągu 24 godzin roboczych',
+    opis: 'Oddzwonimy albo wyślemy e-mail z dopasowaną ofertą i dalszymi krokami.',
+  },
+  {
+    tytul: 'Polisa wystawiona zdalnie',
+    opis: 'Dokumenty podpiszesz elektronicznie, składkę opłacisz przelewem. '
+      + 'Bez wychodzenia z domu.',
+  },
+];
+---
+<Baza tytul={tytul} opis={opis} sciezka={sciezka} bezIndeksu>
+  <div class="max-w-[1200px] mx-auto px-5 py-20">
+    <div class="max-w-[42em]">
+      <p class="font-mono text-xs tracking-[0.16em] uppercase text-akcent-ciemny font-semibold m-0">
+        Wniosek przyjęty
+      </p>
+      <h1 class="mt-4 mb-5 text-[clamp(2rem,5vw,3rem)] leading-[1.07]">Dziękujemy</h1>
+      <p class="text-[1.15rem] leading-relaxed text-tekst-drugi m-0">
+        Twój wniosek dotarł. Nasz ekspert przeanalizuje dane i skontaktuje się z Tobą
+        w ciągu 24 godzin roboczych z przygotowaną ofertą.
+      </p>
+    </div>
+
+    <h2 class="text-[clamp(1.4rem,3vw,1.9rem)] leading-tight mt-14 mb-8">Co dzieje się dalej</h2>
+    <ol class="list-none m-0 p-0 grid gap-px bg-linia border border-linia max-w-[52em]">
+      {KROKI.map((k, i) => (
+        <li class="bg-tlo p-7 flex gap-6">
+          <span class="font-mono text-[1.7rem] leading-none text-akcent shrink-0" aria-hidden="true">
+            {String(i + 1).padStart(2, '0')}
+          </span>
+          <div class="min-w-0">
+            <h3 class="text-[18px] font-semibold m-0 mb-2 leading-snug">{k.tytul}</h3>
+            <p class="text-[15.5px] leading-relaxed text-tekst-drugi m-0">{k.opis}</p>
+          </div>
+        </li>
+      ))}
+    </ol>
+
+    <div class="border-l-[3px] border-akcent bg-tlo-jasne p-7 mt-12 max-w-[52em]">
+      <h2 class="text-[19px] font-semibold m-0 mb-2">Masz pytania?</h2>
+      <p class="text-[15.5px] leading-relaxed text-tekst-drugi m-0">
+        Zadzwoń pod <a href={`tel:${FIRMA.telefon}`} class="font-semibold text-akcent-hover">{FIRMA.telefonWyswietlany}</a>
+        {' '}albo napisz na <a href={`mailto:${FIRMA.email}`} class="font-semibold text-akcent-hover">{FIRMA.email}</a>.
+      </p>
+    </div>
+
+    <div class="flex flex-wrap gap-3 mt-10">
+      <a href="/wylaczenia/" class="border-[1.5px] border-akcent text-akcent-ciemny bg-tlo px-7 py-[13px] font-semibold hover:bg-tlo-jasne">
+        Przeczytaj wyłączenia
+      </a>
+      <a href="/dokumenty/" class="border-[1.5px] border-akcent text-akcent-ciemny bg-tlo px-7 py-[13px] font-semibold hover:bg-tlo-jasne">
+        Pobierz OWU
+      </a>
+    </div>
+  </div>
+</Baza>

@@ -1,0 +1,141 @@
+---
+import Baza from '../../layouts/Baza.astro';
+import Kalkulator from '../../components/Kalkulator.svelte';
+import { graf, organizacja, serwis, strona, okruszki, faq } from '../../lib/seo';
+import { symuluj, zl, ZUS_MIESIECZNIE, LIMIT } from '../../lib/symulacja';
+
+const sciezka = '/kalkulator/';
+const tytul = 'Kalkulator ubezpieczenia utraty dochodu | UtrataDochodu.pl';
+const opis = 'Policz, ile dostaniesz z ZUS na zwolnieniu i ile dołoży polisa. '
+  + 'Symulacja przy dochodzie od 5 000 do 100 000 zł, dla B2B i umowy o pracę.';
+
+/** Kilka punktów odniesienia w HTML-u — kalkulator jest wyspą, więc bez nich
+ *  robot i model językowy zobaczyłyby pustą ramkę. */
+const PRZYKLADY = [10000, 18000, 30000, 50000].map((d) => ({
+  dochod: d,
+  b2b: symuluj({ dochod: d, zatrudnienie: 'b2b' }),
+  etat: symuluj({ dochod: d, zatrudnienie: 'etat' }),
+}));
+
+const PYTANIA = [
+  {
+    pytanie: 'Czy wynik kalkulatora to oferta?',
+    odpowiedz: 'Nie. To symulacja pokazująca rząd wielkości. Realną składkę wylicza '
+      + 'system ubezpieczyciela po ocenie ryzyka — zawodu, wieku, sumy ubezpieczenia '
+      + 'i ankiety medycznej.',
+  },
+  {
+    pytanie: 'Skąd bierze się kwota zasiłku z ZUS w kalkulatorze?',
+    odpowiedz: `Kalkulator zakłada najniższą podstawę wymiaru składek (${zl(ZUS_MIESIECZNIE)}) `
+      + `i zasiłek w wysokości 80% tej podstawy, czyli ${zl(Math.round(ZUS_MIESIECZNIE * 0.8))} `
+      + 'miesięcznie. Jeśli opłacasz składki od wyższej podstawy, Twój zasiłek będzie wyższy.',
+  },
+  {
+    pytanie: 'Dlaczego świadczenie nie może pokryć 100% dochodu?',
+    odpowiedz: `Limit wynosi ${Math.round(LIMIT.b2b * 100)}% przy samozatrudnieniu i kontrakcie B2B `
+      + `oraz ${Math.round(LIMIT.etat * 100)}% przy umowie o pracę. Zasada jest taka, że `
+      + 'ubezpieczenie nie może być korzystniejsze finansowo niż praca.',
+  },
+];
+
+const sciezkaOkruszkow = [
+  { nazwa: 'Strona główna', url: '/' },
+  { nazwa: 'Kalkulator', url: sciezka },
+];
+
+const jsonld = graf([
+  organizacja(),
+  serwis(),
+  okruszki(sciezkaOkruszkow),
+  strona({ url: sciezka, tytul, opis, okruszki: sciezkaOkruszkow }),
+  faq(PYTANIA, sciezka),
+]);
+---
+<Baza tytul={tytul} opis={opis} sciezka={sciezka} jsonld={jsonld}>
+  <div class="bg-linear-102 from-tlo via-tlo-cyjan to-tlo-hero border-b border-linia">
+    <div class="max-w-[1200px] mx-auto px-5 py-14 lg:py-16 grid gap-12 lg:grid-cols-[1fr_26em] items-start">
+      <div>
+        <nav aria-label="Okruszki" class="mb-5">
+          <ol class="flex flex-wrap gap-2 text-[13px] text-tekst-trzeci list-none m-0 p-0">
+            <li><a href="/" class="hover:text-akcent-ciemny">Strona główna</a></li>
+            <li aria-hidden="true">/</li>
+            <li aria-current="page" class="text-tekst-drugi">Kalkulator</li>
+          </ol>
+        </nav>
+        <h1 class="text-[clamp(2rem,5vw,2.9rem)] leading-[1.07] max-w-[15em] m-0">
+          Kalkulator ubezpieczenia utraty dochodu
+        </h1>
+        <p data-odpowiedz class="text-[1.12rem] leading-relaxed text-tekst-drugi max-w-[38em] mt-5 mb-0">
+          Podaj miesięczny dochód i formę zatrudnienia. Zobaczysz, ile realnie wpłynie
+          na konto z ZUS na zwolnieniu i ile dołożyłaby polisa. To symulacja
+          poglądowa, nie oferta.
+        </p>
+      </div>
+      <div class="w-full">
+        <Kalkulator client:idle />
+      </div>
+    </div>
+  </div>
+
+  <section class="max-w-[1200px] mx-auto px-5 py-16">
+    <h2 class="text-[clamp(1.5rem,3.5vw,2.2rem)] leading-tight mb-3">Punkty odniesienia</h2>
+    <p class="text-[1.05rem] leading-relaxed text-tekst-drugi max-w-[42em] mt-0 mb-8">
+      Cztery przykłady policzone tą samą formułą, co kalkulator obok. Kolumna
+      „bez polisy” to sam zasiłek z ZUS przy najniższej podstawie.
+    </p>
+
+    <div class="border border-linia overflow-x-auto">
+      <table class="w-full border-collapse text-left min-w-[42rem]">
+        <caption class="sr-only">Miesięczne wpływy na zwolnieniu przy różnych poziomach dochodu</caption>
+        <thead>
+          <tr class="bg-tlo-jasne border-b border-linia-mocna">
+            <th scope="col" class="font-mono text-[11px] tracking-[0.11em] uppercase font-semibold text-tekst-drugi px-5 py-4">Dochód</th>
+            <th scope="col" class="font-mono text-[11px] tracking-[0.11em] uppercase font-semibold text-alarm px-5 py-4">Bez polisy (ZUS)</th>
+            <th scope="col" class="font-mono text-[11px] tracking-[0.11em] uppercase font-semibold text-akcent-ciemny px-5 py-4">Z polisą — B2B</th>
+            <th scope="col" class="font-mono text-[11px] tracking-[0.11em] uppercase font-semibold text-akcent-ciemny px-5 py-4">Z polisą — etat</th>
+          </tr>
+        </thead>
+        <tbody>
+          {PRZYKLADY.map((p) => (
+            <tr class="border-b border-linia last:border-0">
+              <th scope="row" class="px-5 py-4 font-semibold text-[15.5px] whitespace-nowrap">{zl(p.dochod)}</th>
+              <td class="px-5 py-4 font-mono text-[15.5px] text-alarm whitespace-nowrap">{zl(p.b2b.zus)}</td>
+              <td class="px-5 py-4 font-mono text-[15.5px] font-semibold text-akcent-ciemny whitespace-nowrap">{zl(p.b2b.zus + p.b2b.swiadczenie)}</td>
+              <td class="px-5 py-4 font-mono text-[15.5px] font-semibold text-akcent-ciemny whitespace-nowrap">{zl(p.etat.zus + p.etat.swiadczenie)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+    <p class="text-[13px] leading-relaxed text-tekst-trzeci mt-4 mb-0 max-w-[46em]">
+      Założenia: najniższa podstawa ZUS ({zl(ZUS_MIESIECZNIE)}), zasiłek 80% podstawy,
+      świadczenie z polisy {Math.round(LIMIT.b2b * 100)}% dochodu na B2B
+      i {Math.round(LIMIT.etat * 100)}% na umowie o pracę. Symulacja, nie oferta.
+    </p>
+  </section>
+
+  <section class="bg-tlo-jasne border-y border-linia">
+    <div class="max-w-[1200px] mx-auto px-5 py-14">
+      <h2 class="text-[clamp(1.5rem,3.5vw,2.1rem)] leading-tight mb-8">Jak czytać ten wynik</h2>
+      <div class="border-t border-linia max-w-[52em]">
+        {PYTANIA.map((p, i) => (
+          <details class="border-b border-linia group" open={i < 2}>
+            <summary class="cursor-pointer list-none py-5 flex gap-4 items-start justify-between font-semibold text-[17px]">
+              {p.pytanie}
+              <span aria-hidden="true" class="text-akcent-ciemny shrink-0 group-open:rotate-45 transition-transform">+</span>
+            </summary>
+            <p class="text-[16px] leading-relaxed text-tekst-drugi pb-5 mt-0 max-w-[46em]">{p.odpowiedz}</p>
+          </details>
+        ))}
+      </div>
+      <div class="flex flex-wrap gap-3 mt-9">
+        <a href="/wniosek/" class="bg-akcent-ciemny text-white px-8 py-4 font-bold hover:bg-akcent-hover">
+          Policz realną składkę we wniosku
+        </a>
+        <a href="/wylaczenia/" class="border-[1.5px] border-akcent text-akcent-ciemny bg-tlo px-8 py-[14px] font-semibold hover:bg-tlo-jasne">
+          Zobacz wyłączenia
+        </a>
+      </div>
+    </div>
+  </section>
+</Baza>

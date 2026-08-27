@@ -116,12 +116,22 @@ export const KLAUZULE_NW = [
     kwoty: [0, 100, 250, 500, 1000], naTydzien: true },
 ];
 
-/** Kroki wniosku. */
+/**
+ * Kroki wniosku. `opis` mówi, jakie dane zbiera dany krok — używa go kreator
+ * jako podtytułu, a klauzula informacyjna RODO jako wyliczenia kategorii
+ * danych. Trzymanie tego w jednym miejscu jest wymogiem praktycznym:
+ * rozjazd między formularzem a klauzulą to naruszenie obowiązku
+ * informacyjnego z art. 13 RODO.
+ */
 export const KROKI = [
-  { id: 'dane',    tytul: 'Dane podstawowe' },
-  { id: 'zakres',  tytul: 'Zakres ochrony' },
-  { id: 'zdrowie', tytul: 'Stan zdrowia' },
-  { id: 'zgody',   tytul: 'Zgody i kontakt' },
+  { id: 'dane',    tytul: 'Dane podstawowe',
+    opis: 'imię i nazwisko, PESEL, zawód, forma zatrudnienia i opodatkowania, wysokość dochodu' },
+  { id: 'zakres',  tytul: 'Zakres ochrony',
+    opis: 'wybrane ryzyka, sumy ubezpieczenia i okres wypłaty świadczenia' },
+  { id: 'zdrowie', tytul: 'Stan zdrowia',
+    opis: 'ankieta medyczna — dane szczególnej kategorii, przetwarzane wyłącznie za wyraźną zgodą' },
+  { id: 'zgody',   tytul: 'Zgody i kontakt',
+    opis: 'adres e-mail, numer telefonu oraz zaznaczone zgody' },
 ];
 
 /* ── Walidacja ───────────────────────────────────────────────────────────── */

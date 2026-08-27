@@ -1,0 +1,90 @@
+---
+import Tekst from '../../layouts/Tekst.astro';
+import { FIRMA, SERWIS } from '../../lib/firma';
+
+const sciezka = '/regulamin/';
+const tytul = 'Regulamin świadczenia usług drogą elektroniczną | UtrataDochodu.pl';
+const opis = 'Zasady korzystania z serwisu UtrataDochodu.pl: charakter kalkulatora, '
+  + 'wymagania techniczne, odpowiedzialność i tryb reklamacji.';
+---
+<Tekst
+  tytul={tytul}
+  naglowek="Regulamin świadczenia usług drogą elektroniczną"
+  opis={opis}
+  sciezka={sciezka}
+  zaktualizowano="2026-08-27"
+  wOkruszkach="Regulamin">
+
+  <h2>§ 1. Postanowienia ogólne</h2>
+  <ol>
+    <li>
+      Niniejszy regulamin określa zasady korzystania ze strony internetowej
+      <a href={SERWIS.url}>{SERWIS.url}</a> prowadzonej przez {FIRMA.nazwaPelna}
+      z siedzibą w Warszawie, {FIRMA.adres.ulica}, wpisaną do rejestru przedsiębiorców
+      Krajowego Rejestru Sądowego pod numerem KRS {FIRMA.krs}, NIP {FIRMA.nip},
+      REGON {FIRMA.regon}.
+    </li>
+    <li>
+      Strona umożliwia zapoznanie się z ofertą ubezpieczeń utraty dochodu oraz
+      przesłanie wniosku o przygotowanie indywidualnej oferty.
+    </li>
+    <li>
+      {FIRMA.nazwa} działa jako agent ubezpieczeniowy wpisany do Rejestru Pośredników
+      Ubezpieczeniowych prowadzonego przez Komisję Nadzoru Finansowego pod numerem
+      {' '}{FIRMA.rpu}. Wpis można zweryfikować pod adresem
+      {' '}<a href={FIRMA.rejestrUrl} rel="noopener">{FIRMA.rejestrUrl}</a>.
+    </li>
+  </ol>
+
+  <h2>§ 2. Kalkulator i wniosek</h2>
+  <ol>
+    <li>
+      Kalkulator składki dostępny na stronie ma charakter wyłącznie poglądowy
+      i edukacyjny. Wyniki symulacji nie stanowią oferty w rozumieniu przepisów
+      Kodeksu cywilnego.
+    </li>
+    <li>
+      Ostateczna wysokość składki ubezpieczeniowej zależy od indywidualnej oceny
+      ryzyka (underwritingu) dokonywanej przez towarzystwo ubezpieczeniowe na
+      podstawie pełnego wniosku.
+    </li>
+    <li>
+      Złożenie wniosku przez formularz nie jest równoznaczne z zawarciem umowy
+      ubezpieczenia ani ze złożeniem oferty jej zawarcia przez ubezpieczyciela.
+    </li>
+  </ol>
+
+  <h2>§ 3. Wymagania techniczne</h2>
+  <p>
+    Do poprawnego korzystania z serwisu wymagane jest urządzenie z dostępem do sieci
+    Internet oraz zaktualizowana przeglądarka internetowa (np. Chrome, Firefox, Safari,
+    Edge) z włączoną obsługą języka JavaScript i plików cookies.
+  </p>
+
+  <h2>§ 4. Wyłączenie odpowiedzialności</h2>
+  <p>
+    {FIRMA.nazwa} dokłada wszelkich starań, aby informacje na stronie były aktualne,
+    jednak nie ponosi odpowiedzialności za przerwy w działaniu serwisu ani za utratę
+    danych wynikającą z awarii łączy internetowych. Wiążącą treścią pozostają ogólne
+    warunki ubezpieczenia dostępne w sekcji <a href="/dokumenty/">Dokumenty</a>.
+  </p>
+
+  <h2>§ 5. Reklamacje</h2>
+  <p>
+    Reklamacje związane z funkcjonowaniem strony internetowej można zgłaszać drogą
+    elektroniczną na adres <a href="mailto:zgloszenie@auraexpert.pl">zgloszenie@auraexpert.pl</a>.
+    Rozpatrzenie reklamacji następuje w terminie 14 dni od jej otrzymania.
+  </p>
+  <p>
+    Reklamacje dotyczące umowy ubezpieczenia lub działalności agenta rozpatrywane są
+    w trybie ustawy o rozpatrywaniu reklamacji przez podmioty rynku finansowego
+    i o Rzeczniku Finansowym.
+  </p>
+
+  <h2>§ 6. Zmiany regulaminu</h2>
+  <p>
+    Zastrzegamy sobie prawo do zmiany regulaminu. Zmiany wchodzą w życie z chwilą
+    publikacji na tej stronie. Aktualna wersja jest zawsze dostępna pod adresem
+    {' '}<a href={sciezka}>{SERWIS.url}{sciezka}</a>.
+  </p>
+</Tekst>

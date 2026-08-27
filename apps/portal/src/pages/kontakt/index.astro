@@ -1,0 +1,92 @@
+---
+import Baza from '../../layouts/Baza.astro';
+import SzybkiKontakt from '../../components/SzybkiKontakt.svelte';
+import { graf, organizacja, serwis, strona, okruszki } from '../../lib/seo';
+import { FIRMA } from '../../lib/firma';
+
+const sciezka = '/kontakt/';
+const tytul = 'Kontakt | UtrataDochodu.pl';
+const opis = `Zadzwoń pod ${FIRMA.telefonWyswietlany}, napisz na ${FIRMA.email} `
+  + 'albo zostaw numer — oddzwonimy w ciągu jednego dnia roboczego.';
+
+const URL_FUNKCJI = `${import.meta.env.PUBLIC_SUPABASE_URL}/functions/v1/contact-submit`;
+const KLUCZ_TURNSTILE = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
+
+const sciezkaOkruszkow = [
+  { nazwa: 'Strona główna', url: '/' },
+  { nazwa: 'Kontakt', url: sciezka },
+];
+
+const jsonld = graf([
+  organizacja(),
+  serwis(),
+  okruszki(sciezkaOkruszkow),
+  strona({ url: sciezka, tytul, opis, okruszki: sciezkaOkruszkow }),
+  {
+    '@type': 'ContactPage',
+    '@id': `https://utratadochodu.pl${sciezka}#kontakt`,
+    mainEntity: { '@id': 'https://utratadochodu.pl/#organizacja' },
+  },
+]);
+---
+<Baza tytul={tytul} opis={opis} sciezka={sciezka} jsonld={jsonld}>
+  <div class="bg-tlo-jasne border-b border-linia">
+    <div class="max-w-[1200px] mx-auto px-5 py-14">
+      <nav aria-label="Okruszki" class="mb-5">
+        <ol class="flex flex-wrap gap-2 text-[13px] text-tekst-trzeci list-none m-0 p-0">
+          <li><a href="/" class="hover:text-akcent-ciemny">Strona główna</a></li>
+          <li aria-hidden="true">/</li>
+          <li aria-current="page" class="text-tekst-drugi">Kontakt</li>
+        </ol>
+      </nav>
+      <h1 class="text-[clamp(2rem,5vw,2.9rem)] leading-[1.08] m-0">Kontakt</h1>
+      <p data-odpowiedz class="text-[1.12rem] leading-relaxed text-tekst-drugi max-w-[40em] mt-5 mb-0">
+        Najszybciej przez telefon: <a href={`tel:${FIRMA.telefon}`} class="font-semibold text-akcent-hover">{FIRMA.telefonWyswietlany}</a>.
+        Przejdziemy przez wniosek razem, bez zobowiązań.
+      </p>
+    </div>
+  </div>
+
+  <div class="max-w-[1200px] mx-auto px-5 py-14 grid gap-14 lg:grid-cols-[1fr_22rem] items-start">
+    <div>
+      <h2 class="text-[clamp(1.4rem,3vw,1.9rem)] leading-tight mt-0 mb-2">Zostaw numer, oddzwonimy</h2>
+      <p class="text-[16px] leading-relaxed text-tekst-drugi mt-0 mb-7 max-w-[36em]">
+        Jeden dzień roboczy. Jeśli wolisz od razu policzyć składkę, przejdź
+        do <a href="/wniosek/" class="text-akcent-hover underline decoration-linia-mocna underline-offset-2">wniosku</a>.
+      </p>
+      <div class="max-w-[30rem]">
+        <SzybkiKontakt client:visible urlFunkcji={URL_FUNKCJI} kluczTurnstile={KLUCZ_TURNSTILE}
+                       etykietaPrzycisku="Poproś o kontakt" />
+      </div>
+    </div>
+
+    <aside class="border border-linia bg-tlo-jasne p-7">
+      <h2 class="font-mono text-[11px] tracking-[0.12em] uppercase text-tekst-trzeci font-semibold mt-0 mb-5">Dane kontaktowe</h2>
+      <dl class="m-0 text-[15px] leading-relaxed">
+        <dt class="font-semibold">Telefon</dt>
+        <dd class="m-0 mb-4"><a href={`tel:${FIRMA.telefon}`} class="text-akcent-hover">{FIRMA.telefonWyswietlany}</a></dd>
+
+        <dt class="font-semibold">E-mail</dt>
+        <dd class="m-0 mb-4"><a href={`mailto:${FIRMA.email}`} class="text-akcent-hover break-all">{FIRMA.email}</a></dd>
+
+        <dt class="font-semibold">Adres</dt>
+        <dd class="m-0 mb-4 text-tekst-drugi">
+          {FIRMA.nazwaPelna}<br>
+          {FIRMA.adres.ulica}<br>
+          {FIRMA.adres.kod} {FIRMA.adres.miasto}
+        </dd>
+
+        <dt class="font-semibold">Reklamacje</dt>
+        <dd class="m-0 mb-4 text-tekst-drugi">
+          <a href="mailto:zgloszenie@auraexpert.pl" class="text-akcent-hover">zgloszenie@auraexpert.pl</a><br>
+          <span class="text-[13.5px]">Odpowiedź w ciągu 14 dni — <a href="/regulamin/" class="underline decoration-linia-mocna underline-offset-2">§ 5 regulaminu</a>.</span>
+        </dd>
+
+        <dt class="font-semibold">Numer w rejestrze KNF</dt>
+        <dd class="m-0 font-mono text-[14px] text-tekst-drugi">
+          <a href={FIRMA.rejestrUrl} rel="noopener" class="text-akcent-hover">{FIRMA.rpu}</a>
+        </dd>
+      </dl>
+    </aside>
+  </div>
+</Baza>

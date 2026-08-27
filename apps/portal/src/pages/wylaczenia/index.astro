@@ -1,0 +1,234 @@
+---
+/**
+ * Wyłączenia odpowiedzialności.
+ *
+ * Ta strona istnieje wbrew odruchowi marketingowemu i to jest jej sens.
+ * Model językowy odpytany o „czego nie obejmuje ubezpieczenie utraty dochodu"
+ * cytuje ten serwis, który odpowiada wprost — a nie ten, który wyłączenia
+ * ukrywa w PDF-ie. To samo dotyczy człowieka porównującego oferty.
+ */
+import Baza from '../../layouts/Baza.astro';
+import { graf, organizacja, serwis, strona, okruszki, faq } from '../../lib/seo';
+import { FIRMA } from '../../lib/firma';
+
+const sciezka = '/wylaczenia/';
+const tytul = 'Czego nie obejmuje ubezpieczenie utraty dochodu | UtrataDochodu.pl';
+const opis = 'Pełna lista wyłączeń: wypalenie zawodowe, choroby psychiczne, częściowa '
+  + 'niezdolność do pracy, schorzenia leczone przed zawarciem umowy. Bez gwiazdek.';
+
+/** Kategorie wyłączeń. Każda ma powód — sama lista bez uzasadnień jest bezużyteczna. */
+const GRUPY = [
+  {
+    tytul: 'Zdrowie psychiczne',
+    pozycje: [
+      {
+        co: 'Wypalenie zawodowe jako samodzielna diagnoza',
+        czemu: 'Wypalenie nie jest w klasyfikacji ICD jednostką chorobową, tylko zjawiskiem '
+          + 'związanym z pracą. Ubezpieczyciel nie ma na czym oprzeć oceny, jak długo potrwa '
+          + 'i kiedy się skończy, więc nie obejmuje go ochroną.',
+      },
+      {
+        co: 'Choroby i zaburzenia psychiczne oraz ich następstwa',
+        czemu: 'Depresja, zaburzenia lękowe, nerwica i podobne rozpoznania są wyłączone '
+          + 'w standardowych warunkach. Dotyczy to również sytuacji, w której zaburzenie '
+          + 'jest wtórne wobec choroby somatycznej objętej ochroną.',
+      },
+      {
+        co: 'Stres i przemęczenie',
+        czemu: 'Nie są rozpoznaniem, tylko opisem stanu. Zwolnienie wystawione z takim '
+          + 'uzasadnieniem nie uruchamia świadczenia.',
+      },
+    ],
+  },
+  {
+    tytul: 'Zakres niezdolności do pracy',
+    pozycje: [
+      {
+        co: 'Częściowa niezdolność do pracy',
+        czemu: 'Polisa wypłaca świadczenie za całkowitą niezdolność do wykonywania zawodu. '
+          + 'Praca w ograniczonym wymiarze albo przejście na lżejsze obowiązki oznacza, '
+          + 'że warunek wypłaty nie jest spełniony.',
+      },
+      {
+        co: 'Kwarantanna i izolacja bez orzeczonej niezdolności do pracy',
+        czemu: 'Sam nakaz pozostania w domu nie jest chorobą. Jeśli w trakcie izolacji '
+          + 'lekarz orzeknie niezdolność do pracy, liczy się to orzeczenie, nie sama izolacja.',
+      },
+      {
+        co: 'Przerwa w pracy z powodu braku zleceń',
+        czemu: 'Ubezpieczenie chroni przed utratą zdolności do pracy, a nie przed utratą '
+          + 'kontraktu. To jest różnica między tym produktem a ubezpieczeniem od utraty pracy.',
+      },
+    ],
+  },
+  {
+    tytul: 'Historia leczenia',
+    pozycje: [
+      {
+        co: 'Schorzenia leczone w ciągu 24 miesięcy przed zawarciem umowy',
+        czemu: 'Chyba że zostały zgłoszone w ankiecie medycznej i ubezpieczyciel przyjął je '
+          + 'do ochrony — czasem ze zwyżką składki, czasem z wyłączeniem konkretnego narządu. '
+          + 'Zatajenie takiego schorzenia jest najczęstszą przyczyną odmowy wypłaty.',
+      },
+      {
+        co: 'Następstwa wad wrodzonych',
+        czemu: 'Ochrona dotyczy zdarzeń, które nastąpiły po zawarciu umowy.',
+      },
+    ],
+  },
+  {
+    tytul: 'Okoliczności zdarzenia',
+    pozycje: [
+      {
+        co: 'Zakażenie HIV lub WZW bez wykupionej klauzuli szczególnej',
+        czemu: 'Osobne warunki (LW048 dla wariantu MEDICA, LW049 dla MEDICARE) obejmują '
+          + 'zakażenie w związku z wykonywaniem zawodu medycznego. Bez nich zakażenie '
+          + 'jest wyłączone.',
+      },
+      {
+        co: 'Zdarzenia pod wpływem alkoholu, narkotyków i substancji odurzających',
+        czemu: 'Poza przypadkami zażycia zgodnie z zaleceniem lekarza.',
+      },
+      {
+        co: 'Umyślne samookaleczenie i próba samobójcza',
+        czemu: 'Standardowe wyłączenie w ubezpieczeniach osobowych.',
+      },
+      {
+        co: 'Udział w działaniach wojennych, zamieszkach i aktach terroru',
+        czemu: 'Ryzyka katastroficzne są wyłączone z ochrony indywidualnej.',
+      },
+      {
+        co: 'Wyczynowe uprawianie sportu i sporty wysokiego ryzyka',
+        czemu: 'Nurkowanie, wspinaczka, sporty motorowe, spadochroniarstwo. Część z nich '
+          + 'da się objąć ochroną po zgłoszeniu we wniosku — pytamy o to w kroku o zakresie.',
+      },
+      {
+        co: 'Zabiegi medycyny estetycznej i ich powikłania',
+        czemu: 'Chyba że zabieg był następstwem wypadku objętego ochroną.',
+      },
+    ],
+  },
+];
+
+const PYTANIA = [
+  {
+    pytanie: 'Czy ubezpieczenie utraty dochodu obejmuje depresję?',
+    odpowiedz: 'Nie. Choroby i zaburzenia psychiczne są wyłączone ze standardowego zakresu '
+      + 'ochrony, podobnie jak ich następstwa. Dotyczy to również depresji rozpoznanej '
+      + 'w trakcie trwania umowy.',
+  },
+  {
+    pytanie: 'Czy polisa zadziała przy wypaleniu zawodowym?',
+    odpowiedz: 'Nie, jeśli wypalenie jest jedyną diagnozą. Wypalenie zawodowe nie jest '
+      + 'jednostką chorobową w klasyfikacji ICD, więc nie stanowi podstawy do wypłaty '
+      + 'świadczenia.',
+  },
+  {
+    pytanie: 'Czy dostanę świadczenie, jeśli mogę pracować w mniejszym wymiarze?',
+    odpowiedz: 'Nie. Świadczenie przysługuje za całkowitą niezdolność do wykonywania zawodu. '
+      + 'Częściowa niezdolność nie uruchamia wypłaty.',
+  },
+  {
+    pytanie: 'Co się stanie, jeśli nie zgłoszę wcześniejszego leczenia?',
+    odpowiedz: 'Ubezpieczyciel może odmówić wypłaty, powołując się na zatajenie okoliczności '
+      + 'istotnych dla oceny ryzyka. Zgłoszenie schorzenia zwykle kończy się zwyżką składki '
+      + 'albo wyłączeniem jednego narządu — a nie odmową ubezpieczenia.',
+  },
+  {
+    pytanie: 'Czy zakażenie HIV przy pracy jest objęte ochroną?',
+    odpowiedz: 'Tylko po wykupieniu warunków szczególnych HIV/WZW, dostępnych przy '
+      + 'wariantach medycznych MEDICA i MEDICARE. W standardowym zakresie zakażenie '
+      + 'jest wyłączone.',
+  },
+];
+
+const sciezkaOkruszkow = [
+  { nazwa: 'Strona główna', url: '/' },
+  { nazwa: 'Wyłączenia', url: sciezka },
+];
+
+const jsonld = graf([
+  organizacja(),
+  serwis(),
+  okruszki(sciezkaOkruszkow),
+  strona({ url: sciezka, tytul, opis, okruszki: sciezkaOkruszkow }),
+  faq(PYTANIA, sciezka),
+]);
+
+const ile = GRUPY.reduce((suma, g) => suma + g.pozycje.length, 0);
+---
+<Baza tytul={tytul} opis={opis} sciezka={sciezka} jsonld={jsonld}>
+  <div class="bg-tlo-jasne border-b border-linia">
+    <div class="max-w-[1200px] mx-auto px-5 py-14 lg:py-18">
+      <nav aria-label="Okruszki" class="mb-5">
+        <ol class="flex flex-wrap gap-2 text-[13px] text-tekst-trzeci list-none m-0 p-0">
+          <li><a href="/" class="hover:text-akcent-ciemny">Strona główna</a></li>
+          <li aria-hidden="true">/</li>
+          <li aria-current="page" class="text-tekst-drugi">Wyłączenia</li>
+        </ol>
+      </nav>
+      <h1 class="text-[clamp(1.9rem,5vw,3rem)] leading-[1.08] max-w-[16em] m-0">
+        Czego to ubezpieczenie nie obejmuje
+      </h1>
+      <p data-odpowiedz class="text-[1.12rem] leading-relaxed text-tekst-drugi max-w-[42em] mt-6 mb-0">
+        {ile} wyłączeń, zebranych w jednym miejscu, zanim wypełnisz wniosek.
+        Najważniejsze z nich: wypalenie zawodowe jako samodzielna diagnoza, choroby
+        psychiczne, częściowa niezdolność do pracy oraz schorzenia leczone w ciągu
+        24 miesięcy przed zawarciem umowy, jeśli nie zostały zgłoszone.
+      </p>
+      <p class="text-[15px] leading-relaxed text-tekst-drugi max-w-[42em] mt-4 mb-0">
+        Lista jest streszczeniem. Wiążącą treścią są ogólne warunki ubezpieczenia —
+        <a href="/dokumenty/" class="text-akcent-hover underline decoration-linia-mocna underline-offset-2">pobierz je i sprawdź sam</a>.
+      </p>
+    </div>
+  </div>
+
+  <div class="max-w-[1200px] mx-auto px-5 py-14 flex flex-col gap-12">
+    {GRUPY.map((g) => (
+      <section aria-labelledby={`g-${g.tytul.replace(/\s+/g, '-').toLowerCase()}`}>
+        <h2 id={`g-${g.tytul.replace(/\s+/g, '-').toLowerCase()}`}
+            class="text-[clamp(1.35rem,3vw,1.8rem)] pb-3 mb-6 border-b-2 border-akcent">
+          {g.tytul}
+        </h2>
+        <ul class="list-none m-0 p-0 grid gap-x-10 gap-y-7 grid-cols-[repeat(auto-fill,minmax(21rem,1fr))]">
+          {g.pozycje.map((p) => (
+            <li class="border-l-[3px] border-alarm pl-5">
+              <h3 class="text-[17px] font-semibold m-0 mb-2 leading-snug">{p.co}</h3>
+              <p class="text-[15px] leading-relaxed text-tekst-drugi m-0">{p.czemu}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+  </div>
+
+  <section class="bg-tlo-jasne border-y border-linia">
+    <div class="max-w-[1200px] mx-auto px-5 py-14">
+      <h2 class="text-[clamp(1.5rem,3.5vw,2.1rem)] leading-tight mb-8">Najczęstsze pytania o wyłączenia</h2>
+      <div class="border-t border-linia max-w-[52em]">
+        {PYTANIA.map((p, i) => (
+          <details class="border-b border-linia group" open={i < 2}>
+            <summary class="cursor-pointer list-none py-5 flex gap-4 items-start justify-between font-semibold text-[17px]">
+              {p.pytanie}
+              <span aria-hidden="true" class="text-akcent-ciemny shrink-0 group-open:rotate-45 transition-transform">+</span>
+            </summary>
+            <p class="text-[16px] leading-relaxed text-tekst-drugi pb-5 mt-0 max-w-[46em]">{p.odpowiedz}</p>
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <div class="max-w-[1200px] mx-auto px-5 py-14 flex flex-wrap gap-8 justify-between items-center">
+    <div class="max-w-[38em]">
+      <h2 class="text-[clamp(1.3rem,3vw,1.8rem)] leading-tight m-0 mb-2">Nie masz pewności, czy Twój przypadek jest objęty?</h2>
+      <p class="text-[16px] leading-relaxed text-tekst-drugi m-0">
+        Zadzwoń i zapytaj wprost, zanim wypełnisz wniosek. To krótsza droga niż
+        czytanie stu stron warunków.
+      </p>
+    </div>
+    <a href={`tel:${FIRMA.telefon}`} class="bg-akcent-ciemny text-white px-8 py-4 font-bold text-lg hover:bg-akcent-hover">
+      {FIRMA.telefonWyswietlany}
+    </a>
+  </div>
+</Baza>

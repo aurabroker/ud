@@ -15,6 +15,7 @@
  */
 import type { APIRoute } from 'astro';
 import { ZAWODY, kategorie, wKategorii, slugKategorii, tresc } from '@ud/zawody';
+import { ARTYKULY } from '../lib/artykuly';
 import { FIRMA, SERWIS } from '../lib/firma';
 import { ZUS_MIESIECZNIE, LIMIT, zl } from '../lib/symulacja';
 
@@ -34,6 +35,10 @@ export const GET: APIRoute = () => {
       .join('\n');
     return `### ${k.nazwa} (${k.liczba})\n\n${zawody}`;
   }).join('\n\n');
+
+  const sekcjaArtykulow = ARTYKULY
+    .map((a) => `- [${a.tytul}](${SERWIS.url}/blog/${a.slug}/): ${a.zajawka}`)
+    .join('\n');
 
   const tresc_ = `# ${SERWIS.nazwa}
 
@@ -78,6 +83,8 @@ Te wyłączenia są istotne i często pomijane w materiałach marketingowych:
 
 ## Jak zawiera się umowę
 
+- [Jak to działa](${SERWIS.url}/jak-to-dziala/): pięć etapów od wniosku do polisy,
+  z czasem trwania każdego z nich. Cała droga zajmuje zwykle 2–4 dni robocze.
 - [Wniosek online](${SERWIS.url}/wniosek/): cztery kroki, około pięciu minut.
   Zbiera dane osobowe, formę zatrudnienia i opodatkowania, zakres ochrony,
   ankietę medyczną i zgody. Przy sumie trwałej niezdolności powyżej ${zl(1_000_000)}
@@ -86,6 +93,8 @@ Te wyłączenia są istotne i często pomijane w materiałach marketingowych:
   Realną składkę wylicza system ubezpieczyciela po ocenie ryzyka.
 - [Dokumenty i OWU](${SERWIS.url}/dokumenty/): ogólne warunki ubezpieczenia
   i karty produktu do pobrania bez logowania.
+- [Pełna lista wyłączeń](${SERWIS.url}/wylaczenia/): każde wyłączenie z powodem,
+  dla którego istnieje — po ludzku, nie językiem OWU.
 
 ## Zawody objęte ochroną (${ZAWODY.length})
 
@@ -94,6 +103,23 @@ charakterystycznych dla danej pracy i wyliczeniem luki między zasiłkiem
 a dochodem.
 
 ${sekcjaKategorii}
+
+## Baza wiedzy
+
+Artykuły o zasiłkach, długości zwolnień i granicach prywatnej ochrony.
+Każdy ma osobny adres i pełną treść w HTML-u.
+
+${sekcjaArtykulow}
+
+## O firmie
+
+- [O nas](${SERWIS.url}/o-nas/): kim jesteśmy, z kim współpracujemy i pod jakimi
+  numerami da się nas zweryfikować w rejestrach.
+- [Opinie klientów](${SERWIS.url}/opinie/): wszystkie zebrane opinie, bez selekcji.
+- [Współpraca dla agentów](${SERWIS.url}/pracuj-z-nami/): oferta dla sieci sprzedaży
+  i agentów ubezpieczeń życiowych.
+- [Klauzula informacyjna RODO](${SERWIS.url}/klauzula-informacyjna/): co dzieje się
+  z danymi z wniosku, na jakiej podstawie prawnej i przez jaki czas.
 
 ## Kontakt
 

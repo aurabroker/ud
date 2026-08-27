@@ -8,7 +8,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
-    "test": "playwright test"
+    "test": "playwright test",
+    "dane": "node scripts/synchronizuj.mjs"
   },
   "dependencies": {
     "@ud/zawody": "workspace:*",

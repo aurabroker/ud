@@ -1,0 +1,125 @@
+---
+/**
+ * Klauzula informacyjna z art. 13 RODO — obowiązek informacyjny wobec osoby,
+ * która składa wniosek. Kreator linkuje tu ze zgód, więc treść musi
+ * odpowiadać dokładnie temu, co formularz faktycznie zbiera.
+ */
+import Tekst from '../../layouts/Tekst.astro';
+import { FIRMA } from '../../lib/firma';
+import { KROKI } from '@ud/wniosek/schemat';
+
+const sciezka = '/klauzula-informacyjna/';
+const tytul = 'Klauzula informacyjna RODO | UtrataDochodu.pl';
+const opis = 'Obowiązek informacyjny z art. 13 RODO dla osób składających wniosek '
+  + 'o ubezpieczenie utraty dochodu: administrator, cele, odbiorcy i prawa.';
+---
+<Tekst
+  tytul={tytul}
+  naglowek="Klauzula informacyjna RODO"
+  opis={opis}
+  sciezka={sciezka}
+  zaktualizowano="2026-08-27"
+  wOkruszkach="Klauzula informacyjna">
+
+  <p data-odpowiedz>
+    Wypełniając wniosek o ubezpieczenie utraty dochodu, przekazujesz nam dane osobowe —
+    w tym dane o stanie zdrowia. Zgodnie z art. 13 rozporządzenia RODO informujemy,
+    co się z nimi dzieje.
+  </p>
+
+  <h2>Kto jest administratorem Twoich danych</h2>
+  <p>
+    {FIRMA.nazwaPelna}, {FIRMA.adres.ulica}, {FIRMA.adres.kod} {FIRMA.adres.miasto},
+    KRS {FIRMA.krs}, NIP {FIRMA.nip}, REGON {FIRMA.regon} — agent ubezpieczeniowy
+    wpisany do Rejestru Pośredników Ubezpieczeniowych KNF pod numerem {FIRMA.rpu}.
+  </p>
+  <p>
+    W sprawach dotyczących danych osobowych napisz na
+    {' '}<a href={`mailto:${FIRMA.email}`}>{FIRMA.email}</a> albo zadzwoń pod
+    {' '}<a href={`tel:${FIRMA.telefon}`}>{FIRMA.telefonWyswietlany}</a>.
+  </p>
+
+  <h2>W jakim celu i na jakiej podstawie</h2>
+  <dl>
+    <dt>Przygotowanie oferty i obsługa wniosku</dt>
+    <dd>
+      Art. 6 ust. 1 lit. b RODO — podjęcie działań na Twoje żądanie przed zawarciem
+      umowy ubezpieczenia.
+    </dd>
+
+    <dt>Przekazanie wniosku ubezpieczycielowi</dt>
+    <dd>
+      Art. 6 ust. 1 lit. b RODO. Bez tego kroku ubezpieczyciel nie może ocenić ryzyka
+      ani wystawić polisy.
+    </dd>
+
+    <dt>Dane o stanie zdrowia z ankiety medycznej</dt>
+    <dd>
+      Art. 9 ust. 2 lit. a RODO — Twoja wyraźna zgoda, zaznaczana w ostatnim kroku
+      wniosku. Zgodę możesz cofnąć w każdej chwili; cofnięcie nie wpływa na
+      zgodność z prawem przetwarzania, które nastąpiło wcześniej.
+    </dd>
+
+    <dt>Obowiązki agenta ubezpieczeniowego</dt>
+    <dd>
+      Art. 6 ust. 1 lit. c RODO w związku z ustawą o dystrybucji ubezpieczeń
+      i przepisami o przeciwdziałaniu praniu pieniędzy.
+    </dd>
+
+    <dt>Kontakt marketingowy</dt>
+    <dd>
+      Art. 6 ust. 1 lit. f RODO albo Twoja zgoda — wyłącznie wtedy, gdy zaznaczysz
+      odpowiednie pole. Zgoda na kontakt jest odrębna od zgody na przetwarzanie
+      danych o zdrowiu i nie warunkuje przygotowania oferty.
+    </dd>
+  </dl>
+
+  <h2>Jakie dane zbiera wniosek</h2>
+  <p>Formularz prowadzi przez {KROKI.length} kroki:</p>
+  <ol>
+    {KROKI.map((k) => <li><strong>{k.tytul}</strong> — {k.opis}</li>)}
+  </ol>
+  <p>
+    Podanie danych jest dobrowolne, ale bez nich nie przygotujemy oferty.
+    PESEL jest potrzebny, bo ubezpieczyciel identyfikuje po nim osobę ubezpieczoną
+    i wylicza składkę zależną od wieku.
+  </p>
+
+  <h2>Komu przekazujemy dane</h2>
+  <ul>
+    <li>Ubezpieczycielom, w imieniu których działamy: {FIRMA.ubezpieczyciele.join(' oraz ')}.</li>
+    <li>Dostawcom usług informatycznych utrzymującym bazę danych i pocztę.</li>
+    <li>Podmiotom świadczącym nam obsługę prawną i księgową.</li>
+    <li>Organom uprawnionym na podstawie przepisów prawa.</li>
+  </ul>
+  <p>
+    Nie sprzedajemy danych i nie przekazujemy ich brokerom danych ani sieciom
+    reklamowym.
+  </p>
+
+  <h2>Jak długo przechowujemy dane</h2>
+  <ul>
+    <li>Gdy dojdzie do zawarcia umowy — przez czas jej trwania i okres wynikający z obowiązków archiwizacyjnych.</li>
+    <li>Gdy do umowy nie dojdzie — przez okres niezbędny do wykazania prawidłowej obsługi zapytania oraz do upływu terminów przedawnienia roszczeń.</li>
+    <li>Dane przetwarzane na podstawie zgody — do jej cofnięcia.</li>
+  </ul>
+
+  <h2>Twoje prawa</h2>
+  <p>
+    Masz prawo dostępu do danych, sprostowania, usunięcia, ograniczenia
+    przetwarzania, przenoszenia danych oraz sprzeciwu wobec przetwarzania
+    opartego na prawnie uzasadnionym interesie. Zgodę możesz cofnąć w każdej chwili.
+  </p>
+  <p>
+    Jeśli uznasz, że przetwarzamy dane niezgodnie z prawem, możesz wnieść skargę do
+    Prezesa Urzędu Ochrony Danych Osobowych, ul. Stawki 2, 00-193 Warszawa.
+  </p>
+
+  <h2>Czy podejmujemy decyzje automatycznie</h2>
+  <p>
+    Kalkulator na stronie liczy symulację, ale nie podejmuje żadnej decyzji o Twojej
+    sprawie. Ocenę ryzyka i decyzję o zawarciu umowy podejmuje ubezpieczyciel;
+    o zasadach tej oceny informuje w swoich dokumentach — znajdziesz je w sekcji
+    {' '}<a href="/dokumenty/">Dokumenty</a>.
+  </p>
+</Tekst>

@@ -34,11 +34,14 @@ export function organizacja() {
     address: {
       '@type': 'PostalAddress',
       streetAddress: FIRMA.adres.ulica,
+      postalCode: FIRMA.adres.kod,
       addressLocality: FIRMA.adres.miasto,
       addressCountry: FIRMA.adres.kraj,
     },
+    vatID: FIRMA.nip,
     identifier: [
       { '@type': 'PropertyValue', name: 'KRS', value: FIRMA.krs },
+      { '@type': 'PropertyValue', name: 'NIP', value: FIRMA.nip },
       { '@type': 'PropertyValue', name: 'REGON', value: FIRMA.regon },
       { '@type': 'PropertyValue', name: 'Rejestr Pośredników Ubezpieczeniowych KNF', value: FIRMA.rpu },
     ],
