@@ -5015,5 +5015,440 @@
     "odpowiedz": "Płynie, dopóki portfel jest odnawiany, a to wymaga kontaktu z klientami. Przy dłuższej przerwie wznowienia przechodzą do konkurencji i ta część dochodu wygasa w ciągu jednego cyklu rocznego."
    }
   ]
+ },
+ "copywriter": {
+  "wstep": "Copywriter sprzedaje zdania, które muszą powstać do konkretnej daty emisji. Kampania z wykupionym czasem antenowym nie przesunie startu, bo autorowi tekstów wysiadł nadgarstek.",
+  "dochod": "Rozliczenie za projekt, za znak albo w stałej współpracy z agencją. Do tego dochodzą teksty pisane pod własnym nazwiskiem, które budują portfolio, ale nie płacą od razu.",
+  "przerwa": "Agencja pracuje w cyklu przetargowym: brief przychodzi w poniedziałek, prezentacja jest w czwartek. Copywriter, który nie odda koncepcji na czas, kosztuje agencję udział w przetargu, więc przy drugim takim zdarzeniu współpraca się kończy. Stałe współprace mają krótkie wypowiedzenia właśnie dlatego, że dostępność jest w tej roli warunkiem podstawowym.",
+  "ryzyka": [
+   {
+    "tytul": "Uszkodzenie ręki piszącej",
+    "opis": "Kilkanaście tysięcy znaków dziennie w okresach kampanijnych, przy niezmiennej pozycji przedramienia. To zawód, w którym uszkodzenie ręki oznacza dokładnie zero możliwości wykonywania pracy, bez żadnego wariantu zastępczego."
+   },
+   {
+    "tytul": "Zespół widzenia komputerowego",
+    "opis": "Praca z tekstem na ekranie przez cały dzień, przy wielokrotnym czytaniu tego samego materiału. Zmęczenie akomodacji obniża zdolność wychwytywania błędów we własnym tekście."
+   },
+   {
+    "tytul": "Zaburzenia snu przy pracy w terminach",
+    "opis": "Koncepcje powstają zwykle w nocy przed prezentacją, bo tak wygląda cykl przetargowy w agencjach. Nieregularny rytm dobowy kumuluje skutki metaboliczne przez lata."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Piszę dla kilku agencji na fakturę — jaki mam limit?",
+    "odpowiedz": "Działalność gospodarcza oznacza limit osiemdziesięciu procent udokumentowanego dochodu. Przychody ze wszystkich agencji sumujesz, bo jedna kontuzja wyklucza Cię ze wszystkich zleceń naraz."
+   },
+   {
+    "pytanie": "Czy uraz ręki to dla mnie całkowita niezdolność?",
+    "odpowiedz": "Przy zawodzie polegającym wyłącznie na pisaniu uszkodzenie dominującej ręki jest niezdolnością do jego wykonywania. Warto opisać to we wniosku, bo z nazwy zawodu nie wynika, jak wąska jest tu podstawa sprawności."
+   }
+  ]
+ },
+ "dyrektor": {
+  "wstep": "Dyrektor odpowiada za wynik jednostki, którą kieruje, i za decyzje, których skutki widać po kwartałach. Ta odpowiedzialność nie da się zawiesić na czas zwolnienia — organizacja podejmuje decyzje dalej, tylko bez niego.",
+  "dochod": "Wynagrodzenie zasadnicze uzupełnione premią roczną i często udziałem w zysku albo programem opcyjnym. Część zmienna bywa połową dochodu i liczy się od wyników okresu, w którym dyrektora nie było.",
+  "przerwa": "Kwartał nieobecności na stanowisku kierowniczym oznacza, że decyzje zapadły bez Ciebie, a struktura ułożyła się wokół osoby zastępującej. Rada nadzorcza albo zarząd rzadko cofa takie zmiany w połowie roku obrotowego, bo oznaczałoby to drugą reorganizację w krótkim czasie. Premia roczna, liczona od realizacji planu, przepada niezależnie od tego, kto był chory.",
+  "ryzyka": [
+   {
+    "tytul": "Choroby układu krążenia od stałej odpowiedzialności",
+    "opis": "Odpowiedzialność za wynik i za ludzi, utrzymywana bez przerwy przez lata, także poza godzinami pracy. Choroba niedokrwienna serca i nadciśnienie pojawiają się w tej grupie wcześnie i bywają pierwszym sygnałem po czterdziestce."
+   },
+   {
+    "tytul": "Skutki intensywnych podróży służbowych",
+    "opis": "Spotkania w oddziałach, u kontrahentów i w centrali oznaczają stałe przemieszczanie się. Ryzyko wypadku komunikacyjnego i skutki nieregularnego trybu życia rosną razem z liczbą wyjazdów."
+   },
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Prezentacje dla zarządu, spotkania z zespołami i negocjacje zajmują większość tygodnia. Obciążenie głosu jest tu porównywalne z pracą wykładowcy, choć nikt tak o tej roli nie myśli."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Premia roczna to połowa mojego dochodu — czy się liczy?",
+    "odpowiedz": "Liczy się to, co wypłacone i wykazane w zeznaniu. Przy dużym udziale części zmiennej warto przedstawić dwa pełne lata, żeby suma nie została wyliczona z roku bez wypłaty premii."
+   },
+   {
+    "pytanie": "Jestem na etacie — czy zasiłek z ZUS nie wystarczy?",
+    "odpowiedz": "Zasiłek liczy się od podstawy wymiaru składek, która jest ograniczona ustawowo. Przy wynagrodzeniu kierowniczym różnica między zasiłkiem a realnym dochodem bywa wielokrotna."
+   }
+  ]
+ },
+ "manager": {
+  "wstep": "Manager zarządza ludźmi, budżetem i wynikiem zespołu, mając do dyspozycji głównie rozmowę. Jego dzień składa się ze spotkań, w których trzeba mówić, słuchać i pamiętać ustalenia z poprzedniego tygodnia.",
+  "dochod": "Wynagrodzenie zasadnicze z premią kwartalną albo roczną powiązaną z realizacją celów zespołu. Część menedżerów pracuje na kontrakcie B2B, co daje wyższy próg świadczenia, ale zero zabezpieczenia z ZUS.",
+  "przerwa": "Zespół bez menedżera pracuje dalej, ale traci to, co menedżer wnosił: rozstrzyganie priorytetów, osłonę przed innymi działami i decyzje kadrowe. Po dwóch miesiącach organizacja mianuje kogoś tymczasowo, a taka tymczasowość ma tendencję do utrwalania się razem z kolejnym cyklem planowania. Cele kwartalne rozlicza się z wyniku, a nie z obecności.",
+  "ryzyka": [
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Kilkanaście spotkań dziennie, rozmowy jeden na jeden i prezentacje wyników. Utrata głosu wyklucza z pracy natychmiast, bo w tej roli nie ma czynności, którą da się wykonać bez mówienia."
+   },
+   {
+    "tytul": "Ubytek słuchu od spotkań zdalnych",
+    "opis": "Praca w słuchawkach przez większość dnia, przy podniesionym poziomie odsłuchu. Niedosłuch w paśmie mowy narasta bezobjawowo i utrudnia wychwytywanie tego, co w zespole niedopowiedziane."
+   },
+   {
+    "tytul": "Choroby układu krążenia od odpowiedzialności za wynik",
+    "opis": "Rozliczanie z celów, których realizacja zależy od pracy innych ludzi. Ten układ obciąża szczególnie mocno, a rozpoznania z kręgu psychicznego są z ochrony wyłączone."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Pracuję na kontrakcie B2B jako menedżer — jaki mam limit?",
+    "odpowiedz": "Osiemdziesiąt procent udokumentowanego dochodu, bo decyduje forma rozliczenia, a nie charakter stanowiska. Jednocześnie na B2B nie ma zasiłku chorobowego, więc polisa jest tu jedynym zabezpieczeniem."
+   },
+   {
+    "pytanie": "Premia zależy od wyniku zespołu — jak ją wykazać?",
+    "odpowiedz": "Na podstawie zeznania rocznego, obejmującego wszystkie wypłacone składniki. Przy premiach kwartalnych rok jest wystarczająco reprezentatywny, przy rocznych warto pokazać dwa."
+   }
+  ]
+ },
+ "konsultant": {
+  "wstep": "Konsultant sprzedaje czas i wiedzę, rozliczane w dniach obecności u klienta. Nie ma tu produktu, licencji ani portfela, który zarabiałby dalej — jest tylko kalendarz i to, czy jest zapełniony.",
+  "dochod": "Stawka dzienna albo projektowa, rozliczana za faktycznie przepracowane dni. Doświadczeni konsultanci mają wyższe stawki i mniej dni w roku, więc wartość pojedynczego dnia rośnie z każdym rokiem stażu.",
+  "przerwa": "Projekt doradczy ma harmonogram uzgodniony z zarządem klienta i budżet rozpisany na etapy. Konsultant, który wypada w środku, zostaje zastąpiony osobą z tej samej firmy albo z konkurencji, a relacja z klientem przechodzi razem z projektem. Przy pracy samodzielnej oznacza to utratę zarówno bieżącego zlecenia, jak i rekomendacji, z której brałyby się kolejne.",
+  "ryzyka": [
+   {
+    "tytul": "Skutki intensywnych podróży do klientów",
+    "opis": "Praca u klienta oznacza tygodnie spędzane poza domem, w hotelach i w drodze. Nieregularny tryb życia i ekspozycja na ruch drogowy są w tej roli głównym źródłem ryzyka."
+   },
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Warsztaty, wywiady i prezentacje wyników wypełniają większość dnia u klienta. Przewlekłe zapalenie krtani wyklucza z pracy, która polega na prowadzeniu rozmów."
+   },
+   {
+    "tytul": "Skutki pracy w skrajnym tempie projektowym",
+    "opis": "Projekty doradcze mają krótkie terminy i wysokie oczekiwania, przy dwunastogodzinnych dniach. Kumulacja tego trybu przez lata obciąża układ krążenia i metabolizm."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Rozliczam się za dni obecności — co przy chorobie?",
+    "odpowiedz": "Dzień bez pracy to dzień bez faktury, bez żadnego składnika wyrównującego. To jest dokładnie ta sytuacja, na którą odpowiada ubezpieczenie utraty dochodu."
+   },
+   {
+    "pytanie": "Pracuję u klientów za granicą — czy ochrona działa?",
+    "odpowiedz": "Krótkie wyjazdy projektowe są objęte. Dłuższy pobyt poza Polską wymaga zgłoszenia ubezpieczycielowi, a niezgłoszony bywa podstawą odmowy wypłaty."
+   }
+  ]
+ },
+ "project-manager": {
+  "wstep": "Project Manager pilnuje zakresu, terminu i budżetu jednocześnie, wiedząc, że można poświęcić najwyżej jedno z trzech. Cała praca polega na koordynowaniu ludzi, którzy mu nie podlegają.",
+  "dochod": "Etat albo kontrakt B2B, w projektach wdrożeniowych rozliczanych etapami, czasem z premią za dotrzymanie terminu. Kierownicy projektów pracujący na kontraktach mają zwykle jeden projekt naraz, czyli jedno źródło dochodu.",
+  "przerwa": "Projekt ma kamienie milowe zapisane w umowie z klientem, z karami za opóźnienie. Kierownik nieobecny przez miesiąc oznacza, że nikt nie pilnuje zależności między zadaniami, a ryzyka nie są eskalowane — problemy ujawniają się wtedy naraz, przy najbliższym kamieniu. Firma wymienia kierownika natychmiast, bo alternatywą jest kara umowna.",
+  "ryzyka": [
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Statusy, eskalacje i uzgodnienia z klientem prowadzone rozmową, przez cały dzień. Utrata głosu wyklucza z pracy, która sprowadza się do komunikowania między stronami."
+   },
+   {
+    "tytul": "Choroby układu krążenia od pracy pod presją terminu",
+    "opis": "Odpowiedzialność za termin, na który wpływ mają dziesiątki osób spoza własnego zespołu. Ten rodzaj obciążenia utrzymuje się przez cały czas trwania projektu, a nie w pojedynczych momentach."
+   },
+   {
+    "tytul": "Zespoły przeciążeniowe od pracy z dokumentacją projektową",
+    "opis": "Harmonogramy, rejestry ryzyk i raporty statusowe prowadzone równolegle do spotkań. Neuropatia nadgarstka wyłącza z tej części pracy na tygodnie."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Prowadzę jeden projekt naraz — czy to zwiększa ryzyko utraty dochodu?",
+    "odpowiedz": "Zwiększa, bo nie ma tu dywersyfikacji: zakończenie jednego kontraktu oznacza zero przychodu do czasu znalezienia następnego. To argument za sumą bliższą maksimum przy Twoim dochodzie."
+   },
+   {
+    "pytanie": "Premia za dotrzymanie terminu — czy wchodzi do podstawy?",
+    "odpowiedz": "Wchodzi, jeśli została wypłacona i rozliczona. Warto ją wykazać, bo w projektach dużej skali bywa istotną częścią rocznego dochodu."
+   }
+  ]
+ },
+ "event-manager": {
+  "wstep": "Event Manager pracuje pod datę, której nie da się przesunąć: konferencja odbywa się w wyznaczonym dniu, bo goście mają bilety, a sala jest opłacona. Nieobecność w dniu wydarzenia jest nieodwracalna.",
+  "dochod": "Wynagrodzenie za organizację pojedynczego wydarzenia albo stała współpraca z klientem korporacyjnym, plus prowizje od podwykonawców. Przychód jest skoncentrowany wokół sezonów konferencyjnych — wiosennego i jesiennego.",
+  "przerwa": "Wydarzenie ma zamówione catering, technikę, salę i prelegentów, a każda z tych umów ma własne terminy rezygnacji i kary. Organizator nieobecny na dwa tygodnie przed datą zostawia klienta z kilkunastoma umowami bez koordynacji, więc klient przejmuje projekt albo zleca go agencji. Prowizje od podwykonawców przechodzą wtedy na tę agencję razem z kontaktami.",
+  "ryzyka": [
+   {
+    "tytul": "Uraz podczas montażu i pracy na obiekcie",
+    "opis": "Nadzór nad zabudową obejmuje pracę na drabinach, przy konstrukcjach scenicznych i wśród sprzętu w ruchu. Upadki i urazy przy przenoszeniu elementów są tu zdarzeniami powtarzalnymi."
+   },
+   {
+    "tytul": "Skutki pracy w dniach wydarzeń",
+    "opis": "Dzień eventowy to szesnaście godzin w ruchu, po kilku dobach przygotowań o skróconym śnie. Ten wzorzec powtarza się kilkanaście razy w sezonie i kumuluje obciążenie układu krążenia."
+   },
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Koordynacja na obiekcie odbywa się głosem, w hałasie, często przez cały dzień montażu i wydarzenia. Utrata głosu w dniu eventu uniemożliwia prowadzenie zespołu na miejscu."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Sezon mam wiosną i jesienią — czy to obniża sumę?",
+    "odpowiedz": "Nie, bo podstawą jest przychód roczny. Warto natomiast pamiętać, że przerwa w środku sezonu kosztuje wielokrotnie więcej niż w lipcu, i wybrać sumę z tym na uwadze."
+   },
+   {
+    "pytanie": "Czy uraz podczas montażu jest objęty?",
+    "odpowiedz": "Jest, jako nieszczęśliwy wypadek. Warto natomiast opisać we wniosku, że praca obejmuje nadzór nad zabudową — to inny profil ryzyka niż koordynacja wyłącznie biurowa."
+   }
+  ]
+ },
+ "sales-manager": {
+  "wstep": "Sales Manager odpowiada za plan sprzedaży zespołu i za relacje z kluczowymi klientami. Plan rozlicza się z wyniku kwartału, niezależnie od tego, ile dni w tym kwartale był zdrowy.",
+  "dochod": "Podstawa uzupełniona prowizją od realizacji planu zespołu, przy czym część zmienna zwykle przeważa. Prowizja liczy się od wyniku okresu i nie zna pojęcia usprawiedliwionej nieobecności.",
+  "przerwa": "Kluczowi klienci są przypisani osobiście i przy braku kontaktu przechodzą pod opiekę innego menedżera — a przy odnowieniu kontraktu to on zbiera prowizję za relację budowaną latami. Zespół bez przełożonego traci tempo w połowie kwartału, a plan zostaje nierozliczony. Firmy w tej roli reagują szybko, bo sprzedaż jest jedyną funkcją rozliczaną co miesiąc.",
+  "ryzyka": [
+   {
+    "tytul": "Skutki intensywnych podróży handlowych",
+    "opis": "Objazd klientów oznacza kilkaset kilometrów tygodniowo, często w napiętym harmonogramie spotkań. Wypadek komunikacyjny jest w tej pracy zdarzeniem o najwyższym prawdopodobieństwie."
+   },
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Spotkania handlowe, telefony i prezentacje wypełniają cały dzień roboczy. Przewlekłe zapalenie krtani wyklucza z pracy, w której rozmowa jest jedynym narzędziem."
+   },
+   {
+    "tytul": "Choroby układu krążenia od rozliczania z planu",
+    "opis": "Wynik mierzony co miesiąc, przy dochodzie zależnym od jego realizacji i przy zobowiązaniach o stałej wysokości. Nadciśnienie i zaburzenia rytmu są w tej grupie zawodowej wcześniejsze niż przeciętnie."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Prowizja to większość mojego dochodu — jak ją wykazać?",
+    "odpowiedz": "Wykazujesz pełne wynagrodzenie z zeznania rocznego, razem z częścią zmienną. Przy silnych wahaniach warto pokazać dwa lata, bo pojedynczy słaby rok zaniżyłby sumę poniżej realnych możliwości zarobkowych."
+   },
+   {
+    "pytanie": "Klienci są przypisani do mnie osobiście — co tracę przy przerwie?",
+    "odpowiedz": "Zwykle relację, a wraz z nią prowizję z przyszłych odnowień. Polisa nie odzyskuje relacji, ale zastępuje dochód na czas, w którym nie możesz jej pielęgnować."
+   }
+  ]
+ },
+ "key-account-manager": {
+  "wstep": "Key Account Manager obsługuje kilku klientów, z których każdy odpowiada za znaczną część obrotu firmy. Ta koncentracja oznacza, że utrata jednej relacji ma skutki nieporównywalne z utratą jednego z wielu drobnych kontrahentów.",
+  "dochod": "Podstawa z prowizją liczoną od obrotu przypisanych klientów, wypłacaną zwykle kwartalnie. Prowizja od dużego klienta bywa większa niż roczna podstawa, ale zależy od utrzymania kontraktu.",
+  "przerwa": "Klient kluczowy ma po drugiej stronie własnego kupca, który rozlicza się z ciągłości dostaw i warunków. Brak kontaktu przez miesiąc przy negocjacjach rocznych oznacza, że warunki ustala kto inny — a przy kolejnym cyklu klient jest już przypisany do niego. Kontrakty ramowe negocjuje się raz w roku i tego terminu nie da się przesunąć.",
+  "ryzyka": [
+   {
+    "tytul": "Skutki podróży i pracy w cudzym rytmie",
+    "opis": "Spotkania w siedzibach klientów, często w innych miastach, dopasowane do ich kalendarza. Nieregularny tryb dnia i długie przejazdy obciążają metabolizm i podnoszą ryzyko wypadku."
+   },
+   {
+    "tytul": "Choroby układu krążenia od koncentracji ryzyka",
+    "opis": "Odpowiedzialność za relacje warte procenty obrotu całej firmy, przy negocjacjach prowadzonych raz w roku. Ekspozycja jest stała, choć jej rozstrzygnięcie następuje w kilku dniach."
+   },
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Negocjacje i spotkania handlowe wypełniają większość tygodnia, często w salach bez nagłośnienia. Utrata głosu w okresie negocjacji rocznych jest nie do nadrobienia."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Prowizja od jednego klienta to połowa mojego dochodu — czy to problem?",
+    "odpowiedz": "Dla wyliczenia sumy nie, bo liczy się dochód, a nie jego źródło. Jest to natomiast argument za wyższą sumą, bo utrata jednej relacji ma tu skutki nieporównywalne z rozproszonym portfelem."
+   },
+   {
+    "pytanie": "Negocjacje roczne wypadają w jednym miesiącu — co jeśli wtedy zachoruję?",
+    "odpowiedz": "Polisa wypłaca świadczenie za niezdolność do pracy, nie za utracony kontrakt. Ale to właśnie taki scenariusz warto mieć na uwadze przy wyborze sumy — strata bywa wielokrotnie wyższa niż miesięczny dochód."
+   }
+  ]
+ },
+ "przedstawiciel-handlowy": {
+  "wstep": "Przedstawiciel handlowy spędza w samochodzie więcej czasu niż przy biurku. Trasa obejmuje kilkanaście punktów dziennie, a przy części z nich trzeba jeszcze rozładować towar albo ustawić ekspozycję.",
+  "dochod": "Podstawa z prowizją od sprzedaży na przypisanym terenie, czasem z premią za realizację celów dystrybucyjnych. Prowizja liczy się od obrotu wygenerowanego na terenie, także wtedy, gdy przedstawiciela na nim nie ma.",
+  "przerwa": "Teren bez przedstawiciela traci sprzedaż w tempie widocznym w raportach po dwóch tygodniach: zamówienia spadają, ekspozycje się rozjeżdżają, konkurencja zajmuje półkę. Firma przydziela teren sąsiadowi albo zatrudnia kogoś nowego, a odzyskanie własnego obszaru po powrocie nie jest oczywiste. Relacje z kierownikami sklepów są osobiste i przechodzą razem z terenem.",
+  "ryzyka": [
+   {
+    "tytul": "Wypadek komunikacyjny",
+    "opis": "Kilkadziesiąt tysięcy kilometrów rocznie, w napiętym harmonogramie wizyt, przy zmiennych warunkach. To najczęstsze zdarzenie nagłe w tym zawodzie i najczęstsza przyczyna długiej niezdolności."
+   },
+   {
+    "tytul": "Uraz kręgosłupa przy rozładunku i ekspozycji",
+    "opis": "Przenoszenie kartonów z bagażnika, ustawianie ekspozytorów i uzupełnianie półek. Praca w skłonie z obciążeniem, wielokrotnie dziennie, daje przeciążenia lędźwiowe wcześnie."
+   },
+   {
+    "tytul": "Skutki wielogodzinnego prowadzenia pojazdu",
+    "opis": "Sześć do ośmiu godzin dziennie w pozycji siedzącej, przy wibracjach i bez ruchu. Żylaki, zespoły bólowe kręgosłupa i choroby metaboliczne są tu następstwem samego trybu pracy."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy wypadek w drodze między klientami jest objęty?",
+    "odpowiedz": "Jest, jako nieszczęśliwy wypadek — bez znaczenia, czy do zdarzenia doszło służbowo, czy prywatnie. Objęte są następstwa urazu i wynikająca z nich niezdolność do pracy."
+   },
+   {
+    "pytanie": "Prowizja liczy się od terenu — czy dostanę ją, gdy jestem chory?",
+    "odpowiedz": "To zależy od Twojej umowy, nie od polisy. Praktyka jest zwykle taka, że prowizja spada razem ze sprzedażą na terenie — dlatego suma powinna odpowiadać pełnemu dochodowi, a nie samej podstawie."
+   }
+  ]
+ },
+ "handlowiec": {
+  "wstep": "Handlowiec zamyka transakcje, których nikt za niego nie dokończy — proces sprzedaży opiera się na relacji z konkretną osobą po drugiej stronie. Przekazanie tego komuś innemu zwykle oznacza rozpoczęcie rozmów od początku.",
+  "dochod": "Wynagrodzenie w większości prowizyjne, wypłacane po podpisaniu umowy albo po zapłacie faktury przez klienta. Cykl sprzedaży w wielu branżach trwa miesiącami, więc dochód dzisiejszy pochodzi z pracy sprzed pół roku.",
+  "przerwa": "Proces sprzedaży ma własną dynamikę: rozmowy prowadzone przez trzy miesiące i przerwane na sześć tygodni zwykle wygasają, bo klient w tym czasie rozmawia z konkurencją. Firma przydziela leady komuś innemu, a prowizja od zamkniętych przez niego umów należy się jemu. Efekt przerwy widać w dochodzie dopiero po kwartale, kiedy skończy się strumień z transakcji sprzed choroby.",
+  "ryzyka": [
+   {
+    "tytul": "Wypadek komunikacyjny podczas objazdów",
+    "opis": "Spotkania u klientów w różnych miastach, często kilka dziennie. Ekspozycja na ruch drogowy jest tu wielokrotnie wyższa niż przy pracy stacjonarnej."
+   },
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Kilkadziesiąt rozmów telefonicznych i kilka spotkań dziennie. Chrypka trwająca dwa tygodnie oznacza dwa tygodnie bez możliwości prowadzenia rozmów handlowych."
+   },
+   {
+    "tytul": "Obciążenie serca przy dochodzie zależnym od wyniku",
+    "opis": "Dochód zależny wprost od wyniku, przy zobowiązaniach o stałej wysokości i celach rozliczanych co miesiąc. Ciśnienie i zaburzenia rytmu pojawiają się w tej grupie zawodowej wcześniej, niż wskazywałby wiek."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Mój dochód pochodzi z pracy sprzed pół roku — jak to wykazać?",
+    "odpowiedz": "Na podstawie zeznania rocznego, które to opóźnienie już uwzględnia. Warto natomiast wiedzieć, że skutek przerwy w pracy zobaczysz w przychodach dopiero po kwartale — i na ten okres też potrzebujesz zabezpieczenia."
+   },
+   {
+    "pytanie": "Pracuję na umowie zlecenie — jaki mam limit?",
+    "odpowiedz": "Sześćdziesiąt pięć procent udokumentowanego dochodu, tak samo jak przy umowie o pracę. Do osiemdziesięciu procent dochodzą wyłącznie osoby rozliczające się fakturą z własnej działalności."
+   }
+  ]
+ },
+ "rekruter": {
+  "wstep": "Rekruter prowadzi procesy, w których po jednej stronie jest firma z terminem obsadzenia stanowiska, a po drugiej kandydat rozmawiający równolegle z trzema innymi. Obie strony mają własny zegar i żadna nie czeka.",
+  "dochod": "Wynagrodzenie z prowizji od skutecznie zamkniętych rekrutacji, liczonej zwykle jako procent rocznego wynagrodzenia zatrudnionej osoby. Wypłata następuje po przyjęciu oferty, czasem po okresie próbnym.",
+  "przerwa": "Kandydat, z którym nikt nie rozmawiał przez dwa tygodnie, przyjmuje inną ofertę — proces rekrutacyjny ma bardzo krótką pamięć. Klient, którego stanowisko stoi puste, zleca je równolegle innej agencji i płaci temu, kto dostarczy pierwszy. Prowizje z procesów prowadzonych miesiącami przepadają wtedy w całości, bo wynagrodzenie zależy od skutku, nie od włożonej pracy.",
+  "ryzyka": [
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Kilkanaście rozmów kwalifikacyjnych dziennie, prowadzonych przez telefon albo zdalnie. Utrata głosu wyklucza z pracy natychmiast, bo cała czynność zawodowa polega na rozmowie."
+   },
+   {
+    "tytul": "Ubytek słuchu od pracy w słuchawkach",
+    "opis": "Rozmowy zdalne przez większość dnia roboczego, przy podniesionym poziomie odsłuchu. Ocena kandydata opiera się między innymi na tym, co słychać w wahaniu głosu."
+   },
+   {
+    "tytul": "Zespoły przeciążeniowe od pracy z systemami rekrutacyjnymi",
+    "opis": "Przeglądanie setek zgłoszeń i prowadzenie dokumentacji procesów w systemie. Neuropatia nadgarstka rozwija się przy monotonii tej pracy szybciej, niż wynikałoby z liczby godzin."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Prowizja zależy od zamknięcia procesu — co przy przerwie?",
+    "odpowiedz": "Procesy prowadzone miesiącami przepadają, bo wynagrodzenie należy się za skutek. Polisa wypłaca świadczenie miesięczne liczone od Twojego średniego dochodu i to ono ma zastąpić ten strumień."
+   },
+   {
+    "pytanie": "Prowadzę rekrutacje na własny rachunek — jaki mam limit?",
+    "odpowiedz": "Działalność gospodarcza daje limit osiemdziesięciu procent. Przy dochodzie w całości prowizyjnym warto wykazać dwa lata, żeby średnia nie wypadła z przypadkowo słabego okresu."
+   }
+  ]
+ },
+ "marketing-specialist": {
+  "wstep": "Specjalista do spraw marketingu prowadzi kampanie, których budżety wydają się same, gdy nikt ich nie pilnuje. Reklama nie zatrzymuje się na czas zwolnienia lekarskiego — wydaje pieniądze dalej, tylko bez optymalizacji.",
+  "dochod": "Etat albo kontrakt B2B, część specjalistów rozlicza się z agencjami za prowadzenie kont reklamowych z prowizją od budżetu. Ta prowizja jest stabilna, dopóki konta są prowadzone.",
+  "przerwa": "Kampania bez nadzoru przez dwa tygodnie potrafi wydać budżet miesięczny przy pogarszających się wynikach — i to widać w raportach natychmiast. Klient agencyjny, który raz zobaczył taki rachunek, przenosi konto do innego opiekuna i już go nie oddaje. Przy pracy etatowej stanowisko zostaje, ale prowadzenie kampanii przejmuje kto inny wraz z odpowiedzialnością i wpływem na wyniki.",
+  "ryzyka": [
+   {
+    "tytul": "Zespół widzenia komputerowego przy pracy z panelami reklamowymi",
+    "opis": "Analiza wyników kampanii w gęstych tabelach i wykresach, przez cały dzień. Zdolność wychwytywania odchyleń w danych zależy tu wprost od jakości widzenia."
+   },
+   {
+    "tytul": "Neuropatia nadgarstka od pracy w systemach reklamowych",
+    "opis": "Prowadzenie kampanii to tysiące precyzyjnych operacji myszą dziennie, w panelach o gęstym interfejsie. Objawy narastają miesiącami i kończą się zabiegiem."
+   },
+   {
+    "tytul": "Skutki pracy w rytmie kampanijnym",
+    "opis": "Uruchomienia i wyprzedaże wymagają nadzoru poza godzinami, w tym nocą i w weekendy. Nieregularny rytm kumuluje skutki metaboliczne, mimo pozornie biurowego charakteru pracy."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Rozliczam się prowizją od budżetu reklamowego — czy to dochód?",
+    "odpowiedz": "Tak, o ile jest fakturowana i rozliczona w Twojej działalności. Suma liczy się od Twojego dochodu, a nie od wartości budżetów, którymi zarządzasz."
+   },
+   {
+    "pytanie": "Prowadzę konta kilku klientów — czy to rozprasza ryzyko?",
+    "odpowiedz": "Nie, bo jedna choroba wyłącza Cię z prowadzenia wszystkich naraz. Przy kilku klientach strata jest większa niż przy jednym, więc suma powinna to odzwierciedlać."
+   }
+  ]
+ },
+ "hr-specialist": {
+  "wstep": "Specjalista do spraw kadr odpowiada za dokumentację, której braki ujawnia dopiero kontrola Państwowej Inspekcji Pracy albo spór sądowy z pracownikiem. Terminy w prawie pracy są sztywne i nie znają usprawiedliwionej nieobecności osoby prowadzącej akta.",
+  "dochod": "Etat w dziale personalnym albo kontrakt na obsługę kadrowo-płacową, często dla kilku firm naraz. Do tego dochodzą projekty: wdrożenia systemów, audyty dokumentacji, szkolenia z prawa pracy.",
+  "przerwa": "Wypłata ma termin ustawowy, a deklaracje do ZUS własny — jedno i drugie musi się wydarzyć niezależnie od tego, kto choruje. Firma obsługiwana zewnętrznie, która raz nie wypłaciła wynagrodzeń na czas, zmienia dostawcę usługi natychmiast, bo ryzyko dotyczy jej odpowiedzialności wobec pracowników. Zaległości kadrowe kumulują się podobnie jak księgowe.",
+  "ryzyka": [
+   {
+    "tytul": "Skutki kumulacji terminów płacowych",
+    "opis": "Naliczenie wynagrodzeń, deklaracje i sprawozdania zbiegają się w tych samych dniach miesiąca. Ten cykl, powtarzany latami, obciąża układ krążenia bardziej niż równomierne tempo pracy."
+   },
+   {
+    "tytul": "Zespół widzenia komputerowego przy pracy z dokumentacją",
+    "opis": "Weryfikacja akt osobowych, umów i list płac przez cały dzień, na ekranie i papierze. Zaburzenia akomodacji podnoszą ryzyko przeoczenia błędu, którego skutki ujawniają się przy kontroli."
+   },
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Rozmowy z pracownikami, szkolenia i rekrutacje wypełniają znaczną część tygodnia. Obciążenie głosu bywa w tej roli pomijane, choć jest realne."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Obsługuję kadry kilku firm na kontrakcie — jak wykazać dochód?",
+    "odpowiedz": "Sumujesz wszystkie umowy w zeznaniu rocznym. Ta konfiguracja jest szczególnie warta ubezpieczenia, bo jedna choroba narusza terminy płacowe u każdego klienta jednocześnie."
+   },
+   {
+    "pytanie": "Czy odpowiadam za błąd w dokumentacji, jeśli byłem chory?",
+    "odpowiedz": "Wobec klienta odpowiada podmiot świadczący usługę, a szkodę pokrywa ubezpieczenie odpowiedzialności cywilnej, jeśli je masz. Ta polisa dotyczy wyłącznie Twojej niezdolności do pracy."
+   }
+  ]
+ },
+ "public-relations": {
+  "wstep": "Specjalista public relations bywa potrzebny najbardziej wtedy, gdy dzieje się źle — a kryzys wizerunkowy ma własny harmonogram, zwykle piątkowy. Doba zwłoki w reakcji jest w tej pracy różnicą między incydentem a sprawą.",
+  "dochod": "Kontrakt z klientem na stałą obsługę, projekty komunikacyjne rozliczane osobno oraz obsługa kryzysowa wyceniana najwyżej. Ta ostatnia wymaga dostępności o każdej porze.",
+  "przerwa": "Kryzys nie czeka, a klient, który w takim momencie nie dodzwonił się do swojego doradcy, zapamiętuje to na stałe — nawet jeśli wszystko skończyło się dobrze. Relacje z dziennikarzami, które są w tej pracy głównym kapitałem, utrzymuje się bieżącym kontaktem i po kilku miesiącach przerwy trzeba je budować od nowa. Stałe obsługi mają miesięczne wypowiedzenia.",
+  "ryzyka": [
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Rozmowy z mediami, przygotowanie rzeczników i wystąpienia wypełniają dzień roboczy. Utrata głosu w trakcie kryzysu wyklucza z tej części pracy, która jest wyceniana najwyżej."
+   },
+   {
+    "tytul": "Skutki pracy w trybie gotowości",
+    "opis": "Kryzys zaczyna się bez zapowiedzi i trwa tyle, ile trzeba, często kilka dób bez przerwy. Skrajne natężenie wchodzące nagle w spokojny rytm obciąża serce mocniej niż stała, wysoka presja."
+   },
+   {
+    "tytul": "Przeciążenie nadgarstka od pisania pod presją czasu",
+    "opis": "Komunikaty, oświadczenia i materiały prasowe pisane w terminach liczonych w godzinach. Neuropatia nadgarstka wyłącza z pracy dokładnie wtedy, gdy tempo jest największe."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Obsługa kryzysowa wymaga dostępności — czy to ryzyko zawodowe?",
+    "odpowiedz": "Dla ubezpieczyciela liczy się faktyczny tryb pracy. Warto opisać we wniosku gotowość całodobową, bo to inny profil obciążenia niż praca w stałych godzinach."
+   },
+   {
+    "pytanie": "Mam stałe obsługi i projekty kryzysowe — jak to ująć?",
+    "odpowiedz": "Wykazujesz łączny przychód z działalności. Obsługa kryzysowa jest nieregularna z natury, więc przy wahaniach warto przedstawić dwa pełne lata."
+   }
+  ]
+ },
+ "wlasciciel-firmy": {
+  "wstep": "Właściciel małej firmy jest w niej zwykle najlepszym handlowcem, głównym specjalistą i osobą podpisującą umowy naraz. Im mniejsza firma, tym więcej z tych ról spoczywa na jednej osobie — i tym dotkliwsza jest jej nieobecność.",
+  "dochod": "Wypłata z zysku, wynagrodzenie z tytułu pełnionej funkcji albo faktura z własnej działalności. Dochód właściciela jest zwykle tym, co zostaje po pokryciu wszystkich kosztów firmy — czyli spada pierwszy, gdy przychody maleją.",
+  "przerwa": "Firma bez właściciela funkcjonuje tak długo, jak długo wystarcza bieżących zleceń — nowe pozyskuje zwykle on sam. Po dwóch miesiącach kończy się portfel zamówień, a koszty stałe biegną: pensje, czynsz, leasingi, zobowiązania wobec dostawców. To jest różnica między pracownikiem a właścicielem: pracownik traci wynagrodzenie, właściciel dokłada do firmy z oszczędności.",
+  "ryzyka": [
+   {
+    "tytul": "Choroby układu krążenia od odpowiedzialności całkowitej",
+    "opis": "Odpowiedzialność za zobowiązania firmy, wypłaty pracowników i własne bezpieczeństwo finansowe, bez rozdzielenia na godziny pracy i czas wolny. Ta ekspozycja jest w praktyce ciągła."
+   },
+   {
+    "tytul": "Skutki pracy bez możliwości przerwy",
+    "opis": "Brak zastępowalności prowadzi do pracy także w chorobie i do odkładania leczenia. Odłożone rozpoznanie ma zwykle cięższy przebieg i dłuższą rekonwalescencję niż podjęte na czas."
+   },
+   {
+    "tytul": "Ryzyko właściwe dla wykonywanej pracy",
+    "opis": "Właściciel wykonuje zwykle także pracę merytoryczną firmy — jeśli to zakład produkcyjny, to razem z ryzykiem fizycznym. We wniosku warto opisać, co robisz naprawdę, a nie tylko czym się firma zajmuje."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Zatrudniam ludzi — czy firma nie poradzi sobie beze mnie?",
+    "odpowiedz": "Z tego powodu formularz pyta o Twój udział w wypracowaniu przychodu. Jeśli sprzedaż i kluczowe decyzje są na Tobie, ten udział jest wysoki i suma powinna to odzwierciedlać. Jeśli firma działa samodzielnie, suma będzie niższa — i to jest uczciwe, bo strata też."
+   },
+   {
+    "pytanie": "Jak wykazać dochód, skoro wypłacam sobie z zysku?",
+    "odpowiedz": "Na podstawie zeznania rocznego i rozliczenia spółki, jeśli działasz w tej formie. Ubezpieczyciel patrzy na to, ile faktycznie z firmy wyjmujesz, a nie na jej obrót."
+   }
+  ]
  }
 }
