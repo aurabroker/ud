@@ -3391,5 +3391,469 @@
     "odpowiedz": "Tak. Nieliczna specjalizacja oznacza mniej alternatyw zawodowych przy ograniczonej sprawności i często konieczność przeprowadzki, żeby w ogóle pracować w zawodzie."
    }
   ]
+ },
+ "neurolog": {
+  "wstep": "Badanie neurologiczne polega na tym, że lekarz własnymi rękami ocenia siłę, napięcie i odruchy pacjenta. Neurolog z osłabionym chwytem nie zbada siły mięśniowej, bo nie ma jej z czym porównać.",
+  "dochod": "Kontrakt oddziałowy albo poradniany, badania elektrofizjologiczne rozliczane za procedurę, kwalifikacje do programów lekowych w stwardnieniu rozsianym i gabinet prywatny. Elektromiografia daje najwyższą stawkę jednostkową.",
+  "przerwa": "Chory w programie lekowym ma wizyty wpisane w harmonogram, od którego zależy dalsze finansowanie terapii. Ośrodek przenosi pacjentów na innego neurologa, żeby program nie stanął, i po powrocie nie ma powodu ich oddawać. Pracownia elektrofizjologiczna z zapisanym terminarzem odwołuje badania w całości, bo aparat bez operatora nie pracuje.",
+  "ryzyka": [
+   {
+    "tytul": "Osłabienie siły i czucia we własnych rękach",
+    "opis": "Ocena siły mięśniowej odbywa się przez opór stawiany ręką badającego, a badanie czucia wymaga wyczuwalnego dotyku. Neuropatia u samego neurologa odbiera narzędzie, którym pracuje, zanim wpłynie na cokolwiek innego."
+   },
+   {
+    "tytul": "Przeciążenie nadgarstka przy elektromiografii",
+    "opis": "Wprowadzanie elektrody igłowej i utrzymywanie jej w mięśniu wymaga stabilnego, precyzyjnego chwytu przez czas badania. Powtarzane setki razy w miesiącu daje zapalenie ścięgien prostowników."
+   },
+   {
+    "tytul": "Uraz przy badaniu chorego pobudzonego",
+    "opis": "Pacjenci po udarze, z otępieniem albo w stanie splątania bywają niespokojni i silni. Uraz przy próbie badania jest tu zdarzeniem nagłym i zewnętrznym, więc mieści się w definicji wypadku."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Neuropatia w moich rękach — czy to niezdolność w moim zawodzie?",
+    "odpowiedz": "Badanie neurologiczne opiera się na czuciu i sile rąk badającego, więc ich upośledzenie odbiera zdolność wykonywania podstawowej czynności zawodowej. Warto opisać to we wniosku, bo z nazwy specjalizacji nie wynika."
+   },
+   {
+    "pytanie": "Wykonuję badania EMG — czy wykazywać je osobno?",
+    "odpowiedz": "Nie osobno, ale warto wspomnieć o nich w opisie pracy. Elektrofizjologia wiąże się z innym obciążeniem niż sama praca poradniana, a wycena ma to odróżniać."
+   }
+  ]
+ },
+ "psychiatra": {
+  "wstep": "Psychiatra pracuje z pacjentami w kryzysie, psychozie i pobudzeniu, często bez zabezpieczenia fizycznego. To jedyna specjalizacja lekarska, w której główne ryzyko zawodowe jest jednocześnie tym, czego polisa nie obejmuje.",
+  "dochod": "Kontrakt z oddziałem albo poradnią zdrowia psychicznego, dyżury, opinie sądowo-psychiatryczne i gabinet prywatny. Opinie sądowe płacą według rozporządzenia i po zakończeniu sprawy, gabinet prywatny — od razu i najlepiej.",
+  "przerwa": "Pacjent w farmakoterapii ma wizyty kontrolne powiązane z wystawianiem recept, których nie da się odroczyć bez przerwania leczenia. Poradnia przydziela chorych innemu lekarzowi w ciągu dni. Opinie sądowo-psychiatryczne przechodzą do kolejnego biegłego z listy, a wypadnięcie z niej na dłużej oznacza czekanie do następnego naboru kadencyjnego.",
+  "ryzyka": [
+   {
+    "tytul": "Napaść ze strony pacjenta",
+    "opis": "Interwencje przy pobudzeniu psychoruchowym i przymusie bezpośrednim odbywają się w bezpośrednim kontakcie fizycznym. Złamania, urazy głowy i uszkodzenia stawów są tu następstwem realnym, objętym ochroną jako wypadek."
+   },
+   {
+    "tytul": "Skutki obciążenia psychicznego — wyłączone z ochrony",
+    "opis": "To jest ryzyko definiujące tę specjalizację i jednocześnie nieobjęte polisą w żadnym wariancie. Piszemy o tym wprost, bo psychiatra ma prawo wiedzieć, że akurat jego główne zagrożenie zawodowe zostaje poza zakresem umowy."
+   },
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Sześć do ośmiu wizyt dziennie, każda oparta wyłącznie na rozmowie, prowadzonych bez przerwy na odpoczynek głosu. Niedomykalność fałdów głosowych rozwija się przy tym obciążeniu jak u wykładowcy."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Skoro choroby psychiczne są wyłączone, czy polisa ma dla mnie sens?",
+    "odpowiedz": "Ma, ale trzeba wiedzieć, na co. Chroni przed skutkami urazu, choroby somatycznej i wypadku — czyli przed wszystkim poza tym jednym obszarem. Zatajanie tego byłoby wobec psychiatry szczególnie nie w porządku."
+   },
+   {
+    "pytanie": "Wydaję opinie sądowo-psychiatryczne — czy to osobne źródło?",
+    "odpowiedz": "Wchodzi do łącznego dochodu z działalności. Wypłata następuje po zakończeniu sprawy, więc przy dokumentowaniu warto pokazać dwa pełne lata, a nie bieżące wpływy."
+   }
+  ]
+ },
+ "internista": {
+  "wstep": "Internista w podstawowej opiece przyjmuje w sezonie po czterdziestu pacjentów dziennie, z których większość przychodzi z infekcją. Ekspozycja na patogeny oddechowe jest tu wyższa niż w oddziale zakaźnym, tylko rozłożona na tysiące krótkich kontaktów.",
+  "dochod": "Praktyka rozliczana stawką kapitacyjną za zadeklarowanych pacjentów, dyżury w izbie przyjęć i wizyty prywatne. Kapitacja jest przychodem stabilnym, ale liczonym od liczby deklaracji, a nie od liczby przyjęć.",
+  "przerwa": "Deklaracja pacjenta to przychód na cały rok, a zmienia się ją jednym podpisem. Rodzina, która przez tydzień nie mogła dostać się do swojego lekarza, przepisuje się do sąsiedniej przychodni i zostaje tam do końca roku rozliczeniowego. Przy własnej praktyce biegną pensje personelu, czynsz i umowa z płatnikiem, która wymaga zapewnienia opieki niezależnie od zdrowia właściciela.",
+  "ryzyka": [
+   {
+    "tytul": "Kumulacja ekspozycji na patogeny oddechowe",
+    "opis": "Kilkadziesiąt krótkich kontaktów dziennie z chorymi zakaźnie, w gabinecie o ograniczonej wentylacji, przez cały sezon jesienno-zimowy. Powtarzalne infekcje i ich powikłania wyłączają z pracy wielokrotnie w ciągu roku."
+   },
+   {
+    "tytul": "Choroby układu krążenia od tempa przyjęć",
+    "opis": "Decyzja diagnostyczna co dziesięć minut, przez osiem godzin, przy pełnej odpowiedzialności za każdą z nich. Nadciśnienie i choroba niedokrwienna rozwijają się w tej grupie wcześnie."
+   },
+   {
+    "tytul": "Zespoły przeciążeniowe od dokumentacji elektronicznej",
+    "opis": "Każde przyjęcie kończy się wpisem, receptą i skierowaniem wprowadzanym ręcznie. Neuropatia nadgarstka bierze się w tym zawodzie z klawiatury, a nie z badania pacjenta."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Mam własną praktykę na kontrakcie z płatnikiem — kto zapewnia zastępstwo?",
+    "odpowiedz": "Umowa z płatnikiem wymaga zapewnienia ciągłości opieki, więc zastępstwo organizujesz i opłacasz sam. Świadczenie z polisy wypłacane jest bez wskazania celu, więc może pokryć właśnie ten koszt."
+   },
+   {
+    "pytanie": "Kapitacja daje stały przychód — czy potrzebuję ubezpieczenia?",
+    "odpowiedz": "Kapitacja płynie dalej tylko dopóki pacjenci nie zmienią deklaracji, a zmieniają je właśnie wtedy, gdy lekarza nie ma. Strata jest więc odroczona o kilka miesięcy, a nie żadna."
+   }
+  ]
+ },
+ "geriatria": {
+  "wstep": "Geriatra bada pacjentów, którzy nie wstaną z łóżka bez pomocy i nie przekręcą się na bok o własnych siłach. Znaczna część badania to praca fizyczna, wykonywana przy łóżku albo w domu chorego.",
+  "dochod": "Kontrakt z oddziałem geriatrycznym, konsultacje dla domów opieki, wizyty domowe i orzecznictwo. Wizyty domowe i konsultacje w placówkach opiekuńczych stanowią zwykle istotną część dochodu i wymagają dojazdów.",
+  "przerwa": "Dom opieki, który ma umowę na konsultacje geriatryczne, potrzebuje lekarza dostępnego w wyznaczonych dniach — przy nieobecności podpisuje umowę z kimś innym i zwykle jej nie zmienia. Pacjenci prowadzeni w domu, u których ciągłość opieki jest częścią leczenia, przechodzą pod opiekę innego lekarza wraz z rodziną, która tę zmianę zorganizowała.",
+  "ryzyka": [
+   {
+    "tytul": "Uraz kręgosłupa przy badaniu chorego leżącego",
+    "opis": "Obracanie i podnoszenie pacjenta niesamodzielnego, wielokrotnie w ciągu dnia, w warunkach domowych bez podnośnika i regulowanego łóżka. Przeciążenie odcinka lędźwiowego jest tu najczęstszą przyczyną przerwy w pracy."
+   },
+   {
+    "tytul": "Ekspozycja na zakażenia u chorych przewlekle",
+    "opis": "Pacjenci geriatryczni często noszą szczepy wielolekooporne i mają odleżyny wymagające opatrywania. Zakażenie własne w takich warunkach bywa trudniejsze do leczenia niż u pacjenta."
+   },
+   {
+    "tytul": "Skutki wielogodzinnych dojazdów",
+    "opis": "Wizyty domowe oznaczają kilkaset kilometrów tygodniowo przeplatanych pracą fizyczną przy łóżku. Ta kombinacja siedzenia i nagłego wysiłku obciąża kręgosłup bardziej niż każda z tych czynności osobno."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Wizyty domowe wiążą się z dojazdami — czy wypadek w drodze jest objęty?",
+    "odpowiedz": "Wypadek komunikacyjny spełnia definicję zdarzenia nagłego i zewnętrznego, więc jego następstwa są objęte. Nie ma znaczenia, czy doszło do niego w drodze do pacjenta, czy prywatnie."
+   },
+   {
+    "pytanie": "Konsultuję w kilku domach opieki — jak to wykazać?",
+    "odpowiedz": "Wszystkie umowy razem, na podstawie rozliczenia rocznego. Ten rodzaj współpracy urywa się przy pierwszej dłuższej nieobecności, bo placówka musi mieć zapewnioną opiekę w wyznaczonych dniach."
+   }
+  ]
+ },
+ "hematolog": {
+  "wstep": "Hematolog ogląda rozmaz krwi pod mikroskopem i rozpoznaje chorobę po kształcie i barwie komórek. To ocena wzrokowa struktur mierzonych w mikrometrach, której nie zastąpi żaden analizator.",
+  "dochod": "Kontrakt z oddziałem hematologii, biopsje szpiku rozliczane za procedurę, kwalifikacje do programów lekowych i przeszczepień oraz konsultacje. Programy lekowe wymagają regularnych wizyt o wyznaczonych terminach.",
+  "przerwa": "Chory na białaczkę ma protokół z cyklami rozpisanymi co do dnia — przesunięcie obniża szansę na remisję. Ośrodek przekazuje pacjentów natychmiast i nie oddaje ich w trakcie leczenia, bo zmiana lekarza prowadzącego w toku terapii jest dla chorego ryzykiem. Pracownia biopsji szpiku bez operatora odwołuje zabiegi diagnostyczne, od których zależy rozpoczęcie leczenia.",
+  "ryzyka": [
+   {
+    "tytul": "Pogorszenie widzenia w mikroskopii",
+    "opis": "Ocena rozmazu wymaga rozróżniania ziarnistości i odcieni cytoplazmy przy powiększeniu tysiąckrotnym. Zaburzenia widzenia barw albo ostrości kończą pracę diagnostyczną, choć nie kliniczną."
+   },
+   {
+    "tytul": "Ekspozycja na materiał zakaźny przy biopsji szpiku",
+    "opis": "Nakłucie talerza biodrowego u pacjenta z małopłytkowością oznacza obfite krwawienie w polu zabiegu. Zakażenie krwiopochodne objęte jest wyłącznie osobnymi warunkami szczególnymi."
+   },
+   {
+    "tytul": "Kontakt z chorymi w głębokiej immunosupresji",
+    "opis": "Pacjenci po chemioterapii i przeszczepieniu szpiku są nosicielami szczepów szpitalnych, a jednocześnie skrajnie podatni. Ekspozycja działa w obie strony i wymaga reżimu, którego naruszenie ma konsekwencje po obu stronach."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy utrata precyzji widzenia zamknie mi całą specjalizację?",
+    "odpowiedz": "Zamknie diagnostykę mikroskopową, ale nie pracę kliniczną z pacjentem. To przypadek niezdolności częściowej — warto we wniosku rozpisać, jaka część dochodu pochodzi z każdej z tych czynności."
+   },
+   {
+    "pytanie": "Wykonuję biopsje szpiku — czy to zwiększa ryzyko ekspozycji?",
+    "odpowiedz": "Zwiększa i warto to opisać jako charakter pracy. Hematologia zabiegowa i wyłącznie konsultacyjna mają inny profil, a klauzula HIV/WZW nabiera przy tej pierwszej realnego znaczenia."
+   }
+  ]
+ },
+ "endokrynolog": {
+  "wstep": "Endokrynolog wbija igłę w guzek tarczycy o średnicy kilku milimetrów, celując pod kontrolą ultrasonografii i patrząc nie na rękę, tylko na ekran. Koordynacja ręki z obrazem jest tu warunkiem wykonywania zawodu.",
+  "dochod": "Poradnia endokrynologiczna w ramach kontraktu, biopsje aspiracyjne cienkoigłowe rozliczane za procedurę, badania ultrasonograficzne i gabinet prywatny. Biopsje pod kontrolą USG dają najwyższą stawkę jednostkową.",
+  "przerwa": "Pacjentka z guzkiem podejrzanym onkologicznie czeka na biopsję, od której zależy decyzja o operacji — terminy są tu liczone w tygodniach, nie miesiącach. Pracownia przekazuje zabiegi innemu endokrynologowi natychmiast. Chorzy przewlekli, prowadzeni w cukrzycy i chorobach tarczycy latami, przechodzą z dokumentacją do kolejnego lekarza i wracają rzadko.",
+  "ryzyka": [
+   {
+    "tytul": "Utrata koordynacji wzrokowo-ruchowej",
+    "opis": "Biopsja pod kontrolą ultrasonografii wymaga prowadzenia igły z obserwacją jej czubka na ekranie, nie w polu widzenia. Drżenie albo zaburzenie tej koordynacji wyklucza z zabiegów, choć nie z poradni."
+   },
+   {
+    "tytul": "Przeciążenie nadgarstka i barku przy ultrasonografii",
+    "opis": "Głowica trzymana pod stałym kątem, z uciskiem na szyję pacjenta, przy kilkudziesięciu badaniach tygodniowo. Zapalenie ścięgien i konflikt podbarkowy rozwijają się przy tej czynności wcześnie."
+   },
+   {
+    "tytul": "Pogorszenie ostrości widzenia",
+    "opis": "Ocena obrazu ultrasonograficznego to rozróżnianie subtelnych różnic echogeniczności na ekranie. Utrata tej zdolności obniża trafność rozpoznania w sposób, którego nie kompensuje doświadczenie."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Wykonuję biopsje cienkoigłowe — czy to zmienia ocenę?",
+    "odpowiedz": "Zmienia profil pracy, bo endokrynologia zabiegowa różni się od poradnianej obciążeniem i ekspozycją. Warto to opisać, zamiast wpisywać samą nazwę specjalizacji."
+   },
+   {
+    "pytanie": "Prowadzę pacjentów z cukrzycą latami — co tracę przy przerwie?",
+    "odpowiedz": "Chorych prowadzonych przewlekle, którzy przechodzą do innego lekarza wraz z dokumentacją. To strata odroczona, ale trwała — dlatego suma powinna odpowiadać dochodowi rocznemu, a nie odczuciu bieżącej straty."
+   }
+  ]
+ },
+ "alergolog": {
+  "wstep": "Alergolog wykonuje testy skórne i próby prowokacyjne, czyli celowo wywołuje u pacjenta reakcję, którą potem trzeba opanować. Ryzyko wstrząsu anafilaktycznego w gabinecie jest tu wpisane w metodę diagnostyczną.",
+  "dochod": "Poradnia alergologiczna, testy skórne rozliczane za panel, odczulanie prowadzone latami i gabinet prywatny. Immunoterapia swoista to pacjenci przychodzący regularnie przez trzy do pięciu lat — najbardziej przewidywalne źródło przychodu w tej specjalizacji.",
+  "przerwa": "Odczulanie ma harmonogram dawek, którego przerwanie oznacza konieczność powrotu do niższej dawki albo rozpoczęcia cyklu od nowa. Pacjent w trakcie immunoterapii nie może czekać, więc poradnia przekazuje go innemu alergologowi, a on kończy z nim cały wieloletni cykl. Testy skórne, wymagające nadzoru lekarza przez trzydzieści minut po podaniu, odwołuje się w całości.",
+  "ryzyka": [
+   {
+    "tytul": "Uczulenie zawodowe na alergeny testowe",
+    "opis": "Codzienny kontakt z wyciągami alergenowymi w wysokich stężeniach przy przygotowaniu testów. Uczulenie własne u alergologa jest zjawiskiem opisanym i po rozwinięciu wyklucza z wykonywania testów skórnych."
+   },
+   {
+    "tytul": "Skutki pracy w gotowości do reanimacji",
+    "opis": "Każda próba prowokacyjna wymaga gotowości do opanowania wstrząsu w ciągu minut. To obciążenie stałe, obecne przy każdym pacjencie, a nie okresowe."
+   },
+   {
+    "tytul": "Nawracające infekcje dróg oddechowych",
+    "opis": "Poradnia alergologiczna przyjmuje pacjentów z astmą i nieżytem nosa, często w zaostrzeniu infekcyjnym. Ekspozycja jest ciągła i skoncentrowana w sezonie pylenia oraz jesienno-zimowym."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy uczulenie na alergeny testowe będzie objęte?",
+    "odpowiedz": "Objęta jest niezdolność do pracy z tego powodu, o ile uczulenie rozpoznano po zawarciu umowy. Przy schorzeniach rozwijających się z wieloletniej ekspozycji warto ubezpieczyć się zanim pierwsze objawy trafią do dokumentacji."
+   },
+   {
+    "pytanie": "Prowadzę odczulanie przez kilka lat — co tracę przy przerwie?",
+    "odpowiedz": "Pacjentów w trakcie wieloletniego cyklu, którzy przejdą do innego alergologa i tam go dokończą. Przy immunoterapii strata jest więc rozłożona na lata, a nie na miesiące nieobecności."
+   }
+  ]
+ },
+ "immunolog": {
+  "wstep": "Immunolog kliniczny prowadzi chorych z niedoborami odporności i z chorobami autoimmunologicznymi, jednocześnie interpretując wyniki badań, których nikt poza nim w ośrodku nie czyta. Ta podwójna rola sprawia, że jego nieobecność zatrzymuje dwie rzeczy naraz.",
+  "dochod": "Kontrakt z ośrodkiem immunologii, konsultacje dla innych oddziałów, kwalifikacje do leczenia immunoglobulinami i interpretacja badań immunologicznych. Ośrodków prowadzących pierwotne niedobory odporności jest w Polsce niewiele.",
+  "przerwa": "Pacjent z pierwotnym niedoborem odporności otrzymuje immunoglobuliny w regularnych odstępach — przerwa oznacza spadek stężenia ochronnego i ryzyko ciężkiego zakażenia. Ośrodek przydziela chorych innemu lekarzowi natychmiast. Konsultacje dla oddziałów, wymagające bieżącej dostępności, przechodzą w tym samym czasie i wracają najwolniej.",
+  "ryzyka": [
+   {
+    "tytul": "Kontakt z pacjentami o skrajnie obniżonej odporności",
+    "opis": "Chorzy z niedoborami odporności są podatni na patogeny nieszkodliwe dla innych, a jednocześnie bywają nosicielami zakażeń oportunistycznych. Reżim sanitarny jest tu obustronny i jego naruszenie kosztuje obie strony."
+   },
+   {
+    "tytul": "Pogorszenie wzroku przy interpretacji badań",
+    "opis": "Ocena cytometrii przepływowej i preparatów immunofluorescencyjnych opiera się na rozróżnianiu intensywności sygnału i barwy. Zaburzenia widzenia barwnego utrudniają tę ocenę bezpośrednio."
+   },
+   {
+    "tytul": "Ekspozycja na preparaty krwiopochodne",
+    "opis": "Nadzór nad wlewami immunoglobulin i praca z materiałem osoczopochodnym. Ryzyko zakażenia krwiopochodnego objęte jest wyłącznie osobnymi warunkami szczególnymi."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Moja specjalizacja jest nieliczna — jak to wpływa na wybór sumy?",
+    "odpowiedz": "Im mniej ośrodków prowadzi Twoją dziedzinę, tym mniejsza szansa na pracę zastępczą w zawodzie po ograniczeniu sprawności. To argument za sumą bliższą górnej granicy dopuszczalnej przy Twoim dochodzie."
+   },
+   {
+    "pytanie": "Konsultuję dla innych oddziałów — czy to część dochodu?",
+    "odpowiedz": "Tak, jeśli jest rozliczane w ramach kontraktu albo działalności. Konsultacje bywają w tej specjalizacji stałym składnikiem wynagrodzenia i warto je wykazać."
+   }
+  ]
+ },
+ "foniatra": {
+  "wstep": "Foniatra ocenia głos pacjenta słuchem i obrazem z endoskopu krtaniowego. Jego własny słuch jest tu narzędziem diagnostycznym o dokładności, której nie zastąpi analiza akustyczna.",
+  "dochod": "Poradnia foniatryczna, badania wideostroboskopowe rozliczane za procedurę, rehabilitacja głosu i gabinet prywatny. Znaczną część pacjentów stanowią zawodowcy głosu — śpiewacy, aktorzy, nauczyciele — leczący się prywatnie i pilnie.",
+  "przerwa": "Śpiewak przed premierą albo aktor w trakcie sezonu nie odłoży leczenia o miesiąc — trafi do innego foniatry tego samego tygodnia. Rehabilitacja głosu prowadzona jest w cyklach o wyznaczonej częstotliwości i traci skuteczność przy przerwie. Pracownia wideostroboskopowa bez operatora odwołuje badania, od których zależy kwalifikacja do zabiegu.",
+  "ryzyka": [
+   {
+    "tytul": "Ubytek słuchu",
+    "opis": "Ocena barwy, chrypki i zaburzeń fonacji opiera się na słuchu badającego. Niedosłuch, nawet niewielki i w wąskim paśmie, odbiera zdolność do podstawowej czynności diagnostycznej tej specjalizacji."
+   },
+   {
+    "tytul": "Ekspozycja na aerozol przy endoskopii krtani",
+    "opis": "Badanie wywołuje kaszel i odruch wymiotny, rozpylając materiał z dróg oddechowych na wprost badającego. Ekspozycja jest bezpośrednia i trudna do pełnego zabezpieczenia."
+   },
+   {
+    "tytul": "Choroby własnego narządu głosu",
+    "opis": "Instruktaż rehabilitacji głosowej wymaga demonstracji techniki fonacyjnej, wielokrotnie w ciągu dnia. Foniatra obciąża przy tym własną krtań tak samo jak pacjent, którego uczy jej oszczędzać."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy niedosłuch będzie uznany za niezdolność w mojej specjalizacji?",
+    "odpowiedz": "Ocena słuchowa głosu jest w foniatrii czynnością podstawową, więc jej utrata jest niezdolnością do wykonywania zawodu. Warto rozpisać to we wniosku, bo z samej nazwy specjalizacji nie wynika."
+   },
+   {
+    "pytanie": "Leczę zawodowców głosu prywatnie — czy to osobne źródło?",
+    "odpowiedz": "Liczy się razem z resztą przychodów z działalności. Ta grupa pacjentów płaci najlepiej i odchodzi najszybciej, bo ich własna praca też stoi — dlatego strata przy przerwie bywa większa, niż wynikałoby ze średniej miesięcznej."
+   }
+  ]
+ },
+ "rehabilitacja": {
+  "wstep": "Lekarz rehabilitacji ocenia funkcję, a nie tylko obraz — bada zakres ruchu, siłę i wzorzec chodu, dotykając pacjenta i stawiając mu opór. Bez sprawnych rąk nie ma tego badania.",
+  "dochod": "Kontrakt z oddziałem rehabilitacji albo poradnią, kwalifikacje do turnusów i zaopatrzenia ortopedycznego, orzecznictwo oraz gabinet prywatny. Orzecznictwo i kwalifikacje wymagają osobistego badania, którego nie da się przeprowadzić zdalnie.",
+  "przerwa": "Pacjent po udarze albo po endoprotezoplastyce ma okno rehabilitacyjne, w którym efekty są największe — opóźnienie przekłada się bezpośrednio na wynik funkcjonalny. Oddział przekazuje chorych innemu lekarzowi natychmiast. Kwalifikacje do turnusów mają terminy wynikające z harmonogramu płatnika, a niewykorzystane miejsca przepadają razem z finansowaniem.",
+  "ryzyka": [
+   {
+    "tytul": "Uraz przy badaniu funkcjonalnym",
+    "opis": "Ocena zakresu ruchu i siły wymaga stawiania oporu pacjentowi, czasem znacznie silniejszemu. Nagłe obciążenie przy zmianie pozycji chorego jest tu najczęstszą przyczyną urazu lędźwiowego u lekarza."
+   },
+   {
+    "tytul": "Ograniczenie ruchomości palców i nadgarstków",
+    "opis": "Badanie palpacyjne i testy manualne wykonywane kilkadziesiąt razy dziennie przez lata. Ograniczenie sprawności rąk odbiera możliwość badania, zanim wpłynie na cokolwiek innego."
+   },
+   {
+    "tytul": "Przeciążenie kręgosłupa przy pracy z chorym leżącym",
+    "opis": "Badanie na łóżku i przy stole rehabilitacyjnym wymusza pochylenie z jednoczesnym przenoszeniem ciężaru pacjenta. Zespoły bólowe lędźwiowe są tu następstwem samej metody badania."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy prowadzę też terapię, czy tylko kwalifikuję?",
+    "odpowiedz": "To rozróżnienie warto zapisać we wniosku. Lekarz wyłącznie orzekający ma inny profil obciążenia niż ten, który sam prowadzi terapię manualną — a wycena ma odróżniać jedno od drugiego."
+   },
+   {
+    "pytanie": "Jaką sumę wybrać, skoro pracuję rękami?",
+    "odpowiedz": "Przy zawodach, w których ograniczenie sprawności rąk oznacza koniec badania, a nie tylko utrudnienie, warto rozważyć sumę bliską maksimum. Wyższe kwoty wiążą się z dłuższą ankietą zdrowotną w formularzu."
+   }
+  ]
+ },
+ "epidemiolog": {
+  "wstep": "Epidemiolog prowadzi dochodzenie w ognisku zakażenia, czyli jedzie tam, gdzie ludzie już chorują, i szuka źródła. Praca jest w połowie terenowa i zaczyna się wtedy, gdy sytuacja jest już poza kontrolą.",
+  "dochod": "Zatrudnienie w inspekcji sanitarnej albo w zespole kontroli zakażeń szpitalnych, konsultacje dla placówek medycznych i szkolenia. Konsultacje dla szpitali, rozliczane kontraktowo, dają zwykle wyższy przychód niż praca etatowa.",
+  "przerwa": "Szpital ma ustawowy obowiązek prowadzenia kontroli zakażeń i musi zapewnić obsadę zespołu niezależnie od tego, kto choruje. Umowa konsultacyjna przy dłuższej nieobecności przechodzi na innego specjalistę, a takich umów placówka nie zmienia często. Dochodzenie epidemiologiczne w toku przejmuje kto inny i to on kończy raport, od którego zależą decyzje administracyjne.",
+  "ryzyka": [
+   {
+    "tytul": "Ekspozycja podczas dochodzenia w ognisku",
+    "opis": "Wejście do miejsca aktywnego ogniska przed pełnym rozpoznaniem czynnika etiologicznego. Środki ochrony dobiera się na podstawie hipotezy, a ta bywa weryfikowana po fakcie."
+   },
+   {
+    "tytul": "Uraz podczas pracy terenowej",
+    "opis": "Kontrole obejmują zakłady produkcyjne, ujęcia wody, gospodarstwa i obiekty w złym stanie technicznym. Upadek i uraz przy oględzinach są tu ryzykiem realnym, choć rzadko kojarzonym z tym zawodem."
+   },
+   {
+    "tytul": "Skutki pracy w trybie kryzysowym",
+    "opis": "Ognisko epidemiczne oznacza kilkanaście dni pracy niemal bez przerwy, powtarzane nieregularnie. Ten wzorzec obciążenia jest dla układu krążenia trudniejszy niż stałe wysokie tempo."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy zakażenie podczas dochodzenia jest objęte?",
+    "odpowiedz": "Objęta jest niezdolność do pracy z powodu choroby, niezależnie od tego, gdzie doszło do zakażenia. Odrębnych warunków wymagają wyłącznie zakażenia krwiopochodne, przenoszone przez kontakt z krwią."
+   },
+   {
+    "pytanie": "Łączę etat w inspekcji z konsultacjami dla szpitali — jak to ująć?",
+    "odpowiedz": "Wykazujesz oba źródła. Limit procentowy wyznacza forma, z której pochodzi większa część rocznego dochodu — konsultacje kontraktowe często przeważają nad etatem i wtedy obowiązuje wyższy próg."
+   }
+  ]
+ },
+ "medycyna-sportowa": {
+  "wstep": "Lekarz medycyny sportowej pracuje przy boisku, na macie i w hali, gdzie uraz zawodnika wymaga decyzji w kilkanaście sekund. Do tego dochodzą wyjazdy z drużyną, czyli praca poza gabinetem przez znaczną część sezonu.",
+  "dochod": "Kontrakt z klubem sportowym, badania kwalifikacyjne do uprawiania sportu rozliczane za orzeczenie, zabezpieczenie zawodów i gabinet prywatny. Kontrakty klubowe są sezonowe i wygasają razem z rozgrywkami.",
+  "przerwa": "Klub musi mieć lekarza przy każdym meczu i treningu, więc nieobecność zapełnia natychmiast, a kontraktu sezonowego zwykle nie przedłuża. Badania kwalifikacyjne mają terminy wynikające z regulaminów związków sportowych — zawodnik bez ważnego orzeczenia nie wystąpi, więc pójdzie do innego lekarza tego samego tygodnia.",
+  "ryzyka": [
+   {
+    "tytul": "Uraz podczas interwencji na boisku",
+    "opis": "Wbieganie na płytę w trakcie gry, praca przy leżącym zawodniku wśród ruchu innych. Zderzenie i uraz przy transporcie kontuzjowanego to zdarzenia opisane i objęte jako wypadek."
+   },
+   {
+    "tytul": "Przeciążenie kręgosłupa przy transporcie zawodników",
+    "opis": "Zniesienie zawodnika z boiska na noszach, przenoszenie sprzętu medycznego i praca w przysiadzie przy linii bocznej. Uraz lędźwiowy jest tu następstwem powtarzalnym."
+   },
+   {
+    "tytul": "Skutki nieregularnego trybu pracy w sezonie",
+    "opis": "Wyjazdy, mecze wieczorne, powroty nocą i treningi rano. Zaburzenia rytmu dobowego kumulują się przez cały sezon i nie mają okresu wyrównania aż do przerwy letniej."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Wyjeżdżam z drużyną za granicę — czy ochrona działa?",
+    "odpowiedz": "Wyjazdy służbowe na zawody są objęte bez dodatkowych warunków. Zgłoszenia wymaga dopiero dłuższy pobyt poza Polską, na przykład przy pracy w klubie zagranicznym przez cały sezon."
+   },
+   {
+    "pytanie": "Kontrakt klubowy jest sezonowy — czy to problem?",
+    "odpowiedz": "Nie, o ile dochód roczny jest udokumentowany. Przerwy między sezonami są w tej dziedzinie normą i liczy się średnia z pełnego roku, a nie ciągłość jednej umowy."
+   }
+  ]
+ },
+ "medycyna-tropikalna": {
+  "wstep": "Lekarz medycyny tropikalnej rozpoznaje choroby, których większość polskich lekarzy nigdy nie widziała, i robi to często u pacjenta w ciężkim stanie po powrocie z podróży. Część pracy odbywa się w krajach, gdzie te choroby są endemiczne.",
+  "dochod": "Poradnia medycyny podróży z kwalifikacją do szczepień, konsultacje dla oddziałów zakaźnych, orzeczenia dla wyjeżdżających służbowo i wyjazdy w ramach misji medycznych. Poradnia szczepień daje przychód stały i sezonowy, skoncentrowany przed okresem urlopowym.",
+  "przerwa": "Pacjent przed wyjazdem ma sztywny termin — szczepienia wymagają wyprzedzenia liczonego w tygodniach i nie da się ich przyspieszyć. Osoba, która nie dostała kwalifikacji na czas, idzie do innej poradni i tam się zaszczepi. Konsultacje dla oddziałów, wymagające dostępności przy chorym w stanie ciężkim, przechodzą do kolejnego specjalisty w ciągu godzin.",
+  "ryzyka": [
+   {
+    "tytul": "Zakażenie chorobą tropikalną podczas wyjazdu",
+    "opis": "Malaria, dengi, gorączki krwotoczne i pasożytozy nabyte w rejonie endemicznym. Część z nich daje następstwa przewlekłe, ujawniające się miesiące po powrocie."
+   },
+   {
+    "tytul": "Ekspozycja przy diagnostyce chorych importowanych",
+    "opis": "Badanie i pobrania u pacjenta z niezidentyfikowaną gorączką po powrocie z tropiku, przed ustaleniem czynnika. Środki ochrony dobiera się do najgorszego prawdopodobnego scenariusza, ale rozpoznanie przychodzi później."
+   },
+   {
+    "tytul": "Skutki wyjazdów i zmiany stref klimatycznych",
+    "opis": "Loty długodystansowe, zmiany stref czasowych i praca w klimacie gorącym i wilgotnym. Obciążenie układu krążenia i zaburzenia rytmu dobowego kumulują się przy każdym wyjeździe."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Wyjeżdżam na misje medyczne — czy polisa działa za granicą?",
+    "odpowiedz": "Dłuższe pobyty poza Polską wymagają zgłoszenia ubezpieczycielowi, a wyjazdy do rejonów o podwyższonym ryzyku mogą być wyłączone albo objęte na innych warunkach. To trzeba ustalić przed wyjazdem, nie po zdarzeniu."
+   },
+   {
+    "pytanie": "Poradnia szczepień pracuje sezonowo — jak wykazać dochód?",
+    "odpowiedz": "Przez rozliczenie roczne, obejmujące wszystkie miesiące. Skoncentrowanie przychodu przed sezonem urlopowym nie obniża sumy, ale warto pamiętać, że przerwa właśnie wtedy kosztuje wielokrotnie więcej niż zimą."
+   }
+  ]
+ },
+ "androlog": {
+  "wstep": "Androlog łączy diagnostykę laboratoryjną z zabiegami — ocenia nasienie pod mikroskopem i wykonuje biopsje jądra. Jedna z najwęższych specjalizacji w polskiej medycynie, z niewielką liczbą ośrodków.",
+  "dochod": "Poradnia andrologiczna, badania nasienia i procedury pobrania plemników rozliczane za zabieg, współpraca z klinikami leczenia niepłodności. Kliniki niepłodności są głównym zleceniodawcą i płacą za procedury wykonane w wyznaczonych terminach.",
+  "przerwa": "Procedura pobrania plemników jest zsynchronizowana z cyklem stymulacji u partnerki i musi odbyć się w konkretnym dniu — przesunięcie unieważnia cały kosztowny cykl. Klinika przekazuje zabiegi innemu androlagowi natychmiast i nie ryzykuje powrotu do poprzedniego układu w trakcie sezonu. Pacjenci poradni, prowadzeni miesiącami, przechodzą wraz z dokumentacją.",
+  "ryzyka": [
+   {
+    "tytul": "Pogorszenie widzenia w mikroskopii",
+    "opis": "Ocena ruchliwości i morfologii plemników odbywa się pod mikroskopem, przy dużym powiększeniu. Utrata ostrości widzenia bliskiego kończy pracę diagnostyczną, która stanowi znaczną część tej specjalizacji."
+   },
+   {
+    "tytul": "Utrata precyzji manualnej przy zabiegach",
+    "opis": "Mikrochirurgiczne pobranie plemników z jądra wykonuje się pod powiększeniem, na strukturach mierzonych w dziesiątych częściach milimetra. Drżenie rąk wyklucza z tych procedur całkowicie."
+   },
+   {
+    "tytul": "Ekspozycja na materiał biologiczny",
+    "opis": "Praca z nasieniem i krwią przy zabiegach, w warunkach laboratoryjnych i zabiegowych naraz. Zakażenia krwiopochodne objęte są wyłącznie osobnymi warunkami szczególnymi."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Moja specjalizacja ma mało ośrodków — co to zmienia?",
+    "odpowiedz": "Zmniejsza szansę na pracę zastępczą w zawodzie po ograniczeniu sprawności i często oznacza konieczność przeprowadzki. To argument, żeby wybrać sumę bliższą górnej granicy dopuszczalnej przy Twoim dochodzie."
+   },
+   {
+    "pytanie": "Współpracuję z klinikami niepłodności — jak wykazać dochód?",
+    "odpowiedz": "Sumujesz umowy ze wszystkimi klinikami w rozliczeniu rocznym. Rozproszenie zleceniodawców nie chroni tu przed przerwą, bo procedury są zsynchronizowane z cyklami pacjentek i nie czekają."
+   }
+  ]
+ },
+ "balneolog": {
+  "wstep": "Balneolog pracuje w uzdrowisku, gdzie sam czynnik leczniczy jest jednocześnie czynnikiem szkodliwym: siarkowodór w wodach siarczkowych, radon w radoczynnych, wysoka wilgotność w pijalniach i basenach.",
+  "dochod": "Kontrakt z zakładem lecznictwa uzdrowiskowego, kwalifikacje do turnusów, orzecznictwo i gabinet prywatny w sezonie. Turnusy finansowane przez płatnika mają harmonogram roczny, a kuracjusze prywatni przyjeżdżają sezonowo.",
+  "przerwa": "Turnus uzdrowiskowy zaczyna się w wyznaczony poniedziałek i wymaga badania kwalifikacyjnego przy przyjęciu — bez lekarza kuracjusz nie zostanie przyjęty na leczenie. Zakład uzupełnia obsadę natychmiast, bo turnusy są rozliczane z płatnikiem co do osoby. Kontrakt sezonowy przy dłuższej nieobecności zwykle nie jest przedłużany na kolejny sezon.",
+  "ryzyka": [
+   {
+    "tytul": "Ekspozycja na siarkowodór i radon",
+    "opis": "Praca w otoczeniu wód mineralnych oznacza wdychanie siarkowodoru w pijalniach i pomieszczeniach zabiegowych oraz narażenie na radon w uzdrowiskach radoczynnych. Skutki oddechowe i neurologiczne kumulują się przez lata."
+   },
+   {
+    "tytul": "Skutki pracy w wysokiej wilgotności",
+    "opis": "Baseny, komory borowinowe i pomieszczenia zabiegowe utrzymują wilgotność powyżej osiemdziesięciu procent. Przewlekłe zapalenia zatok, dróg oddechowych i dolegliwości stawowe są tu następstwem środowiska pracy."
+   },
+   {
+    "tytul": "Uraz przy badaniu pacjenta o ograniczonej sprawności",
+    "opis": "Kuracjusze to często osoby po urazach i w podeszłym wieku, wymagające asysty przy zmianie pozycji. Przeciążenie kręgosłupa przy podtrzymywaniu pacjenta jest tu zdarzeniem powtarzalnym."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Czy narażenie na siarkowodór trzeba zgłaszać we wniosku?",
+    "odpowiedz": "Warto, bo to czynnik środowiskowy nietypowy dla medycyny. Ubezpieczyciel ocenia faktyczne warunki pracy, a balneologia w uzdrowisku siarczkowym różni się od pracy w gabinecie miejskim."
+   },
+   {
+    "pytanie": "Pracuję sezonowo w uzdrowisku — jak liczyć dochód?",
+    "odpowiedz": "Na podstawie pełnego roku, łącznie z miesiącami poza sezonem. Wahania sezonowe nie obniżają sumy, o ile udokumentujesz cały rok, a nie same miesiące szczytu."
+   }
+  ]
+ },
+ "seksuolog": {
+  "wstep": "Seksuolog prowadzi terapię opartą wyłącznie na rozmowie, w warunkach wymagających pełnej poufności i ciągłości. Zmiana terapeuty w trakcie procesu jest dla pacjenta na tyle trudna, że część po prostu przerywa leczenie.",
+  "dochod": "Gabinet prywatny stanowi w tej dziedzinie zdecydowaną większość przychodu, uzupełniony o opinie sądowo-seksuologiczne i szkolenia. Poradnie finansowane publicznie są nieliczne, więc niemal cały dochód jest pozbawiony jakiegokolwiek zabezpieczenia.",
+  "przerwa": "Proces terapeutyczny przerwany na dwa miesiące zwykle się kończy — pacjent, który z trudem zdecydował się na pierwszą wizytę, rzadko powtarza tę decyzję u kogoś nowego. Opinie sądowe mają terminy wyznaczone przez sąd i przechodzą do innego biegłego. Odbudowa grafiku po dłuższej nieobecności trwa kwartały, bo nowi pacjenci trafiają z polecenia, a polecenia biorą się z bieżącej pracy.",
+  "ryzyka": [
+   {
+    "tytul": "Choroby narządu głosu",
+    "opis": "Siedem do ośmiu sesji dziennie, każda oparta na rozmowie prowadzonej przyciszonym, kontrolowanym głosem. Niedomykalność fałdów głosowych rozwija się przy tym obciążeniu mimo braku krzyku."
+   },
+   {
+    "tytul": "Następstwa somatyczne obciążenia pracą",
+    "opis": "Praca z traumą seksualną i przemocą przez wiele godzin dziennie. Rozpoznania z kręgu chorób psychicznych są z ochrony wyłączone — objęte są wyłącznie skutki somatyczne z odrębną diagnozą."
+   },
+   {
+    "tytul": "Skutki wielogodzinnej pracy w pozycji siedzącej",
+    "opis": "Osiem godzin w fotelu, bez możliwości wstania w trakcie sesji, przy pełnej uwadze skierowanej na pacjenta. Zaostrzenie rwy kulszowej albo obrzęk nóg oznacza tu przerwanie dnia pracy w całości, bo sesji nie da się prowadzić na stojąco."
+   }
+  ],
+  "pytania": [
+   {
+    "pytanie": "Prawie cały mój dochód to gabinet prywatny — czy to zmienia wycenę?",
+    "odpowiedz": "Nie zmienia zasad, ale zmienia stawkę, o którą toczy się gra. Przy dochodzie niemal wyłącznie prywatnym nie ma żadnego zabezpieczenia z ZUS, więc suma powinna odpowiadać całości rocznego przychodu."
+   },
+   {
+    "pytanie": "Czy praca online zmienia coś w ochronie?",
+    "odpowiedz": "Nie, dopóki pracujesz z terytorium Polski. Znaczenie ma dopiero dłuższy pobyt za granicą, o którym trzeba poinformować ubezpieczyciela przed wyjazdem."
+   }
+  ]
  }
 }
