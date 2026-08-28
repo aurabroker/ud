@@ -5,7 +5,8 @@ import sitemap from '@astrojs/sitemap';
 import { EnumChangefreq } from 'sitemap';
 import tailwind from '@tailwindcss/vite';
 import { przekierowania } from '@ud/zawody';
-import { writeFileSync, appendFileSync, existsSync } from 'node:fs';
+import { writeFileSync, appendFileSync, existsSync, readdirSync, lstatSync, realpathSync } from 'node:fs';
+import { join, relative, resolve } from 'node:path';
 
 const SITE = 'https://utratadochodu.pl';
 
@@ -42,6 +43,51 @@ export default defineConfig({
           if (existsSync(plik)) appendFileSync(plik, tresc, 'utf8');
           else writeFileSync(plik, tresc, 'utf8');
           logger.info(`dopisano ${reguly.length} przekierowań 301 do _redirects`);
+        },
+      },
+    },
+    /**
+     * Cloudflare Pages odrzuca katalog wyjściowy zawierający dowiązania, które
+     * wychodzą poza ten katalog — komunikatem „build output directory contains
+     * links to files that can't be accessed". Jest on na tyle ogólny, że można
+     * przy nim stracić godzinę, więc sprawdzamy to na miejscu i mówimy wprost,
+     * który plik zawinił.
+     */
+    {
+      name: 'ud:bez-dowiazan',
+      hooks: {
+        'astro:build:done': ({ dir, logger }) => {
+          const katalog = resolve(dir.pathname);
+          const winne = [];
+
+          const obejdz = (sciezka) => {
+            for (const wpis of readdirSync(sciezka, { withFileTypes: true })) {
+              const pelna = join(sciezka, wpis.name);
+              if (wpis.isSymbolicLink()) {
+                let cel;
+                try {
+                  cel = realpathSync(pelna);
+                } catch {
+                  winne.push(`${relative(katalog, pelna)} → zepsute dowiązanie`);
+                  continue;
+                }
+                if (relative(katalog, cel).startsWith('..')) {
+                  winne.push(`${relative(katalog, pelna)} → ${cel} (poza katalogiem)`);
+                }
+                continue;
+              }
+              if (wpis.isDirectory()) obejdz(pelna);
+            }
+          };
+
+          obejdz(katalog);
+
+          if (winne.length > 0) {
+            throw new Error(
+              `Katalog wyjściowy zawiera dowiązania, których Cloudflare Pages nie przyjmie:\n  ${winne.join('\n  ')}`,
+            );
+          }
+          logger.info('katalog wyjściowy bez dowiązań');
         },
       },
     },
