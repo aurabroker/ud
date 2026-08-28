@@ -83,7 +83,10 @@
    * Stąd render=explicit w adresie skryptu i wywołanie render() stąd.
    */
   function zamontujTurnstile() {
-    if (!kontenerTurnstile || widgetTurnstile !== null) return;
+    // Bez klucza witryny render() rzuca wyjątkiem i wywraca hydratację kroku,
+    // przez co przycisk „Wyślij" przestaje reagować. Brak konfiguracji ma
+    // pogorszyć ochronę przed botami, a nie zepsuć formularz.
+    if (!kluczTurnstile || !kontenerTurnstile || widgetTurnstile !== null) return;
     if (!window.turnstile?.render) return;   // skrypt jeszcze nie doszedł
     widgetTurnstile = window.turnstile.render(kontenerTurnstile, {
       sitekey: kluczTurnstile,
@@ -104,7 +107,7 @@
 
   /** Montujemy widget, gdy kontener pojawi się w DOM-ie. */
   $effect(() => {
-    if (idKroku !== 'zgody' || !kontenerTurnstile) return;
+    if (idKroku !== 'zgody' || !kontenerTurnstile || !kluczTurnstile) return;
     zamontujTurnstile();
     if (widgetTurnstile !== null) return;
     // Skrypt Cloudflare jest async — dokładamy się do jego kolejki onload.
@@ -509,7 +512,9 @@
           {#if bledy.informedAccepted}<span class="text-[13px] text-alarm -mt-2 pl-8.5">{bledy.informedAccepted}</span>{/if}
         </div>
 
-        <div bind:this={kontenerTurnstile} class="mt-7"></div>
+        {#if kluczTurnstile}
+          <div bind:this={kontenerTurnstile} class="mt-7"></div>
+        {/if}
 
         {#if bladWysylki}
           <div role="alert" class="border border-alarm bg-tlo p-5 mt-6">

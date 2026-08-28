@@ -47,6 +47,39 @@ export default defineConfig({
       },
     },
     /**
+     * Brak klucza Turnstile nie może przejść przez wdrożenie po cichu.
+     *
+     * Klucz wchodzi do kodu stron w trakcie budowania. Gdy go zabraknie,
+     * widżet się nie renderuje, wniosek leci bez tokenu, a funkcja brzegowa
+     * — która swój sekret ma — odrzuca zgłoszenie. Formularz wygląda
+     * normalnie i nie działa. Dokładnie tak formularz kontaktowy stał
+     * martwy przez 74 dni.
+     *
+     * Na Cloudflare przerywamy build. Lokalnie tylko ostrzegamy, żeby dało
+     * się pracować bez kluczy.
+     */
+    {
+      name: 'ud:klucze',
+      hooks: {
+        'astro:config:done': ({ logger }) => {
+          const brakujace = ['PUBLIC_TURNSTILE_SITE_KEY', 'PUBLIC_SUPABASE_URL']
+            .filter((k) => !process.env[k]);
+          if (brakujace.length === 0) return;
+
+          const opis = `brak zmiennych budowania: ${brakujace.join(', ')}`;
+          if (process.env.CF_PAGES) {
+            throw new Error(
+              `${opis}. Ustaw je w projekcie Cloudflare Pages ` +
+              '(Settings → Variables and Secrets) i zbuduj ponownie. ' +
+              'Bez klucza Turnstile formularze wyglądają na sprawne, ale ich zgłoszenia są odrzucane.',
+            );
+          }
+          logger.warn(`${opis} — formularze zbudują się bez ochrony przed botami`);
+        },
+      },
+    },
+
+    /**
      * Cloudflare Pages odrzuca katalog wyjściowy zawierający dowiązania, które
      * wychodzą poza ten katalog — komunikatem „build output directory contains
      * links to files that can't be accessed". Jest on na tyle ogólny, że można
