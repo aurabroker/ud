@@ -9,6 +9,8 @@
 import { kategorie, wKategorii, ZAWODY } from '@ud/zawody';
 import Baza from '../../layouts/Baza.astro';
 import { graf, organizacja, serwis, strona, okruszki } from '../../lib/seo';
+import { Image } from 'astro:assets';
+import { obrazKategorii, opisKategorii } from '../../lib/obrazy';
 
 const sciezka = '/zawody/';
 const tytul = `Ubezpieczenie utraty dochodu według zawodu — ${ZAWODY.length} grup zawodowych | UtrataDochodu.pl`;
@@ -54,8 +56,15 @@ const jsonld = graf([
   <div class="max-w-[1200px] mx-auto px-5 py-16 flex flex-col gap-14">
     {KATEGORIE.map((k) => (
       <section aria-labelledby={`kat-${k.slug}`}>
-        <div class="flex flex-wrap items-baseline gap-4 pb-3 mb-6 border-b-2 border-akcent">
-          <h2 id={`kat-${k.slug}`} class="text-[clamp(1.4rem,3vw,1.9rem)] m-0">
+        <div class="flex flex-wrap items-center gap-5 pb-3 mb-6 border-b-2 border-akcent">
+          {obrazKategorii(k.obraz) && (
+            <a href={`/zawody/${k.slug}/`} class="shrink-0 overflow-hidden border border-linia">
+              <Image src={obrazKategorii(k.obraz)!} alt={opisKategorii(k.nazwa)}
+                     widths={[128, 256]} sizes="64px" loading="lazy"
+                     class="w-16 h-16 object-cover" />
+            </a>
+          )}
+          <h2 id={`kat-${k.slug}`} class="text-[clamp(1.4rem,3vw,1.9rem)] m-0 flex-1">
             <a href={`/zawody/${k.slug}/`} class="hover:text-akcent-ciemny">{k.nazwa}</a>
           </h2>
           <span class="text-sm text-tekst-trzeci">{k.liczba} zawodów</span>

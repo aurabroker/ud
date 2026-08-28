@@ -37,10 +37,18 @@ export function slugi() {
 /** Nazwy kategorii w kolejności malejącej liczby zawodów. */
 export function kategorie() {
   const licznik = new Map();
-  for (const z of ZAWODY) licznik.set(z.kategoria, (licznik.get(z.kategoria) ?? 0) + 1);
+  const obrazy = new Map();
+  for (const z of ZAWODY) {
+    licznik.set(z.kategoria, (licznik.get(z.kategoria) ?? 0) + 1);
+    // Wszystkie zawody z kategorii dzielą jedno zdjęcie; bierzemy pierwsze,
+    // żeby strona kategorii nie musiała po nie sięgać do listy zawodów.
+    if (!obrazy.has(z.kategoria)) obrazy.set(z.kategoria, z.obraz);
+  }
   return [...licznik.entries()]
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'pl'))
-    .map(([nazwa, liczba]) => ({ nazwa, liczba, slug: slugKategorii(nazwa) }));
+    .map(([nazwa, liczba]) => ({
+      nazwa, liczba, slug: slugKategorii(nazwa), obraz: obrazy.get(nazwa),
+    }));
 }
 
 /** Zawody z jednej kategorii, alfabetycznie. */

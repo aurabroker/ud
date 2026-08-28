@@ -87,3 +87,34 @@ test('żaden link wewnętrzny nie prowadzi w pustkę', () => {
 
   expect(martwe.size, `martwe linki wewnętrzne:\n${opis}`).toBe(0);
 });
+
+test('zdjęcia kategorii faktycznie się renderują', () => {
+  /**
+   * Czternaście zdjęć branż leżało w public/ i było używane wyłącznie jako
+   * obrazek Open Graph — na żadnej stronie serwisu nie renderował się ani
+   * jeden <img>. Ten test pilnuje, żeby nie wróciły do roli metadanych.
+   */
+  const sprawdz = [
+    ['index.html', 14],
+    ['zawody/index.html', 14],
+    ['zawody/medycyna/index.html', 1],
+    ['stomatolog/index.html', 1],
+  ];
+  for (const [plik, ile] of sprawdz) {
+    const html = readFileSync(join(DIST, plik), 'utf8');
+    const znalezione = (html.match(/<img\b/g) ?? []).length;
+    expect(znalezione, `${plik}: ${znalezione} zdjęć zamiast ${ile}`).toBeGreaterThanOrEqual(ile);
+  }
+});
+
+test('zdjęcia przechodzą przez optymalizację i mają wymiary', () => {
+  const html = readFileSync(join(DIST, 'stomatolog/index.html'), 'utf8');
+  const img = html.match(/<img[^>]*>/)?.[0] ?? '';
+
+  // Nieprzetworzone zdjęcie zostawiłoby ścieżkę /img/*.jpg zamiast /_astro/*.webp.
+  expect(img, 'zdjęcie nie przeszło przez sharpa').toMatch(/\/_astro\/[^"']+\.webp/);
+  // Brak wymiarów to skok układu w trakcie wczytywania.
+  expect(img, 'brak width').toMatch(/width="\d+"/);
+  expect(img, 'brak height').toMatch(/height="\d+"/);
+  expect(img, 'brak opisu alternatywnego').toMatch(/alt="[^"]+"/);
+});

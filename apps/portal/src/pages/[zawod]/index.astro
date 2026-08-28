@@ -17,6 +17,8 @@ import Kalkulator from '../../components/Kalkulator.svelte';
 import { symuluj, zl, ZUS_MIESIECZNIE } from '../../lib/symulacja';
 import { graf, organizacja, serwis, strona, okruszki, usluga, faq } from '../../lib/seo';
 import { FIRMA } from '../../lib/firma';
+import { Image, getImage } from 'astro:assets';
+import { obrazKategorii, opisKategorii } from '../../lib/obrazy';
 
 export function getStaticPaths() {
   return ZAWODY.map((z) => ({ params: { zawod: z.slug }, props: { slug: z.slug } }));
@@ -67,8 +69,18 @@ const jsonld = graf([
 ]);
 
 const powiazane = pokrewne(z.slug, 10);
+
+/**
+ * Zdjęcie kategorii. Open Graph potrzebuje JPEG-a o stałych wymiarach —
+ * miniatura w komunikatorze nie zna WebP w każdej wersji — więc dla niego
+ * generujemy osobny wariant.
+ */
+const zdjecie = obrazKategorii(z.obraz);
+const ogObraz = zdjecie
+  ? (await getImage({ src: zdjecie, width: 1200, height: 630, format: 'jpg' })).src
+  : undefined;
 ---
-<Baza tytul={tytul} opis={opis} sciezka={sciezka} jsonld={jsonld} obraz={`/img/${z.obraz}`}>
+<Baza tytul={tytul} opis={opis} sciezka={sciezka} jsonld={jsonld} obraz={ogObraz}>
 
   <nav aria-label="Okruszki" class="bg-tlo-jasne border-b border-linia-lekka">
     <ol class="max-w-[1200px] mx-auto px-5 py-3 flex flex-wrap gap-2 items-center text-[13px] text-tekst-trzeci list-none m-0">
@@ -85,7 +97,8 @@ const powiazane = pokrewne(z.slug, 10);
 
   <!-- ── Nagłówek zawodu ────────────────────────────────────────────────── -->
   <div class="bg-linear-102 from-tlo via-tlo-cyjan to-tlo-hero border-b border-linia">
-    <div class="max-w-[1200px] mx-auto px-5 py-16 lg:py-20">
+    <div class="max-w-[1200px] mx-auto px-5 py-16 lg:py-20 grid gap-12 lg:grid-cols-[minmax(0,1fr)_22rem] items-center">
+      <div>
       <p class="font-mono text-xs tracking-[0.16em] uppercase text-akcent-ciemny font-semibold m-0">
         {z.kategoria} · kontrakt B2B
       </p>
@@ -106,6 +119,16 @@ const powiazane = pokrewne(z.slug, 10);
           Zobacz, co nie jest objęte
         </a>
       </div>
+      </div>
+
+      {zdjecie && (
+        <div class="overflow-hidden border border-linia bg-tlo order-first lg:order-none">
+          <Image src={zdjecie} alt={opisKategorii(z.kategoria)}
+                 widths={[352, 704]} sizes="(max-width: 1024px) 100vw, 22rem"
+                 loading="eager" fetchpriority="high"
+                 class="w-full h-56 lg:h-72 object-cover" />
+        </div>
+      )}
     </div>
   </div>
 

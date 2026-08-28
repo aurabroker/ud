@@ -36,6 +36,8 @@ export interface Kategoria {
   nazwa: string;
   liczba: number;
   slug: string;
+  /** Nazwa pliku zdjęcia, wspólnego dla całej kategorii. */
+  obraz: string;
 }
 
 export const ZAWODY: Zawod[];
