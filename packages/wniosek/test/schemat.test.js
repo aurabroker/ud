@@ -8,6 +8,7 @@ import assert from 'node:assert/strict';
 import {
   pesekPoprawny, dataZPesel, wiekZPesel, telefonPoprawny, emailPoprawny,
   sprawdzKrok, ankietaRozszerzona, doWysylki, HEALTH_SURVEY_THRESHOLD,
+  AKTYWNOSCI_RYZYKOWNE, POLA_LOGICZNE,
 } from '../src/schemat.js';
 
 /** Dokleja poprawną cyfrę kontrolną do dziesięciu cyfr. */
@@ -147,4 +148,33 @@ test('klauzule poniżej progu nie idą do wysyłki', async () => {
   });
   assert.equal(powyzej.nwFuneral, 10_000, 'powyżej progu wybór zostaje');
   assert.equal(powyzej.nwHospitalDaily, 300);
+});
+
+test('lista aktywności pokrywa się z kolumnami risk_* w ud_clients', () => {
+  /**
+   * Kolumny odczytane z bazy 2026-08-28. Formularz pokazywał osiem z piętnastu,
+   * więc underwriter dostawał puste pole tam, gdzie klient mógł mieć „tak".
+   * Ten test nie sprawdza bazy na żywo — jest zapisem tego, co w niej jest,
+   * żeby rozjazd wyszedł przy zmianie schematu, a nie przy odmowie wypłaty.
+   */
+  const wBazie = [
+    'risk_aviation', 'risk_balloon', 'risk_caving', 'risk_climbing', 'risk_diving',
+    'risk_extreme_bike_boat', 'risk_gravity_bike', 'risk_horse', 'risk_horse_jumping',
+    'risk_hunting', 'risk_paragliding', 'risk_quad', 'risk_sailing', 'risk_skiing',
+    'risk_skydiving',
+  ];
+  const wFormularzu = AKTYWNOSCI_RYZYKOWNE.map((a) => a.klucz).sort();
+
+  assert.deepEqual(wFormularzu, [...wBazie].sort(),
+    'formularz i tabela ud_clients wymieniają inne aktywności');
+});
+
+test('każda aktywność ma etykietę i trafia do wysyłki', () => {
+  for (const a of AKTYWNOSCI_RYZYKOWNE) {
+    assert.ok(a.etykieta && a.etykieta.length > 3, `${a.klucz} bez etykiety`);
+    assert.ok(POLA_LOGICZNE.includes(a.klucz), `${a.klucz} nie trafia do doWysylki`);
+  }
+  const wyslane = doWysylki({ risk_skydiving: true, risk_quad: false });
+  assert.equal(wyslane.risk_skydiving, 'Yes');
+  assert.equal(wyslane.risk_quad, 'No');
 });

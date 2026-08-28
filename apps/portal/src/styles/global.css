@@ -22,6 +22,13 @@
   --color-linia-mocna: #BEDFF0;
   --color-linia-lekka: #E6F4FA;
 
+  /* Obramowanie pól formularza.
+     Osobny, wyraźnie ciemniejszy token, bo linia rozdzielająca sekcje i krawędź
+     pola do wypełnienia mają różne zadania. --color-linia daje na bieli 1,26:1,
+     a WCAG wymaga 3:1 dla granic elementów interfejsu — pole było widoczne
+     głównie z pamięci o tym, gdzie stoi. Ten kolor daje 3,09:1. */
+  --color-linia-pole:  #5E9AB9;
+
   /* Tekst — trzy poziomy ważności. */
   --color-tekst:       #0F2E40;
   --color-tekst-drugi: #4E6D7D;
@@ -69,6 +76,16 @@
 
   /* Akapity nie zostawiają jednego słowa w ostatniej linii. */
   p { text-wrap: pretty; }
+
+  /* Pola formularza dziedziczą krój po stronie.
+     Bez tego przeglądarka wstawia własny font systemowy — inny dla <input>,
+     inny dla <select>, jeszcze inny dla <textarea> — i kreator wygląda,
+     jakby każde okienko pochodziło z innego serwisu. */
+  input, select, textarea, button {
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+  }
 
   /* Widoczny focus jest wymogiem dostępności, a domyślny bywa wygaszany. */
   :focus-visible {

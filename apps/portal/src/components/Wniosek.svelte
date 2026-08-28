@@ -181,7 +181,7 @@
             <span class="block text-sm font-semibold mb-1.5">Imię i nazwisko</span>
             <input name="fullName" bind:value={dane.fullName} autocomplete="name"
                    aria-invalid={!!bledy.fullName} aria-describedby={bledy.fullName ? 'e-fullName' : undefined}
-                   class="w-full border border-linia p-3 bg-tlo focus:border-akcent">
+                   class="w-full border border-linia-pole p-3 bg-tlo focus:border-akcent">
             {#if bledy.fullName}<span id="e-fullName" class="block text-[13px] text-alarm mt-1.5">{bledy.fullName}</span>{/if}
           </label>
 
@@ -196,7 +196,7 @@
           <label class="block">
             <span class="block text-sm font-semibold mb-1.5">Forma zatrudnienia</span>
             <select name="employmentType" bind:value={dane.employmentType}
-                    class="w-full border border-linia p-3 bg-tlo focus:border-akcent">
+                    class="w-full border border-linia-pole p-3 bg-tlo focus:border-akcent">
               {#each FORMY_ZATRUDNIENIA as f}<option value={f.wartosc}>{f.etykieta}</option>{/each}
             </select>
             <span class="block text-[13px] text-tekst-trzeci mt-1.5">
@@ -209,7 +209,7 @@
             <input name="profession" bind:value={dane.profession} list="lista-zawodow" autocomplete="off"
                    placeholder="Wpisz lub wybierz z listy"
                    aria-invalid={!!bledy.profession} aria-describedby={bledy.profession ? 'e-profession' : undefined}
-                   class="w-full border border-linia p-3 bg-tlo focus:border-akcent">
+                   class="w-full border border-linia-pole p-3 bg-tlo focus:border-akcent">
             <datalist id="lista-zawodow">
               {#each zawody as z}<option value={z}></option>{/each}
             </datalist>
@@ -219,19 +219,19 @@
           <label class="block">
             <span class="block text-sm font-semibold mb-1.5">Waga (kg)</span>
             <input name="weight" type="number" min="30" max="300" bind:value={dane.weight}
-                   class="w-full border border-linia p-3 bg-tlo focus:border-akcent">
+                   class="w-full border border-linia-pole p-3 bg-tlo focus:border-akcent">
           </label>
 
           <label class="block">
             <span class="block text-sm font-semibold mb-1.5">Wzrost (cm)</span>
             <input name="height" type="number" min="100" max="250" bind:value={dane.height}
-                   class="w-full border border-linia p-3 bg-tlo focus:border-akcent">
+                   class="w-full border border-linia-pole p-3 bg-tlo focus:border-akcent">
           </label>
 
           <label class="block sm:col-span-2">
             <span class="block text-sm font-semibold mb-1.5">Forma opodatkowania</span>
             <select name="taxForm" bind:value={dane.taxForm}
-                    class="w-full border border-linia p-3 bg-tlo focus:border-akcent">
+                    class="w-full border border-linia-pole p-3 bg-tlo focus:border-akcent">
               <option value="">— wybierz —</option>
               {#each FORMY_OPODATKOWANIA as f}<option value={f.wartosc}>{f.etykieta}</option>{/each}
             </select>
@@ -266,22 +266,22 @@
             <label class="block">
               <span class="block text-sm font-semibold mb-1.5">Data rozpoczęcia działalności</span>
               <input name="emp_startDate" type="date" bind:value={dane.emp_startDate}
-                     class="w-full border border-linia p-3 bg-tlo focus:border-akcent">
+                     class="w-full border border-linia-pole p-3 bg-tlo focus:border-akcent">
             </label>
             <label class="block">
               <span class="block text-sm font-semibold mb-1.5">Branża</span>
               <input name="emp_industry" bind:value={dane.emp_industry}
-                     class="w-full border border-linia p-3 bg-tlo focus:border-akcent">
+                     class="w-full border border-linia-pole p-3 bg-tlo focus:border-akcent">
             </label>
             <label class="block">
               <span class="block text-sm font-semibold mb-1.5">Pracownicy — rok ubiegły</span>
               <input name="emp_count_2024" type="number" min="0" bind:value={dane.emp_count_2024}
-                     class="w-full border border-linia p-3 bg-tlo focus:border-akcent">
+                     class="w-full border border-linia-pole p-3 bg-tlo focus:border-akcent">
             </label>
             <label class="block">
               <span class="block text-sm font-semibold mb-1.5">Pracownicy — obecnie</span>
               <input name="emp_count_current" type="number" min="0" bind:value={dane.emp_count_current}
-                     class="w-full border border-linia p-3 bg-tlo focus:border-akcent">
+                     class="w-full border border-linia-pole p-3 bg-tlo focus:border-akcent">
             </label>
             <label class="block sm:col-span-2">
               <span class="block text-sm font-semibold mb-1.5">
@@ -319,7 +319,7 @@
                        class="w-5 h-5 mt-0.5 accent-akcent-ciemny shrink-0">
                 <span>
                   <span class="block font-bold text-[16.5px]">{r.etykieta}</span>
-                  <span class="block font-mono text-[11px] tracking-[0.1em] uppercase text-tekst-trzeci mt-1">{r.rodzaj}</span>
+                  <span class="block font-mono text-[12px] tracking-[0.08em] uppercase text-tekst-drugi font-semibold mt-1.5">{r.rodzaj}</span>
                 </span>
               </label>
 
@@ -360,7 +360,7 @@
               <label class="block">
                 <span class="block text-sm font-semibold mb-1.5">{k.etykieta}</span>
                 <select name={k.klucz} bind:value={dane[k.klucz]}
-                        class="w-full border border-linia p-3 bg-tlo focus:border-akcent">
+                        class="w-full border border-linia-pole p-3 bg-tlo focus:border-akcent">
                   {#each k.kwoty as kw}
                     <option value={kw}>
                       {kw === 0 ? 'Nie wybieram' : zl(kw) + (k.naDzien ? ' / dzień' : k.naTydzien ? ' / tydzień' : '')}
@@ -479,13 +479,13 @@
           <label class="block">
             <span class="block text-sm font-semibold mb-1.5">Adres e-mail</span>
             <input name="email" type="email" bind:value={dane.email} autocomplete="email"
-                   aria-invalid={!!bledy.email} class="w-full border border-linia p-3 bg-tlo focus:border-akcent">
+                   aria-invalid={!!bledy.email} class="w-full border border-linia-pole p-3 bg-tlo focus:border-akcent">
             {#if bledy.email}<span class="block text-[13px] text-alarm mt-1.5">{bledy.email}</span>{/if}
           </label>
           <label class="block">
             <span class="block text-sm font-semibold mb-1.5">Telefon</span>
             <input name="phone" type="tel" bind:value={dane.phone} autocomplete="tel"
-                   aria-invalid={!!bledy.phone} class="w-full border border-linia p-3 bg-tlo focus:border-akcent">
+                   aria-invalid={!!bledy.phone} class="w-full border border-linia-pole p-3 bg-tlo focus:border-akcent">
             {#if bledy.phone}<span class="block text-[13px] text-alarm mt-1.5">{bledy.phone}</span>{/if}
           </label>
         </div>

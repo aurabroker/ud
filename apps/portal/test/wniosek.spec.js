@@ -130,3 +130,39 @@ test('klauzule dodatkowe otwierają się dopiero powyżej 300 000 zł', async ({
   await page.fill('input[name="nwDeathSum"]', '100000');
   await expect(page.getByRole('heading', { name: 'Klauzule dodatkowe' })).toHaveCount(0);
 });
+
+test('kreator pokazuje wszystkie aktywności podwyższonego ryzyka', async ({ page }) => {
+  await page.fill('input[name="fullName"]', 'Jan Kowalski');
+  await page.fill('input[name="profession"]', 'Lekarz');
+  await page.fill('input[name="pesel"]', PESEL);
+  await page.getByRole('button', { name: 'Dalej' }).click();
+
+  await page.check('input[name="riskTempIncapacity"]');
+  await page.fill('input[name="tempIncapacitySum"]', '12000');
+  await page.getByRole('button', { name: 'Dalej' }).click();
+
+  /**
+   * Liczba pól ma odpowiadać liczbie kolumn risk_* w tabeli ud_clients.
+   * Stary formularz pokazywał osiem z piętnastu, więc underwriter dostawał
+   * puste pole tam, gdzie klient mógł mieć „tak".
+   */
+  const pola = page.locator('input[type="checkbox"][name^="risk_"]');
+  await expect(pola).toHaveCount(15);
+  await expect(page.getByText('Spadochroniarstwo')).toBeVisible();
+  await expect(page.getByText('Lotnictwo — pilot lub członek załogi')).toBeVisible();
+});
+
+test('pola formularza mają czytelne obramowanie i ten sam krój co strona', async ({ page }) => {
+  const pole = page.locator('input[name="fullName"]');
+  await pole.waitFor({ state: 'visible' });
+
+  const styl = await pole.evaluate((el) => {
+    const s = getComputedStyle(el);
+    return { obramowanie: s.borderTopColor, kroj: s.fontFamily };
+  });
+  const krojStrony = await page.evaluate(() => getComputedStyle(document.body).fontFamily);
+
+  // #5E9AB9 — token --color-linia-pole, 3,09:1 na bieli. Poprzedni dawał 1,26:1.
+  expect(styl.obramowanie).toBe('rgb(94, 154, 185)');
+  expect(styl.kroj, 'pole używa innego kroju niż reszta strony').toBe(krojStrony);
+});

@@ -102,21 +102,21 @@
       <label for="k-imie" class="font-semibold text-[14.5px]">Imię i nazwisko</label>
       <input id="k-imie" name="imie" type="text" autocomplete="name" required
              bind:value={imie}
-             class="border border-linia-mocna bg-tlo px-4 py-3 text-[16px] focus:border-akcent outline-none">
+             class="border border-linia-pole bg-tlo px-4 py-3 text-[16px] focus:border-akcent outline-none">
     </div>
 
     <div class="flex flex-col gap-1.5">
       <label for="k-email" class="font-semibold text-[14.5px]">Adres e-mail</label>
       <input id="k-email" name="email" type="email" autocomplete="email" inputmode="email" required
              bind:value={email}
-             class="border border-linia-mocna bg-tlo px-4 py-3 text-[16px] focus:border-akcent outline-none">
+             class="border border-linia-pole bg-tlo px-4 py-3 text-[16px] focus:border-akcent outline-none">
     </div>
 
     <div class="flex flex-col gap-1.5">
       <label for="k-telefon" class="font-semibold text-[14.5px]">Numer telefonu</label>
       <input id="k-telefon" name="telefon" type="tel" autocomplete="tel" inputmode="tel" required
              bind:value={telefon}
-             class="border border-linia-mocna bg-tlo px-4 py-3 text-[16px] focus:border-akcent outline-none">
+             class="border border-linia-pole bg-tlo px-4 py-3 text-[16px] focus:border-akcent outline-none">
     </div>
 
     <label class="flex gap-3 items-start text-[13.5px] leading-relaxed text-tekst-drugi cursor-pointer">

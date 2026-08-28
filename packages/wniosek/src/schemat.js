@@ -48,14 +48,35 @@ export const PYTANIA_MEDYCZNE = [
 ];
 
 /** Aktywności podwyższonego ryzyka. Wpływają na ocenę, nie wykluczają z automatu. */
+/**
+ * Aktywności podwyższonego ryzyka.
+ *
+ * Piętnaście pozycji, tyle samo, ile kolumn `risk_*` ma tabela ud_clients
+ * i tyle samo, ile mapuje funkcja form-submit. Stary formularz pokazywał
+ * osiem: łączył jazdę konną ze skokami przez przeszkody i kolarstwo
+ * grawitacyjne z raftingiem, a lotnictwa, balonu, spadochroniarstwa,
+ * paralotniarstwa i quadów nie miał wcale. Underwriter dostawał więc puste
+ * pole tam, gdzie klient mógł mieć „tak" — i to jest ten rodzaj braku,
+ * który wychodzi dopiero przy odmowie wypłaty.
+ *
+ * Kolejność od najczęstszych do najrzadszych, żeby dało się przejrzeć listę
+ * wzrokiem i nie klikać przez rzeczy, których nikt nie uprawia.
+ */
 export const AKTYWNOSCI_RYZYKOWNE = [
-  { klucz: 'risk_caving',            etykieta: 'Eksploracja jaskiń' },
   { klucz: 'risk_climbing',          etykieta: 'Wspinaczka wysokogórska' },
-  { klucz: 'risk_extreme_bike_boat', etykieta: 'Kolarstwo grawitacyjne / rafting' },
-  { klucz: 'risk_diving',            etykieta: 'Ryzykowne nurkowanie' },
-  { klucz: 'risk_sailing',           etykieta: 'Żeglarstwo (załoga)' },
-  { klucz: 'risk_horse',             etykieta: 'Jazda / skoki konne' },
+  { klucz: 'risk_caving',            etykieta: 'Eksploracja jaskiń' },
+  { klucz: 'risk_diving',            etykieta: 'Nurkowanie głębokie lub jaskiniowe' },
   { klucz: 'risk_skiing',            etykieta: 'Narciarstwo poza trasami' },
+  { klucz: 'risk_gravity_bike',      etykieta: 'Kolarstwo grawitacyjne (downhill, enduro)' },
+  { klucz: 'risk_extreme_bike_boat', etykieta: 'Rafting i kajakarstwo górskie' },
+  { klucz: 'risk_sailing',           etykieta: 'Żeglarstwo morskie (załoga)' },
+  { klucz: 'risk_horse',             etykieta: 'Jazda konna' },
+  { klucz: 'risk_horse_jumping',     etykieta: 'Skoki przez przeszkody konne' },
+  { klucz: 'risk_quad',              etykieta: 'Quady i sporty motorowe' },
+  { klucz: 'risk_skydiving',         etykieta: 'Spadochroniarstwo' },
+  { klucz: 'risk_paragliding',       etykieta: 'Paralotniarstwo i lotniarstwo' },
+  { klucz: 'risk_balloon',           etykieta: 'Loty balonem' },
+  { klucz: 'risk_aviation',          etykieta: 'Lotnictwo — pilot lub członek załogi' },
   { klucz: 'risk_hunting',           etykieta: 'Łowiectwo z użyciem broni' },
 ];
 

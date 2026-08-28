@@ -82,19 +82,19 @@
       <div class="flex flex-col gap-1.5">
         <label for="o-imie" class="font-semibold text-[14.5px]">Imię</label>
         <input id="o-imie" type="text" autocomplete="given-name" required bind:value={imie}
-               class="border border-linia-mocna bg-tlo px-4 py-3 text-[16px] focus:border-akcent outline-none">
+               class="border border-linia-pole bg-tlo px-4 py-3 text-[16px] focus:border-akcent outline-none">
       </div>
       <div class="flex flex-col gap-1.5">
         <label for="o-miasto" class="font-semibold text-[14.5px]">Miasto</label>
         <input id="o-miasto" type="text" autocomplete="address-level2" required bind:value={miasto}
-               class="border border-linia-mocna bg-tlo px-4 py-3 text-[16px] focus:border-akcent outline-none">
+               class="border border-linia-pole bg-tlo px-4 py-3 text-[16px] focus:border-akcent outline-none">
       </div>
     </div>
 
     <div class="flex flex-col gap-1.5">
       <label for="o-zawod" class="font-semibold text-[14.5px]">Zawód <span class="font-normal text-tekst-trzeci">(opcjonalnie)</span></label>
       <input id="o-zawod" type="text" bind:value={zawod}
-             class="border border-linia-mocna bg-tlo px-4 py-3 text-[16px] focus:border-akcent outline-none">
+             class="border border-linia-pole bg-tlo px-4 py-3 text-[16px] focus:border-akcent outline-none">
     </div>
 
     <fieldset class="border-0 p-0 m-0">
@@ -114,7 +114,7 @@
     <div class="flex flex-col gap-1.5">
       <label for="o-komentarz" class="font-semibold text-[14.5px]">Komentarz <span class="font-normal text-tekst-trzeci">(opcjonalnie)</span></label>
       <textarea id="o-komentarz" rows="4" maxlength="2000" bind:value={komentarz}
-                class="border border-linia-mocna bg-tlo px-4 py-3 text-[16px] focus:border-akcent outline-none resize-y"></textarea>
+                class="border border-linia-pole bg-tlo px-4 py-3 text-[16px] focus:border-akcent outline-none resize-y"></textarea>
     </div>
 
     {#if kluczTurnstile}

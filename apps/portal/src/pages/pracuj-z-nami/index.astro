@@ -37,7 +37,21 @@ const ARGUMENTY = [
       + 'prowadzimy sprawę do wystawienia polisy, Ty rozliczasz prowizję. Bez '
       + 'papierologii po Twojej stronie.',
   },
+  {
+    tytul: 'Autorski system porównywania ofert',
+    opis: 'Wniosek klienta trafia do naszego systemu, który zestawia warianty obu '
+      + 'ubezpieczycieli obok siebie: sumy, składki, okres wypłaty i wyłączenia. '
+      + 'Zamiast czytać dwa komplety OWU, widzisz jedną tabelę i wiesz, gdzie '
+      + 'przebiega różnica. Do klienta idzie gotowa oferta w PDF z Twoimi danymi, '
+      + 'a komplet dokumentów — OWU i karty produktu — dopina się do niej sam.',
+    obraz: '/img/system-ofert.png',
+    obrazOpis: 'Zestawienie wariantów ofert w panelu — sumy, składki i okres wypłaty obok siebie.',
+  },
 ];
+
+/** Zrzut z panelu pokazujemy tylko, gdy plik faktycznie leży w repozytorium. */
+import { existsSync } from 'node:fs';
+const maZrzut = (sciezka: string) => existsSync(new URL(`../../../public${sciezka}`, import.meta.url));
 
 const sciezkaOkruszkow = [
   { nazwa: 'Strona główna', url: '/' },
@@ -78,12 +92,24 @@ const jsonld = graf([
   <section class="max-w-[1200px] mx-auto px-5 py-16">
     <div class="grid gap-6 grid-cols-[repeat(auto-fit,minmax(19rem,1fr))]">
       {ARGUMENTY.map((a, i) => (
-        <article class="border border-linia bg-tlo p-7">
-          <span class="font-mono text-[1.7rem] leading-none text-akcent" aria-hidden="true">
-            {String(i + 1).padStart(2, '0')}
-          </span>
-          <h2 class="text-[19px] font-semibold mt-4 mb-3 leading-snug">{a.tytul}</h2>
-          <p class="text-[15.5px] leading-relaxed text-tekst-drugi m-0">{a.opis}</p>
+        <article class:list={['border border-linia bg-tlo flex flex-col',
+                              'obraz' in a && 'sm:col-span-2 lg:col-span-3']}>
+          <div class="p-7">
+            <span class="font-mono text-[1.7rem] leading-none text-akcent" aria-hidden="true">
+              {String(i + 1).padStart(2, '0')}
+            </span>
+            <h2 class="text-[19px] font-semibold mt-4 mb-3 leading-snug">{a.tytul}</h2>
+            <p class="text-[15.5px] leading-relaxed text-tekst-drugi m-0 max-w-[46em]">{a.opis}</p>
+          </div>
+          {'obraz' in a && a.obraz && maZrzut(a.obraz) && (
+            <figure class="m-0 border-t border-linia bg-tlo-jasne p-5 sm:p-7">
+              <img src={a.obraz} alt={a.obrazOpis} loading="lazy" decoding="async"
+                   class="w-full h-auto border border-linia">
+              <figcaption class="text-[13px] leading-relaxed text-tekst-trzeci mt-3">
+                {a.obrazOpis}
+              </figcaption>
+            </figure>
+          )}
         </article>
       ))}
     </div>
