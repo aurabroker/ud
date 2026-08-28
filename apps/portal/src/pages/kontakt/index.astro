@@ -3,14 +3,15 @@ import Baza from '../../layouts/Baza.astro';
 import SzybkiKontakt from '../../components/SzybkiKontakt.svelte';
 import { graf, organizacja, serwis, strona, okruszki } from '../../lib/seo';
 import { FIRMA } from '../../lib/firma';
+import { funkcja, TURNSTILE_KLUCZ } from '../../lib/uslugi';
 
 const sciezka = '/kontakt/';
 const tytul = 'Kontakt | UtrataDochodu.pl';
 const opis = `Zadzwoń pod ${FIRMA.telefonWyswietlany}, napisz na ${FIRMA.email} `
   + 'albo zostaw numer — oddzwonimy w ciągu jednego dnia roboczego.';
 
-const URL_FUNKCJI = `${import.meta.env.PUBLIC_SUPABASE_URL}/functions/v1/contact-submit`;
-const KLUCZ_TURNSTILE = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
+const URL_FUNKCJI = funkcja('contact-submit');
+const KLUCZ_TURNSTILE = TURNSTILE_KLUCZ;
 
 const sciezkaOkruszkow = [
   { nazwa: 'Strona główna', url: '/' },

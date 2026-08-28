@@ -5,7 +5,7 @@ import sitemap from '@astrojs/sitemap';
 import { EnumChangefreq } from 'sitemap';
 import tailwind from '@tailwindcss/vite';
 import { przekierowania } from '@ud/zawody';
-import { writeFileSync, appendFileSync, existsSync, readdirSync, lstatSync, realpathSync } from 'node:fs';
+import { writeFileSync, appendFileSync, existsSync, readdirSync, lstatSync, realpathSync, readFileSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 
 const SITE = 'https://utratadochodu.pl';
@@ -47,34 +47,42 @@ export default defineConfig({
       },
     },
     /**
-     * Brak klucza Turnstile nie może przejść przez wdrożenie po cichu.
+     * Mówi w logu builda, które ustawienia wzięliśmy z panelu, a które
+     * z wartości wbudowanych.
      *
-     * Klucz wchodzi do kodu stron w trakcie budowania. Gdy go zabraknie,
-     * widżet się nie renderuje, wniosek leci bez tokenu, a funkcja brzegowa
-     * — która swój sekret ma — odrzuca zgłoszenie. Formularz wygląda
-     * normalnie i nie działa. Dokładnie tak formularz kontaktowy stał
-     * martwy przez 74 dni.
-     *
-     * Na Cloudflare przerywamy build. Lokalnie tylko ostrzegamy, żeby dało
-     * się pracować bez kluczy.
+     * Wcześniej brak klucza Turnstile przerywał build. To było o jeden krok
+     * za daleko: te wartości nie są sekretami i mają sensowne wartości
+     * domyślne w lib/uslugi.ts, więc ich brak nie psuje już wysyłki.
+     * Zostaje sama informacja — żeby po zmianie klucza w panelu dało się
+     * sprawdzić w logu, czy build ją zobaczył.
      */
     {
-      name: 'ud:klucze',
+      name: 'ud:konfiguracja',
       hooks: {
         'astro:config:done': ({ logger }) => {
-          const brakujace = ['PUBLIC_TURNSTILE_SITE_KEY', 'PUBLIC_SUPABASE_URL']
-            .filter((k) => !process.env[k]);
-          if (brakujace.length === 0) return;
+          /**
+           * Astro bierze zmienne z DWÓCH źródeł: środowiska procesu i pliku
+           * .env. Sprawdzanie samego process.env dawało log twierdzący, że nic
+           * nie jest ustawione, podczas gdy .env podawał wartości — czyli
+           * dokładnie mylną podpowiedź przy szukaniu takiej usterki.
+           */
+          const zPliku = new Set();
+          try {
+            const plik = readFileSync(new URL('.env', import.meta.url), 'utf8');
+            for (const linia of plik.split('\n')) {
+              const nazwa = linia.match(/^\s*([A-Z0-9_]+)\s*=\s*\S/)?.[1];
+              if (nazwa) zPliku.add(nazwa);
+            }
+          } catch { /* brak .env to normalna sytuacja */ }
 
-          const opis = `brak zmiennych budowania: ${brakujace.join(', ')}`;
-          if (process.env.CF_PAGES) {
-            throw new Error(
-              `${opis}. Ustaw je w projekcie Cloudflare Pages ` +
-              '(Settings → Variables and Secrets) i zbuduj ponownie. ' +
-              'Bez klucza Turnstile formularze wyglądają na sprawne, ale ich zgłoszenia są odrzucane.',
-            );
-          }
-          logger.warn(`${opis} — formularze zbudują się bez ochrony przed botami`);
+          const ustawione = ['PUBLIC_SUPABASE_URL', 'PUBLIC_TURNSTILE_SITE_KEY',
+                             'PUBLIC_GA4_ID', 'PUBLIC_ADS_ID', 'PUBLIC_META_PIXEL_ID']
+            .filter((k) => process.env[k] || zPliku.has(k));
+          logger.info(
+            ustawione.length > 0
+              ? `ustawienia z konfiguracji: ${ustawione.join(', ')}`
+              : 'brak zmiennych PUBLIC_* — build użyje wartości wbudowanych z lib/uslugi.ts',
+          );
         },
       },
     },

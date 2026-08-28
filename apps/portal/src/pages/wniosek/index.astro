@@ -11,6 +11,7 @@ import Wniosek from '../../components/Wniosek.svelte';
 import { ZAWODY } from '@ud/zawody';
 import { graf, organizacja, serwis, strona, okruszki } from '../../lib/seo';
 import { FIRMA } from '../../lib/firma';
+import { funkcja, TURNSTILE_KLUCZ } from '../../lib/uslugi';
 
 const sciezka = '/wniosek/';
 const tytul = 'Wniosek o ubezpieczenie utraty dochodu | UtrataDochodu.pl';
@@ -36,8 +37,8 @@ const nazwyZawodow = ZAWODY.map((z) => z.nazwa).sort((a, b) => a.localeCompare(b
  * Klucz publiczny Turnstile z definicji trafia do przeglądarki — nie jest
  * sekretem; sekretem jest TURNSTILE_SECRET_KEY po stronie funkcji.
  */
-const URL_FUNKCJI = `${import.meta.env.PUBLIC_SUPABASE_URL}/functions/v1/form-submit`;
-const KLUCZ_TURNSTILE = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
+const URL_FUNKCJI = funkcja('form-submit');
+const KLUCZ_TURNSTILE = TURNSTILE_KLUCZ;
 ---
 <Baza tytul={tytul} opis={opis} sciezka={sciezka} jsonld={jsonld}>
   <nav aria-label="Okruszki" class="bg-tlo-jasne border-b border-linia-lekka">

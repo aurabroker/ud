@@ -11,14 +11,15 @@ import Baza from '../../layouts/Baza.astro';
 import Opinia from '../../components/Opinia.svelte';
 import { graf, organizacja, serwis, strona, okruszki } from '../../lib/seo';
 import dane from '../../dane/opinie.json';
+import { funkcja, TURNSTILE_KLUCZ } from '../../lib/uslugi';
 
 const sciezka = '/opinie/';
 const tytul = 'Opinie klientów | UtrataDochodu.pl';
 const opis = 'Co mówią osoby, które zawarły polisę przez UtrataDochodu.pl. '
   + 'Wszystkie opinie publikujemy po weryfikacji, bez selekcji ocen.';
 
-const URL_FUNKCJI = `${import.meta.env.PUBLIC_SUPABASE_URL}/functions/v1/review-submit`;
-const KLUCZ_TURNSTILE = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
+const URL_FUNKCJI = funkcja('review-submit');
+const KLUCZ_TURNSTILE = TURNSTILE_KLUCZ;
 
 const OPINIE = dane.opinie;
 const data = (iso: string) =>
