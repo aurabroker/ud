@@ -1,0 +1,39 @@
+# Monitor UtrataDochodu.pl — worker z cronem i własną bazą D1.
+#
+# Osobny worker, nie funkcja w projekcie Pages portalu. Powód jest jeden:
+# monitor ma działać także wtedy, gdy portal się nie zbuduje albo nie wdroży.
+# Wspólny pipeline oznaczałby, że nieudany deploy portalu zabiera ze sobą
+# narzędzie, którym mielibyśmy to zauważyć.
+
+name = "ud-monitor"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+
+# Co pięć minut. Krócej nie ma sensu: sondy kontraktowe uderzają w funkcje
+# brzegowe, a te są rozliczane za wywołanie.
+[triggers]
+crons = ["*/5 * * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "ud-monitor"
+database_id = "TU_WKLEJ_ID_BAZY"   # npx wrangler d1 create ud-monitor
+
+[vars]
+URL_PORTALU  = "https://utratadochodu.pl"
+URL_SUPABASE = "https://kukvgsjrmrqtzhkszzum.supabase.co"
+# Ile nieudanych pomiarów z rzędu to awaria. 2 przy cronie co 5 min oznacza,
+# że pojedyncze mrugnięcie sieci nikogo nie budzi, a realna awaria jest
+# zgłoszona po ~10 minutach.
+PROG_AWARII  = "2"
+# Po ilu godzinach bez zgłoszenia w godzinach pracy uznajemy to za podejrzane.
+GODZIN_CISZY = "8"
+
+# Sekrety — NIE tutaj. Ustaw przez `npx wrangler secret put <NAZWA>`:
+#
+#   KLUCZ_ANON              klucz anonimowy Supabase (sondy RLS)
+#   KLUCZ_SERWISOWY         service_role — wyłącznie do zliczania zgłoszeń
+#   ALERT_WEBHOOK           adres webhooka Slack / Discord / własny
+#   TOKEN_STATUSU           token do strony statusu
+#   URL_STATUSU             adres strony statusu wstawiany w treść alertu
+#   ID_DOKUMENTU_TESTOWEGO  id aktywnego OWU do sprawdzania pobierania
