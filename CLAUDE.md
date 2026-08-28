@@ -174,3 +174,28 @@ obecność banera — atrapa przechodzi każdy test oparty na DOM-ie.
 
 Do zamknięcia po stronie klienta: druga właściwość GA4 (`G-D9XHPWP5DE`) —
 inaczej historia ruchu zostaje rozbita na dwie niepełne właściwości.
+
+---
+
+## Serwis jest jasny — bez trybu ciemnego
+
+Decyzja klienta, 2026-08-28. Nie proponuj ponownie i nie dokładaj wariantu
+ciemnego „przy okazji".
+
+Paleta w `apps/portal/src/styles/global.css` to jeden zestaw tokenów bez
+odpowiedników dla `prefers-color-scheme: dark`. Ciemny bywa tylko tekst.
+Dodanie drugiego zestawu to nie jest zmiana kosmetyczna: wymaga ponownego
+sprawdzenia kontrastów wszystkich par kolor–tło, bo wartości policzone dla
+bieli nie przenoszą się na ciemne tło.
+
+Kontrasty, które już policzyliśmy dla tła białego:
+
+| Token | Na bieli | Wymóg WCAG |
+|---|---|---|
+| `--color-linia-pole` (krawędź pola) | 3,09:1 | 3:1 dla elementów interfejsu |
+| `--color-tekst-drugi` | 5,52:1 | 4,5:1 dla drobnego tekstu |
+| `--color-tekst-trzeci` | 2,65:1 | **za mało na tekst** — tylko do ozdobników |
+
+`--color-tekst-trzeci` nie nadaje się na treść, którą ktoś ma przeczytać.
+Etykiety typu „Jednorazowe świadczenie" trafiły tam przez pomyłkę i wróciły
+na `--color-tekst-drugi`.
