@@ -5,7 +5,7 @@
  * statystyki konwersji, gdy ktoś wejdzie na nią prosto z Google.
  */
 import Baza from '../../layouts/Baza.astro';
-import { FIRMA } from '../../lib/firma';
+import { FIRMA, UBEZPIECZYCIELE } from '../../lib/firma';
 import { TAGI } from '../../lib/analityka';
 
 const sciezka = '/podziekowanie/';
@@ -15,7 +15,7 @@ const opis = 'Twój wniosek dotarł. Skontaktujemy się w ciągu 24 godzin roboc
 const KROKI = [
   {
     tytul: 'Analiza wniosku',
-    opis: `Sprawdzamy dane pod kątem ofert ${FIRMA.ubezpieczyciele.join(' i ')} `
+    opis: `Sprawdzamy dane pod kątem ofert ${UBEZPIECZYCIELE.join(' i ')} `
       + 'i dobieramy wariant do Twojego zawodu.',
   },
   {

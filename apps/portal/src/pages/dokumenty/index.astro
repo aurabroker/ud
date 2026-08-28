@@ -25,10 +25,8 @@ const NAZWY_RODZAJU: Record<string, string> = {
   'warunki-szczegolne': 'Warunki szczególne',
 };
 
-const NAZWY_UBEZPIECZYCIELA: Record<string, string> = {
-  leadenhall: 'Leadenhall Insurance S.A.',
-  ceu: 'CEU',
-};
+/** Nazwy bierzemy z FIRMA — klucze odpowiadają kolumnie `insurer_type`. */
+const NAZWY_UBEZPIECZYCIELA: Record<string, string> = FIRMA.ubezpieczycieleWg;
 
 /** Grupujemy po ubezpieczycielu — tak, jak klient wybiera ofertę. */
 const grupy = [...new Set(dane.dokumenty.map((d) => d.ubezpieczyciel))].map((u) => ({

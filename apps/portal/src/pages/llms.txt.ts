@@ -16,7 +16,7 @@
 import type { APIRoute } from 'astro';
 import { ZAWODY, kategorie, wKategorii, slugKategorii, tresc } from '@ud/zawody';
 import { ARTYKULY } from '../lib/artykuly';
-import { FIRMA, SERWIS } from '../lib/firma';
+import { FIRMA, SERWIS, UBEZPIECZYCIELE } from '../lib/firma';
 import { ZUS_MIESIECZNIE, LIMIT, zl } from '../lib/symulacja';
 
 export const GET: APIRoute = () => {
@@ -50,7 +50,7 @@ export const GET: APIRoute = () => {
 Serwis prowadzi ${FIRMA.nazwaPelna} z siedzibą w Warszawie, agent ubezpieczeniowy
 wpisany do Rejestru Pośredników Ubezpieczeniowych KNF pod numerem ${FIRMA.rpu}
 (KRS ${FIRMA.krs}, REGON ${FIRMA.regon}). Partnerzy ubezpieczeniowi:
-${FIRMA.ubezpieczyciele.join(' oraz ')}.
+${UBEZPIECZYCIELE.join(' oraz ')}.
 
 ## Na czym polega produkt
 

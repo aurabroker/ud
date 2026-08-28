@@ -28,8 +28,22 @@ export const FIRMA = {
   telefonWyswietlany: '504 400 901',
   email: 'biuro@utratadochodu.com',
 
-  ubezpieczyciele: ['Leadenhall Insurance S.A.', 'CEU (Casualty & Enterprise Underwriters)'],
+  /**
+   * Ubezpieczyciele, w imieniu których działamy.
+   *
+   * Klucz odpowiada kolumnie `insurer_type` w ud_owu_library — dzięki temu
+   * strona dokumentów nie musi trzymać własnej mapy nazw. Nazwa prawna jest
+   * tu raz i tylko raz: wcześniej żyła w trzech miejscach i zdążyła się
+   * rozjechać.
+   */
+  ubezpieczycieleWg: {
+    leadenhall: 'Leadenhall Insurance S.A.',
+    ceu: 'CEU sp. z o.o.',
+  },
 } as const;
+
+/** Nazwy ubezpieczycieli do użycia w zdaniach: „Partnerzy: X oraz Y". */
+export const UBEZPIECZYCIELE = Object.values(FIRMA.ubezpieczycieleWg);
 
 export const SERWIS = {
   url: 'https://utratadochodu.pl',

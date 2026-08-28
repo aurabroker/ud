@@ -6,7 +6,7 @@
 import Baza from '../../layouts/Baza.astro';
 import SzybkiKontakt from '../../components/SzybkiKontakt.svelte';
 import { graf, organizacja, serwis, strona, okruszki } from '../../lib/seo';
-import { FIRMA } from '../../lib/firma';
+import { FIRMA, UBEZPIECZYCIELE } from '../../lib/firma';
 import { ZAWODY } from '@ud/zawody';
 
 const sciezka = '/pracuj-z-nami/';
@@ -26,7 +26,7 @@ const ARGUMENTY = [
   },
   {
     tytul: 'Zaplecze, którego nie zbudujesz sam',
-    opis: `Pracujemy z ${FIRMA.ubezpieczyciele.join(' i ')}. Ocena ryzyka zawodowego dla `
+    opis: `Pracujemy z ${UBEZPIECZYCIELE.join(' i ')}. Ocena ryzyka zawodowego dla `
       + `${ZAWODY.length} grup, warianty medyczne z klauzulami HIV/WZW i underwriting `
       + 'przy wysokich sumach — to jest wiedza, którą wnosimy do wspólnego klienta.',
   },

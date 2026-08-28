@@ -1,6 +1,6 @@
 ---
 import Tekst from '../../layouts/Tekst.astro';
-import { FIRMA, SERWIS } from '../../lib/firma';
+import { FIRMA, SERWIS, UBEZPIECZYCIELE } from '../../lib/firma';
 
 const sciezka = '/polityka-prywatnosci/';
 const tytul = 'Polityka prywatności | UtrataDochodu.pl';
@@ -53,7 +53,7 @@ const opis = 'Jakie dane zbieramy we wniosku ubezpieczeniowym, na jakiej podstaw
   <h2>4. Odbiorcy danych</h2>
   <p>Twoje dane mogą być przekazywane:</p>
   <ul>
-    <li>ubezpieczycielom i reasekuratorom: {FIRMA.ubezpieczyciele.join(', ')};</li>
+    <li>ubezpieczycielom i reasekuratorom: {UBEZPIECZYCIELE.join(', ')};</li>
     <li>dostawcom systemów informatycznych (hosting bazy danych na terenie UE oraz USA, na podstawie standardowych klauzul umownych);</li>
     <li>dostawcom narzędzi e-mail marketingu;</li>
     <li>podmiotom świadczącym obsługę prawną i księgową.</li>

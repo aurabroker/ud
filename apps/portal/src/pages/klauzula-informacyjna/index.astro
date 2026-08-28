@@ -5,7 +5,7 @@
  * odpowiadać dokładnie temu, co formularz faktycznie zbiera.
  */
 import Tekst from '../../layouts/Tekst.astro';
-import { FIRMA } from '../../lib/firma';
+import { FIRMA, UBEZPIECZYCIELE } from '../../lib/firma';
 import { KROKI } from '@ud/wniosek/schemat';
 
 const sciezka = '/klauzula-informacyjna/';
@@ -87,7 +87,7 @@ const opis = 'Obowiązek informacyjny z art. 13 RODO dla osób składających wn
 
   <h2>Komu przekazujemy dane</h2>
   <ul>
-    <li>Ubezpieczycielom, w imieniu których działamy: {FIRMA.ubezpieczyciele.join(' oraz ')}.</li>
+    <li>Ubezpieczycielom, w imieniu których działamy: {UBEZPIECZYCIELE.join(' oraz ')}.</li>
     <li>Dostawcom usług informatycznych utrzymującym bazę danych i pocztę.</li>
     <li>Podmiotom świadczącym nam obsługę prawną i księgową.</li>
     <li>Organom uprawnionym na podstawie przepisów prawa.</li>

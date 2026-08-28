@@ -58,8 +58,10 @@ export default defineConfig({
       hooks: {
         'astro:build:done': ({ dir, logger }) => {
           const katalog = resolve(dir.pathname);
+          /** @type {string[]} */
           const winne = [];
 
+          /** @param {string} sciezka */
           const obejdz = (sciezka) => {
             for (const wpis of readdirSync(sciezka, { withFileTypes: true })) {
               const pelna = join(sciezka, wpis.name);
