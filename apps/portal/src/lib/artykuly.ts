@@ -28,6 +28,8 @@ export interface Artykul {
   opublikowano: string;
   utworzono: string;
   obraz: string | null;
+  /** Wariant 1600 px; null, gdy zdjęcie jest jeszcze zdalne. */
+  obrazDuzy: string | null;
   tresc: string;
   minuty: number;
   naglowki: { poziom: 2 | 3; tekst: string; id: string }[];
@@ -133,6 +135,7 @@ function zbuduj(meta: (typeof dane.artykuly)[number]): Artykul {
   return {
     ...meta,
     tagi: meta.tagi ?? [],
+    obrazDuzy: ('obrazDuzy' in meta ? meta.obrazDuzy : null) as string | null,
     tresc: zKotwicami(tresc),
     // 200 słów na minutę to tempo czytania tekstu użytkowego po polsku.
     minuty: Math.max(1, Math.round(slow / 200)),

@@ -42,11 +42,18 @@ const jsonld = graf([
   },
 ]);
 
-/** Miniatura z transformacją po stronie Supabase — pełne zdjęcie potrafi mieć
- *  kilkaset kilobajtów, a w kafelku i tak zajmuje 800 px szerokości. */
-const miniatura = (url: string, szerokosc: number) =>
-  `${url.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/')}`
-  + `?width=${szerokosc}&quality=80&format=webp`;
+/**
+ * Zdjęcia są lokalne, zmniejszone w trakcie synchronizacji treści.
+ *
+ * Wcześniej szły przez transformację obrazów Supabase (`/render/image/`).
+ * To usługa płatna, z limitem na rozmiar wejścia, a oryginały w kubełku mają
+ * od 2 do 16 MB — przy nieudanej transformacji kafelek zostawał pusty,
+ * a przy udanej i tak zależał od cudzej usługi przy każdej odsłonie.
+ *
+ * Gdy zrzut nie ma jeszcze wersji lokalnej, zostaje adres oryginału: ciężki,
+ * ale widoczny. Puste miejsce jest gorsze niż wolne zdjęcie.
+ */
+const lokalne = (url: string) => url.startsWith('/');
 ---
 <Baza tytul={tytul} opis={opis} sciezka={sciezka} jsonld={jsonld}>
   <div class="bg-tlo-jasne border-b border-linia">
@@ -82,8 +89,10 @@ const miniatura = (url: string, szerokosc: number) =>
             <article class="border border-linia bg-tlo h-full flex flex-col hover:border-akcent">
               {a.obraz && (
                 <div class="h-48 overflow-hidden border-b border-linia bg-tlo-cyjan">
-                  <img src={miniatura(a.obraz, 800)}
-                       srcset={`${miniatura(a.obraz, 800)} 800w, ${miniatura(a.obraz, 1200)} 1200w`}
+                  <img src={a.obraz}
+                       srcset={lokalne(a.obraz) && a.obrazDuzy
+                         ? `${a.obraz} 800w, ${a.obrazDuzy} 1600w`
+                         : undefined}
                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                        alt="" width="800" height="192"
                        loading={i < 3 ? 'eager' : 'lazy'} decoding="async"

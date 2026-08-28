@@ -18,7 +18,8 @@
  * (RLS: is_ud_user()). Bez niego skrypt zsynchronizuje artykuły i opinie,
  * a dokumenty zostawi bez zmian.
  */
-import { writeFileSync, mkdirSync, readdirSync, rmSync } from 'node:fs';
+import { writeFileSync, mkdirSync, readdirSync, rmSync, existsSync } from 'node:fs';
+import sharp from 'sharp';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -44,6 +45,51 @@ async function pobierz(sciezka, klucz) {
 }
 
 const dzis = new Date().toISOString().slice(0, 10);
+
+/**
+ * Szerokości, w jakich zapisujemy zdjęcia artykułów.
+ *
+ * Oryginały w kubełku to pliki prosto z aparatu — od 2 do 16 MB. Poprzednia
+ * wersja liczyła na transformację obrazów po stronie Supabase (`/render/image/`),
+ * ale to usługa płatna, z własnymi limitami na rozmiar wejścia, i bez niej
+ * kafelek zostaje pusty. Zdjęcie w karcie bloga ma 800 px szerokości; nie ma
+ * powodu, żeby przechodziło przez sieć w rozdzielczości matrycy.
+ */
+const SZEROKOSCI = [800, 1600];
+
+/** Nazwa pliku wynikowego — stabilna, żeby build nie zmieniał się bez powodu. */
+const nazwaObrazka = (slug, rola, szerokosc) => `${slug}-${rola}-${szerokosc}.webp`;
+
+/**
+ * Pobiera zdjęcie, zmniejsza do zadanych szerokości i zapisuje jako WebP.
+ * Zwraca ścieżkę do najmniejszego wariantu albo null, gdy się nie udało —
+ * nieosiągalne zdjęcie nie może wywrócić całej synchronizacji.
+ */
+async function zapiszObrazek(url, slug, rola) {
+  const juzJest = SZEROKOSCI.every((w) => existsSync(join(KATALOG_OBRAZKOW, nazwaObrazka(slug, rola, w))));
+  if (juzJest) return `/blog/${nazwaObrazka(slug, rola, SZEROKOSCI[0])}`;
+
+  try {
+    const odp = await fetch(url);
+    if (!odp.ok) throw new Error(`${odp.status}`);
+    const zrodlo = Buffer.from(await odp.arrayBuffer());
+
+    for (const w of SZEROKOSCI) {
+      const dane = await sharp(zrodlo)
+        .rotate()                                   // honoruje orientację z EXIF
+        .resize({ width: w, withoutEnlargement: true })
+        .webp({ quality: 80 })
+        .toBuffer();
+      writeFileSync(join(KATALOG_OBRAZKOW, nazwaObrazka(slug, rola, w)), dane);
+    }
+    const kb = Math.round(zrodlo.byteLength / 1024);
+    console.log(`  obrazek ${slug}/${rola}: ${kb} kB → ${SZEROKOSCI.length} warianty WebP`);
+    return `/blog/${nazwaObrazka(slug, rola, SZEROKOSCI[0])}`;
+  } catch (e) {
+    console.warn(`  obrazek ${slug}/${rola}: nie pobrałem (${e.message}) — zostaje adres zdalny`);
+    return null;
+  }
+}
 const zapisz = (plik, dane) =>
   writeFileSync(join(KATALOG, plik), JSON.stringify(dane, null, 2) + '\n', 'utf8');
 
@@ -62,7 +108,8 @@ const zapisz = (plik, dane) =>
   mkdirSync(KATALOG_OBRAZKOW, { recursive: true });
 
   const zachowane = new Set();
-  const artykuly = surowe.map((a) => {
+  const artykuly = [];
+  for (const a of surowe) {
     zachowane.add(`${a.slug}.html`);
 
     /**
@@ -72,7 +119,7 @@ const zapisz = (plik, dane) =>
      * zbuforować osobno. Wyciągamy je do plików obok reszty statyków.
      */
     let numer = 0;
-    const tresc = (a.content ?? '').replace(
+    let tresc = (a.content ?? '').replace(
       /src="data:image\/([a-z]+);base64,([A-Za-z0-9+/=]+)"/g,
       (_, typ, dane) => {
         const nazwa = `${a.slug}-${++numer}.${typ === 'jpeg' ? 'jpg' : typ}`;
@@ -81,18 +128,35 @@ const zapisz = (plik, dane) =>
       },
     );
 
+    /**
+     * Zdjęcia w treści też wciągamy na dysk. Jedno z nich waży 16 MB —
+     * wysłanie go do przeglądarki w oryginale to kilkanaście sekund czekania
+     * na łączu komórkowym.
+     */
+    let wTresci = 0;
+    for (const adres of [...tresc.matchAll(/src="(https:\/\/[^"]*\/storage\/v1\/object\/public\/[^"]+)"/g)]) {
+      const lokalny = await zapiszObrazek(adres[1], a.slug, `tresc-${++wTresci}`);
+      if (lokalny) tresc = tresc.replaceAll(adres[1], lokalny);
+    }
+
     writeFileSync(join(KATALOG_ARTYKULOW, `${a.slug}.html`), tresc, 'utf8');
 
-    return {
+    const zdalny = a.preview_image_url || a.thumbnail_url || null;
+    const lokalny = zdalny ? await zapiszObrazek(zdalny, a.slug, 'okladka') : null;
+
+    artykuly.push({
       slug: a.slug,
       tytul: a.title,
       zajawka: a.excerpt ?? '',
       tagi: a.tags ?? [],
       opublikowano: a.published_at ?? a.created_at,
       utworzono: a.created_at,
-      obraz: a.preview_image_url || a.thumbnail_url || null,
-    };
-  });
+      // Ścieżka lokalna, gdy udało się pobrać. Adres zdalny zostaje jako
+      // awaryjny — lepiej ciężkie zdjęcie niż puste miejsce w kafelku.
+      obraz: lokalny ?? zdalny,
+      obrazDuzy: lokalny ? lokalny.replace(`-${SZEROKOSCI[0]}.webp`, `-${SZEROKOSCI[1]}.webp`) : null,
+    });
+  }
 
   // Artykuł wycofany z publikacji ma zniknąć także z repo, inaczej jego
   // strona zostanie w buildzie na zawsze.
