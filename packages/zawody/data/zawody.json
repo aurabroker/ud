@@ -3,7 +3,6 @@
     "slug": "administrator-sieci",
     "nazwa": "Administrator Sieci",
     "kategoria": "IT / Tech",
-    "obraz": "it.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B -- brak faktury = brak przychodu)",
     "ryzyka": [
@@ -36,7 +35,6 @@
     "slug": "adwokat-aplikant",
     "nazwa": "Aplikant Adwokacki",
     "kategoria": "Prawo",
-    "obraz": "prawo.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B/kancelaria) lub ~80% (etat, po 30 dniach)",
     "ryzyka": [
@@ -71,7 +69,6 @@
     "slug": "adwokat",
     "nazwa": "Adwokat",
     "kategoria": "Prawo",
-    "obraz": "prawo.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (kancelaria bez adwokata nie zarabia)",
     "ryzyka": [
@@ -104,7 +101,6 @@
     "slug": "agent-celny",
     "nazwa": "Agent Celny",
     "kategoria": "Transport",
-    "obraz": "biznes.jpg",
     "swiadczenieDzienne": 350,
     "bezUbezpieczenia": "0 zł (brak kursu = brak wypłaty)",
     "ryzyka": [
@@ -137,7 +133,6 @@
     "slug": "agent-nieruchomosci",
     "nazwa": "Agent Nieruchomości",
     "kategoria": "Finanse",
-    "obraz": "biznes.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -170,7 +165,6 @@
     "slug": "agent-ubezpieczeniowy",
     "nazwa": "Agent Ubezpieczeniowy",
     "kategoria": "Finanse",
-    "obraz": "biznes.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -203,7 +197,6 @@
     "slug": "ai-engineer",
     "nazwa": "AI Engineer",
     "kategoria": "IT / Tech",
-    "obraz": "it.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B -- brak faktury = brak przychodu)",
     "ryzyka": [
@@ -236,7 +229,6 @@
     "slug": "aktor",
     "nazwa": "Aktor",
     "kategoria": "Sztuka / Media",
-    "obraz": "sztuka.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "0 zł (brak zleceń = brak przychodu)",
     "ryzyka": [
@@ -269,7 +261,6 @@
     "slug": "aktuariusz",
     "nazwa": "Aktuariusz",
     "kategoria": "Finanse",
-    "obraz": "finanse.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -304,7 +295,6 @@
     "slug": "alergolog",
     "nazwa": "Alergolog",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -337,7 +327,6 @@
     "slug": "analityk-danych",
     "nazwa": "Analityk Danych",
     "kategoria": "IT / Tech",
-    "obraz": "it.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B -- brak faktury = brak przychodu)",
     "ryzyka": [
@@ -370,7 +359,6 @@
     "slug": "analityk-finansowy",
     "nazwa": "Analityk Finansowy",
     "kategoria": "Finanse",
-    "obraz": "finanse.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -403,7 +391,6 @@
     "slug": "analityk-kredytowy",
     "nazwa": "Analityk Kredytowy",
     "kategoria": "Finanse",
-    "obraz": "finanse.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -436,7 +423,6 @@
     "slug": "analityk-laboratoryjny",
     "nazwa": "Analityk Laboratoryjny",
     "kategoria": "Farmacja",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 300,
     "bezUbezpieczenia": "~80% podstawy (etat) lub 0 zł (B2B)",
     "ryzyka": [
@@ -471,7 +457,6 @@
     "slug": "analityk-naukowy",
     "nazwa": "Analityk Naukowy",
     "kategoria": "Edukacja",
-    "obraz": "it.jpg",
     "swiadczenieDzienne": 300,
     "bezUbezpieczenia": "~80% podstawy (etat) po 30 dniach; 0 zł (freelance)",
     "ryzyka": [
@@ -506,7 +491,6 @@
     "slug": "androlog",
     "nazwa": "Androlog",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -539,7 +523,6 @@
     "slug": "anestezjolog",
     "nazwa": "Anestezjolog",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -572,7 +555,6 @@
     "slug": "animator-3d",
     "nazwa": "Animator 3D",
     "kategoria": "Sztuka / Media",
-    "obraz": "sztuka.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "0 zł (brak zleceń = brak przychodu)",
     "ryzyka": [
@@ -607,7 +589,6 @@
     "slug": "animator",
     "nazwa": "Animator Kultury",
     "kategoria": "Edukacja",
-    "obraz": "sztuka.jpg",
     "swiadczenieDzienne": 300,
     "bezUbezpieczenia": "~80% podstawy (etat) po 30 dniach; 0 zł (freelance)",
     "ryzyka": [
@@ -642,7 +623,6 @@
     "slug": "architect-it",
     "nazwa": "Architekt IT",
     "kategoria": "IT / Tech",
-    "obraz": "it.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B -- brak faktury = brak przychodu)",
     "ryzyka": [
@@ -675,7 +655,6 @@
     "slug": "architekt-wnetrz",
     "nazwa": "Architekt Wnętrz",
     "kategoria": "Budownictwo",
-    "obraz": "sztuka.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "0 zł (brak zleceń = brak przychodu)",
     "ryzyka": [
@@ -708,7 +687,6 @@
     "slug": "architekt",
     "nazwa": "Architekt",
     "kategoria": "Budownictwo",
-    "obraz": "biznes.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "0 zł (brak zleceń = brak przychodu)",
     "ryzyka": [
@@ -741,7 +719,6 @@
     "slug": "audytor",
     "nazwa": "Audytor",
     "kategoria": "Finanse",
-    "obraz": "finanse.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -774,7 +751,6 @@
     "slug": "backend-developer",
     "nazwa": "Backend Developer",
     "kategoria": "IT / Tech",
-    "obraz": "it.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B -- brak faktury = brak przychodu)",
     "ryzyka": [
@@ -807,7 +783,6 @@
     "slug": "balneolog",
     "nazwa": "Balneolog",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -840,7 +815,6 @@
     "slug": "barista",
     "nazwa": "Barista",
     "kategoria": "Gastronomia",
-    "obraz": "gastronomia.jpg",
     "swiadczenieDzienne": 250,
     "bezUbezpieczenia": "0 zł (zmiana odwołana = brak wypłaty)",
     "ryzyka": [
@@ -873,7 +847,6 @@
     "slug": "bibliotekarz",
     "nazwa": "Bibliotekarz",
     "kategoria": "Edukacja",
-    "obraz": "edukacja.jpg",
     "swiadczenieDzienne": 300,
     "bezUbezpieczenia": "~80% podstawy (etat) po 30 dniach; 0 zł (freelance)",
     "ryzyka": [
@@ -906,7 +879,6 @@
     "slug": "blockchain-developer",
     "nazwa": "Blockchain Developer",
     "kategoria": "IT / Tech",
-    "obraz": "it.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B -- brak faktury = brak przychodu)",
     "ryzyka": [
@@ -939,7 +911,6 @@
     "slug": "brand-manager",
     "nazwa": "Brand Manager",
     "kategoria": "Biznes",
-    "obraz": "biznes.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B) lub ~80% (etat, po 30 dniach)",
     "ryzyka": [
@@ -974,7 +945,6 @@
     "slug": "business-analyst",
     "nazwa": "Business Analyst",
     "kategoria": "IT / Tech",
-    "obraz": "biznes.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B -- brak faktury = brak przychodu)",
     "ryzyka": [
@@ -1007,7 +977,6 @@
     "slug": "chirurg-szczekowy",
     "nazwa": "Chirurg Szczękowo-Twarzowy",
     "kategoria": "Stomatologia",
-    "obraz": "stomatologia.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "0 zł / mies. (gabinet bez stomatologa nie generuje przychodu)",
     "ryzyka": [
@@ -1042,7 +1011,6 @@
     "slug": "chirurg",
     "nazwa": "Chirurg",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -1075,7 +1043,6 @@
     "slug": "chirurgia-naczyn",
     "nazwa": "Chirurg Naczyniowy",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -1110,7 +1077,6 @@
     "slug": "chirurgia-onkologiczna",
     "nazwa": "Chirurg Onkologiczny",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -1145,7 +1111,6 @@
     "slug": "chirurgia-plastyczna",
     "nazwa": "Chirurg Plastyczny",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -1178,7 +1143,6 @@
     "slug": "choreograf",
     "nazwa": "Choreograf",
     "kategoria": "Sztuka / Media",
-    "obraz": "sztuka.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "0 zł (brak zleceń = brak przychodu)",
     "ryzyka": [
@@ -1211,7 +1175,6 @@
     "slug": "ciesla",
     "nazwa": "Cieśla",
     "kategoria": "Budownictwo",
-    "obraz": "biznes.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "0 zł (brak zleceń = brak przychodu)",
     "ryzyka": [
@@ -1246,7 +1209,6 @@
     "slug": "cloud-architect",
     "nazwa": "Cloud Architect",
     "kategoria": "IT / Tech",
-    "obraz": "it.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B -- brak faktury = brak przychodu)",
     "ryzyka": [
@@ -1279,7 +1241,6 @@
     "slug": "coach",
     "nazwa": "Coach",
     "kategoria": "Edukacja",
-    "obraz": "edukacja.jpg",
     "swiadczenieDzienne": 300,
     "bezUbezpieczenia": "~80% podstawy (etat) po 30 dniach; 0 zł (freelance)",
     "ryzyka": [
@@ -1312,7 +1273,6 @@
     "slug": "compliance-officer",
     "nazwa": "Compliance Officer",
     "kategoria": "Finanse",
-    "obraz": "biznes.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -1345,7 +1305,6 @@
     "slug": "controller",
     "nazwa": "Controller Finansowy",
     "kategoria": "Finanse",
-    "obraz": "finanse.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -1378,7 +1337,6 @@
     "slug": "copywriter",
     "nazwa": "Copywriter",
     "kategoria": "Biznes",
-    "obraz": "sztuka.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B) lub ~80% (etat, po 30 dniach)",
     "ryzyka": [
@@ -1411,7 +1369,6 @@
     "slug": "cukiernik",
     "nazwa": "Cukiernik",
     "kategoria": "Gastronomia",
-    "obraz": "gastronomia.jpg",
     "swiadczenieDzienne": 250,
     "bezUbezpieczenia": "0 zł (zmiana odwołana = brak wypłaty)",
     "ryzyka": [
@@ -1444,7 +1401,6 @@
     "slug": "cybersecurity",
     "nazwa": "Specjalista Cyberbezpieczeństwa",
     "kategoria": "IT / Tech",
-    "obraz": "it.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B -- brak faktury = brak przychodu)",
     "ryzyka": [
@@ -1477,7 +1433,6 @@
     "slug": "data-scientist",
     "nazwa": "Data Scientist",
     "kategoria": "IT / Tech",
-    "obraz": "it.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B -- brak faktury = brak przychodu)",
     "ryzyka": [
@@ -1510,7 +1465,6 @@
     "slug": "dekarz",
     "nazwa": "Dekarz",
     "kategoria": "Budownictwo",
-    "obraz": "biznes.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "0 zł (brak zleceń = brak przychodu)",
     "ryzyka": [
@@ -1543,7 +1497,6 @@
     "slug": "dermatolog",
     "nazwa": "Dermatolog",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -1576,7 +1529,6 @@
     "slug": "detektyw",
     "nazwa": "Detektyw",
     "kategoria": "Prawo",
-    "obraz": "bezpieczenstwo.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "~80% podstawy (etat) po 30 dniach; niewystarczające",
     "ryzyka": [
@@ -1609,7 +1561,6 @@
     "slug": "developer",
     "nazwa": "Developer",
     "kategoria": "IT / Tech",
-    "obraz": "it.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B -- brak faktury = brak przychodu)",
     "ryzyka": [
@@ -1642,7 +1593,6 @@
     "slug": "devops",
     "nazwa": "DevOps Engineer",
     "kategoria": "IT / Tech",
-    "obraz": "it.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B -- brak faktury = brak przychodu)",
     "ryzyka": [
@@ -1675,7 +1625,6 @@
     "slug": "diagnosta",
     "nazwa": "Diagnosta Laboratoryjny",
     "kategoria": "Farmacja",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 300,
     "bezUbezpieczenia": "~80% podstawy (etat) lub 0 zł (B2B)",
     "ryzyka": [
@@ -1708,7 +1657,6 @@
     "slug": "dietetyk",
     "nazwa": "Dietetyk",
     "kategoria": "Pielęgniarstwo",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 350,
     "bezUbezpieczenia": "~80% podstawy (etat) po 30 dniach; 0 zł na B2B",
     "ryzyka": [
@@ -1741,7 +1689,6 @@
     "slug": "doradca-finansowy",
     "nazwa": "Doradca Finansowy",
     "kategoria": "Finanse",
-    "obraz": "finanse.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -1774,7 +1721,6 @@
     "slug": "doradca-podatkowy",
     "nazwa": "Doradca Podatkowy",
     "kategoria": "Finanse",
-    "obraz": "finanse.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -1807,7 +1753,6 @@
     "slug": "doradca-zawodowy",
     "nazwa": "Doradca Zawodowy",
     "kategoria": "Edukacja",
-    "obraz": "edukacja.jpg",
     "swiadczenieDzienne": 300,
     "bezUbezpieczenia": "~80% podstawy (etat) po 30 dniach; 0 zł (freelance)",
     "ryzyka": [
@@ -1842,7 +1787,6 @@
     "slug": "dyrektor",
     "nazwa": "Dyrektor",
     "kategoria": "Biznes",
-    "obraz": "biznes.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B) lub ~80% (etat, po 30 dniach)",
     "ryzyka": [
@@ -1875,7 +1819,6 @@
     "slug": "dyspozytor",
     "nazwa": "Dyspozytor",
     "kategoria": "Transport",
-    "obraz": "transport.jpg",
     "swiadczenieDzienne": 350,
     "bezUbezpieczenia": "0 zł (brak kursu = brak wypłaty)",
     "ryzyka": [
@@ -1908,7 +1851,6 @@
     "slug": "dziennikarz",
     "nazwa": "Dziennikarz",
     "kategoria": "Sztuka / Media",
-    "obraz": "sztuka.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "0 zł (brak zleceń = brak przychodu)",
     "ryzyka": [
@@ -1941,7 +1883,6 @@
     "slug": "ekonomista",
     "nazwa": "Ekonomista",
     "kategoria": "Finanse",
-    "obraz": "finanse.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -1974,7 +1915,6 @@
     "slug": "elektryk",
     "nazwa": "Elektryk",
     "kategoria": "Budownictwo",
-    "obraz": "biznes.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "0 zł (brak zleceń = brak przychodu)",
     "ryzyka": [
@@ -2007,7 +1947,6 @@
     "slug": "endodontolog",
     "nazwa": "Endodontolog",
     "kategoria": "Stomatologia",
-    "obraz": "stomatologia.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "0 zł / mies. (gabinet bez stomatologa nie generuje przychodu)",
     "ryzyka": [
@@ -2040,7 +1979,6 @@
     "slug": "endokrynolog",
     "nazwa": "Endokrynolog",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -2073,7 +2011,6 @@
     "slug": "epidemiolog",
     "nazwa": "Epidemiolog",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -2106,7 +2043,6 @@
     "slug": "esteta",
     "nazwa": "Esteta Medyczny",
     "kategoria": "Beauty / Uroda",
-    "obraz": "beauty.jpg",
     "swiadczenieDzienne": 300,
     "bezUbezpieczenia": "0 zł (brak wizyt = brak przychodu)",
     "ryzyka": [
@@ -2141,7 +2077,6 @@
     "slug": "event-manager",
     "nazwa": "Event Manager",
     "kategoria": "Biznes",
-    "obraz": "biznes.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B) lub ~80% (etat, po 30 dniach)",
     "ryzyka": [
@@ -2174,7 +2109,6 @@
     "slug": "farmaceuta-aptekarz",
     "nazwa": "Aptekarz",
     "kategoria": "Farmacja",
-    "obraz": "farmacja.jpg",
     "swiadczenieDzienne": 300,
     "bezUbezpieczenia": "~80% podstawy (etat) lub 0 zł (B2B)",
     "ryzyka": [
@@ -2207,7 +2141,6 @@
     "slug": "farmaceuta",
     "nazwa": "Farmaceuta",
     "kategoria": "Farmacja",
-    "obraz": "farmacja.jpg",
     "swiadczenieDzienne": 300,
     "bezUbezpieczenia": "~80% podstawy (etat) lub 0 zł (B2B)",
     "ryzyka": [
@@ -2240,7 +2173,6 @@
     "slug": "fizjoterapeuta",
     "nazwa": "Fizjoterapeuta",
     "kategoria": "Pielęgniarstwo",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 350,
     "bezUbezpieczenia": "~80% podstawy (etat) po 30 dniach; 0 zł na B2B",
     "ryzyka": [
@@ -2273,7 +2205,6 @@
     "slug": "foniatra",
     "nazwa": "Foniatra",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -2306,7 +2237,6 @@
     "slug": "fotograf",
     "nazwa": "Fotograf",
     "kategoria": "Sztuka / Media",
-    "obraz": "sztuka.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "0 zł (brak zleceń = brak przychodu)",
     "ryzyka": [
@@ -2339,7 +2269,6 @@
     "slug": "frontend-developer",
     "nazwa": "Frontend Developer",
     "kategoria": "IT / Tech",
-    "obraz": "it.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B -- brak faktury = brak przychodu)",
     "ryzyka": [
@@ -2372,7 +2301,6 @@
     "slug": "fryzjer",
     "nazwa": "Fryzjer",
     "kategoria": "Beauty / Uroda",
-    "obraz": "beauty.jpg",
     "swiadczenieDzienne": 300,
     "bezUbezpieczenia": "0 zł (salon bez fryzjera nie zarabia)",
     "ryzyka": [
@@ -2405,7 +2333,6 @@
     "slug": "fullstack-developer",
     "nazwa": "Fullstack Developer",
     "kategoria": "IT / Tech",
-    "obraz": "it.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B -- brak faktury = brak przychodu)",
     "ryzyka": [
@@ -2438,7 +2365,6 @@
     "slug": "game-developer",
     "nazwa": "Game Developer",
     "kategoria": "IT / Tech",
-    "obraz": "it.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B -- brak faktury = brak przychodu)",
     "ryzyka": [
@@ -2471,7 +2397,6 @@
     "slug": "gastroenterolog",
     "nazwa": "Gastroenterolog",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -2504,7 +2429,6 @@
     "slug": "geodeta",
     "nazwa": "Geodeta",
     "kategoria": "Budownictwo",
-    "obraz": "biznes.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "0 zł (brak zleceń = brak przychodu)",
     "ryzyka": [
@@ -2537,7 +2461,6 @@
     "slug": "geriatria",
     "nazwa": "Geriatra",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -2570,7 +2493,6 @@
     "slug": "ginekolog",
     "nazwa": "Ginekolog",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -2603,7 +2525,6 @@
     "slug": "glazurnik",
     "nazwa": "Glazurnik",
     "kategoria": "Budownictwo",
-    "obraz": "biznes.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "0 zł (brak zleceń = brak przychodu)",
     "ryzyka": [
@@ -2638,7 +2559,6 @@
     "slug": "grafik",
     "nazwa": "Grafik",
     "kategoria": "Sztuka / Media",
-    "obraz": "sztuka.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "0 zł (brak zleceń = brak przychodu)",
     "ryzyka": [
@@ -2671,7 +2591,6 @@
     "slug": "handlowiec",
     "nazwa": "Handlowiec",
     "kategoria": "Biznes",
-    "obraz": "biznes.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B) lub ~80% (etat, po 30 dniach)",
     "ryzyka": [
@@ -2704,7 +2623,6 @@
     "slug": "hematolog",
     "nazwa": "Hematolog",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -2737,7 +2655,6 @@
     "slug": "higienistka-stomatologiczna",
     "nazwa": "Higienistka Stomatologiczna",
     "kategoria": "Pielęgniarstwo",
-    "obraz": "stomatologia.jpg",
     "swiadczenieDzienne": 350,
     "bezUbezpieczenia": "~80% podstawy (etat) po 30 dniach; 0 zł na B2B",
     "ryzyka": [
@@ -2770,7 +2687,6 @@
     "slug": "hr-specialist",
     "nazwa": "Specjalista HR",
     "kategoria": "Biznes",
-    "obraz": "biznes.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B) lub ~80% (etat, po 30 dniach)",
     "ryzyka": [
@@ -2803,7 +2719,6 @@
     "slug": "hydraulik",
     "nazwa": "Hydraulik",
     "kategoria": "Budownictwo",
-    "obraz": "biznes.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "0 zł (brak zleceń = brak przychodu)",
     "ryzyka": [
@@ -2838,7 +2753,6 @@
     "slug": "ilustrator",
     "nazwa": "Ilustrator",
     "kategoria": "Sztuka / Media",
-    "obraz": "sztuka.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "0 zł (brak zleceń = brak przychodu)",
     "ryzyka": [
@@ -2871,7 +2785,6 @@
     "slug": "immunolog",
     "nazwa": "Immunolog",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -2904,7 +2817,6 @@
     "slug": "infectolog",
     "nazwa": "Specjalista Chorób Zakaźnych",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -2937,7 +2849,6 @@
     "slug": "inspektor-nadzoru",
     "nazwa": "Inspektor Nadzoru Budowlanego",
     "kategoria": "Budownictwo",
-    "obraz": "biznes.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "0 zł (brak zleceń = brak przychodu)",
     "ryzyka": [
@@ -2970,7 +2881,6 @@
     "slug": "instalator",
     "nazwa": "Instalator",
     "kategoria": "Budownictwo",
-    "obraz": "biznes.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "0 zł (brak zleceń = brak przychodu)",
     "ryzyka": [
@@ -3003,7 +2913,6 @@
     "slug": "instruktor-jazdy",
     "nazwa": "Instruktor Jazdy",
     "kategoria": "Edukacja",
-    "obraz": "transport.jpg",
     "swiadczenieDzienne": 300,
     "bezUbezpieczenia": "~80% podstawy (etat) po 30 dniach; 0 zł (freelance)",
     "ryzyka": [
@@ -3036,7 +2945,6 @@
     "slug": "internista",
     "nazwa": "Internista",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -3069,7 +2977,6 @@
     "slug": "inzynier-budowlany",
     "nazwa": "Inżynier Budowlany",
     "kategoria": "Budownictwo",
-    "obraz": "biznes.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "0 zł (brak zleceń = brak przychodu)",
     "ryzyka": [
@@ -3102,7 +3009,6 @@
     "slug": "kapitan-statku",
     "nazwa": "Kapitan Statku",
     "kategoria": "Transport",
-    "obraz": "transport.jpg",
     "swiadczenieDzienne": 350,
     "bezUbezpieczenia": "0 zł (brak kursu = brak wypłaty)",
     "ryzyka": [
@@ -3137,7 +3043,6 @@
     "slug": "kardiochirurg",
     "nazwa": "Kardiochirurg",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -3170,7 +3075,6 @@
     "slug": "kardiolog",
     "nazwa": "Kardiolog",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -3203,7 +3107,6 @@
     "slug": "kelner",
     "nazwa": "Kelner",
     "kategoria": "Gastronomia",
-    "obraz": "gastronomia.jpg",
     "swiadczenieDzienne": 250,
     "bezUbezpieczenia": "0 zł (zmiana odwołana = brak wypłaty)",
     "ryzyka": [
@@ -3238,7 +3141,6 @@
     "slug": "key-account-manager",
     "nazwa": "Key Account Manager",
     "kategoria": "Biznes",
-    "obraz": "biznes.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B) lub ~80% (etat, po 30 dniach)",
     "ryzyka": [
@@ -3271,7 +3173,6 @@
     "slug": "kierowca-zawodowy",
     "nazwa": "Kierowca Zawodowy",
     "kategoria": "Transport",
-    "obraz": "transport.jpg",
     "swiadczenieDzienne": 350,
     "bezUbezpieczenia": "0 zł (brak kursu = brak wypłaty)",
     "ryzyka": [
@@ -3304,7 +3205,6 @@
     "slug": "kierownik-budowy",
     "nazwa": "Kierownik Budowy",
     "kategoria": "Budownictwo",
-    "obraz": "biznes.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "0 zł (brak zleceń = brak przychodu)",
     "ryzyka": [
@@ -3339,7 +3239,6 @@
     "slug": "komornik",
     "nazwa": "Komornik",
     "kategoria": "Prawo",
-    "obraz": "prawo.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B/kancelaria) lub ~80% (etat, po 30 dniach)",
     "ryzyka": [
@@ -3372,7 +3271,6 @@
     "slug": "konsultant",
     "nazwa": "Konsultant",
     "kategoria": "Biznes",
-    "obraz": "biznes.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B) lub ~80% (etat, po 30 dniach)",
     "ryzyka": [
@@ -3405,7 +3303,6 @@
     "slug": "kosmetolog",
     "nazwa": "Kosmetolog",
     "kategoria": "Beauty / Uroda",
-    "obraz": "beauty.jpg",
     "swiadczenieDzienne": 300,
     "bezUbezpieczenia": "0 zł (brak wizyt = brak przychodu)",
     "ryzyka": [
@@ -3438,7 +3335,6 @@
     "slug": "kosmetyczka",
     "nazwa": "Kosmetyczka",
     "kategoria": "Beauty / Uroda",
-    "obraz": "beauty.jpg",
     "swiadczenieDzienne": 300,
     "bezUbezpieczenia": "0 zł (brak wizyt = brak przychodu)",
     "ryzyka": [
@@ -3471,7 +3367,6 @@
     "slug": "kosztorysant",
     "nazwa": "Kosztorysant Budowlany",
     "kategoria": "Budownictwo",
-    "obraz": "biznes.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "0 zł (brak zleceń = brak przychodu)",
     "ryzyka": [
@@ -3504,7 +3399,6 @@
     "slug": "kryminolog",
     "nazwa": "Kryminolog",
     "kategoria": "Prawo",
-    "obraz": "bezpieczenstwo.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "~80% podstawy (etat) po 30 dniach; niewystarczające",
     "ryzyka": [
@@ -3537,7 +3431,6 @@
     "slug": "ksiegowy",
     "nazwa": "Księgowy",
     "kategoria": "Finanse",
-    "obraz": "finanse.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -3570,7 +3463,6 @@
     "slug": "kucharz",
     "nazwa": "Kucharz",
     "kategoria": "Gastronomia",
-    "obraz": "gastronomia.jpg",
     "swiadczenieDzienne": 250,
     "bezUbezpieczenia": "0 zł (zmiana odwołana = brak wypłaty)",
     "ryzyka": [
@@ -3603,7 +3495,6 @@
     "slug": "kurier",
     "nazwa": "Kurier",
     "kategoria": "Transport",
-    "obraz": "transport.jpg",
     "swiadczenieDzienne": 350,
     "bezUbezpieczenia": "0 zł (brak kursu = brak wypłaty)",
     "ryzyka": [
@@ -3636,7 +3527,6 @@
     "slug": "lekarz",
     "nazwa": "Lekarz",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł (kontrakt B2B -- brak dyżurów = brak przychodu)",
     "ryzyka": [
@@ -3669,7 +3559,6 @@
     "slug": "lektor-radiowy",
     "nazwa": "Lektor Radiowy",
     "kategoria": "Sztuka / Media",
-    "obraz": "sztuka.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "0 zł (brak zleceń = brak przychodu)",
     "ryzyka": [
@@ -3702,7 +3591,6 @@
     "slug": "lektor",
     "nazwa": "Lektor Języków",
     "kategoria": "Edukacja",
-    "obraz": "edukacja.jpg",
     "swiadczenieDzienne": 300,
     "bezUbezpieczenia": "~80% podstawy (etat) po 30 dniach; 0 zł (freelance)",
     "ryzyka": [
@@ -3735,7 +3623,6 @@
     "slug": "logistyk",
     "nazwa": "Logistyk",
     "kategoria": "Transport",
-    "obraz": "biznes.jpg",
     "swiadczenieDzienne": 350,
     "bezUbezpieczenia": "0 zł (brak kursu = brak wypłaty)",
     "ryzyka": [
@@ -3768,7 +3655,6 @@
     "slug": "logopeda",
     "nazwa": "Logopeda",
     "kategoria": "Pielęgniarstwo",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 350,
     "bezUbezpieczenia": "~80% podstawy (etat) po 30 dniach; 0 zł na B2B",
     "ryzyka": [
@@ -3801,7 +3687,6 @@
     "slug": "makler",
     "nazwa": "Makler Giełdowy",
     "kategoria": "Finanse",
-    "obraz": "finanse.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -3834,7 +3719,6 @@
     "slug": "manager",
     "nazwa": "Manager",
     "kategoria": "Biznes",
-    "obraz": "biznes.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B) lub ~80% (etat, po 30 dniach)",
     "ryzyka": [
@@ -3867,7 +3751,6 @@
     "slug": "marketing-specialist",
     "nazwa": "Specjalista ds. Marketingu",
     "kategoria": "Biznes",
-    "obraz": "biznes.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B) lub ~80% (etat, po 30 dniach)",
     "ryzyka": [
@@ -3900,7 +3783,6 @@
     "slug": "masazysta",
     "nazwa": "Masażysta",
     "kategoria": "Beauty / Uroda",
-    "obraz": "beauty.jpg",
     "swiadczenieDzienne": 300,
     "bezUbezpieczenia": "0 zł (brak wizyt = brak przychodu)",
     "ryzyka": [
@@ -3933,7 +3815,6 @@
     "slug": "maszynista",
     "nazwa": "Maszynista",
     "kategoria": "Transport",
-    "obraz": "transport.jpg",
     "swiadczenieDzienne": 350,
     "bezUbezpieczenia": "0 zł (brak kursu = brak wypłaty)",
     "ryzyka": [
@@ -3968,7 +3849,6 @@
     "slug": "mechanik",
     "nazwa": "Mechanik",
     "kategoria": "Budownictwo",
-    "obraz": "transport.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "0 zł (brak zleceń = brak przychodu)",
     "ryzyka": [
@@ -4001,7 +3881,6 @@
     "slug": "mediator",
     "nazwa": "Mediator",
     "kategoria": "Prawo",
-    "obraz": "prawo.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B/kancelaria) lub ~80% (etat, po 30 dniach)",
     "ryzyka": [
@@ -4034,7 +3913,6 @@
     "slug": "medycyna-hiperbaryczna",
     "nazwa": "Lekarz Medycyny Hiperbarycznej",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -4069,7 +3947,6 @@
     "slug": "medycyna-pracy",
     "nazwa": "Lekarz Medycyny Pracy",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -4104,7 +3981,6 @@
     "slug": "medycyna-ratunkowa",
     "nazwa": "Lekarz Medycyny Ratunkowej",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -4137,7 +4013,6 @@
     "slug": "medycyna-rodzinna",
     "nazwa": "Lekarz Medycyny Rodzinnej",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -4172,7 +4047,6 @@
     "slug": "medycyna-sadowa",
     "nazwa": "Lekarz Medycyny Sądowej",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -4207,7 +4081,6 @@
     "slug": "medycyna-sportowa",
     "nazwa": "Lekarz Medycyny Sportowej",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -4240,7 +4113,6 @@
     "slug": "medycyna-tropikalna",
     "nazwa": "Lekarz Medycyny Tropikalnej",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -4273,7 +4145,6 @@
     "slug": "menedzer-restauracji",
     "nazwa": "Menedżer Restauracji",
     "kategoria": "Gastronomia",
-    "obraz": "gastronomia.jpg",
     "swiadczenieDzienne": 250,
     "bezUbezpieczenia": "0 zł (zmiana odwołana = brak wypłaty)",
     "ryzyka": [
@@ -4306,7 +4177,6 @@
     "slug": "ml-engineer",
     "nazwa": "Machine Learning Engineer",
     "kategoria": "IT / Tech",
-    "obraz": "it.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B -- brak faktury = brak przychodu)",
     "ryzyka": [
@@ -4339,7 +4209,6 @@
     "slug": "mobile-developer",
     "nazwa": "Mobile Developer",
     "kategoria": "IT / Tech",
-    "obraz": "it.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B -- brak faktury = brak przychodu)",
     "ryzyka": [
@@ -4372,7 +4241,6 @@
     "slug": "montazysta",
     "nazwa": "Montażysta",
     "kategoria": "Sztuka / Media",
-    "obraz": "sztuka.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "0 zł (brak zleceń = brak przychodu)",
     "ryzyka": [
@@ -4405,7 +4273,6 @@
     "slug": "murarz",
     "nazwa": "Murarz",
     "kategoria": "Budownictwo",
-    "obraz": "biznes.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "0 zł (brak zleceń = brak przychodu)",
     "ryzyka": [
@@ -4440,7 +4307,6 @@
     "slug": "muzyk",
     "nazwa": "Muzyk",
     "kategoria": "Sztuka / Media",
-    "obraz": "sztuka.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "0 zł (brak zleceń = brak przychodu)",
     "ryzyka": [
@@ -4473,7 +4339,6 @@
     "slug": "nail-artist",
     "nazwa": "Nail Artist",
     "kategoria": "Beauty / Uroda",
-    "obraz": "beauty.jpg",
     "swiadczenieDzienne": 300,
     "bezUbezpieczenia": "0 zł (brak wizyt = brak przychodu)",
     "ryzyka": [
@@ -4506,7 +4371,6 @@
     "slug": "nauczyciel",
     "nazwa": "Nauczyciel",
     "kategoria": "Edukacja",
-    "obraz": "edukacja.jpg",
     "swiadczenieDzienne": 300,
     "bezUbezpieczenia": "~80% podstawy (etat) po 30 dniach; 0 zł (freelance)",
     "ryzyka": [
@@ -4539,7 +4403,6 @@
     "slug": "naukowiec",
     "nazwa": "Naukowiec",
     "kategoria": "Edukacja",
-    "obraz": "edukacja.jpg",
     "swiadczenieDzienne": 300,
     "bezUbezpieczenia": "~80% podstawy (etat) po 30 dniach; 0 zł (freelance)",
     "ryzyka": [
@@ -4574,7 +4437,6 @@
     "slug": "nefrolog",
     "nazwa": "Nefrolog",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -4607,7 +4469,6 @@
     "slug": "neonatolog",
     "nazwa": "Neonatolog",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -4640,7 +4501,6 @@
     "slug": "neurochirurg",
     "nazwa": "Neurochirurg",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -4673,7 +4533,6 @@
     "slug": "neurolog",
     "nazwa": "Neurolog",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -4706,7 +4565,6 @@
     "slug": "notariusz-aplikant",
     "nazwa": "Aplikant Notarialny",
     "kategoria": "Prawo",
-    "obraz": "prawo.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B/kancelaria) lub ~80% (etat, po 30 dniach)",
     "ryzyka": [
@@ -4741,7 +4599,6 @@
     "slug": "notariusz",
     "nazwa": "Notariusz",
     "kategoria": "Prawo",
-    "obraz": "prawo.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B/kancelaria) lub ~80% (etat, po 30 dniach)",
     "ryzyka": [
@@ -4774,7 +4631,6 @@
     "slug": "nuklearny",
     "nazwa": "Lekarz Medycyny Nuklearnej",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -4809,7 +4665,6 @@
     "slug": "ochroniarz",
     "nazwa": "Pracownik Ochrony",
     "kategoria": "Bezpieczeństwo",
-    "obraz": "bezpieczenstwo.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "~80% podstawy (etat) po 30 dniach; niewystarczające",
     "ryzyka": [
@@ -4844,7 +4699,6 @@
     "slug": "okulista",
     "nazwa": "Okulista",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -4877,7 +4731,6 @@
     "slug": "onkolog-kliniczny",
     "nazwa": "Onkolog Kliniczny",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -4912,7 +4765,6 @@
     "slug": "onkolog",
     "nazwa": "Onkolog",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -4945,7 +4797,6 @@
     "slug": "operator-kamery",
     "nazwa": "Operator Kamery",
     "kategoria": "Sztuka / Media",
-    "obraz": "sztuka.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "0 zł (brak zleceń = brak przychodu)",
     "ryzyka": [
@@ -4978,7 +4829,6 @@
     "slug": "optometrysta",
     "nazwa": "Optometrysta",
     "kategoria": "Pielęgniarstwo",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 350,
     "bezUbezpieczenia": "~80% podstawy (etat) po 30 dniach; 0 zł na B2B",
     "ryzyka": [
@@ -5011,7 +4861,6 @@
     "slug": "ortodonta",
     "nazwa": "Ortodonta",
     "kategoria": "Stomatologia",
-    "obraz": "stomatologia.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "0 zł / mies. (gabinet bez stomatologa nie generuje przychodu)",
     "ryzyka": [
@@ -5044,7 +4893,6 @@
     "slug": "ortopeda",
     "nazwa": "Ortopeda",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -5077,7 +4925,6 @@
     "slug": "patolog",
     "nazwa": "Patolog",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -5112,7 +4959,6 @@
     "slug": "pedagog",
     "nazwa": "Pedagog",
     "kategoria": "Edukacja",
-    "obraz": "edukacja.jpg",
     "swiadczenieDzienne": 300,
     "bezUbezpieczenia": "~80% podstawy (etat) po 30 dniach; 0 zł (freelance)",
     "ryzyka": [
@@ -5145,7 +4991,6 @@
     "slug": "pediatra",
     "nazwa": "Pediatra",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -5178,7 +5023,6 @@
     "slug": "periodontolog",
     "nazwa": "Periodontolog",
     "kategoria": "Stomatologia",
-    "obraz": "stomatologia.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "0 zł / mies. (gabinet bez stomatologa nie generuje przychodu)",
     "ryzyka": [
@@ -5211,7 +5055,6 @@
     "slug": "pielegniarka-operacyjna",
     "nazwa": "Pielęgniarka Operacyjna",
     "kategoria": "Pielęgniarstwo",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 350,
     "bezUbezpieczenia": "~80% podstawy (etat) po 30 dniach; 0 zł na B2B",
     "ryzyka": [
@@ -5244,7 +5087,6 @@
     "slug": "pielegniarka-srodowiskowa",
     "nazwa": "Pielęgniarka Środowiskowa",
     "kategoria": "Pielęgniarstwo",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 350,
     "bezUbezpieczenia": "~80% podstawy (etat) po 30 dniach; 0 zł na B2B",
     "ryzyka": [
@@ -5279,7 +5121,6 @@
     "slug": "pielegniarka",
     "nazwa": "Pielęgniarka",
     "kategoria": "Pielęgniarstwo",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 350,
     "bezUbezpieczenia": "~80% podstawy (etat) po 30 dniach; 0 zł na B2B",
     "ryzyka": [
@@ -5312,7 +5153,6 @@
     "slug": "pilot",
     "nazwa": "Pilot",
     "kategoria": "Transport",
-    "obraz": "transport.jpg",
     "swiadczenieDzienne": 350,
     "bezUbezpieczenia": "0 zł (brak kursu = brak wypłaty)",
     "ryzyka": [
@@ -5345,7 +5185,6 @@
     "slug": "pisarz",
     "nazwa": "Pisarz",
     "kategoria": "Sztuka / Media",
-    "obraz": "sztuka.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "0 zł (brak zleceń = brak przychodu)",
     "ryzyka": [
@@ -5380,7 +5219,6 @@
     "slug": "policjant",
     "nazwa": "Policjant",
     "kategoria": "Bezpieczeństwo",
-    "obraz": "bezpieczenstwo.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "~80% podstawy (etat) po 30 dniach; niewystarczające",
     "ryzyka": [
@@ -5415,7 +5253,6 @@
     "slug": "polozna",
     "nazwa": "Położna",
     "kategoria": "Pielęgniarstwo",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 350,
     "bezUbezpieczenia": "~80% podstawy (etat) po 30 dniach; 0 zł na B2B",
     "ryzyka": [
@@ -5448,7 +5285,6 @@
     "slug": "posrednik-nieruchomosci",
     "nazwa": "Pośrednik Nieruchomości",
     "kategoria": "Finanse",
-    "obraz": "biznes.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -5481,7 +5317,6 @@
     "slug": "prawnik",
     "nazwa": "Prawnik",
     "kategoria": "Prawo",
-    "obraz": "prawo.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B/kancelaria) lub ~80% (etat, po 30 dniach)",
     "ryzyka": [
@@ -5514,7 +5349,6 @@
     "slug": "product-manager",
     "nazwa": "Product Manager",
     "kategoria": "IT / Tech",
-    "obraz": "biznes.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B -- brak faktury = brak przychodu)",
     "ryzyka": [
@@ -5547,7 +5381,6 @@
     "slug": "programista",
     "nazwa": "Programista",
     "kategoria": "IT / Tech",
-    "obraz": "it.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B -- brak faktury = brak przychodu)",
     "ryzyka": [
@@ -5580,7 +5413,6 @@
     "slug": "project-manager",
     "nazwa": "Project Manager",
     "kategoria": "Biznes",
-    "obraz": "biznes.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B) lub ~80% (etat, po 30 dniach)",
     "ryzyka": [
@@ -5613,7 +5445,6 @@
     "slug": "prokurator",
     "nazwa": "Prokurator",
     "kategoria": "Prawo",
-    "obraz": "prawo.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B/kancelaria) lub ~80% (etat, po 30 dniach)",
     "ryzyka": [
@@ -5648,7 +5479,6 @@
     "slug": "protetyk",
     "nazwa": "Protetyk Stomatologiczny",
     "kategoria": "Stomatologia",
-    "obraz": "stomatologia.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "0 zł / mies. (gabinet bez stomatologa nie generuje przychodu)",
     "ryzyka": [
@@ -5681,7 +5511,6 @@
     "slug": "przedstawiciel-handlowy",
     "nazwa": "Przedstawiciel Handlowy",
     "kategoria": "Biznes",
-    "obraz": "biznes.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B) lub ~80% (etat, po 30 dniach)",
     "ryzyka": [
@@ -5714,7 +5543,6 @@
     "slug": "psychiatra",
     "nazwa": "Psychiatra",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -5747,7 +5575,6 @@
     "slug": "psycholog",
     "nazwa": "Psycholog",
     "kategoria": "Pielęgniarstwo",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 350,
     "bezUbezpieczenia": "~80% podstawy (etat) po 30 dniach; 0 zł na B2B",
     "ryzyka": [
@@ -5780,7 +5607,6 @@
     "slug": "public-relations",
     "nazwa": "Specjalista PR",
     "kategoria": "Biznes",
-    "obraz": "biznes.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B) lub ~80% (etat, po 30 dniach)",
     "ryzyka": [
@@ -5813,7 +5639,6 @@
     "slug": "pulmonolog",
     "nazwa": "Pulmonolog",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -5846,7 +5671,6 @@
     "slug": "radca-prawny",
     "nazwa": "Radca Prawny",
     "kategoria": "Prawo",
-    "obraz": "prawo.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B/kancelaria) lub ~80% (etat, po 30 dniach)",
     "ryzyka": [
@@ -5879,7 +5703,6 @@
     "slug": "radiolog",
     "nazwa": "Radiolog",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -5912,7 +5735,6 @@
     "slug": "ratownik-medyczny",
     "nazwa": "Ratownik Medyczny",
     "kategoria": "Pielęgniarstwo",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 350,
     "bezUbezpieczenia": "~80% podstawy (etat) po 30 dniach; 0 zł na B2B",
     "ryzyka": [
@@ -5945,7 +5767,6 @@
     "slug": "rehabilitacja",
     "nazwa": "Lekarz Rehabilitacji",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -5978,7 +5799,6 @@
     "slug": "rekruter",
     "nazwa": "Rekruter",
     "kategoria": "Biznes",
-    "obraz": "biznes.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B) lub ~80% (etat, po 30 dniach)",
     "ryzyka": [
@@ -6011,7 +5831,6 @@
     "slug": "reumatolog",
     "nazwa": "Reumatolog",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -6044,7 +5863,6 @@
     "slug": "rezyser",
     "nazwa": "Reżyser",
     "kategoria": "Sztuka / Media",
-    "obraz": "sztuka.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "0 zł (brak zleceń = brak przychodu)",
     "ryzyka": [
@@ -6077,7 +5895,6 @@
     "slug": "rzecznik-patentowy",
     "nazwa": "Rzecznik Patentowy",
     "kategoria": "Prawo",
-    "obraz": "prawo.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B/kancelaria) lub ~80% (etat, po 30 dniach)",
     "ryzyka": [
@@ -6110,7 +5927,6 @@
     "slug": "rzeczoznawca-budowlany",
     "nazwa": "Rzeczoznawca Budowlany",
     "kategoria": "Budownictwo",
-    "obraz": "biznes.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "0 zł (brak zleceń = brak przychodu)",
     "ryzyka": [
@@ -6143,7 +5959,6 @@
     "slug": "rzeczoznawca",
     "nazwa": "Rzeczoznawca Majątkowy",
     "kategoria": "Finanse",
-    "obraz": "finanse.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -6176,7 +5991,6 @@
     "slug": "sales-manager",
     "nazwa": "Sales Manager",
     "kategoria": "Biznes",
-    "obraz": "biznes.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B) lub ~80% (etat, po 30 dniach)",
     "ryzyka": [
@@ -6209,7 +6023,6 @@
     "slug": "scenarzysta",
     "nazwa": "Scenarzysta",
     "kategoria": "Sztuka / Media",
-    "obraz": "sztuka.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "0 zł (brak zleceń = brak przychodu)",
     "ryzyka": [
@@ -6244,7 +6057,6 @@
     "slug": "scrum-master",
     "nazwa": "Scrum Master",
     "kategoria": "IT / Tech",
-    "obraz": "it.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B -- brak faktury = brak przychodu)",
     "ryzyka": [
@@ -6277,7 +6089,6 @@
     "slug": "security-analyst",
     "nazwa": "Security Analyst",
     "kategoria": "IT / Tech",
-    "obraz": "bezpieczenstwo.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B -- brak faktury = brak przychodu)",
     "ryzyka": [
@@ -6310,7 +6121,6 @@
     "slug": "sedzia",
     "nazwa": "Sędzia",
     "kategoria": "Prawo",
-    "obraz": "prawo.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B/kancelaria) lub ~80% (etat, po 30 dniach)",
     "ryzyka": [
@@ -6345,7 +6155,6 @@
     "slug": "seksuolog",
     "nazwa": "Seksuolog",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -6378,7 +6187,6 @@
     "slug": "slusarz",
     "nazwa": "Ślusarz",
     "kategoria": "Budownictwo",
-    "obraz": "biznes.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "0 zł (brak zleceń = brak przychodu)",
     "ryzyka": [
@@ -6413,7 +6221,6 @@
     "slug": "solution-architect",
     "nazwa": "Solution Architect",
     "kategoria": "IT / Tech",
-    "obraz": "it.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B -- brak faktury = brak przychodu)",
     "ryzyka": [
@@ -6446,7 +6253,6 @@
     "slug": "sommelier",
     "nazwa": "Sommelier",
     "kategoria": "Gastronomia",
-    "obraz": "gastronomia.jpg",
     "swiadczenieDzienne": 250,
     "bezUbezpieczenia": "0 zł (zmiana odwołana = brak wypłaty)",
     "ryzyka": [
@@ -6481,7 +6287,6 @@
     "slug": "spawacz",
     "nazwa": "Spawacz",
     "kategoria": "Budownictwo",
-    "obraz": "biznes.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "0 zł (brak zleceń = brak przychodu)",
     "ryzyka": [
@@ -6514,7 +6319,6 @@
     "slug": "spedytor",
     "nazwa": "Spedytor",
     "kategoria": "Transport",
-    "obraz": "transport.jpg",
     "swiadczenieDzienne": 350,
     "bezUbezpieczenia": "0 zł (brak kursu = brak wypłaty)",
     "ryzyka": [
@@ -6547,7 +6351,6 @@
     "slug": "statystyk",
     "nazwa": "Statystyk",
     "kategoria": "Finanse",
-    "obraz": "finanse.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -6580,7 +6383,6 @@
     "slug": "stomatolog",
     "nazwa": "Stomatolog",
     "kategoria": "Stomatologia",
-    "obraz": "stomatologia.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "0 zł / mies. (gabinet bez stomatologa nie generuje przychodu)",
     "ryzyka": [
@@ -6613,7 +6415,6 @@
     "slug": "strazak",
     "nazwa": "Strażak",
     "kategoria": "Bezpieczeństwo",
-    "obraz": "bezpieczenstwo.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "~80% podstawy (etat) po 30 dniach; niewystarczające",
     "ryzyka": [
@@ -6648,7 +6449,6 @@
     "slug": "straznik-miejski",
     "nazwa": "Strażnik Miejski",
     "kategoria": "Bezpieczeństwo",
-    "obraz": "bezpieczenstwo.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "~80% podstawy (etat) po 30 dniach; niewystarczające",
     "ryzyka": [
@@ -6683,7 +6483,6 @@
     "slug": "stylista",
     "nazwa": "Stylista",
     "kategoria": "Beauty / Uroda",
-    "obraz": "beauty.jpg",
     "swiadczenieDzienne": 300,
     "bezUbezpieczenia": "0 zł (brak wizyt = brak przychodu)",
     "ryzyka": [
@@ -6716,7 +6515,6 @@
     "slug": "syndyk",
     "nazwa": "Syndyk",
     "kategoria": "Prawo",
-    "obraz": "prawo.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B/kancelaria) lub ~80% (etat, po 30 dniach)",
     "ryzyka": [
@@ -6749,7 +6547,6 @@
     "slug": "szef-kuchni",
     "nazwa": "Szef Kuchni",
     "kategoria": "Gastronomia",
-    "obraz": "gastronomia.jpg",
     "swiadczenieDzienne": 250,
     "bezUbezpieczenia": "0 zł (zmiana odwołana = brak wypłaty)",
     "ryzyka": [
@@ -6782,7 +6579,6 @@
     "slug": "taksowkarz",
     "nazwa": "Taksówkarz",
     "kategoria": "Transport",
-    "obraz": "transport.jpg",
     "swiadczenieDzienne": 350,
     "bezUbezpieczenia": "0 zł (brak kursu = brak wypłaty)",
     "ryzyka": [
@@ -6815,7 +6611,6 @@
     "slug": "tatuazysta",
     "nazwa": "Tatuażysta",
     "kategoria": "Beauty / Uroda",
-    "obraz": "tattoo.jpg",
     "swiadczenieDzienne": 300,
     "bezUbezpieczenia": "0 zł (brak wizyt = brak przychodu)",
     "ryzyka": [
@@ -6848,7 +6643,6 @@
     "slug": "technik-elektroradiolog",
     "nazwa": "Technik Elektroradiolog",
     "kategoria": "Pielęgniarstwo",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 350,
     "bezUbezpieczenia": "~80% podstawy (etat) po 30 dniach; 0 zł na B2B",
     "ryzyka": [
@@ -6881,7 +6675,6 @@
     "slug": "technik-farmaceutyczny",
     "nazwa": "Technik Farmaceutyczny",
     "kategoria": "Farmacja",
-    "obraz": "farmacja.jpg",
     "swiadczenieDzienne": 300,
     "bezUbezpieczenia": "~80% podstawy (etat) lub 0 zł (B2B)",
     "ryzyka": [
@@ -6914,7 +6707,6 @@
     "slug": "technik-rtg",
     "nazwa": "Technik Radiologii",
     "kategoria": "Pielęgniarstwo",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 350,
     "bezUbezpieczenia": "~80% podstawy (etat) po 30 dniach; 0 zł na B2B",
     "ryzyka": [
@@ -6947,7 +6739,6 @@
     "slug": "technolog-zywnosci",
     "nazwa": "Technolog Żywności",
     "kategoria": "Gastronomia",
-    "obraz": "gastronomia.jpg",
     "swiadczenieDzienne": 250,
     "bezUbezpieczenia": "0 zł (zmiana odwołana = brak wypłaty)",
     "ryzyka": [
@@ -6980,7 +6771,6 @@
     "slug": "terapeuta-zajeciowy",
     "nazwa": "Terapeuta Zajęciowy",
     "kategoria": "Pielęgniarstwo",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 350,
     "bezUbezpieczenia": "~80% podstawy (etat) po 30 dniach; 0 zł na B2B",
     "ryzyka": [
@@ -7014,7 +6804,6 @@
     "slug": "terapeuta",
     "nazwa": "Terapeuta",
     "kategoria": "Beauty / Uroda",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 300,
     "bezUbezpieczenia": "0 zł (brak wizyt = brak przychodu)",
     "ryzyka": [
@@ -7047,7 +6836,6 @@
     "slug": "tester",
     "nazwa": "Tester Oprogramowania",
     "kategoria": "IT / Tech",
-    "obraz": "it.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B -- brak faktury = brak przychodu)",
     "ryzyka": [
@@ -7080,7 +6868,6 @@
     "slug": "tlumacz",
     "nazwa": "Tłumacz",
     "kategoria": "Sztuka / Media",
-    "obraz": "edukacja.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "0 zł (brak zleceń = brak przychodu)",
     "ryzyka": [
@@ -7113,7 +6900,6 @@
     "slug": "toksykolog",
     "nazwa": "Toksykolog Kliniczny",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -7146,7 +6932,6 @@
     "slug": "torakochirurg",
     "nazwa": "Torakochirurg",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -7179,7 +6964,6 @@
     "slug": "transplantologia",
     "nazwa": "Transplantolog",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -7212,7 +6996,6 @@
     "slug": "treasury-analyst",
     "nazwa": "Treasury Analyst",
     "kategoria": "Finanse",
-    "obraz": "finanse.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -7245,7 +7028,6 @@
     "slug": "trener-personalny",
     "nazwa": "Trener Personalny",
     "kategoria": "Edukacja",
-    "obraz": "edukacja.jpg",
     "swiadczenieDzienne": 300,
     "bezUbezpieczenia": "~80% podstawy (etat) po 30 dniach; 0 zł (freelance)",
     "ryzyka": [
@@ -7278,7 +7060,6 @@
     "slug": "urolog",
     "nazwa": "Urolog",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -7311,7 +7092,6 @@
     "slug": "ux-designer",
     "nazwa": "UX Designer",
     "kategoria": "IT / Tech",
-    "obraz": "it.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B -- brak faktury = brak przychodu)",
     "ryzyka": [
@@ -7344,7 +7124,6 @@
     "slug": "wealth-manager",
     "nazwa": "Wealth Manager",
     "kategoria": "Finanse",
-    "obraz": "finanse.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -7377,7 +7156,6 @@
     "slug": "wenerolog",
     "nazwa": "Wenerolog",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -7410,7 +7188,6 @@
     "slug": "weterynarz",
     "nazwa": "Weterynarz",
     "kategoria": "Medycyna",
-    "obraz": "medycyna.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł / mies. (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [
@@ -7443,7 +7220,6 @@
     "slug": "wizazysta",
     "nazwa": "Wizażysta",
     "kategoria": "Beauty / Uroda",
-    "obraz": "beauty.jpg",
     "swiadczenieDzienne": 300,
     "bezUbezpieczenia": "0 zł (brak wizyt = brak przychodu)",
     "ryzyka": [
@@ -7476,7 +7252,6 @@
     "slug": "wlasciciel-firmy",
     "nazwa": "Właściciel Firmy",
     "kategoria": "Biznes",
-    "obraz": "biznes.jpg",
     "swiadczenieDzienne": 600,
     "bezUbezpieczenia": "0 zł (B2B) lub ~80% (etat, po 30 dniach)",
     "ryzyka": [
@@ -7509,7 +7284,6 @@
     "slug": "wykladowca",
     "nazwa": "Wykładowca",
     "kategoria": "Edukacja",
-    "obraz": "edukacja.jpg",
     "swiadczenieDzienne": 300,
     "bezUbezpieczenia": "~80% podstawy (etat) po 30 dniach; 0 zł (freelance)",
     "ryzyka": [
@@ -7542,7 +7316,6 @@
     "slug": "youtuber",
     "nazwa": "Youtuber / Twórca",
     "kategoria": "Sztuka / Media",
-    "obraz": "sztuka.jpg",
     "swiadczenieDzienne": 400,
     "bezUbezpieczenia": "0 zł (brak zleceń = brak przychodu)",
     "ryzyka": [
@@ -7575,7 +7348,6 @@
     "slug": "zarzadca-nieruchomosci",
     "nazwa": "Zarządca Nieruchomości",
     "kategoria": "Finanse",
-    "obraz": "biznes.jpg",
     "swiadczenieDzienne": 500,
     "bezUbezpieczenia": "0 zł (B2B) lub ~80% podstawy (etat, po 30 dniach)",
     "ryzyka": [

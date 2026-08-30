@@ -15,8 +15,6 @@ export interface Zawod {
   slug: string;
   nazwa: string;
   kategoria: string;
-  /** Nazwa pliku zdjęcia kategorii, np. „medycyna.jpg". */
-  obraz: string;
   /** Maksymalne świadczenie dzienne w złotych. */
   swiadczenieDzienne: number | null;
   /** Co dostaje osoba w tym zawodzie bez polisy — zdanie z llms.txt. */
@@ -35,9 +33,8 @@ export interface Zawod {
 export interface Kategoria {
   nazwa: string;
   liczba: number;
+  /** Zarazem adres `/zawody/<slug>/` i nazwa pliku zdjęcia kategorii. */
   slug: string;
-  /** Nazwa pliku zdjęcia, wspólnego dla całej kategorii. */
-  obraz: string;
 }
 
 export const ZAWODY: Zawod[];

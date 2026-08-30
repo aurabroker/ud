@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
+import { kategorie } from '@ud/zawody';
 
 /**
  * Wykrywanie martwych linków wewnętrznych w zbudowanym serwisie.
@@ -11,6 +12,8 @@ import { join, relative } from 'node:path';
  */
 
 const DIST = 'dist';
+/** Katalog aplikacji — Playwright startuje z apps/portal. */
+const KORZEN = '.';
 
 /** Wszystkie pliki HTML w buildzie. */
 function stronyHtml(katalog = DIST, zebrane = []) {
@@ -88,22 +91,57 @@ test('żaden link wewnętrzny nie prowadzi w pustkę', () => {
   expect(martwe.size, `martwe linki wewnętrzne:\n${opis}`).toBe(0);
 });
 
+/**
+ * Kategorie, dla których nie ma jeszcze pliku zdjęcia. Lista jest tymczasowa
+ * i ma sama po sobie posprzątać: gdy plik się pojawi, test poniżej wywali się
+ * na nieaktualnym wpisie i zmusi do jego usunięcia.
+ */
+const BEZ_ZDJECIA = new Set(['budownictwo']);
+
+test('każde zdjęcie w src/obrazy/kategorie nosi nazwę istniejącej kategorii', () => {
+  /**
+   * Wcześniej zdjęcie wisiało przy zawodzie, a kategoria brała je od pierwszego
+   * zawodu alfabetycznie — stąd biurowiec na Budownictwie i mężczyzna
+   * z niemowlęciem („bezpieczenstwo.jpg") u dwóch prawników. Nazwa pliku równa
+   * slugowi kategorii sprawia, że takie rozjechanie jest niewyrażalne.
+   */
+  const slugi = new Set(kategorie().map((k) => k.slug));
+  const pliki = readdirSync(join(KORZEN, 'src/obrazy/kategorie'))
+    .filter((f) => f.endsWith('.jpg'))
+    .map((f) => f.replace(/\.jpg$/, ''));
+
+  const osierocone = pliki.filter((f) => !slugi.has(f));
+  expect(osierocone, `pliki bez kategorii: ${osierocone.join(', ')}`).toEqual([]);
+
+  const nieaktualne = [...BEZ_ZDJECIA].filter((s) => pliki.includes(s));
+  expect(nieaktualne, `zdjęcie już jest — usuń z BEZ_ZDJECIA: ${nieaktualne.join(', ')}`).toEqual([]);
+
+  const brakujace = [...slugi].filter((s) => !pliki.includes(s) && !BEZ_ZDJECIA.has(s));
+  expect(brakujace, `kategorie bez zdjęcia: ${brakujace.join(', ')}`).toEqual([]);
+});
+
 test('zdjęcia kategorii faktycznie się renderują', () => {
   /**
-   * Czternaście zdjęć branż leżało w public/ i było używane wyłącznie jako
+   * Czternaście zdjęć branż leżało w public/ i było używanych wyłącznie jako
    * obrazek Open Graph — na żadnej stronie serwisu nie renderował się ani
    * jeden <img>. Ten test pilnuje, żeby nie wróciły do roli metadanych.
    */
-  const sprawdz = [
-    ['index.html', 14],
-    ['zawody/index.html', 14],
-    ['zawody/medycyna/index.html', 1],
-    ['stomatolog/index.html', 1],
-  ];
-  for (const [plik, ile] of sprawdz) {
-    const html = readFileSync(join(DIST, plik), 'utf8');
-    const znalezione = (html.match(/<img\b/g) ?? []).length;
-    expect(znalezione, `${plik}: ${znalezione} zdjęć zamiast ${ile}`).toBeGreaterThanOrEqual(ile);
+  const zeZdjeciem = kategorie().filter((k) => !BEZ_ZDJECIA.has(k.slug));
+
+  const glowna = readFileSync(join(DIST, 'index.html'), 'utf8');
+  const kafelki = (glowna.match(/<img\b/g) ?? []).length;
+  expect(kafelki, `strona główna: ${kafelki} kafelków ze zdjęciem zamiast ${zeZdjeciem.length}`)
+    .toBe(zeZdjeciem.length);
+
+  for (const k of zeZdjeciem) {
+    const html = readFileSync(join(DIST, `zawody/${k.slug}/index.html`), 'utf8');
+    expect((html.match(/<img\b/g) ?? []).length, `/zawody/${k.slug}/ bez zdjęcia`).toBe(1);
+  }
+
+  // Podstrona zawodu dziedziczy zdjęcie po swojej kategorii.
+  for (const plik of ['stomatolog', 'kierowca-zawodowy', 'copywriter']) {
+    const html = readFileSync(join(DIST, `${plik}/index.html`), 'utf8');
+    expect((html.match(/<img\b/g) ?? []).length, `/${plik}/ bez zdjęcia`).toBe(1);
   }
 });
 

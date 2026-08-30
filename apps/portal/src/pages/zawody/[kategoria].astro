@@ -55,19 +55,19 @@ const jsonld = graf([
     </ol>
   </nav>
 
+  {obrazKategorii(kategoria.slug) && (
+    <div class="overflow-hidden bg-tlo-jasne border-b border-linia">
+      <Image src={obrazKategorii(kategoria.slug)!} alt={opisKategorii(kategoria.nazwa)}
+             widths={[768, 1280, 1920]} sizes="100vw"
+             loading="eager" fetchpriority="high"
+             class="w-full h-[clamp(11rem,24vw,19rem)] object-cover" />
+    </div>
+  )}
+
   <div class="max-w-[1200px] mx-auto px-5 py-16">
-    <div class="grid gap-10 lg:grid-cols-[minmax(0,1fr)_20rem] items-center mb-12">
-      <div>
-        <h1 class="text-[clamp(2rem,5vw,3rem)] leading-[1.06] mb-5">{kategoria.nazwa}</h1>
-        <p data-odpowiedz class="text-[1.12rem] leading-relaxed text-tekst-drugi max-w-[42em] m-0">{opis}</p>
-      </div>
-      {obrazKategorii(kategoria.obraz) && (
-        <div class="overflow-hidden border border-linia order-first lg:order-none">
-          <Image src={obrazKategorii(kategoria.obraz)!} alt={opisKategorii(kategoria.nazwa)}
-                 widths={[320, 640]} sizes="(max-width: 1024px) 100vw, 20rem"
-                 loading="eager" class="w-full h-48 lg:h-56 object-cover" />
-        </div>
-      )}
+    <div class="mb-12">
+      <h1 class="text-[clamp(2rem,5vw,3rem)] leading-[1.06] mb-5">{kategoria.nazwa}</h1>
+      <p data-odpowiedz class="text-[1.12rem] leading-relaxed text-tekst-drugi max-w-[42em] m-0">{opis}</p>
     </div>
 
     <ul class="grid gap-4 list-none m-0 p-0 grid-cols-[repeat(auto-fill,minmax(17rem,1fr))]">

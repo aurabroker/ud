@@ -199,3 +199,37 @@ Kontrasty, które już policzyliśmy dla tła białego:
 `--color-tekst-trzeci` nie nadaje się na treść, którą ktoś ma przeczytać.
 Etykiety typu „Jednorazowe świadczenie" trafiły tam przez pomyłkę i wróciły
 na `--color-tekst-drugi`.
+
+---
+
+## Zdjęcia kategorii — jedno na kategorię, nazwane jej slugiem
+
+`apps/portal/src/obrazy/kategorie/<slug-kategorii>.jpg`, gdzie slug jest tym
+samym, co w adresie `/zawody/<slug>/`. Dokłada się je przez `obrazKategorii()`
+z `src/lib/obrazy.ts`; brak pliku to `null` i szablon po prostu nie renderuje
+pasa ze zdjęciem.
+
+Wcześniej zdjęcie wisiało przy **każdym zawodzie z osobna** (pole `obraz`
+w `zawody.json`), a strona kategorii brała je od pierwszego zawodu
+alfabetycznie. Skutki: Budownictwo ilustrował biurowiec (bo Architekt),
+Transport też biurowiec (bo Agent Celny), a dwóch prawników i informatyk
+dostali `bezpieczenstwo.jpg` — zdjęcie mężczyzny z niemowlęciem na białym tle.
+Pole `obraz` zostało usunięte z danych; nie przywracaj go.
+
+Pilnuje tego `test/linki.spec.js`:
+- żaden plik w katalogu nie może mieć nazwy spoza slugów kategorii,
+- każda kategoria poza wymienionymi w `BEZ_ZDJECIA` musi mieć plik,
+- **`BEZ_ZDJECIA` sprząta po sobie** — gdy plik się pojawi, test wywala się na
+  nieaktualnym wpisie.
+
+### Kadr
+
+Zdjęcia idą przez całą szerokość okna, w pasie `clamp(11rem, 24vw, 19rem)` —
+przy szerokim ekranie to proporcja ok. 6:1. Materiał 21:9 jest więc przycinany
+w pionie mniej więcej o połowę, `object-cover`, do środka. Kadruj z zapasem
+nad i pod bohaterem, a lewą i prawą tercję zostaw spokojną.
+
+Zestaw z 2026-08-30 powstał na Artlist (Seedream 5.0, 21:9, 2K) ze style kitu
+„UtrataDochodu.pl — zdjęcia kategorii": jasne, przewietrzone wnętrza, chłodna
+cyjanowa paleta pod tło serwisu, kadr dokumentalny bez patrzenia w obiektyw.
+Kit trzyma spójność serii — kolejne zdjęcia rób z niego, nie od zera.

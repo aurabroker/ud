@@ -138,9 +138,9 @@ const KATEGORIE = kategorie();
           <li>
             <a href={`/zawody/${k.slug}/`}
                class="group flex flex-col border border-linia bg-tlo h-full hover:border-akcent">
-              {obrazKategorii(k.obraz) && (
+              {obrazKategorii(k.slug) && (
                 <span class="block overflow-hidden border-b border-linia">
-                  <Image src={obrazKategorii(k.obraz)!} alt={opisKategorii(k.nazwa)}
+                  <Image src={obrazKategorii(k.slug)!} alt={opisKategorii(k.nazwa)}
                          widths={[320, 640]} sizes="(max-width: 640px) 100vw, 15rem"
                          loading="lazy" class="w-full h-28 object-cover" />
                 </span>

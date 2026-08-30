@@ -75,7 +75,7 @@ const powiazane = pokrewne(z.slug, 10);
  * miniatura w komunikatorze nie zna WebP w każdej wersji — więc dla niego
  * generujemy osobny wariant.
  */
-const zdjecie = obrazKategorii(z.obraz);
+const zdjecie = obrazKategorii(slugKategorii(z.kategoria));
 const ogObraz = zdjecie
   ? (await getImage({ src: zdjecie, width: 1200, height: 630, format: 'jpg' })).src
   : undefined;
@@ -95,10 +95,22 @@ const ogObraz = zdjecie
     </ol>
   </nav>
 
+  <!-- ── Zdjęcie zawodu ─────────────────────────────────────────────────── -->
+  <!-- Pas przez całą szerokość okna, nie kolumna obok tekstu: przy szerokim
+       kadrze zdjęcie ma być tłem sceny, a nie ikoną przy nagłówku. Ładowane
+       zachłannie — to element LCP tej strony. -->
+  {zdjecie && (
+    <div class="overflow-hidden bg-tlo-jasne border-b border-linia">
+      <Image src={zdjecie} alt={opisKategorii(z.kategoria)}
+             widths={[768, 1280, 1920]} sizes="100vw"
+             loading="eager" fetchpriority="high"
+             class="w-full h-[clamp(11rem,24vw,19rem)] object-cover" />
+    </div>
+  )}
+
   <!-- ── Nagłówek zawodu ────────────────────────────────────────────────── -->
   <div class="bg-linear-102 from-tlo via-tlo-cyjan to-tlo-hero border-b border-linia">
-    <div class="max-w-[1200px] mx-auto px-5 py-16 lg:py-20 grid gap-12 lg:grid-cols-[minmax(0,1fr)_22rem] items-center">
-      <div>
+    <div class="max-w-[1200px] mx-auto px-5 py-16 lg:py-20">
       <p class="font-mono text-xs tracking-[0.16em] uppercase text-akcent-ciemny font-semibold m-0">
         {z.kategoria} · kontrakt B2B
       </p>
@@ -119,16 +131,6 @@ const ogObraz = zdjecie
           Zobacz, co nie jest objęte
         </a>
       </div>
-      </div>
-
-      {zdjecie && (
-        <div class="overflow-hidden border border-linia bg-tlo order-first lg:order-none">
-          <Image src={zdjecie} alt={opisKategorii(z.kategoria)}
-                 widths={[352, 704]} sizes="(max-width: 1024px) 100vw, 22rem"
-                 loading="eager" fetchpriority="high"
-                 class="w-full h-56 lg:h-72 object-cover" />
-        </div>
-      )}
     </div>
   </div>
 
