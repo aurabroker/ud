@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
-import { kategorie } from '@ud/zawody';
+import { kategorie, ZAWODY } from '@ud/zawody';
 
 /**
  * Wykrywanie martwych linków wewnętrznych w zbudowanym serwisie.
@@ -118,6 +118,34 @@ test('każde zdjęcie w src/obrazy/kategorie nosi nazwę istniejącej kategorii'
 
   const brakujace = [...slugi].filter((s) => !pliki.includes(s) && !BEZ_ZDJECIA.has(s));
   expect(brakujace, `kategorie bez zdjęcia: ${brakujace.join(', ')}`).toEqual([]);
+});
+
+test('zdjęcia zawodów: nazwa pliku to slug zawodu i strona go pokazuje', () => {
+  /**
+   * Warstwa nad zdjęciami kategorii: zawód, który ma własne zdjęcie, bierze
+   * własne, reszta dziedziczy po branży. Zestaw rośnie zawód po zawodzie,
+   * więc jedyne, czego trzeba pilnować, to że nazwa pliku wskazuje na
+   * istniejący zawód i że plik faktycznie trafia na jego podstronę.
+   */
+  const katalog = join(KORZEN, 'src/obrazy/zawody');
+  const pliki = existsSync(katalog)
+    ? readdirSync(katalog).filter((f) => f.endsWith('.jpg')).map((f) => f.replace(/\.jpg$/, ''))
+    : [];
+
+  const slugi = new Set(ZAWODY.map((z) => z.slug));
+  const osierocone = pliki.filter((f) => !slugi.has(f));
+  expect(osierocone, `pliki bez zawodu: ${osierocone.join(', ')}`).toEqual([]);
+
+  // Sprawdzamy po opisie alternatywnym, a nie po nazwie assetu: Vite scala
+  // pliki o identycznej zawartości pod jedną nazwą, więc nazwa assetu nie
+  // rozstrzyga, którą gałęzią poszedł szablon. Opis rozstrzyga.
+  for (const slug of pliki) {
+    const zawod = ZAWODY.find((z) => z.slug === slug);
+    const html = readFileSync(join(DIST, `${slug}/index.html`), 'utf8');
+    const alt = html.match(/<img[^>]*\balt="([^"]*)"/)?.[1];
+    expect(alt, `/${slug}/ dziedziczy zdjęcie kategorii mimo własnego pliku`)
+      .toBe(`Zdjęcie ilustracyjne — ${zawod.odmiana.mianownik.toLowerCase()}`);
+  }
 });
 
 test('zdjęcia kategorii faktycznie się renderują', () => {

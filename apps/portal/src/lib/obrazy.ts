@@ -1,25 +1,57 @@
 import type { ImageMetadata } from 'astro';
 
 /**
- * Zdjęcie kategorii zawodowej.
+ * Zdjęcia ilustracyjne: własne dla zawodu, wspólne dla kategorii.
  *
- * Jedno zdjęcie na kategorię, nazwane jej slugiem — tym samym, który stoi
- * w adresie `/zawody/<slug>/`. Wcześniej zdjęcie wisiało przy każdym zawodzie
- * z osobna, a strona kategorii brała je od pierwszego zawodu alfabetycznie.
- * Dlatego Budownictwo ilustrował biurowiec (Architekt), Transport — też
- * biurowiec (Agent Celny), a dwóch prawników i informatyk dostali zdjęcie
- * mężczyzny z niemowlęciem. Powiązanie ze slugiem kategorii wyklucza taką
- * pomyłkę: nazwa pliku jest tym samym, co adres strony.
+ * Zawód bierze swoje zdjęcie, jeśli je ma, a w przeciwnym razie zdjęcie swojej
+ * kategorii. Dzięki temu zestaw można uzupełniać zawód po zawodzie, bez etapu,
+ * w którym część podstron stoi pusta.
+ *
+ * W obie strony obowiązuje jedna zasada: **nazwa pliku to slug adresu**, który
+ * ma go pokazać — `<slug-zawodu>.jpg` dla `/<slug>/`, `<slug-kategorii>.jpg`
+ * dla `/zawody/<slug>/`. Wcześniej zdjęcie było polem w danych zawodu, a strona
+ * kategorii brała je od pierwszego zawodu alfabetycznie: Budownictwo
+ * ilustrował biurowiec (bo Architekt), a dwóch prawników i informatyk dostali
+ * zdjęcie mężczyzny z niemowlęciem. Powiązanie nazwy pliku z adresem sprawia,
+ * że taka pomyłka jest niewyrażalna.
  */
-const PLIKI = import.meta.glob<{ default: ImageMetadata }>(
+const KATEGORIE = import.meta.glob<{ default: ImageMetadata }>(
   '../obrazy/kategorie/*.jpg',
   { eager: true },
 );
 
-/** `null`, gdy zdjęcia jeszcze nie ma — szablon po prostu go nie renderuje. */
+const ZAWODY = import.meta.glob<{ default: ImageMetadata }>(
+  '../obrazy/zawody/*.jpg',
+  { eager: true },
+);
+
+/** `null`, gdy zdjęcia nie ma — szablon po prostu nie renderuje pasa. */
 export function obrazKategorii(slugKategorii: string): ImageMetadata | null {
-  return PLIKI[`../obrazy/kategorie/${slugKategorii}.jpg`]?.default ?? null;
+  return KATEGORIE[`../obrazy/kategorie/${slugKategorii}.jpg`]?.default ?? null;
 }
 
-export const opisKategorii = (kategoria: string) =>
-  `Zdjęcie ilustracyjne — ${kategoria.toLowerCase()}`;
+export function obrazZawodu(slugZawodu: string): ImageMetadata | null {
+  return ZAWODY[`../obrazy/zawody/${slugZawodu}.jpg`]?.default ?? null;
+}
+
+/**
+ * Zdjęcie podstrony zawodu wraz z opisem alternatywnym. Opis idzie za tym,
+ * co widać: własne zdjęcie opisujemy zawodem, odziedziczone — branżą.
+ */
+export function zdjecieZawodu(
+  slugZawodu: string,
+  nazwaZawodu: string,
+  slugKategorii: string,
+  nazwaKategorii: string,
+): { obraz: ImageMetadata; opis: string } | null {
+  const wlasne = obrazZawodu(slugZawodu);
+  if (wlasne) return { obraz: wlasne, opis: opisIlustracji(nazwaZawodu) };
+
+  const kategoria = obrazKategorii(slugKategorii);
+  return kategoria ? { obraz: kategoria, opis: opisIlustracji(nazwaKategorii) } : null;
+}
+
+export const opisIlustracji = (co: string) => `Zdjęcie ilustracyjne — ${co.toLowerCase()}`;
+
+/** @deprecated Nazwa z czasów, gdy zdjęcia były wyłącznie kategorii. */
+export const opisKategorii = opisIlustracji;

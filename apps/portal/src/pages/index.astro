@@ -6,7 +6,7 @@ import { symuluj, zl, ZUS_MIESIECZNIE } from '../lib/symulacja';
 import { graf, organizacja, serwis, strona, faq } from '../lib/seo';
 import { FIRMA } from '../lib/firma';
 import { Image } from 'astro:assets';
-import { obrazKategorii, opisKategorii } from '../lib/obrazy';
+import { obrazKategorii, opisIlustracji } from '../lib/obrazy';
 
 const sciezka = '/';
 const tytul = 'Ubezpieczenie utraty dochodu dla samozatrudnionych | UtrataDochodu.pl';
@@ -140,7 +140,7 @@ const KATEGORIE = kategorie();
                class="group flex flex-col border border-linia bg-tlo h-full hover:border-akcent">
               {obrazKategorii(k.slug) && (
                 <span class="block overflow-hidden border-b border-linia">
-                  <Image src={obrazKategorii(k.slug)!} alt={opisKategorii(k.nazwa)}
+                  <Image src={obrazKategorii(k.slug)!} alt={opisIlustracji(k.nazwa)}
                          widths={[320, 640]} sizes="(max-width: 640px) 100vw, 15rem"
                          loading="lazy" class="w-full h-28 object-cover" />
                 </span>

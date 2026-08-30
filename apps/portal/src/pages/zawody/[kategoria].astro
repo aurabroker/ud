@@ -3,7 +3,7 @@ import { kategorie, wKategorii } from '@ud/zawody';
 import Baza from '../../layouts/Baza.astro';
 import { graf, organizacja, serwis, strona, okruszki } from '../../lib/seo';
 import { Image } from 'astro:assets';
-import { obrazKategorii, opisKategorii } from '../../lib/obrazy';
+import { obrazKategorii, opisIlustracji } from '../../lib/obrazy';
 
 export function getStaticPaths() {
   return kategorie().map((k) => ({ params: { kategoria: k.slug }, props: { kategoria: k } }));
@@ -57,7 +57,7 @@ const jsonld = graf([
 
   {obrazKategorii(kategoria.slug) && (
     <div class="overflow-hidden bg-tlo-jasne border-b border-linia">
-      <Image src={obrazKategorii(kategoria.slug)!} alt={opisKategorii(kategoria.nazwa)}
+      <Image src={obrazKategorii(kategoria.slug)!} alt={opisIlustracji(kategoria.nazwa)}
              widths={[768, 1280, 1920]} sizes="100vw"
              loading="eager" fetchpriority="high"
              class="w-full h-[clamp(11rem,24vw,19rem)] object-cover" />

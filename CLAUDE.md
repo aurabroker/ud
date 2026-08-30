@@ -202,12 +202,26 @@ na `--color-tekst-drugi`.
 
 ---
 
-## Zdjęcia kategorii — jedno na kategorię, nazwane jej slugiem
+## Zdjęcia — nazwa pliku to slug adresu, który ma je pokazać
 
-`apps/portal/src/obrazy/kategorie/<slug-kategorii>.jpg`, gdzie slug jest tym
-samym, co w adresie `/zawody/<slug>/`. Dokłada się je przez `obrazKategorii()`
-z `src/lib/obrazy.ts`; brak pliku to `null` i szablon po prostu nie renderuje
-pasa ze zdjęciem.
+Dwie warstwy, obie w `src/lib/obrazy.ts`:
+
+| Katalog | Nazwa pliku | Widać na |
+|---|---|---|
+| `src/obrazy/zawody/` | `<slug-zawodu>.jpg` | `/<slug>/` |
+| `src/obrazy/kategorie/` | `<slug-kategorii>.jpg` | `/zawody/<slug>/`, kafelki na `/`, oraz `/<slug>/` gdy zawód nie ma własnego |
+
+Podstrona zawodu bierze `zdjecieZawodu()`: własne zdjęcie, jeśli plik istnieje,
+w przeciwnym razie zdjęcie kategorii. Dzięki temu zestaw zawodowy można
+uzupełniać zawód po zawodzie — nie ma etapu, w którym część podstron stoi
+pusta. Opis alternatywny idzie za tym, co widać: własne zdjęcie opisujemy
+zawodem, odziedziczone — branżą.
+
+Strona kategorii i kafelki na stronie głównej biorą **wyłącznie** zdjęcie
+kategorii. Nigdy nie pożyczaj kategorii zdjęcia od któregoś z jej zawodów —
+to była dokładnie ta pomyłka, którą opisuje akapit niżej.
+
+Brak pliku to `null` i szablon po prostu nie renderuje pasa ze zdjęciem.
 
 Wcześniej zdjęcie wisiało przy **każdym zawodzie z osobna** (pole `obraz`
 w `zawody.json`), a strona kategorii brała je od pierwszego zawodu
@@ -217,7 +231,11 @@ dostali `bezpieczenstwo.jpg` — zdjęcie mężczyzny z niemowlęciem na białym
 Pole `obraz` zostało usunięte z danych; nie przywracaj go.
 
 Pilnuje tego `test/linki.spec.js`:
-- żaden plik w katalogu nie może mieć nazwy spoza slugów kategorii,
+- żaden plik w żadnym z katalogów nie może mieć nazwy spoza slugów (kategorii
+  albo zawodów — zależnie od katalogu),
+- zawód z własnym plikiem faktycznie go pokazuje; test sprawdza to po opisie
+  alternatywnym, bo Vite scala pliki o identycznej zawartości pod jedną nazwą
+  assetu i sama nazwa nie rozstrzyga, którą gałęzią poszedł szablon,
 - każda kategoria poza wymienionymi w `BEZ_ZDJECIA` musi mieć plik,
 - **`BEZ_ZDJECIA` sprząta po sobie** — gdy plik się pojawi, test wywala się na
   nieaktualnym wpisie.

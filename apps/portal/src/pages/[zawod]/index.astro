@@ -18,7 +18,7 @@ import { symuluj, zl, ZUS_MIESIECZNIE } from '../../lib/symulacja';
 import { graf, organizacja, serwis, strona, okruszki, usluga, faq } from '../../lib/seo';
 import { FIRMA } from '../../lib/firma';
 import { Image, getImage } from 'astro:assets';
-import { obrazKategorii, opisKategorii } from '../../lib/obrazy';
+import { zdjecieZawodu } from '../../lib/obrazy';
 
 export function getStaticPaths() {
   return ZAWODY.map((z) => ({ params: { zawod: z.slug }, props: { slug: z.slug } }));
@@ -71,13 +71,13 @@ const jsonld = graf([
 const powiazane = pokrewne(z.slug, 10);
 
 /**
- * Zdjęcie kategorii. Open Graph potrzebuje JPEG-a o stałych wymiarach —
- * miniatura w komunikatorze nie zna WebP w każdej wersji — więc dla niego
- * generujemy osobny wariant.
+ * Zdjęcie zawodu, a gdy go jeszcze nie ma — zdjęcie jego kategorii. Open Graph
+ * potrzebuje JPEG-a o stałych wymiarach (miniatura w komunikatorze nie zna WebP
+ * w każdej wersji), więc dla niego generujemy osobny wariant.
  */
-const zdjecie = obrazKategorii(slugKategorii(z.kategoria));
+const zdjecie = zdjecieZawodu(z.slug, o.mianownik, slugKategorii(z.kategoria), z.kategoria);
 const ogObraz = zdjecie
-  ? (await getImage({ src: zdjecie, width: 1200, height: 630, format: 'jpg' })).src
+  ? (await getImage({ src: zdjecie.obraz, width: 1200, height: 630, format: 'jpg' })).src
   : undefined;
 ---
 <Baza tytul={tytul} opis={opis} sciezka={sciezka} jsonld={jsonld} obraz={ogObraz}>
@@ -101,7 +101,7 @@ const ogObraz = zdjecie
        zachłannie — to element LCP tej strony. -->
   {zdjecie && (
     <div class="overflow-hidden bg-tlo-jasne border-b border-linia">
-      <Image src={zdjecie} alt={opisKategorii(z.kategoria)}
+      <Image src={zdjecie.obraz} alt={zdjecie.opis}
              widths={[768, 1280, 1920]} sizes="100vw"
              loading="eager" fetchpriority="high"
              class="w-full h-[clamp(11rem,24vw,19rem)] object-cover" />
