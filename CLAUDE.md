@@ -240,12 +240,40 @@ Pilnuje tego `test/linki.spec.js`:
 - **`BEZ_ZDJECIA` sprząta po sobie** — gdy plik się pojawi, test wywala się na
   nieaktualnym wpisie.
 
-### Kadr
+### Kadr i tekst na zdjęciu
 
-Zdjęcia idą przez całą szerokość okna, w pasie `clamp(11rem, 24vw, 19rem)` —
-przy szerokim ekranie to proporcja ok. 6:1. Materiał 21:9 jest więc przycinany
-w pionie mniej więcej o połowę, `object-cover`, do środka. Kadruj z zapasem
-nad i pod bohaterem, a lewą i prawą tercję zostaw spokojną.
+Nagłówek podstrony zawodu i kategorii leży **na zdjęciu**, nie pod nim. To nie
+jest wybór estetyczny: gdy zdjęcie było osobnym pasem nad nagłówkiem, musiało
+być niskie, żeby nie spychać treści poniżej ekranu — i ucinało bohatera w pół.
+Przy tekście na wierzchu pas ma `min-h: clamp(26rem, 34vw, 38rem)`, więc kadr
+21:9 traci w pionie ok. jednej piątej zamiast połowy.
+
+Kadruj z zapasem nad i pod bohaterem, a lewą tercję zostaw spokojną — tam stoi
+tekst.
+
+Czytelność trzyma `.zaslona-hero` w `global.css`. Policzone nad najciemniejszym
+możliwym zdjęciem (czerń pod spodem), w obrębie kolumny tekstu:
+
+| Element | Kontrast | Wymóg |
+|---|---|---|
+| `h1` (`--color-tekst`) | 11,8–13,7:1 | 3:1 (duży tekst) |
+| lead (`--color-tekst-drugi`) | 4,6–5,4:1 | 4,5:1 |
+| etykieta (`--color-akcent-tekst`) | 5,0–5,8:1 | 4,5:1 |
+
+Dwie rzeczy, których nie ruszaj bez ponownego przeliczenia:
+
+- **Etykieta mono nie może wrócić na `--color-akcent-ciemny`** — ten daje na
+  czystej bieli 3,34:1, czyli za mało dla 12 px. Stąd `--color-akcent-tekst`
+  (#0A6A96, 5,97:1). `--color-akcent-hover` też nie wystarczy (4,65:1 zostawia
+  zero zapasu, gdy tłem jest zasłona, a nie biel).
+- **Wersja mobilna zasłony liczy stopnie w pikselach, nie w procentach.**
+  Wysokość pasa zależy od długości tekstu, a ten jest inny na każdej ze 188
+  podstron; przy procentach tekst potrafiłby wypaść tam, gdzie zasłona jeszcze
+  przepuszcza zdjęcie. Szablon odsuwa tekst o 17 rem od góry, zasłona osiąga
+  pełną siłę na 260 px.
+
+Pilnuje tego `test/linki.spec.js` — sprawdza, że obraz, zasłona i `h1` siedzą
+w jednym bloku, i że bez zdjęcia nie ma ani zasłony, ani odsunięcia od góry.
 
 Zestaw z 2026-08-30 powstał na Artlist (Seedream 5.0, 21:9, 2K) ze style kitu
 „UtrataDochodu.pl — zdjęcia kategorii": jasne, przewietrzone wnętrza, chłodna

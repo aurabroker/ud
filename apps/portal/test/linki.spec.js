@@ -173,6 +173,33 @@ test('zdjęcia kategorii faktycznie się renderują', () => {
   }
 });
 
+test('nagłówek leży na zdjęciu, nie pod nim', () => {
+  /**
+   * Zdjęcie było kiedyś osobnym pasem nad nagłówkiem. Musiało być przez to
+   * niskie, żeby nie spychać treści poniżej ekranu, i ucinało bohatera w pół.
+   * Ten test pilnuje, że obraz, zasłona i nagłówek siedzą w jednym bloku —
+   * dopiero wtedy pas może być wysoki, a kadr nie traci połowy wysokości.
+   */
+  for (const plik of ['stomatolog/index.html', 'zawody/medycyna/index.html']) {
+    const html = readFileSync(join(DIST, plik), 'utf8');
+    const hero = html.indexOf('relative isolate');
+    expect(hero, `${plik}: brak bloku nagłówka ze zdjęciem`).toBeGreaterThan(-1);
+
+    const obraz = html.indexOf('<img', hero);
+    const zaslona = html.indexOf('zaslona-hero', hero);
+    const naglowek = html.indexOf('<h1', hero);
+
+    expect(obraz, `${plik}: zdjęcie poza blokiem nagłówka`).toBeGreaterThan(hero);
+    expect(zaslona, `${plik}: zasłona przed zdjęciem`).toBeGreaterThan(obraz);
+    expect(naglowek, `${plik}: nagłówek nie leży na zdjęciu`).toBeGreaterThan(zaslona);
+  }
+
+  // Bez zdjęcia nie ma po co odsuwać tekstu od góry ani rezerwować wysokości.
+  const bezZdjecia = readFileSync(join(DIST, 'dekarz/index.html'), 'utf8');
+  expect(bezZdjecia).not.toContain('zaslona-hero');
+  expect(bezZdjecia).not.toContain('pt-[17rem]');
+});
+
 test('zdjęcia przechodzą przez optymalizację i mają wymiary', () => {
   const html = readFileSync(join(DIST, 'stomatolog/index.html'), 'utf8');
   const img = html.match(/<img[^>]*>/)?.[0] ?? '';

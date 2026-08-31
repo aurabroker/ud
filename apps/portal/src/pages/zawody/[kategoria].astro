@@ -55,20 +55,26 @@ const jsonld = graf([
     </ol>
   </nav>
 
-  {obrazKategorii(kategoria.slug) && (
-    <div class="overflow-hidden bg-tlo-jasne border-b border-linia">
-      <Image src={obrazKategorii(kategoria.slug)!} alt={opisIlustracji(kategoria.nazwa)}
-             widths={[768, 1280, 1920]} sizes="100vw"
-             loading="eager" fetchpriority="high"
-             class="w-full h-[clamp(11rem,24vw,19rem)] object-cover" />
+  <!-- Tekst na zdjęciu — powód w komentarzu przy `.zaslona-hero`. -->
+  <div class="relative isolate border-b border-linia bg-linear-102 from-tlo via-tlo-cyjan to-tlo-hero">
+    {obrazKategorii(kategoria.slug) && (
+      <>
+        <Image src={obrazKategorii(kategoria.slug)!} alt={opisIlustracji(kategoria.nazwa)}
+               widths={[768, 1280, 1920]} sizes="100vw"
+               loading="eager" fetchpriority="high"
+               class="absolute inset-0 -z-10 w-full h-full object-cover" />
+        <div class="absolute inset-0 -z-10 zaslona-hero" aria-hidden="true"></div>
+      </>
+    )}
+    <div class={`max-w-[1200px] mx-auto px-5 flex flex-col justify-end ${obrazKategorii(kategoria.slug)
+      ? 'pt-[17rem] pb-16 lg:pt-24 lg:pb-24 min-h-[clamp(22rem,26vw,30rem)]'
+      : 'py-16 lg:py-20'}`}>
+      <h1 class="text-[clamp(2rem,5vw,3rem)] leading-[1.06] mb-5">{kategoria.nazwa}</h1>
+      <p data-odpowiedz class="text-[1.12rem] leading-relaxed text-tekst-drugi max-w-[38em] m-0">{opis}</p>
     </div>
-  )}
+  </div>
 
   <div class="max-w-[1200px] mx-auto px-5 py-16">
-    <div class="mb-12">
-      <h1 class="text-[clamp(2rem,5vw,3rem)] leading-[1.06] mb-5">{kategoria.nazwa}</h1>
-      <p data-odpowiedz class="text-[1.12rem] leading-relaxed text-tekst-drugi max-w-[42em] m-0">{opis}</p>
-    </div>
 
     <ul class="grid gap-4 list-none m-0 p-0 grid-cols-[repeat(auto-fill,minmax(17rem,1fr))]">
       {zawodyKategorii.map((z) => (

@@ -95,23 +95,27 @@ const ogObraz = zdjecie
     </ol>
   </nav>
 
-  <!-- ── Zdjęcie zawodu ─────────────────────────────────────────────────── -->
-  <!-- Pas przez całą szerokość okna, nie kolumna obok tekstu: przy szerokim
-       kadrze zdjęcie ma być tłem sceny, a nie ikoną przy nagłówku. Ładowane
-       zachłannie — to element LCP tej strony. -->
-  {zdjecie && (
-    <div class="overflow-hidden bg-tlo-jasne border-b border-linia">
-      <Image src={zdjecie.obraz} alt={zdjecie.opis}
-             widths={[768, 1280, 1920]} sizes="100vw"
-             loading="eager" fetchpriority="high"
-             class="w-full h-[clamp(11rem,24vw,19rem)] object-cover" />
-    </div>
-  )}
+  <!-- ── Nagłówek ze zdjęciem ───────────────────────────────────────────── -->
+  <!-- Tekst leży NA zdjęciu. Gdy zdjęcie było osobnym pasem nad nagłówkiem,
+       musiało być niskie, żeby nie spychać treści poniżej ekranu — i przez to
+       ucinało bohatera w pół. Tak pas może być wysoki, a kadr 21:9 traci
+       w pionie ok. jednej piątej. Bez zdjęcia zostaje sam gradient. -->
+  <div class="relative isolate border-b border-linia bg-linear-102 from-tlo via-tlo-cyjan to-tlo-hero">
+    {zdjecie && (
+      <>
+        <Image src={zdjecie.obraz} alt={zdjecie.opis}
+               widths={[768, 1280, 1920]} sizes="100vw"
+               loading="eager" fetchpriority="high"
+               class="absolute inset-0 -z-10 w-full h-full object-cover" />
+        <div class="absolute inset-0 -z-10 zaslona-hero" aria-hidden="true"></div>
+      </>
+    )}
 
-  <!-- ── Nagłówek zawodu ────────────────────────────────────────────────── -->
-  <div class="bg-linear-102 from-tlo via-tlo-cyjan to-tlo-hero border-b border-linia">
-    <div class="max-w-[1200px] mx-auto px-5 py-16 lg:py-20">
-      <p class="font-mono text-xs tracking-[0.16em] uppercase text-akcent-ciemny font-semibold m-0">
+    <div class={`max-w-[1200px] mx-auto px-5 flex flex-col justify-end ${zdjecie
+      ? 'pt-[17rem] pb-16 lg:pt-24 lg:pb-24 min-h-[clamp(26rem,34vw,38rem)]'
+      : 'py-16 lg:py-20'}`}>
+      <div class="max-w-[36em]">
+      <p class="font-mono text-xs tracking-[0.16em] uppercase text-akcent-tekst font-semibold m-0">
         {z.kategoria} · kontrakt B2B
       </p>
       <h1 class="mt-4 mb-5 text-[clamp(2rem,5vw,3.25rem)] leading-[1.06] max-w-[16em]">
@@ -130,6 +134,7 @@ const ogObraz = zdjecie
            class="border-[1.5px] border-akcent text-akcent-ciemny bg-tlo px-7 py-[14px] font-semibold hover:bg-tlo-jasne">
           Zobacz, co nie jest objęte
         </a>
+      </div>
       </div>
     </div>
   </div>
