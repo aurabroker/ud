@@ -208,8 +208,17 @@ Dwie warstwy, obie w `src/lib/obrazy.ts`:
 
 | Katalog | Nazwa pliku | Widać na |
 |---|---|---|
-| `src/obrazy/zawody/` | `<slug-zawodu>.jpg` | `/<slug>/` |
-| `src/obrazy/kategorie/` | `<slug-kategorii>.jpg` | `/zawody/<slug>/`, kafelki na `/`, oraz `/<slug>/` gdy zawód nie ma własnego |
+| `src/obrazy/zawody/` | `<slug-zawodu>` | `/<slug>/` |
+| `src/obrazy/kategorie/` | `<slug-kategorii>` | `/zawody/<slug>/`, kafelki na `/`, oraz `/<slug>/` gdy zawód nie ma własnego |
+
+Rozszerzenie nie ma znaczenia — `jpg`, `jpeg`, `png` i `webp` działają tak samo,
+bo zestaw powstaje w różnych narzędziach i wymuszanie konwersji przed wrzuceniem
+kończyło się plikiem, którego strona nie widzi. Serwowany jest i tak WebP,
+niezależnie od formatu źródła. Ten sam slug w dwóch formatach naraz to błąd —
+test go wyłapuje, bo `obrazy.ts` wybrałby jeden po kolejności rozszerzeń.
+
+**Pliki idą do `src/`, nigdy do `public/`.** Tylko `src/` przechodzi przez
+optymalizację; z `public/` plik leci do przeglądarki taki, jaki jest.
 
 Podstrona zawodu bierze `zdjecieZawodu()`: własne zdjęcie, jeśli plik istnieje,
 w przeciwnym razie zdjęcie kategorii. Dzięki temu zestaw zawodowy można

@@ -91,6 +91,24 @@ test('żaden link wewnętrzny nie prowadzi w pustkę', () => {
   expect(martwe.size, `martwe linki wewnętrzne:\n${opis}`).toBe(0);
 });
 
+const ROZSZERZENIA = /\.(jpe?g|png|webp)$/i;
+
+/**
+ * Nazwy zdjęć w katalogu, bez rozszerzenia. Format nie ma znaczenia — liczy się
+ * nazwa — ale ten sam slug w dwóch formatach naraz jest błędem: `obrazy.ts`
+ * wybrałby jeden po kolejności rozszerzeń, a autor zmiany zobaczyłby losowy.
+ */
+function nazwyZdjec(katalog) {
+  if (!existsSync(katalog)) return [];
+  const nazwy = readdirSync(katalog)
+    .filter((f) => ROZSZERZENIA.test(f))
+    .map((f) => f.replace(ROZSZERZENIA, ''));
+
+  const podwojne = nazwy.filter((n, i) => nazwy.indexOf(n) !== i);
+  expect(podwojne, `ten sam slug w dwóch formatach: ${podwojne.join(', ')}`).toEqual([]);
+  return nazwy;
+}
+
 /**
  * Kategorie, dla których nie ma jeszcze pliku zdjęcia. Lista jest tymczasowa
  * i ma sama po sobie posprzątać: gdy plik się pojawi, test poniżej wywali się
@@ -106,9 +124,7 @@ test('każde zdjęcie w src/obrazy/kategorie nosi nazwę istniejącej kategorii'
    * slugowi kategorii sprawia, że takie rozjechanie jest niewyrażalne.
    */
   const slugi = new Set(kategorie().map((k) => k.slug));
-  const pliki = readdirSync(join(KORZEN, 'src/obrazy/kategorie'))
-    .filter((f) => f.endsWith('.jpg'))
-    .map((f) => f.replace(/\.jpg$/, ''));
+  const pliki = nazwyZdjec(join(KORZEN, 'src/obrazy/kategorie'));
 
   const osierocone = pliki.filter((f) => !slugi.has(f));
   expect(osierocone, `pliki bez kategorii: ${osierocone.join(', ')}`).toEqual([]);
@@ -128,9 +144,7 @@ test('zdjęcia zawodów: nazwa pliku to slug zawodu i strona go pokazuje', () =>
    * istniejący zawód i że plik faktycznie trafia na jego podstronę.
    */
   const katalog = join(KORZEN, 'src/obrazy/zawody');
-  const pliki = existsSync(katalog)
-    ? readdirSync(katalog).filter((f) => f.endsWith('.jpg')).map((f) => f.replace(/\.jpg$/, ''))
-    : [];
+  const pliki = nazwyZdjec(katalog);
 
   const slugi = new Set(ZAWODY.map((z) => z.slug));
   const osierocone = pliki.filter((f) => !slugi.has(f));

@@ -16,22 +16,42 @@ import type { ImageMetadata } from 'astro';
  * że taka pomyłka jest niewyrażalna.
  */
 const KATEGORIE = import.meta.glob<{ default: ImageMetadata }>(
-  '../obrazy/kategorie/*.jpg',
+  '../obrazy/kategorie/*.{jpg,jpeg,png,webp}',
   { eager: true },
 );
 
 const ZAWODY = import.meta.glob<{ default: ImageMetadata }>(
-  '../obrazy/zawody/*.jpg',
+  '../obrazy/zawody/*.{jpg,jpeg,png,webp}',
   { eager: true },
 );
 
+/**
+ * Rozszerzenie pliku nie ma znaczenia — liczy się nazwa. Zestaw zdjęć powstaje
+ * w różnych narzędziach, jedne oddają JPEG, inne PNG, i wymuszanie konwersji
+ * przed wrzuceniem do repo kończyłoby się plikiem, którego strona nie widzi.
+ * Build i tak serwuje WebP niezależnie od formatu źródła.
+ */
+const ROZSZERZENIA = ['jpg', 'jpeg', 'png', 'webp'];
+
+function znajdz(
+  zbior: Record<string, { default: ImageMetadata }>,
+  katalog: string,
+  slug: string,
+): ImageMetadata | null {
+  for (const rozszerzenie of ROZSZERZENIA) {
+    const trafienie = zbior[`../obrazy/${katalog}/${slug}.${rozszerzenie}`];
+    if (trafienie) return trafienie.default;
+  }
+  return null;
+}
+
 /** `null`, gdy zdjęcia nie ma — szablon po prostu nie renderuje pasa. */
 export function obrazKategorii(slugKategorii: string): ImageMetadata | null {
-  return KATEGORIE[`../obrazy/kategorie/${slugKategorii}.jpg`]?.default ?? null;
+  return znajdz(KATEGORIE, 'kategorie', slugKategorii);
 }
 
 export function obrazZawodu(slugZawodu: string): ImageMetadata | null {
-  return ZAWODY[`../obrazy/zawody/${slugZawodu}.jpg`]?.default ?? null;
+  return znajdz(ZAWODY, 'zawody', slugZawodu);
 }
 
 /**
