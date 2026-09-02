@@ -10,6 +10,7 @@
 import Baza from '../../layouts/Baza.astro';
 import { ARTYKULY, dataPl } from '../../lib/artykuly';
 import { graf, organizacja, serwis, strona, okruszki, abs } from '../../lib/seo';
+import Znak from '../../components/Znak.astro';
 
 const sciezka = '/blog/';
 const tytul = 'Baza wiedzy o utracie dochodu i zasiłkach ZUS | UtrataDochodu.pl';
@@ -87,7 +88,11 @@ const lokalne = (url: string) => url.startsWith('/');
         {ARTYKULY.map((a, i) => (
           <li>
             <article class="border border-linia bg-tlo h-full flex flex-col hover:border-akcent">
-              {a.obraz && (
+              {/* Kafel jest zawsze — bez niego siatka rozjeżdża się na przemian,
+                  bo zdjęcie ma dziś tylko część artykułów. Zastępnik to znak
+                  marki na gradiencie, nie podstawione zdjęcie z innego wpisu:
+                  ma czytać się jako „brak zdjęcia", a nie wprowadzać w błąd. */}
+              {a.obraz ? (
                 <div class="h-48 overflow-hidden border-b border-linia bg-tlo-cyjan">
                   <img src={a.obraz}
                        srcset={lokalne(a.obraz) && a.obrazDuzy
@@ -97,6 +102,11 @@ const lokalne = (url: string) => url.startsWith('/');
                        alt={a.tytul} width="800" height="192"
                        loading={i < 3 ? 'eager' : 'lazy'} decoding="async"
                        class="w-full h-full object-cover">
+                </div>
+              ) : (
+                <div class="h-48 border-b border-linia bg-linear-102 from-tlo-cyjan via-tlo-mocne to-tlo-hero
+                            flex items-center justify-center" aria-hidden="true">
+                  <Znak wysokosc={44} klasa="opacity-45" />
                 </div>
               )}
               <div class="p-6 flex flex-col flex-grow">
