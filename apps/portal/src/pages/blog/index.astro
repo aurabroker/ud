@@ -94,7 +94,7 @@ const lokalne = (url: string) => url.startsWith('/');
                          ? `${a.obraz} 800w, ${a.obrazDuzy} 1600w`
                          : undefined}
                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                       alt="" width="800" height="192"
+                       alt={a.tytul} width="800" height="192"
                        loading={i < 3 ? 'eager' : 'lazy'} decoding="async"
                        class="w-full h-full object-cover">
                 </div>
