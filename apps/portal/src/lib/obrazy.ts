@@ -55,6 +55,26 @@ export function obrazZawodu(slugZawodu: string): ImageMetadata | null {
 }
 
 /**
+ * Zdjęcie nagłówka strony głównej: `src/obrazy/hero.<ext>`.
+ *
+ * Osobny plik, a nie pożyczone zdjęcie kategorii — strona główna obsługuje
+ * 188 zawodów, więc jeden gabinet lekarski na wejściu zawęża ofertę do jednej
+ * branży. Póki pliku nie ma, nagłówek zostaje na samym gradiencie.
+ */
+const HERO = import.meta.glob<{ default: ImageMetadata }>(
+  '../obrazy/hero.{jpg,jpeg,png,webp}',
+  { eager: true },
+);
+
+export function obrazHero(): ImageMetadata | null {
+  for (const rozszerzenie of ROZSZERZENIA) {
+    const trafienie = HERO[`../obrazy/hero.${rozszerzenie}`];
+    if (trafienie) return trafienie.default;
+  }
+  return null;
+}
+
+/**
  * Zdjęcie podstrony zawodu wraz z opisem alternatywnym. Opis idzie za tym,
  * co widać: własne zdjęcie opisujemy zawodem, odziedziczone — branżą.
  */
