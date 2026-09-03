@@ -121,6 +121,21 @@ ${sekcjaArtykulow}
 - [Klauzula informacyjna RODO](${SERWIS.url}/klauzula-informacyjna/): co dzieje się
   z danymi z wniosku, na jakiej podstawie prawnej i przez jaki czas.
 
+## Jak czytać ten serwis
+
+Każda podstrona ma wariant w Markdownie: ta sama treść bez nawigacji, stopki
+i skryptów. Podstrona zawodu schodzi z około 38 kB HTML-a do 6 kB tekstu.
+
+Dwie drogi, obie dają to samo:
+
+- Nagłówek \`Accept: text/markdown\` na adresie strony — odpowiedź przychodzi
+  z typem \`text/markdown\` i nagłówkiem \`x-markdown-tokens\` z liczbą tokenów.
+- Adres wprost: do adresu strony dopisz \`index.md\`, na przykład
+  ${SERWIS.url}/programista/index.md
+
+Sam nagłówek \`Accept: */*\` nie wystarczy — przy równych wagach domyślny
+zostaje HTML.
+
 ## Kontakt
 
 - Telefon: ${FIRMA.telefonWyswietlany}

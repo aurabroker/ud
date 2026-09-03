@@ -243,6 +243,69 @@ inaczej historia ruchu zostaje rozbita na dwie niepełne właściwości.
 
 ---
 
+## Markdown dla agentów — negocjacja nagłówkiem Accept
+
+Każda z 227 podstron ma bliźniaczy plik `.md` z tą samą treścią bez nawigacji,
+stopki, skryptów i wysp Svelte. Podstrona zawodu schodzi z 38 kB HTML-a do
+5,8 kB tekstu; cały serwis z 8,0 MB do 1,1 MB.
+
+Dwie drogi do tego samego:
+
+| Sposób | Adres | Kiedy |
+|---|---|---|
+| Nagłówek `Accept: text/markdown` | adres strony | agent negocjuje treść |
+| Adres wprost | `/<slug>/index.md` | gdy negocjacja jest niewygodna |
+
+Odpowiedź w Markdownie niesie `Content-Type: text/markdown; charset=utf-8`,
+`Vary: Accept` i `x-markdown-tokens` z liczbą tokenów (kodowanie o200k_base).
+
+### Trzy pliki, każdy z inną robotą
+
+| Plik | Co robi |
+|---|---|
+| `integracje/markdown.mjs` | po buildzie konwertuje `<main id="tresc">` na `index.md` i liczy tokeny do `tokeny-markdown.json` |
+| `functions/_middleware.js` | czyta Accept i podaje wariant, który klient chce bardziej |
+| `public/_routes.json` | wyłącza zasoby statyczne spod funkcji, żeby nie wołać workera po każdy plik |
+
+Konwersja idzie z **gotowego HTML-a, nie z osobnych szablonów**. Ręcznie pisany
+wariant markdownowy rozjechałby się przy pierwszej edycji, której ktoś nie
+powtórzy w dwóch miejscach.
+
+To nie zastępuje `llms.txt`: tamten plik jest indeksem i streszczeniem serwisu
+w formacie llmstxt.org, ten — wierną kopią jednej podstrony.
+
+### Rzeczy, o które łatwo się potknąć
+
+- **`Accept: */*` ma dostać HTML.** Markdown wychodzi tylko wtedy, gdy klient
+  chce go *bardziej* niż HTML-a — porównujemy wagi `q`, a przy remisie wygrywa
+  typ wymieniony imiennie. Naiwne „czy nagłówek zawiera markdown" wysłałoby
+  Markdown przeglądarce, bo jej Accept kończy się typem zbiorczym.
+- **Brak pliku `.md` nie daje 404.** Warstwa zasobów Pages podaje wtedy stronę
+  główną ze statusem 200. Samo `response.ok` tego nie odsiewa, więc middleware
+  sprawdza typ MIME odpowiedzi — inaczej agent dostaje HTML opisany jako
+  `text/markdown`. Sprawdzone na wranglerze, nie zgadnięte.
+- **`Vary: Accept` musi być na KAŻDEJ odpowiedzi HTML**, nie tylko na
+  wynegocjowanej — inaczej bufor pośredni poda przeglądarce zapisany wcześniej
+  Markdown.
+- **Pliki `.md` mają `X-Robots-Tag: noindex`**, bo pod adresem strony stoi ta
+  sama treść. Wynegocjowana odpowiedź tego nagłówka **nie** dziedziczy —
+  przeszedłby wtedy na adres, pod którym indeksowana jest wersja HTML.
+- **Middleware odpala się przy każdym żądaniu strony.** Statyki są wyłączone
+  w `_routes.json`, ale każda odsłona HTML to jedno wywołanie funkcji.
+
+Cloudflare ma to samo jako przełącznik na poziomie strefy („Markdown for
+Agents") — konwertuje HTML w locie. Robimy to u siebie, bo konwersja z builda
+widzi semantyczny HTML zamiast wyniku po CSS-ie i wchodzi do repozytorium razem
+z testami. Włączenie przełącznika obok niczego nie psuje.
+
+Pilnuje tego `test/markdown.spec.js` — dwanaście testów, wołających `onRequest`
+wprost, bo serwer testowy podaje statyki i nie uruchamia funkcji brzegowych.
+Najważniejszy jest ten porównujący `<h1>` ze strony z treścią pliku `.md`:
+gdyby konwersja przestała łapać treść, pliki zostałyby z samą nawigacją
+i nikt by tego nie zauważył.
+
+---
+
 ## Serwis jest jasny — bez trybu ciemnego
 
 Decyzja klienta, 2026-08-28. Nie proponuj ponownie i nie dokładaj wariantu

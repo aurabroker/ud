@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "include": ["/*"],
+  "exclude": [
+    "/_astro/*",
+    "/fonts/*",
+    "/img/*",
+    "/blog/rss.xml",
+    "/llms.txt",
+    "/robots.txt",
+    "/sitemap-index.xml",
+    "/sitemap-0.xml",
+    "/tokeny-markdown.json",
+    "/favicon.svg",
+    "/awaria.js",
+    "/zgody.js"
+  ]
+}

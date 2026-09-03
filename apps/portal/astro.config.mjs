@@ -5,6 +5,7 @@ import sitemap from '@astrojs/sitemap';
 import { EnumChangefreq } from 'sitemap';
 import tailwind from '@tailwindcss/vite';
 import { przekierowania } from '@ud/zawody';
+import { markdownDlaAgentow } from './integracje/markdown.mjs';
 import { writeFileSync, appendFileSync, existsSync, readdirSync, lstatSync, realpathSync, readFileSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 
@@ -28,6 +29,7 @@ export default defineConfig({
 
   integrations: [
     svelte(),
+    markdownDlaAgentow({ serwis: SITE }),
     /**
      * Dopisuje do _redirects trwałe przekierowania z adresów, które zmieniły
      * się względem starego serwisu. 301 zachowuje pozycję podstrony; 404 ją kasuje.

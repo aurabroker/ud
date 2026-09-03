@@ -62,6 +62,11 @@ const ogObraz = new URL(obraz ?? '/og-domyslny.jpg', SERWIS.url).href;
   <title>{tytul}</title>
   <meta name="description" content={opis}>
   <link rel="canonical" href={kanoniczny}>
+
+  <!-- Ta sama treść bez nawigacji, stopki i wysp — dla agentów, które przyszły
+       po tekst, a nie po stronę. To samo wraca pod adresem strony, gdy żądanie
+       ma nagłówek `Accept: text/markdown` (obsługa: functions/_middleware.js). -->
+  <link rel="alternate" type="text/markdown" href={`${sciezka}index.md`}>
   {bezIndeksu
     ? <meta name="robots" content="noindex, follow">
     : <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">}
