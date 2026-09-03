@@ -66,6 +66,30 @@ function chceMarkdown(accept) {
   return md.szczegolowosc < html.szczegolowosc;
 }
 
+/**
+ * Zasoby maszynowe serwisu, wskazywane nagłówkiem Link (RFC 8288).
+ *
+ * Wypisane są wyłącznie relacje z rejestru IANA i wyłącznie cele, które
+ * naprawdę istnieją. Świadomie NIE ma tu `api-catalog`, `service-desc` ani
+ * `service-doc`: serwis nie wystawia publicznego API, a odnośnik do katalogu,
+ * którego nie ma, jest gorszy niż jego brak — agent traci na nim jedno
+ * żądanie i kończy z błędem zamiast z odpowiedzią.
+ *
+ * Mapy strony tu nie ma, bo deklaruje ją `robots.txt` — to jest mechanizm,
+ * który rozumie każdy robot, i nie ma powodu mówić tego samego dwa razy.
+ *
+ * Ścieżki są względne wobec korzenia; RFC 8288 na to pozwala i tak wyglądają
+ * przykłady w samym dokumencie.
+ */
+const ZASOBY = [
+  // Streszczenie serwisu w formacie llmstxt.org.
+  '</llms.txt>; rel="describedby"; type="text/plain"',
+  '</blog/rss.xml>; rel="alternate"; type="application/rss+xml"; title="Baza wiedzy UtrataDochodu.pl"',
+  '</polityka-prywatnosci/>; rel="privacy-policy"',
+  '</regulamin/>; rel="terms-of-service"',
+  '</o-nas/>; rel="author"',
+].join(', ');
+
 /** Adres strony — tylko takie mają wariant .md obok siebie. */
 const toStrona = (sciezka) => sciezka.endsWith('/');
 
@@ -144,6 +168,7 @@ export async function onRequest({ request, next }) {
     // Vary na KAŻDEJ odpowiedzi HTML, nie tylko na wynegocjowanej: bez tego
     // bufor pośredni mógłby podać przeglądarce zapisany wcześniej Markdown.
     naglowki.append('Vary', 'Accept');
+    naglowki.append('Link', ZASOBY);
     if (toStrona(url.pathname)) {
       naglowki.append('Link', `<${url.pathname}index.md>; rel="alternate"; type="text/markdown"`);
     }

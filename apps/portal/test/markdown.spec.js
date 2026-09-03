@@ -194,3 +194,39 @@ test('adres .md spoza builda też nie udaje Markdownu', async () => {
   const odp = await pobierz('/nie-ma-takiej-strony/index.md', ACCEPT_PRZEGLADARKI);
   expect(odp.headers.get('content-type')).not.toContain('markdown');
 });
+
+test('strona główna wskazuje zasoby maszynowe nagłówkiem Link', async () => {
+  const odp = await pobierz('/', ACCEPT_PRZEGLADARKI);
+  const link = odp.headers.get('link') ?? '';
+
+  const wymagane = [
+    ['</llms.txt>; rel="describedby"',            'streszczenie serwisu'],
+    ['rel="alternate"; type="application/rss+xml"', 'kanał RSS'],
+    ['</polityka-prywatnosci/>; rel="privacy-policy"', 'polityka prywatności'],
+    ['</regulamin/>; rel="terms-of-service"',     'regulamin'],
+    ['</o-nas/>; rel="author"',                   'wydawca'],
+    ['</index.md>; rel="alternate"; type="text/markdown"', 'wariant markdownowy'],
+  ];
+  for (const [fragment, co] of wymagane) {
+    expect(link, `brak odnośnika: ${co}`).toContain(fragment);
+  }
+});
+
+test('Link nie obiecuje API, którego nie ma', () => {
+  // Odnośnik do katalogu, którego nie ma, kosztuje agenta jedno żądanie
+  // i kończy się błędem zamiast odpowiedzią. Serwis nie wystawia publicznego
+  // API, więc tych trzech relacji tu nie ma — i mają nie wrócić przez pomyłkę.
+  const zrodlo = readFileSync('functions/_middleware.js', 'utf8');
+  for (const relacja of ['api-catalog', 'service-desc', 'service-doc']) {
+    expect(zrodlo, `middleware wskazuje na ${relacja}, a serwis go nie wystawia`)
+      .not.toContain(`rel="${relacja}"`);
+  }
+});
+
+test('każda podstrona dostaje ten sam zestaw odnośników', async () => {
+  for (const adres of ['/', '/programista/', '/blog/', '/kontakt/']) {
+    const link = (await pobierz(adres, ACCEPT_PRZEGLADARKI)).headers.get('link') ?? '';
+    expect(link, `${adres} bez odnośnika do llms.txt`).toContain('rel="describedby"');
+    expect(link, `${adres} bez wariantu markdownowego`).toContain(`<${adres}index.md>`);
+  }
+});

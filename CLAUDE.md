@@ -298,11 +298,29 @@ Agents") — konwertuje HTML w locie. Robimy to u siebie, bo konwersja z builda
 widzi semantyczny HTML zamiast wyniku po CSS-ie i wchodzi do repozytorium razem
 z testami. Włączenie przełącznika obok niczego nie psuje.
 
-Pilnuje tego `test/markdown.spec.js` — dwanaście testów, wołających `onRequest`
+Pilnuje tego `test/markdown.spec.js` — piętnaście testów, wołających `onRequest`
 wprost, bo serwer testowy podaje statyki i nie uruchamia funkcji brzegowych.
 Najważniejszy jest ten porównujący `<h1>` ze strony z treścią pliku `.md`:
 gdyby konwersja przestała łapać treść, pliki zostałyby z samą nawigacją
 i nikt by tego nie zauważył.
+
+### Nagłówek Link — co wskazujemy, czego nie
+
+Każda odpowiedź HTML niesie `Link` (RFC 8288) z zasobami maszynowymi serwisu:
+`describedby` na `llms.txt`, `alternate` na kanał RSS i na wariant markdownowy
+tej podstrony, `privacy-policy`, `terms-of-service`, `author`. Lista siedzi
+w stałej `ZASOBY` w `functions/_middleware.js`.
+
+**Nie ma tam `api-catalog`, `service-desc` ani `service-doc` i nie mają wrócić.**
+Serwis nie wystawia publicznego API. Odnośnik do katalogu, którego nie ma,
+kosztuje agenta jedno żądanie i kończy się błędem zamiast odpowiedzią — jest
+więc gorszy niż jego brak. Skanery zgodności lubią te trzy relacje, ale
+wpisanie ich na sucho oznaczałoby, że dokument opisuje interfejs nieistniejący.
+Gdyby kiedyś powstało prawdziwe API, katalog RFC 9727 i te relacje mają sens —
+wcześniej nie. Test na to jest.
+
+Mapy strony w nagłówku nie ma, bo deklaruje ją `robots.txt` — ten mechanizm
+rozumie każdy robot i nie ma powodu mówić tego samego dwa razy.
 
 ---
 
