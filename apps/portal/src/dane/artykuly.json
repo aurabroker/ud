@@ -1,51 +1,72 @@
 {
-  "pobrano": "2026-08-27",
-  "zrodlo": "aura_articles (status=published, platforms zawiera UtrataDochodu.pl)",
+  "pobrano": "2026-09-03",
+  "zrodlo": "aura_articles (status=published, platforms zawiera UtrataDochodu.pl); zdjęcia z preview_image_800/1600",
   "artykuly": [
     {
       "slug": "choroby-psychiczne-a-ubezpieczenie-od-utraty-dochodu",
       "tytul": "Choroby psychiczne a ubezpieczenie od utraty dochodu",
       "zajawka": "Czy ubezpieczenie od utraty dochodu obejmuje depresję, stres i zaburzenia lękowe? Sprawdź, jak czytać OWU i gdzie są wyłączenia odpowiedzialności.",
-      "tagi": ["Depresja", "wypalenie zawodowe"],
+      "tagi": [
+        "Depresja",
+        "wypalenie zawodowe"
+      ],
       "opublikowano": "2026-07-07T10:46:45Z",
       "utworzono": "2026-06-17T08:04:29Z",
-      "obraz": null
+      "obraz": null,
+      "obrazDuzy": null
     },
     {
       "slug": "zus-a-ubezpieczenie-od-utraty-dochodu-w-2025-roku-analiza-i-porownanie",
       "tytul": "ZUS a ubezpieczenie od utraty dochodu. Analiza i porównanie",
       "zajawka": "Przedsiębiorca płaci ZUS co miesiąc i zakłada, że system go zabezpieczy. Między „w jakimś stopniu” a „wystarczy mi na życie” bywa jednak spora przepaść.",
-      "tagi": ["ZUS", "ubezpieczenie L4"],
+      "tagi": [
+        "ZUS",
+        "ubezpieczenie L4"
+      ],
       "opublikowano": "2026-06-05T12:42:33Z",
       "utworzono": "2026-06-05T12:42:33Z",
-      "obraz": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/1780663348722-ywgy5simu.jpg"
+      "obraz": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/zus-a-ubezpieczenie-od-utraty-dochodu-w-2025-roku-analiza-i-porownanie-cover-800.webp",
+      "obrazDuzy": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/zus-a-ubezpieczenie-od-utraty-dochodu-w-2025-roku-analiza-i-porownanie-cover-1600.webp"
     },
     {
       "slug": "ubezpieczenie-od-utraty-dochodu-dla-programisty-jak-chronic-swoje-zarobki",
       "tytul": "Ubezpieczenie od utraty dochodu dla programisty – jak chronić swoje zarobki?",
       "zajawka": "W branży IT łatwo przyzwyczaić się do dobrych zarobków. Problem pojawia się wtedy, gdy nagle nie możesz pracować, a rata kredytu i ZUS nie znikają.",
-      "tagi": ["programista", "IT", "utrata dochodu"],
+      "tagi": [
+        "programista",
+        "IT",
+        "utrata dochodu"
+      ],
       "opublikowano": "2026-06-05T10:54:21Z",
       "utworzono": "2026-06-05T10:49:10Z",
-      "obraz": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/1780656455584-5t9w7dgsz.jpg"
+      "obraz": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/ubezpieczenie-od-utraty-dochodu-dla-programisty-jak-chronic-swoje-zarobki-cover-800.webp",
+      "obrazDuzy": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/ubezpieczenie-od-utraty-dochodu-dla-programisty-jak-chronic-swoje-zarobki-cover-1600.webp"
     },
     {
       "slug": "wypadek-przy-pracy-a-dlugie-l4-co-mowi-zus-i-co-dzieje-sie-po-182-dniach",
       "tytul": "Wypadek przy pracy a długie L4. Co mówi ZUS i co dzieje się po 182 dniach",
       "zajawka": "Wypadek przy pracy rzadko zaczyna się dramatyczną sceną. Częściej to zwykły poranek: hala, magazyn, budowa, biuro — i nagle kilka miesięcy bez dochodu.",
-      "tagi": ["ZUS", "L4"],
+      "tagi": [
+        "ZUS",
+        "L4"
+      ],
       "opublikowano": "2026-05-27T08:21:41Z",
       "utworzono": "2026-05-27T08:21:41Z",
-      "obraz": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/1779870025368-lhms22s2k.jpg"
+      "obraz": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/wypadek-przy-pracy-a-dlugie-l4-co-mowi-zus-i-co-dzieje-sie-po-182-dniach-cover-800.webp",
+      "obrazDuzy": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/wypadek-przy-pracy-a-dlugie-l4-co-mowi-zus-i-co-dzieje-sie-po-182-dniach-cover-1600.webp"
     },
     {
       "slug": "290000000-dni-na-zwolnieniu-l4",
       "tytul": "290 000 000 dni na zwolnieniu L4",
       "zajawka": "W 2025 r. do ZUS trafiło 27,5 mln zaświadczeń lekarskich o czasowej niezdolności do pracy. Razem: 290,5 miliona dni absencji chorobowej.",
-      "tagi": ["L4", "choroba/wypadek"],
+      "tagi": [
+        "L4",
+        "choroba/wypadek"
+      ],
       "opublikowano": "2026-05-18T13:47:52Z",
       "utworzono": "2026-05-18T13:47:53Z",
-      "obraz": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/1779111806904-9acd24f1q.jpg"
+      "obraz": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/290000000-dni-na-zwolnieniu-l4-cover-800.webp",
+      "obrazDuzy": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/290000000-dni-na-zwolnieniu-l4-cover-1600.webp"
     },
     {
       "slug": "chron-swoj-dochod-niezaleznie-od-losu-poznaj-utratadochodupl",
@@ -54,25 +75,33 @@
       "tagi": [],
       "opublikowano": "2026-05-09T10:26:46Z",
       "utworzono": "2026-05-09T10:24:12Z",
-      "obraz": null
+      "obraz": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/chron-swoj-dochod-niezaleznie-od-losu-poznaj-utratadochodupl-content1-800.webp",
+      "obrazDuzy": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/chron-swoj-dochod-niezaleznie-od-losu-poznaj-utratadochodupl-content1-1600.webp"
     },
     {
       "slug": "kto-placi-za-l4-w-2026-roku-pracodawca-czy-zus",
       "tytul": "Kto płaci za L4 w 2026 roku – pracodawca czy ZUS?",
       "zajawka": "Sprawdź, kiedy wynagrodzenie chorobowe wypłaca pracodawca, kiedy świadczenie przejmuje ZUS i od kiedy zasiłek przysługuje przedsiębiorcy.",
-      "tagi": ["L4"],
+      "tagi": [
+        "L4"
+      ],
       "opublikowano": "2026-05-05T08:57:26Z",
       "utworzono": "2026-05-05T08:35:10Z",
-      "obraz": null
+      "obraz": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/kto-placi-za-l4-w-2026-roku-pracodawca-czy-zus-content1-800.webp",
+      "obrazDuzy": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/kto-placi-za-l4-w-2026-roku-pracodawca-czy-zus-content1-1600.webp"
     },
     {
       "slug": "w-pracy-duzo-wypadkow",
       "tytul": "W pracy dużo wypadków",
       "zajawka": "W 2025 roku GUS zgłosił 66 733 osoby poszkodowane w wypadkach przy pracy. Udział polskich ofiar śmiertelnych w UE jest ponad dwukrotnie wyższy niż udział samych wypadków.",
-      "tagi": ["GUS", "wypadek"],
+      "tagi": [
+        "GUS",
+        "wypadek"
+      ],
       "opublikowano": "2026-04-21T13:00:53Z",
       "utworzono": "2026-04-21T12:21:35Z",
-      "obraz": null
+      "obraz": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/w-pracy-duzo-wypadkow-content1-800.webp",
+      "obrazDuzy": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/w-pracy-duzo-wypadkow-content1-1600.webp"
     }
   ]
 }

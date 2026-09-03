@@ -83,3 +83,34 @@ test('obrazki w treści nie są wklejone jako data URI', () => {
     expect(html, `„${slug}" — obrazek jako data URI w treści`).not.toContain('src="data:image');
   }
 });
+
+test('żadne zdjęcie nie idzie do przeglądarki w oryginale z kubełka', () => {
+  /**
+   * Kubełek `article-images` trzyma pliki prosto z aparatu — najcięższy ma
+   * 15,9 MB. Do przeglądarki mają iść wyłącznie warianty z podkatalogu
+   * `normalized/` (800 i 1600 px, WebP), które robi funkcja brzegowa
+   * `normalize-article-images` albo skrypt synchronizacji.
+   *
+   * Test patrzy na zbudowany HTML, nie na zrzut JSON: adres surowy potrafi
+   * wejść też z treści artykułu, a nie tylko z pola okładki.
+   */
+  const surowy = /article-images\/(?!normalized\/)[^"']+/g;
+  for (const { slug, html } of strony) {
+    const trafienia = [...new Set(html.match(surowy) ?? [])];
+    expect(trafienia, `„${slug}" pokazuje oryginał z kubełka: ${trafienia.join(', ')}`).toEqual([]);
+  }
+  const lista = readFileSync(join(DIST, 'index.html'), 'utf8');
+  const naLiscie = [...new Set(lista.match(surowy) ?? [])];
+  expect(naLiscie, `lista bloga pokazuje oryginał: ${naLiscie.join(', ')}`).toEqual([]);
+});
+
+test('kafelek z okładką ma oba warianty szerokości', () => {
+  // Bez srcset ekran gęsty dostaje 800 px rozciągnięte do 1600 — rozmyte.
+  const lista = readFileSync(join(DIST, 'index.html'), 'utf8');
+  const zeZdjeciem = zrzut.artykuly.filter((a) => a.obraz);
+  for (const a of zeZdjeciem) {
+    expect(a.obrazDuzy, `„${a.slug}" ma okładkę bez wariantu 1600 px`).toBeTruthy();
+    expect(lista, `„${a.slug}" — brak srcset w kafelku`).toContain(`${a.obraz} 800w`);
+  }
+  expect(zeZdjeciem.length, 'zrzut nie ma ani jednej okładki').toBeGreaterThan(0);
+});

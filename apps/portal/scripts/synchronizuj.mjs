@@ -98,7 +98,8 @@ const zapisz = (plik, dane) =>
  * wtedy zmienione zdania, a nie jedną długą linię z uciekniętymi cudzysłowami.
  */
 {
-  const kolumny = 'id,slug,title,excerpt,tags,published_at,created_at,preview_image_url,thumbnail_url,content';
+  const kolumny = 'id,slug,title,excerpt,tags,published_at,created_at,preview_image_url,thumbnail_url,'
+    + 'preview_image_800,preview_image_1600,images_status,content';
   const surowe = await pobierz(
     `aura_articles?select=${kolumny}&status=eq.published&platforms=cs.{"UtrataDochodu.pl"}&order=published_at.desc`,
     KLUCZ_ANON,
@@ -141,7 +142,17 @@ const zapisz = (plik, dane) =>
 
     writeFileSync(join(KATALOG_ARTYKULOW, `${a.slug}.html`), tresc, 'utf8');
 
-    const zdalny = a.preview_image_url || a.thumbnail_url || null;
+    /**
+     * Okładkę bierzemy z kolumn, które wypełnia funkcja brzegowa
+     * `normalize-article-images`: to ten sam obrazek, tylko 800/1600 px w WebP
+     * zamiast oryginału z aparatu. Adres surowy zostaje jako awaryjny — gdyby
+     * normalizacja jeszcze nie przeszła, lepiej ciężkie zdjęcie niż puste
+     * miejsce. Wtedy jednak ostrzegamy, bo to znaczy, że kolejka stoi.
+     */
+    if (a.images_status !== 'ready') {
+      console.warn(`  uwaga: ${a.slug} ma images_status=${a.images_status} — zdjęcia jeszcze nieprzeliczone`);
+    }
+    const zdalny = a.preview_image_1600 || a.preview_image_url || a.thumbnail_url || null;
     const lokalny = zdalny ? await zapiszObrazek(zdalny, a.slug, 'okladka') : null;
 
     artykuly.push({

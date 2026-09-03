@@ -44,17 +44,17 @@ const jsonld = graf([
 ]);
 
 /**
- * Zdjęcia są lokalne, zmniejszone w trakcie synchronizacji treści.
+ * Zdjęcia mają dwie szerokości: 800 px do kafelka, 1600 px na ekrany gęste.
  *
- * Wcześniej szły przez transformację obrazów Supabase (`/render/image/`).
- * To usługa płatna, z limitem na rozmiar wejścia, a oryginały w kubełku mają
- * od 2 do 16 MB — przy nieudanej transformacji kafelek zostawał pusty,
- * a przy udanej i tak zależał od cudzej usługi przy każdej odsłonie.
+ * Oba warianty powstają raz — albo lokalnie przy synchronizacji treści, albo
+ * przy publikacji, w funkcji brzegowej `normalize-article-images`. Ta druga
+ * droga jest ważniejsza, bo tabela artykułów obsługuje jedenaście serwisów:
+ * naprawa po stronie szablonu naprawiłaby jeden z nich.
  *
- * Gdy zrzut nie ma jeszcze wersji lokalnej, zostaje adres oryginału: ciężki,
- * ale widoczny. Puste miejsce jest gorsze niż wolne zdjęcie.
+ * Wcześniej w kafelku lądował oryginał z kubełka — od 2 do 16 MB. Adres
+ * surowy zostaje jako awaryjny, gdyby normalizacja nie zdążyła: ciężkie
+ * zdjęcie jest gorsze niż lekkie, ale lepsze niż puste miejsce.
  */
-const lokalne = (url: string) => url.startsWith('/');
 ---
 <Baza tytul={tytul} opis={opis} sciezka={sciezka} jsonld={jsonld}>
   <div class="bg-tlo-jasne border-b border-linia">
@@ -95,9 +95,7 @@ const lokalne = (url: string) => url.startsWith('/');
               {a.obraz ? (
                 <div class="h-48 overflow-hidden border-b border-linia bg-tlo-cyjan">
                   <img src={a.obraz}
-                       srcset={lokalne(a.obraz) && a.obrazDuzy
-                         ? `${a.obraz} 800w, ${a.obrazDuzy} 1600w`
-                         : undefined}
+                       srcset={a.obrazDuzy ? `${a.obraz} 800w, ${a.obrazDuzy} 1600w` : undefined}
                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                        alt={a.tytul} width="800" height="192"
                        loading={i < 3 ? 'eager' : 'lazy'} decoding="async"

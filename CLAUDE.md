@@ -9,42 +9,98 @@ Zamiast tego wypisuj każdą potrzebną kolumnę z osobna.
 
 ### Kolumny z obrazkami w tabeli `aura_articles`
 
-Tabela posiada dwa pola z URL-ami zdjęć:
+Tabela ma pięć pól opisujących zdjęcie. Dwa pierwsze wypełnia CMS, trzy
+kolejne — funkcja brzegowa `normalize-article-images`:
 
-| Kolumna | Opis |
-|---|---|
-| `preview_image_url` | Główne zdjęcie ilustracyjne artykułu (preferowane) |
-| `thumbnail_url` | Miniatura (fallback gdy brak `preview_image_url`) |
+| Kolumna | Kto wypełnia | Co w niej jest |
+|---|---|---|
+| `preview_image_url` | CMS | Oryginał prosto z wysyłki — od 300 kB do 15,9 MB |
+| `thumbnail_url` | CMS | Zapasowy oryginał, w praktyce zawsze pusty |
+| `preview_image_800` | normalizacja | WebP 800 px — do kafelka i listy |
+| `preview_image_1600` | normalizacja | WebP 1600 px — do nagłówka artykułu |
+| `images_status` | normalizacja | `pending`, `ready` albo `error` |
 
-**Zawsze dołączaj oba pola do SELECT**, nawet jeśli strona docelowo ma je tylko wyświetlać:
+**Do przeglądarki wysyłaj wyłącznie `preview_image_800` / `preview_image_1600`.**
+Adresy z dwóch pierwszych kolumn to pliki z aparatu; jeden z nich waży 15,9 MB
+i na łączu komórkowym wczytuje się kilkanaście sekund. Adres surowy nadaje się
+najwyżej na wyjście awaryjne, gdy `images_status` to jeszcze `pending`.
+
+`images_status = 'ready'` przy pustym `preview_image_800` znaczy „ten artykuł
+naprawdę nie ma zdjęcia" — wtedy renderuj kafelek zastępczy, a nie czekaj.
 
 ```js
-.select('id, slug, title, excerpt, tags, published_at, created_at, preview_image_url, thumbnail_url')
+.select('id, slug, title, excerpt, tags, published_at, created_at, '
+      + 'preview_image_800, preview_image_1600, images_status, '
+      + 'preview_image_url, thumbnail_url')
 ```
 
 ### Renderowanie zdjęcia — wzorzec obowiązkowy
 
-Nie używaj statycznych emoji ani placeholderów gdy dostępne są URL-e zdjęć.
-Stosuj ten wzorzec w każdym szablonie karty / kafelka artykułu:
+Nie używaj statycznych emoji ani placeholderów, gdy dostępne są URL-e zdjęć.
+Dwie szerokości idą do `srcset` — bez tego ekran gęsty dostaje 800 px
+rozciągnięte do 1600 i zdjęcie wygląda na rozmyte.
 
 ```js
-${art.preview_image_url || art.thumbnail_url
-  ? `<img src="${art.preview_image_url || art.thumbnail_url}" alt="${art.title}" class="w-full h-full object-cover">`
+${art.preview_image_800
+  ? `<img src="${art.preview_image_800}"
+          srcset="${art.preview_image_800} 800w, ${art.preview_image_1600} 1600w"
+          sizes="(max-width: 640px) 100vw, 33vw"
+          alt="${art.title}" loading="lazy" decoding="async"
+          class="w-full h-full object-cover">`
   : `<span class="text-6xl">${style.emoji}</span>`}
 ```
 
-Kontener obrazka musi mieć `overflow-hidden`, żeby `object-cover` działał poprawnie:
+Kontener obrazka musi mieć `overflow-hidden`, żeby `object-cover` działał
+poprawnie:
 
 ```html
 <div class="h-48 overflow-hidden ...">
-  <!-- img lub emoji -->
+  <!-- img albo kafelek zastępczy -->
 </div>
 ```
 
-### Strony, które wymagają weryfikacji tego wzorca
+`alt` to tytuł artykułu, nigdy pusty ciąg: kafelek jest odnośnikiem, a czytnik
+ekranu przeczyta wtedy sam adres.
 
-- [ ] `blog.html` / `blog.js` — **naprawione** (2026-05-19)
-- [ ] Inne strony z listą artykułów / kart — do sprawdzenia
+### Normalizacja zdjęć — jak to działa
+
+Funkcja brzegowa `normalize-article-images` (kod: `supabase/functions/`) robi
+przy publikacji trzy rzeczy:
+
+1. Zapisuje okładkę jako WebP 800 i 1600 px w `article-images/normalized/`.
+2. Wyciąga z `content` obrazki wklejone jako `data:` URI i podmienia je na
+   adresy plików. Jeden taki artykuł miał 1,3 mln znaków HTML-a; po podmianie
+   ma 5,5 tysiąca.
+3. Gdy artykuł nie ma okładki, ale ma zdjęcie w treści — bierze pierwsze
+   z treści. To nie jest podstawianie cudzego zdjęcia: ono w tym artykule jest,
+   tylko redakcja nie wypełniła pola.
+
+Kolejkę pilnuje wyzwalacz `aura_articles_images_pending`: zmiana zdjęcia albo
+treści przestawia `images_status` na `pending`, a `pg_cron` co dziesięć minut
+woła `public.aura_normalize_article_images()`.
+
+**Nie wołaj funkcji brzegowej z gołym `net.http_post`** — token siedzi w Vault
+i wyciąga go tamta funkcja SQL-owa. Wpisanie tokenu do zadania cron oznacza, że
+przeczyta go każdy z dostępem do bazy.
+
+Dwa ograniczenia, o których warto wiedzieć, zanim ktoś zacznie to zmieniać:
+
+- **Worker ma około dwóch sekund czasu procesora na żądanie.** Rozpakowanie
+  JPEG-a z aparatu się w tym nie mieści — pierwsza wersja ginęła z komunikatem
+  „CPU Time exceeded”. Dlatego pliki powyżej 1,5 MB idą przez usługę skalowania
+  Supabase (`/render/image/`), a nie przez ImageMagick w funkcji. Jedno
+  wywołanie bierze jeden artykuł; nie podnoś tego bez ponownego sprawdzenia.
+- **`sharp` w Edge Functions nie działa** (biblioteka natywna). Jedyne, co tam
+  liczy obrazki, to magick-wasm.
+
+Oryginał treści sprzed podmiany leży w `aura_article_content_backup` — jeden
+wiersz na artykuł, zapisywany tylko przy pierwszym przepisaniu.
+
+### Kubełek `article-images` ma limity
+
+`file_size_limit` 5 MB i `allowed_mime_types` ograniczone do jpeg/png/webp/avif.
+Wcześniej oba były puste i stąd wzięło się 68 MB w trzynastu plikach. Limit
+działa na nowe wysyłki — pliki, które już leżą, zostają.
 
 ---
 
@@ -95,10 +151,20 @@ obie muszą być wymienione osobno.
 ## Struktura Supabase
 
 - **Projekt:** `kukvgsjrmrqtzhkszzum`
-- **Tabela artykułów:** `aura_articles`
-- **Storage bucket:** `article-images`
+- **Tabela artykułów:** `aura_articles` — **wspólna dla jedenastu serwisów**
+- **Rejestr wariantów zdjęć:** `aura_article_images` (zapisuje tylko funkcja brzegowa)
+- **Kopia treści sprzed przepisania:** `aura_article_content_backup`
+- **Storage bucket:** `article-images`, podkatalog `normalized/` na warianty
 - **Filtr platformy:** `.contains('platforms', ['UtrataDochodu.pl'])`
 - **Filtr statusu:** `.eq('status', 'published')`
+
+`aura_articles` obsługuje AuraBenefits, AuraConsulting.pl, Grupowe.pro,
+Gwarancje.pro, Idzik.org.pl, Zarzad, cztery serwisy rozwodowe
+i UtrataDochodu.pl. Zmiana schematu tej tabeli dotyka ich wszystkich —
+dokładaj kolumny, nie zmieniaj znaczenia istniejących.
+
+Migracje z 2026-09-03 leżą w `supabase/migrations/`. Starsze są wyłącznie
+w panelu Supabase.
 
 ---
 
