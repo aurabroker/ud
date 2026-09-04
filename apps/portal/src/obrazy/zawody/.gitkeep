@@ -1,0 +1,4 @@
+Ten plik trzyma katalog w repozytorium, dopóki nie ma tu żadnego zdjęcia —
+git nie śledzi pustych katalogów, więc bez niego folder znikał po sklonowaniu
+i nie było widać, gdzie wrzucać pliki. Można go usunąć, gdy pojawi się
+pierwsze zdjęcie zawodu. Zasady nazewnictwa: ../README.md
