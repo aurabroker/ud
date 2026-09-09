@@ -218,9 +218,12 @@ Działanie:
 
 Zmienne środowiskowe:
   RESEND2_API_KEY — klucz API Resend
-  SMSAPI_TOKEN    — token OAuth SMSAPI.pl (bez niego SMS jest pomijany,
+  SMSAPI_SENDER   — token OAuth SMSAPI.pl (mylna nazwa, tak sekret został
+                    założony w panelu; bez tokenu SMS jest pomijany,
                     e-mail idzie normalnie)
-  SMSAPI_SENDER   — zarejestrowana nazwa nadawcy; pusta = domyślny nadawca konta
+  SMSAPI_TOKEN    — ta sama rola, ma pierwszeństwo; użyć po przemianowaniu
+                    sekretu w panelu
+  SMSAPI_FROM     — zarejestrowana nazwa nadawcy; pusta = domyślny nadawca konta
   ADVISOR_PHONE   — numer doradcy w formacie 48XXXXXXXXX
                     (domyślnie 48504400901)
 
@@ -253,7 +256,7 @@ Pełny wniosek:
 
 --- SMS dla doradcy (SMSAPI.pl) ---
 
-Serwis: https://api.smsapi.pl/sms.do (autoryzacja: Bearer SMSAPI_TOKEN)
+Serwis: https://api.smsapi.pl/sms.do (autoryzacja: Bearer, token z sekretu)
 Odbiorca: ADVISOR_PHONE
 
 Szybki formularz: "UtrataDochodu: nowy kontakt. X, tel X, X"
@@ -336,8 +339,9 @@ Generator: build_ud.py + professions-metadata.json
 
 Supabase Edge Function Secrets (ustawiać przez Supabase Dashboard):
   RESEND2_API_KEY        — klucz API Resend (wysyłka emaili)
-  SMSAPI_TOKEN           — token OAuth SMSAPI.pl (SMS do doradcy)
-  SMSAPI_SENDER          — nazwa nadawcy SMS (opcjonalna)
+  SMSAPI_SENDER          — token OAuth SMSAPI.pl (SMS do doradcy)
+  SMSAPI_TOKEN           — to samo pod właściwą nazwą, ma pierwszeństwo
+  SMSAPI_FROM            — nazwa nadawcy SMS (opcjonalna)
   ADVISOR_PHONE          — numer doradcy, format 48XXXXXXXXX (opcjonalny)
   TURNSTILE_SECRET_KEY   — sekret Cloudflare Turnstile (weryfikacja formularzy)
   GETRESPONSE_API_KEY    — klucz API GetResponse (sync listy mailingowej)

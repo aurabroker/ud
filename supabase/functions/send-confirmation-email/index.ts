@@ -5,9 +5,15 @@ const FROM_EMAIL = "UtrataDochodu.pl <noreply@utratadochodu.com>";
 const REPLY_TO = "biuro@utratadochodu.com";
 
 /* Powiadomienie dla doradcy: SMS przez SMSAPI.pl.
-   Wcześniej szło na WhatsAppa (CallMeBot) — kanał został wyłączony. */
-const SMSAPI_TOKEN  = Deno.env.get("SMSAPI_TOKEN") ?? "";
-const SMSAPI_SENDER = Deno.env.get("SMSAPI_SENDER") ?? "";      // pusty = domyślny nadawca konta
+   Wcześniej szło na WhatsAppa (CallMeBot) — kanał został wyłączony.
+
+   Token API leży w sekrecie o nazwie SMSAPI_SENDER — tak został nazwany
+   przy zakładaniu. SMSAPI_TOKEN ma pierwszeństwo, więc po ewentualnym
+   przemianowaniu sekretu w panelu kod zadziała bez zmiany. */
+const SMSAPI_TOKEN = Deno.env.get("SMSAPI_TOKEN") || Deno.env.get("SMSAPI_SENDER") || "";
+/* Nazwa nadawcy (pole "from"), nie mylić z powyższym. Pusta = domyślny
+   nadawca konta SMSAPI. */
+const SMSAPI_FROM   = Deno.env.get("SMSAPI_FROM") ?? "";
 const ADVISOR_PHONE = Deno.env.get("ADVISOR_PHONE") ?? "48504400901";
 
 /* SMS z polskimi znakami idzie w UCS-2 i limit spada ze 160 do 70 znaków,
@@ -25,7 +31,7 @@ function bezOgonkow(txt: string): string {
 
 async function sendSms(msg: string): Promise<void> {
   if (!SMSAPI_TOKEN) {
-    console.warn("SMSAPI_TOKEN nie ustawiony — pomijam SMS do doradcy");
+    console.warn("Brak tokenu SMSAPI (SMSAPI_TOKEN / SMSAPI_SENDER) — pomijam SMS do doradcy");
     return;
   }
 
@@ -35,7 +41,7 @@ async function sendSms(msg: string): Promise<void> {
     format: "json",
     encoding: "utf-8",
   });
-  if (SMSAPI_SENDER) params.append("from", SMSAPI_SENDER);
+  if (SMSAPI_FROM) params.append("from", SMSAPI_FROM);
 
   try {
     const res = await fetch("https://api.smsapi.pl/sms.do", {
@@ -47,9 +53,26 @@ async function sendSms(msg: string): Promise<void> {
       body: params,
     });
     const body = await res.text();
-    // SMSAPI zwraca 200 także dla błędów — sprawdzamy treść odpowiedzi.
-    if (!res.ok || body.includes('"error"')) {
-      console.error(`SMSAPI [${res.status}]:`, body.substring(0, 300));
+
+    /* SMSAPI odpowiada 200 także przy odmowie, a przy powodzeniu wstawia
+       w treść "error":null — sam ciąg "error" nic więc nie znaczy.
+       Błąd globalny to {"error":101,...}, błąd pojedynczej wiadomości
+       siedzi w list[].error. */
+    let blad: string | null = null;
+    try {
+      const dane = JSON.parse(body);
+      if (dane.error != null) {
+        blad = String(dane.error);
+      } else if (Array.isArray(dane.list)) {
+        const odrzucona = dane.list.find((m: Record<string, unknown>) => m.error != null);
+        if (odrzucona) blad = String(odrzucona.error);
+      }
+    } catch {
+      blad = "odpowiedź nie jest JSON-em";
+    }
+
+    if (!res.ok || blad) {
+      console.error(`SMSAPI [${res.status}] błąd ${blad}:`, body.substring(0, 300));
     } else {
       console.log(`SMSAPI [${res.status}]:`, body.substring(0, 300));
     }
