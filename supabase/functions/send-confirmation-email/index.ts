@@ -4,17 +4,54 @@ const RESEND_API_KEY = Deno.env.get("RESEND2_API_KEY")!;
 const FROM_EMAIL = "UtrataDochodu.pl <noreply@utratadochodu.com>";
 const REPLY_TO = "biuro@utratadochodu.com";
 
-const WA_PHONE  = "48504400901";
-const WA_APIKEY = "5838995";
+/* Powiadomienie dla doradcy: SMS przez SMSAPI.pl.
+   Wcześniej szło na WhatsAppa (CallMeBot) — kanał został wyłączony. */
+const SMSAPI_TOKEN  = Deno.env.get("SMSAPI_TOKEN") ?? "";
+const SMSAPI_SENDER = Deno.env.get("SMSAPI_SENDER") ?? "";      // pusty = domyślny nadawca konta
+const ADVISOR_PHONE = Deno.env.get("ADVISOR_PHONE") ?? "48504400901";
 
-async function sendWhatsApp(msg: string): Promise<void> {
-  const url = `https://api.callmebot.com/whatsapp.php?phone=${WA_PHONE}&text=${encodeURIComponent(msg)}&apikey=${WA_APIKEY}`;
+/* SMS z polskimi znakami idzie w UCS-2 i limit spada ze 160 do 70 znaków,
+   czyli jedno zgłoszenie potrafi kosztować trzy wiadomości. Powiadomienie
+   dla doradcy jest czysto informacyjne, więc spłaszczamy je do ASCII. */
+function bezOgonkow(txt: string): string {
+  return txt
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/ł/g, "l").replace(/Ł/g, "L")
+    .replace(/[^\x20-\x7E\n]/g, "");
+}
+
+async function sendSms(msg: string): Promise<void> {
+  if (!SMSAPI_TOKEN) {
+    console.warn("SMSAPI_TOKEN nie ustawiony — pomijam SMS do doradcy");
+    return;
+  }
+
+  const params = new URLSearchParams({
+    to: ADVISOR_PHONE,
+    message: bezOgonkow(msg),
+    format: "json",
+    encoding: "utf-8",
+  });
+  if (SMSAPI_SENDER) params.append("from", SMSAPI_SENDER);
+
   try {
-    const res = await fetch(url);
+    const res = await fetch("https://api.smsapi.pl/sms.do", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${SMSAPI_TOKEN}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: params,
+    });
     const body = await res.text();
-    console.log(`CallMeBot [${res.status}]:`, body.substring(0, 300));
+    // SMSAPI zwraca 200 także dla błędów — sprawdzamy treść odpowiedzi.
+    if (!res.ok || body.includes('"error"')) {
+      console.error(`SMSAPI [${res.status}]:`, body.substring(0, 300));
+    } else {
+      console.log(`SMSAPI [${res.status}]:`, body.substring(0, 300));
+    }
   } catch (err) {
-    console.error("CallMeBot fetch error:", err);
+    console.error("SMSAPI fetch error:", err);
   }
 }
 
@@ -228,10 +265,10 @@ Deno.serve(async (req: Request) => {
 
   const name  = String(record.full_name ?? record.name ?? "—");
   const phone = String(record.phone ?? "—");
-  const waMsg = isQuick
-    ? `📱 Nowy kontakt!\nImię: ${name}\nTel: ${phone}\nEmail: ${email}`
-    : `📋 Nowy wniosek!\nImię: ${name}\nTel: ${phone}\nEmail: ${email}\nZawód: ${String(record.profession ?? "—")}`;
-  await sendWhatsApp(waMsg);
+  const smsMsg = isQuick
+    ? `UtrataDochodu: nowy kontakt. ${name}, tel ${phone}, ${email}`
+    : `UtrataDochodu: nowy wniosek. ${name}, tel ${phone}, ${email}, zawod: ${String(record.profession ?? "-")}`;
+  await sendSms(smsMsg);
 
   return new Response(JSON.stringify({ ok: true, id: result.id }), {
     headers: { "Content-Type": "application/json" },

@@ -87,7 +87,7 @@ serve(async (req) => {
     );
 
     // Tylko kolumny, które istnieją w udochodu_contacts.
-    // Webhook ON INSERT odpala send-confirmation-email (e-mail + WhatsApp do doradcy).
+    // Webhook ON INSERT odpala send-confirmation-email (e-mail + SMS do doradcy).
     const { error } = await supabase
       .from('udochodu_contacts')
       .insert({ name, email, phone, rodo_consent: body.rodo_consent === true });
