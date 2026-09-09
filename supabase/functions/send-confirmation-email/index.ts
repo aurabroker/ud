@@ -12,10 +12,13 @@ const ADVISOR_PHONE = Deno.env.get("ADVISOR_PHONE") ?? "48504400901";
 
 /* SMS z polskimi znakami idzie w UCS-2 i limit spada ze 160 do 70 znaków,
    czyli jedno zgłoszenie potrafi kosztować trzy wiadomości. Powiadomienie
-   dla doradcy jest czysto informacyjne, więc spłaszczamy je do ASCII. */
+   dla doradcy jest czysto informacyjne, więc spłaszczamy je do ASCII.
+
+   NFD rozbija ą na "a" plus znak łączący, a filtr ASCII zdejmuje ten znak
+   (razem z emoji). ł i Ł się nie rozkładają, więc idą osobno. */
 function bezOgonkow(txt: string): string {
   return txt
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .normalize("NFD")
     .replace(/ł/g, "l").replace(/Ł/g, "L")
     .replace(/[^\x20-\x7E\n]/g, "");
 }
