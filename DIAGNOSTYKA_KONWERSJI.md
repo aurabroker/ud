@@ -5,7 +5,9 @@ Zakres: dlaczego cel „Przesłanie formularza kontaktowego” (AW-18020137303) 
 rejestrować konwersje po 09.06.2026 i dlaczego cel „Prośba o wycenę” (import z GA4)
 nie zarejestrował ich nigdy.
 
-**Status: diagnoza. Żadna zmiana w kodzie produkcyjnym nie została wykonana.**
+**Status: diagnoza zamknięta, poprawki wdrożone 09.09.2026.**
+Zakres wdrożenia opisany w sekcji „Co zostało wdrożone” na końcu dokumentu.
+Guardrail chroniący znaczniki Google trafił do `CLAUDE.md`.
 
 ---
 
@@ -323,3 +325,59 @@ osobno zdecydować o zgodach.
 | 2026-06-15 10:01 | `3cf32e8` | Turnstile we wniosku na `index.html` | nadal blokowany przez CSP w `<meta>` |
 | 2026-08-24 | `340381e` | Ujednolicenie CSP `<meta>` z `_headers` | widget odblokowany |
 | 2026-09-09 | `22ba46c` | Krótki kontakt przez Edge Function | wysyłka naprawiona, śledzenia nadal brak |
+
+
+---
+
+## Co zostało wdrożone (09.09.2026)
+
+Decyzja właściciela: **P1 odrzucone** — konwersje z krótkiego formularza nie są
+potrzebne, bo każdy klient i tak musi finalnie wypełnić pełny wniosek. Pozostałe
+pozycje wdrożone zgodnie z rekomendacją.
+
+| Poz. | Status | Co zrobiono |
+|---|---|---|
+| P1 | **odrzucone** | Krótki formularz świadomie bez śledzenia konwersji |
+| P2 | wdrożone | `gtag('config', 'G-MGB0RBTCC9')` w `thankyou.html` i `formularz.html` |
+| P3 | wdrożone | Brak widgetu Turnstile zgłaszany jako `TURNSTILE_BRAK_WIDGETU` w `style.js` i `app.js` |
+| P4 | wdrożone | Reset widgetu Turnstile przy wejściu na ostatni krok kreatora |
+| P5 | odłożone | Consent Mode — decyzja biznesowa, zapisana jako guardrail w `CLAUDE.md` |
+
+### Konsekwencja decyzji o P1
+
+Cel **„Prośba o wycenę”** (import z GA4, REQUEST_QUOTE) pozostaje bez źródła
+zdarzenia i nadal nie zarejestruje żadnej konwersji. To jest teraz stan
+zamierzony, a nie usterka. Do rozważenia w panelu Google Ads: wyłączenie tego celu
+albo przepięcie go na zdarzenie z pełnego wniosku, żeby nie zaniżał statystyk
+kampanii i nie mylił przy optymalizacji.
+
+### Znaleziska uboczne naprawione przy okazji
+
+- **`thankyou.html`, `<meta charset>` na bajcie 1020.** Cztery bajty przed limitem
+  1024. Dopisanie linijki GA4 do bloku gtag wypchnęłoby deklarację poza zasięg
+  skanera kodowania i rozjechałoby polskie znaki na stronie podziękowania.
+  Deklaracja przeniesiona na początek `<head>` (bajt 62), tak jak w pozostałych
+  plikach.
+- **`formularz.html`, `<script nonce="{{NONCE}}">`.** Niepodstawiony placeholder,
+  jedyne wystąpienie w repozytorium, nic go nie generuje. Dziś nieszkodliwy, bo CSP
+  ma `'unsafe-inline'` i żadnego `nonce-`. Gdyby ktoś kiedyś usunął `'unsafe-inline'`
+  albo dodał `nonce-`, ten blok przestałby się wykonywać i zabrałby ze sobą tag
+  Google Ads na stronie wniosku. Atrybut usunięty.
+
+### Czego wdrożenie nie rozstrzyga
+
+Nadal nie wiadomo, dlaczego po naprawie CSP z 24.08 nie było konwersji do 09.09.
+Produkcja jest niedostępna z tego środowiska (proxy zwraca 403), więc hipotezy
+o renderowaniu widgetu Turnstile w kontenerze `display:none` nie dało się
+zweryfikować na żywym serwisie. P4 usuwa ten scenariusz niezależnie od tego, czy
+występował, ale potwierdzeniem będzie dopiero pierwsza konwersja po wdrożeniu.
+
+Do sprawdzenia po deployu, w tej kolejności:
+
+1. Konsola na `utratadochodu.pl` — czy widget Turnstile renderuje się w obu
+   formularzach i czy nie ma blokad CSP.
+2. Przejście pełnego wniosku do końca — czy następuje redirect na `/thankyou.html`.
+3. GA4, raport czasu rzeczywistego — czy `/thankyou.html` pojawia się jako odsłona.
+4. Google Ads — czy w ciągu 24–48 h pojawia się konwersja i czy cel „Przesłanie
+   formularza kontaktowego” nie został oznaczony jako nieaktywny po trzech
+   miesiącach zerowego ruchu.

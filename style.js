@@ -24,9 +24,22 @@ function updateWizardUI() {
   document.getElementById('next-btn').classList.toggle('hidden', currentStepIndex === total - 1);
   document.getElementById('submit-btn').classList.toggle('hidden', currentStepIndex !== total - 1);
 
+  /* Token Turnstile jest ważny ok. 5 minut, a wywiad medyczny w kreatorze trwa
+     zwykle dłużej niż tyle. Widget renderuje się przy wczytaniu strony, więc do
+     wysyłki wchodziłby token bliski wygaśnięcia. Odświeżamy go przy wejściu na
+     ostatni krok, żeby przycisk Wyślij miał zawsze pełne okno ważności. */
   const turnstileWrapper = document.getElementById('turnstile-wrapper');
   if (turnstileWrapper) {
-    turnstileWrapper.classList.toggle('hidden', currentStepIndex !== total - 1);
+    const naOstatnimKroku = currentStepIndex === total - 1;
+    const byloUkryte      = turnstileWrapper.classList.contains('hidden');
+    turnstileWrapper.classList.toggle('hidden', !naOstatnimKroku);
+
+    if (naOstatnimKroku && byloUkryte && window.turnstile) {
+      const widget = turnstileWrapper.querySelector('.cf-turnstile');
+      if (widget) {
+        try { window.turnstile.reset(widget); } catch (e) { /* widget jeszcze się renderuje */ }
+      }
+    }
   }
 }
 
@@ -206,6 +219,18 @@ function initFormSubmit() {
 
   form.addEventListener('submit', async e => {
     e.preventDefault();
+
+    /* Rozróżniamy dwa przypadki, bo mają różnych winnych:
+       - widgetu nie ma w DOM  → awaria konfiguracji strony, zgłaszamy do ud_errors,
+       - widget jest nierozwiązany → użytkownik ma co kliknąć, zwykły komunikat.
+       Bez tego rozróżnienia wysyłka przerywała się po cichu i brak leadów wyszedł
+       dopiero z raportu Google Ads po trzech miesiącach. */
+    if (!form.querySelector('.cf-turnstile')) {
+      showAwariaModal('TURNSTILE_BRAK_WIDGETU',
+        'Formularz jest chwilowo niedostępny.',
+        'Brak elementu .cf-turnstile w formularzu ' + (form.id || '(bez id)'));
+      return;
+    }
 
     const turnstileToken = form.querySelector('[name="cf-turnstile-response"]')?.value;
     if (!turnstileToken) {

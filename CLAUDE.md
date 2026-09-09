@@ -48,6 +48,63 @@ Kontener obrazka musi mieć `overflow-hidden`, żeby `object-cover` działał po
 
 ---
 
+## Znaczniki Google — nie dotykać
+
+**Zakaz modyfikowania, przenoszenia i usuwania znaczników Google przy okazji innej
+pracy.** Dotyczy bloku `<!-- Google tag -->` w `<head>` każdej strony, wywołań
+`gtag(...)`, `dataLayer`, identyfikatorów `AW-18020137303` i `G-MGB0RBTCC9`,
+etykiety konwersji `_uZeCOTG_KwcENfy1ZBD` oraz przekierowania na `/thankyou.html`
+po udanej wysyłce wniosku.
+
+Zmiana w tych miejscach wymaga **wyraźnej zgody właściciela strony** i osobnego
+commita, który nie robi nic innego. Nie „przy okazji” refaktoru, porządków w
+`<head>`, migracji CSS czy zmian w CSP.
+
+Powód: konwersje z Google Ads zamarły na trzy miesiące (09.06–09.09.2026), bo
+kolejne zmiany poboczne po kolei rozbrajały tę ścieżkę. Pełna analiza w
+`DIAGNOSTYKA_KONWERSJI.md`. Nikt tego nie zauważył, bo nic się nie wysypuje —
+strona wygląda normalnie, po prostu przestają spływać leady.
+
+### Czego pilnować przy każdej zmianie w `<head>`
+
+| Element | Gdzie | Czego nie wolno |
+|---|---|---|
+| `gtag('config', 'AW-18020137303')` | każda strona | usunąć, zakomentować, przenieść za inne skrypty |
+| `gtag('config', 'G-MGB0RBTCC9')` | `index.html`, `formularz.html`, `thankyou.html` | jw. |
+| `gtag('event', 'conversion', …)` | tylko `thankyou.html` | usunąć, przenieść na inną stronę, odpalić warunkowo |
+| `window.location.href = '/thankyou.html'` | `style.js`, gałąź sukcesu | zamienić z powrotem na modal — to jedyny wyzwalacz konwersji |
+
+### Nie dodawaj bramek przed wysyłką bez sprawdzenia wszystkich stron
+
+`style.js` obsługuje formularz `#insurance-form` na **dwóch** stronach:
+`index.html` i `formularz.html`. `app.js` obsługuje `#quick-form` na `index.html`.
+Każdy nowy warunek, który potrafi przerwać `submit`, trzeba wprowadzić razem
+z odpowiednim markupem na **wszystkich** stronach korzystających z danego pliku.
+Dokładnie na tym poległ Turnstile 07.06.2026: bramka trafiła do `style.js`,
+a widget tylko do `formularz.html`.
+
+Warunek, który przerywa wysyłkę z powodu brakującego elementu strony, ma zgłaszać
+awarię przez `Awaria.pokaz()` (kod `TURNSTILE_BRAK_WIDGETU`), a nie pokazywać
+użytkownikowi prośbę o kliknięcie w coś, czego nie ma.
+
+### Test
+
+```
+NODE_PATH=$(npm root -g) node tests/wniosek-konwersja-test.js
+```
+
+Sprawdza całą ścieżkę: wysyłka → redirect → event konwersji z poprawną etykietą,
+plus rozróżnienie braku widgetu od nierozwiązanego widgetu. Uruchom po każdej
+zmianie w `style.js`, `app.js`, `thankyou.html` i w CSP.
+
+### Consent Mode
+
+Nie jest zaimplementowany i **nie wolno go wprowadzać bez decyzji właściciela** —
+włączenie zmienia wolumen raportowanych konwersji. Temat jest świadomie odłożony,
+nie jest to przeoczenie do „naprawienia” przy okazji.
+
+---
+
 ## Formularze — wysyłka zawsze przez Edge Function
 
 Żaden formularz publiczny nie strzela z przeglądarki prosto do PostgREST
@@ -166,9 +223,16 @@ Przeglądarka skanuje w poszukiwaniu deklaracji kodowania tylko pierwszy
 skryptem Meta Pixela (bajt 1812 / 1162) i był ignorowany — polskie znaki
 ratował wyłącznie nagłówek `charset=utf-8` od Cloudflare.
 
+`thankyou.html` miał ten sam problem w wersji utajonej: deklaracja siedziała na
+bajcie **1020**, czyli cztery bajty przed limitem. Dopisanie jednej linijki do
+bloku gtag wypchnęłoby ją poza 1 KB. Naprawione 09.09.2026 — wszystkie trzy pliki
+mają teraz `charset` na bajcie 62.
+
 **`<meta charset="UTF-8">` ma być pierwszą linią po `<head>`.** Przy dodawaniu
 czegokolwiek na początek `<head>` sprawdź, czy nie wypycha deklaracji poza 1 KB:
 
 ```
-python3 -c "import re;d=open('index.html','rb').read();print(re.search(rb'<meta[^>]*charset',d).start())"
+for f in index.html formularz.html thankyou.html; do
+  python3 -c "import re,sys;d=open('$f','rb').read();print('$f', re.search(rb'<meta[^>]*charset',d).start())"
+done
 ```

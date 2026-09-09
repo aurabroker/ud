@@ -207,6 +207,17 @@ function initQuickForm() {
     const phone = document.getElementById('quick-phone')?.value.trim();
     const turnstileToken = form.querySelector('[name="cf-turnstile-response"]')?.value;
     if (!name || !email || !phone) return;
+
+    /* Ta sama pułapka co we wniosku: bez widgetu w DOM użytkownik dostaje prośbę
+       o potwierdzenie, że nie jest robotem, i nie ma czego kliknąć. To awaria
+       konfiguracji — ma trafić do ud_errors, a nie zostać na stronie po cichu. */
+    if (!form.querySelector('.cf-turnstile')) {
+      pokazBladSzybkiegoKontaktu('TURNSTILE_BRAK_WIDGETU',
+        'Formularz jest chwilowo niedostępny.',
+        'Brak elementu .cf-turnstile w formularzu ' + (form.id || '(bez id)'));
+      return;
+    }
+
     if (!turnstileToken) {
       document.getElementById('quick-turnstile-error').classList.remove('hidden');
       return;

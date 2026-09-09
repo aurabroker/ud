@@ -33,6 +33,22 @@ widgetu Turnstile po nieudanej próbie.
 NODE_PATH=$(npm root -g) node tests/quick-form-test.js
 ```
 
+## Konwersja z wniosku (`wniosek-konwersja-test.js`)
+
+Pilnuje jedynej działającej ścieżki konwersji Google Ads: udana wysyłka wniosku →
+redirect na `/thankyou.html` → `gtag('event', 'conversion')`. Sprawdza etykietę
+konwersji, konfigurację Google Ads i GA4 na stronie podziękowania, rozróżnienie
+między brakiem widgetu Turnstile (awaria konfiguracji) a nierozwiązanym widgetem
+(zwykły komunikat) oraz odświeżanie tokenu na ostatnim kroku kreatora.
+
+Regresja, której pilnuje: 07.06.2026 bramka Turnstile trafiła do `style.js`,
+a widget tylko do `formularz.html`. Wysyłka z `index.html` przerywała się po cichu
+i konwersje stały trzy miesiące.
+
+```
+NODE_PATH=$(npm root -g) node tests/wniosek-konwersja-test.js
+```
+
 ## Modal awarii (`awaria-test.js`)
 
 Symuluje padnięty backend na każdej stronie z formularzem i sprawdza, czy
