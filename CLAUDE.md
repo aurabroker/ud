@@ -48,6 +48,44 @@ Kontener obrazka musi mieć `overflow-hidden`, żeby `object-cover` działał po
 
 ---
 
+## Formularze — wysyłka zawsze przez Edge Function
+
+Żaden formularz publiczny nie strzela z przeglądarki prosto do PostgREST
+(`/rest/v1/<tabela>`). Wysyłka idzie do Edge Function, która weryfikuje token
+Turnstile i dopiero wtedy zapisuje rekord kluczem `service_role`.
+
+| Formularz | Endpoint | Tabela |
+|---|---|---|
+| Szybki kontakt (`index.html`) | `/functions/v1/contact-submit` | `udochodu_contacts` |
+| Pełny wniosek (`index.html`, `formularz.html`) | `/functions/v1/form-submit` | `ud_clients` |
+| Opinia (`opinia.html`) | `/functions/v1/review-submit` | `ud_review` |
+
+Dwa powody — oba wynikają z realnej awarii (formularz szybkiego kontaktu był
+martwy od 15.06.2026 do 09.09.2026, zero leadów przez trzy miesiące):
+
+1. **Token nie jest kolumną.** Payload z polem `cf-turnstile-response` leci do
+   PostgREST jako nieistniejąca kolumna i cały INSERT wraca błędem 400
+   (`PGRST204`). Do bazy wolno wysyłać wyłącznie kolumny, które w niej są.
+2. **Tokenu nie ma kto sprawdzić.** PostgREST nie rozmawia z Cloudflare, więc
+   widget bez Edge Function jest wyłącznie dekoracją — bot i tak wejdzie
+   bezpośrednio na REST API.
+
+### Po nieudanej wysyłce zresetuj widget Turnstile
+
+Token jest jednorazowy. Bez `turnstile.reset(widget)` druga próba poleci ze
+zużytym tokenem i też się wywali. Resetuj wskazując element kontenera
+(`form.querySelector('.cf-turnstile')`) — na `index.html` są dwa widgety
+(szybki kontakt i wniosek), więc gołe `reset()` bez argumentu trafi
+w niewłaściwy.
+
+### Test
+
+```
+NODE_PATH=$(npm root -g) node tests/quick-form-test.js
+```
+
+---
+
 ## CSP (Content-Security-Policy)
 
 Zdjęcia z Supabase Storage są serwowane z domeny:

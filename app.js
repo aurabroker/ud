@@ -172,13 +172,29 @@ async function initRandomBlogPost() {
 ────────────────────────────────────────── */
 /* Modal awarii z prośbą o telefon; bez awaria.js zostaje czerwony tekst
    pod formularzem (ma ten sam numer). */
-function pokazBladSzybkiegoKontaktu(kod, szczegoly) {
+function pokazBladSzybkiegoKontaktu(kod, opis, szczegoly) {
   if (window.Awaria) {
-    window.Awaria.pokaz({ kod: kod, szczegoly: szczegoly });
+    window.Awaria.pokaz({ kod: kod, opis: opis || undefined, szczegoly: szczegoly });
   } else {
     document.getElementById('quick-error')?.classList.remove('hidden');
   }
 }
+
+/* Token Turnstile jest jednorazowy — po nieudanej wysyłce trzeba zresetować
+   widget, inaczej ponowna próba poleci ze zużytym tokenem i też się wywali.
+   Reset po elemencie, bo na stronie głównej są dwa widgety (tu i we wniosku). */
+function resetujTurnstile(form) {
+  const widget = form.querySelector('.cf-turnstile');
+  if (widget && window.turnstile) {
+    try { window.turnstile.reset(widget); } catch {}
+  }
+}
+
+/* Wysyłka idzie przez Edge Function, nie prosto do PostgREST: token Turnstile
+   musi zweryfikować serwer (PostgREST tego nie potrafi), a payload z polem
+   cf-turnstile-response leciał do bazy jako nieistniejąca kolumna — każdy
+   INSERT kończył się wtedy błędem 400 (PGRST204). */
+const CONTACT_FN_URL = `${_SB_URL}/functions/v1/contact-submit`;
 
 function initQuickForm() {
   const form = document.getElementById('quick-form');
@@ -203,24 +219,23 @@ function initQuickForm() {
     btn.disabled = true;
 
     try {
-      const res = await fetch(`${_SB_URL}/rest/v1/udochodu_contacts`, {
+      const res = await fetch(CONTACT_FN_URL, {
         method: 'POST',
-        headers: {
-          apikey: _SB_KEY,
-          'Content-Type': 'application/json',
-          Prefer: 'return=minimal',
-        },
+        headers: { 'Content-Type': 'application/json', apikey: _SB_KEY },
         body: JSON.stringify({ name, email, phone, 'cf-turnstile-response': turnstileToken }),
       });
+      const wynik = await res.json().catch(() => ({}));
 
-      if (res.ok) {
+      if (res.ok && wynik.status === 'success') {
         form.classList.add('hidden');
         document.getElementById('quick-success').classList.remove('hidden');
       } else {
-        pokazBladSzybkiegoKontaktu('SZYBKI_KONTAKT_ODPOWIEDZ', 'HTTP ' + res.status);
+        resetujTurnstile(form);
+        pokazBladSzybkiegoKontaktu('SZYBKI_KONTAKT_ODPOWIEDZ', wynik.message, wynik.message || 'HTTP ' + res.status);
       }
     } catch (err) {
-      pokazBladSzybkiegoKontaktu('SZYBKI_KONTAKT_SIEC', err);
+      resetujTurnstile(form);
+      pokazBladSzybkiegoKontaktu('SZYBKI_KONTAKT_SIEC', null, err);
     } finally {
       btn.textContent = origTxt;
       btn.disabled = false;

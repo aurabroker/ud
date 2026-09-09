@@ -69,7 +69,9 @@ Telefon:  +48 504 400 901
 
   supabase/
     functions/
+      contact-submit/         — Obsługa szybkiego kontaktu (→ udochodu_contacts)
       form-submit/            — Obsługa pełnego wniosku (→ ud_clients + GetResponse)
+      review-submit/          — Obsługa formularza opinii (→ ud_review)
       send-confirmation-email/ — Wysyłka emaila (Resend) + powiadomienie WhatsApp
 
   <zawod>/index.html      — Ponad 200 stron landing page per zawód (SEO)
@@ -92,10 +94,11 @@ Telefon:  +48 504 400 901
 Lokalizacja: index.html — sekcja na samej górze strony (nad nawigacją)
 Pola: Imię i nazwisko | Adres e-mail | Numer telefonu
 Tabela Supabase: udochodu_contacts
-Wysyłka: fetch() → Supabase REST API (anon key, RLS policy: anon INSERT)
+Wysyłka: fetch() → Edge Function contact-submit (service_role, bypass RLS)
 
 Przepływ po wysłaniu:
-  1. Rekord trafia do udochodu_contacts
+  1. Edge Function weryfikuje token Turnstile i zapisuje rekord
+     do udochodu_contacts
   2. Database Webhook (INSERT) → Edge Function send-confirmation-email
   3. Klient dostaje email z podziękowaniem + link do pełnego wniosku
   4. Doradca dostaje powiadomienie WhatsApp z danymi klienta
@@ -164,6 +167,26 @@ Storage bucket: article-images
 ================================================================================
 5. EDGE FUNCTIONS
 ================================================================================
+
+--- contact-submit ---
+Wyzwalacz: POST z przeglądarki (fetch w app.js, formularz szybkiego kontaktu)
+Autoryzacja: brak JWT (publiczny endpoint z CORS)
+Działanie:
+  1. Weryfikacja tokenu Turnstile w API Cloudflare (siteverify)
+  2. Walidacja imienia, e-maila i telefonu
+  3. INSERT do udochodu_contacts (createClient z service_role key)
+  4. Zwraca { status: 'success' } lub { status: 'error', message: '...' }
+
+Zmienne środowiskowe:
+  SUPABASE_URL              — auto-inject
+  SUPABASE_SERVICE_ROLE_KEY — auto-inject
+  TURNSTILE_SECRET_KEY      — sekret Cloudflare Turnstile
+                              (gdy nie ustawiony, weryfikacja jest pomijana)
+
+Uwaga: przeglądarka NIE może wysyłać tego formularza prosto do PostgREST.
+Token `cf-turnstile-response` nie jest kolumną w udochodu_contacts, więc taki
+INSERT kończy się błędem 400 (PGRST204), a tokenu i tak nie miałby kto
+zweryfikować — PostgREST nie rozmawia z Cloudflare.
 
 --- form-submit ---
 Wyzwalacz: POST z przeglądarki (fetch w style.js)
