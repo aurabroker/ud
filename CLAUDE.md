@@ -216,6 +216,37 @@ Zasady:
   `opinia.html` (opinie). Nową ścieżkę wysyłki podpinaj tak samo.
 - Test: `NODE_PATH=$(npm root -g) node tests/awaria-test.js`.
 
+## Ikona strony (favicon)
+
+Master to **`favicon.svg`** — zwykły plik tekstowy, edytowalny ręcznie. Rastry są
+z niego odtwarzane:
+
+```
+python3 build_favicon.py
+```
+
+Nie poprawiaj `favicon.png`, `favicon.ico` ani `apple-touch-icon.png` w edytorze
+graficznym — przy następnym uruchomieniu skryptu zmiany przepadną. Popraw SVG.
+
+| Plik | Rozmiar | Do czego |
+|---|---|---|
+| `favicon.svg` | wektor | główna ikona nowoczesnych przeglądarek |
+| `favicon.ico` | 16 / 32 / 48 | starsze przeglądarki i automatyczne zapytanie o `/favicon.ico` |
+| `favicon.png` | 32 | fallback dla `type="image/png"` |
+| `apple-touch-icon.png` | 180 | ekran główny iOS, **musi być nieprzezroczysty** i bez zaokrąglonych rogów |
+
+Linki są w `index.html`, `formularz.html` i `opinia.html`. Pozostałe 235 podstron
+nie ma tagów i nie potrzebuje ich — przeglądarka sama pyta o `/favicon.ico`
+w katalogu głównym i go znajduje.
+
+Kolejność linków ma znaczenie: przeglądarka bierze **ostatni** format, który zna,
+więc SVG idzie na końcu.
+
+Test CSP liczy odpowiedzi 404, więc usunięcie któregokolwiek z tych plików
+wywali `tests/csp-test.js`.
+
+---
+
 ## `<meta charset>` musi być w pierwszym 1 KB pliku
 
 Przeglądarka skanuje w poszukiwaniu deklaracji kodowania tylko pierwszy
