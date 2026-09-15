@@ -247,6 +247,43 @@ wywali `tests/csp-test.js`.
 
 ---
 
+## Logo marki
+
+```
+python3 build_logo.py
+```
+
+Poziomy lockup: znak z `favicon.svg` plus napis „UtrataDochodu” w kroju Inter,
+kolory prosto z nawigacji (`#0f172a` + `#2563eb`). Master kompozycji siedzi
+w samym skrypcie, w stałej `LOCKUP_HTML` — nie ma osobnego pliku graficznego
+do edycji.
+
+Skrypt zapisuje ten sam render pod **dwa adresy**, bo w kodzie istnieją oba
+i oba były martwe:
+
+| Ścieżka | Kto się odwołuje |
+|---|---|
+| `/logo.png` | blok `Organization` w Schema.org na `index.html` |
+| `/img/logo.png` | `publisher.logo` na 228 podstronach zawodów |
+
+Nie kopiuj pliku ręcznie między tymi lokalizacjami — uruchom skrypt, wtedy nie
+mogą się rozjechać. Znak bierze się z `favicon.svg`, więc ikona i logo zawsze
+zostają spójne.
+
+Krój Inter jest pobierany z Google Fonts w trakcie renderowania. Bez sieci
+skrypt przerywa pracę, zamiast po cichu wypuścić logo w zastępczym foncie.
+
+### Do decyzji właściciela
+
+Blok `Organization` na `index.html` opisuje **Aura Expert Sp. z o.o.**
+(`url` wskazuje na `auraexpert.pl`), a `logo` pokazuje znak UtrataDochodu.
+Google używa tego do panelu wiedzy nazwanej firmy, więc docelowo powinno tam
+być logo Aura Expert albo blok powinien opisywać UtrataDochodu.pl. Na
+podstronach zawodów jest to zrobione poprawnie — organizacja nazywa się tam
+`UtrataDochodu.pl`.
+
+---
+
 ## `<meta charset>` musi być w pierwszym 1 KB pliku
 
 Przeglądarka skanuje w poszukiwaniu deklaracji kodowania tylko pierwszy
