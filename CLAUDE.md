@@ -324,6 +324,54 @@ rozumie każdy robot i nie ma powodu mówić tego samego dwa razy.
 
 ---
 
+## Przepięcie domeny — co musi być, zanim pójdzie
+
+### Stare adresy mają dokąd prowadzić
+
+240 adresów starego serwisu, 227 podstron nowego, 53 reguły przekierowań,
+zero osieroconych. Pilnuje tego test w `linki.spec.js`, który dodatkowo
+sprawdza, że cel każdej reguły naprawdę istnieje.
+
+Reguły stoją w dwóch miejscach i kolejność ma znaczenie, bo Cloudflare bierze
+pierwsze trafienie:
+
+1. `public/_redirects` — strony najwyższego poziomu starego serwisu
+   (`/blog.html`, `/formularz.html`, stare mapy strony). Ręczne, bo nie ma ich
+   skąd wyliczyć.
+2. Dopisywane w buildzie przez integrację `ud:przekierowania` — podstrony
+   zawodów, z danych.
+
+### `404.astro` musi istnieć
+
+Bez pliku `404.html` w katalogu wyjściowym Pages na nieznany adres **nie
+odpowiada błędem, tylko podaje stronę główną ze statusem 200**. Google czyta
+to jako miękki 404 i wciąga adres do indeksu jako duplikat strony głównej.
+
+Ta strona jest zbudowana jako `404.html`, a nie `404/index.html`, więc nie ma
+bliźniaczego pliku `.md` — dlatego dostaje `wariantMarkdown={false}`. Bez tego
+układ ogłasza wariant markdownowy, którego nie ma.
+
+### Podgląd nie może konkurować z domeną
+
+Każde wdrożenie ma adres `<hash>.utratadochodu.pages.dev` z kopią całego
+serwisu. Middleware dokłada tam `X-Robots-Tag: noindex, nofollow` na każdą
+odpowiedź. Kanoniczne odnośniki w HTML-u to za mało — są podpowiedzią, nagłówek
+jest wiążący.
+
+### Czego nie da się zrobić z repozytorium
+
+To są ustawienia w panelu Cloudflare i decyzje klienta:
+
+- Root directory `apps/portal`, build command `pnpm install && pnpm build`.
+- `SUPABASE_SERVICE_ROLE_KEY` jako **Encrypt**, nigdy Plain — bez niego
+  `/pobierz/<id>` nie poda żadnego dokumentu OWU.
+- Zmienne `PUBLIC_*` odwrotnie: muszą być Plain, inaczej nie dojdą do builda.
+  Nie są sekretami, widać je w źródle strony.
+- Podpis prawnika pod regulaminem, polityką prywatności i klauzulą
+  informacyjną oraz okresy retencji danych.
+
+---
+
 ## Serwis jest jasny — bez trybu ciemnego
 
 Decyzja klienta, 2026-08-28. Nie proponuj ponownie i nie dokładaj wariantu
