@@ -1013,10 +1013,12 @@ src="https://www.facebook.com/tr?id=4299065913693248&ev=PageView&noscript=1"
                                     <label class="block text-sm font-semibold text-slate-700 mb-1">Suma ubezpieczenia (zł)</label>
                                     <input type="number" name="permIncapacitySum" id="permIncapacitySum" min="0" step="1000" placeholder="np. 300 000" inputmode="numeric"
                                         class="block w-full rounded-md border-slate-300 border shadow-sm p-2.5 outline-none focus:ring-2 focus:ring-blue-500">
-                                    <p class="text-xs text-slate-400 mt-1">Max. 10× roczne przychody. Zaokrąglana do tysięcy.</p>
+                                    <p class="text-xs text-slate-400 mt-1">Max. 10× roczne przychody. Zaokrąglana do tysięcy. Wymaga zaznaczenia „Okresowej niezdolności".</p>
                                 </div>
                             </div>
 
+                            <!-- „Okresowa" jest ryzykiem podstawowym — bez niej Edge Function odrzuca wniosek. -->
+                            <p id="risks-error" class="hidden text-sm text-red-600 font-semibold bg-red-50 border border-red-200 rounded-lg p-3 mt-2" role="alert"></p>
                         </div>
 
                         <!-- Klauzule NW — pojawia się gdy suma ≥ 300 000 -->

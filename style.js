@@ -43,6 +43,41 @@ function updateWizardUI() {
   }
 }
 
+/* „Okresowa niezdolność" jest ryzykiem podstawowym — Edge Function odrzuca
+   wniosek z samą „Trwałą" błędem 400. Ta sama reguła musi działać w formularzu,
+   inaczej klient dowiaduje się o niej dopiero po kliknięciu Wyślij, ze zużytym
+   tokenem Turnstile w tle. Zwraca komunikat albo pusty string. */
+function bladWyboruRyzyk(form) {
+  const perm = form.querySelector('[name="riskPermIncapacity"]');
+  const temp = form.querySelector('[name="riskTempIncapacity"]');
+  if (!perm || !temp) return '';
+  if (perm.checked && !temp.checked) {
+    return 'Polisy nie da się zawrzeć bez „Okresowej niezdolności" — to ryzyko ' +
+           'podstawowe. Zaznacz ją razem z „Trwałą niezdolnością".';
+  }
+  return '';
+}
+
+/* Zwraca false, gdy na stronie nie ma gdzie pokazać komunikatu — wtedy woła
+   się zwykły modal błędu. Blokada, która zatrzymuje klienta bez słowa
+   wyjaśnienia, to ten sam błąd co Turnstile 07.06.2026. */
+function pokazBladRyzyk(form, komunikat) {
+  const box = document.getElementById('risks-error');
+  if (!box) return false;
+  box.textContent = komunikat;
+  box.classList.toggle('hidden', !komunikat);
+  return true;
+}
+
+function initRisksValidation() {
+  const form = document.getElementById('insurance-form');
+  if (!form) return;
+  ['riskPermIncapacity', 'riskTempIncapacity'].forEach(name => {
+    const el = form.querySelector(`[name="${name}"]`);
+    el?.addEventListener('change', () => pokazBladRyzyk(form, bladWyboruRyzyk(form)));
+  });
+}
+
 function goNext() {
   const currentStepEl = document.getElementById(activeSteps[currentStepIndex]);
   const inputs = currentStepEl.querySelectorAll('input, select, textarea');
@@ -50,6 +85,19 @@ function goNext() {
   for (const input of inputs) {
     if (!input.checkValidity()) {
       input.reportValidity();
+      return;
+    }
+  }
+
+  if (activeSteps[currentStepIndex] === 'step-risks') {
+    const form = document.getElementById('insurance-form');
+    const blad = form ? bladWyboruRyzyk(form) : '';
+    if (blad) {
+      if (pokazBladRyzyk(form, blad)) {
+        document.getElementById('risks-error').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        showErrorModal(blad);
+      }
       return;
     }
   }
@@ -159,6 +207,42 @@ const BOOL_FIELDS = [
   'informedAccepted',
 ];
 
+/* Ankieta zdrowotna dla Edge Function: klucz w payloadzie ← pole formularza.
+   Przy sumie trwałej niezdolności powyżej 1 000 000 zł funkcja wymaga pól
+   hs_* i bez nich odrzuca wniosek błędem 400 z prośbą o „odświeżenie
+   formularza" — czyli o coś, czego klient nie jest w stanie zrobić.
+   Pytania są w kreatorze od zawsze (krok medyczny), więc wysyłamy odpowiedzi,
+   których klient już udzielił, w formacie, którego oczekuje funkcja.
+   Wartości: 'tak'/'nie'. Szczegóły idą w hsd_<klucz>. */
+const ANKIETA_ZDROWOTNA = {
+  weight_change:           { pole: 'weightChange' },
+  takes_meds:              { pole: 'takesMeds' },
+  pending_diagnosis:       { pole: 'pendingDiagnosis' },
+  disability_congenital:   { pole: 'disabilityCongenital' },
+  smoker:                  { pole: 'smoker' },
+  event_hospitalization:   { pole: 'eventHospitalization' },
+  event_sick_leave_30:     { pole: 'eventSickLeave30' },
+  event_further_diagnosis: { pole: 'eventFurtherDiagnosis' },
+  med_heart:               { pole: 'med_heart',    opis: 'med_heart_notes' },
+  med_neuro:               { pole: 'med_neuro',    opis: 'med_neuro_notes' },
+  med_stomach:             { pole: 'med_stomach',  opis: 'med_stomach_notes' },
+  med_locomotor:           { pole: 'med_bones',    opis: 'med_bones_notes' },
+  med_diabetes:            { pole: 'med_diabetes', opis: 'med_diabetes_notes' },
+};
+
+function dodajAnkieteZdrowotna(form, dataObj) {
+  Object.entries(ANKIETA_ZDROWOTNA).forEach(([klucz, { pole, opis }]) => {
+    const zaznaczony = form.querySelector(`[name="${pole}"]:checked`);
+    if (!zaznaczony) return;
+    const tak = String(zaznaczony.value).toLowerCase() === 'yes';
+    dataObj['hs_' + klucz] = tak ? 'tak' : 'nie';
+    if (tak && opis) {
+      const szczegoly = form.querySelector(`[name="${opis}"]`);
+      if (szczegoly && szczegoly.value.trim()) dataObj['hsd_' + klucz] = szczegoly.value.trim();
+    }
+  });
+}
+
 function collectFormData(form) {
   const dataObj = Object.fromEntries(new FormData(form).entries());
 
@@ -177,6 +261,8 @@ function collectFormData(form) {
     if (slider) dataObj.emp_contribution = slider.value + '%';
   }
 
+  dodajAnkieteZdrowotna(form, dataObj);
+
   return dataObj;
 }
 
@@ -186,7 +272,19 @@ async function submitToSupabase(dataObj) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(dataObj),
   });
-  return res.json();
+  const dane = await res.json().catch(() => ({}));
+  return { ok: res.ok, status: res.status, dane: dane };
+}
+
+/* Token Turnstile jest jednorazowy — po nieudanej wysyłce trzeba zresetować
+   widget, inaczej druga próba poleci zużytym tokenem i funkcja odbije ją
+   komunikatem o weryfikacji bezpieczeństwa. Reset po elemencie, bo na
+   index.html są dwa widgety (szybki kontakt i wniosek). */
+function resetujTurnstile(form) {
+  const widget = form.querySelector('.cf-turnstile');
+  if (widget && window.turnstile) {
+    try { window.turnstile.reset(widget); } catch (e) { /* widget jeszcze się renderuje */ }
+  }
 }
 
 function showSuccessModal(form) {
@@ -238,6 +336,16 @@ function initFormSubmit() {
       return;
     }
 
+    /* Reguła biznesowa z Edge Function — lepiej zatrzymać wniosek tutaj niż
+       spalić token na pewnym 400. Element #risks-error jest na obu stronach
+       korzystających z tego pliku (index.html i formularz.html). */
+    const bladRyzyk = bladWyboruRyzyk(form);
+    if (bladRyzyk) {
+      pokazBladRyzyk(form, bladRyzyk);
+      showErrorModal(bladRyzyk);
+      return;
+    }
+
     const btn     = document.getElementById('submit-btn');
     const origTxt = btn.innerText;
     btn.innerText = 'Wysyłanie…';
@@ -246,15 +354,27 @@ function initFormSubmit() {
     try {
       const dataObj = collectFormData(form);
       dataObj['cf-turnstile-response'] = turnstileToken;
-      const mainRes = await submitToSupabase(dataObj);
+      const odp = await submitToSupabase(dataObj);
 
-      if (mainRes.status === 'success') {
+      if (odp.dane.status === 'success') {
         showSuccessModal(form);
       } else {
-        showAwariaModal('WNIOSEK_ODRZUCONY', mainRes.message, mainRes);
+        /* Token przepadł przy każdej nieudanej próbie — bez resetu kolejna
+           wysyłka wywali się na weryfikacji, a klient nie ma jak tego obejść. */
+        resetujTurnstile(form);
+
+        /* 400 to odpowiedź walidacyjna (PESEL, reguły ryzyk, ankieta) — klient
+           ma co poprawić, więc dostaje zwykły komunikat. Awarię (modal z prośbą
+           o telefon) zostawiamy dla tego, czego poprawić nie może. */
+        if (odp.status === 400 && odp.dane.message) {
+          showErrorModal(odp.dane.message);
+        } else {
+          showAwariaModal('WNIOSEK_ODRZUCONY', odp.dane.message, odp.dane);
+        }
       }
     } catch (err) {
       console.error('Błąd sieci:', err);
+      resetujTurnstile(form);
       showAwariaModal('WNIOSEK_SIEC', null, err);
     } finally {
       btn.innerText = origTxt;
@@ -285,6 +405,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initEmployerToggle();
   initNwToggle();
   initPeselValidation();
+  initRisksValidation();
   initFormSubmit();
   updateWizardUI();
 

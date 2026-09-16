@@ -34,10 +34,41 @@ async function syncGetResponse(data: Record<string, unknown>): Promise<boolean> 
 }
 
 function yesNo(val: unknown): boolean | null {
-  if (val === 'Yes' || val === true) return true;
-  if (val === 'No'  || val === false) return false;
+  if (val === 'Yes' || val === 'yes' || val === true) return true;
+  if (val === 'No'  || val === 'no'  || val === false) return false;
   return null;
 }
+
+/* Kwoty w PLN — musi być zgodne z parseAmount w style.js (spec zmiana_2.parsowanie). */
+function parseAmount(raw: unknown): number {
+  if (raw == null) return NaN;
+  const cleaned = String(raw)
+    .replace(/[\s ]/g, '')
+    .replace(/z[łl]/gi, '')
+    .replace(/pln/gi, '')
+    .replace(',', '.');
+  const m = cleaned.match(/-?\d+(?:\.\d+)?/);
+  return m ? parseFloat(m[0]) : NaN;
+}
+
+/* Mapowanie kluczy ankiety zdrowotnej na kolumny płaskie w ud_clients
+   (odpowiedzi ankiety mają pierwszeństwo nad zwykłymi checkboxami — spec zmiana_2). */
+const HEALTH_SURVEY_COLUMNS: Record<string, string> = {
+  weight_change:            'weight_change',
+  takes_meds:               'takes_meds',
+  pending_diagnosis:        'pending_diagnosis',
+  disability_congenital:    'disability_congenital',
+  smoker:                   'smoker',
+  event_hospitalization:    'event_hospitalization',
+  event_sick_leave_30:      'event_sick_leave_30',
+  event_further_diagnosis:  'event_further_diagnosis',
+  med_heart:                'med_heart',
+  med_neuro:                'med_neuro',
+  med_stomach:              'med_stomach',
+  med_locomotor:            'med_bones',
+  med_diabetes:             'med_diabetes',
+};
+const HEALTH_SURVEY_THRESHOLD = 1_000_000;
 
 async function verifyTurnstile(token: string, ip: string): Promise<boolean> {
   const secret = Deno.env.get('TURNSTILE_SECRET_KEY');
@@ -90,7 +121,7 @@ serve(async (req) => {
       pesel,
       employment_type:    body.employmentType  ?? body.employment_type  ?? null,
       profession:         body.profession                                ?? null,
-      source:             body.source                                   ?? 'direct',
+      source:             body.source                                   ?? 'form',
       affiliate_code_used: body.affiliateCode  ?? body.affiliate_code_used ?? null,
 
       /* ── personal data (new) ── */
@@ -170,6 +201,62 @@ serve(async (req) => {
       exclusions_accepted:  yesNo(body.exclusionsAccepted ?? body.exclusions_accepted),
       informed_accepted:    yesNo(body.informedAccepted   ?? body.informed_accepted),
     };
+
+    /* Spec zmiana_1: „Okresowa" jest ryzykiem podstawowym.
+       Nie można wybrać wyłącznie „Trwałej". */
+    if (record.risk_perm_incapacity === true && record.risk_temp_incapacity !== true) {
+      return new Response(
+        JSON.stringify({
+          status: 'error',
+          message: 'Nie można wybrać wyłącznie „Trwałej niezdolności". Polisy nie da się zawrzeć bez „Okresowej niezdolności" — to ryzyko podstawowe.',
+        }),
+        { status: 400, headers: { ...CORS, 'Content-Type': 'application/json' } },
+      );
+    }
+
+    // Spec zmiana_2: zbierz odpowiedzi ankiety hs_<key>/hsd_<key> do form_data.health_survey.
+    // Ankieta ma pierwszeństwo nad zwykłymi checkboxami dla kluczy z HEALTH_SURVEY_COLUMNS.
+    const healthSurvey: Record<string, { answer: string; details: string }> = {};
+    for (const [k, v] of Object.entries(body as Record<string, unknown>)) {
+      if (!k.startsWith('hs_')) continue;
+      const key = k.slice(3);
+      const answer = String(v ?? '').toLowerCase().trim();
+      if (answer !== 'tak' && answer !== 'nie') continue;
+      const details = String((body as Record<string, unknown>)[`hsd_${key}`] ?? '');
+      healthSurvey[key] = { answer, details: answer === 'tak' ? details : '' };
+    }
+
+    /* Spec zmiana_2: przy sumie trwałej > 1 000 000 zł ankieta jest wymagana.
+       Ostro większe (parseAmount 1_000_000 → NIE, 1_000_001 → TAK). */
+    const permAmount = parseAmount(record.perm_incapacity_sum);
+    if (
+      record.risk_perm_incapacity === true &&
+      Number.isFinite(permAmount) &&
+      permAmount > HEALTH_SURVEY_THRESHOLD &&
+      Object.keys(healthSurvey).length === 0
+    ) {
+      return new Response(
+        JSON.stringify({
+          status: 'error',
+          message: 'Przy sumie trwałej niezdolności powyżej 1 000 000 zł wymagana jest pełna ankieta medyczna. Odśwież formularz i wypełnij wszystkie pytania.',
+        }),
+        { status: 400, headers: { ...CORS, 'Content-Type': 'application/json' } },
+      );
+    }
+
+    /* Pierwszeństwo ankiety nad checkboxami — nadpisz kolumny płaskie
+       gdy odpowiedź w ankiecie istnieje. */
+    for (const [hsKey, colName] of Object.entries(HEALTH_SURVEY_COLUMNS)) {
+      const entry = healthSurvey[hsKey];
+      if (entry) record[colName] = entry.answer === 'tak';
+    }
+
+    /* form_data (jsonb) — cały payload jak dotąd + health_survey.
+       Wyrzucamy token captchy (jednorazowy) i pola pomocnicze slidera. */
+    const formData: Record<string, unknown> = { ...(body as Record<string, unknown>) };
+    delete formData['cf-turnstile-response'];
+    formData.health_survey = healthSurvey;
+    record.form_data = formData;
 
     /* Strip null values so Supabase uses column defaults */
     const cleanRecord = Object.fromEntries(

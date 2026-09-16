@@ -73,6 +73,15 @@ payload z przeglądarki i konfrontuje go z:
 NODE_PATH=$(npm root -g) node tests/wniosek-kontrakt-test.js
 ```
 
-Test **nie przechodzi** — opisuje sześć znalezionych rozjazdów. Nie usuwaj
-asercji, żeby zrobić zielono; albo naprawiamy kod, albo świadomie zmieniamy
-kontrakt i wtedy test.
+Wszystko sprawdza na **obu** stronach z wnioskiem (`index.html`
+i `formularz.html`) — bramka dodana tylko do jednej z nich to błąd, na którym
+poległ Turnstile 07.06.2026.
+
+Uruchom po każdej zmianie w `style.js`, w kroku ryzyk / ankiecie medycznej
+w obu plikach HTML oraz w `supabase/functions/form-submit/index.ts`.
+
+Znana, świadoma różnica między stronami: `formularz.html` ma pola opisu chorób
+(`med_*_notes`), `index.html` ich nie ma — pyta o choroby, ale nie daje ich
+opisać. Funkcja przyjmuje ankietę bez opisów, więc to nie blokada; czeka na
+decyzję właściciela, bo dokładanie pól na stronie głównej dotyka ścieżki
+konwersji.

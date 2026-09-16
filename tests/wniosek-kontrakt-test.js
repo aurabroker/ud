@@ -13,10 +13,14 @@
  *   projekt  kukvgsjrmrqtzhkszzum
  *   funkcja  form-submit, wersja 20
  *   sha256   05bbd41d1b1969aeee8ffe135466145e10607107986ea9c9812991406fc4c776
- * Wdrożona wersja zawiera dwie reguły biznesowe („spec zmiana_1" i „zmiana_2"),
- * których NIE MA w repo (supabase/functions/form-submit/index.ts). Poniższe
- * funkcje wdrozona*() to wierny port tych reguł — służą do oceny prawdziwego
- * payloadu zebranego z przeglądarki.
+ * Wdrożona wersja zawiera dwie reguły biznesowe („spec zmiana_1" i „zmiana_2").
+ * Repo było od nich starsze — stąd ten test. Funkcje wdrozona*() to wierny port
+ * tych reguł; służą do oceny prawdziwego payloadu zebranego z przeglądarki,
+ * a osobna sekcja pilnuje, żeby plik w repo dalej je zawierał.
+ *
+ * WSZYSTKO SPRAWDZAMY NA OBU STRONACH. style.js obsługuje #insurance-form na
+ * index.html i formularz.html — bramka dodana tylko do jednej z nich to
+ * dokładnie ten błąd, na którym poległ Turnstile 07.06.2026.
  */
 const http = require('http'), fs = require('fs'), path = require('path');
 const { chromium } = require('playwright');
@@ -187,50 +191,152 @@ const BASE = `http://127.0.0.1:${PORT}`;
     await ctx.close();
   }
 
-  /* ── 2. reguły wdrożonej funkcji nie mają odpowiednika w formularzu ── */
-  console.log('\n=== wniosek / formularz pozwala złożyć wniosek, który produkcja odrzuca ===');
-  {
-    const { ctx, page, payloady } = await nowaStrona(
-      { status: 200, body: { status: 'success' } }, '/formularz.html');
-    await wypelnijIWyslij(page, { okresowa: false, sumaTrwalej: '300000' });
-    await page.waitForTimeout(600);
+  /* ── 2. reguły wdrożonej funkcji mają odpowiednik w formularzu — na OBU stronach ── */
+  for (const strona of ['/formularz.html', '/index.html']) {
+    console.log(`\n=== ${strona} / wniosek nie do przyjęcia przez produkcję ===`);
 
-    const body = JSON.parse(payloady[0] || '{}');
-    ok('sam wybór „Trwałej" nie przechodzi przez formularz (blokada w UI)',
-       payloady.length === 0 || wdrozonaOdrzuca(body) === null,
-       'wdrożona funkcja odwraca to błędem 400: ' + wdrozonaOdrzuca(body));
-    await ctx.close();
+    /* sam wybór „Trwałej" — musi zostać zatrzymany w formularzu, z komunikatem */
+    {
+      const { ctx, page, payloady } = await nowaStrona(
+        { status: 200, body: { status: 'success' } }, strona);
+      await wypelnijIWyslij(page, { okresowa: false, sumaTrwalej: '300000' });
+      await page.waitForTimeout(600);
+
+      const body = JSON.parse(payloady[0] || '{}');
+      ok('sam wybór „Trwałej" nie idzie na serwer',
+         payloady.length === 0 || wdrozonaOdrzuca(body) === null,
+         'wdrożona funkcja odwraca to błędem 400: ' + wdrozonaOdrzuca(body));
+
+      /* Cicha blokada jest gorsza niż błąd 400 — klient musi wiedzieć, co poprawić. */
+      const komunikat = await page.evaluate(() => {
+        const e = document.getElementById('risks-error');
+        return e ? { jest: !e.classList.contains('hidden'), tekst: e.textContent } : null;
+      });
+      ok('strona ma element #risks-error', komunikat !== null,
+         'brak elementu — bramka w style.js nie ma gdzie pokazać powodu');
+      ok('klient widzi powód zatrzymania', !!(komunikat && komunikat.jest && /Okresow/.test(komunikat.tekst)),
+         JSON.stringify(komunikat));
+
+      /* Token musi zostać nietknięty — nie było wysyłki, nie ma czego palić. */
+      const resety = await page.evaluate(() => window.__resety);
+      ok('token Turnstile nie został spalony', resety.length === 0, JSON.stringify(resety));
+      await ctx.close();
+    }
+
+    /* Bramka bez miejsca na komunikat nie może zatrzymywać klienta po cichu —
+       to dokładnie ten błąd, na którym poległ Turnstile 07.06.2026. */
+    {
+      const { ctx, page, payloady } = await nowaStrona(
+        { status: 200, body: { status: 'success' } }, strona);
+      await page.evaluate(() => document.getElementById('risks-error')?.remove());
+      await wypelnijIWyslij(page, { okresowa: false, sumaTrwalej: '300000' });
+      await page.waitForTimeout(600);
+
+      const widoczny = await page.evaluate(() => {
+        const m = document.getElementById('error-modal');
+        return {
+          modal: m && !m.classList.contains('hidden'),
+          tekst: document.getElementById('error-message').textContent,
+          awaria: !!document.getElementById('ud-awaria'),
+        };
+      });
+      ok('bez #risks-error klient i tak dostaje powód',
+         !!(widoczny.modal && /Okresow/.test(widoczny.tekst)) || widoczny.awaria,
+         JSON.stringify(widoczny));
+      ok('wniosek dalej nie leci na pewne 400', payloady.length === 0, 'payloadów: ' + payloady.length);
+      await ctx.close();
+    }
+
+    /* suma powyżej progu — payload musi nieść ankietę hs_* */
+    {
+      const { ctx, page, payloady } = await nowaStrona(
+        { status: 200, body: { status: 'success' } }, strona);
+      await wypelnijIWyslij(page, { okresowa: true, sumaTrwalej: '1500000' });
+      await page.waitForTimeout(600);
+
+      const body = JSON.parse(payloady[0] || '{}');
+      const ankieta = Object.keys(body).filter(k => k.startsWith('hs_'));
+      ok('suma trwałej > 1 000 000 zł niesie ankietę medyczną hs_*', ankieta.length > 0,
+         'payload bez pól hs_ — wdrożona funkcja odrzuca taki wniosek: ' + wdrozonaOdrzuca(body));
+      ok('wdrożona funkcja przyjmuje ten payload', wdrozonaOdrzuca(body) === null, wdrozonaOdrzuca(body));
+
+      /* Funkcja czyta wyłącznie 'tak'/'nie'; cokolwiek innego jest po cichu
+         pomijane i wniosek znów wpada w wymóg ankiety. */
+      const zleWartosci = ankieta.filter(k => body[k] !== 'tak' && body[k] !== 'nie');
+      ok('odpowiedzi ankiety są w formacie tak/nie', zleWartosci.length === 0,
+         zleWartosci.map(k => `${k}=${body[k]}`).join(', '));
+
+      /* Ankieta nadpisuje kolumny płaskie — musi mówić to samo co reszta payloadu,
+         inaczej deklaracja klienta zmienia się po drodze. */
+      ok('ankieta zgadza się z odpowiedziami z kreatora',
+         body.hs_med_heart === 'tak' && body.med_heart === 'yes' &&
+         body.hs_smoker === 'tak' && body.smoker === 'yes',
+         `hs_med_heart=${body.hs_med_heart} med_heart=${body.med_heart} hs_smoker=${body.hs_smoker}`);
+      /* index.html nie ma pól med_*_notes — pyta o choroby, ale nie daje ich opisać
+         (formularz.html ma 7 takich pól). Różnica jest starsza niż ten test i czeka
+         na decyzję właściciela, bo dokładanie pól na stronie głównej dotyka ścieżki
+         konwersji. Funkcja przyjmuje ankietę bez opisów, więc to nie blokada. */
+      const maPolaOpisu = await page.evaluate(() =>
+        !!document.querySelector('#insurance-form [name="med_heart_notes"]'));
+      ok('opis choroby jedzie z odpowiedzią „tak" (o ile strona go zbiera)',
+         !maPolaOpisu || /Arytmia/.test(body.hsd_med_heart || ''),
+         JSON.stringify(body.hsd_med_heart));
+      await ctx.close();
+    }
+
+    /* ── 3. nieudana wysyłka: reset tokenu i komunikat adekwatny do przyczyny ── */
+    {
+      const { ctx, page, payloady } = await nowaStrona(
+        { status: 500, body: { status: 'error', message: 'Błąd zapisu. Spróbuj ponownie.' } }, strona);
+      await wypelnijIWyslij(page, { okresowa: true, sumaTrwalej: '500000' });
+      await page.waitForTimeout(600);
+
+      ok('wysyłka poleciała', payloady.length === 1, 'payloadów: ' + payloady.length);
+      /* Token Turnstile jest jednorazowy. Bez resetu druga próba leci zużytym
+         tokenem i funkcja odbija ją komunikatem o weryfikacji bezpieczeństwa —
+         klient widzi wtedy błąd, którego nie da się obejść inaczej niż F5. */
+      const resety = await page.evaluate(() => window.__resety);
+      ok('widget Turnstile zresetowany po błędzie', resety.length > 0,
+         'style.js nie woła turnstile.reset() — app.js (szybki kontakt) robi to poprawnie');
+      /* Na index.html są dwa widgety; reset bez argumentu trafiłby w szybki kontakt. */
+      ok('zresetowany widget z formularza wniosku, nie inny',
+         resety.every(k => k !== '(bez argumentu)'), JSON.stringify(resety));
+      ok('awaria serwera → modal z prośbą o telefon',
+         await page.evaluate(() => !!document.getElementById('ud-awaria')));
+      await ctx.close();
+    }
+
+    /* Odpowiedź walidacyjna to nie awaria — klient ma co poprawić sam. */
+    {
+      const { ctx, page } = await nowaStrona(
+        { status: 400, body: { status: 'error', message: 'Nieprawidłowy PESEL.' } }, strona);
+      await wypelnijIWyslij(page, { okresowa: true, sumaTrwalej: '500000' });
+      await page.waitForTimeout(600);
+
+      const stan = await page.evaluate(() => ({
+        awaria: !!document.getElementById('ud-awaria'),
+        modal:  !document.getElementById('error-modal').classList.contains('hidden'),
+        tekst:  document.getElementById('error-message').textContent,
+      }));
+      ok('błąd walidacji nie udaje awarii', !stan.awaria, 'wyskoczył modal awarii');
+      ok('klient dostaje komunikat serwera', stan.modal && /PESEL/.test(stan.tekst), JSON.stringify(stan));
+      const resety = await page.evaluate(() => window.__resety);
+      ok('token zresetowany także po błędzie walidacji', resety.length > 0, JSON.stringify(resety));
+      await ctx.close();
+    }
   }
+
+  /* ── 4. repo nie może się rozjechać z produkcją ── */
+  console.log('\n=== form-submit w repo odwzorowuje wdrożoną wersję 20 ===');
   {
-    const { ctx, page, payloady } = await nowaStrona(
-      { status: 200, body: { status: 'success' } }, '/formularz.html');
-    await wypelnijIWyslij(page, { okresowa: true, sumaTrwalej: '1500000' });
-    await page.waitForTimeout(600);
-
-    const body = JSON.parse(payloady[0] || '{}');
-    const ankieta = Object.keys(body).filter(k => k.startsWith('hs_'));
-    ok('suma trwałej > 1 000 000 zł niesie ankietę medyczną hs_*', ankieta.length > 0,
-       'payload nie ma ani jednego pola hs_ — w całym repo nie ma takich pól, ' +
-       'a wdrożona funkcja odrzuca taki wniosek: ' + wdrozonaOdrzuca(body));
-    await ctx.close();
-  }
-
-  /* ── 3. reset Turnstile po nieudanej wysyłce (jak w szybkim kontakcie) ── */
-  console.log('\n=== wniosek / druga próba po nieudanej wysyłce ===');
-  {
-    const { ctx, page, payloady } = await nowaStrona(
-      { status: 400, body: { status: 'error', message: 'Błąd zapisu. Spróbuj ponownie.' } }, '/formularz.html');
-    await wypelnijIWyslij(page, { okresowa: true, sumaTrwalej: '500000' });
-    await page.waitForTimeout(600);
-
-    ok('wysyłka poleciała', payloady.length === 1, 'payloadów: ' + payloady.length);
-    const resety = await page.evaluate(() => window.__resety);
-    /* Token Turnstile jest jednorazowy. Bez resetu druga próba leci zużytym
-       tokenem i funkcja odbija ją komunikatem o weryfikacji bezpieczeństwa —
-       klient widzi wtedy błąd, którego nie da się obejść inaczej niż F5. */
-    ok('widget Turnstile zresetowany po błędzie', resety.length > 0,
-       'style.js nie woła turnstile.reset() — app.js (szybki kontakt) robi to poprawnie');
-    await ctx.close();
+    const src = fs.readFileSync(path.join(ROOT, 'supabase/functions/form-submit/index.ts'), 'utf8');
+    ok('yesNo rozumie małe litery', /val === 'yes'/.test(src) && /val === 'no'/.test(src));
+    ok('reguła zmiana_1 (Okresowa wymagana)', /risk_temp_incapacity !== true/.test(src));
+    ok('reguła zmiana_2 (próg ankiety)', /HEALTH_SURVEY_THRESHOLD\s*=\s*1_000_000/.test(src));
+    ok('zbieranie ankiety hs_*', /startsWith\('hs_'\)/.test(src));
+    ok('pierwszeństwo ankiety nad checkboxami', /HEALTH_SURVEY_COLUMNS/.test(src));
+    ok('zapis całego payloadu do form_data', /record\.form_data = formData/.test(src));
+    ok("source domyślnie 'form'", /\?\? 'form'/.test(src));
   }
 
   await browser.close();
