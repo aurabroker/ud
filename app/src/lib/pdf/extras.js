@@ -14,6 +14,7 @@ import { parseAmount } from './helpers.js';
  * @property {string} label etykieta w tabeli porównania
  * @property {string|null} symbol symbol klauzuli z oferty (np. LW140)
  * @property {boolean|null} covered true = objęte, false = wprost wyłączone, null = brak wzmianki
+ * @property {boolean} [limitation] klauzula ogranicza świadczenie (nie rozszerza zakresu)
  * @property {number|null} amount suma ubezpieczenia, gdy oferta ją podaje
  * @property {string|null} offer_label nazwa użyta w ofercie
  * @property {number} order kolejność w tabeli
@@ -33,6 +34,14 @@ export const EXTRA_REGISTRY = {
   LW121: { key: 'unconsciousness_weekly', label: 'Tygodniowe świadczenie za utratę przytomności', order: 40 },
   LW143: { key: 'permanent_impairment', label: 'Trwały uszczerbek na zdrowiu', order: 50 },
   LW142: { key: 'funeral', label: 'Koszty pogrzebu', order: 60 },
+  // Klauzula ograniczająca, nie świadczenie — stąd `limitation` (bez zielonego
+  // „TAK" w tabeli) i treść drukowana pod tabelą (patrz EXTRA_NOTES).
+  LW144: {
+    key: 'degenerative_limit',
+    label: 'Ograniczenie świadczenia z tytułu zwyrodnień',
+    order: 85,
+    limitation: true
+  },
   // Klauzule informacyjne nie są ryzykiem — nie pokazujemy ich w porównaniu.
   LW300: { informational: true }
 };
@@ -93,7 +102,8 @@ function pushExtra(list, item) {
     covered: item.covered ?? null,
     amount: item.amount ?? null,
     offer_label: item.offer_label || null,
-    order: reg?.order ?? KEY_ORDER[item.key] ?? DEFAULT_ORDER
+    order: reg?.order ?? KEY_ORDER[item.key] ?? DEFAULT_ORDER,
+    ...(reg?.limitation ? { limitation: true } : {})
   });
 }
 

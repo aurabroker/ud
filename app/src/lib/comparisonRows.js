@@ -10,8 +10,41 @@
  * @typedef {{ kind: 'row'|'section', key: string, label: string, premium?: boolean, cells: Cell[] }} Row
  */
 import { money, yesNo, insurerRow, offerNoDisplay } from './format.js';
+import { EXTRA_REGISTRY } from './pdf/extras.js';
 
 export const EXTRAS_SECTION_LABEL = 'Postanowienia dodatkowe';
+
+/**
+ * Klauzule, których sama pozycja w tabeli nie wyczerpuje — ich treść musi być
+ * wydrukowana pod tabelą porównania (prezentacja oferty i PDF rekomendacji).
+ * @type {Record<string, { title: string, text: string }>}
+ */
+export const EXTRA_NOTES = {
+  degenerative_limit: {
+    title: 'Ograniczenie świadczenia z tytułu zwyrodnień — Klauzula LW144',
+    text:
+      'Świadczenie miesięczne z tytułu Całkowitej okresowej niezdolności do pracy spowodowanej ' +
+      'lub do której przyczyniła się choroba zwyrodnieniowa kręgosłupa lub stawów, zapalenie stawów ' +
+      'lub jakikolwiek inny proces zwyrodnieniowy dotyczący kręgosłupa, stawów, kości, mięśni, ' +
+      'ścięgien lub więzadeł, ograniczone jest do 50% kwoty określonej w literze B pozycji 5 ' +
+      'i należne jest przez okres nie dłuższy niż 24 miesiące.'
+  }
+};
+
+/**
+ * Klucze sprzed wpisania klauzuli do rejestru. Oferty sparsowane wcześniej mają
+ * w bazie klucz techniczny — mapujemy go przy odczycie, żeby tabela i treść pod
+ * nią były poprawne także bez ponownego przeczytania PDF-u.
+ * @type {Record<string, string>}
+ */
+const LEGACY_EXTRA_KEYS = { lw_lw144: 'degenerative_limit' };
+
+/** Wpisy rejestru klauzul po wspólnym kluczu (nie po symbolu). */
+const REGISTRY_BY_KEY = Object.fromEntries(
+  Object.values(EXTRA_REGISTRY)
+    .filter((r) => r.key)
+    .map((r) => [r.key, r])
+);
 
 /**
  * Okresowa niezdolność „z oferty”: gdy pokrycie faktycznie jest — TAK na zielono.
@@ -54,7 +87,13 @@ const BASE = [
  */
 function extrasOf(d) {
   const list = d?.parsed_raw?.extras;
-  return Array.isArray(list) ? list : [];
+  if (!Array.isArray(list)) return [];
+  return list.map((e) => {
+    const key = LEGACY_EXTRA_KEYS[e?.key];
+    if (!key) return e;
+    const reg = REGISTRY_BY_KEY[key] || {};
+    return { ...e, key, label: reg.label || e.label, order: reg.order ?? e.order, limitation: !!reg.limitation };
+  });
 }
 
 /**
@@ -89,7 +128,21 @@ function extraCell(d, key) {
   const e = extrasOf(d).find((x) => x.key === key);
   if (!e || e.covered == null) return { text: '—' };
   if (e.covered === false) return { text: 'Nie' };
-  return e.amount != null ? { text: money(e.amount) } : { text: 'TAK', green: true };
+  if (e.amount != null) return { text: money(e.amount) };
+  // Zielone „TAK" znaczy korzyść — klauzula ograniczająca dostaje neutralne.
+  return e.limitation ? { text: 'TAK' } : { text: 'TAK', green: true };
+}
+
+/**
+ * Treści klauzul do wydrukowania pod tabelą — tylko dla tych, które obejmuje
+ * co najmniej jedna z porównywanych ofert.
+ * @param {Array<any>} documents
+ * @returns {Array<{ key: string, title: string, text: string }>}
+ */
+export function extraNotes(documents) {
+  return extraKeys(documents)
+    .filter((e) => EXTRA_NOTES[e.key])
+    .map((e) => ({ key: e.key, ...EXTRA_NOTES[e.key] }));
 }
 
 /**

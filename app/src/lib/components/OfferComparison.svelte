@@ -1,6 +1,6 @@
 <script>
   import { insurerLabel } from '$lib/format.js';
-  import { comparisonRows } from '$lib/comparisonRows.js';
+  import { comparisonRows, extraNotes } from '$lib/comparisonRows.js';
   let { documents = [], selectable = false, onchoose = null, chosenId = null } = $props();
 
   // Gdy wszystkie porównywane oferty są od tego samego ubezpieczyciela,
@@ -12,6 +12,9 @@
   // Wiersze (bazowe + postanowienia dodatkowe + składki) liczy wspólny moduł,
   // ten sam, z którego korzysta PDF rekomendacji.
   const rows = $derived(comparisonRows(documents));
+
+  // Klauzule, których treść musi stać pod tabelą (np. LW144).
+  const notes = $derived(extraNotes(documents));
 </script>
 
 <div class="cmp-wrap">
@@ -66,6 +69,13 @@
   </table>
 </div>
 
+{#each notes as n (n.key)}
+  <div class="cmp-note">
+    <p class="cmp-note-title">{n.title}</p>
+    <p class="cmp-note-text">{n.text}</p>
+  </div>
+{/each}
+
 <style>
   .cmp-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--slate-400); }
   table.cmp { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
@@ -83,4 +93,9 @@
   tr.sec td.sec-lbl { background: var(--slate-100); color: var(--slate-700); font-size: .78rem;
     text-transform: uppercase; letter-spacing: .04em; padding: 6px 14px; }
   .mth { text-decoration: underline; text-underline-offset: 2px; font-weight: 700; }
+  /* Treść klauzuli spod tabeli — np. ograniczenie z tytułu zwyrodnień (LW144). */
+  .cmp-note { margin-top: .75rem; padding: .7rem .9rem; border-left: 3px solid var(--slate-400);
+    background: var(--slate-50); border-radius: 0 8px 8px 0; }
+  .cmp-note-title { margin: 0 0 .25rem; font-weight: 700; font-size: .85rem; color: var(--slate-800); }
+  .cmp-note-text { margin: 0; font-size: .82rem; line-height: 1.5; color: var(--slate-700); }
 </style>

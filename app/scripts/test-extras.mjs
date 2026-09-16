@@ -5,7 +5,7 @@
  * Próbki tekstu odwzorowują układ realnych ofert, ale bez danych osobowych.
  */
 import { detectExtras } from '../src/lib/pdf/extras.js';
-import { comparisonRows, extraKeys } from '../src/lib/comparisonRows.js';
+import { comparisonRows, extraKeys, extraNotes } from '../src/lib/comparisonRows.js';
 
 let failures = 0;
 function check(label, actual, expected) {
@@ -108,27 +108,66 @@ check('klucze bazowe bez zmian', mixed.filter((r) => r.kind === 'row' && !r.key.
   'insurer', 'offer_no', 'period', 'death', 'temp', 'temp_monthly', 'perm', 'indemnity', 'wait_acc', 'wait_ill'
 ]);
 
-// --- Leadenhall: klauzula spoza rejestru (np. LW144) ---
-// Regresja: w tabeli pokazywał się goły klucz techniczny „lw_lw144".
+// --- Leadenhall: klauzula spoza rejestru (np. LW199) ---
+// Regresja: w tabeli pokazywał się goły klucz techniczny („lw_lw199").
 const LH_NIEZNANA = `
 Postanowienia dodatkowe\tUmowa ubezpieczenia obejmuje klauzulę informacyjną (LW300) oraz następujące świadczenia dodatkowe:
-Klauzula pracy fizycznej (LW144)
+Klauzula pracy fizycznej (LW199)
 
 Osoby uprawnione
 `;
 const LH_NIEZNANA_BEZ_NAZWY = `
-Postanowienia dodatkowe\tUmowa ubezpieczenia obejmuje klauzulę (LW144)
+Postanowienia dodatkowe\tUmowa ubezpieczenia obejmuje klauzulę (LW199)
 
 Osoby uprawnione
 `;
 
 console.log('\n=== LEADENHALL — klauzula spoza rejestru ===');
-const nieznana = detectExtras(LH_NIEZNANA, 'leadenhall').find((e) => e.symbol === 'LW144');
-check('klucz techniczny', nieznana?.key, 'lw_lw144');
+const nieznana = detectExtras(LH_NIEZNANA, 'leadenhall').find((e) => e.symbol === 'LW199');
+check('klucz techniczny', nieznana?.key, 'lw_lw199');
 check('etykieta z oferty', nieznana?.label, 'Klauzula pracy fizycznej');
-const bezNazwy = detectExtras(LH_NIEZNANA_BEZ_NAZWY, 'leadenhall').find((e) => e.symbol === 'LW144');
-check('etykieta awaryjna = symbol', bezNazwy?.label, 'Klauzula LW144');
+const bezNazwy = detectExtras(LH_NIEZNANA_BEZ_NAZWY, 'leadenhall').find((e) => e.symbol === 'LW199');
+check('etykieta awaryjna = symbol', bezNazwy?.label, 'Klauzula LW199');
 check('nazwa kolumny oferty nie jest etykietą', bezNazwy?.label.includes('Postanowienia'), false);
+
+// --- Leadenhall: klauzula LW144 (ograniczenie z tytułu zwyrodnień) ---
+// Ma własną nazwę w tabeli, neutralne „TAK" (to ograniczenie, nie korzyść)
+// i treść drukowaną pod tabelą.
+const LH_LW144 = `
+Postanowienia dodatkowe\tUmowa ubezpieczenia obejmuje klauzulę informacyjną (LW300) oraz następujące świadczenia dodatkowe:
+Świadczenie szpitalne (LW140) z sumą ubezpieczenia 500 zł
+Ograniczenie świadczenia z tytułu zwyrodnień (LW144)
+
+Osoby uprawnione
+`;
+
+console.log('\n=== LEADENHALL — klauzula LW144 ===');
+const lw144 = detectExtras(LH_LW144, 'leadenhall');
+const degen = lw144.find((e) => e.symbol === 'LW144');
+check('wspólny klucz', degen?.key, 'degenerative_limit');
+check('etykieta z rejestru', degen?.label, 'Ograniczenie świadczenia z tytułu zwyrodnień');
+check('oznaczona jako ograniczenie', degen?.limitation, true);
+
+const docLw144 = { parsed_raw: { extras: lw144 }, premium_total: 3036, premium_monthly: 253 };
+const rowsLw144 = comparisonRows([docLw144]);
+const degenRow = rowsLw144.find((r) => r.key === 'extra:degenerative_limit');
+check('wiersz w tabeli', degenRow?.label, 'Ograniczenie świadczenia z tytułu zwyrodnień');
+check('TAK bez zielonego', degenRow?.cells[0], { text: 'TAK' });
+const hospRow = rowsLw144.find((r) => r.key === 'extra:hospital_daily');
+check('korzyść nadal na zielono', hospRow?.cells[0].text, '500 zł');
+
+const notes = extraNotes([docLw144]);
+check('treść pod tabelą — jedna pozycja', notes.length, 1);
+check('tytuł treści', notes[0]?.title, 'Ograniczenie świadczenia z tytułu zwyrodnień — Klauzula LW144');
+check('treść zawiera limit 50%', /ograniczone jest do 50% kwoty/.test(notes[0]?.text || ''), true);
+check('bez klauzuli — brak treści', extraNotes([{ parsed_raw: { extras: [] } }]).length, 0);
+
+// Stare oferty mają w bazie jeszcze klucz techniczny — po odczycie musi działać tak samo.
+const stary = { parsed_raw: { extras: [{ key: 'lw_lw144', label: 'lw_lw144', symbol: 'LW144', covered: true, amount: null, order: 90 }] } };
+const rowsStary = comparisonRows([stary]);
+check('stary klucz → nazwa z rejestru', rowsStary.find((r) => r.key === 'extra:degenerative_limit')?.label,
+  'Ograniczenie świadczenia z tytułu zwyrodnień');
+check('stary klucz → treść pod tabelą', extraNotes([stary]).length, 1);
 
 console.log(`\n${failures === 0 ? '✅ WSZYSTKIE ASERCJE OK' : `❌ ${failures} ASERCJI NIE PRZESZŁO`}`);
 process.exit(failures === 0 ? 0 : 1);

@@ -3,7 +3,7 @@
  * Odpowiednik summaryHtml.js, ale bez HTML i bez zewnętrznego API.
  */
 import { insurerLabel } from '$lib/format.js';
-import { comparisonRows } from '$lib/comparisonRows.js';
+import { comparisonRows, extraNotes } from '$lib/comparisonRows.js';
 import { conditionsContent } from './conditionsDoc.js';
 
 const SLATE_900 = '#0f172a';
@@ -42,6 +42,25 @@ function brandNode(logo) {
     bold: true,
     margin: [0, 0, 0, 2]
   };
+}
+
+/**
+ * Treści klauzul drukowane pod tabelą porównania (np. ograniczenie z tytułu
+ * zwyrodnień — LW144). Pokazujemy tylko te, które obejmuje któraś z ofert.
+ * @param {Array<any>} documents
+ * @returns {Array<object>}
+ */
+function clauseNotesContent(documents) {
+  const notes = extraNotes(documents);
+  if (!notes.length) return [];
+  return notes.map((n) => ({
+    table: {
+      widths: ['*'],
+      body: [[{ stack: [{ text: n.title, style: 'noteTitle' }, { text: n.text, style: 'noteText' }] }]]
+    },
+    layout: 'noteBox',
+    margin: [0, 0, 0, 6]
+  }));
 }
 
 /**
@@ -194,6 +213,7 @@ export function buildSummaryDocDefinition(p) {
         margin: [0, 2, 0, 12]
       },
       cmpTable,
+      ...clauseNotesContent(documents),
       ...additionalTermsContent(p.additionalTerms),
       ...conditionsContent(p.footerText)
     ],
@@ -209,6 +229,9 @@ export function buildSummaryDocDefinition(p) {
       cmpSection: { bold: true, fontSize: 8, color: '#475569', fillColor: '#f1f5f9', margin: [4, 3, 4, 3] },
       // Komórki z danymi ofert — wyśrodkowane.
       cmpCell: { margin: [4, 3, 4, 3], alignment: 'center' },
+      // Treść klauzuli spod tabeli (np. LW144).
+      noteTitle: { fontSize: 8.5, bold: true, color: SLATE_900, margin: [0, 0, 0, 2] },
+      noteText: { fontSize: 8, color: '#334155' },
       // Ręczne postanowienia dodatkowe (pole z edycji oferty).
       atTitle: { fontSize: 9.5, bold: true, color: '#92400e', margin: [0, 0, 0, 3] },
       atP: { fontSize: 8.5, margin: [0, 0, 0, 2] },
@@ -256,6 +279,16 @@ export const TABLE_LAYOUTS = {
     paddingRight: () => 8,
     paddingTop: () => 2,
     paddingBottom: () => 2
+  },
+  noteBox: {
+    hLineWidth: () => 0,
+    vLineWidth: (i) => (i === 0 ? 3 : 0),
+    vLineColor: () => SLATE_300,
+    fillColor: () => SLATE_50,
+    paddingLeft: () => 8,
+    paddingRight: () => 8,
+    paddingTop: () => 5,
+    paddingBottom: () => 5
   },
   atBox: {
     hLineWidth: () => 0,
