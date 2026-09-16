@@ -114,7 +114,10 @@ function nazwyZdjec(katalog) {
  * i ma sama po sobie posprzątać: gdy plik się pojawi, test poniżej wywali się
  * na nieaktualnym wpisie i zmusi do jego usunięcia.
  */
-const BEZ_ZDJECIA = new Set(['budownictwo']);
+// Komplet — każda z czternastu kategorii ma swoje zdjęcie. Gdy dojdzie nowa
+// kategoria bez zdjęcia, wpisz tu jej slug; test przypomni o usunięciu wpisu,
+// kiedy plik się pojawi.
+const BEZ_ZDJECIA = new Set();
 
 test('każde zdjęcie w src/obrazy/kategorie nosi nazwę istniejącej kategorii', () => {
   /**
@@ -208,10 +211,30 @@ test('nagłówek leży na zdjęciu, nie pod nim', () => {
     expect(naglowek, `${plik}: nagłówek nie leży na zdjęciu`).toBeGreaterThan(zaslona);
   }
 
-  // Bez zdjęcia nie ma po co odsuwać tekstu od góry ani rezerwować wysokości.
-  const bezZdjecia = readFileSync(join(DIST, 'dekarz/index.html'), 'utf8');
-  expect(bezZdjecia).not.toContain('zaslona-hero');
-  expect(bezZdjecia).not.toContain('pt-[17rem]');
+  /**
+   * Druga gałąź szablonu: bez zdjęcia nie ma po co odsuwać tekstu od góry ani
+   * rezerwować wysokości pasa.
+   *
+   * Podstrona do sprawdzenia szuka się sama, zamiast stać tu na sztywno.
+   * Wcześniej był tu `dekarz` — i przestał pasować w chwili, gdy Budownictwo
+   * dostało swoje zdjęcie, bo zawód zaczął je dziedziczyć. Test wywalał się
+   * wtedy na zmianie, która niczego nie psuła.
+   *
+   * Przy komplecie zdjęć kategorii ta gałąź jest nieosiągalna i sprawdzać nie
+   * ma czego. Wróci sama, gdy dojdzie kategoria bez zdjęcia.
+   */
+  const bezZdjecia = ZAWODY
+    .map((z) => `${z.slug}/index.html`)
+    .find((plik) => {
+      const sciezka = join(DIST, plik);
+      return existsSync(sciezka) && !readFileSync(sciezka, 'utf8').includes('zaslona-hero');
+    });
+
+  if (bezZdjecia) {
+    const html = readFileSync(join(DIST, bezZdjecia), 'utf8');
+    expect(html, `${bezZdjecia}: zasłona bez zdjęcia`).not.toContain('zaslona-hero');
+    expect(html, `${bezZdjecia}: odsunięcie od góry bez zdjęcia`).not.toContain('pt-[17rem]');
+  }
 });
 
 test('zdjęcia przechodzą przez optymalizację i mają wymiary', () => {
