@@ -18,18 +18,18 @@ const DIST = 'dist';
 /**
  * Udaje warstwę zasobów Cloudflare Pages.
  *
- * Zachowanie przy braku pliku jest odwzorowane z wranglera, a nie zgadnięte:
- * Pages nie odpowiada wtedy 404, tylko podaje stronę główną ze statusem 200.
- * Gdyby ta atrapa zwracała 404, testy przepuściłyby błąd, przez który agent
- * dostawał HTML opisany jako `text/markdown`.
+ * Zachowanie przy braku pliku odwzorowuje Pages: podaje `404.html` ze statusem
+ * 404. Zanim ta strona powstała, podstawiana była strona główna ze statusem
+ * 200 — i to właśnie przez nią agent dostawał kiedyś HTML opisany jako
+ * `text/markdown`. Atrapa musi oddawać HTML, bo na tym stoi cały ten test.
  */
 async function zDysku(wejscie) {
   const sciezka = new URL(typeof wejscie === 'string' ? wejscie : wejscie.url).pathname;
   const plik = join(DIST, sciezka.endsWith('/') ? `${sciezka}index.html` : sciezka);
 
   if (!existsSync(plik)) {
-    return new Response(readFileSync(join(DIST, 'index.html')), {
-      status: 200,
+    return new Response(readFileSync(join(DIST, '404.html')), {
+      status: 404,
       headers: { 'Content-Type': 'text/html; charset=utf-8' },
     });
   }
@@ -229,4 +229,29 @@ test('każda podstrona dostaje ten sam zestaw odnośników', async () => {
     expect(link, `${adres} bez odnośnika do llms.txt`).toContain('rel="describedby"');
     expect(link, `${adres} bez wariantu markdownowego`).toContain(`<${adres}index.md>`);
   }
+});
+
+test('podgląd na pages.dev nie idzie do indeksu', async () => {
+  /**
+   * Każde wdrożenie ma własny adres `<hash>.utratadochodu.pages.dev` z kopią
+   * całego serwisu. Zaindeksowana konkuruje z domeną o te same frazy.
+   */
+  const podglad = (sciezka, accept) => {
+    const request = new Request(`https://abc123.utratadochodu.pages.dev${sciezka}`,
+      { headers: accept ? { Accept: accept } : {} });
+    return onRequest({ request, next: (wejscie) => zDysku(wejscie ?? request) });
+  };
+
+  for (const [sciezka, accept, co] of [
+    ['/programista/', ACCEPT_PRZEGLADARKI, 'HTML'],
+    ['/programista/', 'text/markdown', 'Markdown z negocjacji'],
+    ['/programista/index.md', ACCEPT_PRZEGLADARKI, 'plik .md wprost'],
+  ]) {
+    const odp = await podglad(sciezka, accept);
+    expect(odp.headers.get('x-robots-tag'), `${co} z podglądu bez noindex`).toContain('noindex');
+  }
+
+  // Na właściwej domenie ten nagłówek nie ma prawa się pojawić na stronie.
+  const zDomeny = await pobierz('/programista/', ACCEPT_PRZEGLADARKI);
+  expect(zDomeny.headers.get('x-robots-tag'), 'noindex wyciekł na domenę').toBeNull();
 });

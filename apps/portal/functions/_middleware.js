@@ -90,6 +90,16 @@ const ZASOBY = [
   '</o-nas/>; rel="author"',
 ].join(', ');
 
+/**
+ * Podgląd na `*.pages.dev` nie może trafić do wyszukiwarki.
+ *
+ * Każde wdrożenie dostaje własny adres `<hash>.utratadochodu.pages.dev`,
+ * a pod nim stoi kopia całego serwisu co do znaku. Zaindeksowana konkuruje
+ * z domeną o te same frazy i potrafi ją w wynikach zastąpić. Kanoniczne
+ * odnośniki w HTML-u są tylko podpowiedzią; nagłówek jest wiążący.
+ */
+const toPodglad = (host) => host.endsWith('.pages.dev');
+
 /** Adres strony — tylko takie mają wariant .md obok siebie. */
 const toStrona = (sciezka) => sciezka.endsWith('/');
 
@@ -134,6 +144,7 @@ export async function onRequest({ request, next }) {
       // Pod tym adresem indeksowana jest wersja HTML; noindex z pliku .md
       // nie może się tu przenieść, bo dotyczyłby wtedy całej podstrony.
       naglowki.delete('X-Robots-Tag');
+      if (toPodglad(url.hostname)) naglowki.set('X-Robots-Tag', 'noindex, nofollow');
 
       const ile = await liczbaTokenow(next, url);
       if (ile !== undefined) naglowki.set('x-markdown-tokens', String(ile));
@@ -146,6 +157,7 @@ export async function onRequest({ request, next }) {
 
   const odpowiedz = await next();
   const naglowki = new Headers(odpowiedz.headers);
+  if (toPodglad(url.hostname)) naglowki.set('X-Robots-Tag', 'noindex, nofollow');
   const przepisz = () => new Response(odpowiedz.body, {
     status: odpowiedz.status,
     statusText: odpowiedz.statusText,
@@ -158,7 +170,7 @@ export async function onRequest({ request, next }) {
     // rozszerzenie .md. Ten sam tekst stoi pod adresem strony, więc do
     // wyszukiwarki idzie noindex — indeksowana ma być wersja HTML.
     naglowki.set('Content-Type', 'text/markdown; charset=utf-8');
-    naglowki.set('X-Robots-Tag', 'noindex');
+    naglowki.set('X-Robots-Tag', toPodglad(url.hostname) ? 'noindex, nofollow' : 'noindex');
     naglowki.set('Link', `<${url.href.replace(/index\.md$/, '')}>; rel="canonical"`);
     return przepisz();
   }

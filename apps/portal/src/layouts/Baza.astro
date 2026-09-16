@@ -28,9 +28,17 @@ interface Props {
   obraz?: string;
   /** Wyłącza indeksowanie — dla podziękowania i stron technicznych. */
   bezIndeksu?: boolean;
+  /**
+   * Czy obok tej strony leży bliźniaczy plik `.md`.
+   *
+   * Integracja `ud:markdown` przerabia wyłącznie pliki `index.html`, więc
+   * strona zbudowana jako `404.html` wariantu nie dostaje. Ogłaszanie go
+   * nagłówkiem `<link rel="alternate">` prowadziłoby agenta w pustkę.
+   */
+  wariantMarkdown?: boolean;
 }
 
-const { tytul, opis, sciezka, jsonld, obraz, bezIndeksu = false } = Astro.props;
+const { tytul, opis, sciezka, jsonld, obraz, bezIndeksu = false, wariantMarkdown = true } = Astro.props;
 const kanoniczny = new URL(sciezka, SERWIS.url).href;
 const ogObraz = new URL(obraz ?? '/og-domyslny.jpg', SERWIS.url).href;
 ---
@@ -63,10 +71,14 @@ const ogObraz = new URL(obraz ?? '/og-domyslny.jpg', SERWIS.url).href;
   <meta name="description" content={opis}>
   <link rel="canonical" href={kanoniczny}>
 
-  <!-- Ta sama treść bez nawigacji, stopki i wysp — dla agentów, które przyszły
-       po tekst, a nie po stronę. To samo wraca pod adresem strony, gdy żądanie
-       ma nagłówek `Accept: text/markdown` (obsługa: functions/_middleware.js). -->
-  <link rel="alternate" type="text/markdown" href={`${sciezka}index.md`}>
+  {wariantMarkdown && (
+    <>
+      {/* Ta sama treść bez nawigacji, stopki i wysp — dla agentów, które przyszły
+          po tekst, a nie po stronę. To samo wraca pod adresem strony, gdy żądanie
+          ma nagłówek `Accept: text/markdown` (obsługa: functions/_middleware.js). */}
+      <link rel="alternate" type="text/markdown" href={`${sciezka}index.md`} />
+    </>
+  )}
   {bezIndeksu
     ? <meta name="robots" content="noindex, follow">
     : <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">}
