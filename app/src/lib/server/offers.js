@@ -47,6 +47,21 @@ async function generateOfferNumber(sb, agentUserId, clientName) {
 }
 
 /**
+ * Krótki identyfikator oferty do tematu e-maila. Klient odpowiada „Odpowiedz”
+ * na naszą wiadomość, więc bez numeru w temacie nie wiadomo, od którego klienta
+ * odpowiedź przyszła. Preferujemy numer oferty (UD/rok/inicjały/nr/nazwisko),
+ * a gdy go brak — awaryjnie skrót UUID oferty.
+ * @param {{ offer_number?: string|null, id?: string }} offer
+ * @returns {string}
+ */
+export function offerRef(offer) {
+  const num = String(offer?.offer_number || '').trim();
+  if (num) return num;
+  const id = String(offer?.id || '').replace(/-/g, '');
+  return id ? `UD-${id.slice(0, 8).toUpperCase()}` : '';
+}
+
+/**
  * Tworzy ofertę z jednego lub wielu PDF-ów (Leadenhall/CEU).
  * @param {Object} p
  * @param {string} p.agentUserId - auth.users.id agenta (właściciel)
@@ -560,9 +575,10 @@ export async function sendOfferToClient(offerId) {
       logoUrl: settings.logo_url || '',
       footerText: settings.pdf_footer || ''
     });
+    const ref = offerRef(offer);
     email = await sendEmail({
       to: offer.client_email,
-      subject: 'Twoja oferta ubezpieczenia utraty dochodu',
+      subject: `Twoja oferta ubezpieczenia utraty dochodu${ref ? ` — nr ${ref}` : ''}`,
       html: tpl.html,
       text: tpl.text
     });
