@@ -431,7 +431,36 @@ Dwie rzeczy, których nie ruszaj bez ponownego przeliczenia:
 Pilnuje tego `test/linki.spec.js` — sprawdza, że obraz, zasłona i `h1` siedzą
 w jednym bloku, i że bez zdjęcia nie ma ani zasłony, ani odsunięcia od góry.
 
-Zestaw z 2026-08-30 powstał na Artlist (Seedream 5.0, 21:9, 2K) ze style kitu
-„UtrataDochodu.pl — zdjęcia kategorii": jasne, przewietrzone wnętrza, chłodna
-cyjanowa paleta pod tło serwisu, kadr dokumentalny bez patrzenia w obiektyw.
-Kit trzyma spójność serii — kolejne zdjęcia rób z niego, nie od zera.
+### Styl serii — i pułapka w style kicie na Artliście
+
+Zestaw, który faktycznie leży w repo, wygląda tak: jasne, wysokie światło,
+chłodna cyjanowa paleta pod tło serwisu, bohater **po prawej stronie kadru,
+patrzący w obiektyw, z naturalnym ciepłym uśmiechem**, tło miękko rozmyte,
+lewa tercja spokojna pod nagłówek. Kategorie mają 1920×1280 (3:2), zawody
+1915×821 (21:9) — pas i tak przycina przez `object-cover`.
+
+**Style kit „UtrataDochodu.pl — zdjęcia kategorii" na Artliście zawiera
+przeciwną instrukcję i nie wolno go użyć bez poprawki.** W jego tekście stoi
+„never smiling at the camera" i „No face looking into the lens". To jest
+dokładnie ta wytyczna, która wyprodukowała pierwszy zestaw — odrzucony przez
+klienta jako martwy. Paleta w kicie jest dobra, tekst nie.
+
+Dopóki tekst kitu nie zostanie podmieniony, kolejne zdjęcia rób **bez kitu**,
+z pełnym opisem w promptcie. Rzeczy, które muszą się w nim znaleźć:
+
+- kontakt wzrokowy z obiektywem i szczery, swobodny uśmiech — to jest ten
+  element, którego brak zabił pierwszy zestaw,
+- wysokie światło, przewietrzone wnętrze, biele zostają bielami,
+- paleta: `#1BAEE5`, `#CBE9F8`, `#F4FBFE`, stalowy błękit; bez ciepłego
+  bursztynu, bez gradu teal-and-orange, bez HDR,
+- bohater po prawej, lewa tercja pusta,
+- pełna klatka, 50 mm, f/2.8, płytka głębia, naturalna skóra i dłonie,
+- zero tekstu, napisów, logotypów i czytelnych ekranów.
+
+Przy zawodach z budownictwa dopisz jeszcze, czego **nie** chcesz: nie biurowiec
+z zewnątrz i nie architekt przy desce kreślarskiej — to była pierwotna pomyłka
+opisana wyżej.
+
+Zdjęć wygenerowanych na Artliście **nie da się pobrać z tego środowiska** —
+proxy blokuje `cms-toolkit-artifacts.artlist.io`, `ai-toolkit-generations.imgix.net`
+i `mcp.artlist.io`. Wyniki widać w kliencie i pobiera je człowiek.
