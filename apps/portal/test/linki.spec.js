@@ -248,3 +248,41 @@ test('zdjęcia przechodzą przez optymalizację i mają wymiary', () => {
   expect(img, 'brak height').toMatch(/height="\d+"/);
   expect(img, 'brak opisu alternatywnego').toMatch(/alt="[^"]+"/);
 });
+
+test('każdy adres starego serwisu ma dokąd prowadzić', () => {
+  /**
+   * Przepięcie domeny na nowy portal unieważnia wszystkie stare adresy naraz.
+   * Podstrony zawodów obsługuje integracja `ud:przekierowania`, ale strony
+   * najwyższego poziomu stary serwis trzymał jako pliki .html w korzeniu
+   * i te trzeba wymienić z nazwiska.
+   *
+   * Bez reguły adres nie daje nawet 404: warstwa zasobów Pages podaje wtedy
+   * stronę główną ze statusem 200. Google wciąga to do indeksu jako duplikat
+   * strony głównej, a użytkownik z zakładki nie trafia tam, gdzie chciał.
+   */
+  const STARE_ADRESY = [
+    '/index.html', '/blog.html', '/formularz.html', '/thankyou.html',
+    '/o-nas.html', '/opinia.html', '/pracuj-z-nami.html', '/regulamin.html',
+    '/polityka-prywatnosci.html', '/polityka-cookies.html',
+    '/sitemap.xml', '/sitemap_professions.xml',
+  ];
+
+  const plik = readFileSync(join(DIST, '_redirects'), 'utf8');
+  const zrodla = new Set(
+    plik.split('\n')
+      .filter((l) => l.trim() && !l.trimStart().startsWith('#'))
+      .map((l) => l.trim().split(/\s+/)[0]),
+  );
+
+  const bezReguly = STARE_ADRESY.filter((a) => !zrodla.has(a));
+  expect(bezReguly, `stare adresy bez przekierowania: ${bezReguly.join(', ')}`).toEqual([]);
+
+  // Cel każdej reguły musi istnieć — przekierowanie w pustkę jest gorsze niż jego brak.
+  for (const linia of plik.split('\n')) {
+    const [z, na] = linia.trim().split(/\s+/);
+    if (!z?.startsWith('/') || !na?.startsWith('/')) continue;
+    if (na.endsWith('.xml')) continue;                 // mapy strony leżą jako pliki
+    const cel = join(DIST, na, 'index.html');
+    expect(existsSync(cel), `${z} prowadzi do nieistniejącego ${na}`).toBe(true);
+  }
+});
