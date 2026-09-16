@@ -57,3 +57,22 @@ użytkownik dostaje modal z numerem telefonu.
 ```
 NODE_PATH=$(npm root -g) node tests/awaria-test.js
 ```
+
+## Kontrakt wniosku (`wniosek-kontrakt-test.js`)
+
+Sprawdza nie „czy wysyłka poleciała", tylko **co leci w payloadzie** i czy
+funkcja po drugiej stronie to przyjmie. Wypełnia wniosek jak klient (deklaracja
+choroby serca, wybór ryzyk, suma trwałej niezdolności), przechwytuje prawdziwy
+payload z przeglądarki i konfrontuje go z:
+
+- funkcją `yesNo()` wczytaną z `supabase/functions/form-submit/index.ts`,
+- regułami biznesowymi z **wdrożonej** wersji `form-submit` (wersja 20,
+  „spec zmiana_1" i „zmiana_2"), których w repo nie ma.
+
+```
+NODE_PATH=$(npm root -g) node tests/wniosek-kontrakt-test.js
+```
+
+Test **nie przechodzi** — opisuje sześć znalezionych rozjazdów. Nie usuwaj
+asercji, żeby zrobić zielono; albo naprawiamy kod, albo świadomie zmieniamy
+kontrakt i wtedy test.
