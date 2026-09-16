@@ -51,6 +51,25 @@ const KEY_LABEL = {
 };
 
 /**
+ * Nazwa klauzuli wyciągnięta z tekstu oferty. Dopasowanie łapie też zdanie
+ * wprowadzające i poprzedni wiersz, więc zostawiamy tylko ostatni fragment
+ * po dwukropku / nowej linii. Zbyt krótka resztka => brak nazwy.
+ * @param {string} [raw]
+ * @returns {string|null}
+ */
+function cleanOfferLabel(raw) {
+  const s = String(raw || '')
+    .replace(/^[\s\S]*[::]\s*/, '')
+    .replace(/^[\s\S]*[\n\t]/, '')
+    .replace(/^(?:oraz|i|a\s+także|także|,|;|•|-|–)\s+/i, '')
+    .replace(/^umow\w*\s+ubezpieczenia\s+(?:obejmuje|zawiera)\s*/i, '')
+    .trim();
+  // Samo zdanie wprowadzające („…obejmuje klauzulę") nazwą nie jest.
+  if (/^klauzul[a-ząćęłńóśźż]*$/i.test(s)) return null;
+  return s.length >= 3 ? s : null;
+}
+
+/**
  * Dokłada pozycję do listy, bez duplikatów po kluczu (pierwsze wystąpienie wygrywa).
  * @param {Extra[]} list
  * @param {Partial<Extra>} item
@@ -59,10 +78,18 @@ function pushExtra(list, item) {
   if (!item || !item.key) return;
   if (list.some((x) => x.key === item.key)) return;
   const reg = item.symbol ? EXTRA_REGISTRY[item.symbol.toUpperCase()] : null;
+  const symbol = item.symbol ? item.symbol.toUpperCase() : null;
   list.push({
     key: item.key,
-    label: item.label || reg?.label || KEY_LABEL[item.key] || item.offer_label || item.key,
-    symbol: item.symbol ? item.symbol.toUpperCase() : null,
+    // Klucz techniczny (np. lw_lw144) nigdy nie może trafić do tabeli — gdy nazwy
+    // nie znamy ani z rejestru, ani z oferty, pokazujemy sam symbol klauzuli.
+    label:
+      item.label ||
+      reg?.label ||
+      KEY_LABEL[item.key] ||
+      item.offer_label ||
+      (symbol ? `Klauzula ${symbol}` : item.key),
+    symbol,
     covered: item.covered ?? null,
     amount: item.amount ?? null,
     offer_label: item.offer_label || null,
@@ -97,20 +124,19 @@ function detectLeadenhall(text) {
   /** @type {Extra[]} */
   const out = [];
 
-  const withSum = /([^\n(]{3,120}?)\s*\((LW\d{3})\)\s*z\s+sumą\s+ubezpieczenia\s+([\d  ]+(?:,\d{2})?)\s*zł/gi;
+  const withSum = /([^\n\t(]{3,120}?)[ ]*\((LW\d{3})\)\s*z\s+sumą\s+ubezpieczenia\s+([\d  ]+(?:,\d{2})?)\s*zł/gi;
   let m;
   while ((m = withSum.exec(text))) {
     const symbol = m[2].toUpperCase();
     const reg = EXTRA_REGISTRY[symbol];
     if (reg?.informational) continue;
     // Nazwa bywa poprzedzona zdaniem wprowadzającym („…oraz następujące świadczenia dodatkowe:”).
-    const offerLabel = m[1].replace(/^[\s\S]*[::]\s*/, '').replace(/^[\s\S]*\n/, '').trim();
     pushExtra(out, {
       key: reg?.key || `lw_${symbol.toLowerCase()}`,
       symbol,
       covered: true,
       amount: parseAmount(m[3]),
-      offer_label: offerLabel
+      offer_label: cleanOfferLabel(m[1])
     });
   }
 
@@ -120,12 +146,20 @@ function detectLeadenhall(text) {
     /Postanowienia\s+dodatkowe/i,
     /Płatność\s+wynikająca|Osoby\s+uprawnione|Załączniki\s+do\s+polisy/i
   );
-  const bare = /\((LW\d{3})\)/g;
+  // Nazwa klauzuli stoi przed symbolem — bez jej odczytania w tabeli zostawał
+  // sam klucz techniczny (np. lw_lw144).
+  const bare = /([^\n\t(]{0,120}?)[ ]*\((LW\d{3})\)/g;
   while ((m = bare.exec(sec))) {
-    const symbol = m[1].toUpperCase();
+    const symbol = m[2].toUpperCase();
     const reg = EXTRA_REGISTRY[symbol];
     if (reg?.informational) continue;
-    pushExtra(out, { key: reg?.key || `lw_${symbol.toLowerCase()}`, symbol, covered: true, amount: null });
+    pushExtra(out, {
+      key: reg?.key || `lw_${symbol.toLowerCase()}`,
+      symbol,
+      covered: true,
+      amount: null,
+      offer_label: cleanOfferLabel(m[1])
+    });
   }
 
   // HIV/WZW — oferta stwierdza status wprost, w obie strony.

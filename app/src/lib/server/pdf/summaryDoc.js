@@ -45,8 +45,50 @@ function brandNode(logo) {
 }
 
 /**
+ * Blok „Postanowienia dodatkowe" — ręczny tekst agenta (warunki, zastrzeżenia),
+ * niezależny od wiadomości dla klienta. Pusty tekst => sekcji nie ma w ogóle.
+ * Wiersze zaczynające się od myślnika/kropki renderujemy jako listę punktową,
+ * bo tak agenci najczęściej zapisują zastrzeżenia.
+ * @param {string} [text]
+ * @returns {Array<object>}
+ */
+export function additionalTermsContent(text) {
+  const lines = String(text || '').split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  if (!lines.length) return [];
+
+  const nodes = [];
+  /** @type {string[]} */
+  let bullets = [];
+  const flush = () => {
+    if (bullets.length) nodes.push({ ul: bullets, style: 'atList' });
+    bullets = [];
+  };
+  for (const line of lines) {
+    if (/^[-–—•*]\s+/.test(line)) {
+      bullets.push(line.replace(/^[-–—•*]\s+/, ''));
+    } else {
+      flush();
+      nodes.push({ text: line, style: 'atP' });
+    }
+  }
+  flush();
+
+  return [
+    {
+      table: {
+        widths: ['*'],
+        body: [[{ stack: [{ text: 'Postanowienia dodatkowe', style: 'atTitle' }, ...nodes] }]]
+      },
+      layout: 'atBox',
+      margin: [0, 2, 0, 8]
+    }
+  ];
+}
+
+/**
  * @param {{ clientName?: string, documents: any[], employmentType?: string,
- *   offerNumber?: string, footerText?: string, logo?: {kind:string, data:any}|null }} p
+ *   offerNumber?: string, additionalTerms?: string, footerText?: string,
+ *   logo?: {kind:string, data:any}|null }} p
  * @returns {object} docDefinition dla pdfmake
  */
 export function buildSummaryDocDefinition(p) {
@@ -152,6 +194,7 @@ export function buildSummaryDocDefinition(p) {
         margin: [0, 2, 0, 12]
       },
       cmpTable,
+      ...additionalTermsContent(p.additionalTerms),
       ...conditionsContent(p.footerText)
     ],
     styles: {
@@ -166,6 +209,10 @@ export function buildSummaryDocDefinition(p) {
       cmpSection: { bold: true, fontSize: 8, color: '#475569', fillColor: '#f1f5f9', margin: [4, 3, 4, 3] },
       // Komórki z danymi ofert — wyśrodkowane.
       cmpCell: { margin: [4, 3, 4, 3], alignment: 'center' },
+      // Ręczne postanowienia dodatkowe (pole z edycji oferty).
+      atTitle: { fontSize: 9.5, bold: true, color: '#92400e', margin: [0, 0, 0, 3] },
+      atP: { fontSize: 8.5, margin: [0, 0, 0, 2] },
+      atList: { fontSize: 8.5, margin: [0, 0, 0, 2] },
       ocH2: { fontSize: 11.5, bold: true, color: SLATE_900 },
       ocH3: { fontSize: 9.5, bold: true, color: SLATE_900, margin: [0, 10, 0, 4] },
       ocSub: { fontSize: 8.5, bold: true, margin: [0, 4, 0, 2] },
@@ -209,6 +256,16 @@ export const TABLE_LAYOUTS = {
     paddingRight: () => 8,
     paddingTop: () => 2,
     paddingBottom: () => 2
+  },
+  atBox: {
+    hLineWidth: () => 0,
+    vLineWidth: (i) => (i === 0 ? 3 : 0),
+    vLineColor: () => '#f59e0b',
+    fillColor: () => '#fffbeb',
+    paddingLeft: () => 8,
+    paddingRight: () => 8,
+    paddingTop: () => 5,
+    paddingBottom: () => 5
   },
   ocBox: {
     hLineWidth: () => 0.6,

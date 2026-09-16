@@ -91,6 +91,15 @@
       <label class="label" for="brokerMessage">Wiadomość dla klienta (opcjonalnie)</label>
       <textarea class="input" id="brokerMessage" name="brokerMessage" rows="3">{data.defaultMessage || ''}</textarea>
     </div>
+    <div class="field">
+      <label class="label" for="additionalTerms">Postanowienia dodatkowe — warunki, zastrzeżenia (opcjonalnie)</label>
+      <textarea class="input" id="additionalTerms" name="additionalTerms" rows="4"
+        placeholder="np. Oferta ważna do 30.09.2026&#10;- wymagane badania lekarskie przed zawarciem umowy"></textarea>
+      <p class="muted" style="font-size:.8rem;margin:.3rem 0 0;">
+        Osobna sekcja w PDF-ie rekomendacji — niezależna od wiadomości dla klienta.
+        Można też uzupełnić później w „Edycji oferty”.
+      </p>
+    </div>
   </div>
 
   <button class="btn btn-primary btn-lg" type="submit" disabled={loading}>

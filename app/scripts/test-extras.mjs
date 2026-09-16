@@ -108,5 +108,27 @@ check('klucze bazowe bez zmian', mixed.filter((r) => r.kind === 'row' && !r.key.
   'insurer', 'offer_no', 'period', 'death', 'temp', 'temp_monthly', 'perm', 'indemnity', 'wait_acc', 'wait_ill'
 ]);
 
+// --- Leadenhall: klauzula spoza rejestru (np. LW144) ---
+// Regresja: w tabeli pokazywał się goły klucz techniczny „lw_lw144".
+const LH_NIEZNANA = `
+Postanowienia dodatkowe\tUmowa ubezpieczenia obejmuje klauzulę informacyjną (LW300) oraz następujące świadczenia dodatkowe:
+Klauzula pracy fizycznej (LW144)
+
+Osoby uprawnione
+`;
+const LH_NIEZNANA_BEZ_NAZWY = `
+Postanowienia dodatkowe\tUmowa ubezpieczenia obejmuje klauzulę (LW144)
+
+Osoby uprawnione
+`;
+
+console.log('\n=== LEADENHALL — klauzula spoza rejestru ===');
+const nieznana = detectExtras(LH_NIEZNANA, 'leadenhall').find((e) => e.symbol === 'LW144');
+check('klucz techniczny', nieznana?.key, 'lw_lw144');
+check('etykieta z oferty', nieznana?.label, 'Klauzula pracy fizycznej');
+const bezNazwy = detectExtras(LH_NIEZNANA_BEZ_NAZWY, 'leadenhall').find((e) => e.symbol === 'LW144');
+check('etykieta awaryjna = symbol', bezNazwy?.label, 'Klauzula LW144');
+check('nazwa kolumny oferty nie jest etykietą', bezNazwy?.label.includes('Postanowienia'), false);
+
 console.log(`\n${failures === 0 ? '✅ WSZYSTKIE ASERCJE OK' : `❌ ${failures} ASERCJI NIE PRZESZŁO`}`);
 process.exit(failures === 0 ? 0 : 1);

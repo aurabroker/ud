@@ -56,6 +56,7 @@ export const actions = {
       client_email: String(form.get('clientEmail') || '').trim() || null,
       client_phone: String(form.get('clientPhone') || '').trim() || null,
       broker_message: String(form.get('brokerMessage') || '').trim() || null,
+      additional_terms: String(form.get('additionalTerms') || '').trim() || null,
       access_code: String(form.get('accessCode') || '').trim() || null,
       updated_at: new Date().toISOString()
     };

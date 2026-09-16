@@ -34,6 +34,7 @@ export const actions = {
     let clientEmail = String(form.get('clientEmail') || '').trim();
     let clientPhone = String(form.get('clientPhone') || '').trim();
     const brokerMessage = String(form.get('brokerMessage') || '').trim();
+    const additionalTerms = String(form.get('additionalTerms') || '').trim();
     const pdfPassword = String(form.get('pdfPassword') || '').trim();
 
     // Jeśli wybrano istniejącego klienta — dane bierzemy z bazy (autorytatywnie),
@@ -72,6 +73,7 @@ export const actions = {
         clientPhone,
         clientId,
         brokerMessage,
+        additionalTerms,
         password: pdfPassword || null,
         files
       });
