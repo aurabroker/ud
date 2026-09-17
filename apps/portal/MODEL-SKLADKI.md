@@ -180,3 +180,119 @@ Kalibrację warto powtórzyć, gdy w `ud_offer_documents` przybędzie ofert —
 w szczególności takich z okresem 48 lub 60 miesięcy, z drugim ubezpieczycielem
 albo z klientem po pięćdziesiątce. Każde z tych trzech domyka jedną z dziur
 opisanych wyżej.
+
+---
+
+# Plan: worker `ud-kalibrator` — przeliczanie stawek raz dziennie
+
+Status: **plan, nie kod.** Nic z tego nie jest jeszcze wdrożone.
+
+## Rzecz, która przesądza o kształcie: serwis jest statyczny
+
+Kwoty składek nie są czytane w przeglądarce. Są wpieczone w build — w 228
+plików HTML, 227 plików `.md` i 189 plików `llms.txt`. Kalkulator jest wyspą
+Svelte, ale i on renderuje się po stronie serwera, żeby robot i model językowy
+zobaczyły liczby, a nie pustą ramkę.
+
+Z tego wynika, że worker **nie może „zaktualizować danych w serwisie"** przez
+zapis do bazy, z której strona by je czytała. Gdyby czytała, zniknęłyby ze
+źródła strony i cała warstwa dla agentów zostałaby z pustymi miejscami.
+
+Worker może za to zrobić coś lepszego: przeliczyć stawki i **podmienić
+`kalibracja.json` w repozytorium**. Cloudflare Pages zbuduje serwis sam, bo
+commit na gałęzi produkcyjnej jest dla niego wyzwalaczem. Historia gita staje
+się przy okazji dziennikiem: widać, kiedy stawka się zmieniła, o ile i na
+jakiej próbce. Na produkcie regulowanym to nie jest dodatek — to odpowiedź na
+pytanie „co serwis pokazywał w marcu i skąd ta liczba".
+
+Build **nie** pyta bazy o nic. Czyta zatwierdzony plik. Dzięki temu awaria
+Supabase nie może zepsuć wdrożenia portalu.
+
+## Przepływ
+
+```
+cron 05:00 UTC
+  └─ worker ud-kalibrator
+       ├─ RPC do Postgresa: ud_kalibracja_stawek()   → {stawka, okresy, zrodlo}
+       ├─ pobiera obecny kalibracja.json z GitHuba
+       ├─ bramki bezpieczeństwa (niżej)
+       ├─ identyczny → koniec, cisza
+       └─ inny → commit do aurabroker/ud + alert na webhook
+                    └─ Pages buduje i wdraża sam
+```
+
+## Zapytanie mieszka w Postgresie, nie w workerze
+
+Filtr, który odsiewa warianty z trwałą niezdolnością i śmiercią, i złączenie
+par po `offer_id` — to jest cała metoda z tego dokumentu. Przepisanie jej do
+JavaScriptu oznacza dwie wersje prawdy, które rozjadą się przy pierwszej
+poprawce.
+
+Dlatego: funkcja `public.ud_kalibracja_stawek()` w bazie, `SECURITY DEFINER`,
+zwracająca **wyłącznie agregaty** — stawki, mnożniki, liczność próby. Żadnego
+wiersza oferty, żadnego nazwiska, żadnego PESEL-u.
+
+Konsekwencja jest taka, że worker chodzi na **kluczu anonimowym**, nie na
+`service_role`. Na wszystkich trzech tabelach (`ud_offer_documents`,
+`ud_offers`, `ud_clients`) jest włączone RLS, więc bez tej funkcji worker
+musiałby dostać klucz serwisowy — czyli pełny dostęp do bazy jedenastu
+serwisów po to, żeby policzyć jedną średnią. Wyciek takiego klucza z crona
+jest znacznie gorszy niż wyciek klucza, którym da się policzyć medianę.
+
+## Bramki — worker zmienia ceny pokazywane konsumentom
+
+To nie jest zadanie, które wolno puścić bez ograniczeń. Cztery warunki,
+wszystkie muszą być spełnione, inaczej worker **nie zmienia niczego** i wysyła
+alert:
+
+| Bramka | Próg | Po co |
+|---|---|---|
+| liczność próby | ≥ 8 czystych obserwacji | dziś jest 10; przy mniejszej próbce mediana skacze po jednej ofercie |
+| pas zdrowego rozsądku | stawka 1,0–5,0% | literówka w kwocie oferty albo zmiana schematu nie może wjechać na stronę |
+| dzienny ruch | ≤ 15% względnie | prawdziwa zmiana taryfy jest stopniowa; skok o jedną trzecią w dobę to błąd danych, nie rynek |
+| faktyczna różnica | cokolwiek się zmieniło | bez tego historia wdrożeń zapełnia się codziennym commitem bez zmian |
+
+Alert idzie na ten sam webhook, którego używa `ud-monitor`, i przy zmianie
+**też** — nie tylko przy odmowie. Zmiana ceny na serwisie musi być widoczna dla
+człowieka tego samego dnia.
+
+## Czego workerowi nie wolno
+
+- **Dopisywać mnożników dla 48 i 60 miesięcy.** Zero obserwacji to nie jest
+  problem do rozwiązania ekstrapolacją. Jeśli w bazie pojawią się oferty
+  z takim okresem, funkcja SQL policzy je tym samym sposobem co 36 — i dopiero
+  wtedy mnożnik ma prawo trafić do pliku.
+- **Ruszać `MNOZNIK_HIV_WZW`.** Klauzuli w danych nie ma; ta liczba jest do
+  sprawdzenia w tabeli, nie do przeliczenia.
+- **Dopisywać współczynnika klasy ryzyka ani wieku.** Powody są w tym
+  dokumencie wyżej i nie znikną przez dołożenie kilku ofert — dopóki wiek jest
+  zmylony zawodem, rozdzielić ich się nie da.
+
+Praktycznie: funkcja SQL zwraca tylko te pola, które umie policzyć. Worker
+wkleja to, co dostał, i nie umie dopisać niczego od siebie.
+
+## Dlaczego osobny worker, a nie drugi cron w `ud-monitor`
+
+Monitor jest celowo odcięty od portalu — ma działać wtedy, gdy portal się nie
+zbudował. Zadanie, które **wyzwala** wdrożenia portalu, w monitorze psuje
+dokładnie tę własność. Osobny worker, osobne sekrety, osobny budżet awarii.
+
+Koszt: jedno wywołanie na dobę, 30 na miesiąc. Poziom darmowy.
+
+## Czego potrzeba od klienta
+
+1. **Token GitHuba** — fine-grained, wyłącznie `aurabroker/ud`, wyłącznie
+   `contents: write`. Nie klasyczny PAT z dostępem do wszystkiego.
+2. **Decyzja: commit prosto na gałąź produkcyjną czy pull request.**
+   Rekomendacja: prosto, bo bramki już ograniczają ruch, a PR czekający na
+   scalenie oznacza, że stawki stoją, gdy nikt nie patrzy — czyli wracamy do
+   stanu, który naprawiamy. Cofnięcie to jeden plik.
+3. **Adres webhooka alertów**, jeśli ma być inny niż monitorowy.
+
+## Test, bez którego to nie ma prawa wejść
+
+Funkcja `ud_kalibracja_stawek()` uruchomiona na dzisiejszych 48 wierszach musi
+zwrócić 2,02% / 2,20% / 2,44% i mnożnik 1,25 — czyli liczby z tego dokumentu.
+Jeśli kiedyś zwróci co innego przy tych samych danych, to znaczy, że ktoś
+zmienił metodę, a nie że zmienił się rynek. To jest jedyny test, który odróżnia
+te dwie sytuacje.
