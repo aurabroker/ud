@@ -392,14 +392,42 @@ jeszcze nie dostaliśmy. Przełącznik bez nich pokazywałby cenę wariantu
 tylko w drugą stronę. Gdy współczynniki przyjdą: wracają jako mapa
 okres → mnożnik obok `OKRESY`, a `symuluj()` bierze `okres` w założeniach.
 
-Stawka bazowa (1,5%, z klauzulą HIV/WZW 1,8%) odnosi się do wariantu
-24-miesięcznego. Nie jest potwierdzona tabelą — jeśli pochodziła z tabeli dla
-12 miesięcy, wszystkie kwoty na serwisie są zaniżone i trzeba ją podnieść,
-a nie tylko dopisać mnożniki. To pytanie jest otwarte u klienta.
-
 Pilnuje tego `test/kalkulator.spec.js`: okresy muszą być wymienione
 w komplecie, przy składce musi stać, którego wariantu dotyczy, a ciąg
 „zamiast 12" nie może wrócić na stronę.
+
+## Kalkulator — stawka pochodzi z ofert, nie z sufitu
+
+Stawka 1,5% ze starego `Calculator.js` leżała **poniżej najtańszej oferty,
+jaką realnie wystawiliśmy**. Przy sumie 14 400 zł serwis obiecywał 216 zł,
+podczas gdy faktyczne oferty dawały 291–351 zł. Nie przywracaj jej i nie
+wpisuj żadnej stawki „na oko" — na stronie sprzedażowej zaniżona cena to
+najgorszy możliwy kierunek błędu.
+
+Liczby siedzą w **`src/lib/kalibracja.json`** i tylko tam. `symulacja.ts` je
+importuje, reszta serwisu bierze je z `symulacja.ts`. Ten plik jest pomyślany
+tak, żeby dało się go przeliczyć maszynowo — nie wpisuj wartości bezpośrednio
+w kodzie.
+
+| Pole | Skąd |
+|---|---|
+| `stawka.dol` / `stawka.gora` | najtańsza i najdroższa zaobserwowana oferta (2,02% / 2,44%) |
+| `stawka.srodek` | mediana zaokrąglona do 2,2% — tam, gdzie musi paść jedna liczba |
+| `okresy` | mnożniki policzone z par ofert: 24 → 1,00, 36 → 1,25 |
+| `zrodlo` | ile ofert i wariantów stoi za tymi liczbami — idzie do podpisu na stronie |
+
+**Składka jest przedziałem, nie liczbą.** Rozrzut 2,02–2,44% jest prawdziwy
+i bierze się z wieku, klasy ryzyka i karencji, o które kalkulator nie pyta.
+Jedna liczba udawałaby precyzję, której w tym produkcie nie ma.
+
+Metoda, dane źródłowe i — ważniejsze — **czego z tych danych policzyć się nie
+da** (współczynnika klasy ryzyka, współczynnika wieku, mnożników dla 48 i 60
+miesięcy) siedzą w `apps/portal/MODEL-SKLADKI.md`. Zanim ktoś dopisze
+któryś z tych współczynników, ma tam przeczytać, dlaczego go nie ma.
+
+Mnożnik klauzuli HIV/WZW (1,2) to jedyna liczba w tym zestawie bez pokrycia
+w danych — pochodzi z relacji 1,8/1,5 ze starego kalkulatora, a w ofertach
+z bazy klauzuli nie ma wcale.
 
 ---
 

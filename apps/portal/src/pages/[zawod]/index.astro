@@ -14,7 +14,7 @@
 import { ZAWODY, zawod, pokrewne, slugKategorii, tresc } from '@ud/zawody';
 import Baza from '../../layouts/Baza.astro';
 import Kalkulator from '../../components/Kalkulator.svelte';
-import { symuluj, zl, ZUS_MIESIECZNIE } from '../../lib/symulacja';
+import { symuluj, zl, zlZakres, ZUS_MIESIECZNIE } from '../../lib/symulacja';
 import { graf, organizacja, serwis, strona, okruszki, usluga, faq } from '../../lib/seo';
 import { FIRMA } from '../../lib/firma';
 import { Image, getImage } from 'astro:assets';
@@ -229,7 +229,8 @@ const ogObraz = zdjecie
         <p class="text-[13px] leading-relaxed text-tekst-trzeci mt-4 mb-0">
           Symulacja, nie oferta. Kwoty policzone dla dochodu {zl(dochodPrzykladowy)} i limitu 80% na B2B;
           zasiłek ZUS przy podstawie {zl(ZUS_MIESIECZNIE)}. Realną składkę wylicza system ubezpieczyciela
-          po ocenie ryzyka — u nas składka wychodzi ok. {zl(wynik.skladka)} miesięcznie.
+          po ocenie ryzyka — w ofertach, które wystawiliśmy, przy tej sumie
+          wychodziła {zlZakres(wynik.skladkaOd, wynik.skladkaDo)} miesięcznie.
         </p>
       </section>
 

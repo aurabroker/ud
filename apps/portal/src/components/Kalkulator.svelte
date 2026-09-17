@@ -2,15 +2,19 @@
   /**
    * Kalkulator.svelte — symulacja składki.
    *
-   * Kwoty liczone są wzorem z Calculator.js starego serwisu, przeniesionym bez
-   * zmian: suma = dochód × limit, składka = suma × 1,5% (1,8% z klauzulą HIV/WZW).
+   * Kwoty: suma = dochód × limit, składka = suma × stawka. Stawka jest
+   * policzona na ofertach, które naprawdę wystawiliśmy — patrz MODEL-SKLADKI.md.
+   * Dlatego składka jest przedziałem, a nie jedną liczbą: rozrzut między
+   * najtańszą a najdroższą ofertą bierze się z wieku, klasy ryzyka i karencji,
+   * o które kalkulator nie pyta.
    *
    * To jest SYMULACJA, nie oferta i nie stawka z tabeli ubezpieczyciela. Realną
    * składkę wylicza system ubezpieczyciela po ocenie ryzyka. Zastrzeżenie stoi
    * przy każdej kwocie i nie jest ozdobą — przedstawianie szacunku jak oferty
    * to spór z ustawą o dystrybucji ubezpieczeń.
    */
-  import { symuluj, zl, ZUS_MIESIECZNIE, LIMIT, MIESIECY_WYPLATY, OKRESY } from '../lib/symulacja';
+  import { symuluj, zl, zlZakres, ZUS_MIESIECZNIE, LIMIT, MIESIECY_WYPLATY, OKRESY, KALIBRACJA }
+    from '../lib/symulacja';
 
   let { dochodPoczatkowy = 18000, zawod = '', kompaktowy = false } = $props();
 
@@ -86,8 +90,15 @@
       <dd class="font-mono text-lg font-semibold text-alarm m-0">{zl(wynik.zus)}</dd>
     </div>
     <div class="flex items-baseline justify-between gap-4 py-4">
-      <dt class="text-[15px] font-semibold">Szacowana składka miesięczna</dt>
-      <dd class="font-mono text-2xl font-semibold m-0">{zl(wynik.skladka)}</dd>
+      <dt class="text-[15px] font-semibold">
+        Szacowana składka miesięczna
+        <span class="block text-[13px] font-normal text-tekst-drugi">
+          przedział z {KALIBRACJA.ofert} wystawionych ofert
+        </span>
+      </dt>
+      <dd class="font-mono text-2xl font-semibold m-0 whitespace-nowrap">
+        {zlZakres(wynik.skladkaOd, wynik.skladkaDo)}
+      </dd>
     </div>
   </dl>
 
@@ -99,6 +110,12 @@
   <p class="text-[12.5px] leading-relaxed text-tekst-drugi mt-4 mb-0">
     To jest symulacja, nie oferta. Realną składkę wylicza system ubezpieczyciela po ocenie
     ryzyka — może różnić się od tej kwoty. Zasiłek ZUS policzony od podstawy {zl(ZUS_MIESIECZNIE)}.
+  </p>
+  <p class="text-[12.5px] leading-relaxed text-tekst-drugi mt-2.5 mb-0">
+    Przedział składki policzyliśmy z {KALIBRACJA.wariantow} wariantów w {KALIBRACJA.ofert} ofertach,
+    które naprawdę wystawiliśmy — od najtańszej do najdroższej stawki, jaka w nich wystąpiła.
+    Nie jest to widełkowanie na oko. Na Twoją składkę wpłyną wiek, klasa ryzyka Twojego zawodu
+    i długość karencji, o które ten kalkulator nie pyta.
   </p>
   <p class="text-[12.5px] leading-relaxed text-tekst-drugi mt-2.5 mb-0">
     Świadczenie wypłacane jest przez {okresy} miesięcy — okres wybierasz przy zawarciu

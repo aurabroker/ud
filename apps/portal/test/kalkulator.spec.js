@@ -1,13 +1,16 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * Kalkulator liczy wzorem przeniesionym z Calculator.js starego serwisu.
- * Kwoty poniżej są wyliczone ręcznie z tego wzoru — jeśli test padnie,
- * znaczy to, że symulacja rozjechała się z tym, co serwis pokazywał dotąd.
+ * Kwoty poniżej są wyliczone ręcznie ze wzoru — jeśli test padnie, znaczy to,
+ * że symulacja rozjechała się ze stawkami z kalibracja.json.
  *
  *   suma    = dochód × limit          (0,8 na B2B, 0,65 na umowie o pracę)
- *   stawka  = 0,015  albo 0,018 z klauzulą HIV/WZW
+ *   stawka  = 0,0202 (najtańsza oferta) … 0,0244 (najdroższa), ×1,2 z HIV/WZW
  *   składka = round(suma × stawka)
+ *
+ * Składka jest przedziałem, nie liczbą. Stawka 1,5% ze starego Calculator.js
+ * leżała poniżej najtańszej oferty, jaką realnie wystawiliśmy — przy sumie
+ * 14 400 zł dawała 216 zł przy faktycznych 291–351 zł.
  */
 
 const wynik = (page, etykieta) =>
@@ -19,29 +22,41 @@ test.beforeEach(async ({ page }) => {
 });
 
 test('wartości domyślne: 18 000 zł na B2B', async ({ page }) => {
-  // 18 000 × 0,8 = 14 400;  14 400 × 0,015 = 216
+  // 18 000 × 0,8 = 14 400;  × 0,0202 = 290,88 → 291;  × 0,0244 = 351,36 → 351
   await expect(wynik(page, 'Świadczenie z polisy')).toHaveText('14 400 zł');
-  await expect(wynik(page, 'Szacowana składka')).toHaveText('216 zł');
+  await expect(wynik(page, 'Szacowana składka')).toHaveText('291–351 zł');
   // 2800 × 0,8 = 2240 — zasiłek nie zależy od dochodu, tylko od podstawy.
   await expect(wynik(page, 'Zasiłek ZUS')).toHaveText('2 240 zł');
 });
 
 test('umowa o pracę obniża limit z 80% do 65%', async ({ page }) => {
   await page.getByText('Umowa o pracę').click();
-  // 18 000 × 0,65 = 11 700;  11 700 × 0,015 = 175,5 → 176
+  // 18 000 × 0,65 = 11 700;  × 0,0202 = 236,34 → 236;  × 0,0244 = 285,48 → 285
   await expect(wynik(page, 'Świadczenie z polisy')).toHaveText('11 700 zł');
-  await expect(wynik(page, 'Szacowana składka')).toHaveText('176 zł');
+  await expect(wynik(page, 'Szacowana składka')).toHaveText('236–285 zł');
   await expect(page.getByText('do 65% udokumentowanego dochodu')).toBeVisible();
 });
 
-test('klauzula HIV/WZW podnosi stawkę', async ({ page }) => {
+test('klauzula HIV/WZW podnosi stawkę o 20%', async ({ page }) => {
   await page.getByLabel('Klauzula HIV / WZW').check();
-  // 14 400 × 0,018 = 259,2 → 259
-  await expect(wynik(page, 'Szacowana składka')).toHaveText('259 zł');
+  // 14 400 × 0,0202 × 1,2 = 349,06 → 349;  14 400 × 0,0244 × 1,2 = 421,63 → 422
+  await expect(wynik(page, 'Szacowana składka')).toHaveText('349–422 zł');
 
   await page.getByLabel('Klauzula HIV / WZW').uncheck();
-  // 14 400 × 0,015 = 216
-  await expect(wynik(page, 'Szacowana składka')).toHaveText('216 zł');
+  await expect(wynik(page, 'Szacowana składka')).toHaveText('291–351 zł');
+});
+
+/**
+ * Skąd te liczby — to musi stać przy kwocie, nie w dokumentacji.
+ *
+ * Poprzednia stawka (1,5%) nie była niczym poparta i nikt tego po stronie nie
+ * poznawał. Jeśli przedział znowu zacznie brać się znikąd, ten test padnie.
+ */
+test('przy składce stoi, że przedział pochodzi z wystawionych ofert', async ({ page }) => {
+  const kwoty = page.locator('dl').filter({ hasText: 'Szacowana składka' }).first();
+  await expect(kwoty).toContainText('przedział z 15 wystawionych ofert');
+  await expect(page.getByText(/policzyliśmy z 48 wariantów w 15 ofertach/)).toBeVisible();
+  await expect(page.getByText(/o które ten kalkulator nie pyta/)).toBeVisible();
 });
 
 /**
@@ -75,9 +90,9 @@ test('strona kalkulatora tłumaczy okresy wypłaty w pytaniach', async ({ page }
 test('suwak zmienia świadczenie', async ({ page }) => {
   const suwak = page.getByLabel('Miesięczny dochód netto w złotych');
   await suwak.fill('30000');
-  // 30 000 × 0,8 = 24 000;  24 000 × 0,015 = 360
+  // 30 000 × 0,8 = 24 000;  × 0,0202 = 484,8 → 485;  × 0,0244 = 585,6 → 586
   await expect(wynik(page, 'Świadczenie z polisy')).toHaveText('24 000 zł');
-  await expect(wynik(page, 'Szacowana składka')).toHaveText('360 zł');
+  await expect(wynik(page, 'Szacowana składka')).toHaveText('485–586 zł');
 });
 
 test('przy każdej kwocie stoi zastrzeżenie, że to nie jest oferta', async ({ page }) => {
