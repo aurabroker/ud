@@ -455,6 +455,19 @@ Przy tekście na wierzchu pas ma `min-h: clamp(26rem, 34vw, 38rem)`, więc kadr
 Kadruj z zapasem nad i pod bohaterem, a lewą tercję zostaw spokojną — tam stoi
 tekst.
 
+**Pas przycina kadr od 25% wysokości, nie od środka** (`object-[50%_25%]`).
+Domyślne `object-cover` tnie symetrycznie, a zdjęcia w tym zestawie mają twarz
+w górnej tercji — przy oknie 1440 px widoczny fragment farmacji zaczynał się
+na y≈346, podczas gdy oczy są na y≈300. Na stronie zostawał sam uśmiech.
+Medycyna (oczy 270, kadr od 314) i budownictwo (oczy 350, kadr od 408) miały
+to samo, tylko nikt tam nie zajrzał.
+
+Zanim zmienisz tę wartość, przelicz, który fragment oryginału zostaje przy
+oknie 1440 i 1920 px — wysokość pasa to `clamp(26rem, 34vw, 38rem)`, więc
+nadmiar do przycięcia zmienia się razem z szerokością okna. Ta sama klasa
+stoi na pasie zawodu, pasie kategorii, pasie strony głównej i na kafelkach
+kategorii; test w `linki.spec.js` sprawdza trzy pierwsze.
+
 Czytelność trzyma `.zaslona-hero` w `global.css`. Policzone nad najciemniejszym
 możliwym zdjęciem (czerń pod spodem), w obrębie kolumny tekstu:
 

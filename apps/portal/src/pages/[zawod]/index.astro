@@ -106,7 +106,14 @@ const ogObraz = zdjecie
         <Image src={zdjecie.obraz} alt={zdjecie.opis}
                widths={[768, 1280, 1920]} sizes="100vw"
                loading="eager" fetchpriority="high"
-               class="absolute inset-0 -z-10 w-full h-full object-cover" />
+               {/* Kadr przycinany od 25% wysokości, nie od środka.
+                   Zdjęcia w tym zestawie mają twarz w górnej tercji, a pas jest
+                   znacznie szerszy niż wysoki — przy domyślnym `center` widoczny
+                   fragment farmacji zaczynał się na y≈346, podczas gdy oczy są
+                   na y≈300. Zostawał sam uśmiech. To samo dotyczyło medycyny
+                   i budownictwa. Nie zmieniaj bez przeliczenia, którą część
+                   oryginału widać przy oknie 1440 i 1920 px. */}
+               class="absolute inset-0 -z-10 w-full h-full object-cover object-[50%_25%]" />
         <div class="absolute inset-0 -z-10 zaslona-hero" aria-hidden="true"></div>
       </>
     )}

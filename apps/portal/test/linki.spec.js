@@ -286,3 +286,32 @@ test('każdy adres starego serwisu ma dokąd prowadzić', () => {
     expect(existsSync(cel), `${z} prowadzi do nieistniejącego ${na}`).toBe(true);
   }
 });
+
+test('pas nagłówkowy przycina kadr od góry, nie od środka', () => {
+  /**
+   * `object-cover` bez `object-position` przycina od środka. Zdjęcia w tym
+   * zestawie mają twarz w górnej tercji kadru, a pas jest dużo szerszy niż
+   * wysoki — przy oknie 1440 px widoczny fragment farmacji zaczynał się
+   * na y≈346, podczas gdy oczy są na y≈300. Na stronie zostawał sam uśmiech.
+   * To samo dotyczyło medycyny (oczy 270, kadr od 314) i budownictwa
+   * (oczy 350, kadr od 408).
+   *
+   * Nie jest to kwestia jednego pliku, tylko domyślnego zachowania przycięcia,
+   * więc test obejmuje wszystkie trzy rodzaje pasa.
+   */
+  const PASY = [
+    'farmaceuta/index.html',        // zawód dziedziczący zdjęcie kategorii
+    'chirurg/index.html',           // zawód z własnym zdjęciem
+    'zawody/farmacja/index.html',   // strona kategorii
+  ];
+
+  for (const plik of PASY) {
+    const html = readFileSync(join(DIST, plik), 'utf8');
+    const hero = html.indexOf('relative isolate');
+    const obraz = html.slice(hero).match(/<img[^>]*>/)?.[0] ?? '';
+
+    expect(obraz, `${plik}: pas bez zdjęcia`).toMatch(/object-cover/);
+    expect(obraz, `${plik}: kadr przycinany od środka — twarz wypada poza pas`)
+      .toContain('object-[50%_25%]');
+  }
+});

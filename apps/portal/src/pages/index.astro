@@ -64,7 +64,7 @@ const hero = obrazHero();
       <>
         <Image src={hero} alt="" widths={[768, 1280, 1920]} sizes="100vw"
                loading="eager" fetchpriority="high"
-               class="absolute inset-0 -z-10 w-full h-full object-cover" />
+               class="absolute inset-0 -z-10 w-full h-full object-cover object-[50%_25%]" />
         <div class="absolute inset-0 -z-10 zaslona-hero" aria-hidden="true"></div>
       </>
     )}
@@ -152,7 +152,7 @@ const hero = obrazHero();
                 <span class="block overflow-hidden border-b border-linia">
                   <Image src={obrazKategorii(k.slug)!} alt={opisIlustracji(k.nazwa)}
                          widths={[320, 640]} sizes="(max-width: 640px) 100vw, 15rem"
-                         loading="lazy" class="w-full h-28 object-cover" />
+                         loading="lazy" class="w-full h-28 object-cover object-[50%_25%]" />
                 </span>
               )}
               <span class="flex items-baseline justify-between gap-3 px-5 py-4">
