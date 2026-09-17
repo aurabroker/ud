@@ -34,6 +34,10 @@ h1,h2,h3 { margin:0; }
 .badge-viewed { background:#fef3c7; color:#92400e; }
 .badge-chosen { background:#dcfce7; color:#166534; }
 .badge-rejected { background:#fee2e2; color:var(--red-700); }
+/* Kupiona ma być mocniejsza niż „wybrana": tamto znaczy „klient wskazał
+   wariant w portalu", to — „umowa podpisana". Na liście trzeba je rozróżnić
+   jednym spojrzeniem, bo tylko drugie jest sprzedażą. */
+.badge-bought { background:#16a34a; color:#fff; font-weight:700; }
 .muted { color:var(--slate-500); font-size:.85rem; }
 .error-box { background:#fee2e2; color:var(--red-700); padding:.7rem 1rem; border-radius:8px; font-size:.88rem; margin-bottom:1rem; }
 .ok-box { background:#dcfce7; color:#166534; padding:.7rem 1rem; border-radius:8px; font-size:.88rem; margin-bottom:1rem; }

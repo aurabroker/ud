@@ -133,7 +133,7 @@
 {/if}
 {#if form?.sent}
   <div class="{form.email?.sent ? 'ok-box' : 'error-box'}">
-    {form.email?.sent ? 'Oferta wysłana.' : 'Nie udało się wysłać — oferta NIE została oznaczona jako wysłana.'}
+    {form.email?.sent ? `Oferta wysłana — wersja ${form.wersja || 1}.` : 'Nie udało się wysłać — oferta NIE została oznaczona jako wysłana.'}
     <ul style="margin:.35rem 0 0;padding-left:1.1rem;">
       <li>
         Email:
@@ -169,6 +169,62 @@
   {/if}
   {#if data.pin}
     <p class="muted" style="margin-top:.3rem;">Kod aktywny do {dateP(data.pin.expires_at)} · próby: {data.pin.attempts}/3{#if data.pin.verified_at} · zweryfikowany ✓{/if}</p>
+  {/if}
+</div>
+
+<!-- Decyzja klienta, archiwum i historia wysyłek -->
+<div class="card card-pad" style="margin-bottom:1.25rem;">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+    <h3 style="font-size:1rem;margin:0;">
+      Wersja {data.offer.wersja || 1}
+      {#if data.offer.archived_at}<span class="muted" style="font-weight:400;"> · w archiwum</span>{/if}
+    </h3>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+      <form method="POST" action="?/kupiona" use:enhance={() => ({ update }) => update()}>
+        <input type="hidden" name="kupiona" value={data.offer.status === 'bought' ? 'nie' : 'tak'} />
+        <button class="btn {data.offer.status === 'bought' ? 'btn-ghost' : 'btn-primary'}" type="submit">
+          {data.offer.status === 'bought' ? 'Cofnij: jednak nie kupił' : '✓ Klient kupił polisę'}
+        </button>
+      </form>
+      <form method="POST" action="?/archiwum" use:enhance={() => ({ update }) => update()}>
+        <input type="hidden" name="archiwum" value={data.offer.archived_at ? 'nie' : 'tak'} />
+        <button class="btn btn-ghost" type="submit">
+          {data.offer.archived_at ? '↩ Przywróć z archiwum' : '📥 Archiwizuj'}
+        </button>
+      </form>
+    </div>
+  </div>
+
+  {#if data.offer.status === 'bought'}
+    <p class="muted" style="margin:.6rem 0 0;">
+      Polisa sprzedana{#if data.offer.decided_at} — odnotowano {dateP(data.offer.decided_at)}{/if}.
+    </p>
+  {/if}
+
+  <!-- Historia wysyłek. Dokładanie dokumentów nie podbija wersji; podbija ją
+       dopiero wysyłka, bo liczy się to, co klient faktycznie zobaczył. -->
+  <h4 style="font-size:.9rem;margin:1.25rem 0 .5rem;">Co i kiedy poszło do klienta</h4>
+  {#if data.wysylki.length === 0}
+    <p class="muted" style="margin:0;">Jeszcze nic nie wysłano.</p>
+  {:else}
+    <table>
+      <thead><tr><th>Wersja</th><th>Kanał</th><th>Odbiorca</th><th>Kiedy</th><th>Wynik</th></tr></thead>
+      <tbody>
+        {#each data.wysylki as w}
+          <tr>
+            <td style="font-weight:600;">v{w.wersja || 1}</td>
+            <td>{w.channel === 'email' ? '✉ Email' : w.channel}</td>
+            <td class="muted">{w.recipient || '—'}</td>
+            <td class="muted">{dateP(w.created_at)}</td>
+            <td>
+              {#if w.status === 'sent'}wysłana ✓
+              {:else if w.status === 'stub'}tryb testowy
+              {:else}<span style="color:var(--red-700);">błąd{#if w.error} — {w.error}{/if}</span>{/if}
+            </td>
+          </tr>
+        {/each}
+      </tbody>
+    </table>
   {/if}
 </div>
 

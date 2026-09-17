@@ -506,8 +506,12 @@ async function regenerateSummary(sb, offerId) {
  * był losowy PIN dowożony SMS-em; bez SMS-a losowy kod to oferta, której
  * klient nie ma jak otworzyć, a e-mail obiecujący PESEL byłby nieprawdą.
  *
+ * Każda wysyłka po pierwszej podbija numer wersji oferty i zapisuje go
+ * w ud_send_log — bez tego nie da się odtworzyć, którą wersję klient dostał
+ * którego dnia, a przy kilku rundach poprawek to jedyne, o co pyta.
+ *
  * @param {string} offerId
- * @returns {Promise<{ ok: boolean, email: any, pinDev?: string }>}
+ * @returns {Promise<{ ok: boolean, email: any, pinDev?: string, wersja: number }>}
  */
 export async function sendOfferToClient(offerId) {
   const sb = createAdminClient();
@@ -538,6 +542,11 @@ export async function sendOfferToClient(offerId) {
   if (!offer.access_code) {
     await sb.from('ud_offers').update({ access_code: pin }).eq('id', offerId);
   }
+  // Wersja rośnie tylko wtedy, gdy klient już coś dostał. Dokładanie
+  // dokumentów do szkicu to wciąż wersja pierwsza — liczy się to, co klient
+  // faktycznie zobaczył, a nie to, ile razy agent ruszył ofertę.
+  const wersja = offer.sent_at ? (offer.wersja || 1) + 1 : (offer.wersja || 1);
+
   const ttlHours = parseInt(env.PIN_TTL_HOURS || '48', 10);
   const expiresAt = new Date(Date.now() + ttlHours * 3600 * 1000).toISOString();
 
@@ -562,6 +571,7 @@ export async function sendOfferToClient(offerId) {
         channel,
         recipient: recipient || null,
         status,
+        wersja,
         provider_id: res?.id || null,
         error: res?.error || null
       })
@@ -592,7 +602,7 @@ export async function sendOfferToClient(offerId) {
   if (email.sent) {
     await sb
       .from('ud_offers')
-      .update({ status: 'sent', sent_at: new Date().toISOString() })
+      .update({ status: 'sent', sent_at: new Date().toISOString(), wersja })
       .eq('id', offerId);
   }
 
@@ -601,7 +611,7 @@ export async function sendOfferToClient(offerId) {
 
   // pinDev zwracany tylko w trybie stub (brak realnej wysyłki), do testów
   const pinDev = email.stub ? pin : undefined;
-  return { ok: true, email, pinDev };
+  return { ok: true, email, pinDev, wersja };
 }
 
 /**
@@ -713,4 +723,62 @@ export async function signedFileUrl(bucket, path, expiresIn = 300) {
   const { data, error } = await sb.storage.from(bucket).createSignedUrl(path, expiresIn);
   if (error) throw new Error('Signed URL: ' + error.message);
   return data.signedUrl;
+}
+
+/**
+ * Klient kupił polisę.
+ *
+ * To nie to samo co `chosen`: tamten status znaczy „klient wskazał wariant
+ * w portalu", a ten — „umowa podpisana". Mieszanie ich sprawiało, że
+ * z panelu nie dało się odczytać, ile ofert faktycznie się sprzedało.
+ *
+ * @param {string} offerId
+ * @param {boolean} kupiona
+ */
+export async function oznaczKupiona(offerId, kupiona = true) {
+  const sb = createAdminClient();
+  const { data: offer } = await sb.from('ud_offers').select('status').eq('id', offerId).single();
+  if (!offer) throw new Error('Oferta nie znaleziona');
+
+  // Cofnięcie wraca do „wysłana", a nie do szkicu — oferta u klienta była.
+  const patch = kupiona
+    ? { status: 'bought', decided_at: new Date().toISOString() }
+    : { status: 'sent', decided_at: null };
+
+  const { error } = await sb.from('ud_offers').update(patch).eq('id', offerId);
+  if (error) throw new Error('Zapis decyzji: ' + error.message);
+  return { ok: true, status: patch.status };
+}
+
+/**
+ * Archiwum: oferta znika z listy bieżącej, ale zostaje ze swoim statusem.
+ *
+ * Świadomie NIE jest to status. Kupiona oferta ma zostać kupiona także
+ * w archiwum — inaczej statystyka sprzedaży kasuje się przy sprzątaniu listy.
+ *
+ * @param {string} offerId
+ * @param {boolean} archiwum
+ */
+export async function ustawArchiwum(offerId, archiwum = true) {
+  const sb = createAdminClient();
+  const { error } = await sb
+    .from('ud_offers')
+    .update({ archived_at: archiwum ? new Date().toISOString() : null })
+    .eq('id', offerId);
+  if (error) throw new Error('Archiwum: ' + error.message);
+  return { ok: true, archiwum };
+}
+
+/**
+ * Historia wysyłek jednej oferty — wersja, kanał, data, status.
+ * @param {string} offerId
+ */
+export async function historiaWysylek(offerId) {
+  const sb = createAdminClient();
+  const { data } = await sb
+    .from('ud_send_log')
+    .select('wersja, channel, recipient, status, error, created_at')
+    .eq('offer_id', offerId)
+    .order('created_at', { ascending: false });
+  return data || [];
 }

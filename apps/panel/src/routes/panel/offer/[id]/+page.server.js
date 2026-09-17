@@ -1,6 +1,6 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { createAdminClient } from '$lib/server/supabase.js';
-import { sendOfferToClient, deleteOffer, deleteOfferDocument, addDocumentsToOffer, refreshOfferDocuments, addAttachmentsToOffer } from '$lib/server/offers.js';
+import { sendOfferToClient, deleteOffer, deleteOfferDocument, addDocumentsToOffer, refreshOfferDocuments, addAttachmentsToOffer, oznaczKupiona, ustawArchiwum, historiaWysylek } from '$lib/server/offers.js';
 import { clientBaseUrl } from '$lib/server/appUrl.js';
 
 export async function load({ params, locals }) {
@@ -20,6 +20,8 @@ export async function load({ params, locals }) {
       sb.from('ud_clients').select('id, full_name, email, phone').order('created_at', { ascending: false }).limit(500)
     ]);
 
+  const wysylki = await historiaWysylek(offer.id);
+
   return {
     offer,
     documents: documents || [],
@@ -27,17 +29,42 @@ export async function load({ params, locals }) {
     questions: questions || [],
     pin,
     clients: clients || [],
+    wysylki,
     link: `${clientBaseUrl()}/offer/${offer.share_token}`
   };
 }
 
 export const actions = {
+  kupiona: async ({ params, request, locals }) => {
+    const { user } = await locals.safeGetSession();
+    if (!user) throw redirect(303, '/login');
+    const form = await request.formData();
+    try {
+      const r = await oznaczKupiona(params.id, String(form.get('kupiona')) !== 'nie');
+      return { decyzja: r.status };
+    } catch (e) {
+      return fail(400, { error: e?.message || 'Błąd zapisu decyzji' });
+    }
+  },
+
+  archiwum: async ({ params, request, locals }) => {
+    const { user } = await locals.safeGetSession();
+    if (!user) throw redirect(303, '/login');
+    const form = await request.formData();
+    try {
+      const r = await ustawArchiwum(params.id, String(form.get('archiwum')) !== 'nie');
+      return { zarchiwizowana: r.archiwum };
+    } catch (e) {
+      return fail(400, { error: e?.message || 'Błąd archiwum' });
+    }
+  },
+
   send: async ({ params, locals }) => {
     const { user } = await locals.safeGetSession();
     if (!user) throw redirect(303, '/login');
     try {
       const res = await sendOfferToClient(params.id);
-      return { sent: true, email: res.email, pinDev: res.pinDev };
+      return { sent: true, email: res.email, pinDev: res.pinDev, wersja: res.wersja };
     } catch (e) {
       return fail(400, { error: e?.message || 'Błąd wysyłki' });
     }

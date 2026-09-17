@@ -1,15 +1,31 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { deleteOffer, refreshOfferDocuments } from '$lib/server/offers.js';
 
-export async function load({ locals }) {
-  const { data: offers } = await locals.supabase
+export async function load({ locals, url }) {
+  // Archiwum jest osobnym widokiem, nie filtrem domyślnym: sprawy zamknięte
+  // mają zniknąć z listy bieżącej, ale nie wolno ich stracić z oczu.
+  const archiwum = url.searchParams.get('widok') === 'archiwum';
+
+  const zapytanie = locals.supabase
     .from('ud_offers')
-    .select('id, name, offer_number, client_name, status, source, created_at, sent_at, share_token')
+    .select('id, name, offer_number, client_name, status, source, created_at, sent_at, share_token, archived_at, wersja')
     .eq('source', 'pdf_import')
     .order('created_at', { ascending: false })
     .limit(200);
 
-  return { offers: offers || [] };
+  const { data: offers } = await (archiwum
+    ? zapytanie.not('archived_at', 'is', null)
+    : zapytanie.is('archived_at', null));
+
+  // Licznik przy przełączniku — bez niego nie widać, czy archiwum w ogóle
+  // ma zawartość, a pusty widok wygląda jak awaria.
+  const { count: wArchiwum } = await locals.supabase
+    .from('ud_offers')
+    .select('id', { count: 'exact', head: true })
+    .eq('source', 'pdf_import')
+    .not('archived_at', 'is', null);
+
+  return { offers: offers || [], archiwum, wArchiwum: wArchiwum || 0 };
 }
 
 export const actions = {

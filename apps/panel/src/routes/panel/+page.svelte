@@ -2,7 +2,7 @@
   import { enhance } from '$app/forms';
   let { data, form } = $props();
   let refreshingAll = $state(false);
-  const statusLabel = { draft: 'Szkic', sent: 'Wysłana', viewed: 'Otwarta', chosen: 'Wybrana', rejected: 'Rezygnacja' };
+  const statusLabel = { draft: 'Szkic', sent: 'Wysłana', viewed: 'Otwarta', chosen: 'Wybrana', bought: 'Kupiona', rejected: 'Rezygnacja' };
   function fmtDate(s) { return s ? new Date(s).toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—'; }
 </script>
 
@@ -10,8 +10,14 @@
 
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
   <div>
-    <h1 style="font-size:1.5rem;">Oferty z PDF</h1>
-    <p class="muted">Wgraj PDF Leadenhall/CEU, wyślij link klientowi</p>
+    <h1 style="font-size:1.5rem;">{data.archiwum ? 'Archiwum ofert' : 'Oferty z PDF'}</h1>
+    <p class="muted">
+      {#if data.archiwum}
+        Sprawy zamknięte. Status zostaje — kupiona oferta jest kupiona także tutaj.
+      {:else}
+        Wgraj PDF Leadenhall/CEU, wyślij link klientowi
+      {/if}
+    </p>
   </div>
   <div style="display:flex;gap:.5rem;">
     <form method="POST" action="?/refreshAll" use:enhance={() => { refreshingAll = true; return async ({ update }) => { await update(); refreshingAll = false; }; }}
@@ -20,6 +26,11 @@
         {refreshingAll ? 'Odświeżam…' : '↻ Odśwież wszystkie'}
       </button>
     </form>
+    {#if data.archiwum}
+      <a class="btn btn-ghost" href="/panel">← Wróć do bieżących</a>
+    {:else}
+      <a class="btn btn-ghost" href="/panel?widok=archiwum">📥 Archiwum ({data.wArchiwum})</a>
+    {/if}
     <a class="btn btn-primary" href="/panel/new">+ Nowa oferta</a>
   </div>
 </div>
@@ -41,15 +52,20 @@
 <div class="card">
   {#if data.offers.length === 0}
     <div class="card-pad muted" style="text-align:center;padding:3rem 1rem;">
-      Brak ofert. Kliknij <strong>„+ Nowa oferta"</strong>, aby wgrać pierwsze PDF-y.
+      {#if data.archiwum}
+        Archiwum jest puste.
+      {:else}
+        Brak ofert. Kliknij <strong>„+ Nowa oferta"</strong>, aby wgrać pierwsze PDF-y.
+      {/if}
     </div>
   {:else}
     <table>
-      <thead><tr><th>Oferta nr</th><th>Nazwa</th><th>Klient</th><th>Status</th><th>Utworzona</th><th></th></tr></thead>
+      <thead><tr><th>Oferta nr</th><th>Wersja</th><th>Nazwa</th><th>Klient</th><th>Status</th><th>Utworzona</th><th></th></tr></thead>
       <tbody>
         {#each data.offers as o}
           <tr>
             <td style="font-weight:600;font-size:.82rem;">{o.offer_number || '—'}</td>
+            <td class="muted" style="font-size:.82rem;">v{o.wersja || 1}</td>
             <td>{o.name}</td>
             <td>{o.client_name || '—'}</td>
             <td><span class="badge badge-{o.status}">{statusLabel[o.status] || o.status}</span></td>

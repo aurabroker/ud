@@ -478,6 +478,34 @@ zmiany. Usunięcie ich to osobna decyzja — nie kasuj przy okazji.
 
 ---
 
+## Panel — cykl życia oferty
+
+Statusy: `draft` → `sent` → `viewed` → `chosen` → **`bought`** / `rejected`.
+
+**`chosen` to nie sprzedaż.** Znaczy „klient wskazał wariant w portalu";
+`bought` znaczy „umowa podpisana". Mieszanie ich sprawiało, że z panelu nie
+dało się odczytać, ile ofert faktycznie się sprzedało — dlatego `bought` ma
+na liście mocniejszą plakietkę niż `chosen`.
+
+**Archiwum to `archived_at`, nie status.** Kupiona oferta ma zostać kupiona
+także w archiwum; gdyby archiwizacja nadpisywała status, statystyka sprzedaży
+kasowałaby się przy sprzątaniu listy. Lista bieżąca filtruje
+`archived_at is null` i ma na to indeks częściowy.
+
+**Wersję podbija wysyłka, nie dokładanie dokumentów.** `ud_offers.wersja`
+rośnie wyłącznie w `sendOfferToClient()` i tylko wtedy, gdy `sent_at` już
+jest — liczy się to, co klient faktycznie zobaczył. Każdy wpis
+w `ud_send_log` niesie `wersja`, więc widać, którą wersję klient dostał
+którego dnia. Daty były tam od początku (`created_at` zapisuje też nieudane
+próby); brakowało samego numeru.
+
+Nieudana wysyłka **nie** przepala numeru: wersja zapisuje się przy ofercie
+dopiero po `email.sent`, a w logu zostaje ślad próby z tym numerem.
+
+Migracja: `supabase/migrations/20260917200000_oferty_archiwum_wersje.sql`.
+
+---
+
 ## Serwis jest jasny — bez trybu ciemnego
 
 Decyzja klienta, 2026-08-28. Nie proponuj ponownie i nie dokładaj wariantu
