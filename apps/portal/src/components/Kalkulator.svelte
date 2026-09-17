@@ -13,7 +13,7 @@
    * przy każdej kwocie i nie jest ozdobą — przedstawianie szacunku jak oferty
    * to spór z ustawą o dystrybucji ubezpieczeń.
    */
-  import { symuluj, zl, zlZakres, ZUS_MIESIECZNIE, LIMIT, MIESIECY_WYPLATY, OKRESY, KALIBRACJA }
+  import { symuluj, zl, zlZakres, ZUS_MIESIECZNIE, LIMIT, MIESIECY_WYPLATY, OKRESY }
     from '../lib/symulacja';
 
   let { dochodPoczatkowy = 18000, zawod = '', kompaktowy = false } = $props();
@@ -93,7 +93,7 @@
       <dt class="text-[15px] font-semibold">
         Szacowana składka miesięczna
         <span class="block text-[13px] font-normal text-tekst-drugi">
-          przedział z {KALIBRACJA.ofert} wystawionych ofert
+          przedział z ostatnio wystawionych ofert
         </span>
       </dt>
       <dd class="font-mono text-2xl font-semibold m-0 whitespace-nowrap">
@@ -112,10 +112,10 @@
     ryzyka — może różnić się od tej kwoty. Zasiłek ZUS policzony od podstawy {zl(ZUS_MIESIECZNIE)}.
   </p>
   <p class="text-[12.5px] leading-relaxed text-tekst-drugi mt-2.5 mb-0">
-    Przedział składki policzyliśmy z {KALIBRACJA.wariantow} wariantów w {KALIBRACJA.ofert} ofertach,
-    które naprawdę wystawiliśmy — od najtańszej do najdroższej stawki, jaka w nich wystąpiła.
-    Nie jest to widełkowanie na oko. Na Twoją składkę wpłyną wiek, klasa ryzyka Twojego zawodu
-    i długość karencji, o które ten kalkulator nie pyta.
+    Przedział składki policzyliśmy ze wszystkich wariantów we wszystkich ofertach, które
+    naprawdę wystawiliśmy — od najtańszej do najdroższej stawki, jaka w nich wystąpiła.
+    Na Twoją składkę wpłyną wiek, klasa ryzyka Twojego zawodu, długość okresu wyczekiwania,
+    o które ten kalkulator nie pyta.
   </p>
   <p class="text-[12.5px] leading-relaxed text-tekst-drugi mt-2.5 mb-0">
     Świadczenie wypłacane jest przez {okresy} miesięcy — okres wybierasz przy zawarciu

@@ -54,8 +54,8 @@ test('klauzula HIV/WZW podnosi stawkę o 20%', async ({ page }) => {
  */
 test('przy składce stoi, że przedział pochodzi z wystawionych ofert', async ({ page }) => {
   const kwoty = page.locator('dl').filter({ hasText: 'Szacowana składka' }).first();
-  await expect(kwoty).toContainText('przedział z 15 wystawionych ofert');
-  await expect(page.getByText(/policzyliśmy z 48 wariantów w 15 ofertach/)).toBeVisible();
+  await expect(kwoty).toContainText('przedział z ostatnio wystawionych ofert');
+  await expect(page.getByText(/policzyliśmy ze wszystkich wariantów we wszystkich ofertach/)).toBeVisible();
   await expect(page.getByText(/o które ten kalkulator nie pyta/)).toBeVisible();
 });
 

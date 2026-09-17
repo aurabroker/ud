@@ -414,11 +414,23 @@ w kodzie.
 | `stawka.dol` / `stawka.gora` | najtańsza i najdroższa zaobserwowana oferta (2,02% / 2,44%) |
 | `stawka.srodek` | mediana zaokrąglona do 2,2% — tam, gdzie musi paść jedna liczba |
 | `okresy` | mnożniki policzone z par ofert: 24 → 1,00, 36 → 1,25 |
-| `zrodlo` | ile ofert i wariantów stoi za tymi liczbami — idzie do podpisu na stronie |
+| `zrodlo` | ile ofert i wariantów stoi za tymi liczbami — metryczka kalibracji, nie treść strony |
 
 **Składka jest przedziałem, nie liczbą.** Rozrzut 2,02–2,44% jest prawdziwy
-i bierze się z wieku, klasy ryzyka i karencji, o które kalkulator nie pyta.
-Jedna liczba udawałaby precyzję, której w tym produkcie nie ma.
+i bierze się z wieku, klasy ryzyka i okresu wyczekiwania, o które kalkulator
+nie pyta. Jedna liczba udawałaby precyzję, której w tym produkcie nie ma.
+
+**W treści na stronie nie ma liczby ofert ani wariantów.** Stoi tam „przedział
+z ostatnio wystawionych ofert" i „ze wszystkich wariantów we wszystkich
+ofertach". To nie jest ogólnikowość dla samej ogólnikowości: konkretna liczba
+zestarzeje się przy pierwszej nowej ofercie, a wtedy albo ktoś ją poprawia
+ręcznie w trzech miejscach, albo worker `ud-kalibrator` musi przepisywać
+treść zamiast samych stawek. Pola `zrodlo` używaj w dokumentacji i w bramkach
+workera, nie w zdaniu na stronie.
+
+Na stronie mówimy **„okres wyczekiwania"**, nie „karencja" — w kolumnach bazy
+(`wait_accident`, `wait_illness`) i w MODEL-SKLADKI.md termin techniczny
+zostaje, ale w treści dla klienta ma być jedno słowo i to właśnie to.
 
 Metoda, dane źródłowe i — ważniejsze — **czego z tych danych policzyć się nie
 da** (współczynnika klasy ryzyka, współczynnika wieku, mnożników dla 48 i 60

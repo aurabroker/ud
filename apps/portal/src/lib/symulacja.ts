@@ -37,9 +37,6 @@ export type Zatrudnienie = keyof typeof LIMIT;
  */
 export const STAWKA = kalibracja.stawka;
 
-/** Ile ofert stoi za tymi stawkami — do podpisu pod kwotą. */
-export const KALIBRACJA = { ...kalibracja.zrodlo, policzono: kalibracja.policzono };
-
 /**
  * Klauzula HIV/WZW podnosi stawkę o 20%.
  *

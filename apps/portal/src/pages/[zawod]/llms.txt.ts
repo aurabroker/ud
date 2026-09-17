@@ -12,7 +12,7 @@
 import type { APIRoute, GetStaticPaths } from 'astro';
 import { ZAWODY, zawod, tresc, pokrewne, slugKategorii } from '@ud/zawody';
 import { FIRMA, SERWIS } from '../../lib/firma';
-import { symuluj, zl, zlZakres, ZUS_MIESIECZNIE, MIESIECY_WYPLATY, OKRESY, KALIBRACJA }
+import { symuluj, zl, zlZakres, ZUS_MIESIECZNIE, MIESIECY_WYPLATY, OKRESY }
   from '../../lib/symulacja';
 
 export const getStaticPaths: GetStaticPaths = () =>
@@ -72,7 +72,7 @@ ubezpieczyciela po ocenie ryzyka.
   składka poniżej dotyczy wariantu najkrótszego, ${MIESIECY_WYPLATY}-miesięcznego
 - Zasiłek ZUS przy podstawie ${zl(ZUS_MIESIECZNIE)}: ${zl(w.zus)}
 - Szacowana składka miesięczna: ${zlZakres(w.skladkaOd, w.skladkaDo)} — przedział ze stawek
-  najtańszej i najdroższej z ${KALIBRACJA.ofert} ofert, które faktycznie wystawiliśmy
+  najtańszej i najdroższej z ofert, które faktycznie wystawiliśmy
 ${pytania}
 ## Wyłączenia
 
