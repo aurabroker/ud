@@ -19,14 +19,26 @@ export const LIMIT = {
 
 export type Zatrudnienie = keyof typeof LIMIT;
 
+/**
+ * Najkrótszy okres wypłaty świadczenia w ofercie — 24 miesiące.
+ *
+ * Kalkulator miał tu przełącznik „Wypłata przez 24 miesiące zamiast 12"
+ * z dopłatą 10%. Wariantu 12-miesięcznego nie ma w ofercie, więc przełącznik
+ * proponował okres, którego nikt nie może kupić, i stał domyślnie na nim.
+ *
+ * Stawka została tam, gdzie była (1,5% / 1,8% z klauzulą HIV/WZW) — usunięty
+ * został wyłącznie mnożnik 1,1, który był dopłatą za przejście z wariantu
+ * nieistniejącego na ten jedyny. Żadna kwota pokazana na serwisie się przez to
+ * nie zmienia.
+ */
+export const MIESIECY_WYPLATY = 24;
+
 export interface Zalozenia {
   /** Miesięczny dochód netto w złotych. */
   dochod: number;
   zatrudnienie: Zatrudnienie;
   /** Klauzula HIV/WZW podnosi stawkę. */
   hivWzw?: boolean;
-  /** Wariant 24-miesięczny jest o 10% droższy niż 12-miesięczny. */
-  miesiecy?: 12 | 24;
 }
 
 export interface Wynik {
@@ -41,12 +53,11 @@ export interface Wynik {
   limit: number;
 }
 
-export function symuluj({ dochod, zatrudnienie, hivWzw = false, miesiecy = 12 }: Zalozenia): Wynik {
+export function symuluj({ dochod, zatrudnienie, hivWzw = false }: Zalozenia): Wynik {
   const limit = LIMIT[zatrudnienie];
   const swiadczenie = Math.round(dochod * limit);
 
-  let stawka = hivWzw ? 0.018 : 0.015;
-  if (miesiecy === 24) stawka *= 1.1;
+  const stawka = hivWzw ? 0.018 : 0.015;
 
   const zus = Math.round(ZUS_MIESIECZNIE * 0.8);
 

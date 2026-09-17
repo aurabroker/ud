@@ -6,7 +6,7 @@ import { test, expect } from '@playwright/test';
  * znaczy to, że symulacja rozjechała się z tym, co serwis pokazywał dotąd.
  *
  *   suma    = dochód × limit          (0,8 na B2B, 0,65 na umowie o pracę)
- *   stawka  = 0,015  albo 0,018 z klauzulą HIV/WZW,  ×1,1 przy 24 miesiącach
+ *   stawka  = 0,015  albo 0,018 z klauzulą HIV/WZW
  *   składka = round(suma × stawka)
  */
 
@@ -34,18 +34,26 @@ test('umowa o pracę obniża limit z 80% do 65%', async ({ page }) => {
   await expect(page.getByText('do 65% udokumentowanego dochodu')).toBeVisible();
 });
 
-test('klauzula HIV/WZW i wariant 24-miesięczny podnoszą stawkę', async ({ page }) => {
+test('klauzula HIV/WZW podnosi stawkę', async ({ page }) => {
   await page.getByLabel('Klauzula HIV / WZW').check();
   // 14 400 × 0,018 = 259,2 → 259
   await expect(wynik(page, 'Szacowana składka')).toHaveText('259 zł');
 
-  await page.getByLabel('Wypłata przez 24 miesiące zamiast 12').check();
-  // 14 400 × 0,018 × 1,1 = 285,12 → 285
-  await expect(wynik(page, 'Szacowana składka')).toHaveText('285 zł');
-
   await page.getByLabel('Klauzula HIV / WZW').uncheck();
-  // 14 400 × 0,015 × 1,1 = 237,6 → 238
-  await expect(wynik(page, 'Szacowana składka')).toHaveText('238 zł');
+  // 14 400 × 0,015 = 216
+  await expect(wynik(page, 'Szacowana składka')).toHaveText('216 zł');
+});
+
+/**
+ * Okres wypłaty nie jest wyborem: 24 miesiące to najkrótszy wariant w ofercie.
+ * Przełącznik „Wypłata przez 24 miesiące zamiast 12" proponował okres, którego
+ * nie da się kupić, i stał domyślnie na nim — stąd ten test pilnuje obu rzeczy
+ * naraz: że okres jest napisany przy kwocie i że przełącznika nie ma.
+ */
+test('okres wypłaty stoi przy świadczeniu i nie da się go zmienić', async ({ page }) => {
+  const kalkulator = page.locator('dl').filter({ hasText: 'Świadczenie z polisy' }).first();
+  await expect(kalkulator).toContainText('minimum przez 24 miesiące');
+  await expect(page.getByText(/24 miesiące zamiast 12/)).toHaveCount(0);
 });
 
 test('suwak zmienia świadczenie', async ({ page }) => {

@@ -3,28 +3,26 @@
    * Kalkulator.svelte — symulacja składki.
    *
    * Kwoty liczone są wzorem z Calculator.js starego serwisu, przeniesionym bez
-   * zmian: suma = dochód × limit, składka = suma × 1,5% (1,8% z klauzulą HIV/WZW,
-   * ×1,1 przy wariancie 24-miesięcznym).
+   * zmian: suma = dochód × limit, składka = suma × 1,5% (1,8% z klauzulą HIV/WZW).
    *
    * To jest SYMULACJA, nie oferta i nie stawka z tabeli ubezpieczyciela. Realną
    * składkę wylicza system ubezpieczyciela po ocenie ryzyka. Zastrzeżenie stoi
    * przy każdej kwocie i nie jest ozdobą — przedstawianie szacunku jak oferty
    * to spór z ustawą o dystrybucji ubezpieczeń.
    */
-  import { symuluj, zl, ZUS_MIESIECZNIE, LIMIT } from '../lib/symulacja';
+  import { symuluj, zl, ZUS_MIESIECZNIE, LIMIT, MIESIECY_WYPLATY } from '../lib/symulacja';
 
   let { dochodPoczatkowy = 18000, zawod = '', kompaktowy = false } = $props();
 
   let dochod = $state(dochodPoczatkowy);
   let zatrudnienie = $state('b2b');
   let hivWzw = $state(false);
-  let miesiecy = $state(12);
 
   const MIN = 3000;
   const MAX = 60000;
   const KROK = 500;
 
-  const wynik = $derived(symuluj({ dochod, zatrudnienie, hivWzw, miesiecy }));
+  const wynik = $derived(symuluj({ dochod, zatrudnienie, hivWzw }));
   const procent = $derived(Math.round(((dochod - MIN) / (MAX - MIN)) * 100));
   const limitProcent = $derived(Math.round(LIMIT[zatrudnienie] * 100));
 </script>
@@ -65,22 +63,19 @@
     </p>
   </fieldset>
 
-  <div class="flex flex-col gap-2.5 mb-6">
+  <div class="mb-6">
     <label class="flex items-center gap-3 cursor-pointer text-[15px]">
       <input type="checkbox" bind:checked={hivWzw} class="w-4.5 h-4.5 accent-akcent-ciemny">
       Klauzula HIV / WZW
-    </label>
-    <label class="flex items-center gap-3 cursor-pointer text-[15px]">
-      <input type="checkbox" checked={miesiecy === 24}
-             onchange={(e) => (miesiecy = e.currentTarget.checked ? 24 : 12)}
-             class="w-4.5 h-4.5 accent-akcent-ciemny">
-      Wypłata przez 24 miesiące zamiast 12
     </label>
   </div>
 
   <dl class="border-t border-linia m-0">
     <div class="flex items-baseline justify-between gap-4 py-4 border-b border-linia-lekka">
-      <dt class="text-[15px] text-tekst-drugi">Świadczenie z polisy</dt>
+      <dt class="text-[15px] text-tekst-drugi">
+        Świadczenie z polisy
+        <span class="block text-[13px]">wypłacane co miesiąc, minimum przez {MIESIECY_WYPLATY} miesiące</span>
+      </dt>
       <dd class="font-mono text-2xl font-semibold text-akcent-ciemny m-0">{zl(wynik.swiadczenie)}</dd>
     </div>
     <div class="flex items-baseline justify-between gap-4 py-4 border-b border-linia-lekka">
