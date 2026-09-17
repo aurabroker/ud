@@ -2,7 +2,7 @@
 import Baza from '../../layouts/Baza.astro';
 import Kalkulator from '../../components/Kalkulator.svelte';
 import { graf, organizacja, serwis, strona, okruszki, faq } from '../../lib/seo';
-import { symuluj, zl, ZUS_MIESIECZNIE, LIMIT } from '../../lib/symulacja';
+import { symuluj, zl, ZUS_MIESIECZNIE, LIMIT, MIESIECY_WYPLATY, OKRESY } from '../../lib/symulacja';
 
 const sciezka = '/kalkulator/';
 const tytul = 'Kalkulator ubezpieczenia utraty dochodu | UtrataDochodu.pl';
@@ -29,6 +29,13 @@ const PYTANIA = [
     odpowiedz: `Kalkulator zakłada najniższą podstawę wymiaru składek (${zl(ZUS_MIESIECZNIE)}) `
       + `i zasiłek w wysokości 80% tej podstawy, czyli ${zl(Math.round(ZUS_MIESIECZNIE * 0.8))} `
       + 'miesięcznie. Jeśli opłacasz składki od wyższej podstawy, Twój zasiłek będzie wyższy.',
+  },
+  {
+    pytanie: 'Jak długo wypłacane jest świadczenie?',
+    odpowiedz: `Do wyboru są cztery okresy: ${OKRESY.join(', ')} miesięcy. Wybiera się go `
+      + 'przy zawarciu umowy, a świadczenie wypłacane jest co miesiąc przez cały ten czas, '
+      + `dopóki trwa orzeczona niezdolność do wykonywania zawodu. Kalkulator liczy składkę `
+      + `dla wariantu najkrótszego, ${MIESIECY_WYPLATY}-miesięcznego — dłuższy okres wypłaty ją podnosi.`,
   },
   {
     pytanie: 'Dlaczego świadczenie nie może pokryć 100% dochodu?',

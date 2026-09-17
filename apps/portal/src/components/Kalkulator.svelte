@@ -10,7 +10,7 @@
    * przy każdej kwocie i nie jest ozdobą — przedstawianie szacunku jak oferty
    * to spór z ustawą o dystrybucji ubezpieczeń.
    */
-  import { symuluj, zl, ZUS_MIESIECZNIE, LIMIT, MIESIECY_WYPLATY } from '../lib/symulacja';
+  import { symuluj, zl, ZUS_MIESIECZNIE, LIMIT, MIESIECY_WYPLATY, OKRESY } from '../lib/symulacja';
 
   let { dochodPoczatkowy = 18000, zawod = '', kompaktowy = false } = $props();
 
@@ -25,6 +25,9 @@
   const wynik = $derived(symuluj({ dochod, zatrudnienie, hivWzw }));
   const procent = $derived(Math.round(((dochod - MIN) / (MAX - MIN)) * 100));
   const limitProcent = $derived(Math.round(LIMIT[zatrudnienie] * 100));
+
+  /** „24, 36, 48 albo 60" — bez przecinka przed ostatnim. */
+  const okresy = OKRESY.slice(0, -1).join(', ') + ' albo ' + OKRESY.at(-1);
 </script>
 
 <div class="border border-linia bg-tlo p-7 {kompaktowy ? '' : 'shadow-[0_18px_46px_-16px_rgba(15,46,64,0.18)]'}">
@@ -93,8 +96,13 @@
     Przejdź do wniosku
   </a>
 
-  <p class="text-[12.5px] leading-relaxed text-tekst-trzeci mt-4 mb-0">
+  <p class="text-[12.5px] leading-relaxed text-tekst-drugi mt-4 mb-0">
     To jest symulacja, nie oferta. Realną składkę wylicza system ubezpieczyciela po ocenie
     ryzyka — może różnić się od tej kwoty. Zasiłek ZUS policzony od podstawy {zl(ZUS_MIESIECZNIE)}.
+  </p>
+  <p class="text-[12.5px] leading-relaxed text-tekst-drugi mt-2.5 mb-0">
+    Świadczenie wypłacane jest przez {okresy} miesięcy — okres wybierasz przy zawarciu
+    umowy. Powyższa składka dotyczy wariantu najkrótszego, {MIESIECY_WYPLATY}-miesięcznego;
+    dłuższy okres wypłaty podnosi składkę.
   </p>
 </div>

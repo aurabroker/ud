@@ -372,6 +372,37 @@ To są ustawienia w panelu Cloudflare i decyzje klienta:
 
 ---
 
+## Kalkulator — okres wypłaty świadczenia
+
+Okresy w ofercie: **24, 36, 48 i 60 miesięcy**. Najkrótszy to 24.
+
+Kalkulator miał tu przełącznik „Wypłata przez 24 miesiące zamiast 12" z dopłatą
+10% i stał domyślnie na 12. Wariantu 12-miesięcznego nie ma i nie było —
+przełącznik proponował okres, którego nie da się kupić, w pozycji domyślnej.
+Nie przywracaj go.
+
+Lista okresów siedzi w stałej `OKRESY` w `src/lib/symulacja.ts` i stamtąd idzie
+do kalkulatora, do pytań na `/kalkulator/`, do `llms.txt` serwisu i do `llms.txt`
+każdego zawodu. Nie wpisuj tych liczb drugi raz w szablonie.
+
+**Okres jest informacją, nie przełącznikiem — dopóki nie ma tabeli stawek.**
+Dłuższa wypłata kosztuje więcej, ale współczynników z tabeli ubezpieczyciela
+jeszcze nie dostaliśmy. Przełącznik bez nich pokazywałby cenę wariantu
+24-miesięcznego pod etykietą 60-miesięcznego, czyli ten sam błąd co poprzednio,
+tylko w drugą stronę. Gdy współczynniki przyjdą: wracają jako mapa
+okres → mnożnik obok `OKRESY`, a `symuluj()` bierze `okres` w założeniach.
+
+Stawka bazowa (1,5%, z klauzulą HIV/WZW 1,8%) odnosi się do wariantu
+24-miesięcznego. Nie jest potwierdzona tabelą — jeśli pochodziła z tabeli dla
+12 miesięcy, wszystkie kwoty na serwisie są zaniżone i trzeba ją podnieść,
+a nie tylko dopisać mnożniki. To pytanie jest otwarte u klienta.
+
+Pilnuje tego `test/kalkulator.spec.js`: okresy muszą być wymienione
+w komplecie, przy składce musi stać, którego wariantu dotyczy, a ciąg
+„zamiast 12" nie może wrócić na stronę.
+
+---
+
 ## Serwis jest jasny — bez trybu ciemnego
 
 Decyzja klienta, 2026-08-28. Nie proponuj ponownie i nie dokładaj wariantu

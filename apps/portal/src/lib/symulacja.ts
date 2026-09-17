@@ -20,18 +20,26 @@ export const LIMIT = {
 export type Zatrudnienie = keyof typeof LIMIT;
 
 /**
- * Najkrótszy okres wypłaty świadczenia w ofercie — 24 miesiące.
+ * Okresy wypłaty świadczenia dostępne w ofercie, w miesiącach.
  *
  * Kalkulator miał tu przełącznik „Wypłata przez 24 miesiące zamiast 12"
- * z dopłatą 10%. Wariantu 12-miesięcznego nie ma w ofercie, więc przełącznik
- * proponował okres, którego nikt nie może kupić, i stał domyślnie na nim.
+ * z dopłatą 10% i stał domyślnie na 12. Wariantu 12-miesięcznego nie ma
+ * w ofercie — najkrótszy jest 24-miesięczny — więc przełącznik proponował
+ * okres, którego nikt nie może kupić.
  *
- * Stawka została tam, gdzie była (1,5% / 1,8% z klauzulą HIV/WZW) — usunięty
- * został wyłącznie mnożnik 1,1, który był dopłatą za przejście z wariantu
- * nieistniejącego na ten jedyny. Żadna kwota pokazana na serwisie się przez to
- * nie zmienia.
+ * Symulacja liczy dla najkrótszego okresu i pisze to wprost. Dłuższe warianty
+ * są droższe, ale współczynników z tabeli ubezpieczyciela jeszcze nie mamy;
+ * dopóki ich nie ma, wybór okresu w kalkulatorze byłby obietnicą ceny,
+ * której nikt nie policzył. Stąd lista jest informacją, nie przełącznikiem.
+ *
+ * Gdy współczynniki się pojawią: wracają tu jako mapa okres → mnożnik stawki,
+ * a `symuluj()` bierze `okres` w założeniach. Stawka bazowa (1,5%, z klauzulą
+ * HIV/WZW 1,8%) odnosi się wtedy do wariantu 24-miesięcznego.
  */
-export const MIESIECY_WYPLATY = 24;
+export const OKRESY = [24, 36, 48, 60] as const;
+
+/** Najkrótszy okres z oferty — dla niego liczona jest symulacja. */
+export const MIESIECY_WYPLATY = OKRESY[0];
 
 export interface Zalozenia {
   /** Miesięczny dochód netto w złotych. */

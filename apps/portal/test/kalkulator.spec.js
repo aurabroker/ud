@@ -45,15 +45,31 @@ test('klauzula HIV/WZW podnosi stawkę', async ({ page }) => {
 });
 
 /**
- * Okres wypłaty nie jest wyborem: 24 miesiące to najkrótszy wariant w ofercie.
- * Przełącznik „Wypłata przez 24 miesiące zamiast 12" proponował okres, którego
- * nie da się kupić, i stał domyślnie na nim — stąd ten test pilnuje obu rzeczy
- * naraz: że okres jest napisany przy kwocie i że przełącznika nie ma.
+ * Okres wypłaty jest w kalkulatorze informacją, nie przełącznikiem.
+ *
+ * Warianty są cztery — 24, 36, 48 i 60 miesięcy — ale współczynników stawki
+ * dla dłuższych nie mamy z tabeli ubezpieczyciela. Przełącznik pokazywałby
+ * wtedy cenę wariantu 24-miesięcznego pod etykietą 60-miesięcznego, czyli
+ * dokładnie ten błąd, który miał tu wcześniej przełącznik „24 zamiast 12":
+ * okres, którego nie da się kupić, w pozycji domyślnej.
+ *
+ * Test pilnuje więc trzech rzeczy naraz: że okresy są wymienione w komplecie,
+ * że napisane jest, którego z nich dotyczy składka, i że wariant 12-miesięczny
+ * nie wrócił.
  */
-test('okres wypłaty stoi przy świadczeniu i nie da się go zmienić', async ({ page }) => {
-  const kalkulator = page.locator('dl').filter({ hasText: 'Świadczenie z polisy' }).first();
-  await expect(kalkulator).toContainText('minimum przez 24 miesiące');
-  await expect(page.getByText(/24 miesiące zamiast 12/)).toHaveCount(0);
+test('kalkulator wymienia cztery okresy i mówi, którego dotyczy składka', async ({ page }) => {
+  const kwoty = page.locator('dl').filter({ hasText: 'Świadczenie z polisy' }).first();
+  await expect(kwoty).toContainText('minimum przez 24 miesiące');
+  await expect(page.getByText(/wypłacane jest przez 24, 36, 48 albo 60 miesięcy/)).toBeVisible();
+  await expect(page.getByText(/składka dotyczy wariantu najkrótszego, 24-miesięcznego/)).toBeVisible();
+  await expect(page.getByText(/zamiast 12/)).toHaveCount(0);
+});
+
+test('strona kalkulatora tłumaczy okresy wypłaty w pytaniach', async ({ page }) => {
+  await page.goto('/kalkulator/');
+  // Pytanie jest trzecie z kolei, a otwarte z marszu są dwa pierwsze.
+  await page.locator('summary', { hasText: 'Jak długo wypłacane jest świadczenie' }).click();
+  await expect(page.getByText(/Do wyboru są cztery okresy: 24, 36, 48, 60 miesięcy/)).toBeVisible();
 });
 
 test('suwak zmienia świadczenie', async ({ page }) => {

@@ -12,7 +12,7 @@
 import type { APIRoute, GetStaticPaths } from 'astro';
 import { ZAWODY, zawod, tresc, pokrewne, slugKategorii } from '@ud/zawody';
 import { FIRMA, SERWIS } from '../../lib/firma';
-import { symuluj, zl, ZUS_MIESIECZNIE } from '../../lib/symulacja';
+import { symuluj, zl, ZUS_MIESIECZNIE, MIESIECY_WYPLATY, OKRESY } from '../../lib/symulacja';
 
 export const getStaticPaths: GetStaticPaths = () =>
   ZAWODY.map((z) => ({ params: { zawod: z.slug } }));
@@ -67,6 +67,8 @@ ubezpieczyciela po ocenie ryzyka.
 - Dochód przyjęty do wyliczenia: ${zl(dochod)} miesięcznie
 - Limit świadczenia przy kontrakcie B2B: 80%
 - Miesięczne świadczenie z polisy: ${zl(w.swiadczenie)}
+- Okres wypłaty: ${OKRESY.slice(0, -1).join(', ')} albo ${OKRESY.at(-1)} miesięcy;
+  składka poniżej dotyczy wariantu najkrótszego, ${MIESIECY_WYPLATY}-miesięcznego
 - Zasiłek ZUS przy podstawie ${zl(ZUS_MIESIECZNIE)}: ${zl(w.zus)}
 - Szacowana składka miesięczna: ${zl(w.skladka)}
 ${pytania}

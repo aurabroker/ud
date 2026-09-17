@@ -17,7 +17,7 @@ import type { APIRoute } from 'astro';
 import { ZAWODY, kategorie, wKategorii, slugKategorii, tresc } from '@ud/zawody';
 import { ARTYKULY } from '../lib/artykuly';
 import { FIRMA, SERWIS, UBEZPIECZYCIELE } from '../lib/firma';
-import { ZUS_MIESIECZNIE, LIMIT, zl } from '../lib/symulacja';
+import { ZUS_MIESIECZNIE, LIMIT, OKRESY, zl } from '../lib/symulacja';
 
 export const GET: APIRoute = () => {
   const kat = kategorie();
@@ -62,6 +62,9 @@ niezdolnością do wykonywania zawodu z powodu choroby lub nieszczęśliwego wyp
 - **Punkt odniesienia:** zasiłek chorobowy z ZUS wynosi 80% podstawy wymiaru składek.
   Przy najniższej podstawie daje to około ${zl(Math.round(ZUS_MIESIECZNIE * 0.8))} miesięcznie, niezależnie
   od faktycznych zarobków — i to jest luka, którą polisa zamyka.
+- **Okres wypłaty:** świadczenie miesięczne wypłacane przez ${OKRESY.slice(0, -1).join(', ')}
+  albo ${OKRESY.at(-1)} miesięcy — okres wybiera się przy zawarciu umowy, najkrótszy
+  wariant to ${OKRESY[0]} miesiące.
 - **Ryzyka:** okresowa niezdolność do pracy (świadczenie miesięczne), trwała
   niezdolność do pracy oraz śmierć i inwalidztwo wskutek nieszczęśliwego wypadku
   (świadczenia jednorazowe).
