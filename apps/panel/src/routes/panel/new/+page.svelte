@@ -84,7 +84,7 @@
       </div>
       <div class="field">
         <label class="label" for="clientPhone">Telefon klienta</label>
-        <input class="input" id="clientPhone" name="clientPhone" bind:value={clientPhone} placeholder="48XXXXXXXXX (PIN SMS)" />
+        <input class="input" id="clientPhone" name="clientPhone" bind:value={clientPhone} placeholder="48XXXXXXXXX" />
       </div>
     </div>
     <div class="field">

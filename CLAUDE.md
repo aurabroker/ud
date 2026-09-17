@@ -443,6 +443,41 @@ z bazy klauzuli nie ma wcale.
 
 ---
 
+## Panel — kod dostępu do oferty to 4 ostatnie cyfry PESEL-u
+
+**SMS-ów nie wysyłamy.** Klient dostaje sam e-mail z linkiem, a hasłem są
+cztery ostatnie cyfry jego PESEL-u — ten sam ciąg, którym Leadenhall szyfruje
+pliki oferty. Klient zna go z dowodu, więc nie ma czego dowozić drugim kanałem.
+Sprawdzone na danych: wszystkie 17 ofert z ustawionym kodem miało go równy
+`right(pesel, 4)`, zero wyjątków.
+
+Wcześniej `sendOfferToClient()` przy braku kodu losowało PIN i wysyłało go
+SMS-em. Bez SMS-a losowy kod to oferta, której klient nie ma jak otworzyć,
+a e-mail obiecujący PESEL byłby nieprawdą — dlatego zamiast fallbacku są dwie
+bramki i **wysyłka się nie odbywa**, gdy:
+
+- klient nie ma PESEL-u w kartotece (`ud_clients.pesel`),
+- kod przy ofercie jest inny niż `right(pesel, 4)`.
+
+Obie rzucają wyjątek z instrukcją dla agenta; `+page.server.js` pokazuje go
+jako `fail(400)`. To jest celowe: lepiej, żeby agent poprawił kartotekę, niż
+żeby klient dostał list z hasłem, którego nie zna.
+
+Treść mówiąca o haśle stoi w **trzech miejscach i musi być zgodna**:
+
+| Plik | Co tam jest |
+|---|---|
+| `src/lib/server/templates.js` | e-mail do klienta — wersja HTML i tekstowa, obie |
+| `src/routes/offer/[token]/+page.svelte` | podpowiedź nad polem na stronie oferty |
+| `src/routes/panel/offer/[id]/+page.svelte` | opis kodu dla agenta |
+
+Zostało po SMS-ach, celowo nieruszone: `lib/server/sms.js`, test wysyłki
+w Ustawieniach, sonda w `health.js` i filtr kanału w Wysyłkach. Pierwsze trzy
+to narzędzia diagnostyczne SMSAPI, ostatni pokazuje **historię** wysyłek sprzed
+zmiany. Usunięcie ich to osobna decyzja — nie kasuj przy okazji.
+
+---
+
 ## Serwis jest jasny — bez trybu ciemnego
 
 Decyzja klienta, 2026-08-28. Nie proponuj ponownie i nie dokładaj wariantu

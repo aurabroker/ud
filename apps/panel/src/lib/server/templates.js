@@ -36,7 +36,7 @@ export function offerLinkEmail({ clientName, link, ttlHours, logoUrl = '', foote
       </p>
       <p style="font-size:13px;color:#64748b;line-height:1.6;margin:0 0 6px;">Gdyby przycisk nie działał, prosimy skopiować adres:<br />
         <a href="${esc(link)}" style="color:#2563eb;word-break:break-all;">${esc(link)}</a></p>
-      <p style="font-size:13px;color:#64748b;line-height:1.6;margin:14px 0 0;">Dostęp zabezpieczony jest <strong>4-cyfrowym hasłem</strong>, które wysłaliśmy osobno SMS-em. Hasło jest ważne przez ${ttlHours}h.</p>
+      <p style="font-size:13px;color:#64748b;line-height:1.6;margin:14px 0 0;">Hasłem dostępu są <strong>4 ostatnie cyfry Pani/Pana numeru PESEL</strong>. Ten sam kod otwiera pobrane pliki PDF. Link jest aktywny przez ${ttlHours}h.</p>
       <hr style="border:0;border-top:1px solid #e2e8f0;margin:22px 0 14px;" />
       <p style="font-size:11px;color:#94a3b8;line-height:1.5;margin:0;">${esc(footer).replace(/\n/g, '<br />')}</p>
     </div>
@@ -49,7 +49,8 @@ export function offerLinkEmail({ clientName, link, ttlHours, logoUrl = '', foote
     'Oferta dostępna jest pod adresem:',
     link,
     '',
-    `Dostęp zabezpieczony jest 4-cyfrowym hasłem, które wysłaliśmy osobno SMS-em. Hasło jest ważne przez ${ttlHours}h.`,
+    `Hasłem dostępu są 4 ostatnie cyfry Pani/Pana numeru PESEL. Ten sam kod otwiera pobrane pliki PDF.`,
+    `Link jest aktywny przez ${ttlHours}h.`,
     '',
     '---',
     footer

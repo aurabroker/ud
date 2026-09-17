@@ -5,7 +5,6 @@
 import { createAdminClient } from './supabase.js';
 import { parseOfferPdf } from '$lib/pdf/index.js';
 import { generateShareToken, generatePin, hashPin } from './crypto.js';
-import { sendSms } from './sms.js';
 import { sendEmail } from './email.js';
 import { offerLinkEmail } from './templates.js';
 import { resolveOwus } from './owuMatch.js';
@@ -496,19 +495,47 @@ async function regenerateSummary(sb, offerId) {
 }
 
 /**
- * Generuje PIN, zapisuje hash (48h), wysyła SMS + email z linkiem.
+ * Wysyła klientowi e-mail z linkiem do oferty i zapisuje hash kodu dostępu.
+ *
+ * Kodem są CZTERY OSTATNIE CYFRY PESEL-u klienta — ten sam ciąg, którym
+ * Leadenhall szyfruje pliki oferty. Nie wysyłamy go już żadnym kanałem, bo
+ * klient zna go z własnego dowodu; e-mail tylko na niego wskazuje.
+ *
+ * Stąd bramka niżej: jeśli kod zapisany przy ofercie NIE jest czterema
+ * ostatnimi cyframi PESEL-u, wysyłka się nie odbywa. Wcześniej fallbackiem
+ * był losowy PIN dowożony SMS-em; bez SMS-a losowy kod to oferta, której
+ * klient nie ma jak otworzyć, a e-mail obiecujący PESEL byłby nieprawdą.
+ *
  * @param {string} offerId
- * @returns {Promise<{ ok: boolean, sms: any, email: any, pinDev?: string }>}
+ * @returns {Promise<{ ok: boolean, email: any, pinDev?: string }>}
  */
 export async function sendOfferToClient(offerId) {
   const sb = createAdminClient();
   const { data: offer, error } = await sb.from('ud_offers').select('*').eq('id', offerId).single();
   if (error || !offer) throw new Error('Oferta nie znaleziona');
 
-  // Jeden kod: access_code (= hasło PDF lub losowy). Odblokowuje link i otwiera pliki.
-  let pin = offer.access_code;
-  if (!pin) {
-    pin = generatePin();
+  // Jeden kod: access_code (= hasło PDF = 4 ostatnie cyfry PESEL). Odblokowuje
+  // link i otwiera pliki.
+  const { data: klient } = offer.client_id
+    ? await sb.from('ud_clients').select('pesel').eq('id', offer.client_id).maybeSingle()
+    : { data: null };
+  const zPeselu = /^\d{11}$/.test(String(klient?.pesel || '')) ? String(klient.pesel).slice(-4) : null;
+
+  if (!zPeselu) {
+    throw new Error(
+      'Klient nie ma PESEL-u w kartotece. E-mail i strona oferty zapowiadają cztery ostatnie cyfry '
+      + 'PESEL-u jako hasło — bez niego nie ma czego zapowiedzieć. Uzupełnij PESEL i wyślij ponownie.'
+    );
+  }
+  if (offer.access_code && offer.access_code !== zPeselu) {
+    throw new Error(
+      'Kod dostępu przy ofercie nie zgadza się z czterema ostatnimi cyframi PESEL-u klienta. '
+      + 'E-mail zapowiada PESEL, więc klient nie otworzyłby oferty. Popraw kod przy ofercie albo PESEL w kartotece.'
+    );
+  }
+
+  const pin = zPeselu;
+  if (!offer.access_code) {
     await sb.from('ud_offers').update({ access_code: pin }).eq('id', offerId);
   }
   const ttlHours = parseInt(env.PIN_TTL_HOURS || '48', 10);
@@ -541,15 +568,6 @@ export async function sendOfferToClient(offerId) {
       .then(() => {}, () => {}); // log nie może wywrócić wysyłki
   };
 
-  let sms = { sent: false };
-  if (offer.client_phone) {
-    sms = await sendSms(
-      offer.client_phone,
-      `Haslo do oferty: ${pin} (otwiera link i pliki PDF, wazne ${ttlHours}h). Otworz: ${link}`
-    );
-    await logSend('sms', offer.client_phone, sms);
-  }
-
   let email = { sent: false };
   if (offer.client_email) {
     const settings = await getSettings();
@@ -569,9 +587,9 @@ export async function sendOfferToClient(offerId) {
     await logSend('email', offer.client_email, email);
   }
 
-  // Status „Wysłana" tylko wtedy, gdy cokolwiek faktycznie wyszło — inaczej
-  // oferta wyglądałaby na wysłaną mimo odrzucenia przez Resend/SMSAPI.
-  if (sms.sent || email.sent) {
+  // Status „Wysłana" tylko wtedy, gdy e-mail faktycznie wyszedł — inaczej
+  // oferta wyglądałaby na wysłaną mimo odrzucenia przez Resend.
+  if (email.sent) {
     await sb
       .from('ud_offers')
       .update({ status: 'sent', sent_at: new Date().toISOString() })
@@ -582,8 +600,8 @@ export async function sendOfferToClient(offerId) {
   await ensureSummaryUrl(offerId).catch(() => {});
 
   // pinDev zwracany tylko w trybie stub (brak realnej wysyłki), do testów
-  const pinDev = sms.stub || email.stub ? pin : undefined;
-  return { ok: true, sms, email, pinDev };
+  const pinDev = email.stub ? pin : undefined;
+  return { ok: true, email, pinDev };
 }
 
 /**

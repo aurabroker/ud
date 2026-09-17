@@ -114,7 +114,7 @@
           <input class="input" id="e_cp" name="clientPhone" bind:value={eClientPhone} />
         </div>
         <div class="field">
-          <label class="label" for="e_code">Kod dostępu (hasło PDF / SMS)</label>
+          <label class="label" for="e_code">Kod dostępu (4 ostatnie cyfry PESEL)</label>
           <input class="input" id="e_code" name="accessCode" bind:value={eCode} />
         </div>
       </div>
@@ -132,17 +132,9 @@
   </div>
 {/if}
 {#if form?.sent}
-  {@const anySent = form.sms?.sent || form.email?.sent}
-  <div class="{anySent ? 'ok-box' : 'error-box'}">
-    {anySent ? 'Oferta wysłana.' : 'Nie udało się nic wysłać — oferta NIE została oznaczona jako wysłana.'}
+  <div class="{form.email?.sent ? 'ok-box' : 'error-box'}">
+    {form.email?.sent ? 'Oferta wysłana.' : 'Nie udało się wysłać — oferta NIE została oznaczona jako wysłana.'}
     <ul style="margin:.35rem 0 0;padding-left:1.1rem;">
-      <li>
-        SMS:
-        {#if form.sms?.sent}dostarczony ✓
-        {:else if form.sms?.stub}tryb testowy (brak konfiguracji SMSAPI)
-        {:else if form.sms?.error}<span style="color:var(--red-700);">błąd — {form.sms.error}</span>
-        {:else}brak numeru telefonu klienta{/if}
-      </li>
       <li>
         Email:
         {#if form.email?.sent}wysłany ✓{#if form.email.id} <span class="muted">(ID: {form.email.id})</span>{/if}
@@ -164,7 +156,7 @@
     <button class="btn btn-ghost" onclick={copyLink}>{copied ? '✓ Skopiowano' : 'Kopiuj'}</button>
     <form method="POST" action="?/send" use:enhance={() => { sending = true; return async ({ update }) => { await update(); sending = false; }; }}>
       <button class="btn btn-primary" type="submit" disabled={sending}>
-        {sending ? 'Wysyłam…' : (data.offer.status === 'draft' ? 'Wyślij klientowi (SMS + email)' : 'Wyślij ponownie')}
+        {sending ? 'Wysyłam…' : (data.offer.status === 'draft' ? 'Wyślij klientowi e-mailem' : 'Wyślij ponownie')}
       </button>
     </form>
     <a class="btn btn-ghost" href="/panel/offer/{data.offer.id}/summary" target="_blank" rel="noopener">⬇ Pobierz PDF</a>
@@ -172,7 +164,7 @@
   {#if data.offer.access_code}
     <p style="margin-top:.6rem;font-size:.9rem;">
       🔑 Kod dostępu klienta: <strong style="letter-spacing:.1em;font-size:1.05rem;">{data.offer.access_code}</strong>
-      <span class="muted"> — odblokowuje link i otwiera pobrane pliki PDF (wysyłany SMS-em).</span>
+      <span class="muted"> — cztery ostatnie cyfry PESEL-u klienta. Odblokowuje link i otwiera pobrane pliki PDF; nie wysyłamy go, klient zna go z dowodu.</span>
     </p>
   {/if}
   {#if data.pin}

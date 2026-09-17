@@ -37,7 +37,7 @@ export const actions = {
     if (!user) throw redirect(303, '/login');
     try {
       const res = await sendOfferToClient(params.id);
-      return { sent: true, sms: res.sms, email: res.email, pinDev: res.pinDev };
+      return { sent: true, email: res.email, pinDev: res.pinDev };
     } catch (e) {
       return fail(400, { error: e?.message || 'Błąd wysyłki' });
     }
