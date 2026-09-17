@@ -617,6 +617,24 @@ Przy zawodach z budownictwa dopisz jeszcze, czego **nie** chcesz: nie biurowiec
 z zewnątrz i nie architekt przy desce kreślarskiej — to była pierwotna pomyłka
 opisana wyżej.
 
+### Ile to kosztuje i czego nie zamawiać drugi raz
+
+**Kredyty liczą się od sztuki, nie od rozdzielczości.** Sto za ujęcie,
+niezależnie od tego, czy to 2K czy 3K. Wniosek: zawsze bierz najwyższą
+rozdzielczość, a koszt kontroluj liczbą ujęć. Cztery sztuki „na wszelki
+wypadek" to czterysta kredytów — przed każdym zleceniem sprawdź cenę przez
+wycenę, jest darmowa.
+
+Trzy rzeczy, które trzeba dopisać wprost, bo model sam ich nie zgadnie:
+
+- **Uroda środkowoeuropejska.** Bez tego wychodzą rysy azjatyckie. Serwis jest
+  polski i zdjęcia mają wyglądać na zrobione tutaj.
+- **Przysłona f/5.6, nie f/2.8.** Przy f/2.8 tło robi się kremową plamą.
+  Ma być czytelne: widać, że to jasne biuro z oknem. Dopisz wprost
+  „background clearly recognisable, avoid heavy blur".
+- **Kto jest na zdjęciu.** Płeć, wiek, kolor włosów. Zostawione modelowi
+  kończy się losowaniem i drugim zleceniem za te same pieniądze.
+
 Zdjęć wygenerowanych na Artliście **nie da się pobrać z tego środowiska** —
 proxy blokuje `cms-toolkit-artifacts.artlist.io`, `ai-toolkit-generations.imgix.net`
 i `mcp.artlist.io`. Wyniki widać w kliencie i pobiera je człowiek.
