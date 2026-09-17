@@ -98,6 +98,9 @@ const ROZSZERZENIA = /\.(jpe?g|png|webp)$/i;
  * nazwa — ale ten sam slug w dwóch formatach naraz jest błędem: `obrazy.ts`
  * wybrałby jeden po kolejności rozszerzeń, a autor zmiany zobaczyłby losowy.
  */
+/** Rozszerzenia, których obrazy.ts szuka dla zdjęcia strony głównej. */
+const ROZSZERZENIA_HERO = ['jpg', 'jpeg', 'png', 'webp'];
+
 function nazwyZdjec(katalog) {
   if (!existsSync(katalog)) return [];
   const nazwy = readdirSync(katalog)
@@ -174,7 +177,11 @@ test('zdjęcia kategorii faktycznie się renderują', () => {
   const zeZdjeciem = kategorie().filter((k) => !BEZ_ZDJECIA.has(k.slug));
 
   const glowna = readFileSync(join(DIST, 'index.html'), 'utf8');
-  const kafelki = (glowna.match(/<img\b/g) ?? []).length;
+  // Liczymy po opisie alternatywnym, a nie po wszystkich <img> na stronie:
+  // zdjęcie nagłówka strony głównej też jest <img>, tylko z pustym alt, bo
+  // znaczenie niesie nagłówek leżący na nim. Zliczanie wszystkiego kazałoby
+  // poprawiać ten test przy każdym zdjęciu dołożonym gdziekolwiek na stronie.
+  const kafelki = (glowna.match(/alt="Zdjęcie ilustracyjne — /g) ?? []).length;
   expect(kafelki, `strona główna: ${kafelki} kafelków ze zdjęciem zamiast ${zeZdjeciem.length}`)
     .toBe(zeZdjeciem.length);
 
@@ -188,6 +195,33 @@ test('zdjęcia kategorii faktycznie się renderują', () => {
     const html = readFileSync(join(DIST, `${plik}/index.html`), 'utf8');
     expect((html.match(/<img\b/g) ?? []).length, `/${plik}/ bez zdjęcia`).toBe(1);
   }
+});
+
+test('pas strony głównej: zdjęcie albo nic, nigdy sama zasłona', () => {
+  /**
+   * Strona główna jest jedyną, na której zdjęcie nagłówka bierze się z pliku
+   * `src/obrazy/hero.<ext>`, a nie z kategorii czy zawodu. Dopóki pliku nie ma,
+   * pas ma zostać samym gradientem — zasłona bez zdjęcia to ciemna plama,
+   * przez którą nie prześwituje nic.
+   */
+  const jestPlik = ROZSZERZENIA_HERO
+    .some((ext) => existsSync(join(KORZEN, `src/obrazy/hero.${ext}`)));
+  const html = readFileSync(join(DIST, 'index.html'), 'utf8');
+  const pas = html.indexOf('relative isolate');
+  expect(pas, 'strona główna: brak bloku nagłówka').toBeGreaterThan(-1);
+
+  if (!jestPlik) {
+    expect(html, 'zasłona bez zdjęcia — dodaj src/obrazy/hero.<ext>')
+      .not.toContain('zaslona-hero');
+    return;
+  }
+
+  expect(html, 'jest hero.<ext>, a pas bez zasłony').toContain('zaslona-hero');
+  const obraz = html.slice(pas).match(/<img[^>]*>/)?.[0] ?? '';
+  // Ta sama wartość co na pasach zawodu i kategorii: zdjęcia w tym zestawie
+  // mają twarz w górnej tercji, a domyślne object-cover tnie symetrycznie.
+  expect(obraz, 'pas strony głównej tnie kadr od środka, nie od 25% wysokości')
+    .toContain('object-[50%_25%]');
 });
 
 test('nagłówek leży na zdjęciu, nie pod nim', () => {

@@ -515,6 +515,30 @@ Pilnuje tego `test/linki.spec.js`:
 - **`BEZ_ZDJECIA` sprząta po sobie** — gdy plik się pojawi, test wywala się na
   nieaktualnym wpisie.
 
+### Zdjęcie strony głównej ma inny układ niż reszta serii
+
+Plik: `src/obrazy/hero.<jpg|jpeg|png|webp>`, wczytywany przez `obrazHero()`.
+Brak pliku to sam gradient — pas nie renderuje ani obrazu, ani zasłony.
+
+**Nie zamawiaj go według wzorca „bohater po prawej".** W pasie strony głównej
+po prawej stoi karta kalkulatora (`lg:w-[26em]`, nieprzezroczysta) i zasłania
+dokładnie ten fragment kadru, w którym na podstronach zawodu siedzi bohater.
+Po lewej jest nagłówek i lead. Bohater ma więc stać **tuż na prawo od środka**,
+mniej więcej na 58% szerokości, a lewe 45% zostaje spokojne.
+
+Proporcje: **3:2**, jak kategorie. Pas na desktopie jest szerszy (ok. 2,3:1),
+więc 21:9 pasowałby lepiej — ale na telefonie ten sam pas jest wysoki i wąski,
+a `object-cover` pokazuje z niego pionowy pasek. Z 3:2 zostaje wtedy więcej
+kadru niż z 21:9, a ruch jest głównie mobilny.
+
+Pilnuje tego `test/linki.spec.js`:
+- bez pliku pas nie może mieć `zaslona-hero` (zasłona bez zdjęcia to ciemna
+  plama, przez którą nie prześwituje nic),
+- z plikiem pas musi mieć zasłonę i `object-[50%_25%]`,
+- kafelki kategorii na stronie głównej liczone są **po opisie alternatywnym**,
+  nie po wszystkich `<img>` — zdjęcie nagłówka też jest `<img>`, tylko z pustym
+  `alt`, bo znaczenie niesie nagłówek leżący na nim.
+
 ### Kadr i tekst na zdjęciu
 
 Nagłówek podstrony zawodu i kategorii leży **na zdjęciu**, nie pod nim. To nie
