@@ -7,33 +7,45 @@
  * przy której człowiek podmienia dwa zdjęcia miejscami, a test tego nie złapie,
  * bo nazwa pliku będzie poprawna.
  *
- * Mapowanie czyta z MAPOWANIE-medycyna.txt, żeby lista stała w jednym miejscu.
+ * Mapowanie czyta ze WSZYSTKICH plików MAPOWANIE-*.txt w tym katalogu, więc
+ * kolejna partia to dopisanie pliku, nie zmiana skryptu.
  *
- *     node src/obrazy/zawody/przemianuj-medycyne.mjs
+ *     node src/obrazy/zawody/przemianuj.mjs
  */
-import { readFileSync, readdirSync, renameSync, existsSync } from 'node:fs';
+import { readFileSync, readdirSync, renameSync } from 'node:fs';
 import { dirname, join, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const KATALOG = dirname(fileURLToPath(import.meta.url));
-const MAPOWANIE = join(KATALOG, 'MAPOWANIE-medycyna.txt');
+const MAPOWANIA = readdirSync(KATALOG).filter((p) => /^MAPOWANIE-.*\.txt$/.test(p));
 
-if (!existsSync(MAPOWANIE)) {
-  console.error(`Nie ma ${MAPOWANIE} — bez mapowania nie ma czego przemianować.`);
+if (!MAPOWANIA.length) {
+  console.error(`Nie ma żadnego MAPOWANIE-*.txt w ${KATALOG} — nie ma czego przemianować.`);
   process.exit(1);
 }
 
 /** Linie „<uuid>  <slug>”; wszystko inne w pliku to komentarz dla człowieka. */
-const pary = readFileSync(MAPOWANIE, 'utf8')
-  .split('\n')
-  .map((l) => l.match(/^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\s+([a-z0-9-]+)\s*$/))
-  .filter(Boolean)
-  .map((m) => ({ uuid: m[1], slug: m[2] }));
+const pary = MAPOWANIA.flatMap((plik) =>
+  readFileSync(join(KATALOG, plik), 'utf8')
+    .split('\n')
+    .map((l) => l.match(/^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\s+([a-z0-9-]+)\s*$/))
+    .filter(Boolean)
+    .map((m) => ({ uuid: m[1], slug: m[2], plik })));
 
 if (!pary.length) {
-  console.error('Mapowanie nie zawiera żadnej pary uuid → slug.');
+  console.error(`Żaden z plików ${MAPOWANIA.join(', ')} nie zawiera pary uuid → slug.`);
   process.exit(1);
 }
+
+/** Ten sam slug w dwóch mapowaniach znaczy, że ktoś zamówił go dwa razy. */
+const podwojne = [...new Map(pary.map((p) => [p.slug, p])).keys()]
+  .filter((s) => pary.filter((p) => p.slug === s).length > 1);
+if (podwojne.length) {
+  console.error(`Slug w więcej niż jednym mapowaniu: ${podwojne.join(', ')}`);
+  process.exit(1);
+}
+
+console.log(`Mapowania: ${MAPOWANIA.join(', ')} — razem ${pary.length} par.\n`);
 
 const pliki = readdirSync(KATALOG);
 let przemianowane = 0;

@@ -6,7 +6,7 @@ po slugu, więc bez przemianowania żadne z tych zdjęć się nie pokaże.
 
 Wrzuć pliki do tego katalogu i uruchom z katalogu apps/portal:
 
-    node src/obrazy/zawody/przemianuj-medycyne.mjs
+    node src/obrazy/zawody/przemianuj.mjs
 
 uuid pliku                            slug zawodu
 ffdc3f1d-08ee-4cb3-a538-92dc48f69459  lekarz
