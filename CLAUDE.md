@@ -586,18 +586,53 @@ Brak pliku to sam gradient — pas nie renderuje ani obrazu, ani zasłony.
 **Nie zamawiaj go według wzorca „bohater po prawej".** W pasie strony głównej
 po prawej stoi karta kalkulatora (`lg:w-[26em]`, nieprzezroczysta) i zasłania
 dokładnie ten fragment kadru, w którym na podstronach zawodu siedzi bohater.
-Po lewej jest nagłówek i lead. Bohater ma więc stać **tuż na prawo od środka**,
-mniej więcej na 58% szerokości, a lewe 45% zostaje spokojne.
+Po lewej jest nagłówek i lead.
 
-Proporcje: **3:2**, jak kategorie. Pas na desktopie jest szerszy (ok. 2,3:1),
-więc 21:9 pasowałby lepiej — ale na telefonie ten sam pas jest wysoki i wąski,
-a `object-cover` pokazuje z niego pionowy pasek. Z 3:2 zostaje wtedy więcej
-kadru niż z 21:9, a ruch jest głównie mobilny.
+**Bohater ma stać na lewo od środka — jego prawa krawędź najdalej na 55%
+szerokości kadru.** Wcześniej stało tu „mniej więcej na 58%" i to była pomyłka:
+58% kadru to dokładnie miejsce, w którym stoi lewa krawędź karty.
+
+Arytmetyka, bo bez niej ta wytyczna wygląda na widzimisię. Wysokość pasa
+dyktuje karta kalkulatora — **1355 px, niezależnie od szerokości okna**. Lewa
+krawędź karty to `szerokość/2 + 164` px, więc im szersze okno, tym bliżej
+środka ekranu:
+
+| Okno | Lewa krawędź karty | Zapas poziomy przy kadrze 3:2 |
+|---|---|---|
+| 1280 px | 63% | 753 px |
+| 1440 px | 61% | 593 px |
+| 1920 px | 59% | **113 px — za mało przy każdym `object-position`** |
+| 2560 px | 56% | **0 — kadr skaluje się po szerokości, `object-position` bezczynne** |
+
+Dlatego **przesunięcie `object-position` tego nie naprawia** i nie próbuj tego
+drugi raz: powyżej okna `1355 × proporcje kadru` zdjęcie skaluje się po
+szerokości i pozioma składowa `object-position` nie robi już nic.
+
+Proporcje: **węższe niż 3:2, docelowo około 1,1:1**. Plik w repo ma 2808×2496
+(1,125:1) — to oryginał 3744×2496 z Artlista przycięty o 25% z lewej, bo
+bohaterka stała na 56% i karta ucinała jej pół głowy. Przy proporcjach ≤ 1,2:1
+całą szerokość zdjęcia widać już od okna 1626 px, więc pozycja bohatera
+przestaje zależeć od szerokości okna.
+
+Kadr z generatora przychodzi szeroki (3:2 albo 21:9) i **trzeba go przyciąć
+z lewej przed wrzuceniem do repo** — albo od razu zamówić bohatera po lewej.
+
+Skutek uboczny, o którym warto wiedzieć: przesunięcie bohatera w lewo wsuwa go
+pod mocniejszą część `.zaslona-hero` (95% bieli do 46% szerokości), więc zdjęcie
+czyta się bardziej jako tło niż jako portret. To jest wymuszone układem —
+między prawą krawędzią tekstu a lewą krawędzią karty jest zawsze 56 px
+(`gap-14`), a głowa ma na ekranie ze 250 px. Nie ma pozycji, w której bohater
+omija i tekst, i kartę. Rozjaśnienie zasłony wymaga przeliczenia kontrastów
+z tabeli wyżej — lead ma 4,6:1 przy wymaganych 4,5:1, czyli zero zapasu.
 
 Pilnuje tego `test/linki.spec.js`:
 - bez pliku pas nie może mieć `zaslona-hero` (zasłona bez zdjęcia to ciemna
   plama, przez którą nie prześwituje nic),
 - z plikiem pas musi mieć zasłonę i `object-[50%_25%]`,
+- kadr źródłowy mieści się w 0,9–1,2:1; test czyta wymiary z `width`/`height`
+  w zbudowanym znaczniku. **Nie sprawdza, gdzie w kadrze stoi bohater** — tego
+  z pliku odczytać się nie da, więc po podmianie zdjęcia obejrzyj pas przy
+  1440 i 1920 px,
 - kafelki kategorii na stronie głównej liczone są **po opisie alternatywnym**,
   nie po wszystkich `<img>` — zdjęcie nagłówka też jest `<img>`, tylko z pustym
   `alt`, bo znaczenie niesie nagłówek leżący na nim.

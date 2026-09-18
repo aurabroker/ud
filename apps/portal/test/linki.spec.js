@@ -224,6 +224,47 @@ test('pas strony głównej: zdjęcie albo nic, nigdy sama zasłona', () => {
     .toContain('object-[50%_25%]');
 });
 
+test('kadr strony głównej jest węższy niż 3:2 — inaczej bohater wpada za kartę', () => {
+  /**
+   * Wysokość pasa strony głównej dyktuje karta kalkulatora: 1355 px, niezależnie
+   * od szerokości okna. Zdjęcie ma tę wysokość pokryć, więc przy szerokim kadrze
+   * jest mocno przeskalowane i `object-position` szybko traci zapas.
+   *
+   * Karta stoi po prawej, a jej lewa krawędź to `szerokość/2 + 164` px — im
+   * szersze okno, tym bliżej środka ekranu. Bohater stojący na 58% szerokości
+   * kadru (tak brzmiała pierwotna wytyczna) trafiał dokładnie za nią:
+   *
+   *   1920 px → zapas poziomy tylko 113 px, za mało przy każdym object-position
+   *   2560 px → kadr skaluje się po SZEROKOŚCI, object-position bezczynne,
+   *             bohater na stałe 246 px za kartą
+   *
+   * Dlatego kadr źródłowy musi być węższy niż pas: przy proporcjach ≤ 1,2:1
+   * całą szerokość zdjęcia widać już od okna 1626 px, więc pozycja bohatera
+   * przestaje zależeć od szerokości okna. Plik w repo ma 2808×2496 (1,125:1) —
+   * to oryginał 3744×2496 przycięty o 25% z lewej.
+   *
+   * Czego ten test NIE sprawdza: gdzie w kadrze stoi bohater. Tego nie da się
+   * odczytać z pliku — po podmianie zdjęcia obejrzyj pas przy 1440 i 1920 px
+   * i sprawdź, czy głowa mieści się na lewo od karty.
+   */
+  const jestPlik = ROZSZERZENIA_HERO
+    .some((ext) => existsSync(join(KORZEN, `src/obrazy/hero.${ext}`)));
+  if (!jestPlik) return;
+
+  const html = readFileSync(join(DIST, 'index.html'), 'utf8');
+  const obraz = html.slice(html.indexOf('relative isolate')).match(/<img[^>]*>/)?.[0] ?? '';
+  const szerokosc = Number(obraz.match(/width="(\d+)"/)?.[1]);
+  const wysokosc = Number(obraz.match(/height="(\d+)"/)?.[1]);
+  expect(szerokosc, 'brak wymiarów w znaczniku zdjęcia').toBeGreaterThan(0);
+
+  const proporcje = szerokosc / wysokosc;
+  expect(proporcje, `kadr ${szerokosc}×${wysokosc} (${proporcje.toFixed(2)}:1) za szeroki — `
+    + 'bohater wpadnie za kartę kalkulatora; przytnij z lewej')
+    .toBeLessThanOrEqual(1.2);
+  expect(proporcje, `kadr ${szerokosc}×${wysokosc} za wąski — pas utnie go w pionie`)
+    .toBeGreaterThanOrEqual(0.9);
+});
+
 test('nagłówek leży na zdjęciu, nie pod nim', () => {
   /**
    * Zdjęcie było kiedyś osobnym pasem nad nagłówkiem. Musiało być przez to
