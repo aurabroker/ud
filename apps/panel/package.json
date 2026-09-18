@@ -8,7 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
-    "test:parser": "node --experimental-vm-modules scripts/test-parser.mjs"
+    "test:parser": "node --experimental-vm-modules scripts/test-parser.mjs",
+    "test:extras": "node scripts/test-extras.mjs"
   },
   "devDependencies": {
     "@sveltejs/adapter-cloudflare": "^4.7.4",

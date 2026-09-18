@@ -38,7 +38,19 @@ export async function load({ locals }) {
       wait_accident: 14,
       wait_illness: 21,
       premium_total: 3036,
-      premium_monthly: 253
+      premium_monthly: 253,
+      // Postanowienia dodatkowe wskazane w ofercie — pokazują się w tabeli tylko dlatego,
+      // że ten wariant faktycznie je obejmuje.
+      parsed_raw: {
+        death_sum_insured: 300000,
+        extras: [
+          { key: 'hospital_daily', label: 'Dzienne świadczenie szpitalne i rekonwalescencja', symbol: 'LW140', covered: true, amount: 500, order: 10 },
+          { key: 'disability_adaptation', label: 'Przystosowanie do życia w niepełnosprawności', symbol: 'LW141', covered: true, amount: 100000, order: 20 },
+          { key: 'medical_costs', label: 'Zwrot kosztów leczenia i rehabilitacji', symbol: 'LW126', covered: true, amount: 5000, order: 30 },
+          { key: 'permanent_impairment', label: 'Trwały uszczerbek na zdrowiu', symbol: 'LW143', covered: true, amount: 15000, order: 50 },
+          { key: 'hiv_wzw', label: 'Zakażenie HIV / WZW przy pracy', covered: false, amount: null, order: 70 }
+        ]
+      }
     },
     {
       id: 'mock-ceu',
@@ -56,7 +68,14 @@ export async function load({ locals }) {
       wait_accident: null,
       wait_illness: null,
       premium_total: 27331.44,
-      premium_monthly: 2277.62
+      premium_monthly: 2277.62,
+      // Ten wariant obejmuje tylko jedną z tych pozycji — reszta kolumny zostaje pusta.
+      parsed_raw: {
+        extras: [
+          { key: 'hospital_daily', label: 'Dzienne świadczenie szpitalne i rekonwalescencja', covered: true, amount: 300, order: 10 },
+          { key: 'hiv_wzw', label: 'Zakażenie HIV / WZW przy pracy', covered: true, amount: null, order: 70 }
+        ]
+      }
     }
   ];
 

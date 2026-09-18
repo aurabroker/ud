@@ -46,6 +46,21 @@ async function generateOfferNumber(sb, agentUserId, clientName) {
 }
 
 /**
+ * Krótki identyfikator oferty do tematu e-maila. Klient odpowiada „Odpowiedz”
+ * na naszą wiadomość, więc bez numeru w temacie nie wiadomo, od którego klienta
+ * odpowiedź przyszła. Preferujemy numer oferty (UD/rok/inicjały/nr/nazwisko),
+ * a gdy go brak — awaryjnie skrót UUID oferty.
+ * @param {{ offer_number?: string|null, id?: string }} offer
+ * @returns {string}
+ */
+export function offerRef(offer) {
+  const num = String(offer?.offer_number || '').trim();
+  if (num) return num;
+  const id = String(offer?.id || '').replace(/-/g, '');
+  return id ? `UD-${id.slice(0, 8).toUpperCase()}` : '';
+}
+
+/**
  * Tworzy ofertę z jednego lub wielu PDF-ów (Leadenhall/CEU).
  * @param {Object} p
  * @param {string} p.agentUserId - auth.users.id agenta (właściciel)
@@ -55,6 +70,7 @@ async function generateOfferNumber(sb, agentUserId, clientName) {
  * @param {string} [p.clientPhone]
  * @param {string|null} [p.clientId] - opcjonalne powiązanie z ud_clients
  * @param {string} [p.brokerMessage]
+ * @param {string} [p.additionalTerms] - postanowienia dodatkowe (warunki/zastrzeżenia) na PDF
  * @param {string} [p.password] - hasło do zaszyfrowanych PDF (np. Leadenhall)
  * @param {Array<{ name: string, bytes: Uint8Array, password?: string }>} p.files
  * @returns {Promise<{ offerId: string, shareToken: string, documents: any[] }>}
@@ -79,6 +95,7 @@ export async function createOfferFromPdfs(p) {
       client_email: p.clientEmail || null,
       client_phone: p.clientPhone || null,
       broker_message: p.brokerMessage || null,
+      additional_terms: p.additionalTerms || null,
       share_token: shareToken,
       access_code: accessCode,
       offer_number: offerNumber,
@@ -187,7 +204,8 @@ export async function createOfferFromPdfs(p) {
       logo: await loadLogo(sb, settings),
       footerText: settings.pdf_footer || '',
       employmentType,
-      offerNumber
+      offerNumber,
+      additionalTerms: p.additionalTerms || ''
     });
     const pdf = await renderPdf(docDef);
     if (pdf.ok && pdf.buffer) {
@@ -442,7 +460,7 @@ async function regenerateSummary(sb, offerId) {
   try {
     const { data: offer } = await sb
       .from('ud_offers')
-      .select('name, client_name, client_id, offer_number')
+      .select('name, client_name, client_id, offer_number, additional_terms')
       .eq('id', offerId)
       .single();
     const { data: documents } = await sb.from('ud_offer_documents').select('*').eq('offer_id', offerId).order('sort_order');
@@ -469,7 +487,8 @@ async function regenerateSummary(sb, offerId) {
       logo: await loadLogo(sb, settings),
       footerText: settings.pdf_footer || '',
       employmentType,
-      offerNumber: offer?.offer_number || ''
+      offerNumber: offer?.offer_number || '',
+      additionalTerms: offer?.additional_terms || ''
     });
     const pdf = await renderPdf(docDef);
     if (pdf.ok && pdf.buffer) {
@@ -588,9 +607,10 @@ export async function sendOfferToClient(offerId) {
       logoUrl: settings.logo_url || '',
       footerText: settings.pdf_footer || ''
     });
+    const ref = offerRef(offer);
     email = await sendEmail({
       to: offer.client_email,
-      subject: 'Twoja oferta ubezpieczenia utraty dochodu',
+      subject: `Twoja oferta ubezpieczenia utraty dochodu${ref ? ` — nr ${ref}` : ''}`,
       html: tpl.html,
       text: tpl.text
     });

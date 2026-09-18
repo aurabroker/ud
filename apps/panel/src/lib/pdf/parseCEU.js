@@ -6,6 +6,7 @@ import { emptyOffer } from './model.js';
 import {
   firstMatch, matchInt, matchAmount, isCovered, parseDateISO
 } from './helpers.js';
+import { detectExtras } from './extras.js';
 
 /**
  * Wytnij fragment tekstu między dwoma kotwicami (start włącznie, end wyłącznie).
@@ -94,7 +95,9 @@ export function parseCEU(text) {
     premium_annual: o.premium_total,
     premium_monthly: o.premium_monthly,
     installments: o.installments,
-    avg_monthly_income: o.avg_monthly_income
+    avg_monthly_income: o.avg_monthly_income,
+    // Postanowienia dodatkowe wskazane w ofercie (klauzule opcjonalne, ryzyka aktywne).
+    extras: detectExtras(text, 'ceu')
   };
 
   return o;

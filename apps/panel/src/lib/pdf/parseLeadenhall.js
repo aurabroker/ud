@@ -6,6 +6,7 @@ import { emptyOffer } from './model.js';
 import {
   firstMatch, matchInt, matchAmount, parseAmount, isCovered, parseDateISO
 } from './helpers.js';
+import { detectExtras } from './extras.js';
 
 /**
  * @param {string} text - pełny tekst PDF (z unpdf)
@@ -120,7 +121,10 @@ export function parseLeadenhall(text) {
     owu_base: owuBase ? owuBase.toUpperCase() : null,
     covers_hiv_wzw: coversHivWzw,
     hiv_owu_symbol: hivOwuSymbol,
-    death_sum_insured: deathSum
+    death_sum_insured: deathSum,
+    // Postanowienia dodatkowe wskazane w ofercie (klauzule dodatkowe, HIV/WZW,
+    // ryzyka aktywnego życia). Pusta lista = oferta ich nie wskazuje.
+    extras: detectExtras(text, 'leadenhall')
   };
 
   return o;

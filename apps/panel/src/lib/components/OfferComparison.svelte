@@ -1,5 +1,6 @@
 <script>
-  import { money, yesNo, insurerLabel, insurerRow, offerNoDisplay } from '$lib/format.js';
+  import { insurerLabel } from '$lib/format.js';
+  import { comparisonRows, extraNotes } from '$lib/comparisonRows.js';
   let { documents = [], selectable = false, onchoose = null, chosenId = null } = $props();
 
   // Gdy wszystkie porównywane oferty są od tego samego ubezpieczyciela,
@@ -8,27 +9,12 @@
     documents.length > 1 && documents.every((d) => d.insurer_type === documents[0].insurer_type)
   );
 
-  // Okresowa niezdolność „z oferty": gdy pokrycie faktycznie jest — TAK na zielono zamiast „—".
-  function tempIncap(d) {
-    const covered = d.temp_incapacity_covered === true || d.temp_monthly_benefit != null || d.temp_sum_insured != null;
-    if (covered) return { green: true, text: 'TAK' };
-    return yesNo(d.temp_incapacity_covered);
-  }
+  // Wiersze (bazowe + postanowienia dodatkowe + składki) liczy wspólny moduł,
+  // ten sam, z którego korzysta PDF rekomendacji.
+  const rows = $derived(comparisonRows(documents));
 
-  const rows = [
-    ['Ubezpieczyciel', () => insurerRow()],
-    ['Numer oferty', (d) => offerNoDisplay(d.offer_number)],
-    ['Okres ubezpieczenia', (d) => d.insurance_period || '—'],
-    // Kwota z Pozycji A (parsed_raw); gdy ryzyko nieobjęte — Tak/Nie/—
-    ['Śmierć / inwalidztwo (NW)', (d) => (d.parsed_raw?.death_sum_insured != null ? money(d.parsed_raw.death_sum_insured) : yesNo(d.death_covered))],
-    ['Okresowa niezdolność do pracy', (d) => tempIncap(d)],
-    ['— świadczenie miesięczne', (d) => money(d.temp_monthly_benefit)],
-    // Kwota z Pozycji C; gdy oferta nie obejmuje tego ryzyka — Tak/Nie/—
-    ['Trwała niezdolność do pracy', (d) => (d.perm_sum_insured != null ? money(d.perm_sum_insured) : yesNo(d.perm_incapacity_covered))],
-    ['Okres odszkodowawczy', (d) => d.indemnity_period || '—'],
-    ['Okres wyczekiwania (wypadek)', (d) => (d.wait_accident != null ? d.wait_accident + ' dni' : '—')],
-    ['Okres wyczekiwania (choroba)', (d) => (d.wait_illness != null ? d.wait_illness + ' dni' : '—')]
-  ];
+  // Klauzule, których treść musi stać pod tabelą (np. LW144).
+  const notes = $derived(extraNotes(documents));
 </script>
 
 <div class="cmp-wrap">
@@ -46,25 +32,25 @@
       </tr>
     </thead>
     <tbody>
-      {#each rows as [label, fn]}
-        <tr>
-          <td class="lbl">{label}</td>
-          {#each documents as d}
-            {@const v = fn(d)}
-            <td>{#if v && v.green}<span class="yes">{v.text}</span>{:else}{v}{/if}</td>
-          {/each}
-        </tr>
+      {#each rows as row (row.key)}
+        {#if row.kind === 'section'}
+          <tr class="sec">
+            <td class="lbl sec-lbl" colspan={documents.length + 1}>{row.label}</td>
+          </tr>
+        {:else}
+          <tr class={row.premium ? 'premium' : ''}>
+            <td class="lbl">{row.label}</td>
+            {#each row.cells as c}
+              <td>
+                {#if c.green}<span class="yes">{c.text}</span>
+                {:else if c.underline}<span class="mth">{c.text}</span>
+                {:else if c.bold}<strong>{c.text}</strong>
+                {:else}{c.text}{/if}
+              </td>
+            {/each}
+          </tr>
+        {/if}
       {/each}
-      <tr class="premium">
-        <td class="lbl">Składka roczna (łącznie)</td>
-        {#each documents as d}<td><strong>{money(d.premium_total)}</strong></td>{/each}
-      </tr>
-      <tr class="premium">
-        <td class="lbl">Rata miesięczna</td>
-        {#each documents as d}
-          <td>{#if d.premium_monthly != null}<span class="mth">{money(d.premium_monthly)}</span>{:else}—{/if}</td>
-        {/each}
-      </tr>
       {#if selectable}
         <tr>
           <td></td>
@@ -83,6 +69,13 @@
   </table>
 </div>
 
+{#each notes as n (n.key)}
+  <div class="cmp-note">
+    <p class="cmp-note-title">{n.title}</p>
+    <p class="cmp-note-text">{n.text}</p>
+  </div>
+{/each}
+
 <style>
   .cmp-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--slate-400); }
   table.cmp { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
@@ -96,5 +89,13 @@
   tbody tr:nth-child(even) td:not(.lbl) { background: #fbfcfe; }
   tr.premium td { font-size: 0.95rem; border-top: 2px solid var(--slate-200); }
   .yes { color: #15803d; font-weight: 700; }
+  /* Nagłówek sekcji „Postanowienia dodatkowe" — renderowany tylko, gdy sekcja ma wiersze. */
+  tr.sec td.sec-lbl { background: var(--slate-100); color: var(--slate-700); font-size: .78rem;
+    text-transform: uppercase; letter-spacing: .04em; padding: 6px 14px; }
   .mth { text-decoration: underline; text-underline-offset: 2px; font-weight: 700; }
+  /* Treść klauzuli spod tabeli — np. ograniczenie z tytułu zwyrodnień (LW144). */
+  .cmp-note { margin-top: .75rem; padding: .7rem .9rem; border-left: 3px solid var(--slate-400);
+    background: var(--slate-50); border-radius: 0 8px 8px 0; }
+  .cmp-note-title { margin: 0 0 .25rem; font-weight: 700; font-size: .85rem; color: var(--slate-800); }
+  .cmp-note-text { margin: 0; font-size: .82rem; line-height: 1.5; color: var(--slate-700); }
 </style>

@@ -2,7 +2,8 @@
  * summaryDoc.js — definicja dokumentu pdfmake dla podsumowania oferty.
  * Odpowiednik summaryHtml.js, ale bez HTML i bez zewnętrznego API.
  */
-import { money, yesNo, insurerLabel, insurerRow, offerNoDisplay } from '$lib/format.js';
+import { insurerLabel } from '$lib/format.js';
+import { comparisonRows, extraNotes } from '$lib/comparisonRows.js';
 import { conditionsContent } from './conditionsDoc.js';
 
 const SLATE_900 = '#0f172a';
@@ -27,29 +28,6 @@ function isUop(code) {
   return /^uop$/i.test(String(code || '').trim()) || /umowa o prac/i.test(String(code || ''));
 }
 
-/** Okresowa niezdolność: gdy pokrycie faktycznie jest — TAK na zielono. */
-function tempIncap(d) {
-  const covered = d.temp_incapacity_covered === true || d.temp_monthly_benefit != null || d.temp_sum_insured != null;
-  return covered ? { text: 'TAK', color: GREEN, bold: true } : { text: yesNo(d.temp_incapacity_covered) };
-}
-
-const ROWS = [
-  ['Ubezpieczyciel', () => ({ text: insurerRow() })],
-  ['Numer oferty (ubezpieczyciel)', (d) => ({ text: offerNoDisplay(d.offer_number) })],
-  ['Okres ubezpieczenia', (d) => ({ text: d.insurance_period || '—' })],
-  ['Śmierć / inwalidztwo (NW)', (d) => ({
-    text: d.parsed_raw?.death_sum_insured != null ? money(d.parsed_raw.death_sum_insured) : yesNo(d.death_covered)
-  })],
-  ['Okresowa niezdolność do pracy', (d) => tempIncap(d)],
-  ['— świadczenie miesięczne', (d) => ({ text: money(d.temp_monthly_benefit) })],
-  ['Trwała niezdolność do pracy', (d) => ({
-    text: d.perm_sum_insured != null ? money(d.perm_sum_insured) : yesNo(d.perm_incapacity_covered)
-  })],
-  ['Okres odszkodowawczy', (d) => ({ text: d.indemnity_period || '—' })],
-  ['Okres wyczekiwania (wypadek)', (d) => ({ text: d.wait_accident != null ? d.wait_accident + ' dni' : '—' })],
-  ['Okres wyczekiwania (choroba)', (d) => ({ text: d.wait_illness != null ? d.wait_illness + ' dni' : '—' })]
-];
-
 /** Nagłówek: logo (jeśli udało się pobrać) albo napis UtrataDochodu. */
 function brandNode(logo) {
   // Tylko `fit` — podanie równocześnie height/fit potrafi popsuć skalowanie w pdfmake.
@@ -67,8 +45,69 @@ function brandNode(logo) {
 }
 
 /**
+ * Treści klauzul drukowane pod tabelą porównania (np. ograniczenie z tytułu
+ * zwyrodnień — LW144). Pokazujemy tylko te, które obejmuje któraś z ofert.
+ * @param {Array<any>} documents
+ * @returns {Array<object>}
+ */
+function clauseNotesContent(documents) {
+  const notes = extraNotes(documents);
+  if (!notes.length) return [];
+  return notes.map((n) => ({
+    table: {
+      widths: ['*'],
+      body: [[{ stack: [{ text: n.title, style: 'noteTitle' }, { text: n.text, style: 'noteText' }] }]]
+    },
+    layout: 'noteBox',
+    margin: [0, 0, 0, 6]
+  }));
+}
+
+/**
+ * Blok „Postanowienia dodatkowe" — ręczny tekst agenta (warunki, zastrzeżenia),
+ * niezależny od wiadomości dla klienta. Pusty tekst => sekcji nie ma w ogóle.
+ * Wiersze zaczynające się od myślnika/kropki renderujemy jako listę punktową,
+ * bo tak agenci najczęściej zapisują zastrzeżenia.
+ * @param {string} [text]
+ * @returns {Array<object>}
+ */
+export function additionalTermsContent(text) {
+  const lines = String(text || '').split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  if (!lines.length) return [];
+
+  const nodes = [];
+  /** @type {string[]} */
+  let bullets = [];
+  const flush = () => {
+    if (bullets.length) nodes.push({ ul: bullets, style: 'atList' });
+    bullets = [];
+  };
+  for (const line of lines) {
+    if (/^[-–—•*]\s+/.test(line)) {
+      bullets.push(line.replace(/^[-–—•*]\s+/, ''));
+    } else {
+      flush();
+      nodes.push({ text: line, style: 'atP' });
+    }
+  }
+  flush();
+
+  return [
+    {
+      table: {
+        widths: ['*'],
+        body: [[{ stack: [{ text: 'Postanowienia dodatkowe', style: 'atTitle' }, ...nodes] }]]
+      },
+      layout: 'atBox',
+      margin: [0, 2, 0, 8]
+    }
+  ];
+}
+
+/**
  * @param {{ clientName?: string, documents: any[], employmentType?: string,
- *   offerNumber?: string, footerText?: string, logo?: {kind:string, data:any}|null }} p
+ *   offerNumber?: string, additionalTerms?: string, footerText?: string,
+ *   logo?: {kind:string, data:any}|null }} p
  * @returns {object} docDefinition dla pdfmake
  */
 export function buildSummaryDocDefinition(p) {
@@ -112,22 +151,28 @@ export function buildSummaryDocDefinition(p) {
         { text: "przedstawiciel Lloyd's", style: 'cmpHeadFirst' },
         ...documents.map((d) => ({ text: insurerLabel(d.insurer_type), style: 'cmpHead' }))
       ];
+  // Wiersze (bazowe + postanowienia dodatkowe + składki) liczy ten sam moduł,
+  // z którego korzysta tabela w przeglądarce.
   const body = [header];
-  for (const [label, fn] of ROWS) {
-    body.push([{ text: label, style: 'cmpLabel' }, ...documents.map((d) => ({ ...fn(d), style: 'cmpCell' }))]);
+  for (const row of comparisonRows(documents)) {
+    if (row.kind === 'section') {
+      body.push([
+        { text: row.label, style: 'cmpSection', colSpan: documents.length + 1 },
+        ...Array.from({ length: documents.length }, () => ({}))
+      ]);
+      continue;
+    }
+    body.push([
+      { text: row.label, style: 'cmpLabel' },
+      ...row.cells.map((c) => ({
+        text: c.text,
+        style: 'cmpCell',
+        ...(c.green ? { color: GREEN, bold: true } : {}),
+        ...(c.bold ? { bold: true } : {}),
+        ...(c.underline ? { decoration: 'underline' } : {})
+      }))
+    ]);
   }
-  body.push([
-    { text: 'Składka roczna (łącznie)', style: 'cmpLabel' },
-    ...documents.map((d) => ({ text: money(d.premium_total), bold: true, style: 'cmpCell' }))
-  ]);
-  body.push([
-    { text: 'Rata miesięczna', style: 'cmpLabel' },
-    ...documents.map((d) =>
-      d.premium_monthly != null
-        ? { text: money(d.premium_monthly), bold: true, decoration: 'underline', style: 'cmpCell' }
-        : { text: '—', style: 'cmpCell' }
-    )
-  ]);
 
   const cmpTable = {
     table: { headerRows: 1, widths: [150, ...documents.map(() => '*')], body },
@@ -168,6 +213,8 @@ export function buildSummaryDocDefinition(p) {
         margin: [0, 2, 0, 12]
       },
       cmpTable,
+      ...clauseNotesContent(documents),
+      ...additionalTermsContent(p.additionalTerms),
       ...conditionsContent(p.footerText)
     ],
     styles: {
@@ -178,8 +225,17 @@ export function buildSummaryDocDefinition(p) {
       cmpHead: { bold: true, color: '#ffffff', fillColor: SLATE_800, margin: [4, 4, 4, 4], alignment: 'center' },
       cmpHeadFirst: { bold: true, color: '#ffffff', fillColor: SLATE_900, margin: [4, 4, 4, 4] },
       cmpLabel: { bold: true, color: '#334155', fillColor: SLATE_50, margin: [4, 3, 4, 3] },
+      // Nagłówek sekcji „Postanowienia dodatkowe" — wiersz na całą szerokość tabeli.
+      cmpSection: { bold: true, fontSize: 8, color: '#475569', fillColor: '#f1f5f9', margin: [4, 3, 4, 3] },
       // Komórki z danymi ofert — wyśrodkowane.
       cmpCell: { margin: [4, 3, 4, 3], alignment: 'center' },
+      // Treść klauzuli spod tabeli (np. LW144).
+      noteTitle: { fontSize: 8.5, bold: true, color: SLATE_900, margin: [0, 0, 0, 2] },
+      noteText: { fontSize: 8, color: '#334155' },
+      // Ręczne postanowienia dodatkowe (pole z edycji oferty).
+      atTitle: { fontSize: 9.5, bold: true, color: '#92400e', margin: [0, 0, 0, 3] },
+      atP: { fontSize: 8.5, margin: [0, 0, 0, 2] },
+      atList: { fontSize: 8.5, margin: [0, 0, 0, 2] },
       ocH2: { fontSize: 11.5, bold: true, color: SLATE_900 },
       ocH3: { fontSize: 9.5, bold: true, color: SLATE_900, margin: [0, 10, 0, 4] },
       ocSub: { fontSize: 8.5, bold: true, margin: [0, 4, 0, 2] },
@@ -223,6 +279,26 @@ export const TABLE_LAYOUTS = {
     paddingRight: () => 8,
     paddingTop: () => 2,
     paddingBottom: () => 2
+  },
+  noteBox: {
+    hLineWidth: () => 0,
+    vLineWidth: (i) => (i === 0 ? 3 : 0),
+    vLineColor: () => SLATE_300,
+    fillColor: () => SLATE_50,
+    paddingLeft: () => 8,
+    paddingRight: () => 8,
+    paddingTop: () => 5,
+    paddingBottom: () => 5
+  },
+  atBox: {
+    hLineWidth: () => 0,
+    vLineWidth: (i) => (i === 0 ? 3 : 0),
+    vLineColor: () => '#f59e0b',
+    fillColor: () => '#fffbeb',
+    paddingLeft: () => 8,
+    paddingRight: () => 8,
+    paddingTop: () => 5,
+    paddingBottom: () => 5
   },
   ocBox: {
     hLineWidth: () => 0.6,

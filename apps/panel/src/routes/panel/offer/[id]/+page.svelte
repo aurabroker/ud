@@ -28,6 +28,7 @@
   let eClientEmail = $state(data.offer.client_email || '');
   let eClientPhone = $state(data.offer.client_phone || '');
   let eMessage = $state(data.offer.broker_message || '');
+  let eTerms = $state(data.offer.additional_terms || '');
   let eCode = $state(data.offer.access_code || '');
 
   function onPickClient() {
@@ -122,6 +123,15 @@
       <div class="field">
         <label class="label" for="e_msg">Wiadomość dla klienta</label>
         <textarea class="input" id="e_msg" name="brokerMessage" rows="3" bind:value={eMessage}></textarea>
+      </div>
+
+      <div class="field">
+        <label class="label" for="e_terms">Postanowienia dodatkowe (warunki, zastrzeżenia)</label>
+        <textarea class="input" id="e_terms" name="additionalTerms" rows="4" bind:value={eTerms}></textarea>
+        <p class="muted" style="font-size:.8rem;margin:.3rem 0 0;">
+          Trafiają do PDF-a rekomendacji jako osobna sekcja — niezależnie od wiadomości dla klienta.
+          Każdy wiersz zaczynający się od myślnika staje się punktem listy.
+        </p>
       </div>
 
       <div style="display:flex;gap:.5rem;">
