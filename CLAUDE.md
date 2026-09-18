@@ -1,5 +1,39 @@
 # CLAUDE.md — Wytyczne projektu UtrataDochodu.pl
 
+---
+
+## ABSOLUTE_RULE — formularz zgłoszeniowy sprawdzasz na końcu KAŻDEJ pracy
+
+**Formularz wniosku (`/wniosek/` → funkcja brzegowa `form-submit`) to jedyna
+ścieżka, którą wpływają pieniądze. Nie wolno go zepsuć i nie wolno zakładać,
+że jest sprawny.**
+
+Każda praca — bez wyjątku, także taka, która formularza nie dotyka —
+kończy się uruchomieniem:
+
+```
+cd apps/portal && node test/obciazenie-formularza.mjs
+```
+
+Dopiero zielony wynik pozwala uznać robotę za skończoną. Czerwony wynik
+zatrzymuje wszystko inne, aż do naprawy.
+
+Dlaczego „także taka, która formularza nie dotyka": kreator jest wyspą
+Svelte na stronie zbudowanej przez Astro, bierze schemat z `@ud/wniosek`
+i woła funkcję brzegową spoza repozytorium. Zmiana w układzie, w zależności,
+w zmiennej środowiskowej albo we współdzielonym pakiecie potrafi go wyłączyć
+bez jednej linii różnicy w jego własnym pliku. Zmiana, która „nie mogła tego
+ruszyć", jest dokładnie tą, po której nikt nie sprawdza.
+
+Co test mierzy i czego NIE mierzy — patrz nagłówek samego skryptu. Jedna
+rzecz wymaga podkreślenia tutaj: **część sieciowa nie działa z tego
+środowiska**, bo proxy nie ma `kukvgsjrmrqtzhkszzum.supabase.co` na liście
+dozwolonych hostów. Skrypt to wykrywa i mówi wprost, że tej części nie
+wykonał. **Pominięta część sieciowa to nie jest wynik zielony** — trzeba ją
+uruchomić tam, gdzie jest wyjście do sieci.
+
+---
+
 ## Supabase — pobieranie danych
 
 ### Zawsze jawnie wymieniaj kolumny w SELECT
