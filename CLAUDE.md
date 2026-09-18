@@ -735,4 +735,46 @@ Trzy rzeczy, które trzeba dopisać wprost, bo model sam ich nie zgadnie:
 
 Zdjęć wygenerowanych na Artliście **nie da się pobrać z tego środowiska** —
 proxy blokuje `cms-toolkit-artifacts.artlist.io`, `ai-toolkit-generations.imgix.net`
-i `mcp.artlist.io`. Wyniki widać w kliencie i pobiera je człowiek.
+i `mcp.artlist.io`. Wyniki widać w kliencie i pobiera je człowiek. Cała domena
+`artlist.io` też jest zablokowana, więc panelu nie da się stąd obejrzeć — nie
+zgaduj nazw zakładek, podaj znaczniki: datę, godzinę, model i liczbę sztuk.
+
+### Pobrany plik gubi nazwę — i wtedy mapowanie po uuid nic nie daje
+
+Pliki pobrane z panelu przychodzą nazwane **`_Seedream_50_<liczba>.jpg`**.
+W tej nazwie nie ma ani identyfikatora pliku, ani generacji. `przemianuj.mjs`
+dopasowuje po uuid w nazwie, więc **zadziała tylko wtedy, gdy pliki zachowają
+nazwę z generatora** (`-t-e-x-t_-t-o_-i-m-a-g-e-<uuid>.jpeg`). Obie formy się
+zdarzają, zależnie od tego, jak plik został pobrany.
+
+Gdy przyjdą przemianowane, dopasowanie robi się tak: **`get_generation_status`
+na identyfikatorze generacji zwraca gotowy obraz**. Mając parę
+generationId → slug widać, jak wygląda każdy zamówiony zawód, i porównuje się
+to z wgranymi plikami. Dlatego w pliku mapowania trzymaj **identyfikatory
+generacji**, nie tylko uuid plików — te pierwsze pozwalają odtworzyć obraz,
+drugie są bezużyteczne, gdy nazwa przepadnie.
+
+**Nie dopasowuj specjalizacji medycznych po wyglądzie.** Przy partii wrześniowej
+dwóch mężczyzn w identycznych niebieskich fartuchach okazało się weterynarzem
+i neurochirurgiem — różnica była wyłącznie w tle (gabinet zabiegowy kontra
+korytarz szpitalny). Zawody biurowe rozpoznaje się pewnie, bo prompt daje im
+rekwizyt: kalkulator u księgowej, otwarta księga u audytora, kartony
+w pustym mieszkaniu u agenta nieruchomości, monitory z wykresami u maklera.
+Specjalizacje lekarskie takiego rekwizytu zwykle nie dostają.
+
+### Jasność — instrukcja ekspozycji działa, ale nie do końca
+
+Prośba „zdjęcia mogłyby być ciemniejsze" **nie przechodzi**, jeśli napiszesz ją
+wprost — partia medyczna wyszła o 28% jaśniejsza od pierwszej serii. Działa
+dopiero opis fotograficzny: „expose about a third of a stop under: bright but
+NOT blown out, mid-tones stay rich, walls read as a faint tint rather than
+paper white, highlights just below clipping". Z nim partia Prawo/Finanse/IT
+wyszła o 13% jaśniejsza od pierwszej serii zamiast 28%.
+
+Do parytetu z pierwszą serią to wciąż za mało. Jasność mierz, nie oceniaj okiem:
+
+```
+sharp(plik).stats() → średnia z channels[0..2].mean
+```
+
+Pierwsza seria ma około 171, partia medyczna 219, Prawo/Finanse/IT 193.
