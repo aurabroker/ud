@@ -1,0 +1,37 @@
+Zlecenie Artlist z 2026-09-18 — 20 zdjęć specjalizacji medycznych.
+
+Pliki przychodzą z nazwami -t-e-x-t_-t-o_-i-m-a-g-e-<uuid>.jpeg, gdzie <uuid>
+to identyfikator pliku (NIE identyfikator generacji). obrazy.ts szuka wyłącznie
+po slugu, więc bez przemianowania żadne z tych zdjęć się nie pokaże.
+
+Wrzuć pliki do tego katalogu i uruchom z katalogu apps/portal:
+
+    node src/obrazy/zawody/przemianuj-medycyne.mjs
+
+uuid pliku                            slug zawodu
+ffdc3f1d-08ee-4cb3-a538-92dc48f69459  lekarz
+2300533b-945a-4c4c-9d35-c77746655aed  internista
+4d901921-6241-49b4-af5c-217f04583e49  kardiolog
+18223eea-9f5e-4a42-bd96-4913b4c0e707  ginekolog
+3fe6b8cf-495c-4c74-8278-360d105acb0c  neurolog
+ef712a21-dda2-4bc5-b558-9e5c0ddde565  psychiatra
+0e9a8fc2-be99-4dc0-a9e3-20385523469f  onkolog
+6667b1a5-730c-47fb-b623-bc26c0f5b2ac  urolog
+4e3b2ad6-2a82-4b41-ba3d-79ab26c12468  endokrynolog
+9f5b080b-a35d-40fd-a317-f1cf2dc1a6ba  gastroenterolog
+fd29b957-18fd-435d-ab6c-5e8e2a4a49e2  pulmonolog
+367fbcf5-f5a9-4e4e-bbd2-b31730a2636e  reumatolog
+e78f49e1-22d8-491d-8904-62a44dd14361  alergolog
+baab6a23-ee0c-4b3b-830b-ea3100308d9e  nefrolog
+3c72df84-120f-4251-80d1-94a0903be6db  neurochirurg
+3cd2fb3a-bf73-4b22-b108-b62a2a84dc17  kardiochirurg
+41ddb67b-5ab0-433c-bab2-9449878e1e40  chirurgia-plastyczna
+b6e68e4c-b93e-4a58-a1d9-ca27e8d2391a  rehabilitacja
+45dc0adf-c8f7-4572-bb41-6d7c2192a44b  medycyna-ratunkowa
+870aa853-0400-4df1-b08c-d43d3cdb6ffb  weterynarz
+
+Po przemianowaniu ten plik i skrypt można skasować — są tylko na czas
+przenoszenia.
+
+Sprawdź kadry arkuszem kontaktowym przed commitem: podmiana zdjęcia między
+zawodami to błąd, którego test nie złapie, bo nazwa pliku będzie poprawna.
