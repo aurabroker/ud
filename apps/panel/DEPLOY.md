@@ -31,7 +31,21 @@ Aplikacja (`apps/panel/`) buduje się przez `@sveltejs/adapter-cloudflare` do ka
 
 ---
 
-## B) Zmienne środowiskowe (Settings → Variables and Secrets)
+## B) Zmienne środowiskowe — DWA miejsca, nie jedno
+
+**Odkąd w `apps/panel/` leży `wrangler.toml`, panel Cloudflare przestał mieć
+znaczenie dla zmiennych jawnych.** Dokumentacja Pages: *„This file becomes the
+source of truth when used, meaning that you can not edit the same fields in the
+dashboard once you are using this file"* — a `vars` jest jednym z tych pól.
+
+Objaw, gdy się o tym zapomni: sekrety wpisane w panelu działają, a zmienne
+jawne wpisane obok wracają z `/health` jako `MISSING`. Bo sekretami wrangler
+nie zarządza, a zmiennymi jawnymi tak.
+
+| Rodzaj | Gdzie |
+|---|---|
+| jawne (`PUBLIC_*`, `PIN_TTL_HOURS`, `RESEND_FROM`) | **`wrangler.toml`, sekcja `[vars]`** |
+| sekrety | panel Cloudflare, typ **Secret** |
 
 Dla środowiska **Production** (i **Preview**, jeśli chcesz testować):
 
@@ -44,15 +58,15 @@ e-mailem, token obsługuje już tylko diagnostykę w Ustawieniach i sondę w `he
 | `RESEND_API_KEY` | resend.com → API Keys |
 | `PIN_COOKIE_SECRET` | dowolny losowy ciąg (mamy wygenerowany w `.env`) |
 
-### 📄 Plaintext
+### 📄 Jawne — w `wrangler.toml`, NIE w panelu
 | Nazwa | Wartość |
 |---|---|
 | `PUBLIC_SUPABASE_URL` | `https://kukvgsjrmrqtzhkszzum.supabase.co` |
-| `PUBLIC_SUPABASE_ANON_KEY` | (klucz anon — jak w `.env`) |
-| `PUBLIC_APP_URL` | `https://twoja-domena.pl` (adres produkcyjny) |
-| `SMSAPI_SENDER` | zatwierdzona nazwa nadawcy w SMSAPI |
-| `RESEND_FROM` | np. `Utrata Dochodu <oferty@twoja-domena.pl>` |
+| `PUBLIC_SUPABASE_ANON_KEY` | klucz anon (publiczny — widać go w źródle strony) |
+| `PUBLIC_APP_URL` | adres produkcyjny; `appUrl.js` odrzuca `*.pages.dev` |
+| `RESEND_FROM` | domyślnie `UtrataDochodu <info@utratadochodu.pl>` |
 | `PIN_TTL_HOURS` | `48` |
+| `SMSAPI_SENDER` | opcjonalna, tylko do diagnostyki |
 
 > Po dodaniu/zmianie zmiennych zrób **Retry deployment** — Cloudflare zaciąga env przy buildzie.
 

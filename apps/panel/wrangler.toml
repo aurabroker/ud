@@ -11,6 +11,36 @@ compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = ".svelte-kit/cloudflare"
 
-# Zmienne środowiskowe NIE są tu trzymane (sekrety!).
-# Ustaw je w panelu Cloudflare: Settings → Variables and Secrets,
-# albo: npx wrangler pages secret put <NAZWA>
+# ── Zmienne jawne ────────────────────────────────────────────────────────────
+#
+# UWAGA, to nie jest kwestia gustu: **od momentu, gdy ten plik istnieje, panel
+# Cloudflare przestaje mieć znaczenie dla zwykłych zmiennych.** Dokumentacja
+# Pages: „This file becomes the source of truth when used, meaning that you
+# can not edit the same fields in the dashboard once you are using this file."
+# `vars` jest jednym z tych pól.
+#
+# Kosztowało to jeden nieudany wieczór: sekrety wpisane w panelu działały,
+# a te same trzy zmienne jawne wpisane obok wracały z /health jako MISSING —
+# bo sekretami wrangler nie zarządza, a zmiennymi jawnymi tak.
+#
+# Te wartości nie są sekretami. Klucz anon i adres projektu Supabase widać
+# w źródle każdej strony, która z nich korzysta.
+[vars]
+PUBLIC_SUPABASE_URL = "https://kukvgsjrmrqtzhkszzum.supabase.co"
+PUBLIC_APP_URL = "https://app.utratadochodu.pl"
+PIN_TTL_HOURS = "48"
+RESEND_FROM = "UtrataDochodu <info@utratadochodu.pl>"
+
+# DO UZUPEŁNIENIA — wpisz klucz anon i odkomentuj. Zostawiony zakomentowany
+# celowo: zaślepka pokazałaby się w /health jako „set" i wysypała dopiero przy
+# logowaniu, a tak widać wprost jedną brakującą pozycję.
+# PUBLIC_SUPABASE_ANON_KEY = "eyJ..."
+
+# ── Sekrety ──────────────────────────────────────────────────────────────────
+#
+# Tych TU NIE MA i mieć nie może — plik jest w repozytorium. Wrangler nimi nie
+# zarządza, więc panel Cloudflare pozostaje dla nich właściwym miejscem
+# (Settings → Variables and Secrets, typ Secret):
+#
+#   SUPABASE_SERVICE_ROLE_KEY   RESEND_API_KEY
+#   PIN_COOKIE_SECRET           SMSAPI_TOKEN (opcjonalny)
