@@ -31,10 +31,11 @@ PUBLIC_APP_URL = "https://app.utratadochodu.pl"
 PIN_TTL_HOURS = "48"
 RESEND_FROM = "UtrataDochodu <info@utratadochodu.pl>"
 
-# DO UZUPEŁNIENIA — wpisz klucz anon i odkomentuj. Zostawiony zakomentowany
-# celowo: zaślepka pokazałaby się w /health jako „set" i wysypała dopiero przy
-# logowaniu, a tak widać wprost jedną brakującą pozycję.
-# PUBLIC_SUPABASE_ANON_KEY = "eyJ..."
+# Klucz anon (rola `anon`, projekt kukvgsjrmrqtzhkszzum, ważny do 2036-03-07).
+# Publiczny z założenia — trafia do każdej przeglądarki otwierającej stronę.
+# Dostęp ogranicza RLS, nie tajność tego ciągu. Sprawdź `role` w ładunku JWT,
+# zanim podmienisz: `service_role` w tym pliku to incydent, nie literówka.
+PUBLIC_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt1a3Znc2pybXJxdHpoa3N6enVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5MTI0NzYsImV4cCI6MjA4ODQ4ODQ3Nn0.wOB-4CJTcRksSUY7WD7CXEccTKNxPIVF8AT8hczS5zY"
 
 # ── Sekrety ──────────────────────────────────────────────────────────────────
 #
