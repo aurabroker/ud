@@ -8,8 +8,15 @@ Aplikacja (`apps/panel/`) buduje się przez `@sveltejs/adapter-cloudflare` do ka
 ## A) Podłączenie repo do Cloudflare Pages (raz)
 
 1. `dash.cloudflare.com` → **Workers & Pages** → **Create** → **Pages** → **Connect to Git**
-2. Wybierz repo `aurabroker/ud`, branch produkcyjny (np. `main`)
-3. Ustawienia builda:
+2. Wybierz repo `aurabroker/ud`. **Nazwa projektu: `udappnew`** — musi być równa
+   `name` w `wrangler.toml`, inaczej Cloudflare może odrzucić build. Stary projekt
+   `udapp` budował się z osobnego repozytorium `aurabroker/udapp` i zostaje
+   nietknięty, dopóki nowy nie zostanie zweryfikowany.
+3. **Gałąź produkcyjna:** dopóki przebudowa nie jest scalona, `main` NIE zadziała —
+   nie ma tam nawet katalogu `apps/`, a build kończy się na
+   `Cannot find cwd: /opt/buildhome/repo/apps/panel`. Ustaw gałąź roboczą
+   (Settings → Builds & deployments → Branch control) albo najpierw scal do `main`.
+4. Ustawienia builda:
    - **Root directory (advanced):** `apps/panel`
    - **Build command:** `pnpm install --frozen-lockfile && pnpm --filter @ud/panel build`
    - **Build output directory:** `.svelte-kit/cloudflare`
@@ -17,10 +24,10 @@ Aplikacja (`apps/panel/`) buduje się przez `@sveltejs/adapter-cloudflare` do ka
    workspace. `pnpm install` uruchomiony z `apps/panel` sam wychodzi w górę po
    `pnpm-workspace.yaml` — sprawdzone, dowiązanie do `packages/wniosek` zostaje.
    Dlatego `npm install` tu NIE zadziała: npm nie zrozumie `workspace:*`.
-4. **Compatibility flags:** dodaj `nodejs_compat` (Settings → Functions → Compatibility flags),
+5. **Compatibility flags:** dodaj `nodejs_compat` (Settings → Functions → Compatibility flags),
    dla środowiska **Production** i **Preview**. Bez tego unpdf/Web Crypto nie zadziała.
    (Jest też w `wrangler.toml`, ale flagę warto ustawić też w panelu.)
-5. Zapisz i uruchom pierwszy deploy.
+6. Zapisz i uruchom pierwszy deploy.
 
 ---
 

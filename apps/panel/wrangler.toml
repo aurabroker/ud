@@ -1,6 +1,12 @@
-# Cloudflare Pages — konfiguracja projektu udapp (SvelteKit).
+# Cloudflare Pages — konfiguracja projektu `udappnew` (SvelteKit).
+#
+# `name` ma być RÓWNE nazwie projektu w panelu Cloudflare. Stare `udapp`
+# zostało po repozytorium aurabroker/udapp, z którego panel został wciągnięty
+# do tego monorepo; nowy projekt Pages buduje się z aurabroker/ud i nazywa
+# `udappnew`.
+#
 # nodejs_compat jest WYMAGANE (unpdf / Web Crypto / bufory).
-name = "udapp"
+name = "udappnew"
 compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = ".svelte-kit/cloudflare"
