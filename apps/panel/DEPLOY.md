@@ -13,6 +13,10 @@ Aplikacja (`apps/panel/`) buduje się przez `@sveltejs/adapter-cloudflare` do ka
    - **Root directory (advanced):** `apps/panel`
    - **Build command:** `pnpm install --frozen-lockfile && pnpm --filter @ud/panel build`
    - **Build output directory:** `.svelte-kit/cloudflare`
+   Panel zależy od `@ud/wniosek` przez `workspace:*`, więc instalacja musi widzieć
+   workspace. `pnpm install` uruchomiony z `apps/panel` sam wychodzi w górę po
+   `pnpm-workspace.yaml` — sprawdzone, dowiązanie do `packages/wniosek` zostaje.
+   Dlatego `npm install` tu NIE zadziała: npm nie zrozumie `workspace:*`.
 4. **Compatibility flags:** dodaj `nodejs_compat` (Settings → Functions → Compatibility flags),
    dla środowiska **Production** i **Preview**. Bez tego unpdf/Web Crypto nie zadziała.
    (Jest też w `wrangler.toml`, ale flagę warto ustawić też w panelu.)
@@ -28,7 +32,8 @@ Dla środowiska **Production** (i **Preview**, jeśli chcesz testować):
 | Nazwa | Skąd |
 |---|---|
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase → Project Settings → API → `service_role` |
-| `SMSAPI_TOKEN` | Panel SMSAPI → Ustawienia → Tokeny OAuth |
+| `SMSAPI_TOKEN` | Panel SMSAPI → Tokeny OAuth. **Opcjonalne** — oferty idą samym
+e-mailem, token obsługuje już tylko diagnostykę w Ustawieniach i sondę w `health.js`. |
 | `RESEND_API_KEY` | resend.com → API Keys |
 | `PIN_COOKIE_SECRET` | dowolny losowy ciąg (mamy wygenerowany w `.env`) |
 
@@ -46,7 +51,7 @@ Dla środowiska **Production** (i **Preview**, jeśli chcesz testować):
 
 Alternatywnie z terminala:
 ```bash
-cd app
+cd apps/panel
 npx wrangler pages secret put SUPABASE_SERVICE_ROLE_KEY
 npx wrangler pages secret put SMSAPI_TOKEN
 # itd.
@@ -75,7 +80,9 @@ npx wrangler pages secret put SMSAPI_TOKEN
 2. „+ Nowa oferta" → wgraj PDF Leadenhall i/lub CEU → sprawdź sparsowane warianty
    (właściwe OWU podepnie się automatycznie po symbolu).
 3. Uzupełnij email + telefon klienta → „Wyślij klientowi".
-4. Otwórz link z maila (lub skopiowany) w trybie incognito → wpisz PIN z SMS → oferta się odblokuje.
+4. Otwórz link z maila (lub skopiowany) w trybie incognito → wpisz **4 ostatnie cyfry
+   PESEL-u klienta** → oferta się odblokuje. SMS-ów nie wysyłamy; ten sam kod otwiera
+   pobrane pliki PDF. Wysyłka nie odbędzie się, jeśli klient nie ma PESEL-u w kartotece.
 5. Pobierz PDF/OWU, zadaj pytanie, wybierz wariant — sprawdź, czy agent dostał maile.
 
 ---
@@ -83,10 +90,10 @@ npx wrangler pages secret put SMSAPI_TOKEN
 ## Lokalny development
 
 ```bash
-cd app
+cd apps/panel
 cp .env.example .env      # i uzupełnij (public values już są w .env)
-npm install
-npm run dev               # http://localhost:5173
+pnpm install              # z katalogu apps/panel; pnpm sam znajdzie workspace wyżej
+pnpm dev                  # http://localhost:5173
 ```
 Bez kluczy API: SMS/email logują się do konsoli, a PIN testowy pokazuje się agentowi
 w panelu po „Wyślij" (do przejścia całego flow bez realnej wysyłki).
