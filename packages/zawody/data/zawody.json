@@ -4336,7 +4336,7 @@
     "rodzaj": "m"
   },
   {
-    "slug": "nail-artist",
+    "slug": "stylistka-paznokci",
     "nazwa": "Stylistka Paznokci",
     "kategoria": "Beauty / Uroda",
     "swiadczenieDzienne": 300,
@@ -4365,7 +4365,8 @@
       "mnoga": "Stylistki Paznokci",
       "mnogaDop": "Stylistek Paznokci"
     },
-    "rodzaj": "z"
+    "rodzaj": "z",
+    "staryAdres": "nail-artist"
   },
   {
     "slug": "nauczyciel",

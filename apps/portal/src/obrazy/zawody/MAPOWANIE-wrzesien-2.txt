@@ -1,47 +1,53 @@
-MAPOWANIE — partia wrzesniowa 2: Edukacja, Gastronomia, Stomatologia, Farmacja + najpopularniejsze
+MAPOWANIE — partia wrzesniowa 2
+Edukacja, Gastronomia, Stomatologia, Farmacja (cztery kategorie bez ani jednego
+wlasnego zdjecia) oraz zawody najczesciej spotykane w kartotekach klientow.
 
-Zamowione 2026-09-21 na Artliscie, model Seedream 5.0 T2I 4K (modelId 2354), kadr 21:9,
-po jednym ujeciu na zawod, 100 kredytow za ujecie — razem 29 ujec / 2900 kredytow.
+Zamowione 2026-09-21, Artlist, Seedream 5.0 T2I 4K (modelId 2354), kadr 21:9,
+jedno ujecie na zawod, 100 kredytow za ujecie.
 
-Pobrany plik gubi nazwe (`_Seedream_50_<liczba>.jpg`), wiec dopasowanie idzie przez
-identyfikator generacji: `get_generation_status` na nim zwraca gotowy obraz.
-Plik zapisz jako <slug>.jpg w src/obrazy/zawody/.
+Prompty pisane BEZ style kitu: kit "UtrataDochodu.pl — zdjecia kategorii" ma
+w tekscie "never smiling at the camera", czyli wytyczna, ktora wyprodukowala
+odrzucony pierwszy zestaw. Kazdy prompt niesie za to wprost: kontakt wzrokowy
+i szczery usmiech, uroda srodkowoeuropejska, f/5.6 z czytelnym tlem, bohater po
+PRAWEJ z pusta lewa tercja, palete #1BAEE5 / #CBE9F8 / #F4FBFE, opis ekspozycji
+("expose about a third of a stop under..."), plec/wiek/wlosy kazdej osoby, zero
+tekstu w kadrze i rekwizyt rozpoznawczy — bo bez niego pieciu dentystow w tych
+samych fartuchach nie da sie od siebie odroznic.
 
-slug                      generationId                          kategoria
-------------------------------------------------------------------------------------------
-barista                   01a0c5d8-5fac-7fbf-ad9a-7c6e53db157f  Gastronomia
-bibliotekarz              01a0c5d8-711d-733a-b4aa-bd445c80c0f9  Edukacja
-coach                     01a0c5d8-8067-78f4-9bdd-b318152a0f43  Edukacja
-cukiernik                 01a0c5d8-8e22-73f4-bf17-715886ac946d  Gastronomia
-diagnosta                 01a0c5d8-9e8d-78ad-b30d-a23b050946a3  Farmacja
-endodontolog              01a0c5d8-afe0-74fc-acd0-2a9ac7582e4f  Stomatologia
-farmaceuta-aptekarz       01a0c5d8-bdbe-7995-8613-9da6b38106ac  Farmacja
-farmaceuta                01a0c5d8-cc60-7e11-9baa-a9791dbceaa5  Farmacja
-instruktor-jazdy          01a0c5d9-0b09-75d5-b9ca-c4cd6216e556  Edukacja
-kucharz                   01a0c5d9-1992-7626-abe4-a7bc44ef53f9  Gastronomia
-lektor                    01a0c5d9-2ab0-7fc6-b4fb-2cf369b17c18  Edukacja
-menedzer-restauracji      01a0c5d9-3943-7aff-8cbd-086107dbd48a  Gastronomia
-nauczyciel                01a0c5d9-4889-7530-9357-924478261ea8  Edukacja
-ortodonta                 01a0c5d9-594d-7f37-8dcd-aacb0265ac6c  Stomatologia
-pedagog                   01a0c5d9-67a5-7aae-9605-3a6ca39689aa  Edukacja
-periodontolog             01a0c5d9-772c-77a4-b90b-7cbd81b93a7b  Stomatologia
-protetyk                  01a0c5d9-c005-74ea-83bb-d6b8037a3029  Stomatologia
-stomatolog                01a0c5d5-cfc8-7685-a628-0213b455e1b7  Stomatologia
-szef-kuchni               01a0c5d9-d035-76d1-ab81-ae26f9214068  Gastronomia
-technik-farmaceutyczny    01a0c5d9-dfd1-7f2a-b4bd-ee781bb1be96  Farmacja
-technolog-zywnosci        01a0c5d9-ef00-7530-8c8e-bf920611078e  Gastronomia
-trener-personalny         01a0c5d9-fe81-7961-aa7e-a324fb847792  Edukacja
-wykladowca                01a0c5da-0e32-754d-9c94-03f6fefc758b  Edukacja
-nail-artist               01a0c5da-1ee9-773c-8190-0a3edd5a8143  Beauty / Uroda  [popularne]
-psycholog                 01a0c5da-2ea7-747c-a805-ffe9b9a54536  Pielęgniarstwo  [popularne]
-ai-engineer               01a0c5da-3fd4-7029-8912-f40a485a3acb  IT / Tech  [popularne]
-fizjoterapeuta            01a0c5da-5032-7b3e-be08-27f9e40e5a93  Pielęgniarstwo  [popularne]
-project-manager           01a0c5da-608d-7368-ac20-27d78c2f0c4f  Biznes  [popularne]
-przedstawiciel-handlowy   01a0c5da-7052-7920-8ad3-9f3e458d1708  Biznes  [popularne]
+Jasnosc zmierzona po wgraniu (sharp().stats(), srednia z channels[0..2].mean):
+partia ma 212, przy 201 dla zestawu, ktory juz lezal w repo, i ~171 dla pierwszej
+serii. Opis ekspozycji ("expose about a third of a stop under...") zadzialal
+slabiej niz przy partii Prawo/Finanse/IT — tam dal 193. Najciemniejsze ujecia:
+instruktor-jazdy 186, ai-engineer 194; najjasniejsze: farmaceuta, diagnosta
+i protetyk po 222 — czyli wszystkie trzy w bialych fartuchach na bialym tle.
+Przy kolejnej partii z bielami w kadrze trzeba docisnac ekspozycje mocniej.
 
-Prompty: bez style kitu (kit "UtrataDochodu.pl — zdjecia kategorii" ma w tekscie
-"never smiling at the camera" — to wytyczna, ktora zabila pierwszy zestaw).
-Kazdy prompt niesie: kontakt wzrokowy + szczery usmiech, uroda srodkowoeuropejska,
-f/5.6 z czytelnym tlem, bohater po PRAWEJ i pusta lewa tercja, paleta #1BAEE5 / #CBE9F8 /
-#F4FBFE, opis ekspozycji ("expose about a third of a stop under..."), plec/wiek/wlosy
-kazdej osoby, zero tekstu w kadrze oraz rekwizyt rozpoznawczy dla kazdej specjalizacji.
+f615e358-aea6-478b-b7c9-e138defcc553  stomatolog   # NIE WGRANE — ujecie probne, pobierz z panelu
+9b65ba99-a77a-4a9e-b89b-b0f9b2c9056a  barista
+533e6fe9-ecc7-4257-a22e-ae1cc4cc82d5  bibliotekarz
+c87beecc-e67b-49b1-a116-6c141733205e  coach
+c6acd260-c01e-4f9e-8f8b-cd82bd7ff5e5  cukiernik
+8ff66fe8-9c5f-40ce-bbc1-55a0d72ee171  diagnosta
+48eea421-237c-495e-9f3d-b4a980958d27  endodontolog
+b89d2f2c-675a-4e9c-8dfa-e2e191ea119e  farmaceuta-aptekarz
+c649be0d-e0d8-4054-9591-f3b6ecb005c1  farmaceuta
+9cd5d094-9e93-457d-9887-121059eefbd0  instruktor-jazdy
+84574cec-bb0e-4951-bb13-aee0b3772a5e  kucharz
+5278b268-6fce-459f-8126-3ebe1f1166a4  lektor
+9248b72c-3c18-4775-9ef3-5cdf7a01974a  menedzer-restauracji
+afd412fd-1c2a-40ad-bae4-318105335ffe  nauczyciel
+e834f230-d38f-4326-b359-6ca4aabc616d  ortodonta
+eab82979-ae89-47ea-b25e-7726ae17c4ff  pedagog
+f78a5906-36c4-4ef6-a8a1-676245ed5ef6  periodontolog
+cbe7c6d0-e860-4a75-b27a-4a4bd4969083  protetyk
+ff1e0908-31c1-42af-944d-7bf5eb8adf06  szef-kuchni
+95f6335a-7607-40e7-8a5d-3deac75ed593  technik-farmaceutyczny
+003cd128-ee47-4357-9e49-f0ee697671cc  technolog-zywnosci
+1435495f-1cc1-4825-9899-85288afb3571  trener-personalny
+e00bf0fe-371a-472e-9a91-6c4aaabd7e2f  wykladowca
+214af858-cb79-4792-81be-121365a137f3  stylistka-paznokci
+bb8f2b6b-1b03-4ebc-8296-416ec7d5061b  psycholog
+d2cab074-a66c-4467-bbe2-c61ab82aafc7  ai-engineer
+16260896-9a81-48a7-ac58-7441d0b03981  fizjoterapeuta
+d68495a5-2bf1-4691-8105-3a83d90b1415  project-manager
+eb088d4f-1a79-4e57-b663-edc3b7ae6bcc  przedstawiciel-handlowy

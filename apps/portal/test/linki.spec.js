@@ -375,7 +375,7 @@ test('pas nagłówkowy przycina kadr od góry, nie od środka', () => {
    * więc test obejmuje wszystkie trzy rodzaje pasa.
    */
   const PASY = [
-    'farmaceuta/index.html',        // zawód dziedziczący zdjęcie kategorii
+    'agent-celny/index.html',       // zawód dziedziczący zdjęcie kategorii
     'chirurg/index.html',           // zawód z własnym zdjęciem
     'zawody/farmacja/index.html',   // strona kategorii
   ];
