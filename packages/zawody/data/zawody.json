@@ -4337,7 +4337,7 @@
   },
   {
     "slug": "nail-artist",
-    "nazwa": "Nail Artist",
+    "nazwa": "Stylistka Paznokci",
     "kategoria": "Beauty / Uroda",
     "swiadczenieDzienne": 300,
     "bezUbezpieczenia": "0 zł (brak wizyt = brak przychodu)",
@@ -4356,16 +4356,16 @@
       }
     ],
     "odmiana": {
-      "mianownik": "Nail Artist",
-      "dopelniacz": "Nail Artysty",
-      "celownik": "Nail Artyście",
-      "biernik": "Nail Artystę",
-      "narzednik": "Nail Artystą",
-      "miejscownik": "Nail Artyście",
-      "mnoga": "Nail Artyści",
-      "mnogaDop": "Nail Artystów"
+      "mianownik": "Stylistka Paznokci",
+      "dopelniacz": "Stylistki Paznokci",
+      "celownik": "Stylistce Paznokci",
+      "biernik": "Stylistkę Paznokci",
+      "narzednik": "Stylistką Paznokci",
+      "miejscownik": "Stylistce Paznokci",
+      "mnoga": "Stylistki Paznokci",
+      "mnogaDop": "Stylistek Paznokci"
     },
-    "rodzaj": "m"
+    "rodzaj": "z"
   },
   {
     "slug": "nauczyciel",

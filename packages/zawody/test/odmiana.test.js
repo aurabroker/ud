@@ -79,6 +79,9 @@ const PRZYPADKI_WZORCOWE = [
   ['Data Scientist',        'Data Scientista',          'Data Scientistem',         'Data Scientiści'],
   ['Cloud Architect',       'Cloud Architecta',         'Cloud Architectem',        'Cloud Architekci'],
   ['Nail Artist',           'Nail Artysty',             'Nail Artystą',             'Nail Artyści'],
+
+  // Przydawka w dopełniaczu przy głowie rodzaju żeńskiego.
+  ['Stylistka Paznokci',    'Stylistki Paznokci',       'Stylistką Paznokci',       'Stylistki Paznokci'],
   ['UX Designer',           'UX Designera',             'UX Designerem',            'UX Designerzy'],
 
   // Apozycja — odmieniają się oba człony.
@@ -114,6 +117,7 @@ test('rodzaj gramatyczny', () => {
   assert.equal(rodzaj('Programista'), MESKI);
   assert.equal(rodzaj('Pielęgniarka Operacyjna'), ZENSKI);
   assert.equal(rodzaj('Położna'), ZENSKI);
+  assert.equal(rodzaj('Stylistka Paznokci'), ZENSKI);
 });
 
 test('żadna forma nie jest pusta ani nie gubi wyrazów', () => {

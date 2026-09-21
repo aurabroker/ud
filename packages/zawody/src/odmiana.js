@@ -157,7 +157,7 @@ const PRZYDAWKI_STALE = new Set([
   'Budowlanego', 'Budowy', 'Chorób', 'Cyberbezpieczeństwa', 'Danych', 'Firmy',
   'Hiperbarycznej', 'Jazdy', 'Języków', 'Kamery', 'Kuchni', 'Kultury',
   'Marketingu', 'Medycyny', 'Nadzoru', 'Nieruchomości', 'Nuklearnej', 'Ochrony',
-  'Oprogramowania', 'Pracy', 'Radiologii', 'Ratunkowej', 'Rehabilitacji',
+  'Oprogramowania', 'Paznokci', 'Pracy', 'Radiologii', 'Ratunkowej', 'Rehabilitacji',
   'Restauracji', 'Rodzinnej', 'Sieci', 'Sportowej', 'Statku', 'Sądowej',
   'Tropikalnej', 'Wnętrz', 'Zakaźnych', 'Żywności', 'Zasobów', 'Ludzkich',
 ]);
@@ -197,7 +197,7 @@ export const ODPRZYMIOTNIKOWE = new Set(['Księgowy', 'Chorąży', 'Woźny']);
 
 /** Zawody rodzaju żeńskiego — reszta jest traktowana jako męskoosobowa. */
 export const ZENSKIE_ZAWODY = new Set([
-  'Pielęgniarka', 'Położna', 'Kosmetyczka', 'Higienistka',
+  'Pielęgniarka', 'Położna', 'Kosmetyczka', 'Higienistka', 'Stylistka',
 ]);
 
 /* ── Silnik ──────────────────────────────────────────────────────────────── */

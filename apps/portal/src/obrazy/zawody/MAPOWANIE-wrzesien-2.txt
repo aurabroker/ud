@@ -1,0 +1,47 @@
+MAPOWANIE — partia wrzesniowa 2: Edukacja, Gastronomia, Stomatologia, Farmacja + najpopularniejsze
+
+Zamowione 2026-09-21 na Artliscie, model Seedream 5.0 T2I 4K (modelId 2354), kadr 21:9,
+po jednym ujeciu na zawod, 100 kredytow za ujecie — razem 29 ujec / 2900 kredytow.
+
+Pobrany plik gubi nazwe (`_Seedream_50_<liczba>.jpg`), wiec dopasowanie idzie przez
+identyfikator generacji: `get_generation_status` na nim zwraca gotowy obraz.
+Plik zapisz jako <slug>.jpg w src/obrazy/zawody/.
+
+slug                      generationId                          kategoria
+------------------------------------------------------------------------------------------
+barista                   01a0c5d8-5fac-7fbf-ad9a-7c6e53db157f  Gastronomia
+bibliotekarz              01a0c5d8-711d-733a-b4aa-bd445c80c0f9  Edukacja
+coach                     01a0c5d8-8067-78f4-9bdd-b318152a0f43  Edukacja
+cukiernik                 01a0c5d8-8e22-73f4-bf17-715886ac946d  Gastronomia
+diagnosta                 01a0c5d8-9e8d-78ad-b30d-a23b050946a3  Farmacja
+endodontolog              01a0c5d8-afe0-74fc-acd0-2a9ac7582e4f  Stomatologia
+farmaceuta-aptekarz       01a0c5d8-bdbe-7995-8613-9da6b38106ac  Farmacja
+farmaceuta                01a0c5d8-cc60-7e11-9baa-a9791dbceaa5  Farmacja
+instruktor-jazdy          01a0c5d9-0b09-75d5-b9ca-c4cd6216e556  Edukacja
+kucharz                   01a0c5d9-1992-7626-abe4-a7bc44ef53f9  Gastronomia
+lektor                    01a0c5d9-2ab0-7fc6-b4fb-2cf369b17c18  Edukacja
+menedzer-restauracji      01a0c5d9-3943-7aff-8cbd-086107dbd48a  Gastronomia
+nauczyciel                01a0c5d9-4889-7530-9357-924478261ea8  Edukacja
+ortodonta                 01a0c5d9-594d-7f37-8dcd-aacb0265ac6c  Stomatologia
+pedagog                   01a0c5d9-67a5-7aae-9605-3a6ca39689aa  Edukacja
+periodontolog             01a0c5d9-772c-77a4-b90b-7cbd81b93a7b  Stomatologia
+protetyk                  01a0c5d9-c005-74ea-83bb-d6b8037a3029  Stomatologia
+stomatolog                01a0c5d5-cfc8-7685-a628-0213b455e1b7  Stomatologia
+szef-kuchni               01a0c5d9-d035-76d1-ab81-ae26f9214068  Gastronomia
+technik-farmaceutyczny    01a0c5d9-dfd1-7f2a-b4bd-ee781bb1be96  Farmacja
+technolog-zywnosci        01a0c5d9-ef00-7530-8c8e-bf920611078e  Gastronomia
+trener-personalny         01a0c5d9-fe81-7961-aa7e-a324fb847792  Edukacja
+wykladowca                01a0c5da-0e32-754d-9c94-03f6fefc758b  Edukacja
+nail-artist               01a0c5da-1ee9-773c-8190-0a3edd5a8143  Beauty / Uroda  [popularne]
+psycholog                 01a0c5da-2ea7-747c-a805-ffe9b9a54536  Pielęgniarstwo  [popularne]
+ai-engineer               01a0c5da-3fd4-7029-8912-f40a485a3acb  IT / Tech  [popularne]
+fizjoterapeuta            01a0c5da-5032-7b3e-be08-27f9e40e5a93  Pielęgniarstwo  [popularne]
+project-manager           01a0c5da-608d-7368-ac20-27d78c2f0c4f  Biznes  [popularne]
+przedstawiciel-handlowy   01a0c5da-7052-7920-8ad3-9f3e458d1708  Biznes  [popularne]
+
+Prompty: bez style kitu (kit "UtrataDochodu.pl — zdjecia kategorii" ma w tekscie
+"never smiling at the camera" — to wytyczna, ktora zabila pierwszy zestaw).
+Kazdy prompt niesie: kontakt wzrokowy + szczery usmiech, uroda srodkowoeuropejska,
+f/5.6 z czytelnym tlem, bohater po PRAWEJ i pusta lewa tercja, paleta #1BAEE5 / #CBE9F8 /
+#F4FBFE, opis ekspozycji ("expose about a third of a stop under..."), plec/wiek/wlosy
+kazdej osoby, zero tekstu w kadrze oraz rekwizyt rozpoznawczy dla kazdej specjalizacji.
