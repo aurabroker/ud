@@ -14,7 +14,7 @@
   import {
     KROKI, RYZYKA, KLAUZULE_NW, PYTANIA_MEDYCZNE, AKTYWNOSCI_RYZYKOWNE,
     FORMY_ZATRUDNIENIA, FORMY_OPODATKOWANIA, LIMIT_DOCHODU,
-    HEALTH_SURVEY_GROUPS, HEALTH_SURVEY_THRESHOLD,
+    HEALTH_SURVEY_GROUPS, HEALTH_SURVEY_ITEMS, HEALTH_SURVEY_THRESHOLD,
     sprawdzKrok, ankietaRozszerzona, doWysylki, klauzuleDostepne, PROG_KLAUZUL_NW,
   } from '@ud/wniosek';
 
@@ -28,6 +28,12 @@
     ...Object.fromEntries(RYZYKA.map((r) => [r.klucz, false])),
     ...Object.fromEntries(RYZYKA.map((r) => [r.poleSumy, ''])),
     ...Object.fromEntries(KLAUZULE_NW.map((k) => [k.klucz, 0])),
+    // Pozycje ankiety rozszerzonej startują PUSTE, nie na „nie". Deklaracja
+    // zdrowotna wstępnie odznaczona na „nie" to oświadczenie złożone za klienta
+    // — walidacja wymaga świadomej odpowiedzi na każdą pozycję. Cztery klucze
+    // wspólne z siódemką poniżej dostają jej domyślne „no”, bo to jedno pytanie.
+    ...Object.fromEntries(HEALTH_SURVEY_ITEMS.map((i) => [i.key, ''])),
+    ...Object.fromEntries(HEALTH_SURVEY_ITEMS.map((i) => [`${i.key}_notes`, ''])),
     ...Object.fromEntries(PYTANIA_MEDYCZNE.map((p) => [p.klucz, 'no'])),
     ...Object.fromEntries(PYTANIA_MEDYCZNE.map((p) => [`${p.klucz}_notes`, ''])),
     ...Object.fromEntries(AKTYWNOSCI_RYZYKOWNE.map((a) => [a.klucz, false])),
@@ -43,6 +49,21 @@
 
   const idKroku = $derived(KROKI[krok].id);
   const rozszerzona = $derived(ankietaRozszerzona(dane));
+
+  /*
+   * Pięć pozycji ankiety rozszerzonej pyta o to samo co podstawowa siódemka:
+   * cztery pod tym samym kluczem (serce, cukrzyca, żołądek, neurologia), więc
+   * `bind:group` trzyma je w jednym stanie i odpowiedź jest z definicji spójna.
+   * Drugiego pola na opis dla nich nie renderujemy — byłoby związane z tą samą
+   * zmienną co pole wyżej i klient przepisywałby sobie własny tekst.
+   *
+   * Piąty dubel — „Układ ruchu" (`med_locomotor`) wobec podstawowego
+   * `med_bones` — ma inny klucz, więc tego mechanizmu nie łapie i opis zbiera
+   * osobno. Funkcja brzegowa mapuje `med_locomotor` na kolumnę `med_bones`,
+   * więc dane trafiają gdzie trzeba; to zdublowane pytanie jest kwestią
+   * redakcji listy, nie zapisu, i nie zmieniam go po cichu przy okazji.
+   */
+  const KLUCZE_PODSTAWOWE = new Set(PYTANIA_MEDYCZNE.map((p) => p.klucz));
   const limit = $derived(LIMIT_DOCHODU[dane.employmentType] ?? 0.8);
   const klauzule = $derived(klauzuleDostepne(dane));
 
@@ -432,17 +453,34 @@
                 </legend>
                 <div class="flex flex-col gap-2.5">
                   {#each grupa.items as poz}
-                    <div class="border border-linia p-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 justify-between">
-                      <span class="text-[15px] leading-relaxed">{poz.label}</span>
-                      <div class="flex gap-5 shrink-0">
-                        {#each [['yes', 'Tak'], ['no', 'Nie']] as [w, e]}
-                          <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name={poz.key} value={w} bind:group={dane[poz.key]}
-                                   class="w-4 h-4 accent-akcent-ciemny">
-                            <span class="text-[15px]">{e}</span>
-                          </label>
-                        {/each}
+                    <div class="border border-linia p-4" data-pole={poz.key}
+                         class:border-alarm={!!bledy[poz.key]}>
+                      <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 justify-between">
+                        <span class="text-[15px] leading-relaxed">{poz.label}</span>
+                        <div class="flex gap-5 shrink-0">
+                          {#each [['yes', 'Tak'], ['no', 'Nie']] as [w, e]}
+                            <label class="flex items-center gap-2 cursor-pointer">
+                              <input type="radio" name={`hs_${poz.key}`} value={w} bind:group={dane[poz.key]}
+                                     class="w-4 h-4 accent-akcent-ciemny">
+                              <span class="text-[15px]">{e}</span>
+                            </label>
+                          {/each}
+                        </div>
                       </div>
+                      {#if bledy[poz.key]}
+                        <span class="block text-[13px] text-alarm mt-2">{bledy[poz.key]}</span>
+                      {/if}
+                      {#if dane[poz.key] === 'yes' && !KLUCZE_PODSTAWOWE.has(poz.key)}
+                        <label class="block mt-4">
+                          <span class="block text-sm font-semibold mb-1.5">Opisz krótko, czego dotyczy</span>
+                          <textarea name={`hsd_${poz.key}`} rows="2" bind:value={dane[`${poz.key}_notes`]}
+                                    aria-invalid={!!bledy[`${poz.key}_notes`]}
+                                    class="w-full border border-linia p-3 bg-tlo resize-none focus:border-akcent"></textarea>
+                          {#if bledy[`${poz.key}_notes`]}
+                            <span class="block text-[13px] text-alarm mt-1.5">{bledy[`${poz.key}_notes`]}</span>
+                          {/if}
+                        </label>
+                      {/if}
                     </div>
                   {/each}
                 </div>

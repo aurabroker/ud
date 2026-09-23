@@ -477,6 +477,80 @@ z bazy klauzuli nie ma wcale.
 
 ---
 
+## Ankieta rozszerzona — kontrakt z funkcją brzegową to `hs_<klucz>`
+
+Przy sumie „trwałej niezdolności" **powyżej 1 000 000 zł** kreator pokazuje
+dodatkowe dwadzieścia pytań (`HEALTH_SURVEY_GROUPS` w `packages/wniosek/src/ankieta.js`).
+
+**Funkcja brzegowa czyta je WYŁĄCZNIE z pól `hs_<klucz>` o wartości `tak`/`nie`,
+a szczegóły z `hsd_<klucz>`.** Inne nazwy są dla niej niewidzialne. Tak samo
+wysyła ankietę panel przy ręcznym wprowadzaniu klienta — to jeden kontrakt,
+nie dwa.
+
+Co się dzieje, gdy kreator wyśle gołe `weight_change: 'yes'`:
+
+1. `form-submit` zbiera ankietę po prefiksie `hs_` → zero trafień.
+2. Bramka „suma powyżej progu i pusta ankieta" → **HTTP 400** z komunikatem
+   „wymagana jest pełna ankieta medyczna. Odśwież formularz i wypełnij
+   wszystkie pytania".
+3. Klient, który właśnie wypełnił dwadzieścia pytań, dostaje polecenie
+   wypełnienia ich jeszcze raz. **Wniosku nie da się złożyć** — i to przy
+   najwyższych sumach, czyli najdroższych wnioskach.
+
+Formularz wygląda przy tym na sprawny na każdym ekranie, więc żaden test
+oparty na DOM-ie tego nie łapie. Pilnuje tego `test/wniosek-ankieta.spec.js`,
+który czyta kontrakt **z pliku funkcji brzegowej**, a nie z przepisanej kopii —
+kopia rozjechałaby się przy pierwszej zmianie po tamtej stronie i test
+pilnowałby własnego wyobrażenia zamiast produkcji.
+
+### Czego nie wolno dopisać do `POLA_LOGICZNE`
+
+Ośmiu nazw ze starego formularza: `weightChange`, `takesMeds`,
+`pendingDiagnosis`, `disabilityCongenital`, `smoker`, `eventHospitalization`,
+`eventSickLeave30`, `eventFurtherDiagnosis`.
+
+Nowy kreator nie ma pól o tych nazwach — pyta o to samo pod kluczami
+`weight_change`, `takes_meds` i tak dalej. Dopóki stały w `POLA_LOGICZNE`,
+normalizacja w `doWysylki()` wpisywała im `"No"`, bo pola o takiej nazwie
+w stanie kreatora nie ma. Funkcja czyta `body.weightChange ?? body.weight_change`,
+a `??` przepuszcza `"No"` — to nie jest `null` ani `undefined` — i po prawdziwą
+odpowiedź nigdy nie sięgała. Klient zaznaczał „tak" przy hospitalizacji,
+a do bazy szło „nie".
+
+**Fałszywe „nie" na deklaracji zdrowotnej jest gorsze niż puste pole.** Puste
+underwriter dopyta; „nie" przyjmie, a przy szkodzie zrobi się z niego zarzut
+zatajenia.
+
+Z tego samego powodu pozycje ankiety **startują puste, nie na „nie"**,
+a walidacja wymaga świadomej odpowiedzi na każdą z dwudziestu. Wyjątkiem są
+cztery klucze wspólne z podstawową siódemką (`med_heart`, `med_diabetes`,
+`med_stomach`, `med_neuro`) — to jedno pytanie zadane w dwóch miejscach,
+związane jednym stanem, więc dziedziczy domyślne „no" stamtąd i nie zbiera
+drugiego opisu.
+
+### Siedem pozycji bez własnej kolumny — to nie jest brak
+
+`med_thyroid`, `med_urinary`, `med_respiratory`, `med_oncology`,
+`med_spine_degenerative`, `med_allergy`, `med_other` nie mają kolumny boolean
+i mieć nie muszą. Komplet dwudziestu odpowiedzi razem z opisami ląduje
+w `ud_clients.form_data.health_survey`; kolumny płaskie to skrót dla
+underwritera na trzynaście pozycji, które miały je wcześniej.
+
+Mapa `HEALTH_SURVEY_COLUMNS` w funkcji brzegowej trzyma jeden wyjątek:
+`med_locomotor` → `med_bones`. **Nie zmieniaj klucza `med_locomotor`
+w `ankieta.js` na `med_bones`** — mapa go wtedy nie rozpozna i ankieta straci
+pierwszeństwo nad odpowiedzią z podstawowej siódemki.
+
+### Funkcja brzegowa w repozytorium bywa starsza niż wdrożona
+
+Wdrożona wersja `form-submit` to **v20**. Zanim cokolwiek wdrożysz
+z `supabase/functions/`, porównaj z produkcją przez `get_edge_function` —
+w repozytorium leżała kopia sprzed v20, bez `form_data`, bez zbiórki `hs_*`,
+bez obu bramek walidacyjnych i z `yesNo()`, który nie przyjmował małych liter.
+Jej wdrożenie skasowałoby to wszystko na produkcji.
+
+---
+
 ## Panel — kod dostępu do oferty to 4 ostatnie cyfry PESEL-u
 
 **SMS-ów nie wysyłamy.** Klient dostaje sam e-mail z linkiem, a hasłem są

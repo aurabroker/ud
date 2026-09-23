@@ -12,7 +12,9 @@
  * ankietę medyczną. W starym formularzu było odwrotnie — pytanie wyzwalające
  * padało po tym, co wyzwala.
  */
-import { HEALTH_SURVEY_THRESHOLD, surveyRequired, parseSum } from './ankieta.js';
+import {
+  HEALTH_SURVEY_THRESHOLD, HEALTH_SURVEY_ITEMS, surveyRequired, parseSum,
+} from './ankieta.js';
 
 export { HEALTH_SURVEY_THRESHOLD, surveyRequired, parseSum };
 
@@ -251,6 +253,25 @@ export function sprawdzKrok(krok, dane) {
         bledy[`${p.klucz}_notes`] = 'Przy odpowiedzi „tak" opisz krótko, czego dotyczy.';
       }
     }
+    // Ankieta rozszerzona pyta o te same rzeczy co panel przy ręcznym wprowadzaniu,
+    // a panel wymaga opisu przy każdym „tak". Samo „tak" przy pozycji „inna,
+    // niewymieniona wcześniej choroba" nie jest informacją — underwriter i tak
+    // odbije wniosek, tylko dzień później i przez agenta.
+    if (ankietaRozszerzona(dane)) {
+      for (const poz of HEALTH_SURVEY_ITEMS) {
+        // Brak odpowiedzi musi zatrzymać wniosek tutaj. Gdyby przeszedł dalej,
+        // doWysylki() wystawiłby „nie" — bo puste nie jest „tak" — i klient
+        // złożyłby oświadczenie, którego nie złożył. Panel przy ręcznym
+        // wprowadzaniu odrzuca to samo i tym samym komunikatem.
+        if (dane[poz.key] !== 'yes' && dane[poz.key] !== 'no') {
+          bledy[poz.key] = 'Odpowiedz „tak" albo „nie".';
+          continue;
+        }
+        if (dane[poz.key] === 'yes' && !String(dane[`${poz.key}_notes`] ?? '').trim()) {
+          bledy[`${poz.key}_notes`] = 'Przy odpowiedzi „tak" opisz krótko, czego dotyczy.';
+        }
+      }
+    }
   }
 
   if (krok === 'zgody') {
@@ -282,9 +303,28 @@ export const POLA_LOGICZNE = [
   ...AKTYWNOSCI_RYZYKOWNE.map((a) => a.klucz),
   ...RYZYKA.map((r) => r.klucz),
   'exclusions_accepted', 'employsPeople', 'informedAccepted', 'nwPermanentDamage',
-  'weightChange', 'takesMeds', 'pendingDiagnosis', 'disabilityCongenital', 'smoker',
-  'eventHospitalization', 'eventSickLeave30', 'eventFurtherDiagnosis',
 ];
+
+/*
+ * Czego tu NIE MA i dlaczego nie wolno tego dopisać.
+ *
+ * Stały tu kiedyś `weightChange`, `takesMeds`, `pendingDiagnosis`,
+ * `disabilityCongenital`, `smoker`, `eventHospitalization`, `eventSickLeave30`
+ * i `eventFurtherDiagnosis` — nazwy ze starego formularza, który pytał o te
+ * rzeczy wprost. Nowy kreator pyta o nie wyłącznie w ankiecie rozszerzonej,
+ * pod kluczami `weight_change`, `takes_meds` i tak dalej.
+ *
+ * Dopóki tu stały, normalizacja niżej wpisywała im „No" — bo pola o takiej
+ * nazwie w stanie kreatora nie ma. Funkcja brzegowa czyta
+ * `body.weightChange ?? body.weight_change`, a `??` przepuszcza „No”
+ * (to nie jest null ani undefined) i po prawdziwą odpowiedź nigdy nie sięga.
+ * Klient mógł zaznaczyć „tak" przy hospitalizacji i do bazy szło „nie”.
+ *
+ * Bez tych nazw w ładunku nie ma nic, funkcja zapisuje null, a `cleanRecord`
+ * i tak wycina nulle — kolumna zostaje pusta. Puste znaczy „nie pytaliśmy”
+ * i o to chodzi: przy sumie poniżej progu ankiety nie ma, więc twarde „nie”
+ * na pytanie o stałe leki byłoby oświadczeniem, którego klient nie złożył.
+ */
 
 /** Zamienia stan formularza na kształt, którego oczekuje funkcja form-submit. */
 export function doWysylki(dane) {
@@ -300,6 +340,26 @@ export function doWysylki(dane) {
   }
   if (out.employsPeople === 'Yes' && dane.emp_contribution_slider != null) {
     out.emp_contribution = `${dane.emp_contribution_slider}%`;
+  }
+  // Ankieta rozszerzona ma JEDEN kontrakt z funkcją brzegową: pola `hs_<klucz>`
+  // z wartością „tak"/„nie" i `hsd_<klucz>` ze szczegółami. Tak samo wysyła ją
+  // panel przy ręcznym wprowadzaniu klienta.
+  //
+  // Nie jest to kwestia stylu. form-submit zbiera ankietę wyłącznie z kluczy
+  // zaczynających się od `hs_`, a potem sprawdza, czy przy sumie trwałej
+  // niezdolności powyżej progu cokolwiek zebrał. Kreator wysyłający gołe
+  // `weight_change: 'yes'` daje zero trafień i dostaje 400 z poleceniem
+  // wypełnienia ankiety, którą klient właśnie wypełnił — pętla bez wyjścia,
+  // i to przy najwyższych sumach, czyli najdroższych wnioskach.
+  //
+  // Kontrakt po drugiej stronie: supabase/functions/form-submit/index.ts,
+  // stałe HEALTH_SURVEY_COLUMNS i HEALTH_SURVEY_THRESHOLD.
+  if (ankietaRozszerzona(dane)) {
+    for (const poz of HEALTH_SURVEY_ITEMS) {
+      const odp = dane[poz.key];
+      out[`hs_${poz.key}`] = odp === true || odp === 'yes' || odp === 'tak' ? 'tak' : 'nie';
+      out[`hsd_${poz.key}`] = String(dane[`${poz.key}_notes`] ?? '');
+    }
   }
   return out;
 }
