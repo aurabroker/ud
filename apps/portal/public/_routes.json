@@ -1,15 +1,17 @@
 {
   "version": 1,
-  "include": ["/*"],
+  "include": [
+    "/*"
+  ],
   "exclude": [
     "/_astro/*",
     "/fonts/*",
     "/img/*",
     "/blog/rss.xml",
-    "/llms.txt",
     "/robots.txt",
     "/sitemap-index.xml",
     "/sitemap-0.xml",
+    "/owu-adresy.json",
     "/tokeny-markdown.json",
     "/favicon.svg",
     "/awaria.js",

@@ -326,6 +326,17 @@ w formacie llmstxt.org, ten — wierną kopią jednej podstrony.
   przeszedłby wtedy na adres, pod którym indeksowana jest wersja HTML.
 - **Middleware odpala się przy każdym żądaniu strony.** Statyki są wyłączone
   w `_routes.json`, ale każda odsłona HTML to jedno wywołanie funkcji.
+- **`llms.txt` to Markdown, mimo rozszerzenia `.txt`.** Format llmstxt.org
+  narzuca nazwę pliku, ale treść to nagłówki, listy i odnośniki. Warstwa
+  zasobów Pages przypisuje typ po rozszerzeniu i wysyłała `text/plain`.
+  Deklaracja `Content-Type` w `src/pages/llms.txt.ts` tego **nie ratuje**:
+  build jest statyczny, endpoint jest prerenderowany do pliku na dysku
+  i nagłówki ustawione w jego `Response` nigdy nie wychodzą. Typ stawia
+  middleware dla każdej ścieżki kończącej się na `/llms.txt`, a `/llms.txt`
+  został **wypisany z `_routes.json`** — inaczej korzeniowy plik omijałby
+  funkcję i jako jedyny zostawałby przy `text/plain`. `_headers` tu nie
+  wystarczy, bo nie dotyczy odpowiedzi generowanych przez funkcje, a pliki
+  zawodów przez funkcję przechodzą.
 
 Cloudflare ma to samo jako przełącznik na poziomie strefy („Markdown for
 Agents") — konwertuje HTML w locie. Robimy to u siebie, bo konwersja z builda
@@ -337,6 +348,58 @@ wprost, bo serwer testowy podaje statyki i nie uruchamia funkcji brzegowych.
 Najważniejszy jest ten porównujący `<h1>` ze strony z treścią pliku `.md`:
 gdyby konwersja przestała łapać treść, pliki zostałyby z samą nawigacją
 i nikt by tego nie zauważył.
+
+### Dokumenty OWU pod stałym adresem `/owu/<slug>.pdf`
+
+Pliki leżą w prywatnym kubełku `ud-owu`, ale wychodzą spod stałego adresu
+na naszej domenie. Funkcja `functions/owu/[plik].js` **strumieniuje** plik
+z kubełka kluczem serwisowym.
+
+**Strumieniuje, nie przekierowuje — i to jest sedno.** Wcześniej
+`/pobierz/<id>` przekierowywał na adres podpisany na 300 sekund. Człowiekowi
+to wystarcza, robotowi nie: zaindeksować treść PDF-a można tylko pod adresem,
+który będzie żył jutro. Przekierowanie ma jeszcze drugą wadę — oddaje adres
+końcowy domenie `supabase.co`, więc do indeksu trafia cudzy host z naszą
+treścią. Warunki ubezpieczenia to najbardziej merytoryczna rzecz, jaką serwis
+ma; były niewidoczne dla wyszukiwarek i modeli językowych.
+
+**Slug bierze się z TYTUŁU, nie z symbolu.** Symbol niesie numer wersji
+(`LW044/AD_D_TTD_PTD/PL/5`), więc adres umierałby przy każdej nowej wersji
+razem z zaindeksowanym odnośnikiem. Tytuł zostaje ten sam, więc
+`/owu/leadenhall-utrata-dochodu.pdf` zawsze podaje warunki **obowiązujące** —
+i o to w publicznej bibliotece chodzi. Numer wersji stoi na stronie i w samym
+dokumencie.
+
+Skutek uboczny jest pożądany: gdyby w bibliotece zostały aktywne dwie wersje
+tego samego OWU, dwa wiersze dałyby ten sam adres, a generator mapy
+(`src/pages/owu-adresy.json.ts`) **wywala build** z nazwami obu. To jest
+ta pomyłka, którą trzeba złapać przed wdrożeniem.
+
+Trzy rzeczy, których nie upraszczaj:
+
+- **Dwa zapytania, nie jedno.** Mapa slug → id pochodzi z builda, ale `active`
+  sprawdzamy na żywo w bazie. Gdyby aktywność brać z mapy, wycofane OWU byłoby
+  serwowane aż do następnego wdrożenia portalu.
+- **Bufor liczy się w minutach** (`s-maxage=600`), nie w godzinach. Dłuższy
+  oszczędziłby wywołań, ale wycofany dokument wisiałby pod publicznym adresem
+  tyle, ile trwa wpis w buforze — a to dokument, na który klient się powołuje.
+- **`Content-Disposition: inline`**, nie `attachment`. Plik ma się otworzyć,
+  a nie spaść na dysk; nazwa idzie w dwóch zapisach (ASCII + RFC 5987), bo
+  w nazwach CEU są polskie znaki i spacje.
+
+`/pobierz/<id>` został jako **301** na nowy adres — siedzi w cudzych zakładkach
+i w wysłanych e-mailach. 301, nie 302: wartość starego adresu ma przejść na
+nowy, a nie żyć obok.
+
+**Do mapy sitemap tych plików nie dodajemy.** Strona `/dokumenty/` jest
+zaindeksowana i linkuje do wszystkich trzynastu z opisowym tekstem odnośnika —
+to wystarczająca ścieżka odkrycia, a wpis w mapie zestarzałby się przy zmianie
+tytułu i zostawił w niej adres dający 404. `robots.txt` niczego tu nie blokuje.
+
+Pilnuje tego `test/owu.spec.js` — jedenaście testów z podstawionym `fetch`,
+bez ruchu sieciowego. Najważniejsze: że odpowiedź ma status 200 i typ
+`application/pdf`, a nie przekierowanie, i że zapytanie do bazy niesie filtr
+`active=is.true`.
 
 ### Nagłówek Link — co wskazujemy, czego nie
 

@@ -2,17 +2,19 @@
 /**
  * Dokumenty — ogólne warunki ubezpieczenia i karty produktu.
  *
- * Pliki leżą w prywatnym kubełku `ud-owu`, więc nie da się na nie po prostu
- * podać linku. Pobieranie idzie przez funkcję `/pobierz/<id>`, która po stronie
- * serwera podpisuje adres na pięć minut. Skutek uboczny jest istotny:
- * podpisany adres wygasa, więc ani Google, ani robot modelu językowego nie
- * zaindeksuje treści PDF-ów. Trwałe rozwiązanie to kopia aktywnych plików
- * w kubełku publicznym pod stabilnymi adresami — czeka na decyzję.
+ * Pliki leżą w prywatnym kubełku `ud-owu`, ale wychodzą pod STAŁYM adresem
+ * `/owu/<slug>.pdf` na naszej domenie — funkcja brzegowa strumieniuje je
+ * z kubełka zamiast przekierowywać na adres podpisany na pięć minut.
+ * Powód jest indeksowy: podpisany adres wygasa, więc treść PDF-ów była
+ * niewidoczna dla wyszukiwarek i modeli językowych, a to jest najbardziej
+ * merytoryczna treść, jaką serwis ma. Slug bierze się z tytułu, nie z symbolu,
+ * więc adres przeżywa podmianę wersji OWU — szczegóły w `src/lib/owu.ts`.
  */
 import Baza from '../../layouts/Baza.astro';
 import { graf, organizacja, serwis, strona, okruszki } from '../../lib/seo';
 import { FIRMA } from '../../lib/firma';
 import dane from '../../dane/dokumenty.json';
+import { adresDokumentu } from '../../lib/owu';
 
 const sciezka = '/dokumenty/';
 const tytul = 'Dokumenty — OWU i karty produktu | UtrataDochodu.pl';
@@ -93,7 +95,7 @@ const jsonld = graf([
         <ul class="list-none m-0 p-0 grid gap-4 grid-cols-[repeat(auto-fill,minmax(22rem,1fr))]">
           {g.dokumenty.map((d) => (
             <li>
-              <a href={`/pobierz/${d.id}`}
+              <a href={adresDokumentu(d.tytul)}
                  class="flex gap-4 items-start border border-linia bg-tlo p-5 h-full
                         hover:border-akcent hover:bg-tlo-jasne">
                 <span class="font-mono text-[10.5px] tracking-[0.08em] font-semibold text-white

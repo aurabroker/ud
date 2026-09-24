@@ -255,3 +255,38 @@ test('podgląd na pages.dev nie idzie do indeksu', async () => {
   const zDomeny = await pobierz('/programista/', ACCEPT_PRZEGLADARKI);
   expect(zDomeny.headers.get('x-robots-tag'), 'noindex wyciekł na domenę').toBeNull();
 });
+
+/**
+ * llms.txt jest Markdownem, mimo rozszerzenia .txt
+ *
+ * Format llmstxt.org narzuca nazwę pliku, ale treść to nagłówki, listy
+ * i odnośniki. Warstwa zasobów Pages przypisuje typ po rozszerzeniu i wysyłała
+ * `text/plain`. Deklaracja w `src/pages/llms.txt.ts` tego nie ratuje — build
+ * jest statyczny, endpoint jest prerenderowany do pliku i jego nagłówki nigdy
+ * nie wychodzą. Ten zestaw pilnuje, żeby nikt nie „uprościł" tego z powrotem.
+ */
+test('llms.txt serwisu wychodzi jako Markdown', async () => {
+  const odp = await pobierz('/llms.txt', ACCEPT_PRZEGLADARKI);
+  expect(odp.headers.get('content-type'),
+    'rozszerzenie .txt daje text/plain — typ trzeba postawić samemu')
+    .toBe('text/markdown; charset=utf-8');
+});
+
+test('llms.txt zawodu też, bo idzie tą samą ścieżką', async () => {
+  const odp = await pobierz('/programista/llms.txt', ACCEPT_PRZEGLADARKI);
+  expect(odp.headers.get('content-type')).toBe('text/markdown; charset=utf-8');
+});
+
+test('nagłówek Link opisuje llms.txt zgodnie z tym, czym jest', async () => {
+  const odp = await pobierz('/', ACCEPT_PRZEGLADARKI);
+  const link = odp.headers.get('link') ?? '';
+  expect(link).toContain('</llms.txt>; rel="describedby"; type="text/markdown"');
+  expect(link, 'stary typ text/plain wrócił do stałej ZASOBY').not.toContain('type="text/plain"');
+});
+
+test('adres bez pliku llms.txt nie dostaje typu Markdown', async () => {
+  // Pages podaje wtedy podstawioną stronę; opisanie jej jako text/markdown
+  // dałoby agentowi dokument kłamiący o swoim typie.
+  const odp = await pobierz('/nie-ma-takiego-zawodu/llms.txt', ACCEPT_PRZEGLADARKI);
+  expect(odp.headers.get('content-type')).not.toContain('text/markdown');
+});

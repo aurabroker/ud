@@ -83,7 +83,7 @@ function chceMarkdown(accept) {
  */
 const ZASOBY = [
   // Streszczenie serwisu w formacie llmstxt.org.
-  '</llms.txt>; rel="describedby"; type="text/plain"',
+  '</llms.txt>; rel="describedby"; type="text/markdown"',
   '</blog/rss.xml>; rel="alternate"; type="application/rss+xml"; title="Baza wiedzy UtrataDochodu.pl"',
   '</polityka-prywatnosci/>; rel="privacy-policy"',
   '</regulamin/>; rel="terms-of-service"',
@@ -172,6 +172,26 @@ export async function onRequest({ request, next }) {
     naglowki.set('Content-Type', 'text/markdown; charset=utf-8');
     naglowki.set('X-Robots-Tag', toPodglad(url.hostname) ? 'noindex, nofollow' : 'noindex');
     naglowki.set('Link', `<${url.href.replace(/index\.md$/, '')}>; rel="canonical"`);
+    return przepisz();
+  }
+
+  /* ── llms.txt — Markdown mimo rozszerzenia .txt ─────────────────────── */
+  if (url.pathname.endsWith('/llms.txt') && naprawdeMarkdown(odpowiedz)) {
+    // Format llmstxt.org ma rozszerzenie .txt w specyfikacji, ale treść to
+    // nagłówki, listy i odnośniki — czyli Markdown. Warstwa zasobów Pages
+    // przypisuje typ po rozszerzeniu i wysyłała `text/plain`, więc agent
+    // dostawał dokument opisany niezgodnie z tym, czym jest.
+    //
+    // Deklaracja w `src/pages/llms.txt.ts` tego NIE ratuje: build jest
+    // statyczny, endpoint jest prerenderowany do pliku na dysku i nagłówki
+    // ustawione w jego Response nigdy nie wychodzą. Dlatego typ stawiamy tutaj,
+    // a `/llms.txt` został wypisany z `_routes.json` — inaczej korzeniowy plik
+    // omijałby tę funkcję i jako jedyny zostałby przy `text/plain`.
+    //
+    // `naprawdeMarkdown` pełni tu tę samą rolę co przy plikach .md: odsiewa
+    // podstawioną stronę główną, którą Pages podaje ze statusem 200, gdy pliku
+    // pod adresem nie ma.
+    naglowki.set('Content-Type', 'text/markdown; charset=utf-8');
     return przepisz();
   }
 
