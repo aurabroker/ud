@@ -7,7 +7,7 @@ import { parseOfferPdf } from '$lib/pdf/index.js';
 import { generateShareToken, generatePin, hashPin } from './crypto.js';
 import { sendEmail } from './email.js';
 import { offerLinkEmail } from './templates.js';
-import { resolveOwus } from './owuMatch.js';
+import { resolveOwus, pokryteBazy, bezInnychWersji } from './owuMatch.js';
 import { buildSummaryDocDefinition } from './pdf/summaryDoc.js';
 import { renderPdf, loadLogo } from './pdf/engine.js';
 import { getSettings } from './settings.js';
@@ -239,6 +239,32 @@ export async function createOfferFromPdfs(p) {
  * @param {Array<{ name: string, bytes: Uint8Array }>} files
  * @param {string|null} [password]
  */
+/**
+ * Co oferta ma już podpięte: ścieżki plików OWU i mapa baza → symbole.
+ *
+ * Bibliotekę pytamy BEZ filtra `active`. Wycofane OWU nadal obowiązuje polisy
+ * zawarte na jego warunkach, więc jego baza ma się liczyć jako pokryta —
+ * z filtrem `active` stara wersja byłaby tu niewidzialna i odświeżenie
+ * dokleiłoby obok niej wersję bieżącą.
+ */
+async function pokrycieOferty(sb, offerId) {
+  const { data: pliki } = await sb
+    .from('ud_offer_files')
+    .select('storage_path')
+    .eq('offer_id', offerId)
+    .eq('file_type', 'owu');
+  const sciezki = (pliki || []).map((r) => r.storage_path);
+  if (sciezki.length === 0) return { sciezki: new Set(), pokryte: new Map() };
+  const { data: wiersze } = await sb
+    .from('ud_owu_library')
+    .select('symbol, storage_path')
+    .in('storage_path', sciezki);
+  return {
+    sciezki: new Set(sciezki),
+    pokryte: pokryteBazy((wiersze || []).map((r) => r.symbol)),
+  };
+}
+
 export async function addDocumentsToOffer(offerId, files, password) {
   const sb = createAdminClient();
   const { data: offer, error } = await sb.from('ud_offers').select('*').eq('id', offerId).single();
@@ -300,19 +326,16 @@ export async function addDocumentsToOffer(offerId, files, password) {
   }
 
   // OWU dla nowych wariantów (dedup względem już podpiętych).
-  const { data: existingOwu } = await sb
-    .from('ud_offer_files')
-    .select('storage_path')
-    .eq('offer_id', offerId)
-    .eq('file_type', 'owu');
-  const attached = new Set((existingOwu || []).map((r) => r.storage_path));
+  // `pokryte` liczone RAZ, przed pętlą, i w niej nieaktualizowane — inaczej
+  // karta produktu przepadłaby zaraz po podpięciu OWU o tym samym symbolu.
+  const { sciezki: attached, pokryte } = await pokrycieOferty(sb, offerId);
   const owuCache = {};
   for (const doc of newDocs) {
     if (!owuCache[doc.insurer_type]) {
       const { data } = await sb.from('ud_owu_library').select('*').eq('insurer_type', doc.insurer_type).eq('active', true);
       owuCache[doc.insurer_type] = data || [];
     }
-    const owus = resolveOwus(owuCache[doc.insurer_type], doc);
+    const owus = bezInnychWersji(resolveOwus(owuCache[doc.insurer_type], doc), pokryte);
     for (const owu of owus) {
       if (attached.has(owu.storage_path)) continue;
       attached.add(owu.storage_path);
@@ -425,8 +448,10 @@ export async function refreshOfferDocuments(offerId) {
   }
 
   // Podepnij brakujące OWU (dedup względem już podpiętych).
-  const { data: existingOwu } = await sb.from('ud_offer_files').select('storage_path').eq('offer_id', offerId).eq('file_type', 'owu');
-  const attached = new Set((existingOwu || []).map((r) => r.storage_path));
+  // Patrz pokrycieOferty(): odświeżenie NIE dokłada innej wersji bazy, którą
+  // oferta już ma — to jest ten przycisk, który po podmianie OWU u ubezpieczyciela
+  // przeszedłby po dwustu ofertach i każdej dołożył wersję nie jej dotyczącą.
+  const { sciezki: attached, pokryte } = await pokrycieOferty(sb, offerId);
   const owuCache = {};
   let addedOwu = 0;
   for (const doc of documents) {
@@ -434,7 +459,7 @@ export async function refreshOfferDocuments(offerId) {
       const { data } = await sb.from('ud_owu_library').select('*').eq('insurer_type', doc.insurer_type).eq('active', true);
       owuCache[doc.insurer_type] = data || [];
     }
-    for (const owu of resolveOwus(owuCache[doc.insurer_type], doc)) {
+    for (const owu of bezInnychWersji(resolveOwus(owuCache[doc.insurer_type], doc), pokryte)) {
       if (attached.has(owu.storage_path)) continue;
       attached.add(owu.storage_path);
       await sb.from('ud_offer_files').insert({

@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
     "test:parser": "node --experimental-vm-modules scripts/test-parser.mjs",
-    "test:extras": "node scripts/test-extras.mjs"
+    "test:extras": "node scripts/test-extras.mjs",
+    "test:owu": "node scripts/test-owu.mjs"
   },
   "devDependencies": {
     "@sveltejs/adapter-cloudflare": "^4.7.4",

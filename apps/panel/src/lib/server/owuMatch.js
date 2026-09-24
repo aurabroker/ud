@@ -45,9 +45,49 @@ export function findOwuBySymbol(candidates, sym) {
 }
 
 /** Prefiks bazowy (LW044/LW046/LW047) z symbolu oferty. */
-function baseFromSymbol(sym) {
+export function baseFromSymbol(sym) {
   const m = String(sym || '').match(/LW0\d{2}/i);
   return m ? m[0].toUpperCase() : null;
+}
+
+/**
+ * Mapa baza → zbiór symboli, które oferta ma JUŻ podpięte.
+ *
+ * Dlaczego baza i symbol osobno, a nie sama baza: OWU i karta produktu tej
+ * samej wersji mają w bibliotece IDENTYCZNY symbol (oba LW046/MEDICA/PL/4),
+ * a kolejna wersja tego samego OWU różni się ostatnim członem (…/PL/5).
+ * Po samej bazie te dwa przypadki wyglądają tak samo, a rozróżnić je trzeba:
+ * kartę produktu do już podpiętego OWU wolno dołożyć, nowej wersji OWU nie.
+ */
+export function pokryteBazy(symbole) {
+  const m = new Map();
+  for (const s of symbole || []) {
+    const b = baseFromSymbol(s);
+    if (!b) continue;
+    if (!m.has(b)) m.set(b, new Set());
+    m.get(b).add(normSym(s));
+  }
+  return m;
+}
+
+/**
+ * Odsiewa dokumenty będące INNĄ WERSJĄ bazy, którą oferta już ma podpiętą.
+ *
+ * Oferta trzyma wskaźnik na konkretny plik i to ten plik obowiązuje polisę
+ * zawartą na jego warunkach. Gdy ubezpieczyciel wyda nowe OWU, stare jest
+ * w bibliotece dezaktywowane — ale odświeżanie dokumentów czyta wyłącznie
+ * pozycje aktywne i dopasowuje po samej bazie (LW044), więc bez tego filtra
+ * dokleiłoby klientowi obok jego wersji tę, która jego umowy nie dotyczy.
+ * Nic by przy tym nie zginęło i żaden błąd by się nie zapalił — klient
+ * dostałby po prostu dwa OWU i sam musiałby zgadnąć, które czytać.
+ */
+export function bezInnychWersji(kandydaci, pokryte) {
+  if (!pokryte || pokryte.size === 0) return kandydaci || [];
+  return (kandydaci || []).filter((c) => {
+    const b = baseFromSymbol(c && c.symbol);
+    if (!b || !pokryte.has(b)) return true;
+    return pokryte.get(b).has(normSym(c && c.symbol));
+  });
 }
 
 /**

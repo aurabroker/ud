@@ -612,6 +612,47 @@ dopiero po `email.sent`, a w logu zostaje ślad próby z tym numerem.
 
 Migracja: `supabase/migrations/20260917200000_oferty_archiwum_wersje.sql`.
 
+### Podmiana wersji OWU — co wolno, a co urywa dostęp
+
+Na stronie pokazujemy **tylko aktualne OWU**. Wgląd w wersje historyczne idzie
+przez oferty: `createOfferFromPdfs`, `addDocumentsToOffer`
+i `refreshOfferDocuments` kopiują `storage_bucket` i `storage_path`
+do `ud_offer_files` w chwili wystawienia. Oferta trzyma wskaźnik na **plik**,
+nie odpytuje biblioteki przy otwarciu — więc dezaktywacja starej wersji nie
+rusza ofert historycznych.
+
+**Wycofuje się przełącznikiem `active`, nigdy przyciskiem usuwania.** Akcja
+`delete` w Panel → OWU kasuje obiekt z kubełka, a wtedy urywa się każda oferta
+wskazująca na ten plik. To jest cała podstawa modelu opisanego wyżej.
+
+**Nowa wersja i dezaktywacja starej idą razem, nie w dwóch podejściach.**
+`resolveOwus()` dopasowuje po prefiksie bazowym (`LW044`), nie po pełnym
+symbolu z numerem wersji — przy dwóch aktywnych wersjach podpina do wariantu
+obie i klient dostaje OWU w dwóch wersjach bez wskazówki, która go dotyczy.
+
+`bezInnychWersji()` w `owuMatch.js` pilnuje, żeby odświeżanie dokumentów nie
+dokładało ofercie innej wersji bazy, którą już ma. Bez tego jedno kliknięcie
+„odśwież wszystkie" (pętla po dwustu ofertach) dołożyłoby po podmianie każdej
+historycznej ofercie wersję, która jej nie dotyczy — obok tej, która dotyczy.
+Nic by nie zginęło i nic by się nie zapaliło; klient dostałby dwa OWU i sam
+musiałby zgadnąć.
+
+Rozróżnienie, na którym to stoi: **OWU i karta produktu tej samej wersji mają
+w bibliotece identyczny `symbol`** (oba `LW046/MEDICA/PL/4`), a kolejna wersja
+tego samego OWU różni się ostatnim członem (`…/PL/5`). Po samej bazie te dwa
+przypadki wyglądają jednakowo — kartę produktu wolno dołożyć, nowej wersji OWU
+nie. Dlatego filtr porównuje symbole w obrębie bazy, a pokrycie liczone jest
+**raz, przed pętlą**: aktualizowane w trakcie kasowałoby kartę produktu zaraz
+po podpięciu OWU o tym samym symbolu.
+
+Bibliotekę do ustalenia pokrycia pytamy **bez filtra `active`** — wycofane OWU
+nadal obowiązuje polisy zawarte na jego warunkach, więc jego baza ma się liczyć
+jako pokryta.
+
+Test: `pnpm test:owu` w `apps/panel`. `test:parser` z tego samego katalogu to
+narzędzie ręczne — bierze dwa pliki PDF jako argumenty i bez nich się wywala;
+to nie jest regres.
+
 ---
 
 ## Serwis jest jasny — bez trybu ciemnego
