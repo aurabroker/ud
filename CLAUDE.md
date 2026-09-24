@@ -202,6 +202,86 @@ w panelu Supabase.
 
 ---
 
+## Funkcje brzegowe — kto może je wołać
+
+Dziewięć z dwunastu funkcji ma `verify_jwt = false`, więc platforma wpuszcza
+do nich każdego, kto zna adres — a roboty te adresy znajdują (17.09 SemrushBot
+zapukał GET-em do `div-send-email`). Bramka musi siedzieć w kodzie funkcji.
+Stan po audycie z 24.09.2026:
+
+| Funkcja | Kto woła | Bramka |
+|---|---|---|
+| `form-submit`, `contact-submit`, `review-submit` | formularze publiczne | Turnstile; bez sekretu 503 + wpis w `ud_errors` |
+| `send-digest-email`, `sync-beauty-companies` | pg_cron | nagłówek `x-cron-token` z Vaulta |
+| `normalize-article-images` | pg_cron | nagłówek `x-blog-token` z Vaulta |
+| `review-admin` | panel opinii | JWT + `profiles.rola = 'admin'` |
+| `send-offer-email` | stary `js/client.js` w udapp — w praktyce nikt | treść wyłącznie z bazy, wysyłka tylko do 30 min po wyborze |
+| `div-send-email` | formularz kancelarii (rozwod.waw.pl) | **żadna** — patrz niżej |
+| pozostałe trzy | — | `verify_jwt = true` |
+
+### Funkcja wołana przez cron dostaje token z Vaulta, nie z treści zadania
+
+Wzorzec z migracji `20260924191031_edge_cron_token.sql`: sekret
+`edge_cron_token` powstaje w Vaulcie i bazy nie opuszcza, zadanie cron woła
+funkcję SQL-ową (`ud_send_digest_email()`, `aura_sync_beauty_companies()`),
+a ta dokłada nagłówek. Funkcja brzegowa sprawdza go przez
+`edge_cron_token_matches()` **przed** pierwszym odczytem. Nową funkcję
+cronową podpinaj tak samo — nie gołym `net.http_post` i nigdy z tokenem
+wpisanym w treść zadania.
+
+Do przeniesienia na ten wzorzec: oba wyzwalacze `send-confirmation-email-*`
+(na `ud_clients` i `udochodu_contacts`) mają w definicji jawnym tekstem JWT
+z rolą `service_role`. Z zewnątrz tego nie widać, ale główny klucz projektu
+trafia do każdego zrzutu schematu — **nie commituj zrzutów schematu**.
+
+### Turnstile: sekret z tego samego widżetu, co klucz na stronie
+
+Do 24.09.2026 `TURNSTILE_SECRET_KEY` w projekcie nie było, a funkcje miały
+`if (!secret) return true` — CAPTCHA była dekoracją i nic tego nie zgłaszało.
+Teraz brak sekretu kończy się odmową 503 z telefonem i wpisem w `ud_errors`.
+
+Sekret musi pochodzić z widżetu o kluczu `0x4AAAAAADgSxo_FfjvXKO29` (ten stoi
+na stronach i w `uslugi.ts` portalu). Sekret z innego widżetu też odrzuci
+fałszywy token, ale odrzuci i prawdziwych klientów — dlatego po każdej zmianie
+sekretu potrzebne są dwa sprawdzenia:
+
+1. sonda przez `net.http_post` z fałszywym tokenem i bez danych (nic nie
+   zapisuje) → ma wrócić „Weryfikacja bezpieczeństwa nie powiodła się",
+2. **jedno prawdziwe zgłoszenie z żywej strony** — tylko ono dowodzi, że
+   sekret pasuje do widżetu.
+
+### Co zostało otwarte świadomie
+
+- **`div-send-email`** — formularz kancelarii: bez Turnstile, bez limitu,
+  a adres odbiorcy potwierdzenia bierze z żądania, czyli rozsyła list
+  z `no-reply@rozwod.waw.pl` na dowolny adres. Zamknięcie wymaga widżetu na
+  stronach kancelarii, których nie ma w tym repozytorium.
+- **`review-admin` w repozytorium jest starszy i słabszy od wdrożonego**
+  (wspólne hasło w ciele żądania zamiast JWT + roli, inna tabela). Nie wdrażaj
+  go z repo.
+- **`sync-beauty-companies` od czerwca nie przenosi osób kontaktowych**:
+  `crm_client_contacts` nie ma unikalnego ograniczenia na
+  `(tenant_id, beauty_id)`, więc każda paczka kończy się błędem 42P10, który
+  trafia tylko do logu funkcji.
+- **Ta sama synchronizacja codziennie nadpisuje `crm_clients.rodo_zgoda`**
+  wartością z BEAUTY — tam pole jest puste, więc wszędzie ląduje `false`.
+  Zgoda wpisana ręcznie w CRM przetrwa tylko do najbliższej synchronizacji
+  (9:00); trzeba ją zapisywać w BEAUTY albo wyłączyć pola RODO z upsertu.
+
+### Wdrażanie przez MCP
+
+Funkcja z `import … from '../_shared/logger.ts'` idzie jako dwa pliki:
+`source/index.ts` i `_shared/logger.ts`, z `entrypoint_path: source/index.ts`.
+Treść do wdrożenia generuj skryptem (`json.dumps`) z pliku w repo, zamiast
+przepisywać — w `form-submit` stoi twarda spacja (U+00A0) w `parseAmount()`,
+która przy przepisywaniu znika bez śladu.
+
+Pilnuje tego `test/funkcje-brzegowe.spec.js` — czyta źródła i sprawdza, że
+bramki stoją przed pierwszym odczytem. Na wersjach sprzed 24.09 wywala się
+w dziewięciu z dziesięciu testów.
+
+---
+
 ## Modal awarii (`awaria.js`)
 
 Gdy coś się wysypie, użytkownik dostaje modal z prośbą o telefon
@@ -655,11 +735,16 @@ pierwszeństwo nad odpowiedzią z podstawowej siódemki.
 
 ### Funkcja brzegowa w repozytorium bywa starsza niż wdrożona
 
-Wdrożona wersja `form-submit` to **v20**. Zanim cokolwiek wdrożysz
-z `supabase/functions/`, porównaj z produkcją przez `get_edge_function` —
-w repozytorium leżała kopia sprzed v20, bez `form_data`, bez zbiórki `hs_*`,
-bez obu bramek walidacyjnych i z `yesNo()`, który nie przyjmował małych liter.
-Jej wdrożenie skasowałoby to wszystko na produkcji.
+Zanim cokolwiek wdrożysz z `supabase/functions/`, porównaj z produkcją przez
+`get_edge_function` — **treść, nie numer wersji**. W repozytorium leżała kopia
+`form-submit` sprzed v20, bez `form_data`, bez zbiórki `hs_*`, bez obu bramek
+walidacyjnych i z `yesNo()`, który nie przyjmował małych liter. Jej wdrożenie
+skasowałoby to wszystko na produkcji. To samo dotyczy dziś `review-admin`
+(patrz „Funkcje brzegowe — kto może je wołać").
+
+Numer wersji rośnie także wtedy, gdy nikt nie wdraża kodu: wpisanie sekretu
+w Edge Functions → Secrets podbiło 24.09 licznik **wszystkim** funkcjom o jeden,
+przy identycznym `ezbr_sha256`. Stan na 24.09 wieczorem: `form-submit` v22.
 
 ---
 
