@@ -1,5 +1,5 @@
 {
-  "pobrano": "2026-09-23",
+  "pobrano": "2026-09-24",
   "zrodlo": "ud_owu_library (active = true)",
   "dokumenty": [
     {
@@ -30,22 +30,13 @@
       "bajty": 302999
     },
     {
-      "id": "253cd9b5-6dc1-44ed-b725-0f693930ae5b",
+      "id": "b37fe690-b620-405b-b1d0-313f672d9939",
       "ubezpieczyciel": "leadenhall",
-      "symbol": "LW044/AD_D_TTD_PTD/PL/4",
+      "symbol": "LW044/AD_D_TTD_PTD/PL/5",
       "tytul": "Leadenhall Utrata Dochodu",
       "rodzaj": "owu",
-      "plik": "LW_044_AD_D_TTD_PTD_PL_4.pdf",
-      "bajty": 281030
-    },
-    {
-      "id": "7d4eabb6-9e52-45c2-9fd9-f3fe9ec9c30c",
-      "ubezpieczyciel": "leadenhall",
-      "symbol": "LW046/MEDICA/PL/4",
-      "tytul": "Karta produktu — Leadenhall MEDICA",
-      "rodzaj": "ipid",
-      "plik": "Karta_produktu_LH_Medica_LW_046_v4.pdf",
-      "bajty": 326879
+      "plik": "LW_044_AD_D_TTD_PTD_PL_5.pdf",
+      "bajty": 332657
     },
     {
       "id": "6a425447-3c20-4859-9716-2cb6e606a42d",
@@ -57,13 +48,13 @@
       "bajty": 275430
     },
     {
-      "id": "56be98a8-8de6-4ee3-b6ae-437a5313b163",
+      "id": "7d4eabb6-9e52-45c2-9fd9-f3fe9ec9c30c",
       "ubezpieczyciel": "leadenhall",
-      "symbol": "LW047/MEDICARE/PL/4",
-      "tytul": "Karta produktu — Leadenhall MEDICARE",
+      "symbol": "LW046/MEDICA/PL/4",
+      "tytul": "Karta produktu — Leadenhall MEDICA",
       "rodzaj": "ipid",
-      "plik": "Karta_produktu_LH_Medicare_LW_047_v4.pdf",
-      "bajty": 327318
+      "plik": "Karta_produktu_LH_Medica_LW_046_v4.pdf",
+      "bajty": 326879
     },
     {
       "id": "7ed59d7e-b28e-45d4-9453-7124efa8de18",
@@ -73,6 +64,15 @@
       "rodzaj": "owu",
       "plik": "LW_047_MEDICARE_PL_4.pdf",
       "bajty": 272698
+    },
+    {
+      "id": "56be98a8-8de6-4ee3-b6ae-437a5313b163",
+      "ubezpieczyciel": "leadenhall",
+      "symbol": "LW047/MEDICARE/PL/4",
+      "tytul": "Karta produktu — Leadenhall MEDICARE",
+      "rodzaj": "ipid",
+      "plik": "Karta_produktu_LH_Medicare_LW_047_v4.pdf",
+      "bajty": 327318
     },
     {
       "id": "7134d025-4f2a-4f83-83ed-05e62e9774d6",
