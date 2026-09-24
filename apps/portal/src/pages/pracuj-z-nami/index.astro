@@ -8,14 +8,17 @@ import SzybkiKontakt from '../../components/SzybkiKontakt.svelte';
 import { graf, organizacja, serwis, strona, okruszki } from '../../lib/seo';
 import { FIRMA, UBEZPIECZYCIELE } from '../../lib/firma';
 import { ZAWODY } from '@ud/zawody';
-import { funkcja, TURNSTILE_KLUCZ } from '../../lib/uslugi';
+import { TURNSTILE_KLUCZ } from '../../lib/uslugi';
 
 const sciezka = '/pracuj-z-nami/';
 const tytul = 'Współpraca dla agentów i sieci sprzedaży | UtrataDochodu.pl';
 const opis = 'Ubezpieczenie utraty dochodu jako uzupełnienie polisy na życie. '
   + 'Dedykowane linki sprzedażowe, proces w całości online, prowizja od zawartej polisy.';
 
-const URL_FUNKCJI = funkcja('contact-submit');
+// Zgłoszenia partnerskie idą e-mailem przez Resend, a nie do tabeli leadów
+// klienckich — patrz `functions/wspolpraca.js`. To funkcja Pages z tego
+// repozytorium, więc adres jest względny, nie wskazuje na Supabase.
+const URL_FUNKCJI = '/wspolpraca';
 const KLUCZ_TURNSTILE = TURNSTILE_KLUCZ;
 
 const ARGUMENTY = [

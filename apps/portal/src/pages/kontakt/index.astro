@@ -1,17 +1,12 @@
 ---
 import Baza from '../../layouts/Baza.astro';
-import SzybkiKontakt from '../../components/SzybkiKontakt.svelte';
 import { graf, organizacja, serwis, strona, okruszki } from '../../lib/seo';
 import { FIRMA } from '../../lib/firma';
-import { funkcja, TURNSTILE_KLUCZ } from '../../lib/uslugi';
 
 const sciezka = '/kontakt/';
 const tytul = 'Kontakt | UtrataDochodu.pl';
-const opis = `Zadzwoń pod ${FIRMA.telefonWyswietlany}, napisz na ${FIRMA.email} `
-  + 'albo zostaw numer — oddzwonimy w ciągu jednego dnia roboczego.';
-
-const URL_FUNKCJI = funkcja('contact-submit');
-const KLUCZ_TURNSTILE = TURNSTILE_KLUCZ;
+const opis = `Zadzwoń pod ${FIRMA.telefonWyswietlany} albo napisz na ${FIRMA.email}. `
+  + 'Jeśli wolisz policzyć składkę od razu — wypełnij wniosek.';
 
 const sciezkaOkruszkow = [
   { nazwa: 'Strona główna', url: '/' },
@@ -50,15 +45,25 @@ const jsonld = graf([
 
   <div class="max-w-[1200px] mx-auto px-5 py-14 grid gap-14 lg:grid-cols-[1fr_22rem] items-start">
     <div>
-      <h2 class="text-[clamp(1.4rem,3vw,1.9rem)] leading-tight mt-0 mb-2">Zostaw numer, oddzwonimy</h2>
+      <h2 class="text-[clamp(1.4rem,3vw,1.9rem)] leading-tight mt-0 mb-2">Najszybciej telefonem</h2>
       <p class="text-[16px] leading-relaxed text-tekst-drugi mt-0 mb-7 max-w-[36em]">
-        Jeden dzień roboczy. Jeśli wolisz od razu policzyć składkę, przejdź
-        do <a href="/wniosek/" class="text-akcent-hover underline decoration-linia-mocna underline-offset-2">wniosku</a>.
+        Dzwoniąc, wychodzisz z rozmowy z policzoną składką — bez czekania na
+        oddzwonienie i bez zostawiania danych komuś, kto akurat nie odbiera.
       </p>
-      <div class="max-w-[30rem]">
-        <SzybkiKontakt client:visible urlFunkcji={URL_FUNKCJI} kluczTurnstile={KLUCZ_TURNSTILE}
-                       etykietaPrzycisku="Poproś o kontakt" />
-      </div>
+      <p class="text-[17px] leading-relaxed mt-0 mb-7 max-w-[36em]">
+        <a href={`tel:${FIRMA.telefon}`} class="font-semibold text-akcent-hover text-[clamp(1.3rem,3vw,1.7rem)]">
+          {FIRMA.telefonWyswietlany}
+        </a><br>
+        <span class="text-tekst-drugi text-[15.5px]">albo <a href={`mailto:${FIRMA.email}`} class="text-akcent-hover break-all">{FIRMA.email}</a></span>
+      </p>
+      <a href="/wniosek/"
+         class="inline-block bg-akcent-ciemny text-white px-7 py-[13px] font-semibold hover:bg-akcent-hover">
+        Policz składkę i złóż wniosek
+      </a>
+      <p class="text-[15px] leading-relaxed text-tekst-drugi mt-5 mb-0 max-w-[36em]">
+        Wniosek zajmuje kilka minut i nie zobowiązuje do niczego — dostajesz ofertę
+        do porównania.
+      </p>
     </div>
 
     <aside class="border border-linia bg-tlo-jasne p-7">
