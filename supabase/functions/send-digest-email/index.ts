@@ -12,6 +12,18 @@ function fmt(dt: string) {
   return new Date(dt).toLocaleString("pl-PL", { timeZone: "Europe/Warsaw", hour12: false });
 }
 
+/* Imię, telefon, e-mail i zawód wpisuje odwiedzający w formularzu publicznym.
+ * Bez escape'owania dało się nimi wstawić do raportu na biuro@ działający
+ * odnośnik albo dowolny HTML. */
+function esc(v: unknown): string {
+  return String(v ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function buildHtml(
   contacts: Record<string, unknown>[],
   clients: Record<string, unknown>[],
@@ -22,18 +34,18 @@ function buildHtml(
 
   const contactRows = contacts.map(c => `
     <tr>
-      <td style="padding:10px 12px;border-bottom:1px solid #f1f0eb;font-size:13px;color:#334155;">${c.name ?? "—"}</td>
-      <td style="padding:10px 12px;border-bottom:1px solid #f1f0eb;font-size:13px;color:#334155;">${c.phone ?? "—"}</td>
-      <td style="padding:10px 12px;border-bottom:1px solid #f1f0eb;font-size:13px;color:#334155;">${c.email}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #f1f0eb;font-size:13px;color:#334155;">${esc(c.name ?? "—")}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #f1f0eb;font-size:13px;color:#334155;">${esc(c.phone ?? "—")}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #f1f0eb;font-size:13px;color:#334155;">${esc(c.email)}</td>
       <td style="padding:10px 12px;border-bottom:1px solid #f1f0eb;font-size:13px;color:#94a3b8;">${fmt(String(c.created_at))}</td>
     </tr>`).join("");
 
   const clientRows = clients.map(c => `
     <tr>
-      <td style="padding:10px 12px;border-bottom:1px solid #f1f0eb;font-size:13px;color:#334155;">${c.full_name ?? "—"}</td>
-      <td style="padding:10px 12px;border-bottom:1px solid #f1f0eb;font-size:13px;color:#334155;">${c.phone ?? "—"}</td>
-      <td style="padding:10px 12px;border-bottom:1px solid #f1f0eb;font-size:13px;color:#334155;">${c.email}</td>
-      <td style="padding:10px 12px;border-bottom:1px solid #f1f0eb;font-size:13px;color:#334155;">${c.profession ?? "—"}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #f1f0eb;font-size:13px;color:#334155;">${esc(c.full_name ?? "—")}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #f1f0eb;font-size:13px;color:#334155;">${esc(c.phone ?? "—")}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #f1f0eb;font-size:13px;color:#334155;">${esc(c.email)}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #f1f0eb;font-size:13px;color:#334155;">${esc(c.profession ?? "—")}</td>
       <td style="padding:10px 12px;border-bottom:1px solid #f1f0eb;font-size:13px;color:#94a3b8;">${fmt(String(c.created_at))}</td>
     </tr>`).join("");
 
@@ -99,8 +111,26 @@ function buildHtml(
 </body></html>`;
 }
 
-Deno.serve(async () => {
+/**
+ * Woła ją wyłącznie pg_cron przez public.ud_send_digest_email(), która dokłada
+ * nagłówek x-cron-token z Vaulta (sekret `edge_cron_token`).
+ *
+ * Wcześniej handler nie przyjmował nawet żądania: każdy, kto znał adres —
+ * także robot, który trafi na niego GET-em — wysyłał raport na biuro@
+ * i dostawał w odpowiedzi liczbę zgłoszeń z ostatnich dwóch godzin.
+ */
+Deno.serve(async (req: Request) => {
   const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const token = req.headers.get("x-cron-token") ?? "";
+  if (!token) return new Response("brak nagłówka x-cron-token", { status: 401 });
+  const { data: zgoda, error: bladTokenu } = await supabase.rpc("edge_cron_token_matches", { token });
+  if (bladTokenu) {
+    console.error("Digest: nie mogę sprawdzić tokenu:", bladTokenu.message);
+    return new Response("nie mogę sprawdzić tokenu", { status: 500 });
+  }
+  if (zgoda !== true) return new Response("zły nagłówek x-cron-token", { status: 401 });
+
   const since = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
 
   const [{ data: contacts = [] }, { data: clients = [] }] = await Promise.all([

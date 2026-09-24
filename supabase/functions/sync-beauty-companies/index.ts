@@ -19,6 +19,27 @@ Deno.serve(async (req: Request) => {
   const AURA_URL = Deno.env.get('SUPABASE_URL') ?? '';
   const AURA_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 
+  // Woła ją wyłącznie pg_cron przez public.aura_sync_beauty_companies(), która
+  // dokłada nagłówek x-cron-token z Vaulta (sekret `edge_cron_token`). Bez tej
+  // bramki każdy, kto znał adres, odpalał pełną synchronizację i dostawał
+  // w odpowiedzi liczbę firm, a przy błędzie — surowy komunikat PostgREST-u
+  // projektu BEAUTY. Bramka stoi przed sprawdzeniem BEAUTY_KEY, żeby obcy nie
+  // dowiedział się nawet, jak funkcja jest skonfigurowana.
+  const odmowa = (status: number, error: string) =>
+    new Response(JSON.stringify({ error }), { status, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' } });
+  const token = req.headers.get('x-cron-token') ?? '';
+  if (!token) return odmowa(401, 'Unauthorized');
+  const sprawdzenie = await fetch(`${AURA_URL}/rest/v1/rpc/edge_cron_token_matches`, {
+    method: 'POST',
+    headers: { 'apikey': AURA_KEY, 'Authorization': `Bearer ${AURA_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token }),
+  }).catch(() => null);
+  if (!sprawdzenie?.ok) {
+    console.error('Nie mogę sprawdzić tokenu:', sprawdzenie?.status);
+    return odmowa(500, 'Token check failed');
+  }
+  if ((await sprawdzenie.json()) !== true) return odmowa(401, 'Unauthorized');
+
   if (!BEAUTY_KEY) {
     return new Response(JSON.stringify({ error: 'BEAUTY_SERVICE_ROLE_KEY not configured' }), { status: 500, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' } });
   }
