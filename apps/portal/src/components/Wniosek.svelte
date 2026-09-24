@@ -43,6 +43,15 @@
   let wysylanie = $state(false);
   let bladWysylki = $state('');
 
+  /**
+   * Identyfikator jednego złożonego wniosku — klucz deduplikacji konwersji.
+   * `crypto.randomUUID` wymaga bezpiecznego kontekstu; zapasowy wariant jest
+   * na wypadek starszej przeglądarki, bo brak identyfikatora znaczy tu brak
+   * policzonej konwersji.
+   */
+  const identyfikatorWniosku = () =>
+    crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
   /** Uchwyt widgetu Turnstile — potrzebny do reset() po nieudanej wysyłce. */
   let widgetTurnstile = null;
   let kontenerTurnstile = $state(null);
@@ -158,6 +167,13 @@
       });
       const wynik = await res.json().catch(() => ({}));
       if (res.ok && wynik.status !== 'error') {
+        // Znacznik złożonego wniosku dla konwersji Ads na stronie podziękowania.
+        // Bez niego /podziekowanie/ nie zgłasza konwersji — powód opisany tam.
+        // Wniosek jest już w bazie, więc awaria zapisu do sesji (tryb prywatny,
+        // zablokowane dane witryn) nie może zatrzymać przekierowania.
+        try {
+          sessionStorage.setItem('ud:wniosek', identyfikatorWniosku());
+        } catch { /* zostaje niepoliczona konwersja, nie zgubiony wniosek */ }
         window.location.href = '/podziekowanie/';
         return;
       }

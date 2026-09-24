@@ -78,14 +78,36 @@ const KROKI = [
 
 <script is:inline define:vars={{ etykieta: TAGI.konwersjaWniosek }}>
   /**
-   * Konwersja Google Ads. Idzie przez UDCookies.konwersja(), więc sama
-   * sprawdza zgodę na marketing — bez niej nie wysyła nic. Stara wersja
-   * strony strzelała bezwarunkowo.
+   * Konwersja Google Ads. Trzy zabezpieczenia, każde z innego powodu.
    *
-   * Zdarzenie odpalamy też po późniejszej akceptacji zgód: użytkownik, który
-   * zgodził się dopiero na tej stronie, jest tą samą konwersją.
+   * 1. Idzie przez UDCookies.konwersja(), więc sama sprawdza zgodę na
+   *    marketing — bez niej nie leci nic. Stara wersja strony strzelała
+   *    bezwarunkowo.
+   *
+   * 2. Leci TYLKO przy znaczniku złożonego wniosku, który kreator zapisuje
+   *    tuż przed przekierowaniem. Stary thankyou.html liczył konwersję przy
+   *    każdym wczytaniu strony — odświeżenie, powrót przyciskiem wstecz
+   *    i adres wklejony z zakładki dawały konwersje bez wniosku. Liczba
+   *    w Ads znaczyła „tyle razy ktoś zobaczył tę stronę", nie „tyle wniosków
+   *    wpłynęło", i nie dało się odczytać, o ile jest zawyżona.
+   *
+   * 3. Znacznik idzie jako `transaction_id`. Ads deduplikuje po nim, więc
+   *    odświeżenie strony i zgoda udzielona dopiero tutaj dają TĘ SAMĄ
+   *    konwersję zamiast dwóch.
+   *
+   * Dlatego znacznika NIE kasujemy po wysłaniu: klient, który zgodzi się na
+   * cookies dopiero na tej stronie, musi zostać policzony, a przed podwójnym
+   * liczeniem broni `transaction_id`, nie skasowanie klucza. Znacznik znika
+   * razem z sesją karty.
    */
-  function zglos() { window.UDCookies?.konwersja?.(etykieta); }
+  function znacznik() {
+    try { return sessionStorage.getItem('ud:wniosek'); } catch { return null; }
+  }
+  function zglos() {
+    var id = znacznik();
+    if (!id) return;
+    window.UDCookies?.konwersja?.(etykieta, { transaction_id: id });
+  }
   zglos();
   document.addEventListener('ud:zgody', zglos, { once: true });
 </script>

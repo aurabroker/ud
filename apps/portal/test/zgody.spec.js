@@ -144,22 +144,74 @@ test('modal awarii jest dostępny na każdej stronie', async ({ page }) => {
   expect(zAwaria).toBeGreaterThan(zZgody);
 });
 
+/**
+ * Konwersja z podziękowania — zgoda, znacznik wniosku i deduplikacja.
+ *
+ * Stary thankyou.html strzelał konwersją przy każdym wczytaniu strony, bez
+ * `transaction_id` i bez żadnego warunku. Odświeżenie, powrót przyciskiem
+ * wstecz i adres wklejony z zakładki dawały konwersje bez złożonego wniosku,
+ * więc liczba w Ads znaczyła „tyle razy ktoś zobaczył tę stronę".
+ */
+
+/** Podstawia znacznik złożonego wniosku — to, co zapisuje kreator. */
+async function zZlozonymWnioskiem(page, id = 'test-wniosek-1') {
+  await page.addInitScript((wartosc) => {
+    try { sessionStorage.setItem('ud:wniosek', wartosc); } catch { /* nieistotne w teście */ }
+  }, id);
+}
+
+const konwersje = (page) => page.evaluate(() =>
+  (window.dataLayer ?? []).map((a) => Array.from(a)).filter((a) => a[1] === 'conversion'));
+
 test('konwersja Ads na podziękowaniu czeka na zgodę na marketing', async ({ page }) => {
-  // Bez zgody: żadnego zdarzenia konwersji.
+  await zZlozonymWnioskiem(page);
+
+  // Bez zgody: żadnego zdarzenia konwersji, mimo złożonego wniosku.
   await page.goto('/podziekowanie/');
   await page.getByRole('button', { name: 'Odrzucam wszystkie' }).click();
   await page.waitForTimeout(400);
-  let konwersje = await page.evaluate(() =>
-    (window.dataLayer ?? []).map((a) => Array.from(a)).filter((a) => a[1] === 'conversion'));
-  expect(konwersje, 'konwersja poleciała mimo odmowy').toHaveLength(0);
+  expect(await konwersje(page), 'konwersja poleciała mimo odmowy').toHaveLength(0);
 
-  // Po akceptacji: dokładnie jedno zdarzenie.
+  // Po akceptacji: dokładnie jedno zdarzenie, z kluczem deduplikacji.
   await page.evaluate(() => localStorage.clear());
   await page.goto('/podziekowanie/');
   await page.getByRole('button', { name: 'Akceptuję wszystkie' }).click();
   await page.waitForTimeout(600);
-  konwersje = await page.evaluate(() =>
-    (window.dataLayer ?? []).map((a) => Array.from(a)).filter((a) => a[1] === 'conversion'));
-  expect(konwersje, 'brak konwersji po zgodzie').toHaveLength(1);
-  expect(konwersje[0][2].send_to).toContain('AW-18020137303/');
+  const zdarzenia = await konwersje(page);
+  expect(zdarzenia, 'brak konwersji po zgodzie').toHaveLength(1);
+  expect(zdarzenia[0][2].send_to).toContain('AW-18020137303/');
+  expect(zdarzenia[0][2].transaction_id,
+    'bez transaction_id Ads nie ma po czym deduplikować').toBe('test-wniosek-1');
+});
+
+test('podziękowanie otwarte bez wniosku nie liczy konwersji', async ({ page }) => {
+  // Adres z zakładki, wklejony link, powrót przyciskiem wstecz w nowej sesji —
+  // w sesji nie ma znacznika, więc nie ma czego liczyć.
+  await page.goto('/podziekowanie/');
+  await page.getByRole('button', { name: 'Akceptuję wszystkie' }).click();
+  await page.waitForTimeout(600);
+  expect(await konwersje(page),
+    'konwersja bez złożonego wniosku — tak zawyżał się stary thankyou.html')
+    .toHaveLength(0);
+});
+
+test('odświeżenie podziękowania nie tworzy drugiej konwersji', async ({ page }) => {
+  await zZlozonymWnioskiem(page, 'test-wniosek-2');
+
+  await page.goto('/podziekowanie/');
+  await page.getByRole('button', { name: 'Akceptuję wszystkie' }).click();
+  await page.waitForTimeout(600);
+  const pierwsza = (await konwersje(page))[0];
+
+  await page.reload();
+  await page.waitForTimeout(600);
+  const poOdswiezeniu = await konwersje(page);
+
+  // dataLayer zeruje się przy przeładowaniu, więc liczba zdarzeń w oknie nic
+  // nie mówi. Rozstrzyga klucz: ten sam transaction_id to dla Ads ta sama
+  // konwersja, a nie druga.
+  expect(poOdswiezeniu.length, 'po odświeżeniu nie poleciało nic').toBeGreaterThan(0);
+  expect(poOdswiezeniu[0][2].transaction_id,
+    'odświeżenie dało nowy klucz — Ads policzy to drugi raz')
+    .toBe(pierwsza[2].transaction_id);
 });

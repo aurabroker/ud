@@ -293,6 +293,49 @@ console.log('\nC. Co widzi klient, gdy funkcja brzegowa nie działa');
   }
 }
 
+// ── C2. Udana wysyłka ────────────────────────────────────────────────────────
+//
+// Nie o samo przekierowanie tu chodzi, tylko o znacznik, który kreator zapisuje
+// tuż przed nim. Strona podziękowania zgłasza konwersję Google Ads WYŁĄCZNIE
+// przy tym znaczniku — bez niego wniosek wpłynie, a w Ads go nie będzie.
+// To jest ten rodzaj awarii, którego nie widać: formularz działa, baza się
+// zapełnia, a kampania wygląda, jakby nie sprzedawała.
+console.log('\nC2. Co się dzieje po udanej wysyłce');
+{
+  const page = await browser.newPage();
+  await page.addInitScript(() => {
+    window.turnstile = {
+      render: () => 'widget-testowy',
+      getResponse: () => 'token-testowy',
+      reset() {},
+    };
+  });
+  await page.route('**/functions/v1/form-submit', (route) => route.fulfill({
+    status: 200, contentType: 'application/json', body: '{"status":"success"}',
+  }));
+  await page.goto(ADRES, { waitUntil: 'domcontentloaded' });
+
+  let ok = false;
+  let opis = 'nie doszedł do wysyłki';
+  if (await przejdzKreator(page)) {
+    await page.getByRole('button', { name: /Wyślij wniosek|Wysyłam/ }).click();
+    await page.waitForURL('**/podziekowanie/', { timeout: 8000 }).catch(() => {});
+
+    const naPodziekowaniu = page.url().includes('/podziekowanie/');
+    const znacznik = await page.evaluate(() => {
+      try { return sessionStorage.getItem('ud:wniosek'); } catch { return null; }
+    });
+
+    ok = naPodziekowaniu && !!znacznik && znacznik.length >= 8;
+    opis = (naPodziekowaniu ? 'przekierowanie ✓' : 'BRAK przekierowania na /podziekowanie/')
+      + (znacznik
+        ? ', znacznik konwersji zapisany ✓'
+        : ', BRAK ZNACZNIKA — konwersja nie zostanie policzona w Ads');
+  }
+  zapisz('C2', 'wniosek ląduje na podziękowaniu ze znacznikiem konwersji', ok, opis);
+  await page.close();
+}
+
 await browser.close();
 srv.close();
 

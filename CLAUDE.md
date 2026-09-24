@@ -275,6 +275,55 @@ obecność banera — atrapa przechodzi każdy test oparty na DOM-ie.
 Do zamknięcia po stronie klienta: druga właściwość GA4 (`G-D9XHPWP5DE`) —
 inaczej historia ruchu zostaje rozbita na dwie niepełne właściwości.
 
+### Konwersja Ads liczy WNIOSKI, nie odsłony podziękowania
+
+Stary `thankyou.html` miał w treści goły strzał:
+
+```js
+gtag('event', 'conversion', {'send_to': 'AW-18020137303/_uZeCOTG_KwcENfy1ZBD'});
+```
+
+Bez `transaction_id` i bez żadnego warunku, więc konwersję liczyło **każde
+wczytanie strony**: odświeżenie, powrót przyciskiem wstecz, adres wklejony
+z zakładki. Liczba w Ads znaczyła „tyle razy ktoś zobaczył tę stronę" i nie
+dało się odczytać, o ile jest zawyżona.
+
+Nowy portal ma trzy zabezpieczenia i **każde jest potrzebne**:
+
+1. **Zgoda.** Zdarzenie idzie przez `UDCookies.konwersja()`, więc leci wyłącznie
+   przy zgodzie na marketing.
+2. **Znacznik wniosku.** Kreator zapisuje do `sessionStorage` klucz
+   `ud:wniosek` (UUID) tuż przed przekierowaniem, a `/podziekowanie/` **bez
+   tego znacznika nie zgłasza nic**. To wycina odsłony bez złożonego wniosku.
+3. **`transaction_id`.** Znacznik idzie w zdarzeniu jako klucz deduplikacji —
+   odświeżenie strony i zgoda udzielona dopiero na niej dają Ads **tę samą**
+   konwersję.
+
+**Znacznika nie kasuj po wysłaniu zdarzenia.** Klient, który zgodzi się na
+cookies dopiero na stronie podziękowania, musi zostać policzony; przed
+podwójnym liczeniem broni `transaction_id`, nie skasowanie klucza. Znacznik
+znika razem z sesją karty.
+
+Etykieta `konwersjaWniosek` w `analityka.ts` należy do akcji **„Przesłanie
+formularza kontaktowego"** (kategoria `SUBMIT_LEAD_FORM`) — sprawdzone przez
+`tag_snippets` w Ads. Nazwa akcji kłamie: liczy złożone wnioski, nie formularze
+kontaktowe. Szybki kontakt nie zgłasza konwersji w ogóle, ani w starym
+serwisie, ani w nowym.
+
+W koncie Ads licytowalne są tylko dwie kategorie: `SUBMIT_LEAD_FORM`
+i `PHONE_CALL_LEAD`. `REQUEST_QUOTE` i `ENGAGEMENT` mają `biddable: false`,
+więc nic z importów GA4 nie steruje stawkami — to dlatego zamknięcie drugiej
+właściwości jest bezpieczne. Sprawdzić to potrafi `narzedzia/ads-konwersje-ga4.js`.
+
+**Po przepięciu domeny liczba konwersji spadnie i to jest poprawne** — stary
+baner zgód był atrapą i tagi startowały bezwarunkowo.
+
+Pilnują tego trzy testy w `test/zgody.spec.js` (zgoda, brak znacznika,
+odświeżenie) i scenariusz C2 w bramie obciążeniowej, który przechodzi kreator
+do końca i sprawdza, że znacznik faktycznie się zapisał. Bez C2 mielibyśmy
+awarię niewidoczną: formularz działa, baza się zapełnia, a kampania wygląda,
+jakby nie sprzedawała.
+
 ---
 
 ## Markdown dla agentów — negocjacja nagłówkiem Accept
