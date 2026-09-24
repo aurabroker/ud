@@ -1,0 +1,24 @@
+# Zgłoszenia dotyczące bezpieczeństwa serwisu UtrataDochodu.pl.
+# Format: RFC 9116.
+#
+# Pole Expires jest OBOWIĄZKOWE i po tej dacie plik przestaje być ważny.
+# To nie jest formalność: nieaktualny security.txt deklaruje kanał kontaktu,
+# którego może już nie być, a data mija po cichu. Dlatego pilnuje jej test
+# w `test/security-txt.spec.js`, który wywala build na trzydzieści dni przed
+# terminem — żeby było kiedy odnowić.
+#
+# Nie prowadzimy programu bug bounty. Zgłoszenia przyjmujemy i odpowiadamy
+# na nie, ale nie wypłacamy nagród — piszemy to wprost, żeby nikt nie tracił
+# czasu na wycenę.
+
+Contact: mailto:info@utratadochodu.pl
+Contact: tel:+48504400901
+Expires: 2027-06-30T23:59:59.000Z
+Preferred-Languages: pl, en
+Canonical: https://utratadochodu.pl/.well-known/security.txt
+
+# Czego tu NIE MA i dlaczego: Policy, Encryption i Acknowledgments wskazywałyby
+# na strony, których nie prowadzimy. Odnośnik do dokumentu, który nie istnieje,
+# kosztuje zgłaszającego jedno żądanie i kończy się błędem zamiast odpowiedzią —
+# jest więc gorszy niż jego brak. Ta sama zasada co przy nagłówku Link
+# i relacjach api-catalog / service-desc.

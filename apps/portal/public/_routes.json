@@ -4,6 +4,7 @@
     "/*"
   ],
   "exclude": [
+    "/.well-known/*",
     "/_astro/*",
     "/fonts/*",
     "/img/*",
