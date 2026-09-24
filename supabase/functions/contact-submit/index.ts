@@ -21,9 +21,19 @@ const CORS = {
 const json = (data: unknown, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { ...CORS, 'Content-Type': 'application/json' } });
 
+/* Gdy w projekcie brakuje TURNSTILE_SECRET_KEY, formularz odmawia zamiast
+   wpuszczać bez sprawdzenia. Klient dostaje drogę kontaktu, a brak sekretu
+   trafia do ud_errors — głośna awaria zamiast cichej dziury. */
+const BRAK_WERYFIKACJI = 'Formularz jest chwilowo niedostępny. Zadzwoń: 504 400 901 albo napisz na info@utratadochodu.pl.';
+
 async function verifyTurnstile(token: string, ip: string): Promise<boolean> {
   const secret = Deno.env.get('TURNSTILE_SECRET_KEY');
-  if (!secret) return true; // brak konfiguracji = nie blokuj wysyłki
+  // Bez sekretu nie ma czym sprawdzić tokenu — odmowa, nie przepustka.
+  // Wcześniej stało tu `return true` i do 24.09.2026 sekretu w projekcie nie
+  // było wcale: CAPTCHA była dekoracją, każdy niepusty ciąg przechodził jako
+  // token, a nic tego nie zgłaszało. Handler wyłapuje ten stan wcześniej
+  // i odpowiada 503 z wpisem w ud_errors — to jest tylko druga linia obrony.
+  if (!secret) return false;
 
   const form = new URLSearchParams();
   form.append('secret', secret);
@@ -62,6 +72,10 @@ serve(async (req) => {
     }
 
     const token = String(body['cf-turnstile-response'] ?? '').trim();
+    if (!Deno.env.get('TURNSTILE_SECRET_KEY')) {
+      await logError('contact-submit', 'Brak TURNSTILE_SECRET_KEY — formularz odmawia przyjęcia zgłoszeń', undefined, ip);
+      return json({ status: 'error', message: BRAK_WERYFIKACJI }, 503);
+    }
     if (!token || !(await verifyTurnstile(token, ip))) {
       return json({ status: 'error', message: 'Weryfikacja bezpieczeństwa nie powiodła się. Odśwież stronę i spróbuj ponownie.' }, 400);
     }
