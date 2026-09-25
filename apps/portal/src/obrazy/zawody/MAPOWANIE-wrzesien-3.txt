@@ -1,0 +1,73 @@
+MAPOWANIE — partia wrzesniowa 3
+Dobicie kazdej kategorii do 35% pokrycia wlasnymi zdjeciami. Piec kategorii
+lezalo ponizej progu; ta partia podnosi je dokladnie do niego, ani jednego
+ujecia wiecej:
+
+  Budownictwo      2/12 = 17%  ->  5/12 = 42%   (architekt, spawacz, mechanik)
+  Finanse          6/18 = 33%  ->  7/18 = 39%   (analityk-finansowy)
+  IT / Tech        6/24 = 25%  ->  9/24 = 38%   (developer, devops, analityk-danych)
+  Sztuka / Media   1/13 =  8%  ->  5/13 = 38%   (fotograf, dziennikarz, grafik, aktor)
+  Transport        1/8  = 13%  ->  3/8  = 38%   (kurier, logistyk)
+
+Zamowione 2026-09-25, Artlist, Seedream 5.0 T2I 4K (modelId 2354), kadr 21:9,
+jedno ujecie na zawod, 100 kredytow za ujecie — razem 1300 kredytow.
+
+Prompty pisane BEZ style kitu, z tych samych powodow co w partii 2: kit
+"UtrataDochodu.pl — zdjecia kategorii" ma w tekscie "never smiling at the
+camera". Kazdy prompt niesie wprost kontakt wzrokowy i szczery usmiech, urode
+srodkowoeuropejska, f/5.6 z czytelnym tlem, bohatera po PRAWEJ z pusta lewa
+tercja, palete #1BAEE5 / #CBE9F8 / #F4FBFE, plec/wiek/wlosy kazdej osoby, zero
+tekstu w kadrze i rekwizyt rozpoznawczy.
+
+ZMIANA WZGLEDEM PARTII 2 — ekspozycja. Tamta wyszla na 212 przy 171 pierwszej
+serii, a trzy najjasniejsze ujecia (farmaceuta, diagnosta, protetyk, po 222) laczylo
+to samo: bialy fartuch na bialej scianie. Opis "expose about a third of a stop
+under" okazal sie za slaby. Tu stoi mocniejszy i z jawnym zakazem bieli na bieli:
+
+  Airy, well-lit interior, but expose a FULL STOP UNDER: this is a bright scene
+  photographed slightly dark, not a bright exposure. Mid-tones stay rich and
+  clearly separated, walls read as a definite tint rather than white, shadows
+  keep visible detail, highlights sit well below clipping. Avoid white-on-white:
+  never put a light-clothed subject against a white wall — give the background
+  a tone.
+
+Jasnosc trzeba zmierzyc PO wgraniu plikow (sharp().stats(), srednia z
+channels[0..2].mean) i dopisac tutaj. Cel: blizej 171 niz 212.
+
+Kolumny: <uuid pliku>  <slug>. Skrypt przemianuj.mjs dopasowuje po uuid w nazwie
+pliku, wiec zadziala tylko na plikach, ktore zachowaly nazwe z generatora
+(-t-e-x-t_-t-o_-i-m-a-g-e-<uuid>.jpeg). Pobrane przez panel przychodza jako
+_Seedream_50_<liczba>.jpg i uuid w nich nie ma — wtedy dopasuj recznie po
+identyfikatorze generacji z tabeli na dole pliku (get_generation_status na nim
+zwraca gotowy obraz).
+
+e99870f9-6ba7-4cf1-9ce8-0931eaf398ec  fotograf
+75e47198-4adb-4af0-8c37-844ce3cc62e2  dziennikarz
+e0f7eec9-26a0-4ed2-8556-89d61f0ca1b2  grafik
+d90d9e83-a7a0-4ea6-b8f3-a05c359cec31  aktor
+ea2560ed-f638-4d52-9bcf-81cbe0d6b0f2  kurier
+34ce0a1a-1868-4170-8fe4-38b6ada177b6  logistyk
+a96c9742-ab3a-477f-a984-6751f0cda56d  architekt
+5ad7bcd4-da2a-485e-9ad0-546e95950b03  spawacz
+cb2ed5ea-232d-49de-b359-aa4f7dfb22db  mechanik
+b0b806e0-d6c5-4850-988f-c477225066e9  developer
+16909faa-94d7-4f2c-9fb9-bee94d90db65  devops
+8e515039-e56b-4733-ada8-d78dc9984fc7  analityk-danych
+2d5b512e-682f-4f6a-b4d3-b2be5cc9c9b6  analityk-finansowy
+
+# Identyfikatory generacji — trzymane, bo uuid pliku jest bezuzyteczny, gdy
+# nazwa przepadnie przy pobieraniu, a z generationId da sie obraz odtworzyc.
+#
+# fotograf             01a0daae-2e30-7b1c-bbed-1eb035c2654b
+# dziennikarz          01a0daae-3f20-7aca-b164-7e23e969a822
+# grafik               01a0daae-5323-7b73-b3de-42a7868bb03b
+# aktor                01a0daae-625c-754c-8b7f-ebb57de37592
+# kurier               01a0daae-72c4-762e-976f-17b6cc26bf28
+# logistyk             01a0daae-841b-7855-b81e-cfd131ca1d33
+# architekt            01a0daae-9468-74d9-9a1a-003f9d0e66d8
+# spawacz              01a0daaf-2435-782f-80a7-2bc1fd52520c
+# mechanik             01a0daaf-2759-788f-a1b8-8abba39723d4
+# developer            01a0daaf-2a00-79c3-9347-82a03acfea04
+# devops               01a0daaf-2c5d-7534-be41-b368bad2f7cb
+# analityk-danych      01a0daaf-2ea8-7c36-a38b-f9518744b794
+# analityk-finansowy   01a0daaf-311e-7df7-b3d7-de47f1e1a151
