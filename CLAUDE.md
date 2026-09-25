@@ -730,13 +730,35 @@ serwisu. Middleware dokłada tam `X-Robots-Tag: noindex, nofollow` na każdą
 odpowiedź. Kanoniczne odnośniki w HTML-u to za mało — są podpowiedzią, nagłówek
 jest wiążący.
 
+### Kontrola z zewnątrz — przed przepięciem i zaraz po nim
+
+```
+bash apps/portal/scripts/sprawdz-wdrozenie.sh https://<hash>.utratadochodu.pages.dev
+bash apps/portal/scripts/sprawdz-wdrozenie.sh https://utratadochodu.pl
+```
+
+Testy w `test/` sprawdzają kod i build na miejscu. Sekretów w projekcie Pages,
+reguł `_redirects` wykonywanych przez Cloudflare i nagłówków po przejściu przez
+middleware stamtąd nie widać — skrypt sprawdza je żądaniami z zewnątrz. Niczego
+nie zapisuje i sam rozpoznaje tryb po adresie: na podglądzie wymaga `noindex`,
+na domenie traktuje go jako błąd.
+
+**Z sandboksa asystenta nie zadziała** — proxy nie wpuszcza ani `*.pages.dev`,
+ani domeny. Uruchamia go człowiek, na zwykłym komputerze.
+
+**Zmienne i sekrety w Pages działają od następnego wdrożenia.** Wdrożenie
+zbudowane przed ich dodaniem odpowiada 503 na `/owu/…` i `/wspolpraca` — wtedy
+Deployments → Retry deployment, a nie szukanie błędu w kodzie.
+
 ### Czego nie da się zrobić z repozytorium
 
 To są ustawienia w panelu Cloudflare i decyzje klienta:
 
 - Root directory `apps/portal`, build command `pnpm install && pnpm build`.
 - `SUPABASE_SERVICE_ROLE_KEY` jako **Encrypt**, nigdy Plain — bez niego
-  `/pobierz/<id>` nie poda żadnego dokumentu OWU.
+  `/owu/<slug>.pdf` nie poda żadnego dokumentu OWU.
+- `TURNSTILE_SECRET_KEY` i `RESEND_API_KEY` też jako Secret — bez nich
+  formularz współpracy (`/wspolpraca`) odpowiada 503.
 - Zmienne `PUBLIC_*` odwrotnie: muszą być Plain, inaczej nie dojdą do builda.
   Nie są sekretami, widać je w źródle strony.
 - Podpis prawnika pod regulaminem, polityką prywatności i klauzulą
