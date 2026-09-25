@@ -172,22 +172,29 @@ async function initRandomBlogPost() {
 ────────────────────────────────────────── */
 /* Modal awarii z prośbą o telefon; bez awaria.js zostaje czerwony tekst
    pod formularzem (ma ten sam numer). */
-function pokazBladSzybkiegoKontaktu(kod, szczegoly) {
+function pokazBladSzybkiegoKontaktu(kod, opis, szczegoly) {
   if (window.Awaria) {
-    window.Awaria.pokaz({ kod: kod, szczegoly: szczegoly });
+    window.Awaria.pokaz({ kod: kod, opis: opis || undefined, szczegoly: szczegoly });
   } else {
     document.getElementById('quick-error')?.classList.remove('hidden');
   }
 }
 
-/* Token Turnstile jest jednorazowy — po nieudanej próbie trzeba go odświeżyć,
-   inaczej kolejne kliknięcie „Wyślij" poleci ze zużytym tokenem. */
-function resetTurnstile(form) {
+/* Token Turnstile jest jednorazowy — po nieudanej wysyłce trzeba zresetować
+   widget, inaczej ponowna próba poleci ze zużytym tokenem i też się wywali.
+   Reset po elemencie, bo na stronie głównej są dwa widgety (tu i we wniosku). */
+function resetujTurnstile(form) {
   const widget = form.querySelector('.cf-turnstile');
   if (widget && window.turnstile) {
-    try { window.turnstile.reset(widget); } catch { /* widget jeszcze nieaktywny */ }
+    try { window.turnstile.reset(widget); } catch {}
   }
 }
+
+/* Wysyłka idzie przez Edge Function, nie prosto do PostgREST: token Turnstile
+   musi zweryfikować serwer (PostgREST tego nie potrafi), a payload z polem
+   cf-turnstile-response leciał do bazy jako nieistniejąca kolumna — każdy
+   INSERT kończył się wtedy błędem 400 (PGRST204). */
+const CONTACT_FN_URL = `${_SB_URL}/functions/v1/contact-submit`;
 
 function initQuickForm() {
   const form = document.getElementById('quick-form');
@@ -200,6 +207,17 @@ function initQuickForm() {
     const phone = document.getElementById('quick-phone')?.value.trim();
     const turnstileToken = form.querySelector('[name="cf-turnstile-response"]')?.value;
     if (!name || !email || !phone) return;
+
+    /* Ta sama pułapka co we wniosku: bez widgetu w DOM użytkownik dostaje prośbę
+       o potwierdzenie, że nie jest robotem, i nie ma czego kliknąć. To awaria
+       konfiguracji — ma trafić do ud_errors, a nie zostać na stronie po cichu. */
+    if (!form.querySelector('.cf-turnstile')) {
+      pokazBladSzybkiegoKontaktu('TURNSTILE_BRAK_WIDGETU',
+        'Formularz jest chwilowo niedostępny.',
+        'Brak elementu .cf-turnstile w formularzu ' + (form.id || '(bez id)'));
+      return;
+    }
+
     if (!turnstileToken) {
       document.getElementById('quick-turnstile-error').classList.remove('hidden');
       return;
@@ -212,34 +230,23 @@ function initQuickForm() {
     btn.disabled = true;
 
     try {
-      /* Przez edge function, nie prosto do PostgREST: token Turnstile musi
-         zweryfikować serwer, a PostgREST odrzuciłby payload z polem
-         'cf-turnstile-response' (nie ma takiej kolumny → PGRST204). */
-      const res = await fetch(`${_SB_URL}/functions/v1/contact-submit`, {
+      const res = await fetch(CONTACT_FN_URL, {
         method: 'POST',
-        headers: {
-          apikey: _SB_KEY,
-          Authorization: `Bearer ${_SB_KEY}`,
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json', apikey: _SB_KEY },
         body: JSON.stringify({ name, email, phone, 'cf-turnstile-response': turnstileToken }),
       });
-
       const wynik = await res.json().catch(() => ({}));
 
       if (res.ok && wynik.status === 'success') {
         form.classList.add('hidden');
         document.getElementById('quick-success').classList.remove('hidden');
       } else {
-        pokazBladSzybkiegoKontaktu(
-          'SZYBKI_KONTAKT_ODPOWIEDZ',
-          'HTTP ' + res.status + (wynik.message ? ' — ' + wynik.message : ''),
-        );
-        resetTurnstile(form);
+        resetujTurnstile(form);
+        pokazBladSzybkiegoKontaktu('SZYBKI_KONTAKT_ODPOWIEDZ', wynik.message, wynik.message || 'HTTP ' + res.status);
       }
     } catch (err) {
-      pokazBladSzybkiegoKontaktu('SZYBKI_KONTAKT_SIEC', err);
-      resetTurnstile(form);
+      resetujTurnstile(form);
+      pokazBladSzybkiegoKontaktu('SZYBKI_KONTAKT_SIEC', null, err);
     } finally {
       btn.textContent = origTxt;
       btn.disabled = false;

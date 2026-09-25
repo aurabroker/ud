@@ -1,4 +1,6 @@
-# Test CSP
+# Testy
+
+## CSP
 
 Sprawdza, czy polityka CSP (`_headers` + metatagi w HTML) nie blokuje żadnego
 zasobu używanego przez strony. Uruchamia prawdziwe Chromium, serwuje repo
@@ -18,3 +20,68 @@ NODE_PATH=$(npm root -g) node tests/csp-test.js
 ```
 
 Kod wyjścia 0 = brak blokad. Po każdej zmianie CSP uruchom ten test.
+
+## Szybki kontakt (`quick-form-test.js`)
+
+Pilnuje, żeby formularz szybkiego kontaktu z `index.html` szedł do Edge Function
+`contact-submit`, a nie prosto do PostgREST — to była awaria, przez którą
+formularz nie zapisał ani jednego leada od 15.06 do 09.09.2026. Sprawdza też
+kształt payloadu, ścieżkę błędu (modal awarii z komunikatem serwera) i reset
+widgetu Turnstile po nieudanej próbie.
+
+```
+NODE_PATH=$(npm root -g) node tests/quick-form-test.js
+```
+
+## Konwersja z wniosku (`wniosek-konwersja-test.js`)
+
+Pilnuje jedynej działającej ścieżki konwersji Google Ads: udana wysyłka wniosku →
+redirect na `/thankyou.html` → `gtag('event', 'conversion')`. Sprawdza etykietę
+konwersji, konfigurację Google Ads i GA4 na stronie podziękowania, rozróżnienie
+między brakiem widgetu Turnstile (awaria konfiguracji) a nierozwiązanym widgetem
+(zwykły komunikat) oraz odświeżanie tokenu na ostatnim kroku kreatora.
+
+Regresja, której pilnuje: 07.06.2026 bramka Turnstile trafiła do `style.js`,
+a widget tylko do `formularz.html`. Wysyłka z `index.html` przerywała się po cichu
+i konwersje stały trzy miesiące.
+
+```
+NODE_PATH=$(npm root -g) node tests/wniosek-konwersja-test.js
+```
+
+## Modal awarii (`awaria-test.js`)
+
+Symuluje padnięty backend na każdej stronie z formularzem i sprawdza, czy
+użytkownik dostaje modal z numerem telefonu.
+
+```
+NODE_PATH=$(npm root -g) node tests/awaria-test.js
+```
+
+## Kontrakt wniosku (`wniosek-kontrakt-test.js`)
+
+Sprawdza nie „czy wysyłka poleciała", tylko **co leci w payloadzie** i czy
+funkcja po drugiej stronie to przyjmie. Wypełnia wniosek jak klient (deklaracja
+choroby serca, wybór ryzyk, suma trwałej niezdolności), przechwytuje prawdziwy
+payload z przeglądarki i konfrontuje go z:
+
+- funkcją `yesNo()` wczytaną z `supabase/functions/form-submit/index.ts`,
+- regułami biznesowymi z **wdrożonej** wersji `form-submit` (wersja 20,
+  „spec zmiana_1" i „zmiana_2"), których w repo nie ma.
+
+```
+NODE_PATH=$(npm root -g) node tests/wniosek-kontrakt-test.js
+```
+
+Wszystko sprawdza na **obu** stronach z wnioskiem (`index.html`
+i `formularz.html`) — bramka dodana tylko do jednej z nich to błąd, na którym
+poległ Turnstile 07.06.2026.
+
+Uruchom po każdej zmianie w `style.js`, w kroku ryzyk / ankiecie medycznej
+w obu plikach HTML oraz w `supabase/functions/form-submit/index.ts`.
+
+Znana, świadoma różnica między stronami: `formularz.html` ma pola opisu chorób
+(`med_*_notes`), `index.html` ich nie ma — pyta o choroby, ale nie daje ich
+opisać. Funkcja przyjmuje ankietę bez opisów, więc to nie blokada; czeka na
+decyzję właściciela, bo dokładanie pól na stronie głównej dotyka ścieżki
+konwersji.

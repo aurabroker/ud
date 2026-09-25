@@ -23,18 +23,22 @@ src="https://www.facebook.com/tr?id=4299065913693248&ev=PageView&noscript=1"
 <!-- End Meta Pixel Code -->
 <!-- Google tag -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=AW-18020137303"></script>
-<script nonce="{{NONCE}}">
+<script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
   gtag('config', 'AW-18020137303');
+  gtag('config', 'G-MGB0RBTCC9');
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Wniosek ubezpieczeniowy | UtrataDochodu.pl</title>
 <meta name="description" content="Wypełnij wniosek o ubezpieczenie od utraty dochodu. Produkty Lloyd's: CEU i Leadenhall Insurance SA. Aura Expert Sp. z o.o.">
 <meta name="robots" content="noindex, nofollow">
 <link rel="canonical" href="https://utratadochodu.pl/formularz.html">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="icon" type="image/png" href="/favicon.png">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="theme-color" content="#01696f">
 <link rel="stylesheet" href="/formularz.css">
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
@@ -365,10 +369,12 @@ src="https://www.facebook.com/tr?id=4299065913693248&ev=PageView&noscript=1"
                                 <label class="block text-sm font-semibold text-slate-700 mb-1">Suma ubezpieczenia (zł)</label>
                                 <input type="number" name="permIncapacitySum" id="permIncapacitySum" min="0" step="1000" placeholder="np. 300 000" inputmode="numeric"
                                     class="block w-full rounded-md border-slate-300 border shadow-sm p-2.5 outline-none focus:ring-2 focus:ring-blue-500">
-                                <p class="text-xs text-slate-400 mt-1">Max. 10× roczne przychody. Zaokrąglana do tysięcy.</p>
+                                <p class="text-xs text-slate-400 mt-1">Max. 10× roczne przychody. Zaokrąglana do tysięcy. Wymaga zaznaczenia „Okresowej niezdolności".</p>
                             </div>
                         </div>
 
+                        <!-- „Okresowa" jest ryzykiem podstawowym — bez niej Edge Function odrzuca wniosek. -->
+                        <p id="risks-error" class="hidden text-sm text-red-600 font-semibold bg-red-50 border border-red-200 rounded-lg p-3 mt-2" role="alert"></p>
                     </div>
                     <!-- Klauzule NW -->
                     <div id="nw-clauses-section" class="hidden bg-blue-50 border border-blue-200 rounded-xl p-4 sm:p-5 space-y-4">

@@ -10,7 +10,7 @@ SPIS TREŚCI
 3. Formularze i przepływ danych
 4. Backend — Supabase
 5. Edge Functions
-6. Powiadomienia (email + WhatsApp)
+6. Powiadomienia (email + SMS)
 7. Kalkulator składki
 8. Blog
 9. Strony zawodowe (SEO)
@@ -69,8 +69,10 @@ Telefon:  +48 504 400 901
 
   supabase/
     functions/
+      contact-submit/         — Obsługa szybkiego kontaktu (→ udochodu_contacts)
       form-submit/            — Obsługa pełnego wniosku (→ ud_clients + GetResponse)
-      send-confirmation-email/ — Wysyłka emaila (Resend) + powiadomienie WhatsApp
+      review-submit/          — Obsługa formularza opinii (→ ud_review)
+      send-confirmation-email/ — Wysyłka emaila (Resend) + powiadomienie SMS
 
   <zawod>/index.html      — Ponad 200 stron landing page per zawód (SEO)
                             Generowane przez build_ud.py / build.py
@@ -92,13 +94,14 @@ Telefon:  +48 504 400 901
 Lokalizacja: index.html — sekcja na samej górze strony (nad nawigacją)
 Pola: Imię i nazwisko | Adres e-mail | Numer telefonu
 Tabela Supabase: udochodu_contacts
-Wysyłka: fetch() → Supabase REST API (anon key, RLS policy: anon INSERT)
+Wysyłka: fetch() → Edge Function contact-submit (service_role, bypass RLS)
 
 Przepływ po wysłaniu:
-  1. Rekord trafia do udochodu_contacts
+  1. Edge Function weryfikuje token Turnstile i zapisuje rekord
+     do udochodu_contacts
   2. Database Webhook (INSERT) → Edge Function send-confirmation-email
   3. Klient dostaje email z podziękowaniem + link do pełnego wniosku
-  4. Doradca dostaje powiadomienie WhatsApp z danymi klienta
+  4. Doradca dostaje SMS z danymi klienta
 
 --- PEŁNY WNIOSEK (ubezpieczeniowy) ---
 
@@ -120,7 +123,7 @@ Przepływ po wysłaniu:
   3. Kontakt synchronizowany z GetResponse (lista mailingowa)
   4. Database Webhook (INSERT) → Edge Function send-confirmation-email
   5. Klient dostaje email z informacją o weryfikacji (1-2 dni robocze)
-  6. Doradca dostaje powiadomienie WhatsApp z danymi + zawodem
+  6. Doradca dostaje SMS z danymi + zawodem
 
 
 ================================================================================
@@ -165,6 +168,26 @@ Storage bucket: article-images
 5. EDGE FUNCTIONS
 ================================================================================
 
+--- contact-submit ---
+Wyzwalacz: POST z przeglądarki (fetch w app.js, formularz szybkiego kontaktu)
+Autoryzacja: brak JWT (publiczny endpoint z CORS)
+Działanie:
+  1. Weryfikacja tokenu Turnstile w API Cloudflare (siteverify)
+  2. Walidacja imienia, e-maila i telefonu
+  3. INSERT do udochodu_contacts (createClient z service_role key)
+  4. Zwraca { status: 'success' } lub { status: 'error', message: '...' }
+
+Zmienne środowiskowe:
+  SUPABASE_URL              — auto-inject
+  SUPABASE_SERVICE_ROLE_KEY — auto-inject
+  TURNSTILE_SECRET_KEY      — sekret Cloudflare Turnstile
+                              (gdy nie ustawiony, weryfikacja jest pomijana)
+
+Uwaga: przeglądarka NIE może wysyłać tego formularza prosto do PostgREST.
+Token `cf-turnstile-response` nie jest kolumną w udochodu_contacts, więc taki
+INSERT kończy się błędem 400 (PGRST204), a tokenu i tak nie miałby kto
+zweryfikować — PostgREST nie rozmawia z Cloudflare.
+
 --- form-submit ---
 Wyzwalacz: POST z przeglądarki (fetch w style.js)
 Autoryzacja: brak JWT (publiczny endpoint z CORS)
@@ -190,17 +213,23 @@ Działanie:
   3. Określa typ formularza: udochodu_contacts = szybki, ud_clients = pełny
   4. Generuje HTML email (inny dla każdego typu)
   5. Wysyła email przez Resend API
-  6. Wysyła powiadomienie WhatsApp przez CallMeBot API
+  6. Wysyła SMS do doradcy przez SMSAPI.pl
   7. Loguje wynik
 
 Zmienne środowiskowe:
   RESEND2_API_KEY — klucz API Resend
+  SMSAPI_SENDER   — token OAuth SMSAPI.pl (mylna nazwa, tak sekret został
+                    założony w panelu; bez tokenu SMS jest pomijany,
+                    e-mail idzie normalnie)
+  SMSAPI_TOKEN    — ta sama rola, ma pierwszeństwo; użyć po przemianowaniu
+                    sekretu w panelu
+  SMSAPI_FROM     — zarejestrowana nazwa nadawcy; pusta = domyślny nadawca konta
+  ADVISOR_PHONE   — numer doradcy w formacie 48XXXXXXXXX
+                    (domyślnie 48504400901)
 
 Stałe w kodzie:
   FROM_EMAIL = "UtrataDochodu.pl <noreply@utratadochodu.com>"
   REPLY_TO   = "biuro@utratadochodu.com"
-  WA_PHONE   = numer doradcy (format: 48XXXXXXXXX)
-  WA_APIKEY  = klucz CallMeBot
 
 
 ================================================================================
@@ -225,14 +254,19 @@ Pełny wniosek:
   - 3 kroki: weryfikacja (1-2 dni) → oferta emailem → ewentualny telefon
   - Stopka z danymi Aura Expert + ubezpieczycielami
 
---- WhatsApp dla doradcy (CallMeBot) ---
+--- SMS dla doradcy (SMSAPI.pl) ---
 
-Serwis: https://api.callmebot.com
-Aktywacja: jednorazowa — wysłanie "I allow callmebot to send me messages"
-           na numer CallMeBot (aktualny numer na callmebot.com)
+Serwis: https://api.smsapi.pl/sms.do (autoryzacja: Bearer, token z sekretu)
+Odbiorca: ADVISOR_PHONE
 
-Szybki formularz: "📱 Nowy kontakt! Imię: X / Tel: X / Email: X"
-Pełny wniosek:    "📋 Nowy wniosek! Imię: X / Tel: X / Email: X / Zawód: X"
+Szybki formularz: "UtrataDochodu: nowy kontakt. X, tel X, X"
+Pełny wniosek:    "UtrataDochodu: nowy wniosek. X, tel X, X, zawod: X"
+
+Treść jest spłaszczana do ASCII (bez ogonków i emoji). Powód: SMS z polskimi
+znakami idzie w UCS-2, przez co limit spada ze 160 do 70 znaków i jedno
+zgłoszenie potrafi kosztować trzy wiadomości.
+
+Poprzedni kanał — WhatsApp przez CallMeBot — został wyłączony.
 
 
 ================================================================================
@@ -305,6 +339,11 @@ Generator: build_ud.py + professions-metadata.json
 
 Supabase Edge Function Secrets (ustawiać przez Supabase Dashboard):
   RESEND2_API_KEY        — klucz API Resend (wysyłka emaili)
+  SMSAPI_SENDER          — token OAuth SMSAPI.pl (SMS do doradcy)
+  SMSAPI_TOKEN           — to samo pod właściwą nazwą, ma pierwszeństwo
+  SMSAPI_FROM            — nazwa nadawcy SMS (opcjonalna)
+  ADVISOR_PHONE          — numer doradcy, format 48XXXXXXXXX (opcjonalny)
+  TURNSTILE_SECRET_KEY   — sekret Cloudflare Turnstile (weryfikacja formularzy)
   GETRESPONSE_API_KEY    — klucz API GetResponse (sync listy mailingowej)
   GETRESPONSE_LIST_ID    — ID listy w GetResponse
 
@@ -315,11 +354,8 @@ Auto-inject przez Supabase (nie trzeba ustawiać ręcznie):
 
 Frontend (hardcoded w app.js — dane publiczne):
   _SB_URL = https://kukvgsjrmrqtzhkszzum.supabase.co
-  _SB_KEY = <anon key> (tylko SELECT na aura_articles + INSERT na udochodu_contacts)
-
-Edge Function send-confirmation-email (hardcoded):
-  WA_PHONE   — numer WhatsApp doradcy (format 48XXXXXXXXX)
-  WA_APIKEY  — klucz CallMeBot doradcy
+  _SB_KEY = <anon key> (tylko SELECT na aura_articles; zapis formularzy
+            idzie przez Edge Functions)
 
 
 ================================================================================

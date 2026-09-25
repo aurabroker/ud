@@ -138,6 +138,111 @@ działa na nowe wysyłki — pliki, które już leżą, zostają.
 
 ---
 
+## Znaczniki Google — nie dotykać
+
+> **Zakres: stary serwis w katalogu głównym repozytorium** (`index.html`,
+> `formularz.html`, `thankyou.html`, `opinia.html`, `style.js`, `app.js`) —
+> ten, który obsługuje domenę do chwili przepięcia. Nowy portal
+> (`apps/portal`) liczy konwersje inaczej, z Consent Mode v2 w trybie basic,
+> decyzją właściciela z września 2026 — patrz „Zgody na cookies" i „Konwersja
+> Ads liczy WNIOSKI". Obie zasady są prawdziwe, każda dla swojego serwisu.
+
+**Zakaz modyfikowania, przenoszenia i usuwania znaczników Google przy okazji innej
+pracy.** Dotyczy bloku `<!-- Google tag -->` w `<head>` każdej strony, wywołań
+`gtag(...)`, `dataLayer`, identyfikatorów `AW-18020137303` i `G-MGB0RBTCC9`,
+etykiety konwersji `_uZeCOTG_KwcENfy1ZBD` oraz przekierowania na `/thankyou.html`
+po udanej wysyłce wniosku.
+
+Zmiana w tych miejscach wymaga **wyraźnej zgody właściciela strony** i osobnego
+commita, który nie robi nic innego. Nie „przy okazji” refaktoru, porządków w
+`<head>`, migracji CSS czy zmian w CSP.
+
+Powód: konwersje z Google Ads zamarły na trzy miesiące (09.06–09.09.2026), bo
+kolejne zmiany poboczne po kolei rozbrajały tę ścieżkę. Pełna analiza w
+`DIAGNOSTYKA_KONWERSJI.md`. Nikt tego nie zauważył, bo nic się nie wysypuje —
+strona wygląda normalnie, po prostu przestają spływać leady.
+
+### Czego pilnować przy każdej zmianie w `<head>`
+
+| Element | Gdzie | Czego nie wolno |
+|---|---|---|
+| `gtag('config', 'AW-18020137303')` | każda strona | usunąć, zakomentować, przenieść za inne skrypty |
+| `gtag('config', 'G-MGB0RBTCC9')` | `index.html`, `formularz.html`, `thankyou.html` | jw. |
+| `gtag('event', 'conversion', …)` | tylko `thankyou.html` | usunąć, przenieść na inną stronę, odpalić warunkowo |
+| `window.location.href = '/thankyou.html'` | `style.js`, gałąź sukcesu | zamienić z powrotem na modal — to jedyny wyzwalacz konwersji |
+
+### Nie dodawaj bramek przed wysyłką bez sprawdzenia wszystkich stron
+
+`style.js` obsługuje formularz `#insurance-form` na **dwóch** stronach:
+`index.html` i `formularz.html`. `app.js` obsługuje `#quick-form` na `index.html`.
+Każdy nowy warunek, który potrafi przerwać `submit`, trzeba wprowadzić razem
+z odpowiednim markupem na **wszystkich** stronach korzystających z danego pliku.
+Dokładnie na tym poległ Turnstile 07.06.2026: bramka trafiła do `style.js`,
+a widget tylko do `formularz.html`.
+
+Warunek, który przerywa wysyłkę z powodu brakującego elementu strony, ma zgłaszać
+awarię przez `Awaria.pokaz()` (kod `TURNSTILE_BRAK_WIDGETU`), a nie pokazywać
+użytkownikowi prośbę o kliknięcie w coś, czego nie ma.
+
+### Test
+
+```
+NODE_PATH=$(npm root -g) node tests/wniosek-konwersja-test.js
+```
+
+Sprawdza całą ścieżkę: wysyłka → redirect → event konwersji z poprawną etykietą,
+plus rozróżnienie braku widgetu od nierozwiązanego widgetu. Uruchom po każdej
+zmianie w `style.js`, `app.js`, `thankyou.html` i w CSP.
+
+### Consent Mode
+
+W starym serwisie nie jest zaimplementowany i **nie wolno go tam wprowadzać bez
+decyzji właściciela** — włączenie zmienia wolumen raportowanych konwersji. Temat
+jest świadomie odłożony, nie jest to przeoczenie do „naprawienia” przy okazji.
+
+Decyzja dla nowego portalu zapadła osobno: tam Consent Mode v2 jest, a spadek
+liczby konwersji po przepięciu jest oczekiwany (patrz „Zgody na cookies").
+
+---
+
+## Formularze — wysyłka zawsze przez Edge Function
+
+Żaden formularz publiczny nie strzela z przeglądarki prosto do PostgREST
+(`/rest/v1/<tabela>`). Wysyłka idzie do Edge Function, która weryfikuje token
+Turnstile i dopiero wtedy zapisuje rekord kluczem `service_role`.
+
+| Formularz | Endpoint | Tabela |
+|---|---|---|
+| Szybki kontakt (`index.html`) | `/functions/v1/contact-submit` | `udochodu_contacts` |
+| Pełny wniosek (`index.html`, `formularz.html`) | `/functions/v1/form-submit` | `ud_clients` |
+| Opinia (`opinia.html`) | `/functions/v1/review-submit` | `ud_review` |
+
+Dwa powody — oba wynikają z realnej awarii (formularz szybkiego kontaktu był
+martwy od 15.06.2026 do 09.09.2026, zero leadów przez trzy miesiące):
+
+1. **Token nie jest kolumną.** Payload z polem `cf-turnstile-response` leci do
+   PostgREST jako nieistniejąca kolumna i cały INSERT wraca błędem 400
+   (`PGRST204`). Do bazy wolno wysyłać wyłącznie kolumny, które w niej są.
+2. **Tokenu nie ma kto sprawdzić.** PostgREST nie rozmawia z Cloudflare, więc
+   widget bez Edge Function jest wyłącznie dekoracją — bot i tak wejdzie
+   bezpośrednio na REST API.
+
+### Po nieudanej wysyłce zresetuj widget Turnstile
+
+Token jest jednorazowy. Bez `turnstile.reset(widget)` druga próba poleci ze
+zużytym tokenem i też się wywali. Resetuj wskazując element kontenera
+(`form.querySelector('.cf-turnstile')`) — na `index.html` są dwa widgety
+(szybki kontakt i wniosek), więc gołe `reset()` bez argumentu trafi
+w niewłaściwy.
+
+### Test
+
+```
+NODE_PATH=$(npm root -g) node tests/quick-form-test.js
+```
+
+---
+
 ## CSP (Content-Security-Policy)
 
 Zdjęcia z Supabase Storage są serwowane z domeny:
@@ -301,6 +406,40 @@ Zasady:
   `opinia.html` (opinie). Nową ścieżkę wysyłki podpinaj tak samo.
 - Test: `NODE_PATH=$(npm root -g) node tests/awaria-test.js`.
 
+## Ikona strony (favicon)
+
+Zakres: stary serwis w katalogu głównym. Nowy portal ma własną ikonę:
+`apps/portal/public/favicon.svg`.
+
+Master to **`favicon.svg`** — zwykły plik tekstowy, edytowalny ręcznie. Rastry są
+z niego odtwarzane:
+
+```
+python3 build_favicon.py
+```
+
+Nie poprawiaj `favicon.png`, `favicon.ico` ani `apple-touch-icon.png` w edytorze
+graficznym — przy następnym uruchomieniu skryptu zmiany przepadną. Popraw SVG.
+
+| Plik | Rozmiar | Do czego |
+|---|---|---|
+| `favicon.svg` | wektor | główna ikona nowoczesnych przeglądarek |
+| `favicon.ico` | 16 / 32 / 48 | starsze przeglądarki i automatyczne zapytanie o `/favicon.ico` |
+| `favicon.png` | 32 | fallback dla `type="image/png"` |
+| `apple-touch-icon.png` | 180 | ekran główny iOS, **musi być nieprzezroczysty** i bez zaokrąglonych rogów |
+
+Linki są w `index.html`, `formularz.html` i `opinia.html`. Pozostałe 235 podstron
+nie ma tagów i nie potrzebuje ich — przeglądarka sama pyta o `/favicon.ico`
+w katalogu głównym i go znajduje.
+
+Kolejność linków ma znaczenie: przeglądarka bierze **ostatni** format, który zna,
+więc SVG idzie na końcu.
+
+Test CSP liczy odpowiedzi 404, więc usunięcie któregokolwiek z tych plików
+wywali `tests/csp-test.js`.
+
+---
+
 ## `<meta charset>` musi być w pierwszym 1 KB pliku
 
 Przeglądarka skanuje w poszukiwaniu deklaracji kodowania tylko pierwszy
@@ -308,11 +447,18 @@ Przeglądarka skanuje w poszukiwaniu deklaracji kodowania tylko pierwszy
 skryptem Meta Pixela (bajt 1812 / 1162) i był ignorowany — polskie znaki
 ratował wyłącznie nagłówek `charset=utf-8` od Cloudflare.
 
+`thankyou.html` miał ten sam problem w wersji utajonej: deklaracja siedziała na
+bajcie **1020**, czyli cztery bajty przed limitem. Dopisanie jednej linijki do
+bloku gtag wypchnęłoby ją poza 1 KB. Naprawione 09.09.2026 — wszystkie trzy pliki
+mają teraz `charset` na bajcie 62.
+
 **`<meta charset="UTF-8">` ma być pierwszą linią po `<head>`.** Przy dodawaniu
 czegokolwiek na początek `<head>` sprawdź, czy nie wypycha deklaracji poza 1 KB:
 
 ```
-python3 -c "import re;d=open('index.html','rb').read();print(re.search(rb'<meta[^>]*charset',d).start())"
+for f in index.html formularz.html thankyou.html; do
+  python3 -c "import re,sys;d=open('$f','rb').read();print('$f', re.search(rb'<meta[^>]*charset',d).start())"
+done
 ```
 
 ---
