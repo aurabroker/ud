@@ -26,11 +26,13 @@ bez jednej linii różnicy w jego własnym pliku. Zmiana, która „nie mogła t
 ruszyć", jest dokładnie tą, po której nikt nie sprawdza.
 
 Co test mierzy i czego NIE mierzy — patrz nagłówek samego skryptu. Jedna
-rzecz wymaga podkreślenia tutaj: **część sieciowa nie działa z tego
-środowiska**, bo proxy nie ma `kukvgsjrmrqtzhkszzum.supabase.co` na liście
-dozwolonych hostów. Skrypt to wykrywa i mówi wprost, że tej części nie
-wykonał. **Pominięta część sieciowa to nie jest wynik zielony** — trzeba ją
-uruchomić tam, gdzie jest wyjście do sieci.
+rzecz wymaga podkreślenia tutaj: **część sieciowa (D) potrzebuje wyjścia do
+`kukvgsjrmrqtzhkszzum.supabase.co`**. Od 25.09.2026 środowisko agenta ma ten
+host na liście dozwolonych, a skrypt sam włącza `NODE_USE_ENV_PROXY`, bo
+wbudowany `fetch` Node'a nie czyta `HTTPS_PROXY` — bez tego sonda padała
+i test ogłaszał brak sieci mimo dozwolonego hosta. Gdy sieci naprawdę nie ma,
+skrypt mówi wprost, że części D nie wykonał. **Pominięta część sieciowa to nie
+jest wynik zielony** — trzeba ją uruchomić tam, gdzie jest wyjście do sieci.
 
 ---
 
@@ -743,8 +745,15 @@ middleware stamtąd nie widać — skrypt sprawdza je żądaniami z zewnątrz. N
 nie zapisuje i sam rozpoznaje tryb po adresie: na podglądzie wymaga `noindex`,
 na domenie traktuje go jako błąd.
 
-**Z sandboksa asystenta nie zadziała** — proxy nie wpuszcza ani `*.pages.dev`,
-ani domeny. Uruchamia go człowiek, na zwykłym komputerze.
+Z sandboksa asystenta działa od 25.09.2026, kiedy środowisko dostało na listę
+dozwolonych `*.utratadochodu.pages.dev` i `utratadochodu.pl`. Zwykłego http
+tamtejsze proxy nie przepuszcza (`x-deny-reason: host_not_allowed`), więc
+przekierowania http → https stamtąd nie widać — skrypt to rozpoznaje i nie
+liczy jako błędu. To sprawdza się w przeglądarce.
+
+`www.utratadochodu.pl` na 25.09.2026 **nie ma rekordu DNS** — nie działało
+także w starym serwisie. Skrypt w trybie domeny zgłasza to jako błąd, dopóki
+www nie dostanie rekordu i przekierowania na domenę główną.
 
 **Zmienne i sekrety w Pages działają od następnego wdrożenia.** Wdrożenie
 zbudowane przed ich dodaniem odpowiada 503 na `/owu/…` i `/wspolpraca` — wtedy

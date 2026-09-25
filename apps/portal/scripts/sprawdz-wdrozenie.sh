@@ -19,8 +19,10 @@
 # sięgnie po Resend.
 #
 # Wymaga tylko bash i curl: macOS, Linux, na Windowsie Git Bash albo WSL.
-# Z sandboksa asystenta nie zadziała — proxy nie wpuszcza tam ani
-# *.pages.dev, ani domeny.
+# Z sandboksa asystenta działa, o ile środowisko ma na liście dozwolonych
+# *.utratadochodu.pages.dev i utratadochodu.pl (od 25.09.2026 ma). Zwykłego
+# http tamtejsze proxy nie przepuszcza — skrypt rozpoznaje jego odmowę
+# i nie liczy jej jako błędu serwisu.
 
 BAZA=${1%/}
 if [ -z "$BAZA" ]; then
@@ -63,9 +65,13 @@ naglowek() { grep -i "^$1:" "$TMP/h" | sed -E 's/^[^:]+:[[:space:]]*//' | paste 
 ma()       { printf '%s' "$1" | grep -qiF -- "$2"; }
 tresc_ma() { grep -qiF -- "$1" "$TMP/b"; }
 
+# Odpowiedź proxy środowiska, a nie serwisu.
+od_proxy() { [ -n "$(naglowek x-deny-reason)" ]; }
+
 # Status do komunikatu o błędzie; przy braku odpowiedzi — komunikat curla.
 status() {
   if [ "$KOD" = 000 ]; then printf 'brak odpowiedzi: %s' "$(head -1 "$TMP/e")"
+  elif od_proxy; then printf 'odmowa proxy środowiska (%s), nie serwisu' "$(naglowek x-deny-reason)"
   else printf 'status %s' "$KOD"; fi
 }
 
@@ -294,7 +300,8 @@ if [ "$PODGLAD" = 0 ]; then
   sekcja '10. Domena'
   pobierz "http://$HOST/"
   dokad=$(naglowek location)
-  if [[ $KOD == 30[1278] && $dokad == "https://$HOST/"* ]]; then dobrze "http → https ($KOD)"
+  if od_proxy; then info "http → https: nie do sprawdzenia z tego miejsca — $(status)"
+  elif [[ $KOD == 30[1278] && $dokad == "https://$HOST/"* ]]; then dobrze "http → https ($KOD)"
   else zle 'http → https' "$(status)${dokad:+ → $dokad}"; fi
 
   case $HOST in
@@ -306,6 +313,8 @@ if [ "$PODGLAD" = 0 ]; then
         dobrze "www → $HOST ($KOD)"
       elif [ "$KOD" = 200 ]; then
         zle "www → $HOST" '200 — www podaje drugą kopię serwisu zamiast przekierowania'
+      elif [ "$KOD" = 000 ]; then
+        zle "www → $HOST" "$(status) — najpewniej www nie ma rekordu DNS"
       else
         zle "www → $HOST (stałe)" "$(status)${dokad:+ → $dokad}"
       fi

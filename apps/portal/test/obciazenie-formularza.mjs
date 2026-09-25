@@ -28,14 +28,28 @@
  *   odrzucania. To celowe — test nie może zakładać śmieciowych leadów w
  *   produkcji ani powiadomień do doradcy przy każdym uruchomieniu.
  *
- * Część D wymaga wyjścia do sieci. W środowisku agenta proxy nie ma hosta
- * Supabase na liście dozwolonych — skrypt to wykrywa i mówi wprost, że tej
- * części nie wykonał. POMINIĘTA CZĘŚĆ D TO NIE JEST WYNIK ZIELONY.
+ * Część D wymaga wyjścia do sieci. Gdy go nie ma, skrypt to wykrywa i mówi
+ * wprost, że tej części nie wykonał. POMINIĘTA CZĘŚĆ D TO NIE JEST WYNIK
+ * ZIELONY.
  */
 import { chromium } from '@playwright/test';
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { join, extname } from 'node:path';
+import { spawnSync } from 'node:child_process';
+
+// Wbudowany fetch Node'a nie czyta HTTPS_PROXY. Tam, gdzie ruch wychodzi
+// wyłącznie przez proxy (środowisko agenta), sonda części D padała i test
+// ogłaszał brak sieci, choć host Supabase był dozwolony. NODE_USE_ENV_PROXY
+// (Node ≥ 22.21) działa tylko od startu procesu, więc startujemy jeszcze raz
+// z tą zmienną. Kod wyjścia przechodzi bez zmian.
+if ((process.env.HTTPS_PROXY || process.env.https_proxy) && !process.env.NODE_USE_ENV_PROXY) {
+  const { status } = spawnSync(process.execPath, process.argv.slice(1), {
+    stdio: 'inherit',
+    env: { ...process.env, NODE_USE_ENV_PROXY: '1' },
+  });
+  process.exit(status ?? 1);
+}
 
 const arg = (nazwa, domyslna) => {
   const m = process.argv.find((a) => a.startsWith(`--${nazwa}=`));
