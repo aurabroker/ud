@@ -219,13 +219,17 @@ serve(async (req) => {
       informed_accepted:    yesNo(body.informedAccepted   ?? body.informed_accepted),
     };
 
-    /* Spec zmiana_1: „Okresowa" jest ryzykiem podstawowym.
-       Nie można wybrać wyłącznie „Trwałej". */
-    if (record.risk_perm_incapacity === true && record.risk_temp_incapacity !== true) {
+    /* Spec zmiana_1: „Okresowa" jest ryzykiem podstawowym — to ona jest
+       ubezpieczeniem utraty dochodu, śmierć / inwalidztwo i trwała tylko ją
+       rozszerzają. Bez niej, i bez kwoty miesięcznej, wniosku nie przyjmujemy.
+       Do 28.09.2026 stała tu wyłącznie blokada samej „Trwałej", więc przeszedł
+       wniosek z samą śmiercią / inwalidztwem. Kreator trzyma to ryzyko
+       zaznaczone na stałe; ta bramka łapie to, co przyjdzie z jego pominięciem. */
+    if (record.risk_temp_incapacity !== true || !(parseAmount(record.temp_incapacity_sum) > 0)) {
       return new Response(
         JSON.stringify({
           status: 'error',
-          message: 'Nie można wybrać wyłącznie „Trwałej niezdolności". Polisy nie da się zawrzeć bez „Okresowej niezdolności" — to ryzyko podstawowe.',
+          message: 'Polisy nie da się zawrzeć bez „Okresowej niezdolności do pracy" — to ryzyko podstawowe. Zaznacz je i wpisz kwotę miesięczną.',
         }),
         { status: 400, headers: { ...CORS, 'Content-Type': 'application/json' } },
       );

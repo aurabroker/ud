@@ -113,3 +113,14 @@ test.describe('formularze: brak sekretu Turnstile to odmowa, nie przepustka', ()
     });
   }
 });
+
+test('form-submit: bez okresowej niezdolności i jej kwoty wniosek nie trafia do bazy', () => {
+  // Okresowa niezdolność to ryzyko podstawowe. Do 28.09.2026 funkcja
+  // blokowała tylko samą „Trwałą", więc przeszedł wniosek z samą śmiercią /
+  // inwalidztwem. Bramka musi wymagać i ryzyka, i kwoty — i stać przed zapisem.
+  const zrodlo = funkcja('form-submit');
+  const bramka = gdzie(zrodlo, "record.risk_temp_incapacity !== true || !(parseAmount(record.temp_incapacity_sum) > 0)",
+    'bramka ryzyka podstawowego');
+  expect(bramka).toBeLessThan(gdzie(zrodlo, ".from('ud_clients').insert"));
+  expect(zrodlo).not.toContain('record.risk_perm_incapacity === true && record.risk_temp_incapacity !== true');
+});
