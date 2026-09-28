@@ -34,6 +34,21 @@ under" okazal sie za slaby. Tu stoi mocniejszy i z jawnym zakazem bieli na bieli
 Jasnosc trzeba zmierzyc PO wgraniu plikow (sharp().stats(), srednia z
 channels[0..2].mean) i dopisac tutaj. Cel: blizej 171 niz 212.
 
+Zmierzone 28.09.2026 na 9 wgranych plikach (6240x2656):
+
+  fotograf 124   dziennikarz 159   grafik 132   aktor 124   kurier 138
+  logistyk 165   architekt 188     spawacz 169  mechanik 175
+  srednia 153 — pierwszy raz PONIZEJ pierwszej serii (171).
+
+"A FULL STOP UNDER" zadzialalo i przestrzelilo: fotograf i aktor (po 124) sa
+wyraznie ciemniejsze od reszty zestawu. Nastepna partia: wroc do pol przyslony
+("expose about half a stop under"), zakaz bieli na bieli zostaw.
+
+Wgrane 28.09 przez GitHub z nazwami generatora, trzy pliki podwojnie
+(" (1).jpeg", identyczne co do bajta — usuniete). Nie wgrano czterech:
+developer, devops, analityk-danych, analityk-finansowy — ich identyfikatory
+generacji sa na dole pliku.
+
 Kolumny: <uuid pliku>  <slug>. Skrypt przemianuj.mjs dopasowuje po uuid w nazwie
 pliku, wiec zadziala tylko na plikach, ktore zachowaly nazwe z generatora
 (-t-e-x-t_-t-o_-i-m-a-g-e-<uuid>.jpeg). Pobrane przez panel przychodza jako

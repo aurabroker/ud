@@ -921,7 +921,11 @@ skasowałoby to wszystko na produkcji. To samo dotyczy dziś `review-admin`
 
 Numer wersji rośnie także wtedy, gdy nikt nie wdraża kodu: wpisanie sekretu
 w Edge Functions → Secrets podbiło 24.09 licznik **wszystkim** funkcjom o jeden,
-przy identycznym `ezbr_sha256`. Stan na 24.09 wieczorem: `form-submit` v22.
+przy identycznym `ezbr_sha256`. Stan na 28.09: `form-submit` v23 — od tej wersji
+bez „Okresowej niezdolności" i jej kwoty wniosek dostaje 400 (wcześniej blokowana
+była tylko sama „Trwała", więc przechodził wniosek z samą śmiercią / inwalidztwem).
+Kreator ma tę samą regułę: okresowa jest zaznaczona na stałe (`podstawowe: true`
+w `RYZYKA`).
 
 ---
 
@@ -1301,3 +1305,6 @@ sharp(plik).stats() → średnia z channels[0..2].mean
 ```
 
 Pierwsza seria ma około 171, partia medyczna 219, Prawo/Finanse/IT 193.
+Partia 3 (wrzesień, „a FULL STOP UNDER" + zakaz bieli na bieli) wyszła na 153 —
+po raz pierwszy ciemniej niż pierwsza seria, z dwoma ujęciami po 124. Pełna
+przysłona to za dużo; następnym razem pół.
