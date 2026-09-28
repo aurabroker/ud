@@ -138,6 +138,28 @@ wiersz na artykuł, zapisywany tylko przy pierwszym przepisaniu.
 Wcześniej oba były puste i stąd wzięło się 68 MB w trzynastu plikach. Limit
 działa na nowe wysyłki — pliki, które już leżą, zostają.
 
+### Nowy artykuł w portalu — dokładaj pojedynczo, nie pełną synchronizacją
+
+Portal nie pyta bazy w trakcie builda: artykuły leżą w
+`apps/portal/src/dane/artykuly.json` i `src/dane/artykuly/<slug>.html`.
+
+**Nie uruchamiaj pełnego `scripts/synchronizuj.mjs`.** Treści w repozytorium
+mają poprawki redakcyjne (commit d410f70), których w bazie nie ma — pełny
+zrzut cofnąłby je po cichu, bez jednego czerwonego testu. Do tego skrypt
+zapisuje okładki lokalnie do `public/blog/`, a repozytorium wskazuje już
+warianty `normalized/*-cover-800/1600.webp` z kubełka.
+
+Nowy artykuł idzie tak:
+
+1. Wiersz w `aura_articles`: `platforms` z `UtrataDochodu.pl`,
+   `status = 'published'` (normalizacja nie bierze szkiców), okładka
+   w `preview_image_url` — może to być adres z generatora, funkcja sama
+   go pobierze.
+2. `select public.aura_normalize_article_images('{"slug": "<slug>"}'::jsonb);`
+   zamiast czekać na cron; potem sprawdź `images_status = 'ready'`.
+3. Jeden wpis na początku `artykuly.json`, w formacie pozostałych, z adresami
+   800/1600 w `obraz`/`obrazDuzy`, i plik `artykuly/<slug>.html` z treścią.
+
 ---
 
 ## Znaczniki Google — nie dotykać
@@ -1343,3 +1365,24 @@ Pierwsza seria ma około 171, partia medyczna 219, Prawo/Finanse/IT 193.
 Partia 3 (wrzesień, „a FULL STOP UNDER" + zakaz bieli na bieli) wyszła na 153 —
 po raz pierwszy ciemniej niż pierwsza seria, z dwoma ujęciami po 124. Pełna
 przysłona to za dużo; następnym razem pół.
+
+### Okładki artykułów bloga — naturalne kolory, współczesne wnętrze
+
+Okładki bloga to nie seria zawodowa i nie biorą jej chłodnej, cyjanowej
+palety. 28.09.2026 klient odrzucił dwie wersje z rzędu: pierwszą za niebieską
+dominantę („jak w szpitalu"), drugą za przestarzałą kuchnię w tle („PRL").
+Przyjęta trzecia: **nowoczesny salon**, dzienne światło, naturalne barwy.
+
+W prompcie trzeba to napisać wprost, bo model sam tego nie dopilnuje:
+
+- naturalne, neutralne kolory — bez niebieskiej dominanty i szpitalnego
+  chłodu,
+- współczesne mieszkanie, urządzone po 2020 roku; **bez kuchni w tle**,
+  meblościanek, boazerii i wzorzystych płytek,
+- reszta jak w serii: uroda środkowoeuropejska, f/5.6 z czytelnym tłem,
+  płeć, wiek i włosy podane z góry.
+
+Kadr 3:2, rozdzielczość 2K, sto kredytów za ujęcie. Pliku nie wgrywa się do
+repozytorium: adres z generatora idzie do `aura_articles.preview_image_url`,
+a normalizacja sama go pobiera i zapisuje warianty 800/1600 w kubełku (patrz
+„Nowy artykuł w portalu").

@@ -3,6 +3,19 @@
   "zrodlo": "aura_articles (status=published, platforms zawiera UtrataDochodu.pl); zdjęcia z preview_image_800/1600",
   "artykuly": [
     {
+      "slug": "kiedy-nie-warto-kupowac-ubezpieczenia-od-utraty-dochodu",
+      "tytul": "Kiedy NIE warto kupować ubezpieczenia od utraty dochodu? Szczera analiza",
+      "zajawka": "Kiedy polisa od utraty dochodu nie ma sensu: poduszka finansowa, dochody blisko średniej, krótkie choroby, schorzenia w wyłączeniach. Do tego checklista przed zakupem.",
+      "tagi": [
+        "czy warto",
+        "OWU"
+      ],
+      "opublikowano": "2026-09-28T11:47:35Z",
+      "utworzono": "2026-09-28T11:47:35Z",
+      "obraz": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/kiedy-nie-warto-kupowac-ubezpieczenia-od-utraty-dochodu-cover-800.webp",
+      "obrazDuzy": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/kiedy-nie-warto-kupowac-ubezpieczenia-od-utraty-dochodu-cover-1600.webp"
+    },
+    {
       "slug": "choroby-psychiczne-a-ubezpieczenie-od-utraty-dochodu",
       "tytul": "Choroby psychiczne a ubezpieczenie od utraty dochodu",
       "zajawka": "Czy ubezpieczenie od utraty dochodu obejmuje depresję, stres i zaburzenia lękowe? Sprawdź, jak czytać OWU i gdzie są wyłączenia odpowiedzialności.",
