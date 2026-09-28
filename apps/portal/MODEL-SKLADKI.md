@@ -155,10 +155,17 @@ margines dopisany na oko, tylko zmierzony rozrzut modelu.
 
 ### Klauzula HIV/WZW
 
-W tych danych jej nie ma. Relacja 1,8% / 1,5% = **×1,2** pochodzi ze starego
-`Calculator.js` i nie została niczym potwierdzona. Jeśli zostaje, to jako
-mnożnik 1,2 nałożony na nową stawkę bazową — ale trzeba to zweryfikować
-w tabeli, zanim ktoś się na tej liczbie oprze.
+W próbie kalibracyjnej jej nie ma, ale w bazie są dwie oferty z klauzulą
+LW049 (stan 28.09.2026). Jedna daje czystą parę — ten sam wariant MEDICARE
+(5 000 zł, 36 miesięcy, 14/21 dni) z klauzulą i bez: składka bazowa
+1500 zł wobec 1404 zł, **×1,068**. Druga nie rozstrzyga, bo jej dwa warianty
+bez klauzuli różnią się ceną przy identycznych widocznych parametrach
+(+3% albo +13%, zależnie od tego, z którym porównać).
+
+`MNOZNIK_HIV_WZW` = **1,07** od 28.09.2026, decyzją właściciela. Wcześniej
+stało 1,2 — relacja 1,8% / 1,5% ze starego `Calculator.js`, niczym
+niepotwierdzona. Jedna para to wciąż mało: przy kolejnych ofertach z klauzulą
+warto policzyć to jeszcze raz, ręcznie.
 
 ## Jak tę kalibrację powtórzyć
 
@@ -262,8 +269,8 @@ człowieka tego samego dnia.
   problem do rozwiązania ekstrapolacją. Jeśli w bazie pojawią się oferty
   z takim okresem, funkcja SQL policzy je tym samym sposobem co 36 — i dopiero
   wtedy mnożnik ma prawo trafić do pliku.
-- **Ruszać `MNOZNIK_HIV_WZW`.** Klauzuli w danych nie ma; ta liczba jest do
-  sprawdzenia w tabeli, nie do przeliczenia.
+- **Ruszać `MNOZNIK_HIV_WZW`.** Stoi za nim jedna czysta para ofert — za mało
+  na przeliczanie maszynowe; tę liczbę ustawia się ręcznie, w `symulacja.ts`.
 - **Dopisywać współczynnika klasy ryzyka ani wieku.** Powody są w tym
   dokumencie wyżej i nie znikną przez dołożenie kilku ofert — dopóki wiek jest
   zmylony zawodem, rozdzielić ich się nie da.

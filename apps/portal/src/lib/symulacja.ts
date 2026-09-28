@@ -38,13 +38,20 @@ export type Zatrudnienie = keyof typeof LIMIT;
 export const STAWKA = kalibracja.stawka;
 
 /**
- * Klauzula HIV/WZW podnosi stawkę o 20%.
+ * Klauzula HIV/WZW podnosi stawkę o 7%.
  *
- * To jedyna liczba w tym pliku, której nie potwierdzają dane: relacja
- * 1,8% / 1,5% pochodzi ze starego Calculator.js, a w ofertach z bazy klauzuli
- * nie ma wcale. Zostaje do czasu sprawdzenia w tabeli.
+ * Z jedynej czystej pary w ofertach z bazy: ten sam wariant (MEDICARE,
+ * 5 000 zł miesięcznie, 36 miesięcy, 14/21 dni) z klauzulą LW049 i bez niej —
+ * składka bazowa 1500 zł wobec 1404 zł, czyli ×1,068. Druga oferta z klauzulą
+ * nie rozstrzyga: jej dwa warianty bez klauzuli mają przy tych samych
+ * widocznych parametrach różne ceny, więc dopłata wychodzi +3% albo +13%.
+ * 1,07 zamiast górnej granicy 1,13 — decyzja właściciela z 28.09.2026.
+ *
+ * Wcześniej stało tu 1,2 — relacja 1,8% / 1,5% ze starego Calculator.js,
+ * niczym niepotwierdzona. Liczba siedzi tutaj, a nie w kalibracja.json, bo
+ * jedna para to za mało na przeliczanie maszynowe (MODEL-SKLADKI.md).
  */
-export const MNOZNIK_HIV_WZW = 1.2;
+export const MNOZNIK_HIV_WZW = 1.07;
 
 /**
  * Okresy wypłaty świadczenia dostępne w ofercie, w miesiącach.

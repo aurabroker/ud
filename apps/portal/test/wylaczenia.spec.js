@@ -55,7 +55,7 @@ test('żaden tekst nie opisuje zakażenia HIV/WZW jako wyłączonego', () => {
   expect(naruszenia).toEqual([]);
 });
 
-test('HIV/WZW nie stoi na liście wyłączeń, a pytanie o nie mówi, co daje klauzula', () => {
+test('lista wyłączeń trzyma się OWU: bez HIV/WZW, wad wrodzonych i medycyny estetycznej', () => {
   const plik = join(DIST, 'wylaczenia', 'index.md');
   expect(existsSync(plik)).toBe(true);
   const [lista, pytania = ''] = readFileSync(plik, 'utf8').split(/^#+ Najczęstsze pytania/m);
@@ -64,6 +64,11 @@ test('HIV/WZW nie stoi na liście wyłączeń, a pytanie o nie mówi, co daje kl
   expect(pytania).toMatch(/Samo zakażenie nie jest wyłączone/);
   expect(pytania).toMatch(/LW048/);
   expect(pytania).toMatch(/LW049/);
+
+  // Tych pozycji nie ma w żadnym z sześciu OWU (Leadenhall i CEU), a psychiatria
+  // w Leadenhall wyłącza tylko jako JEDYNA przyczyna — stało tu odwrotnie.
+  expect(lista).not.toMatch(/wad wrodzonych|medycyny estetycznej|wtórne wobec/i);
+  expect(lista).toMatch(/jedyna przyczyna niezdolności/);
 
   const llms = readFileSync(join(DIST, 'llms.txt'), 'utf8');
   const sekcja = llms.split('## Czego produkt nie obejmuje')[1]?.split('\n## ')[0] ?? '';

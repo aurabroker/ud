@@ -5,7 +5,7 @@ import { test, expect } from '@playwright/test';
  * że symulacja rozjechała się ze stawkami z kalibracja.json.
  *
  *   suma    = dochód × limit          (0,8 na B2B, 0,65 na umowie o pracę)
- *   stawka  = 0,0202 (najtańsza oferta) … 0,0244 (najdroższa), ×1,2 z HIV/WZW
+ *   stawka  = 0,0202 (najtańsza oferta) … 0,0244 (najdroższa), ×1,07 z HIV/WZW
  *   składka = round(suma × stawka)
  *
  * Składka jest przedziałem, nie liczbą. Stawka 1,5% ze starego Calculator.js
@@ -37,10 +37,10 @@ test('umowa o pracę obniża limit z 80% do 65%', async ({ page }) => {
   await expect(page.getByText('do 65% udokumentowanego dochodu')).toBeVisible();
 });
 
-test('klauzula HIV/WZW podnosi stawkę o 20%', async ({ page }) => {
+test('klauzula HIV/WZW podnosi stawkę o 7%', async ({ page }) => {
   await page.getByLabel('Klauzula HIV / WZW').check();
-  // 14 400 × 0,0202 × 1,2 = 349,06 → 349;  14 400 × 0,0244 × 1,2 = 421,63 → 422
-  await expect(wynik(page, 'Szacowana składka')).toHaveText('349–422 zł');
+  // 14 400 × 0,0202 × 1,07 = 311,24 → 311;  14 400 × 0,0244 × 1,07 = 375,96 → 376
+  await expect(wynik(page, 'Szacowana składka')).toHaveText('311–376 zł');
 
   await page.getByLabel('Klauzula HIV / WZW').uncheck();
   await expect(wynik(page, 'Szacowana składka')).toHaveText('291–351 zł');

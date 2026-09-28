@@ -862,13 +862,14 @@ da** (współczynnika klasy ryzyka, współczynnika wieku, mnożników dla 48 i 
 miesięcy) siedzą w `apps/portal/MODEL-SKLADKI.md`. Zanim ktoś dopisze
 któryś z tych współczynników, ma tam przeczytać, dlaczego go nie ma.
 
-Mnożnik klauzuli HIV/WZW (1,2) to jedyna liczba w tym zestawie bez pokrycia
-w danych — pochodzi z relacji 1,8/1,5 ze starego kalkulatora. Stan na
-28.09.2026: w bazie są dwie oferty z klauzulą (LW049, trzy warianty). Jedyna
-czysta para — ten sam wariant z klauzulą i bez — daje **+7%, nie +20%**
-(składka bazowa 1500 zł wobec 1404 zł). Druga oferta nie rozstrzyga, bo jej
-dwa warianty bez klauzuli różnią się ceną przy identycznych widocznych
-parametrach. Mnożnika nie zmieniono — to decyzja właściciela, nie poprawka.
+Mnożnik klauzuli HIV/WZW to **1,07** (od 28.09.2026, decyzją właściciela;
+wcześniej 1,2 z relacji 1,8/1,5 ze starego kalkulatora, niczym niepotwierdzone).
+Stoi za nim jedna czysta para z bazy — ten sam wariant z klauzulą LW049 i bez:
+składka bazowa 1500 zł wobec 1404 zł. Druga oferta z klauzulą nie rozstrzyga,
+bo jej dwa warianty bez klauzuli różnią się ceną przy identycznych widocznych
+parametrach (+3% albo +13%). Mnożnik siedzi w `symulacja.ts`, nie
+w `kalibracja.json` — jedna para to za mało na przeliczanie maszynowe
+i planowany worker ma go nie ruszać.
 
 ---
 
@@ -900,6 +901,24 @@ tylko wtedy, gdy któryś wariant ma `parsed_raw.covers_hiv_wzw` albo objętą
 pozycję `hiv_wzw` w `extras` — `coversHivWzw()` w `offerConditions.js`.
 Wcześniej stała w każdej ofercie, także w 18 z 20 bez klauzuli. Test:
 `node scripts/test-extras.mjs` w `apps/panel`.
+
+### Lista `/wylaczenia/` sprawdzona z sześcioma OWU
+
+28.09.2026 lista została porównana z OWU Leadenhall (LW044, LW046, LW047)
+i CEU (Utrata Dochodu, LOI Premium, dla zatrudniających). Wypadły dwie
+pozycje, których nie wyłącza żadne z nich: „Następstwa wad wrodzonych"
+(CEU wymienia wady wrodzone tylko przy klauzuli wypłaty od pierwszego dnia —
+wtedy okres oczekiwania wraca do 30 dni) i „Zabiegi medycyny estetycznej".
+
+Psychiatria różni się między towarzystwami i strona mówi to wprost:
+Leadenhall wyłącza niezdolność, gdy zaburzenie jest **jedyną** przyczyną,
+CEU — gdy jej przyczyną była depresja albo podobne rozpoznanie, bez tego
+zastrzeżenia. Wcześniej stało, że wyłączenie obejmuje też zaburzenie wtórne
+wobec choroby somatycznej, czyli odwrotnie niż w Leadenhall.
+
+Przed dopisaniem pozycji do tej listy sprawdź ją w tekście OWU — strona jest
+pisana pod cytowanie przez modele językowe, więc błąd wychodzi poza serwis.
+Pilnuje tego `test/wylaczenia.spec.js`.
 
 ---
 
