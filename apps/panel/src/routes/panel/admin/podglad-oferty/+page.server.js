@@ -1,6 +1,6 @@
 import { error, redirect } from '@sveltejs/kit';
 import { createAdminClient } from '$lib/server/supabase.js';
-import { OFFER_CONDITIONS_HTML } from '$lib/server/offerConditions.js';
+import { offerConditionsHtml } from '$lib/server/offerConditions.js';
 
 async function requireAdmin(locals) {
   const { user } = await locals.safeGetSession();
@@ -101,7 +101,7 @@ export async function load({ locals }) {
     },
     documents,
     files,
-    conditionsHtml: OFFER_CONDITIONS_HTML,
+    conditionsHtml: offerConditionsHtml(documents),
     distributorPdf: { name: 'Informacja o dystrybutorze — Aura Expert.pdf' }
   };
 }

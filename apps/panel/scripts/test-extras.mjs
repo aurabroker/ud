@@ -6,6 +6,8 @@
  */
 import { detectExtras } from '../src/lib/pdf/extras.js';
 import { comparisonRows, extraKeys, extraNotes } from '../src/lib/comparisonRows.js';
+import { coversHivWzw, offerConditionsHtml } from '../src/lib/server/offerConditions.js';
+import { conditionsContent } from '../src/lib/server/pdf/conditionsDoc.js';
 
 let failures = 0;
 function check(label, actual, expected) {
@@ -168,6 +170,25 @@ const rowsStary = comparisonRows([stary]);
 check('stary klucz → nazwa z rejestru', rowsStary.find((r) => r.key === 'extra:degenerative_limit')?.label,
   'Ograniczenie świadczenia z tytułu zwyrodnień');
 check('stary klucz → treść pod tabelą', extraNotes([stary]).length, 1);
+
+// --- Warunki oferty: pozycja HIV/WZW tylko przy ofercie z LW048/LW049 ---
+// OWU bazowe zakażenia nie wyłączają, ale osobnego świadczenia za nie nie dają.
+// Stały wpis w „zakresie ochrony" obiecywał je w każdej ofercie, także bez klauzuli.
+const bezHiv = { parsed_raw: { covers_hiv_wzw: false, extras: bezList } };
+const zHiv = { parsed_raw: { covers_hiv_wzw: true, hiv_owu_symbol: 'LW049' } };
+const zHivPostanowienia = { parsed_raw: { extras: detectExtras(LH_HIV, 'leadenhall') } };
+const reczna = { parsed_raw: null };
+
+console.log('\n=== WARUNKI OFERTY — pozycja HIV/WZW ===');
+check('bez klauzuli — nie obejmuje', coversHivWzw([bezHiv, reczna]), false);
+check('flaga z parsera', coversHivWzw([bezHiv, zHiv]), true);
+check('pozycja z postanowień dodatkowych', coversHivWzw([zHivPostanowienia]), true);
+check('wyłączone w postanowieniach', coversHivWzw([docA]), false);
+check('HTML bez klauzuli — bez HIV', /HIV/.test(offerConditionsHtml([bezHiv])), false);
+check('HTML z klauzulą — jest HIV', /zakażenia wirusem HIV lub WZW podczas pracy/.test(offerConditionsHtml([bezHiv, zHiv])), true);
+const zakres = (hiv) => conditionsContent('', hiv)[1].table.body[0][0].stack[2].ul;
+check('PDF bez klauzuli — ostatnia pozycja', zakres(false).at(-1), 'śmierci i inwalidztwa wskutek nieszczęśliwego wypadku.');
+check('PDF z klauzulą — ostatnia pozycja', zakres(true).at(-1), 'zakażenia wirusem HIV lub WZW podczas pracy.');
 
 console.log(`\n${failures === 0 ? '✅ WSZYSTKIE ASERCJE OK' : `❌ ${failures} ASERCJI NIE PRZESZŁO`}`);
 process.exit(failures === 0 ? 0 : 1);

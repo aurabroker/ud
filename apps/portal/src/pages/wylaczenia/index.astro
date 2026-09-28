@@ -79,12 +79,9 @@ const GRUPY = [
   {
     tytul: 'Okoliczności zdarzenia',
     pozycje: [
-      {
-        co: 'Zakażenie HIV lub WZW bez wykupionej klauzuli szczególnej',
-        czemu: 'Osobne warunki (LW048 dla wariantu MEDICA, LW049 dla MEDICARE) obejmują '
-          + 'zakażenie w związku z wykonywaniem zawodu medycznego. Bez nich zakażenie '
-          + 'jest wyłączone.',
-      },
+      // Zakażenia HIV/WZW tu nie ma i nie ma wrócić: OWU LW044, LW046 i LW047
+      // go nie wyłączają. Klauzula LW048/LW049 dokłada osobne świadczenie za samo
+      // zakażenie — bez niej niezdolność ocenia się na zasadach ogólnych (FAQ niżej).
       {
         co: 'Zdarzenia pod wpływem alkoholu, narkotyków i substancji odurzających',
         czemu: 'Poza przypadkami zażycia zgodnie z zaleceniem lekarza.',
@@ -135,10 +132,14 @@ const PYTANIA = [
       + 'albo wyłączeniem jednego narządu — a nie odmową ubezpieczenia.',
   },
   {
-    pytanie: 'Czy zakażenie HIV przy pracy jest objęte ochroną?',
-    odpowiedz: 'Tylko po wykupieniu warunków szczególnych HIV/WZW, dostępnych przy '
-      + 'wariantach medycznych MEDICA i MEDICARE. W standardowym zakresie zakażenie '
-      + 'jest wyłączone.',
+    pytanie: 'Czy zakażenie HIV albo WZW przy pracy jest objęte ochroną?',
+    odpowiedz: 'Samo zakażenie nie jest wyłączone. Jeśli doprowadzi do niezdolności do '
+      + 'pracy, ocenia się ją na zasadach ogólnych — jak przy każdej innej chorobie. '
+      + 'Warunki szczególne HIV/WZW (LW048 do wariantu MEDICA, LW049 do MEDICARE) dają '
+      + 'ponadto osobne świadczenie za samo zakażenie po niezamierzonym kontakcie z krwią '
+      + 'lub płynami ustrojowymi w pracy: jednorazową wypłatę (przy WZW typu B lub C — po '
+      + '12-miesięcznym okresie wyczekiwania) oraz zwrot kosztów leków antyretrowirusowych '
+      + 'do 5 000 zł i konsultacji z badaniami do 2 000 zł.',
   },
 ];
 

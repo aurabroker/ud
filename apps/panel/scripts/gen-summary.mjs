@@ -1,6 +1,6 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { parseOfferPdf } from '../src/lib/pdf/index.js';
-import { OFFER_CONDITIONS_HTML } from '../src/lib/server/offerConditions.js';
+import { offerConditionsHtml } from '../src/lib/server/offerConditions.js';
 
 const nf = new Intl.NumberFormat('pl-PL', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 const money = (n) => (n == null || n === '' ? '—' : nf.format(typeof n === 'string' ? parseFloat(n) : n) + ' zł');
@@ -57,7 +57,7 @@ function buildHtml(documents, clientName, employmentType, offerNumber) {
     </table>
     <div class="clause">${esc(clause)}</div>
     <table class="cmp"><thead><tr><th>przedstawiciel Lloyd's</th>${cols}</tr></thead><tbody>${rows}${premium}</tbody></table>
-    ${OFFER_CONDITIONS_HTML}
+    ${offerConditionsHtml(documents)}
   </body></html>`;
 }
 

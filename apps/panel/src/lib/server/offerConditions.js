@@ -1,8 +1,29 @@
 /**
  * offerConditions.js — „Istotne informacje o warunkach oferty" (treść z draftu Word).
- * Statyczny blok dołączany do PDF podsumowania (punkt 3 wymagań).
+ * Blok dołączany do PDF podsumowania (punkt 3 wymagań) i do widoku oferty.
  */
-export const OFFER_CONDITIONS_HTML = `
+
+/**
+ * Czy któryś wariant oferty obejmuje warunki szczególne HIV/WZW (LW048/LW049).
+ *
+ * OWU bazowe (LW044, LW046, LW047) zakażenia nie wyłączają — niezdolność do
+ * pracy po nim ocenia się na zasadach ogólnych. Osobne świadczenie za samo
+ * zakażenie daje dopiero dokupiona klauzula, więc pozycja w „zakresie ochrony”
+ * bez niej obiecywałaby klientowi coś, czego jego polisa nie ma.
+ * @param {Array<any>} documents - warianty oferty (ud_offer_documents)
+ */
+export function coversHivWzw(documents) {
+  return (documents || []).some((d) => {
+    const raw = d?.parsed_raw || {};
+    if (raw.covers_hiv_wzw === true) return true;
+    return Array.isArray(raw.extras) && raw.extras.some((e) => e?.key === 'hiv_wzw' && e.covered === true);
+  });
+}
+
+/** @param {Array<any>} documents - warianty oferty; od nich zależy pozycja HIV/WZW. */
+export function offerConditionsHtml(documents) {
+  const hiv = coversHivWzw(documents);
+  return `
 <div class="oc">
   <h2>Istotne informacje o warunkach oferty</h2>
 
@@ -14,8 +35,8 @@ export const OFFER_CONDITIONS_HTML = `
         <ul>
           <li>utraty dochodu w związku z całkowitą okresową niezdolnością do pracy na skutek choroby lub nieszczęśliwego wypadku,</li>
           <li>utraty dochodu w związku z całkowitą okresową i trwałą niezdolnością do pracy na skutek choroby lub nieszczęśliwego wypadku,</li>
-          <li>śmierci i inwalidztwa wskutek nieszczęśliwego wypadku,</li>
-          <li>zakażenia wirusem HIV lub WZW podczas pracy.</li>
+          <li>śmierci i inwalidztwa wskutek nieszczęśliwego wypadku${hiv ? ',' : '.'}</li>${hiv ? `
+          <li>zakażenia wirusem HIV lub WZW podczas pracy.</li>` : ''}
         </ul>
         <strong>Dostępne rozszerzenia zakresu ubezpieczenia</strong>
         <p>Pokrywają wyłącznie skutki nieszczęśliwych wypadków:</p>
@@ -82,3 +103,4 @@ export const OFFER_CONDITIONS_HTML = `
 
   <p class="oc-company">Aura Expert spółka z ograniczoną odpowiedzialnością z siedzibą w Warszawie przy ul. Bolkowskiej 2A lokal 28, wpisana do Krajowego Rejestru Sądowego pod numerem 0000599840 przez Sąd Rejonowy dla m.st. Warszawy, XII Wydział Gospodarczy Krajowego Rejestru Sądowego, kapitał zakładowy 5.000 zł. Spółka wpisana jest do Rejestru Pośredników Ubezpieczeniowych pod numerem 11229690/A.<br>ul. Bolkowska 2A/28, 01-466 Warszawa | REGON 363673048 | NIP 5242793544</p>
 </div>`;
+}

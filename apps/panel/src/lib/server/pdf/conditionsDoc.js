@@ -5,14 +5,15 @@
 
 const ul = (items) => ({ ul: items, style: 'ocList' });
 
-const COL_LEFT = [
+/** @param {boolean} hivWzw - pozycja HIV/WZW tylko przy ofercie z LW048/LW049 (patrz coversHivWzw). */
+const colLeft = (hivWzw) => [
   { text: 'Z czego składa się zakres ochrony?', style: 'ocSub' },
   { text: 'Podstawę ubezpieczenia stanowią świadczenia na wypadek:', style: 'ocP' },
   ul([
     'utraty dochodu w związku z całkowitą okresową niezdolnością do pracy na skutek choroby lub nieszczęśliwego wypadku,',
     'utraty dochodu w związku z całkowitą okresową i trwałą niezdolnością do pracy na skutek choroby lub nieszczęśliwego wypadku,',
-    'śmierci i inwalidztwa wskutek nieszczęśliwego wypadku,',
-    'zakażenia wirusem HIV lub WZW podczas pracy.'
+    `śmierci i inwalidztwa wskutek nieszczęśliwego wypadku${hivWzw ? ',' : '.'}`,
+    ...(hivWzw ? ['zakażenia wirusem HIV lub WZW podczas pracy.'] : [])
   ]),
   { text: 'Dostępne rozszerzenia zakresu ubezpieczenia', style: 'ocSub' },
   { text: 'Pokrywają wyłącznie skutki nieszczęśliwych wypadków:', style: 'ocP' },
@@ -82,12 +83,13 @@ export const COMPANY_FOOTER =
 /**
  * Treść sekcji warunków (tablica elementów pdfmake).
  * @param {string} [footerText] - stopka z ustawień; gdy pusta, używamy domyślnej.
+ * @param {boolean} [hivWzw] - czy oferta obejmuje warunki szczególne HIV/WZW.
  */
-export function conditionsContent(footerText) {
+export function conditionsContent(footerText, hivWzw = false) {
   return [
     { text: 'Istotne informacje o warunkach oferty', style: 'ocH2', margin: [0, 16, 0, 8] },
     {
-      table: { widths: ['50%', '50%'], body: [[{ stack: COL_LEFT }, { stack: COL_RIGHT }]] },
+      table: { widths: ['50%', '50%'], body: [[{ stack: colLeft(hivWzw) }, { stack: COL_RIGHT }]] },
       layout: 'ocBox'
     },
     { text: 'Czego nie obejmuje ubezpieczenie?', style: 'ocH3' },

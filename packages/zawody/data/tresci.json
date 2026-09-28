@@ -6,7 +6,7 @@
     "ryzyka": [
       {
         "tytul": "Ekspozycja zawodowa na HIV i WZW",
-        "opis": "Zakłucie igłą podczas zabiegu albo kontakt z materiałem zakaźnym to ryzyko wpisane w zawód. Serokonwersja oznacza nie tylko chorobę, ale często koniec pracy przy procedurach inwazyjnych. Polisa obejmuje to wyłącznie z osobną klauzulą HIV/WZW — bez niej ryzyko jest wyłączone."
+        "opis": "Zakłucie igłą podczas zabiegu albo kontakt z materiałem zakaźnym to ryzyko wpisane w zawód. Serokonwersja oznacza nie tylko chorobę, ale często koniec pracy przy procedurach inwazyjnych. Osobne świadczenie za samo zakażenie daje klauzula HIV/WZW; bez niej niezdolność do pracy po zakażeniu ocenia się na zasadach ogólnych, bez dodatkowej wypłaty."
       },
       {
         "tytul": "Uraz dłoni albo kręgosłupa szyjnego",
@@ -20,7 +20,7 @@
     "pytania": [
       {
         "pytanie": "Czy polisa obejmuje zakażenie HIV lub WZW przy zabiegu?",
-        "odpowiedz": "Tylko wtedy, gdy oferta zawiera klauzulę HIV/WZW. Jest ona osobnym dokumentem (LW048 albo LW049) i dokładanym wyłącznie do wariantów medycznych — Medica i Medicare. Wariant podstawowy LW044 tego ryzyka nie przewiduje w ogóle."
+        "odpowiedz": "Osobne świadczenie za zakażenie — jednorazową wypłatę oraz zwrot kosztów leków i badań — daje tylko klauzula HIV/WZW: warunki LW048 do wariantu Medica albo LW049 do Medicare. Wariant LW044 jej nie przewiduje. Bez klauzuli zakażenie nie jest wyłączone, ale niezdolność do pracy, do której doprowadzi, ocenia się na zasadach ogólnych."
       },
       {
         "pytanie": "Czy obowiązkowe OC lekarza wystarczy zamiast tej polisy?",
@@ -441,7 +441,7 @@
     "ryzyka": [
       {
         "tytul": "Zakażenie materiałem biologicznym",
-        "opis": "Krew, mocz, płyn mózgowo-rdzeniowy, hodowle bakteryjne. Zakłucie albo rozszczelnienie probówki w wirówce to ekspozycja na wirusowe zapalenie wątroby i HIV — ryzyko objęte polisą wyłącznie z osobną klauzulą HIV/WZW."
+        "opis": "Krew, mocz, płyn mózgowo-rdzeniowy, hodowle bakteryjne. Zakłucie albo rozszczelnienie probówki w wirówce to ekspozycja na wirusowe zapalenie wątroby i HIV — osobne świadczenie za takie zakażenie daje klauzula HIV/WZW."
       },
       {
         "tytul": "Zaburzenia widzenia barw i ostrości",
@@ -455,7 +455,7 @@
     "pytania": [
       {
         "pytanie": "Czy zakłucie w laboratorium jest traktowane jak u lekarza?",
-        "odpowiedz": "Tak — pod warunkiem, że oferta zawiera klauzulę HIV/WZW. Bez niej ryzyko zakażenia zawodowego jest wyłączone, niezależnie od tego, w jakim zawodzie medycznym doszło do ekspozycji."
+        "odpowiedz": "Tak, jeśli oferta zawiera klauzulę HIV/WZW — warunki dla personelu medycznego nie rozróżniają laboratorium i oddziału. Bez niej nie ma osobnej wypłaty za zakażenie, a niezdolność do pracy, do której doprowadzi, ocenia się na zasadach ogólnych."
       },
       {
         "pytanie": "Prowadzę własne laboratorium — czy to zmienia sumę?",
@@ -996,7 +996,7 @@
       },
       {
         "tytul": "Zakażenie materiałem biologicznym",
-        "opis": "Praca z krwią przy uszkodzonej barierze skórnej klienta. Zakłucie igłą to ryzyko zakażenia wirusowym zapaleniem wątroby i HIV — objęte polisą wyłącznie przy osobnej klauzuli HIV/WZW."
+        "opis": "Praca z krwią przy uszkodzonej barierze skórnej klienta. Zakłucie igłą to ryzyko zakażenia wirusowym zapaleniem wątroby i HIV. Klauzula HIV/WZW jest przewidziana dla wariantów medycznych, a poza nimi zakażenie nie jest wyłączone — niezdolność do pracy, do której doprowadzi, ocenia się na zasadach ogólnych."
       },
       {
         "tytul": "Pogorszenie widzenia bliskiego",
@@ -1006,7 +1006,7 @@
     "pytania": [
       {
         "pytanie": "Czy zakłucie igłą jest u mnie traktowane jak w zawodach medycznych?",
-        "odpowiedz": "Mechanizm ekspozycji jest ten sam i tak samo wymaga klauzuli HIV/WZW. Warto o nią zapytać przy wniosku — bez niej zakażenie zawodowe jest wyłączone, niezależnie od zawodu."
+        "odpowiedz": "Mechanizm ekspozycji jest ten sam, ale klauzula HIV/WZW jest przewidziana dla wariantów medycznych — lekarzy, dentystów i personelu medycznego. Bez niej zakażenie nie jest wyłączone: nie ma za nie osobnej wypłaty, a niezdolność do pracy, do której doprowadzi, ocenia się na zasadach ogólnych."
       },
       {
         "pytanie": "Mam zadatki od klientów na pół roku do przodu — czy to dochód?",
@@ -2272,7 +2272,7 @@
       },
       {
         "tytul": "Zakłucie i ekspozycja zawodowa",
-        "opis": "Kaniulacja, pobrania, iniekcje — kilkadziesiąt procedur z ostrym narzędziem na dyżurze. Ryzyko zakażenia HIV i wirusowym zapaleniem wątroby jest objęte wyłącznie przy osobnej klauzuli HIV/WZW."
+        "opis": "Kaniulacja, pobrania, iniekcje — kilkadziesiąt procedur z ostrym narzędziem na dyżurze. Osobne świadczenie za zakażenie HIV albo wirusowym zapaleniem wątroby daje klauzula HIV/WZW."
       },
       {
         "tytul": "Skutki pracy zmianowej",
@@ -2286,7 +2286,7 @@
       },
       {
         "pytanie": "Czy zakłucie igłą jest objęte bez dodatkowej klauzuli?",
-        "odpowiedz": "Nie. Zakażenie zawodowe HIV i WZW obejmują wyłącznie osobne warunki szczególne, dokładane do wariantów medycznych. Warto o nie zapytać przy składaniu wniosku, a nie po ekspozycji."
+        "odpowiedz": "Osobnej wypłaty za zakażenie po zakłuciu bez klauzuli nie ma — jednorazowe świadczenie oraz zwrot leków i badań dają wyłącznie warunki szczególne HIV/WZW, dokładane do wariantów medycznych. Zakażenie nie jest jednak wyłączone: niezdolność do pracy, do której doprowadzi, ocenia się na zasadach ogólnych. O klauzulę warto zapytać przy składaniu wniosku, a nie po ekspozycji."
       }
     ]
   },
@@ -2297,7 +2297,7 @@
     "ryzyka": [
       {
         "tytul": "Skaleczenie ostrym narzędziem w polu operacyjnym",
-        "opis": "Podawanie i odbieranie skalpeli, igieł chirurgicznych i wierteł, dziesiątki razy podczas zabiegu. Ekspozycja na materiał zakaźny jest tu wyższa niż na oddziale, a ochrona zapewniona wyłącznie klauzulą HIV/WZW."
+        "opis": "Podawanie i odbieranie skalpeli, igieł chirurgicznych i wierteł, dziesiątki razy podczas zabiegu. Ekspozycja na materiał zakaźny jest tu wyższa niż na oddziale, a osobne świadczenie za zakażenie daje klauzula HIV/WZW."
       },
       {
         "tytul": "Przewlekła niewydolność żylna",
@@ -2330,7 +2330,7 @@
       },
       {
         "tytul": "Ekspozycja na płyny ustrojowe",
-        "opis": "Kontakt z krwią i płynem owodniowym jest przy porodzie stały i obfity. Ochrona przed zakażeniem zawodowym wymaga osobnej klauzuli HIV/WZW, bez niej ryzyko pozostaje wyłączone."
+        "opis": "Kontakt z krwią i płynem owodniowym jest przy porodzie stały i obfity. Osobne świadczenie za zakażenie zawodowe daje klauzula HIV/WZW; bez niej niezdolność do pracy po zakażeniu ocenia się na zasadach ogólnych."
       },
       {
         "tytul": "Skutki dyżurów dwunasto- i dwudziestoczterogodzinnych",
@@ -2547,7 +2547,7 @@
       },
       {
         "pytanie": "Czy ekspozycja na aerozol to podstawa do klauzuli HIV/WZW?",
-        "odpowiedz": "Klauzula dotyczy zakażenia zawodowego niezależnie od drogi ekspozycji. Przy pracy z aerozolem i ostrymi narzędziami warto o nią zapytać — bez niej ryzyko zakażenia jest wyłączone."
+        "odpowiedz": "Klauzula obejmuje zakażenie po niezamierzonym kontakcie z krwią lub płynami ustrojowymi — przez zakłucie, skaleczenie, błonę śluzową albo uszkodzoną skórę. Przy pracy z aerozolem i ostrymi narzędziami warto o nią zapytać: bez niej nie ma osobnej wypłaty za zakażenie."
       }
     ]
   },
@@ -2649,7 +2649,7 @@
       },
       {
         "tytul": "Ekspozycja zawodowa przy zabiegu",
-        "opis": "Skaleczenie ostrzem, przekłucie rękawicy igłą chirurgiczną, kontakt z krwią w polu operacyjnym. Serokonwersja po ekspozycji na HIV lub WZW oznacza zwykle koniec pracy przy procedurach inwazyjnych — a chroni przed tym wyłącznie osobna klauzula."
+        "opis": "Skaleczenie ostrzem, przekłucie rękawicy igłą chirurgiczną, kontakt z krwią w polu operacyjnym. Serokonwersja po ekspozycji na HIV lub WZW oznacza zwykle koniec pracy przy procedurach inwazyjnych — a osobne świadczenie za samo zakażenie daje wyłącznie klauzula HIV/WZW."
       },
       {
         "tytul": "Zmiany zwyrodnieniowe odcinka szyjnego",
@@ -2659,7 +2659,7 @@
     "pytania": [
       {
         "pytanie": "Czy zakłucie na sali operacyjnej jest objęte bez klauzuli HIV/WZW?",
-        "odpowiedz": "Nie. Zakażenie zawodowe obejmują wyłącznie warunki szczególne LW048 albo LW049, dokładane do wariantów medycznych Medica i Medicare. Wariant podstawowy LW044 nie przewiduje tego ryzyka w ogóle."
+        "odpowiedz": "Osobnego świadczenia za samo zakażenie bez klauzuli nie ma — dają je wyłącznie warunki szczególne LW048 (Medica) albo LW049 (Medicare); wariant LW044 ich nie przewiduje. Zakażenie nie jest jednak wyłączone: niezdolność do pracy, do której doprowadzi, ocenia się na zasadach ogólnych."
       },
       {
         "pytanie": "Operuję w kilku szpitalach na kontraktach — jak wykazać dochód?",
@@ -2827,7 +2827,7 @@
       },
       {
         "tytul": "Ekspozycja zawodowa przy dostępach naczyniowych",
-        "opis": "Kaniulacja żył centralnych i tętnic, wielokrotnie na dyżurze, często w pośpiechu przy pacjencie niestabilnym. Zakłucie w takich warunkach jest częstsze niż przy procedurach planowych, a chroni przed nim wyłącznie klauzula HIV/WZW."
+        "opis": "Kaniulacja żył centralnych i tętnic, wielokrotnie na dyżurze, często w pośpiechu przy pacjencie niestabilnym. Zakłucie w takich warunkach jest częstsze niż przy procedurach planowych, a osobne świadczenie za zakażenie po nim daje klauzula HIV/WZW."
       }
     ],
     "pytania": [
@@ -2906,7 +2906,7 @@
     "ryzyka": [
       {
         "tytul": "Ekspozycja na płyny ustrojowe przy porodzie i zabiegach",
-        "opis": "Kontakt z krwią i płynem owodniowym jest przy porodzie obfity i trudny do pełnego zabezpieczenia. Ochrona przed zakażeniem zawodowym HIV i WZW wymaga osobnej klauzuli szczególnej."
+        "opis": "Kontakt z krwią i płynem owodniowym jest przy porodzie obfity i trudny do pełnego zabezpieczenia. Osobne świadczenie za zakażenie zawodowe HIV i WZW daje klauzula szczególna."
       },
       {
         "tytul": "Skutki pracy dyżurowej bez przewidywalnego rytmu",
@@ -2924,7 +2924,7 @@
       },
       {
         "pytanie": "Czy ekspozycja przy porodzie jest objęta bez klauzuli?",
-        "odpowiedz": "Nie. Zakażenie zawodowe HIV i WZW obejmują wyłącznie warunki szczególne dokładane do wariantów medycznych. Bez nich ryzyko pozostaje wyłączone, niezależnie od okoliczności ekspozycji."
+        "odpowiedz": "Bez klauzuli nie ma osobnej wypłaty za zakażenie HIV albo WZW — tę dają wyłącznie warunki szczególne dokładane do wariantów medycznych. Samo zakażenie nie jest jednak wyłączone: niezdolność do pracy, do której doprowadzi, ocenia się na zasadach ogólnych."
       }
     ]
   },
@@ -2939,7 +2939,7 @@
       },
       {
         "tytul": "Ekspozycja na materiał zakaźny w pracowni",
-        "opis": "Kontakt z treścią przewodu pokarmowego i krwią przy zabiegach terapeutycznych. Ryzyko zakażenia krwiopochodnego objęte jest wyłącznie osobną klauzulą HIV/WZW."
+        "opis": "Kontakt z treścią przewodu pokarmowego i krwią przy zabiegach terapeutycznych. Osobne świadczenie za zakażenie krwiopochodne daje klauzula HIV/WZW."
       },
       {
         "tytul": "Zespoły bólowe barku i karku od pozycji przy aparacie",
@@ -3001,7 +3001,7 @@
       },
       {
         "tytul": "Ekspozycja na materiał zakaźny przy zabiegach",
-        "opis": "Kontakt z moczem i krwią przy zabiegach na drogach moczowych, często u pacjentów z zakażeniami wielolekoopornymi. Zakażenie krwiopochodne obejmuje wyłącznie klauzula szczególna."
+        "opis": "Kontakt z moczem i krwią przy zabiegach na drogach moczowych, często u pacjentów z zakażeniami wielolekoopornymi. Osobne świadczenie za zakażenie HIV albo WZW dają warunki szczególne."
       }
     ],
     "pytania": [
@@ -3011,7 +3011,7 @@
       },
       {
         "pytanie": "Czy zakażenie od pacjenta jest objęte standardowo?",
-        "odpowiedz": "Zakażenia krwiopochodne HIV i WZW wymagają osobnej klauzuli, dokładanej do wariantów medycznych. Pozostałe zakażenia są objęte na zasadach ogólnych, o ile powodują orzeczoną niezdolność do pracy."
+        "odpowiedz": "Na zasadach ogólnych — o ile zakażenie powoduje orzeczoną niezdolność do pracy. Dotyczy to także HIV i WZW; przy nich osobną, jednorazową wypłatę i zwrot kosztów leczenia daje dodatkowo klauzula HIV/WZW, dokładana do wariantów medycznych."
       }
     ]
   },
@@ -3036,7 +3036,7 @@
     "pytania": [
       {
         "pytanie": "Czy zakażenie gruźlicą od pacjenta jest objęte polisą?",
-        "odpowiedz": "Gruźlica jest chorobą jak każda inna i podlega zasadom ogólnym — objęta, o ile powoduje orzeczoną niezdolność i nie była leczona w ciągu 24 miesięcy przed umową. Osobnej klauzuli wymagają wyłącznie HIV i wirusowe zapalenie wątroby."
+        "odpowiedz": "Gruźlica jest chorobą jak każda inna i podlega zasadom ogólnym — objęta, o ile powoduje orzeczoną niezdolność i nie była leczona w ciągu 24 miesięcy przed umową. Osobne świadczenie za samo zakażenie przewiduje klauzula HIV/WZW — tylko dla HIV i wirusowego zapalenia wątroby."
       },
       {
         "pytanie": "Pracuję w oddziale gruźlicy — czy to podnosi składkę?",
@@ -3088,7 +3088,7 @@
       },
       {
         "tytul": "Ekspozycja na materiał zakaźny w warunkach nagłych",
-        "opis": "Dostępy naczyniowe, intubacja i procedury inwazyjne wykonywane u pacjenta niestabilnego, w pośpiechu. Zakłucia zdarzają się tu częściej niż przy zabiegach planowych, a chroni przed nimi wyłącznie klauzula HIV/WZW."
+        "opis": "Dostępy naczyniowe, intubacja i procedury inwazyjne wykonywane u pacjenta niestabilnego, w pośpiechu. Zakłucia zdarzają się tu częściej niż przy zabiegach planowych, a osobne świadczenie za zakażenie po nich daje klauzula HIV/WZW."
       }
     ],
     "pytania": [
@@ -3117,7 +3117,7 @@
       },
       {
         "tytul": "Ekspozycja zawodowa przy zabiegach naczyniowych",
-        "opis": "Dostępy centralne i pobrania u noworodków wykonuje się igłami o bardzo małej średnicy, w polu wielkości dłoni. Zakłucie w takich warunkach jest łatwe, a ochrona wymaga osobnej klauzuli HIV/WZW."
+        "opis": "Dostępy centralne i pobrania u noworodków wykonuje się igłami o bardzo małej średnicy, w polu wielkości dłoni. Zakłucie w takich warunkach jest łatwe, a osobne świadczenie za zakażenie daje klauzula HIV/WZW."
       }
     ],
     "pytania": [
@@ -3142,7 +3142,7 @@
       },
       {
         "tytul": "Ekspozycja zawodowa przy pobraniu i przeszczepieniu",
-        "opis": "Wielogodzinne operacje z rozległym polem i dużą ilością krwi, często u dawców o nieustalonym pełnym statusie serologicznym. Ochrona przed zakażeniem krwiopochodnym wymaga osobnej klauzuli."
+        "opis": "Wielogodzinne operacje z rozległym polem i dużą ilością krwi, często u dawców o nieustalonym pełnym statusie serologicznym. Osobne świadczenie za zakażenie HIV albo WZW dają warunki szczególne."
       },
       {
         "tytul": "Przeciążenie kręgosłupa przy długich zabiegach",
@@ -3181,7 +3181,7 @@
     "pytania": [
       {
         "pytanie": "Populacja dializowana ma więcej zakażeń — czy to ma znaczenie?",
-        "odpowiedz": "Ma, i jest dobrym powodem, żeby zdecydować się na klauzulę HIV/WZW. Bez niej zakażenie zawodowe pozostaje wyłączone, niezależnie od tego, jak wysokie jest ryzyko w danej populacji pacjentów."
+        "odpowiedz": "Ma, i jest dobrym powodem, żeby zdecydować się na klauzulę HIV/WZW. Bez niej nie ma osobnej wypłaty za samo zakażenie, a niezdolność do pracy, do której doprowadzi, ocenia się na zasadach ogólnych."
       },
       {
         "pytanie": "Pracuję w stacji dializ na kontrakcie — jaki mam limit?",
@@ -3301,7 +3301,7 @@
       },
       {
         "pytanie": "Choroby odzwierzęce — czy są objęte tak jak inne?",
-        "odpowiedz": "Tak, na zasadach ogólnych: liczy się orzeczona niezdolność do pracy, o ile schorzenie nie było leczone w ciągu dwóch lat przed umową. Wyjątkiem pozostają zakażenia krwiopochodne, dla których przewidziano odrębne warunki szczególne."
+        "odpowiedz": "Tak, na zasadach ogólnych: liczy się orzeczona niezdolność do pracy, o ile schorzenie nie było leczone w ciągu dwóch lat przed umową."
       }
     ]
   },
@@ -3326,7 +3326,7 @@
     "pytania": [
       {
         "pytanie": "Czy przy mojej specjalizacji klauzula HIV/WZW jest w ogóle dostępna?",
-        "odpowiedz": "Jest, ale ubezpieczyciel oceni ryzyko indywidualnie i może zaproponować wyższą składkę. Warto ją wykupić mimo to — bez niej zakażenie zawodowe pozostaje wyłączone, a w tej specjalizacji jest najbardziej prawdopodobnym scenariuszem."
+        "odpowiedz": "Jest, ale ubezpieczyciel oceni ryzyko indywidualnie i może zaproponować wyższą składkę. Warto ją wykupić mimo to — bez niej nie ma osobnej wypłaty za zakażenie, które w tej specjalizacji jest najbardziej prawdopodobnym scenariuszem."
       },
       {
         "pytanie": "Pracuję w oddziale izolacyjnym — czy to zmienia wycenę?",
@@ -3341,7 +3341,7 @@
     "ryzyka": [
       {
         "tytul": "Zakażenie zawodowe przy badaniu i pobraniach",
-        "opis": "Kontakt z materiałem od pacjentów z rozpoznanymi zakażeniami, w tym z HIV i kiłą. Ryzyko zakażeń krwiopochodnych objęte jest wyłącznie osobną klauzulą, a w tej specjalizacji jest ono najwyższe w medycynie ambulatoryjnej."
+        "opis": "Kontakt z materiałem od pacjentów z rozpoznanymi zakażeniami, w tym z HIV i kiłą. Osobne świadczenie za zakażenie krwiopochodne daje klauzula HIV/WZW, a ryzyko jest w tej specjalizacji najwyższe w medycynie ambulatoryjnej."
       },
       {
         "tytul": "Nabyte zaburzenia widzenia barw i ostrości",
@@ -3355,7 +3355,7 @@
     "pytania": [
       {
         "pytanie": "Czy przy tej specjalizacji klauzula HIV/WZW jest konieczna?",
-        "odpowiedz": "Nie jest obowiązkowa, ale bez niej najbardziej prawdopodobne ryzyko zawodowe pozostaje nieobjęte. Warto o nią wystąpić, licząc się z indywidualną oceną i wyższą składką."
+        "odpowiedz": "Nie jest obowiązkowa, ale bez niej za najbardziej prawdopodobne ryzyko zawodowe nie ma osobnej wypłaty — zostają zasady ogólne przy niezdolności do pracy. Warto o nią wystąpić, licząc się z indywidualną oceną i wyższą składką."
       },
       {
         "pytanie": "Prowadzę pacjentów prywatnie — jak to wykazać?",
@@ -3519,7 +3519,7 @@
       },
       {
         "tytul": "Ekspozycja na materiał zakaźny przy biopsji szpiku",
-        "opis": "Nakłucie talerza biodrowego u pacjenta z małopłytkowością oznacza obfite krwawienie w polu zabiegu. Zakażenie krwiopochodne objęte jest wyłącznie osobnymi warunkami szczególnymi."
+        "opis": "Nakłucie talerza biodrowego u pacjenta z małopłytkowością oznacza obfite krwawienie w polu zabiegu. Osobne świadczenie za zakażenie HIV albo WZW dają warunki szczególne."
       },
       {
         "tytul": "Kontakt z chorymi w głębokiej immunosupresji",
@@ -3610,7 +3610,7 @@
       },
       {
         "tytul": "Ekspozycja na preparaty krwiopochodne",
-        "opis": "Nadzór nad wlewami immunoglobulin i praca z materiałem osoczopochodnym. Ryzyko zakażenia krwiopochodnego objęte jest wyłącznie osobnymi warunkami szczególnymi."
+        "opis": "Nadzór nad wlewami immunoglobulin i praca z materiałem osoczopochodnym. Osobne świadczenie za zakażenie HIV albo WZW dają warunki szczególne."
       }
     ],
     "pytania": [
@@ -3703,7 +3703,7 @@
     "pytania": [
       {
         "pytanie": "Czy zakażenie podczas dochodzenia jest objęte?",
-        "odpowiedz": "Objęta jest niezdolność do pracy z powodu choroby, niezależnie od tego, gdzie doszło do zakażenia. Odrębnych warunków wymagają wyłącznie zakażenia krwiopochodne, przenoszone przez kontakt z krwią."
+        "odpowiedz": "Objęta jest niezdolność do pracy z powodu choroby, niezależnie od tego, gdzie doszło do zakażenia. Przy zakażeniu HIV albo WZW warunki szczególne dla zawodów medycznych dają ponadto osobną, jednorazową wypłatę."
       },
       {
         "pytanie": "Łączę etat w inspekcji z konsultacjami dla szpitali — jak to ująć?",
@@ -3784,7 +3784,7 @@
       },
       {
         "tytul": "Ekspozycja na materiał biologiczny",
-        "opis": "Praca z nasieniem i krwią przy zabiegach, w warunkach laboratoryjnych i zabiegowych naraz. Zakażenia krwiopochodne objęte są wyłącznie osobnymi warunkami szczególnymi."
+        "opis": "Praca z nasieniem i krwią przy zabiegach, w warunkach laboratoryjnych i zabiegowych naraz. Osobne świadczenie za zakażenie HIV albo WZW dają warunki szczególne."
       }
     ],
     "pytania": [

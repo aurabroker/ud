@@ -2,7 +2,7 @@ import { error } from '@sveltejs/kit';
 import { createAdminClient } from '$lib/server/supabase.js';
 import { isVerified } from '$lib/server/clientAuth.js';
 import { getSettings } from '$lib/server/settings.js';
-import { OFFER_CONDITIONS_HTML } from '$lib/server/offerConditions.js';
+import { offerConditionsHtml } from '$lib/server/offerConditions.js';
 
 export async function load({ params, cookies }) {
   const sb = createAdminClient();
@@ -51,7 +51,7 @@ export async function load({ params, cookies }) {
     },
     documents: documents || [],
     files: files || [],
-    conditionsHtml: OFFER_CONDITIONS_HTML,
+    conditionsHtml: offerConditionsHtml(documents),
     distributorPdf: settings.distributor_pdf_path
       ? { name: settings.distributor_pdf_name || 'Informacja o dystrybutorze.pdf' }
       : null

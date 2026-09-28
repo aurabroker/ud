@@ -5,6 +5,7 @@
 import { insurerLabel } from '$lib/format.js';
 import { comparisonRows, extraNotes } from '$lib/comparisonRows.js';
 import { conditionsContent } from './conditionsDoc.js';
+import { coversHivWzw } from '../offerConditions.js';
 
 const SLATE_900 = '#0f172a';
 const SLATE_800 = '#1e293b';
@@ -215,7 +216,7 @@ export function buildSummaryDocDefinition(p) {
       cmpTable,
       ...clauseNotesContent(documents),
       ...additionalTermsContent(p.additionalTerms),
-      ...conditionsContent(p.footerText)
+      ...conditionsContent(p.footerText, coversHivWzw(documents))
     ],
     styles: {
       title: { fontSize: 13, bold: true, color: SLATE_900, margin: [0, 2, 0, 0] },

@@ -841,8 +841,43 @@ miesięcy) siedzą w `apps/portal/MODEL-SKLADKI.md`. Zanim ktoś dopisze
 któryś z tych współczynników, ma tam przeczytać, dlaczego go nie ma.
 
 Mnożnik klauzuli HIV/WZW (1,2) to jedyna liczba w tym zestawie bez pokrycia
-w danych — pochodzi z relacji 1,8/1,5 ze starego kalkulatora, a w ofertach
-z bazy klauzuli nie ma wcale.
+w danych — pochodzi z relacji 1,8/1,5 ze starego kalkulatora. Stan na
+28.09.2026: w bazie są dwie oferty z klauzulą (LW049, trzy warianty). Jedyna
+czysta para — ten sam wariant z klauzulą i bez — daje **+7%, nie +20%**
+(składka bazowa 1500 zł wobec 1404 zł). Druga oferta nie rozstrzyga, bo jej
+dwa warianty bez klauzuli różnią się ceną przy identycznych widocznych
+parametrach. Mnożnika nie zmieniono — to decyzja właściciela, nie poprawka.
+
+---
+
+## Zakażenie HIV/WZW nie jest wyłączeniem
+
+OWU LW044, LW046 i LW047 zakażenia HIV ani WZW **nie wyłączają** —
+niezdolność do pracy, do której doprowadzi, ocenia się na zasadach ogólnych.
+Warunki szczególne LW048 (MEDICA) i LW049 (MEDICARE) nie są warunkiem
+ochrony, tylko dokładają osobne świadczenie za samo zakażenie po
+niezamierzonym kontakcie z krwią lub płynami ustrojowymi w pracy albo przy
+ratowaniu życia:
+
+- jednorazowa wypłata — przy HIV, gdy test po 6 miesiącach od kontaktu
+  potwierdzi zakażenie; przy WZW typu B lub C po 12-miesięcznym okresie
+  wyczekiwania, liczonym od dodatniego testu,
+- zwrot kosztów leków antyretrowirusowych do 5 000 zł i konsultacji
+  z badaniami do 2 000 zł,
+- warunek: niezwłocznie wdrożona procedura poekspozycyjna.
+
+Do 28.09.2026 serwis twierdził odwrotnie — lista na `/wylaczenia/`,
+`llms.txt` i opisy 24 zawodów w `packages/zawody/data/tresci.json`
+(„bez klauzuli zakażenie jest wyłączone"). Pilnuje tego
+`test/wylaczenia.spec.js`, który czyta z builda wszystkie pliki `.md`
+i `llms.txt`; na starych tekstach wywala się na szesnastu zdaniach.
+
+W panelu pozycja „zakażenia wirusem HIV lub WZW podczas pracy" w „Istotnych
+informacjach o warunkach oferty" (strona oferty i PDF podsumowania) stoi
+tylko wtedy, gdy któryś wariant ma `parsed_raw.covers_hiv_wzw` albo objętą
+pozycję `hiv_wzw` w `extras` — `coversHivWzw()` w `offerConditions.js`.
+Wcześniej stała w każdej ofercie, także w 18 z 20 bez klauzuli. Test:
+`node scripts/test-extras.mjs` w `apps/panel`.
 
 ---
 

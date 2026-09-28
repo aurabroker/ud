@@ -70,7 +70,10 @@ niezdolnością do wykonywania zawodu z powodu choroby lub nieszczęśliwego wyp
   (świadczenia jednorazowe).
 - **Warianty:** Leadenhall MEDICARE (LW047), MEDICA (LW046) dla zawodów medycznych
   oraz Utrata Dochodu (LW044) dla pozostałych. Warunki szczególne HIV/WZW
-  (LW048, LW049) tylko przy wariantach medycznych.
+  (LW048 do MEDICA, LW049 do MEDICARE) dokupuje się tylko do wariantów medycznych:
+  dają osobne świadczenie za samo zakażenie po niezamierzonym kontakcie z krwią
+  lub płynami ustrojowymi w pracy — jednorazową wypłatę oraz zwrot kosztów leków
+  antyretrowirusowych i badań.
 
 ## Czego produkt nie obejmuje
 
@@ -81,8 +84,11 @@ Te wyłączenia są istotne i często pomijane w materiałach marketingowych:
 - częściowa niezdolność do pracy,
 - schorzenia leczone w ciągu 24 miesięcy przed zawarciem umowy, o ile nie
   zostały zgłoszone i zaakceptowane przez ubezpieczyciela,
-- kwarantanna i izolacja bez orzeczonej niezdolności do pracy,
-- zakażenie HIV lub WZW bez wykupionej klauzuli szczególnej.
+- kwarantanna i izolacja bez orzeczonej niezdolności do pracy.
+
+Zakażenie HIV albo WZW **nie** jest wyłączone: niezdolność do pracy, do której
+doprowadzi, ocenia się na zasadach ogólnych. Klauzula HIV/WZW nie jest warunkiem
+ochrony, tylko dokłada osobną wypłatę za samo zakażenie.
 
 ## Jak zawiera się umowę
 
