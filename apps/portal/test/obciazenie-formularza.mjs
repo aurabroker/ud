@@ -161,7 +161,8 @@ async function przejdzKreator(page) {
   await page.getByRole('button', { name: 'Dalej' }).click();
   await page.waitForTimeout(250);
 
-  // Krok „zakres" wymaga co najmniej jednego ryzyka — reszta domyka się sama.
+  // Krok „zakres": ryzyko podstawowe jest zaznaczone z góry, kwotę wpisze
+  // wypelnijWidoczne(). check() zostaje na wypadek starszej wersji kreatora.
   if (await page.locator('input[name="riskTempIncapacity"]').count()) {
     await page.check('input[name="riskTempIncapacity"]').catch(() => {});
   }

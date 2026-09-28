@@ -25,7 +25,9 @@
     fullName: '', pesel: '', employmentType: 'b2b', profession: zawodPoczatkowy,
     weight: '', height: '', handedness: '', taxForm: '', employsPeople: false,
     emp_contribution_slider: 50,
-    ...Object.fromEntries(RYZYKA.map((r) => [r.klucz, false])),
+    // Ryzyko podstawowe (okresowa niezdolność) startuje zaznaczone i nie da się
+    // go odznaczyć — bez niego nie ma polisy. Dwa pozostałe to rozszerzenia.
+    ...Object.fromEntries(RYZYKA.map((r) => [r.klucz, !!r.podstawowe])),
     ...Object.fromEntries(RYZYKA.map((r) => [r.poleSumy, ''])),
     ...Object.fromEntries(KLAUZULE_NW.map((k) => [k.klucz, 0])),
     // Pozycje ankiety rozszerzonej startują PUSTE, nie na „nie". Deklaracja
@@ -351,12 +353,18 @@
         <div class="flex flex-col gap-4">
           {#each RYZYKA as r}
             <div class="border p-5 {dane[r.klucz] ? 'border-akcent bg-tlo-jasne' : 'border-linia'}">
-              <label class="flex items-start gap-3.5 cursor-pointer">
+              <label class="flex items-start gap-3.5 {r.podstawowe ? 'cursor-default' : 'cursor-pointer'}">
                 <input type="checkbox" name={r.klucz} bind:checked={dane[r.klucz]}
+                       disabled={r.podstawowe}
                        class="w-5 h-5 mt-0.5 accent-akcent-ciemny shrink-0">
                 <span>
                   <span class="block font-bold text-[16.5px]">{r.etykieta}</span>
                   <span class="block font-mono text-[12px] tracking-[0.08em] uppercase text-tekst-drugi font-semibold mt-1.5">{r.rodzaj}</span>
+                  {#if r.podstawowe}
+                    <span class="block text-[14px] text-tekst-drugi mt-1.5">
+                      Ryzyko podstawowe — polisa zawsze je obejmuje. Pozostałe możesz dołożyć.
+                    </span>
+                  {/if}
                 </span>
               </label>
 

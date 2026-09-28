@@ -82,7 +82,16 @@ export const AKTYWNOSCI_RYZYKOWNE = [
   { klucz: 'risk_hunting',           etykieta: 'Łowiectwo z użyciem broni' },
 ];
 
-/** Trzy ryzyka główne. */
+/**
+ * Trzy ryzyka główne.
+ *
+ * „Okresowa niezdolność do pracy" jest ryzykiem PODSTAWOWYM (`podstawowe`) —
+ * to ona jest ubezpieczeniem utraty dochodu, a dwa pozostałe ryzyka tylko ją
+ * rozszerzają. Polisy bez niej nie ma, więc kreator trzyma ją zaznaczoną na
+ * stałe, a `sprawdzKrok` nie przepuszcza zakresu bez niej. Wcześniej wszystkie
+ * trzy startowały puste i wystarczało „dowolne jedno" — 28.09.2026 przeszedł
+ * tak wniosek z samą śmiercią / inwalidztwem.
+ */
 export const RYZYKA = [
   {
     klucz: 'riskDeathInvalidity',
@@ -96,6 +105,7 @@ export const RYZYKA = [
     poleSumy: 'tempIncapacitySum',
     etykieta: 'Okresowa niezdolność do pracy',
     rodzaj: 'Miesięczne świadczenie',
+    podstawowe: true,
     podpowiedz: 'Maksymalnie {limit}% średniorocznych przychodów netto.',
   },
   {
@@ -236,8 +246,10 @@ export function sprawdzKrok(krok, dane) {
     // Klauzula wybrana, a potem próg przestał być spełniony — to nie jest błąd
     // użytkownika, tylko stan, który wyzeruje zerujKlauzule() przed wysyłką.
 
-    if (wybrane.length === 0) {
-      bledy.ryzyka = 'Zaznacz przynajmniej jedno ryzyko, które ma obejmować polisa.';
+    const brakPodstawowego = RYZYKA.find((r) => r.podstawowe && !dane[r.klucz]);
+    if (brakPodstawowego) {
+      bledy.ryzyka = `„${brakPodstawowego.etykieta}" to ryzyko podstawowe — polisa zawsze je obejmuje. `
+        + 'Pozostałe ryzyka możesz do niego dołożyć.';
     }
     for (const r of wybrane) {
       const suma = Number(dane[r.poleSumy]);

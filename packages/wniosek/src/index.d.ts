@@ -12,6 +12,8 @@ export interface Ryzyko {
   etykieta: string;
   rodzaj: string;
   podpowiedz: string;
+  /** Ryzyko, bez którego polisy nie ma — kreator trzyma je zaznaczone. */
+  podstawowe?: boolean;
 }
 
 export interface Klauzula {

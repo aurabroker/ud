@@ -51,6 +51,7 @@ test('suma powyżej miliona odsłania rozszerzoną ankietę', async ({ page }) =
   await page.fill('input[name="pesel"]', PESEL);
   await page.getByRole('button', { name: 'Dalej' }).click();
 
+  await page.fill('input[name="tempIncapacitySum"]', '12000');
   await page.check('input[name="riskPermIncapacity"]');
 
   // Na progu jeszcze nie, dopiero powyżej.
@@ -71,7 +72,6 @@ test('odpowiedź TAK wymusza opis', async ({ page }) => {
   await page.fill('input[name="pesel"]', PESEL);
   await page.getByRole('button', { name: 'Dalej' }).click();
 
-  await page.check('input[name="riskTempIncapacity"]');
   await page.fill('input[name="tempIncapacitySum"]', '12000');
   await page.getByRole('button', { name: 'Dalej' }).click();
 
@@ -92,7 +92,6 @@ test('zgody są obowiązkowe, a wstecz nie gubi danych', async ({ page }) => {
   await page.fill('input[name="pesel"]', PESEL);
   await page.getByRole('button', { name: 'Dalej' }).click();
 
-  await page.check('input[name="riskTempIncapacity"]');
   await page.fill('input[name="tempIncapacitySum"]', '9000');
   await page.getByRole('button', { name: 'Dalej' }).click();
   await page.getByRole('button', { name: 'Dalej' }).click();
@@ -137,7 +136,6 @@ test('kreator pokazuje wszystkie aktywności podwyższonego ryzyka', async ({ pa
   await page.fill('input[name="pesel"]', PESEL);
   await page.getByRole('button', { name: 'Dalej' }).click();
 
-  await page.check('input[name="riskTempIncapacity"]');
   await page.fill('input[name="tempIncapacitySum"]', '12000');
   await page.getByRole('button', { name: 'Dalej' }).click();
 
@@ -165,4 +163,29 @@ test('pola formularza mają czytelne obramowanie i ten sam krój co strona', asy
   // #5E9AB9 — token --color-linia-pole, 3,09:1 na bieli. Poprzedni dawał 1,26:1.
   expect(styl.obramowanie).toBe('rgb(94, 154, 185)');
   expect(styl.kroj, 'pole używa innego kroju niż reszta strony').toBe(krojStrony);
+});
+
+test('okresowa niezdolność jest zaznaczona na stałe, a sama śmierć nie przechodzi', async ({ page }) => {
+  await page.fill('input[name="fullName"]', 'Jan Kowalski');
+  await page.fill('input[name="profession"]', 'Elektryk');
+  await page.fill('input[name="pesel"]', PESEL);
+  await page.getByRole('button', { name: 'Dalej' }).click();
+
+  // Ryzyko podstawowe: zaznaczone od startu i nie do odznaczenia.
+  const podstawowe = page.locator('input[name="riskTempIncapacity"]');
+  await expect(podstawowe).toBeChecked();
+  await expect(podstawowe).toBeDisabled();
+  await expect(page.getByText(/Ryzyko podstawowe/)).toBeVisible();
+
+  // Sama śmierć / inwalidztwo bez kwoty okresowej — kreator stoi na kroku.
+  await page.check('input[name="riskDeathInvalidity"]');
+  await page.fill('input[name="nwDeathSum"]', '1000000');
+  await page.getByRole('button', { name: 'Dalej' }).click();
+  await expect(page.locator('input[name="tempIncapacitySum"]')).toBeVisible();
+  await expect(page.getByText('Wpisz kwotę.')).toBeVisible();
+
+  // Z kwotą okresowej idzie dalej.
+  await page.fill('input[name="tempIncapacitySum"]', '8000');
+  await page.getByRole('button', { name: 'Dalej' }).click();
+  await expect(page.locator('input[name="riskTempIncapacity"]')).toHaveCount(0);
 });
