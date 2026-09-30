@@ -143,9 +143,13 @@ działa na nowe wysyłki — pliki, które już leżą, zostają.
 Portal nie pyta bazy w trakcie builda: artykuły leżą w
 `apps/portal/src/dane/artykuly.json` i `src/dane/artykuly/<slug>.html`.
 
-**Nie uruchamiaj pełnego `scripts/synchronizuj.mjs`.** Treści w repozytorium
-mają poprawki redakcyjne (commit d410f70), których w bazie nie ma — pełny
-zrzut cofnąłby je po cichu, bez jednego czerwonego testu. Do tego skrypt
+**Nie uruchamiaj pełnego `scripts/synchronizuj.mjs`.** Trzy artykuły mają
+w repozytorium poprawki redakcyjne z importu (commit ed4ddea, 27.08), których
+w bazie nie ma — „w-pracy-duzo-wypadkow" („irreversible" → „nieodwracalna"),
+„wypadek-przy-pracy-a-dlugie-l4-…" i „kto-placi-za-l4-w-2026-…". Pełny zrzut
+cofnąłby je po cichu, bez jednego czerwonego testu. (Wcześniej stało tu
+d410f70 — ten commit treści artykułów nie ruszał; sprawdzone 30.09 przez
+porównanie treści z bazą, siedem pozostałych jest identycznych.) Do tego skrypt
 zapisuje okładki lokalnie do `public/blog/`, a repozytorium wskazuje już
 warianty `normalized/*-cover-800/1600.webp` z kubełka.
 
@@ -165,6 +169,13 @@ Nowy artykuł idzie tak:
    zamiast czekać na cron; potem sprawdź `images_status = 'ready'`.
 3. Jeden wpis na początku `artykuly.json`, w formacie pozostałych, z adresami
    800/1600 w `obraz`/`obrazDuzy`, i plik `artykuly/<slug>.html` z treścią.
+
+**Poprawiasz treść opublikowanego artykułu — dopisz mu `zmieniono`** (ISO,
+jak `opublikowano`). Z tego pola, a bez niego z daty publikacji, bierze się
+`dateModified` na stronie i `<lastmod>` w mapie strony. Datę w mapie mają
+**tylko** artykuły i lista bloga: data builda przy wszystkich stronach
+zmieniałaby się z każdym wdrożeniem i Google przestałby ufać naszym datom,
+także tym prawdziwym. Pilnuje tego `test/mapa-strony.spec.js`.
 
 ---
 

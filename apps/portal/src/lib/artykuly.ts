@@ -27,6 +27,11 @@ export interface Artykul {
   tagi: string[];
   opublikowano: string;
   utworzono: string;
+  /**
+   * Ostatnia istotna zmiana treści — pole `zmieniono` z artykuly.json, a bez
+   * niego data publikacji. Idzie do `dateModified` i do <lastmod> w mapie strony.
+   */
+  zmieniono: string;
   obraz: string | null;
   /** Wariant 1600 px; null, gdy zdjęcie jest jeszcze zdalne. */
   obrazDuzy: string | null;
@@ -136,6 +141,7 @@ function zbuduj(meta: (typeof dane.artykuly)[number]): Artykul {
     ...meta,
     tagi: meta.tagi ?? [],
     obrazDuzy: ('obrazDuzy' in meta ? meta.obrazDuzy : null) as string | null,
+    zmieniono: ('zmieniono' in meta ? meta.zmieniono : meta.opublikowano) as string,
     tresc: zKotwicami(tresc),
     // 200 słów na minutę to tempo czytania tekstu użytkowego po polsku.
     minuty: Math.max(1, Math.round(slow / 200)),

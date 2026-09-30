@@ -11,6 +11,23 @@ import { join, relative, resolve } from 'node:path';
 
 const SITE = 'https://utratadochodu.pl';
 
+/**
+ * Daty zmian do mapy strony — wyłącznie tam, gdzie je naprawdę znamy.
+ *
+ * Google bierze <lastmod> pod uwagę tylko wtedy, gdy jest wiarygodny. Data
+ * builda wpisana wszystkim stronom zmieniałaby się przy każdym wdrożeniu,
+ * także bez zmiany treści, i nauczyłaby robota ignorować nasze daty. Dlatego
+ * datę dostają artykuły (`zmieniono` z artykuly.json, a bez niego data
+ * publikacji — ta sama reguła co dateModified na stronie artykułu) oraz lista
+ * bloga (data najnowszego z nich). Reszta stron zostaje bez <lastmod>.
+ */
+const DATY_ARTYKULOW = new Map(
+  JSON.parse(readFileSync(new URL('./src/dane/artykuly.json', import.meta.url), 'utf8'))
+    .artykuly.map((a) => [`${SITE}/blog/${a.slug}/`, new Date(a.zmieniono ?? a.opublikowano).toISOString()]),
+);
+const DATA_BLOGA = [...DATY_ARTYKULOW.values()].sort().at(-1);
+const dataZmiany = (url) => (url === `${SITE}/blog/` ? DATA_BLOGA : DATY_ARTYKULOW.get(url));
+
 export default defineConfig({
   site: SITE,
 
@@ -149,7 +166,8 @@ export default defineConfig({
         }
         // Baza wiedzy dostaje nowe wpisy — warto zaglądać częściej.
         if (item.url.includes('/blog/')) {
-          return { ...item, priority: 0.6, changefreq: EnumChangefreq.WEEKLY };
+          const lastmod = dataZmiany(item.url);
+          return { ...item, priority: 0.6, changefreq: EnumChangefreq.WEEKLY, ...(lastmod ? { lastmod } : {}) };
         }
         if (/\/(dokumenty|opinie|kontakt|pracuj-z-nami)/.test(item.url)) {
           return { ...item, priority: 0.4, changefreq: EnumChangefreq.MONTHLY };
