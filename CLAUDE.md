@@ -151,6 +151,12 @@ warianty `normalized/*-cover-800/1600.webp` z kubełka.
 
 Nowy artykuł idzie tak:
 
+0. **Treść sprawdzasz z OWU i przepisami, zanim cokolwiek opublikujesz.**
+   Poprawiasz tylko zdania niezgodne z OWU, ofertami albo prawem, resztę
+   zostawiasz słowo w słowo, a listę zmian pokazujesz właścicielowi.
+   **Zdjęcie generujesz zawsze** — każdy artykuł dostaje okładkę z Artlista,
+   bez pytania o zgodę (decyzja właściciela z 30.09.2026). Styl i ograniczenia:
+   „Okładki artykułów bloga" na końcu tego pliku.
 1. Wiersz w `aura_articles`: `platforms` z `UtrataDochodu.pl`,
    `status = 'published'` (normalizacja nie bierze szkiców), okładka
    w `preview_image_url` — może to być adres z generatora, funkcja sama
@@ -1386,6 +1392,11 @@ po raz pierwszy ciemniej niż pierwsza seria, z dwoma ujęciami po 124. Pełna
 przysłona to za dużo; następnym razem pół.
 
 ### Okładki artykułów bloga — naturalne kolory, współczesne wnętrze
+
+**Każdy nowy artykuł dostaje zdjęcie — zawsze, bez pytania.** Decyzja
+właściciela z 30.09.2026: artykuł bez okładki nie idzie na stronę, a o samo
+zdjęcie się nie pyta, tylko je generuje. Jedno ujęcie na artykuł; drugie
+dopiero wtedy, gdy klient pierwsze odrzuci.
 
 Okładki bloga to nie seria zawodowa i nie biorą jej chłodnej, cyjanowej
 palety. 28.09.2026 klient odrzucił dwie wersje z rzędu: pierwszą za niebieską
