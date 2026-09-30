@@ -3,6 +3,19 @@
   "zrodlo": "aura_articles (status=published, platforms zawiera UtrataDochodu.pl); zdjęcia z preview_image_800/1600",
   "artykuly": [
     {
+      "slug": "7-rzeczy-ktore-wykluczaja-wyplate-owu",
+      "tytul": "7 rzeczy, które wykluczą wypłatę — najczęstsze pułapki w OWU ubezpieczeń od utraty dochodu",
+      "zajawka": "Siedem sytuacji, w których ubezpieczyciel odmówi wypłaty: choroby sprzed polisy, zwyrodnienia kręgosłupa, alkohol, samookaleczenie, sporty ekstremalne, wojna i sankcje oraz przemilczenia w ankiecie medycznej.",
+      "tagi": [
+        "OWU",
+        "wyłączenia"
+      ],
+      "opublikowano": "2026-09-30T11:01:57Z",
+      "utworzono": "2026-09-30T11:01:57Z",
+      "obraz": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/7-rzeczy-ktore-wykluczaja-wyplate-owu-cover-800.webp",
+      "obrazDuzy": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/7-rzeczy-ktore-wykluczaja-wyplate-owu-cover-1600.webp"
+    },
+    {
       "slug": "kiedy-nie-warto-kupowac-ubezpieczenia-od-utraty-dochodu",
       "tytul": "Kiedy NIE warto kupować ubezpieczenia od utraty dochodu? Szczera analiza",
       "zajawka": "Kiedy polisa od utraty dochodu nie ma sensu: poduszka finansowa, dochody blisko średniej, krótkie choroby, schorzenia w wyłączeniach. Do tego checklista przed zakupem.",
