@@ -11,7 +11,8 @@
     "test:parser": "node --experimental-vm-modules scripts/test-parser.mjs",
     "test:extras": "node scripts/test-extras.mjs",
     "test:owu": "node scripts/test-owu.mjs",
-    "test:lejek": "node scripts/test-lejek.mjs"
+    "test:lejek": "node scripts/test-lejek.mjs",
+    "test:leady-sql": "node scripts/test-leady-sql.mjs"
   },
   "devDependencies": {
     "@sveltejs/adapter-cloudflare": "^4.7.4",
