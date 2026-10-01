@@ -13,109 +13,29 @@
  * Czego NIE sprawdza: schematu produkcji (atrapa ma tylko potrzebne kolumny),
  * PostgREST ani uprawnień nadawanych przez Supabase poza tymi z migracji.
  *
- * Wymaga binariów Postgresa (initdb, pg_ctl, psql). Gdy ich nie ma, kończy się
- * błędem — pominięty test to nie jest zielony test. Jako root uruchamia je
- * przez `runuser -u postgres`, bo Postgres nie wstaje jako root.
- *
- * Zmienna LEADY_MIGRACJA podmienia plik migracji tablicy leadów (do testów
- * mutacyjnych: pogorszona migracja musi dać czerwony wynik).
+ * Wymaga binariów Postgresa — patrz lib/pg-tymczasowy.mjs (tam też zmienna
+ * LEADY_MIGRACJA do testów mutacyjnych). Zmienna LEADY_PO=plik.sql wykonuje
+ * dodatkowe zapytania na tym samym klastrze (diagnoza).
  */
-import { spawn, spawnSync } from 'node:child_process';
-import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, chownSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { uruchomKlaster, wczytaj } from './lib/pg-tymczasowy.mjs';
 
-const korzen = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
-const wczytaj = (sciezka) => readFileSync(join(korzen, sciezka), 'utf8');
-
-const STUB = wczytaj('supabase/tests/stub.sql');
-const MIGRACJA_SZKICE = wczytaj('supabase/migrations/20261001101112_wnioski_szkice.sql');
-const MIGRACJA_LEADY = process.env.LEADY_MIGRACJA
-  ? readFileSync(resolve(process.env.LEADY_MIGRACJA), 'utf8')
-  : wczytaj('supabase/migrations/20261001180000_leady_kanban.sql');
 const TESTY = wczytaj('supabase/tests/leady.sql');
 
-function znajdzBinaria() {
-  const kandydaci = [];
-  const pg = spawnSync('pg_config', ['--bindir'], { encoding: 'utf8' });
-  if (pg.status === 0) kandydaci.push(pg.stdout.trim());
-  const lib = '/usr/lib/postgresql';
-  if (existsSync(lib)) {
-    for (const v of readdirSync(lib).sort((a, b) => Number(b) - Number(a))) kandydaci.push(join(lib, v, 'bin'));
-  }
-  return kandydaci.find((k) => existsSync(join(k, 'initdb')) && existsSync(join(k, 'psql')));
-}
-
-const bin = znajdzBinaria();
-if (!bin) {
-  console.error('BŁĄD: nie znaleziono Postgresa (initdb/pg_ctl/psql). Test SQL nie został wykonany — to NIE jest wynik zielony.');
+let wyjscie = 1;
+let klaster;
+try {
+  klaster = await uruchomKlaster({ dodatkowe: ['pomocnicze.sql', 'fixture.sql'] });
+} catch (e) {
+  console.error(e.message);
   process.exit(2);
 }
-
-const jakoRoot = typeof process.getuid === 'function' && process.getuid() === 0;
-const opakuj = (polecenie, argumenty) =>
-  jakoRoot ? ['runuser', ['-u', 'postgres', '--', polecenie, ...argumenty]] : [polecenie, argumenty];
-
-const katalog = mkdtempSync(join(tmpdir(), 'ud-leady-sql-'));
-if (jakoRoot) {
-  const uid = Number(spawnSync('id', ['-u', 'postgres'], { encoding: 'utf8' }).stdout);
-  const gid = Number(spawnSync('id', ['-g', 'postgres'], { encoding: 'utf8' }).stdout);
-  chownSync(katalog, uid, gid);
-}
-const dane = join(katalog, 'dane');
-const port = String(20000 + Math.floor(Math.random() * 20000));
-
-function uruchom(polecenie, argumenty, wejscie) {
-  const [cmd, args] = opakuj(polecenie, argumenty);
-  return spawnSync(cmd, args, { encoding: 'utf8', input: wejscie, maxBuffer: 64 * 1024 * 1024 });
-}
-
-const psqlArgs = ['-h', katalog, '-p', port, '-U', 'postgres', '-d', 'postgres', '-X', '-q', '-v', 'ON_ERROR_STOP=1', '-At'];
-
-function psql(sql) {
-  return uruchom(join(bin, 'psql'), psqlArgs, sql);
-}
-
-/** Sesja psql w tle: zwraca obietnicę z wyjściem i czasem trwania. */
-function sesja(sql, opoznienieMs = 0) {
-  return new Promise((rozwiaz) => {
-    setTimeout(() => {
-      const [cmd, args] = opakuj(join(bin, 'psql'), psqlArgs);
-      const start = Date.now();
-      const dziecko = spawn(cmd, args);
-      let out = '';
-      let err = '';
-      dziecko.stdout.on('data', (d) => (out += d));
-      dziecko.stderr.on('data', (d) => (err += d));
-      dziecko.on('close', (kod) => rozwiaz({ kod, out: out.trim(), err, ms: Date.now() - start }));
-      dziecko.stdin.end(sql);
-    }, opoznienieMs);
-  });
-}
-
-let wyjscie = 1;
-function sprzatnij() {
-  uruchom(join(bin, 'pg_ctl'), ['-D', dane, '-m', 'immediate', 'stop']);
-  rmSync(katalog, { recursive: true, force: true });
-}
+const { psql, sesja } = klaster;
 
 try {
-  let r = uruchom(join(bin, 'initdb'), ['-D', dane, '-U', 'postgres', '-A', 'trust', '--no-sync', '-E', 'UTF8', '--locale=C.UTF-8']);
-  if (r.status !== 0) throw new Error('initdb: ' + r.stderr);
-  r = uruchom(join(bin, 'pg_ctl'), [
-    '-D', dane, '-l', join(katalog, 'log'), '-w',
-    '-o', `-k ${katalog} -p ${port} -c listen_addresses= -c fsync=off -c synchronous_commit=off`, 'start',
-  ]);
-  if (r.status !== 0) throw new Error('pg_ctl start: ' + r.stderr);
-
-  for (const [nazwa, sql] of [['stub', STUB], ['migracja szkiców', MIGRACJA_SZKICE], ['migracja leadów', MIGRACJA_LEADY]]) {
-    r = psql(sql);
-    if (r.status !== 0) throw new Error(`${nazwa}:\n${r.stderr}`);
-  }
-
   // ── Asercje SQL ───────────────────────────────────────────────────────────
-  r = psql(TESTY);
+  const r = psql(TESTY);
   const linie = `${r.stderr}\n${r.stdout}`.split('\n');
   const pass = linie.filter((l) => /NOTICE:\s+PASS /.test(l)).length;
   const fail = linie.filter((l) => /NOTICE:\s+FAIL /.test(l)).map((l) => l.replace(/^.*NOTICE:\s+/, ''));
@@ -199,6 +119,6 @@ try {
 } catch (e) {
   console.error(e.message);
 } finally {
-  sprzatnij();
+  klaster.stop();
 }
 process.exit(wyjscie);

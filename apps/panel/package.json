@@ -12,7 +12,8 @@
     "test:extras": "node scripts/test-extras.mjs",
     "test:owu": "node scripts/test-owu.mjs",
     "test:lejek": "node scripts/test-lejek.mjs",
-    "test:leady-sql": "node scripts/test-leady-sql.mjs"
+    "test:leady-sql": "node scripts/test-leady-sql.mjs",
+    "test:leady-api": "node scripts/test-leady-api.mjs"
   },
   "devDependencies": {
     "@sveltejs/adapter-cloudflare": "^4.7.4",
