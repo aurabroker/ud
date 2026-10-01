@@ -350,7 +350,8 @@ w panelu Supabase.
 
 ## Funkcje brzegowe — kto może je wołać
 
-Dziewięć z dwunastu funkcji ma `verify_jwt = false`, więc platforma wpuszcza
+Dziewięć z dwunastu funkcji ma `verify_jwt = false` (po wdrożeniu `wniosek-szkic`
+i `wniosek-przypomnienie` — jedenaście z czternastu), więc platforma wpuszcza
 do nich każdego, kto zna adres — a roboty te adresy znajdują (17.09 SemrushBot
 zapukał GET-em do `div-send-email`). Bramka musi siedzieć w kodzie funkcji.
 Stan po audycie z 24.09.2026:
@@ -358,6 +359,8 @@ Stan po audycie z 24.09.2026:
 | Funkcja | Kto woła | Bramka |
 |---|---|---|
 | `form-submit`, `contact-submit`, `review-submit` | formularze publiczne | Turnstile; bez sekretu 503 + wpis w `ud_errors` |
+| `wniosek-szkic` | kreator wniosku (szkic) i link wycofania zgody | Turnstile przy `start` i przy udzielaniu zgody; reszta po `id` (uuid) lub podpisie HMAC; tylko POST; bez sekretów 503 + `ud_errors` |
+| `wniosek-przypomnienie` | pg_cron (zadanie **wyłączone** do akceptacji zgody) | nagłówek `x-cron-token` z Vaulta, sprawdzany przed odczytem kandydatów |
 | `send-digest-email`, `sync-beauty-companies` | pg_cron | nagłówek `x-cron-token` z Vaulta |
 | `normalize-article-images` | pg_cron | nagłówek `x-blog-token` z Vaulta |
 | `review-admin` | panel opinii | JWT + `profiles.rola = 'admin'` |
@@ -1019,6 +1022,148 @@ bez „Okresowej niezdolności" i jej kwoty wniosek dostaje 400 (wcześniej blok
 była tylko sama „Trwała", więc przechodził wniosek z samą śmiercią / inwalidztwem).
 Kreator ma tę samą regułę: okresowa jest zaznaczona na stałe (`podstawowe: true`
 w `RYZYKA`).
+
+---
+
+## Szkice wniosków — lejek bez danych osobowych, kontakt tylko za zgodą
+
+Plan: `PLAN-NIEDOKONCZONE-WNIOSKI.md`. Dziś (01.10.2026) e-mail i telefon są
+w **pierwszym** kroku kreatora (`kontakt`), a nie w ostatnim — kto odpadnie
+w środku, zostawia kontakt. Kroki: `kontakt` → `dane` → `zakres` → `zdrowie` →
+`zgody`. Liczbę kroków w tekstach bierz z `krokiSlownie()` (`@ud/wniosek`),
+nie wpisuj słowem.
+
+**Szkic** (`ud_wnioski_szkice`) powstaje po zaliczeniu kroku `kontakt` i rośnie
+o krok po każdym kolejnym. `ostatni_krok` to ostatni **zaliczony** krok:
+`kontakt` tuż po utworzeniu, `zgody` wyłącznie po udanej wysyłce wniosku.
+Odpadnięcie „na kroku dane" to więc szkic z `ostatni_krok = 'kontakt'`.
+
+### Co wolno zapisać w szkicu, a czego NIGDY
+
+| Zawsze | Tylko za zgodą | Nigdy |
+|---|---|---|
+| numer kroku, daty, skrót IP (do 24 h) | imię, e-mail, telefon | PESEL, `med_*`, `hs_*`, `hsd_*`, jakiekolwiek odpowiedzi z ankiety |
+
+Dane o zdrowiu z wniosku, którego ktoś nie wysłał, nie mają podstawy prawnej —
+zgoda z art. 9 RODO pada dopiero w ostatnim kroku. Dlatego tabela **nie ma
+kolumn** na PESEL ani ankietę, a ograniczenie `szkic_kontakt_tylko_za_zgoda`
+w bazie odrzuca wiersz z e-mailem bez zgody — nie tylko kod funkcji. Funkcja
+`wniosek-szkic` czyta z żądania wyłącznie pola z nagłówka pliku; reszta ciała
+jest ignorowana. Nie dopisuj tam odczytu `pesel` ani `med_*` (test to łapie).
+
+- **Zgoda** to osobny checkbox w kroku `kontakt`: **niezaznaczony**, nie
+  warunkuje dalszej części wniosku. Treść: `ZGODA_KONTAKT` w `schemat.js`
+  (wersja + tekst). Przeglądarka wysyła tylko **wersję**, a treść do bazy
+  dopisuje funkcja z własnej mapy `ZGODY` — rozliczalność (art. 7 ust. 1 RODO)
+  opiera się na tym, co zna serwer. Zmiana treści = nowa wersja w obu miejscach;
+  `szkice.spec.js` pilnuje, żeby tekst się zgadzał.
+- **E-mail zachęcający do dokończenia wniosku to marketing bezpośredni**
+  (art. 398 Prawa komunikacji elektronicznej) — bez zgody nie piszemy i nie
+  dzwonimy. Zostaje anonimowy lejek.
+- **Identyfikator szkicu żyje w pamięci komponentu**, nie w `sessionStorage` ani
+  w ciasteczku: zapis w urządzeniu na potrzeby lejka wymagałby zgody
+  (art. 399 PKE). Przeładowanie strony zaczyna nowy szkic.
+- **Retencja:** `ud_wnioski_szkice_retencja()` (pg_cron 02:20 UTC) usuwa szkice
+  nieaktywne od 30 dni, zostawiając sumę tydzień × krok w
+  `ud_lejek_wniosku_archiwum`, żeby lejek nie urywał się po miesiącu.
+  Po wysłaniu wniosku dane kontaktowe znikają ze szkicu od razu.
+
+### „Wystrzel i zapomnij" — szkic nigdy nie zatrzymuje wniosku
+
+Wniosek to jedyna ścieżka, którą wpływają pieniądze (patrz ABSOLUTE_RULE). Każde
+wywołanie `wniosek-szkic` z kreatora: bez `await` na ścieżce przejścia dalej,
+limit 3 s (`AbortController`), błąd połykany. Kolejność przy wysyłce bez zmian:
+`form-submit` → znacznik `ud:wniosek` → `/podziekowanie/`; oznaczenie szkicu
+jako ukończonego idzie z `keepalive` **po** znaczniku i nigdy nie jest warunkiem
+przekierowania. Pilnuje tego scenariusz **C3** w `obciazenie-formularza.mjs`
+(szkic: 500 / zerwane połączenie / brak odpowiedzi → wniosek i tak przechodzi).
+
+**Nie dokładaj `await` na szkicu, nie wiąż przejścia do kolejnego kroku z jego
+odpowiedzią i nie wołaj go z `form-submit`.** `form-submit` nie ma w tym planie
+żadnej zmiany i tak ma zostać.
+
+### Turnstile: dwa widgety, każdy ze swoim cyklem życia
+
+Krok `kontakt` ma własny widget (`appearance: 'interaction-only'` — niewidoczny,
+dopóki Cloudflare nie zażąda kliknięcia) z tokenem na **szkic**; krok `zgody`
+ma drugi, z tokenem na **wniosek**. Token jest jednorazowy, więc jeden widget
+z `reset()` w środku kreatora mógłby zostawić końcówkę bez świeżego tokenu.
+
+Widget jest montowany przy wejściu w krok i **zdejmowany przy wyjściu**
+(sprzątanie w `$effect`). Wcześniej uchwyt zostawał w pamięci i po
+`Wstecz` → `Dalej` kontener ostatniego kroku był pusty — po wygaśnięciu starego
+tokenu (300 s) przycisk „Wyślij" odpowiadał „Potwierdź, że nie jesteś robotem",
+choć nie było czego kliknąć. Test: `wniosek.spec.js`, „widżet ostatniego kroku
+montuje się przy KAŻDYM wejściu".
+
+### Wycofanie zgody
+
+Link w mailu prowadzi na `/wycofaj-zgode/#id=…&sig=…` — **fragment, nie
+zapytanie**: nie wychodzi do serwera ani do `page_location` w analityce.
+Strona sama woła `wniosek-szkic` (`akcja: 'wycofaj'`, podpis HMAC SHA-256 z
+`SZKIC_HMAC_SECRET`). GET na funkcji niczego nie robi (skaner linków w skrzynce
+nie wycofa zgody za klienta); mail ma też `List-Unsubscribe` + `List-Unsubscribe-Post`
+(RFC 8058) wskazujące POST na funkcję.
+
+### Przypomnienie e-mailem — czego w liście NIE MA
+
+`wniosek-przypomnienie`: jeden mail, 3 h po ostatniej aktywności, szkice
+z ostatnich 7 dni, **jeden mail na adres na 30 dni** (egzekwuje funkcja SQL
+`ud_wnioski_do_przypomnienia`, która przy okazji zamyka szkice z e-mailem
+istniejącym już w `ud_clients`). Szkic jest „zajmowany" przed wysyłką; przy
+porażce Resend wraca do puli, a funkcja kończy po pierwszym błędzie.
+
+W liście **nie ma imienia z formularza** (pole wpisuje odwiedzający — bez filtra
+to kanał do rozsyłania cudzych treści naszym nadawcą, por. `div-send-email`)
+i **nie ma informacji, na którym kroku klient przerwał** („zatrzymałeś się na
+ankiecie zdrowotnej" to już informacja o zdrowiu). Nie dopisuj ani jednego,
+ani drugiego — `przypomnienie.spec.js` sprawdza treść z imieniem
+`<script>…` i krokiem `zdrowie`.
+
+Nadawca: `UtrataDochodu <info@utratadochodu.pl>`, reply-to `info@utratadochodu.pl`
+(decyzja właściciela 01.10.2026). **Domena `utratadochodu.pl` musi być
+zweryfikowana w Resend** (SPF/DKIM) — pozostałe funkcje wysyłają z
+`utratadochodu.com`. Bez tego Resend odmówi, a w `ud_errors` pojawi się wpis
+`Resend odmówił wysyłki (HTTP 403)`.
+
+### Wdrożenie i włączenie — kolejność
+
+1. Migracja `20261001120000_wnioski_szkice.sql` (zadanie `wnioski-przypomnienia`
+   powstaje **wyłączone**).
+2. Sekret `SZKIC_HMAC_SECRET` w Edge Functions → Secrets (dowolny losowy ciąg,
+   np. 32 bajty hex). **Bez niego `wniosek-szkic` odmawia** (503 + `ud_errors`):
+   zgoda, której nie da się cofnąć linkiem, nie jest zbierana. Do przypomnień
+   potrzebny jest też klucz Resend (`RESEND_API_KEY` albo `RESEND2_API_KEY`).
+3. Wdrożenie `wniosek-szkic` (`verify_jwt = false`, razem z `_shared/logger.ts`
+   i `_shared/szkic-podpis.ts`) i `wniosek-przypomnienie` (`verify_jwt = false`) —
+   treść generuj skryptem z pliku w repo (patrz „Wdrażanie przez MCP").
+4. Dopiero potem portal. Kreator wołający nieistniejącą funkcję nic nie psuje
+   (szkic jest dodatkiem), ale lejek zacznie się zbierać dopiero po kroku 3.
+5. **Przypomnienia włącz dopiero po akceptacji treści zgody przez prawnika**:
+   `select cron.alter_job((select jobid from cron.job where jobname =
+   'wnioski-przypomnienia'), active := true);` oraz `ZGODA_ZATWIERDZONA = true`
+   w `apps/panel/src/routes/panel/niedokonczone/+page.server.js` (do tego czasu
+   panel pokazuje ostrzeżenie, że z listy nie wolno kontaktować).
+6. Po wdrożeniu **jeden prawdziwy przebieg z żywej strony** (sonda z fałszywym
+   tokenem nie dowodzi, że sekret Turnstile pasuje do widżetu): porzucić na
+   kroku 3 i sprawdzić wiersz w `ud_wnioski_szkice`; po włączeniu przypomnień —
+   mail po 3 h, link wycofania usuwa dane.
+
+### Testy
+
+```
+cd apps/portal && pnpm build
+NODE_NO_WARNINGS=1 npx playwright test test/szkice.spec.js test/przypomnienie.spec.js \
+  test/wniosek.spec.js test/funkcje-brzegowe.spec.js
+node test/obciazenie-formularza.mjs          # 16/16 (A:3, B:2, C:4, C2:1, C3:3, D:3)
+cd ../../packages/wniosek && pnpm test
+cd ../../apps/panel && pnpm test:lejek
+```
+
+`szkice.spec.js` i `przypomnienie.spec.js` ładują **prawdziwe źródło** funkcji
+brzegowych (zdejmują typy, wycinają importy) i uruchamiają je z atrapami
+Supabase i Resend; atrapa bazy odtwarza ograniczenia tabeli. Pomocniki:
+`test/pomocnicy-funkcji.js`.
 
 ---
 

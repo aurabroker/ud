@@ -206,6 +206,40 @@ lejka zostaje sam krok.
 3. Kto w panelu widzi niedokończone wnioski (tylko admin czy każdy agent).
 4. Adres nadawcy i reply-to.
 
+## Decyzje właściciela (01.10.2026) i stan realizacji
+
+Odpowiedzi na „Decyzje do potwierdzenia":
+
+1. **Treść zgody** — z planu, wysyłka dopiero po prawniku. Wszystkie etapy są
+   zbudowane z tą treścią; zadanie `wnioski-przypomnienia` w pg_cron jest
+   założone **wyłączone**, a panel pokazuje ostrzeżenie (`ZGODA_ZATWIERDZONA`).
+2. **Opóźnienie przypomnienia** — **3 godziny**.
+3. **Kto widzi listę w panelu** — **każdy agent z dostępem do panelu**.
+4. **Nadawca i reply-to** — **`info@utratadochodu.pl`** (nadawca i reply-to).
+   Domena musi być zweryfikowana w Resend.
+
+Odstępstwa od planu (z powodem):
+
+- **Dwa widgety Turnstile zamiast `reset()` jednego.** Krok `kontakt` ma własny
+  widget (token na szkic), krok `zgody` — własny (token na wniosek). Ścieżka
+  wysyłki zostaje dokładnie taka jak przed szkicami. Przy okazji naprawiony
+  istniejący błąd: po `Wstecz` → `Dalej` kontener ostatniego kroku był pusty.
+- **`ostatni_krok` = ostatni zaliczony krok** (`zgody` tylko po wysyłce).
+- **Dodatkowe kolumny:** `zgoda_wersja` (treść zgody dopisuje serwer z mapy
+  wersja → tekst), `zgoda_wycofana_at`, `obsluzony_at` (przycisk w panelu),
+  `ip_hash` (skrót IP do limitu 10 szkiców/h, zerowany po dobie).
+- **Archiwum lejka** (`ud_lejek_wniosku_archiwum`): retencja 30 dni usuwa szkice,
+  ale suma tydzień × krok zostaje, żeby lejek nie urywał się po miesiącu.
+- **Link wycofania** niesie id i podpis we fragmencie (`#`), nie w zapytaniu,
+  i uzupełnia go nagłówek `List-Unsubscribe-Post` (RFC 8058).
+- Retencja liczona od **ostatniej aktywności** (`updated_at`), nie od utworzenia —
+  inaczej reguła „jeden mail na adres na 30 dni" traciłaby pamięć po usunięciu wiersza.
+
+Stan: etapy 1–7 zrealizowane w repozytorium. **Niewykonane (wymaga właściciela):**
+wdrożenie migracji i funkcji na produkcję, sekret `SZKIC_HMAC_SECRET`,
+weryfikacja domeny `utratadochodu.pl` w Resend, akceptacja treści zgody przez
+prawnika, włączenie crona. Kolejność — CLAUDE.md, „Szkice wniosków".
+
 ## Testy i kryteria odbioru
 
 - `packages/wniosek`: `sprawdzKrok` dla nowego kroku `kontakt` (e-mail,
