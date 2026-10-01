@@ -360,7 +360,7 @@ Stan po audycie z 24.09.2026:
 |---|---|---|
 | `form-submit`, `contact-submit`, `review-submit` | formularze publiczne | Turnstile; bez sekretu 503 + wpis w `ud_errors` |
 | `wniosek-szkic` | kreator wniosku (szkic) i link wycofania zgody | Turnstile przy `start` i przy udzielaniu zgody; reszta po `id` (uuid) lub podpisie HMAC; tylko POST; bez sekretów 503 + `ud_errors` |
-| `wniosek-przypomnienie` | pg_cron (zadanie **wyłączone** do akceptacji zgody) | nagłówek `x-cron-token` z Vaulta, sprawdzany przed odczytem kandydatów |
+| `wniosek-przypomnienie` | pg_cron (zadanie włączone od 01.10.2026) | nagłówek `x-cron-token` z Vaulta, sprawdzany przed odczytem kandydatów |
 | `send-digest-email`, `sync-beauty-companies` | pg_cron | nagłówek `x-cron-token` z Vaulta |
 | `normalize-article-images` | pg_cron | nagłówek `x-blog-token` z Vaulta |
 | `review-admin` | panel opinii | JWT + `profiles.rola = 'admin'` |
@@ -1139,8 +1139,9 @@ pełna ścieżka crona przez `ud_wnioski_przypomnienia()` → `200 {"ok":true,
 przez prawnika bez zmian (01.10.2026), zadanie `wnioski-przypomnienia` **włączone**
 (co godzinę o :10), `ZGODA_ZATWIERDZONA = true` w panelu. **Zostają:** portal
 (krok 4) i prawdziwy przebieg z żywej strony (krok 6). Klauzula informacyjna
-i polityka prywatności (projekt zmian w repo) nie mają jeszcze potwierdzonej
-akceptacji — muszą ją mieć, zanim portal wyjdzie na domenę.
+i polityka prywatności (nowe cele, 30 dni, skrót IP) też zaakceptowane przez
+prawnika (potwierdzenie właściciela, 01.10.2026) — zmiana którejkolwiek z tych
+treści wymaga ponownej akceptacji.
 
 1. Migracja `20261001101112_wnioski_szkice.sql` (zadanie `wnioski-przypomnienia`
    powstaje **wyłączone**).

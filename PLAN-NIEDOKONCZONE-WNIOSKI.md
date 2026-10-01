@@ -235,10 +235,13 @@ Odstępstwa od planu (z powodem):
 - Retencja liczona od **ostatniej aktywności** (`updated_at`), nie od utworzenia —
   inaczej reguła „jeden mail na adres na 30 dni" traciłaby pamięć po usunięciu wiersza.
 
-Stan: etapy 1–7 zrealizowane w repozytorium. **Niewykonane (wymaga właściciela):**
-wdrożenie migracji i funkcji na produkcję, sekret `SZKIC_HMAC_SECRET`,
-weryfikacja domeny `utratadochodu.pl` w Resend, akceptacja treści zgody przez
-prawnika, włączenie crona. Kolejność — CLAUDE.md, „Szkice wniosków".
+Stan na 01.10.2026: etapy 1–7 zrealizowane, backend **wdrożony na produkcji**
+(migracja, `wniosek-szkic`, `wniosek-przypomnienie`), sekret `SZKIC_HMAC_SECRET`
+wpisany, domena `utratadochodu.pl` zweryfikowana w Resend, cron przypomnień
+włączony. Prawnik zaakceptował treść zgody (`v1-2026-10`, bez zmian) oraz
+klauzulę informacyjną i politykę prywatności (potwierdzenie właściciela).
+**Zostają:** wdrożenie portalu i panelu oraz jeden prawdziwy przebieg z żywej
+strony. Kolejność — CLAUDE.md, „Szkice wniosków".
 
 ## Testy i kryteria odbioru
 

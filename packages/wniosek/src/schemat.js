@@ -195,8 +195,10 @@ export function krokiSlownie(n = KROKI.length) {
  * Zmiana treści = NOWA wersja w obu miejscach; test/szkice.spec.js pilnuje, żeby
  * tekst tu i w funkcji był ten sam.
  *
- * TREŚĆ CZEKA NA AKCEPTACJĘ PRAWNIKA. Do tego czasu zadanie `wnioski-przypomnienia`
- * w pg_cron zostaje wyłączone (patrz migracja 20261001101112_wnioski_szkice.sql).
+ * Treść wersji `v1-2026-10` zaakceptował prawnik bez zmian (potwierdzenie
+ * właściciela, 01.10.2026); zadanie `wnioski-przypomnienia` w pg_cron jest od tego
+ * dnia włączone (patrz migracja 20261001101112_wnioski_szkice.sql). Zmiana treści
+ * wymaga nowej wersji i nowej akceptacji — wtedy wyłącz zadanie do jej uzyskania.
  */
 export const ZGODA_KONTAKT = {
   wersja: 'v1-2026-10',
