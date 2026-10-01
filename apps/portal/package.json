@@ -1,0 +1,34 @@
+{
+  "name": "@ud/portal",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "test": "playwright test",
+    "dane": "node scripts/synchronizuj.mjs"
+  },
+  "dependencies": {
+    "@ud/wniosek": "workspace:*",
+    "@ud/zawody": "workspace:*",
+    "astro": "^7.2.7"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.4",
+    "@astrojs/sitemap": "^3.7.3",
+    "@astrojs/svelte": "^9.0.1",
+    "@playwright/test": "^1.57.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "gpt-tokenizer": "^4.0.0",
+    "node-html-markdown": "^2.0.0",
+    "node-html-parser": "^9.0.3",
+    "sharp": "^0.34.4",
+    "sitemap": "^9.0.1",
+    "svelte": "^5.56.10",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.9.3"
+  }
+}

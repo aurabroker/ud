@@ -1,0 +1,23 @@
+# Cloudflare Pages — konfiguracja projektu portalu (Astro, wyjście statyczne).
+#
+# Ten plik istnieje po to, żeby katalog wyjściowy był ustalony w repozytorium,
+# a nie w polu formularza w panelu. Bez niego Pages bierze ścieżkę z ustawień
+# projektu, a gdy tamto pole jest puste, waliduje cały katalog `apps/portal` —
+# razem z `node_modules`, gdzie pnpm trzyma tysiące dowiązań prowadzących poza
+# katalog. Kończy się to komunikatem:
+#
+#   Failed: build output directory contains links to files that can't be accessed
+#
+# UWAGA: `name` musi zgadzać się z nazwą projektu w Cloudflare Pages.
+# Jeśli nazwałeś go inaczej, popraw tę linię — inaczej wdrożenie odbije się
+# z błędem o niezgodnej nazwie.
+name = "utratadochodu"
+compatibility_date = "2025-01-01"
+pages_build_output_dir = "dist"
+
+# Funkcje z katalogu `functions/` (obecnie tylko /pobierz/<id>) używają wyłącznie
+# API standardu Web — fetch, URL, Response. Flaga nodejs_compat nie jest potrzebna.
+
+# Sekrety NIE trafiają tutaj. Ustaw je w panelu Cloudflare
+# (Settings → Variables and Secrets) albo przez:
+#   npx wrangler pages secret put SUPABASE_SERVICE_ROLE_KEY

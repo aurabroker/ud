@@ -43,7 +43,7 @@ function yesNo(val: unknown): boolean | null {
 function parseAmount(raw: unknown): number {
   if (raw == null) return NaN;
   const cleaned = String(raw)
-    .replace(/[\s ]/g, '')
+    .replace(/[\s ]/g, '')
     .replace(/z[łl]/gi, '')
     .replace(/pln/gi, '')
     .replace(',', '.');
@@ -70,9 +70,19 @@ const HEALTH_SURVEY_COLUMNS: Record<string, string> = {
 };
 const HEALTH_SURVEY_THRESHOLD = 1_000_000;
 
+/* Gdy w projekcie brakuje TURNSTILE_SECRET_KEY, formularz odmawia zamiast
+   wpuszczać bez sprawdzenia. Klient dostaje drogę kontaktu, a brak sekretu
+   trafia do ud_errors — głośna awaria zamiast cichej dziury. */
+const BRAK_WERYFIKACJI = 'Formularz jest chwilowo niedostępny. Zadzwoń: 504 400 901 albo napisz na info@utratadochodu.pl.';
+
 async function verifyTurnstile(token: string, ip: string): Promise<boolean> {
   const secret = Deno.env.get('TURNSTILE_SECRET_KEY');
-  if (!secret) return true; // skip if not configured
+  // Bez sekretu nie ma czym sprawdzić tokenu — odmowa, nie przepustka.
+  // Wcześniej stało tu `return true` i do 24.09.2026 sekretu w projekcie nie
+  // było wcale: CAPTCHA była dekoracją, każdy niepusty ciąg przechodził jako
+  // token, a nic tego nie zgłaszało. Handler wyłapuje ten stan wcześniej
+  // i odpowiada 503 z wpisem w ud_errors — to jest tylko druga linia obrony.
+  if (!secret) return false;
 
   const form = new URLSearchParams();
   form.append('secret', secret);
@@ -96,6 +106,13 @@ serve(async (req) => {
     /* Turnstile verification */
     const turnstileToken = String(body['cf-turnstile-response'] ?? '').trim();
     const clientIp = req.headers.get('CF-Connecting-IP') ?? '';
+    if (!Deno.env.get('TURNSTILE_SECRET_KEY')) {
+      await logError('form-submit', 'Brak TURNSTILE_SECRET_KEY — formularz odmawia przyjęcia wniosków', undefined, clientIp || undefined);
+      return new Response(
+        JSON.stringify({ status: 'error', message: BRAK_WERYFIKACJI }),
+        { status: 503, headers: { ...CORS, 'Content-Type': 'application/json' } },
+      );
+    }
     if (!turnstileToken || !(await verifyTurnstile(turnstileToken, clientIp))) {
       return new Response(
         JSON.stringify({ status: 'error', message: 'Weryfikacja bezpieczeństwa nie powiodła się. Odśwież stronę i spróbuj ponownie.' }),
@@ -202,13 +219,17 @@ serve(async (req) => {
       informed_accepted:    yesNo(body.informedAccepted   ?? body.informed_accepted),
     };
 
-    /* Spec zmiana_1: „Okresowa" jest ryzykiem podstawowym.
-       Nie można wybrać wyłącznie „Trwałej". */
-    if (record.risk_perm_incapacity === true && record.risk_temp_incapacity !== true) {
+    /* Spec zmiana_1: „Okresowa" jest ryzykiem podstawowym — to ona jest
+       ubezpieczeniem utraty dochodu, śmierć / inwalidztwo i trwała tylko ją
+       rozszerzają. Bez niej, i bez kwoty miesięcznej, wniosku nie przyjmujemy.
+       Do 28.09.2026 stała tu wyłącznie blokada samej „Trwałej", więc przeszedł
+       wniosek z samą śmiercią / inwalidztwem. Kreator trzyma to ryzyko
+       zaznaczone na stałe; ta bramka łapie to, co przyjdzie z jego pominięciem. */
+    if (record.risk_temp_incapacity !== true || !(parseAmount(record.temp_incapacity_sum) > 0)) {
       return new Response(
         JSON.stringify({
           status: 'error',
-          message: 'Nie można wybrać wyłącznie „Trwałej niezdolności". Polisy nie da się zawrzeć bez „Okresowej niezdolności" — to ryzyko podstawowe.',
+          message: 'Polisy nie da się zawrzeć bez „Okresowej niezdolności do pracy" — to ryzyko podstawowe. Zaznacz je i wpisz kwotę miesięczną.',
         }),
         { status: 400, headers: { ...CORS, 'Content-Type': 'application/json' } },
       );

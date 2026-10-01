@@ -1,0 +1,47 @@
+# Cloudflare Pages — konfiguracja projektu `udappnew` (SvelteKit).
+#
+# `name` ma być RÓWNE nazwie projektu w panelu Cloudflare. Stare `udapp`
+# zostało po repozytorium aurabroker/udapp, z którego panel został wciągnięty
+# do tego monorepo; nowy projekt Pages buduje się z aurabroker/ud i nazywa
+# `udappnew`.
+#
+# nodejs_compat jest WYMAGANE (unpdf / Web Crypto / bufory).
+name = "udappnew"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".svelte-kit/cloudflare"
+
+# ── Zmienne jawne ────────────────────────────────────────────────────────────
+#
+# UWAGA, to nie jest kwestia gustu: **od momentu, gdy ten plik istnieje, panel
+# Cloudflare przestaje mieć znaczenie dla zwykłych zmiennych.** Dokumentacja
+# Pages: „This file becomes the source of truth when used, meaning that you
+# can not edit the same fields in the dashboard once you are using this file."
+# `vars` jest jednym z tych pól.
+#
+# Kosztowało to jeden nieudany wieczór: sekrety wpisane w panelu działały,
+# a te same trzy zmienne jawne wpisane obok wracały z /health jako MISSING —
+# bo sekretami wrangler nie zarządza, a zmiennymi jawnymi tak.
+#
+# Te wartości nie są sekretami. Klucz anon i adres projektu Supabase widać
+# w źródle każdej strony, która z nich korzysta.
+[vars]
+PUBLIC_SUPABASE_URL = "https://kukvgsjrmrqtzhkszzum.supabase.co"
+PUBLIC_APP_URL = "https://app.utratadochodu.pl"
+PIN_TTL_HOURS = "48"
+RESEND_FROM = "UtrataDochodu <info@utratadochodu.pl>"
+
+# Klucz anon (rola `anon`, projekt kukvgsjrmrqtzhkszzum, ważny do 2036-03-07).
+# Publiczny z założenia — trafia do każdej przeglądarki otwierającej stronę.
+# Dostęp ogranicza RLS, nie tajność tego ciągu. Sprawdź `role` w ładunku JWT,
+# zanim podmienisz: `service_role` w tym pliku to incydent, nie literówka.
+PUBLIC_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt1a3Znc2pybXJxdHpoa3N6enVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5MTI0NzYsImV4cCI6MjA4ODQ4ODQ3Nn0.wOB-4CJTcRksSUY7WD7CXEccTKNxPIVF8AT8hczS5zY"
+
+# ── Sekrety ──────────────────────────────────────────────────────────────────
+#
+# Tych TU NIE MA i mieć nie może — plik jest w repozytorium. Wrangler nimi nie
+# zarządza, więc panel Cloudflare pozostaje dla nich właściwym miejscem
+# (Settings → Variables and Secrets, typ Secret):
+#
+#   SUPABASE_SERVICE_ROLE_KEY   RESEND_API_KEY
+#   PIN_COOKIE_SECRET           SMSAPI_TOKEN (opcjonalny)

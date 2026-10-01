@@ -1,0 +1,26 @@
+# Adresy starego serwisu, które nie były podstronami zawodów.
+#
+# Stary serwis trzymał strony jako pliki .html w korzeniu; nowy ma katalogi
+# z ukośnikiem na końcu. Bez tych reguł każdy zaindeksowany odnośnik do
+# /blog.html czy /formularz.html trafia w pustkę — a przy braku strony 404
+# Pages podaje wtedy stronę główną ze statusem 200, czyli miękki 404, który
+# Google wciąga do indeksu jako duplikat.
+#
+# Reguły dla 232 podstron zawodów dopisuje integracja `ud:przekierowania`
+# na końcu tego pliku, w trakcie builda. Cloudflare bierze pierwsze trafienie,
+# więc te wpisy, jako dokładne ścieżki, muszą stać wyżej.
+
+/index.html                   /                        301
+/blog.html                    /blog/                   301
+/formularz.html               /wniosek/                301
+/thankyou.html                /podziekowanie/          301
+/o-nas.html                   /o-nas/                  301
+/opinia.html                  /opinie/                 301
+/pracuj-z-nami.html           /pracuj-z-nami/          301
+/regulamin.html               /regulamin/              301
+/polityka-prywatnosci.html    /polityka-prywatnosci/   301
+/polityka-cookies.html        /polityka-cookies/       301
+
+# Stare mapy strony. Nowa nazywa się inaczej, bo generuje ją @astrojs/sitemap.
+/sitemap.xml                  /sitemap-index.xml       301
+/sitemap_professions.xml      /sitemap-index.xml       301

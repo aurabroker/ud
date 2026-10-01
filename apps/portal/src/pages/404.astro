@@ -1,0 +1,85 @@
+---
+/**
+ * Strona 404.
+ *
+ * Powód istnienia jest konkretny: bez pliku `404.html` w katalogu wyjściowym
+ * Cloudflare Pages na nieznany adres nie odpowiada błędem, tylko podaje
+ * stronę główną ze statusem 200. Dla Google to miękki 404 — adres wygląda na
+ * istniejący, więc trafia do indeksu z treścią strony głównej. Przy 240
+ * starych adresach przepinanych naraz to nie jest teoretyczne ryzyko.
+ *
+ * Astro buduje z tego `dist/404.html`, a Pages podaje go z prawidłowym
+ * statusem 404 samo, bez żadnej reguły.
+ *
+ * Bez okruszków i bez JSON-LD: to nie jest miejsce w strukturze serwisu,
+ * tylko odpowiedź na pomyłkę. `bezIndeksu` trzyma ją poza wyszukiwarką.
+ */
+import Baza from '../layouts/Baza.astro';
+import { ZAWODY } from '@ud/zawody';
+import { FIRMA } from '../lib/firma';
+
+const tytul = 'Nie ma takiej strony | UtrataDochodu.pl';
+const opis = 'Adres, pod który trafiłeś, nie istnieje. Poniżej najczęstsze drogi dalej.';
+
+const DROGI = [
+  {
+    adres: '/zawody/',
+    nazwa: `Ubezpieczenie według zawodu (${ZAWODY.length} grup)`,
+    opis: 'Jeśli szukałeś swojego zawodu, tu jest pełna lista.',
+  },
+  {
+    adres: '/kalkulator/',
+    nazwa: 'Kalkulator świadczenia',
+    opis: 'Ile realnie dostaniesz na zwolnieniu i ile kosztuje zamknięcie luki.',
+  },
+  {
+    adres: '/blog/',
+    nazwa: 'Baza wiedzy',
+    opis: 'Zasiłki, długość zwolnień i granice prywatnej ochrony.',
+  },
+  {
+    adres: '/kontakt/',
+    nazwa: 'Kontakt',
+    opis: `Najszybciej telefonicznie: ${FIRMA.telefonWyswietlany}.`,
+  },
+];
+---
+<Baza tytul={tytul} opis={opis} sciezka="/404/" bezIndeksu wariantMarkdown={false}>
+  <div class="bg-linear-102 from-tlo via-tlo-cyjan to-tlo-hero border-b border-linia">
+    <div class="max-w-[1200px] mx-auto px-5 py-16">
+      <p class="font-mono text-xs tracking-[0.16em] uppercase text-akcent-tekst font-semibold m-0">
+        Błąd 404
+      </p>
+      <h1 class="mt-4 mb-5 text-[clamp(2rem,5vw,3rem)] leading-[1.06] max-w-[18em]">
+        Nie ma takiej strony
+      </h1>
+      <p class="text-[1.15rem] leading-relaxed text-tekst-drugi max-w-[42em] m-0">
+        Adres, pod który trafiłeś, nie istnieje — mógł się zmienić albo w odnośniku
+        jest literówka. Serwis został przebudowany, więc część starych adresów
+        prowadzi dziś gdzie indziej.
+      </p>
+    </div>
+  </div>
+
+  <div class="max-w-[1200px] mx-auto px-5 py-16">
+    <h2 class="text-[clamp(1.4rem,3vw,1.9rem)] mt-0 mb-8">Gdzie dalej</h2>
+
+    <ul class="list-none m-0 p-0 grid gap-5 grid-cols-[repeat(auto-fill,minmax(19rem,1fr))]">
+      {DROGI.map((d) => (
+        <li>
+          <a href={d.adres}
+             class="block h-full p-6 border border-linia bg-tlo hover:border-akcent no-underline">
+            <span class="block font-semibold text-[1.05rem] text-tekst">{d.nazwa}</span>
+            <span class="block mt-2 text-[15px] leading-relaxed text-tekst-drugi">{d.opis}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <p class="mt-10 mb-0 text-[15.5px] text-tekst-drugi">
+      Szukałeś czegoś, czego tu nie ma? Napisz na
+      <a href={`mailto:${FIRMA.email}`} class="hover:text-akcent-ciemny">{FIRMA.email}</a>
+      — poprawimy odnośnik.
+    </p>
+  </div>
+</Baza>

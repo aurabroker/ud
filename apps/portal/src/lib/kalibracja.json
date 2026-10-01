@@ -1,0 +1,18 @@
+{
+  "policzono": "2026-09-17",
+  "zrodlo": {
+    "ofert": 15,
+    "wariantow": 48,
+    "obserwacji": 10,
+    "ubezpieczyciel": "Leadenhall"
+  },
+  "stawka": {
+    "dol": 0.0202,
+    "srodek": 0.022,
+    "gora": 0.0244
+  },
+  "okresy": {
+    "24": 1,
+    "36": 1.25
+  }
+}

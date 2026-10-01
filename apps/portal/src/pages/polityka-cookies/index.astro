@@ -1,0 +1,103 @@
+---
+import Tekst from '../../layouts/Tekst.astro';
+import { FIRMA } from '../../lib/firma';
+
+const sciezka = '/polityka-cookies/';
+const tytul = 'Polityka cookies | UtrataDochodu.pl';
+const opis = 'Jakich plików cookies używa UtrataDochodu.pl, do czego służą '
+  + 'i jak w każdej chwili zmienić albo wycofać zgodę na te analityczne.';
+
+/** Tabela zamiast listy: rodzaj ciasteczka, cel i to, czy wymaga zgody. */
+const RODZAJE = [
+  {
+    rodzaj: 'Niezbędne',
+    cel: 'Utrzymanie sesji formularza, zapamiętanie decyzji o zgodzie na cookies, ochrona przed botami (Cloudflare Turnstile).',
+    zgoda: 'Nie — bez nich strona nie działa poprawnie.',
+  },
+  {
+    rodzaj: 'Analityczne',
+    cel: 'Zliczanie odwiedzin i sprawdzanie, które podstrony są przydatne (Google Analytics 4).',
+    zgoda: 'Tak.',
+  },
+  {
+    rodzaj: 'Marketingowe',
+    cel: 'Pomiar skuteczności reklam i remarketing (Google Ads, Meta Pixel).',
+    zgoda: 'Tak.',
+  },
+];
+---
+<Tekst
+  tytul={tytul}
+  naglowek="Polityka cookies"
+  opis={opis}
+  sciezka={sciezka}
+  zaktualizowano="2026-08-27">
+
+  <h2>Czym są pliki cookies</h2>
+  <p>
+    Cookies to niewielkie pliki tekstowe zapisywane przez przeglądarkę na Twoim
+    urządzeniu. Pozwalają rozpoznać przeglądarkę przy kolejnej wizycie i zapamiętać
+    ustawienia — na przykład to, że wybrałeś już swoje preferencje prywatności.
+  </p>
+
+  <h2>Jakich cookies używamy</h2>
+  <p>
+    Cookies analityczne i marketingowe uruchamiamy dopiero po wyrażeniu zgody.
+    Do tego momentu na stronie działają wyłącznie te niezbędne.
+  </p>
+
+  <div class="border border-linia overflow-x-auto my-7">
+    <table class="w-full border-collapse text-left min-w-[34rem]">
+      <caption class="sr-only">Rodzaje plików cookies używanych w serwisie</caption>
+      <thead>
+        <tr class="bg-tlo-jasne border-b border-linia-mocna">
+          <th scope="col" class="font-mono text-[11px] tracking-[0.11em] uppercase font-semibold text-tekst-drugi px-5 py-3.5">Rodzaj</th>
+          <th scope="col" class="font-mono text-[11px] tracking-[0.11em] uppercase font-semibold text-tekst-drugi px-5 py-3.5">Do czego służą</th>
+          <th scope="col" class="font-mono text-[11px] tracking-[0.11em] uppercase font-semibold text-tekst-drugi px-5 py-3.5">Zgoda</th>
+        </tr>
+      </thead>
+      <tbody>
+        {RODZAJE.map((r) => (
+          <tr class="border-b border-linia last:border-0 align-top">
+            <th scope="row" class="px-5 py-4 font-semibold text-[15px] whitespace-nowrap">{r.rodzaj}</th>
+            <td class="px-5 py-4 text-[15px] leading-relaxed text-tekst-drugi">{r.cel}</td>
+            <td class="px-5 py-4 text-[15px] text-tekst-drugi">{r.zgoda}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Jak zmienić zgodę</h2>
+  <p>
+    Zgodę na cookies analityczne i marketingowe możesz w każdej chwili zmienić
+    albo wycofać. Ustawienia znajdziesz też w swojej przeglądarce — sekcja
+    prywatności pozwala zablokować lub usunąć zapisane pliki.
+  </p>
+  <p>
+    <button type="button" data-cookies-otworz
+            class="bg-tlo border-[1.5px] border-akcent text-akcent-ciemny px-6 py-3 font-semibold text-[15px] hover:bg-tlo-jasne">
+      Zmień preferencje cookies
+    </button>
+  </p>
+
+  <h2>Kto jest administratorem danych</h2>
+  <p>
+    Administratorem danych zbieranych przez cookies jest {FIRMA.nazwaPelna},
+    {' '}{FIRMA.adres.ulica}, {FIRMA.adres.kod} {FIRMA.adres.miasto}.
+    Pełny opis przetwarzania znajdziesz w
+    {' '}<a href="/polityka-prywatnosci/">polityce prywatności</a>.
+  </p>
+</Tekst>
+
+<script>
+  /**
+   * Przycisk ma otworzyć panel zgód. Baner cookies wpina się pod ten sam atrybut,
+   * więc gdy go jeszcze nie ma na stronie, przycisk nie udaje, że zadziałał.
+   */
+  document.querySelector('[data-cookies-otworz]')?.addEventListener('click', () => {
+    const okno = window as unknown as { UDCookies?: { otworz?: () => void } };
+    if (okno.UDCookies?.otworz) okno.UDCookies.otworz();
+    else alert('Panel zgód nie jest jeszcze dostępny na tej stronie. Ustawienia cookies zmienisz w swojej przeglądarce.');
+  });
+</script>

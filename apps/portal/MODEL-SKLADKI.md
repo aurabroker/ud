@@ -1,0 +1,305 @@
+# Model szacowania składki — kalibracja na ofertach z bazy
+
+Stan na 2026-09-17. Źródło: `ud_offer_documents` w projekcie Supabase
+`kukvgsjrmrqtzhkszzum` — 48 wariantów z 15 ofert, jeden ubezpieczyciel
+(Leadenhall), produkty LW044 i LW047/MEDICARE.
+
+Dokument opisuje, skąd biorą się liczby w `src/lib/symulacja.ts`. Bez niego
+każda z nich jest umowna, a to jest dokładnie ten zarzut, który postawił klient
+stawce 1,5%.
+
+## Co w danych jest, a czego nie ma
+
+| Parametr | Pokrycie | Nadaje się do modelu |
+|---|---|---|
+| składka roczna i miesięczna | 48 / 48 | tak |
+| miesięczne świadczenie | 48 / 48 | tak |
+| okres wypłaty | 48 / 48 — ale **tylko 24 i 36 miesięcy** | tak, dla tych dwóch |
+| karencja (NW / choroba) | 48 / 48 | tak |
+| trwała niezdolność, śmierć | 48 / 48 | tak, jako filtr |
+| zawód | 48 / 48 — 14 różnych | nie, zbyt rzadkie |
+| klasa ryzyka | 16 / 48 — tylko LW044 | **nie** (patrz niżej) |
+| wiek (z PESEL-u klienta) | 48 / 48, zakres 26–43 lat | **nie** (patrz niżej) |
+| forma zatrudnienia | 48 / 48 — wszyscy B2B | nie, zero zmienności |
+| dochód, data urodzenia w dokumencie | 0 / 48 | nie |
+
+## Co dane potwierdzają
+
+### 1. Składka jest wprost proporcjonalna do świadczenia
+
+Dwa zawody wystąpiły z dwiema sumami przy identycznej reszcie parametrów:
+
+| Zawód | 1. suma | 2. suma | stawka 1. | stawka 2. |
+|---|---|---|---|---|
+| Elektryk | 10 000 zł | 12 000 zł | 2,120% | 2,117% |
+| Kierowca | 6 000 zł | 8 000 zł | 2,333% | 2,338% |
+
+Różnica poniżej pół procenta. Kształt wzoru `składka = świadczenie × stawka`
+jest więc poprawny — zmiany wymaga sama stawka.
+
+### 2. Stawka za samą niezdolność okresową to około 2,2%, nie 1,5%
+
+Dziesięć wariantów bez trwałej niezdolności i bez śmierci, płatnych w 12 ratach
+(stawka = składka roczna / (świadczenie × 12)):
+
+| Zawód | Świadczenie | Karencja | Składka mies. | Stawka |
+|---|---|---|---|---|
+| Kosmetolog | 5 000 | 14/21 | 101 zł | 2,020% |
+| Kosmetyczka | 5 000 | 14/21 | 102 zł | 2,040% |
+| Ratownik medyczny | 12 000 | 14/21 | 253 zł | 2,108% |
+| Elektryk | 12 000 | 21/21 | 254 zł | 2,117% |
+| Elektryk | 10 000 | 21/21 | 212 zł | 2,120% |
+| Kosmetolog | 15 000 | 14/21 | 326 zł | 2,173% |
+| Kierowca | 6 000 | 14/21 | 140 zł | 2,333% |
+| Kierowca | 8 000 | 14/21 | 187 zł | 2,338% |
+| Pielęgniarka | 15 000 | 14/21 | 356 zł | 2,373% |
+| Pielęgniarka | 15 000 | 14/21 | 366 zł | 2,440% |
+
+Mediana 2,147%, średnia 2,206%, rozrzut 2,02–2,44%.
+
+**Stawka 1,5% z `symulacja.ts` leży poniżej najniższej zaobserwowanej oferty.**
+Przy świadczeniu 14 400 zł serwis pokazuje 216 zł; najtańsza obserwacja daje
+291 zł, najdroższa 351 zł.
+
+### 3. Wydłużenie wypłaty z 24 do 36 miesięcy to około +25%
+
+Sześć par z tej samej oferty, identycznych we wszystkim poza okresem wypłaty
+(bez trwałej niezdolności, bez śmierci, 12 rat):
+
+| Zawód | Świadczenie | 24 mies. | 36 mies. | Mnożnik |
+|---|---|---|---|---|
+| Kosmetolog | 5 000 | 1 212 zł | 1 500 zł | 1,2376 |
+| Pielęgniarka | 15 000 | 4 392 zł | 5 460 zł | 1,2432 |
+| Elektryk | 10 000 | 2 544 zł | 3 168 zł | 1,2453 |
+| Ratownik medyczny | 12 000 | 3 036 zł | 3 792 zł | 1,2490 |
+| Kosmetyczka | 5 000 | 1 224 zł | 1 536 zł | 1,2549 |
+| Pielęgniarka | 15 000 | 4 272 zł | 5 460 zł | 1,2781 |
+
+Mediana 1,2471, rozrzut 1,2376–1,2781. **Mnożnik 1,25.**
+
+Warianty z dorzuconą trwałą niezdolnością dają mnożnik niższy (1,13–1,21),
+bo część składki za trwałą niezdolność nie zależy od okresu wypłaty. To
+potwierdza mechanizm, a przy okazji tłumaczy, czemu mnożnik liczymy wyłącznie
+na wariantach bez dodatków.
+
+### 4. Rozłożenie na raty kosztuje 10%
+
+Dziewięć par „ta sama ochrona, raz jednorazowo, raz w 12 ratach": średnio
+**1,1012**. Opłata dystrybucyjna (`distribution_fee`) to 8,6–9,1% składki
+całkowitej, czyli jest już w `premium_total` — klient płaci tyle, ile stoi
+w tej kolumnie.
+
+### 5. Karencja zmienia składkę mocniej niż cokolwiek innego
+
+Ten sam klient, to samo świadczenie 15 000 zł, 24 miesiące, bez dodatków:
+karencja 14/21 dni → 3 564 zł rocznie, karencja 60/60 dni → 2 497 zł.
+**Dłuższa karencja jest o 30% tańsza.** Kalkulator nie pyta o karencję i tego
+nie zmieniamy — ale to znaczy, że jego wynik dotyczy wariantu najkrótszej
+karencji, czyli najdroższego.
+
+## Czego z tych danych policzyć się NIE da
+
+### Klasy ryzyka
+
+Klasa jest wypełniona w 16 wierszach na 48 (tylko LW044; MEDICARE jej nie ma).
+Po odfiltrowaniu wariantów z trwałą niezdolnością zostają dwie klasy:
+
+- klasa II (Kierowca): 2,333% i 2,338%, karencja 14/21
+- klasa III (Elektryk): 2,117% i 2,120%, karencja **21/21**
+
+Klasa III wychodzi tańsza od klasy II, co jest odwrotnie, niż powinno być —
+bo różni je też karencja, a ta waży więcej niż klasa. Zostają dwie obserwacje
+na klasę, każda od jednej osoby. **Współczynnika klasy z tego nie policzymy.**
+Klasy I i IV występują wyłącznie w wariantach z trwałą niezdolnością albo
+śmiercią, więc nie da się ich porównać z resztą.
+
+### Wiek
+
+Wiek daje się odtworzyć z PESEL-u klienta dla wszystkich 48 wierszy, ale:
+
+- zakres to 26–43 lata, a serwis kieruje ofertę także do osób po pięćdziesiątce,
+- **każdy wiek występuje z innym zawodem** — 14 osób, 14 zawodów. Wiek i zawód
+  są w tych danych nierozróżnialne; to, co przypiszemy wiekowi, mogło być
+  zawodem, i odwrotnie.
+
+W realnym taryfikowaniu utraty dochodu wiek jest czynnikiem numer jeden.
+Model, który go pomija, jest szacunkiem rzędu wielkości i niczym więcej — i tak
+musi być opisany na stronie.
+
+### Okresy 48 i 60 miesięcy
+
+**Zero obserwacji.** W bazie są wyłącznie warianty 24- i 36-miesięczne.
+Mnożnik dla 48 i 60 nie jest czymś, co można wyliczyć — trzeba go dostać
+z tabeli ubezpieczyciela. Ekstrapolacja liniowa z jednego punktu (1,25 na 36)
+dałaby 1,50 i 1,75, ale to byłoby zgadywanie udające rachunek.
+
+## Model, który z tego wynika
+
+```
+świadczenie = dochód × limit                 (0,80 B2B, 0,65 etat)
+składka     = świadczenie × stawka × mnożnik_okresu
+
+stawka          = 0,022          ± 10% (rozrzut w danych: 0,0202–0,0244)
+mnożnik_okresu  = 1,00  dla 24 miesięcy
+                = 1,25  dla 36 miesięcy
+                = brak danych dla 48 i 60
+```
+
+Zakres ważności: niezdolność okresowa bez trwałej niezdolności i bez śmierci,
+B2B, wiek 26–43, karencja 14–21 dni, składka w 12 ratach, Leadenhall.
+
+Sprawdzenie na wszystkich 16 czystych obserwacjach (10 × 24 mies., 6 × 36):
+największy błąd **+10,0%**, najmniejszy **+0,4%**, wszystkie w przedziale
+od −9,8% do +10,0%. Stąd `± 10%` przy stawce — to nie jest ostrożnościowy
+margines dopisany na oko, tylko zmierzony rozrzut modelu.
+
+### Klauzula HIV/WZW
+
+W próbie kalibracyjnej jej nie ma, ale w bazie są dwie oferty z klauzulą
+LW049 (stan 28.09.2026). Jedna daje czystą parę — ten sam wariant MEDICARE
+(5 000 zł, 36 miesięcy, 14/21 dni) z klauzulą i bez: składka bazowa
+1500 zł wobec 1404 zł, **×1,068**. Druga nie rozstrzyga, bo jej dwa warianty
+bez klauzuli różnią się ceną przy identycznych widocznych parametrach
+(+3% albo +13%, zależnie od tego, z którym porównać).
+
+`MNOZNIK_HIV_WZW` = **1,07** od 28.09.2026, decyzją właściciela. Wcześniej
+stało 1,2 — relacja 1,8% / 1,5% ze starego `Calculator.js`, niczym
+niepotwierdzona. Jedna para to wciąż mało: przy kolejnych ofertach z klauzulą
+warto policzyć to jeszcze raz, ręcznie.
+
+## Jak tę kalibrację powtórzyć
+
+Zapytania, którymi policzone są tabele wyżej, są w historii sesji; każde
+sprowadza się do tego samego filtru:
+
+```sql
+where coalesce(perm_incapacity_covered,false)=false
+  and coalesce(perm_sum_insured,0)=0
+  and coalesce(death_covered,false)=false
+  and installments = 12
+```
+
+Mnożnik okresu liczy się na parach złączonych po `offer_id`, świadczeniu,
+karencji, dodatkach i sposobie płatności — inaczej do porównania wchodzą
+warianty różniące się czymś jeszcze i mnożnik rozjeżdża się do 1,13–1,40.
+
+Kalibrację warto powtórzyć, gdy w `ud_offer_documents` przybędzie ofert —
+w szczególności takich z okresem 48 lub 60 miesięcy, z drugim ubezpieczycielem
+albo z klientem po pięćdziesiątce. Każde z tych trzech domyka jedną z dziur
+opisanych wyżej.
+
+---
+
+# Plan: worker `ud-kalibrator` — przeliczanie stawek raz dziennie
+
+Status: **plan, nie kod.** Nic z tego nie jest jeszcze wdrożone.
+
+## Rzecz, która przesądza o kształcie: serwis jest statyczny
+
+Kwoty składek nie są czytane w przeglądarce. Są wpieczone w build — w 228
+plików HTML, 227 plików `.md` i 189 plików `llms.txt`. Kalkulator jest wyspą
+Svelte, ale i on renderuje się po stronie serwera, żeby robot i model językowy
+zobaczyły liczby, a nie pustą ramkę.
+
+Z tego wynika, że worker **nie może „zaktualizować danych w serwisie"** przez
+zapis do bazy, z której strona by je czytała. Gdyby czytała, zniknęłyby ze
+źródła strony i cała warstwa dla agentów zostałaby z pustymi miejscami.
+
+Worker może za to zrobić coś lepszego: przeliczyć stawki i **podmienić
+`kalibracja.json` w repozytorium**. Cloudflare Pages zbuduje serwis sam, bo
+commit na gałęzi produkcyjnej jest dla niego wyzwalaczem. Historia gita staje
+się przy okazji dziennikiem: widać, kiedy stawka się zmieniła, o ile i na
+jakiej próbce. Na produkcie regulowanym to nie jest dodatek — to odpowiedź na
+pytanie „co serwis pokazywał w marcu i skąd ta liczba".
+
+Build **nie** pyta bazy o nic. Czyta zatwierdzony plik. Dzięki temu awaria
+Supabase nie może zepsuć wdrożenia portalu.
+
+## Przepływ
+
+```
+cron 05:00 UTC
+  └─ worker ud-kalibrator
+       ├─ RPC do Postgresa: ud_kalibracja_stawek()   → {stawka, okresy, zrodlo}
+       ├─ pobiera obecny kalibracja.json z GitHuba
+       ├─ bramki bezpieczeństwa (niżej)
+       ├─ identyczny → koniec, cisza
+       └─ inny → commit do aurabroker/ud + alert na webhook
+                    └─ Pages buduje i wdraża sam
+```
+
+## Zapytanie mieszka w Postgresie, nie w workerze
+
+Filtr, który odsiewa warianty z trwałą niezdolnością i śmiercią, i złączenie
+par po `offer_id` — to jest cała metoda z tego dokumentu. Przepisanie jej do
+JavaScriptu oznacza dwie wersje prawdy, które rozjadą się przy pierwszej
+poprawce.
+
+Dlatego: funkcja `public.ud_kalibracja_stawek()` w bazie, `SECURITY DEFINER`,
+zwracająca **wyłącznie agregaty** — stawki, mnożniki, liczność próby. Żadnego
+wiersza oferty, żadnego nazwiska, żadnego PESEL-u.
+
+Konsekwencja jest taka, że worker chodzi na **kluczu anonimowym**, nie na
+`service_role`. Na wszystkich trzech tabelach (`ud_offer_documents`,
+`ud_offers`, `ud_clients`) jest włączone RLS, więc bez tej funkcji worker
+musiałby dostać klucz serwisowy — czyli pełny dostęp do bazy jedenastu
+serwisów po to, żeby policzyć jedną średnią. Wyciek takiego klucza z crona
+jest znacznie gorszy niż wyciek klucza, którym da się policzyć medianę.
+
+## Bramki — worker zmienia ceny pokazywane konsumentom
+
+To nie jest zadanie, które wolno puścić bez ograniczeń. Cztery warunki,
+wszystkie muszą być spełnione, inaczej worker **nie zmienia niczego** i wysyła
+alert:
+
+| Bramka | Próg | Po co |
+|---|---|---|
+| liczność próby | ≥ 8 czystych obserwacji | dziś jest 10; przy mniejszej próbce mediana skacze po jednej ofercie |
+| pas zdrowego rozsądku | stawka 1,0–5,0% | literówka w kwocie oferty albo zmiana schematu nie może wjechać na stronę |
+| dzienny ruch | ≤ 15% względnie | prawdziwa zmiana taryfy jest stopniowa; skok o jedną trzecią w dobę to błąd danych, nie rynek |
+| faktyczna różnica | cokolwiek się zmieniło | bez tego historia wdrożeń zapełnia się codziennym commitem bez zmian |
+
+Alert idzie na ten sam webhook, którego używa `ud-monitor`, i przy zmianie
+**też** — nie tylko przy odmowie. Zmiana ceny na serwisie musi być widoczna dla
+człowieka tego samego dnia.
+
+## Czego workerowi nie wolno
+
+- **Dopisywać mnożników dla 48 i 60 miesięcy.** Zero obserwacji to nie jest
+  problem do rozwiązania ekstrapolacją. Jeśli w bazie pojawią się oferty
+  z takim okresem, funkcja SQL policzy je tym samym sposobem co 36 — i dopiero
+  wtedy mnożnik ma prawo trafić do pliku.
+- **Ruszać `MNOZNIK_HIV_WZW`.** Stoi za nim jedna czysta para ofert — za mało
+  na przeliczanie maszynowe; tę liczbę ustawia się ręcznie, w `symulacja.ts`.
+- **Dopisywać współczynnika klasy ryzyka ani wieku.** Powody są w tym
+  dokumencie wyżej i nie znikną przez dołożenie kilku ofert — dopóki wiek jest
+  zmylony zawodem, rozdzielić ich się nie da.
+
+Praktycznie: funkcja SQL zwraca tylko te pola, które umie policzyć. Worker
+wkleja to, co dostał, i nie umie dopisać niczego od siebie.
+
+## Dlaczego osobny worker, a nie drugi cron w `ud-monitor`
+
+Monitor jest celowo odcięty od portalu — ma działać wtedy, gdy portal się nie
+zbudował. Zadanie, które **wyzwala** wdrożenia portalu, w monitorze psuje
+dokładnie tę własność. Osobny worker, osobne sekrety, osobny budżet awarii.
+
+Koszt: jedno wywołanie na dobę, 30 na miesiąc. Poziom darmowy.
+
+## Czego potrzeba od klienta
+
+1. **Token GitHuba** — fine-grained, wyłącznie `aurabroker/ud`, wyłącznie
+   `contents: write`. Nie klasyczny PAT z dostępem do wszystkiego.
+2. **Decyzja: commit prosto na gałąź produkcyjną czy pull request.**
+   Rekomendacja: prosto, bo bramki już ograniczają ruch, a PR czekający na
+   scalenie oznacza, że stawki stoją, gdy nikt nie patrzy — czyli wracamy do
+   stanu, który naprawiamy. Cofnięcie to jeden plik.
+3. **Adres webhooka alertów**, jeśli ma być inny niż monitorowy.
+
+## Test, bez którego to nie ma prawa wejść
+
+Funkcja `ud_kalibracja_stawek()` uruchomiona na dzisiejszych 48 wierszach musi
+zwrócić 2,02% / 2,20% / 2,44% i mnożnik 1,25 — czyli liczby z tego dokumentu.
+Jeśli kiedyś zwróci co innego przy tych samych danych, to znaczy, że ktoś
+zmienił metodę, a nie że zmienił się rynek. To jest jedyny test, który odróżnia
+te dwie sytuacje.

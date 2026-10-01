@@ -1,0 +1,239 @@
+---
+/**
+ * Wyłączenia odpowiedzialności.
+ *
+ * Ta strona istnieje wbrew odruchowi marketingowemu i to jest jej sens.
+ * Model językowy odpytany o „czego nie obejmuje ubezpieczenie utraty dochodu"
+ * cytuje ten serwis, który odpowiada wprost — a nie ten, który wyłączenia
+ * ukrywa w PDF-ie. To samo dotyczy człowieka porównującego oferty.
+ */
+import Baza from '../../layouts/Baza.astro';
+import { graf, organizacja, serwis, strona, okruszki, faq } from '../../lib/seo';
+import { FIRMA } from '../../lib/firma';
+
+const sciezka = '/wylaczenia/';
+const tytul = 'Czego nie obejmuje ubezpieczenie utraty dochodu | UtrataDochodu.pl';
+const opis = 'Pełna lista wyłączeń: wypalenie zawodowe, choroby psychiczne, częściowa '
+  + 'niezdolność do pracy, schorzenia leczone przed zawarciem umowy. Bez gwiazdek.';
+
+/** Kategorie wyłączeń. Każda ma powód — sama lista bez uzasadnień jest bezużyteczna. */
+const GRUPY = [
+  {
+    tytul: 'Zdrowie psychiczne',
+    pozycje: [
+      {
+        co: 'Wypalenie zawodowe jako samodzielna diagnoza',
+        czemu: 'Wypalenie nie jest w klasyfikacji ICD jednostką chorobową, tylko zjawiskiem '
+          + 'związanym z pracą. Ubezpieczyciel nie ma na czym oprzeć oceny, jak długo potrwa '
+          + 'i kiedy się skończy, więc nie obejmuje go ochroną.',
+      },
+      {
+        // Leadenhall: „jeżeli jedyną przyczyną niezdolności do pracy jest…";
+        // CEU (§ 8 i § 13): „jeżeli jej przyczyną była depresja…". Stało tu, że
+        // wyłączenie obejmuje też zaburzenie wtórne wobec choroby somatycznej —
+        // w Leadenhall jest dokładnie odwrotnie.
+        co: 'Choroby i zaburzenia psychiczne jako przyczyna niezdolności',
+        czemu: 'Depresja, nerwica, zaburzenia lękowe, psychoza i rozstrój emocjonalny nie dają '
+          + 'świadczenia. W Leadenhall wyłączenie działa, gdy to jedyna przyczyna niezdolności: '
+          + 'jeśli pracować nie pozwala także choroba somatyczna objęta ochroną, liczy się ta '
+          + 'choroba. W CEU tego zastrzeżenia nie ma — świadczenie nie przysługuje, jeżeli '
+          + 'przyczyną niezdolności była depresja albo podobne rozpoznanie.',
+      },
+      {
+        co: 'Stres i przemęczenie',
+        czemu: 'Nie są rozpoznaniem, tylko opisem stanu. Zwolnienie wystawione z takim '
+          + 'uzasadnieniem nie uruchamia świadczenia.',
+      },
+    ],
+  },
+  {
+    tytul: 'Zakres niezdolności do pracy',
+    pozycje: [
+      {
+        co: 'Częściowa niezdolność do pracy',
+        czemu: 'Polisa wypłaca świadczenie za całkowitą niezdolność do wykonywania zawodu. '
+          + 'Praca w ograniczonym wymiarze albo przejście na lżejsze obowiązki oznacza, '
+          + 'że warunek wypłaty nie jest spełniony.',
+      },
+      {
+        co: 'Kwarantanna i izolacja bez orzeczonej niezdolności do pracy',
+        czemu: 'Sam nakaz pozostania w domu nie jest chorobą. Jeśli w trakcie izolacji '
+          + 'lekarz orzeknie niezdolność do pracy, liczy się to orzeczenie, nie sama izolacja.',
+      },
+      {
+        co: 'Przerwa w pracy z powodu braku zleceń',
+        czemu: 'Ubezpieczenie chroni przed utratą zdolności do pracy, a nie przed utratą '
+          + 'kontraktu. To jest różnica między tym produktem a ubezpieczeniem od utraty pracy.',
+      },
+    ],
+  },
+  {
+    tytul: 'Historia leczenia',
+    pozycje: [
+      {
+        co: 'Schorzenia leczone w ciągu 24 miesięcy przed zawarciem umowy',
+        czemu: 'Chyba że zostały zgłoszone w ankiecie medycznej i ubezpieczyciel przyjął je '
+          + 'do ochrony — czasem ze zwyżką składki, czasem z wyłączeniem konkretnego narządu. '
+          + 'Zatajenie takiego schorzenia jest najczęstszą przyczyną odmowy wypłaty.',
+      },
+      // Wad wrodzonych tu nie ma: nie wyłącza ich żadne z sześciu OWU (Leadenhall
+      // i CEU, sprawdzone 28.09.2026). CEU wymienia je tylko przy klauzuli wypłaty
+      // od pierwszego dnia — wtedy okres oczekiwania wraca do 30 dni.
+    ],
+  },
+  {
+    tytul: 'Okoliczności zdarzenia',
+    pozycje: [
+      // Zakażenia HIV/WZW tu nie ma i nie ma wrócić: OWU LW044, LW046 i LW047
+      // go nie wyłączają. Klauzula LW048/LW049 dokłada osobne świadczenie za samo
+      // zakażenie — bez niej niezdolność ocenia się na zasadach ogólnych (FAQ niżej).
+      {
+        co: 'Zdarzenia pod wpływem alkoholu, narkotyków i substancji odurzających',
+        czemu: 'Poza przypadkami zażycia zgodnie z zaleceniem lekarza.',
+      },
+      {
+        co: 'Umyślne samookaleczenie i próba samobójcza',
+        czemu: 'Standardowe wyłączenie w ubezpieczeniach osobowych.',
+      },
+      {
+        co: 'Udział w działaniach wojennych, zamieszkach i aktach terroru',
+        czemu: 'Ryzyka katastroficzne są wyłączone z ochrony indywidualnej.',
+      },
+      {
+        co: 'Wyczynowe uprawianie sportu i sporty wysokiego ryzyka',
+        czemu: 'Nurkowanie, wspinaczka, sporty motorowe, spadochroniarstwo. Część z nich '
+          + 'da się objąć ochroną po zgłoszeniu we wniosku — pytamy o to w kroku o zakresie.',
+      },
+      // Zabiegów medycyny estetycznej też nie: żadne OWU ich nie wyłącza.
+    ],
+  },
+];
+
+const PYTANIA = [
+  {
+    pytanie: 'Czy ubezpieczenie utraty dochodu obejmuje depresję?',
+    odpowiedz: 'Nie, jeśli to depresja nie pozwala pracować. Warunki obu ubezpieczycieli '
+      + 'wyłączają niezdolność spowodowaną depresją, nerwicą, zaburzeniami lękowymi '
+      + 'i rozstrojem emocjonalnym — także rozpoznanymi w trakcie trwania umowy. '
+      + 'W Leadenhall wyłączenie dotyczy sytuacji, w której zaburzenie jest jedyną '
+      + 'przyczyną niezdolności; gdy pracować nie pozwala też choroba somatyczna, liczy się ta choroba.',
+  },
+  {
+    pytanie: 'Czy polisa zadziała przy wypaleniu zawodowym?',
+    odpowiedz: 'Nie, jeśli wypalenie jest jedyną diagnozą. Wypalenie zawodowe nie jest '
+      + 'jednostką chorobową w klasyfikacji ICD, więc nie stanowi podstawy do wypłaty '
+      + 'świadczenia.',
+  },
+  {
+    pytanie: 'Czy dostanę świadczenie, jeśli mogę pracować w mniejszym wymiarze?',
+    odpowiedz: 'Nie. Świadczenie przysługuje za całkowitą niezdolność do wykonywania zawodu. '
+      + 'Częściowa niezdolność nie uruchamia wypłaty.',
+  },
+  {
+    pytanie: 'Co się stanie, jeśli nie zgłoszę wcześniejszego leczenia?',
+    odpowiedz: 'Ubezpieczyciel może odmówić wypłaty, powołując się na zatajenie okoliczności '
+      + 'istotnych dla oceny ryzyka. Zgłoszenie schorzenia zwykle kończy się zwyżką składki '
+      + 'albo wyłączeniem jednego narządu — a nie odmową ubezpieczenia.',
+  },
+  {
+    pytanie: 'Czy zakażenie HIV albo WZW przy pracy jest objęte ochroną?',
+    odpowiedz: 'Samo zakażenie nie jest wyłączone. Jeśli doprowadzi do niezdolności do '
+      + 'pracy, ocenia się ją na zasadach ogólnych — jak przy każdej innej chorobie. '
+      + 'Warunki szczególne HIV/WZW (LW048 do wariantu MEDICA, LW049 do MEDICARE) dają '
+      + 'ponadto osobne świadczenie za samo zakażenie po niezamierzonym kontakcie z krwią '
+      + 'lub płynami ustrojowymi w pracy: jednorazową wypłatę (przy WZW typu B lub C — po '
+      + '12-miesięcznym okresie wyczekiwania) oraz zwrot kosztów leków antyretrowirusowych '
+      + 'do 5 000 zł i konsultacji z badaniami do 2 000 zł.',
+  },
+];
+
+const sciezkaOkruszkow = [
+  { nazwa: 'Strona główna', url: '/' },
+  { nazwa: 'Wyłączenia', url: sciezka },
+];
+
+const jsonld = graf([
+  organizacja(),
+  serwis(),
+  okruszki(sciezkaOkruszkow),
+  strona({ url: sciezka, tytul, opis, okruszki: sciezkaOkruszkow }),
+  faq(PYTANIA, sciezka),
+]);
+
+const ile = GRUPY.reduce((suma, g) => suma + g.pozycje.length, 0);
+---
+<Baza tytul={tytul} opis={opis} sciezka={sciezka} jsonld={jsonld}>
+  <div class="bg-tlo-jasne border-b border-linia">
+    <div class="max-w-[1200px] mx-auto px-5 py-14 lg:py-18">
+      <nav aria-label="Okruszki" class="mb-5">
+        <ol class="flex flex-wrap gap-2 text-[13px] text-tekst-trzeci list-none m-0 p-0">
+          <li><a href="/" class="hover:text-akcent-ciemny">Strona główna</a></li>
+          <li aria-hidden="true">/</li>
+          <li aria-current="page" class="text-tekst-drugi">Wyłączenia</li>
+        </ol>
+      </nav>
+      <h1 class="text-[clamp(1.9rem,5vw,3rem)] leading-[1.08] max-w-[16em] m-0">
+        Czego to ubezpieczenie nie obejmuje
+      </h1>
+      <p data-odpowiedz class="text-[1.12rem] leading-relaxed text-tekst-drugi max-w-[42em] mt-6 mb-0">
+        {ile} wyłączeń, zebranych w jednym miejscu, zanim wypełnisz wniosek.
+        Najważniejsze z nich: wypalenie zawodowe jako samodzielna diagnoza, choroby
+        psychiczne, częściowa niezdolność do pracy oraz schorzenia leczone w ciągu
+        24 miesięcy przed zawarciem umowy, jeśli nie zostały zgłoszone.
+      </p>
+      <p class="text-[15px] leading-relaxed text-tekst-drugi max-w-[42em] mt-4 mb-0">
+        Lista jest streszczeniem. Wiążącą treścią są ogólne warunki ubezpieczenia —
+        <a href="/dokumenty/" class="text-akcent-hover underline decoration-linia-mocna underline-offset-2">pobierz je i sprawdź sam</a>.
+      </p>
+    </div>
+  </div>
+
+  <div class="max-w-[1200px] mx-auto px-5 py-14 flex flex-col gap-12">
+    {GRUPY.map((g) => (
+      <section aria-labelledby={`g-${g.tytul.replace(/\s+/g, '-').toLowerCase()}`}>
+        <h2 id={`g-${g.tytul.replace(/\s+/g, '-').toLowerCase()}`}
+            class="text-[clamp(1.35rem,3vw,1.8rem)] pb-3 mb-6 border-b-2 border-akcent">
+          {g.tytul}
+        </h2>
+        <ul class="list-none m-0 p-0 grid gap-x-10 gap-y-7 grid-cols-[repeat(auto-fill,minmax(21rem,1fr))]">
+          {g.pozycje.map((p) => (
+            <li class="border-l-[3px] border-alarm pl-5">
+              <h3 class="text-[17px] font-semibold m-0 mb-2 leading-snug">{p.co}</h3>
+              <p class="text-[15px] leading-relaxed text-tekst-drugi m-0">{p.czemu}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+  </div>
+
+  <section class="bg-tlo-jasne border-y border-linia">
+    <div class="max-w-[1200px] mx-auto px-5 py-14">
+      <h2 class="text-[clamp(1.5rem,3.5vw,2.1rem)] leading-tight mb-8">Najczęstsze pytania o wyłączenia</h2>
+      <div class="border-t border-linia max-w-[52em]">
+        {PYTANIA.map((p, i) => (
+          <details class="border-b border-linia group" open={i < 2}>
+            <summary class="cursor-pointer list-none py-5 flex gap-4 items-start justify-between font-semibold text-[17px]">
+              {p.pytanie}
+              <span aria-hidden="true" class="text-akcent-ciemny shrink-0 group-open:rotate-45 transition-transform">+</span>
+            </summary>
+            <p class="text-[16px] leading-relaxed text-tekst-drugi pb-5 mt-0 max-w-[46em]">{p.odpowiedz}</p>
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <div class="max-w-[1200px] mx-auto px-5 py-14 flex flex-wrap gap-8 justify-between items-center">
+    <div class="max-w-[38em]">
+      <h2 class="text-[clamp(1.3rem,3vw,1.8rem)] leading-tight m-0 mb-2">Nie masz pewności, czy Twój przypadek jest objęty?</h2>
+      <p class="text-[16px] leading-relaxed text-tekst-drugi m-0">
+        Zadzwoń i zapytaj wprost, zanim wypełnisz wniosek. To krótsza droga niż
+        czytanie stu stron warunków.
+      </p>
+    </div>
+    <a href={`tel:${FIRMA.telefon}`} class="bg-akcent-ciemny text-white px-8 py-4 font-bold text-lg hover:bg-akcent-hover">
+      {FIRMA.telefonWyswietlany}
+    </a>
+  </div>
+</Baza>

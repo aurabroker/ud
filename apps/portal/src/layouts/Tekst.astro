@@ -1,0 +1,119 @@
+---
+/**
+ * Tekst.astro — szkielet stron tekstowych: regulaminów, polityk, wyłączeń.
+ *
+ * Wydzielony, bo takich stron jest sześć i wszystkie mają tę samą budowę:
+ * nagłówek z datą aktualizacji, jedna kolumna treści o czytelnej szerokości
+ * i okruszki. Styl akapitów siedzi tutaj, a nie w każdej podstronie z osobna,
+ * więc zmiana interlinii nie wymaga sześciu edycji.
+ */
+import Baza from './Baza.astro';
+import { graf, organizacja, serwis, strona, okruszki } from '../lib/seo';
+
+interface Props {
+  tytul: string;
+  /** Nagłówek H1 — zwykle krótszy niż <title>. */
+  naglowek: string;
+  opis: string;
+  sciezka: string;
+  /** Widoczna data ostatniej zmiany; trafia też do dateModified w JSON-LD. */
+  zaktualizowano?: string;
+  wOkruszkach?: string;
+  bezIndeksu?: boolean;
+}
+
+const { tytul, naglowek, opis, sciezka, zaktualizowano, wOkruszkach, bezIndeksu } = Astro.props;
+
+const sciezkaOkruszkow = [
+  { nazwa: 'Strona główna', url: '/' },
+  { nazwa: wOkruszkach ?? naglowek, url: sciezka },
+];
+
+const jsonld = graf([
+  organizacja(),
+  serwis(),
+  okruszki(sciezkaOkruszkow),
+  strona({
+    url: sciezka,
+    tytul,
+    opis,
+    okruszki: sciezkaOkruszkow,
+    ...(zaktualizowano ? { zmodyfikowano: new Date(zaktualizowano) } : {}),
+  }),
+]);
+---
+<Baza tytul={tytul} opis={opis} sciezka={sciezka} jsonld={jsonld} bezIndeksu={bezIndeksu}>
+  <div class="bg-tlo-jasne border-b border-linia">
+    <div class="max-w-[1200px] mx-auto px-5 py-12 lg:py-16">
+      <nav aria-label="Okruszki" class="mb-5">
+        <ol class="flex flex-wrap gap-2 text-[13px] text-tekst-trzeci list-none m-0 p-0">
+          <li><a href="/" class="hover:text-akcent-ciemny">Strona główna</a></li>
+          <li aria-hidden="true">/</li>
+          <li aria-current="page" class="text-tekst-drugi">{wOkruszkach ?? naglowek}</li>
+        </ol>
+      </nav>
+      <h1 class="text-[clamp(1.9rem,4.5vw,2.8rem)] leading-[1.1] max-w-[20em] m-0">{naglowek}</h1>
+      {zaktualizowano && (
+        <p class="font-mono text-[12.5px] text-tekst-trzeci mt-5 mb-0">
+          Ostatnia aktualizacja: <time datetime={zaktualizowano}>
+            {new Date(zaktualizowano).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' })}
+          </time>
+        </p>
+      )}
+    </div>
+  </div>
+
+  <!-- 34em to około 75 znaków w wierszu — górna granica, powyżej której oko
+       gubi początek następnej linii. -->
+  <div class="max-w-[1200px] mx-auto px-5 py-14">
+    <div class="tekst max-w-[38em]">
+      <slot />
+    </div>
+  </div>
+</Baza>
+
+<style>
+  /* Style opisowe zamiast klas przy każdym akapicie — treść tych stron bywa
+     wklejana z dokumentów prawnych i ma być czytelna bez dopisywania klas. */
+  .tekst :global(h2) {
+    font-size: clamp(1.25rem, 2.6vw, 1.6rem);
+    line-height: 1.25;
+    margin: 2.6rem 0 0.9rem;
+  }
+  .tekst :global(h2:first-child) { margin-top: 0; }
+  .tekst :global(h3) {
+    font-size: 1.1rem;
+    line-height: 1.3;
+    margin: 1.9rem 0 0.6rem;
+  }
+  .tekst :global(p) {
+    font-size: 1.02rem;
+    line-height: 1.72;
+    color: var(--color-tekst-drugi);
+    margin: 0 0 1.05rem;
+  }
+  .tekst :global(ul), .tekst :global(ol) {
+    font-size: 1.02rem;
+    line-height: 1.72;
+    color: var(--color-tekst-drugi);
+    margin: 0 0 1.3rem;
+    padding-left: 1.35rem;
+  }
+  .tekst :global(li) { margin-bottom: 0.5rem; }
+  .tekst :global(li)::marker { color: var(--color-akcent); }
+  .tekst :global(a) {
+    color: var(--color-akcent-hover);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    text-decoration-color: var(--color-linia-mocna);
+  }
+  .tekst :global(a:hover) { text-decoration-color: currentColor; }
+  .tekst :global(strong) { color: var(--color-tekst); font-weight: 600; }
+  .tekst :global(dl) { margin: 0 0 1.5rem; }
+  .tekst :global(dt) { font-weight: 600; margin-top: 1.1rem; }
+  .tekst :global(dd) {
+    margin: 0.3rem 0 0;
+    color: var(--color-tekst-drugi);
+    line-height: 1.7;
+  }
+</style>

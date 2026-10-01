@@ -1,0 +1,132 @@
+{
+  "pobrano": "2026-09-24",
+  "zrodlo": "ud_owu_library (active = true)",
+  "dokumenty": [
+    {
+      "id": "60fde229-d528-4cb4-9128-f75a0f5fd549",
+      "ubezpieczyciel": "ceu",
+      "symbol": "Karta Produktu - OWU LOI PREMIUM 2026 _v_1_2 CEU",
+      "tytul": "Karta produktu — CEU LOI Premium",
+      "rodzaj": "ipid",
+      "plik": "Karta Produktu LOI PREMIUM 2026.pdf",
+      "bajty": 291908
+    },
+    {
+      "id": "5b651bc0-929e-465b-86ca-502167b55e6e",
+      "ubezpieczyciel": "ceu",
+      "symbol": "Karta Produktu - Utrata Dochodu 2026 _v_9_8 CEU",
+      "tytul": "Karta produktu — CEU Utrata Dochodu",
+      "rodzaj": "ipid",
+      "plik": "Karta Produktu Utrata dochodu 2026.pdf",
+      "bajty": 300155
+    },
+    {
+      "id": "1fe655b6-0e0c-42a3-bf40-34dc02512ae4",
+      "ubezpieczyciel": "ceu",
+      "symbol": "Karta Produktu - Utrata Dochodu dla zatrudniających 2026 _v_2_6",
+      "tytul": "Karta produktu — CEU Utrata Dochodu dla zatrudniających",
+      "rodzaj": "ipid",
+      "plik": "Karta Produktu Utrata dochodu dla zatrudniajacych 2026.pdf",
+      "bajty": 302999
+    },
+    {
+      "id": "3014900d-1bcd-4ed6-b02d-21ef3d6fd205",
+      "ubezpieczyciel": "leadenhall",
+      "symbol": "LW044/AD_D_TTD_PTD/PL/5",
+      "tytul": "Karta produktu — Leadenhall Utrata Dochodu",
+      "rodzaj": "ipid",
+      "plik": "Karta_Produktu_LW_044_AD_D_TTD_PTD_PL_5.pdf",
+      "bajty": 238564
+    },
+    {
+      "id": "b37fe690-b620-405b-b1d0-313f672d9939",
+      "ubezpieczyciel": "leadenhall",
+      "symbol": "LW044/AD_D_TTD_PTD/PL/5",
+      "tytul": "Leadenhall Utrata Dochodu",
+      "rodzaj": "owu",
+      "plik": "LW_044_AD_D_TTD_PTD_PL_5.pdf",
+      "bajty": 332657
+    },
+    {
+      "id": "6a425447-3c20-4859-9716-2cb6e606a42d",
+      "ubezpieczyciel": "leadenhall",
+      "symbol": "LW046/MEDICA/PL/4",
+      "tytul": "Leadenhall MEDICA",
+      "rodzaj": "owu",
+      "plik": "LW_046_MEDICA_PL_4.pdf",
+      "bajty": 275430
+    },
+    {
+      "id": "7d4eabb6-9e52-45c2-9fd9-f3fe9ec9c30c",
+      "ubezpieczyciel": "leadenhall",
+      "symbol": "LW046/MEDICA/PL/4",
+      "tytul": "Karta produktu — Leadenhall MEDICA",
+      "rodzaj": "ipid",
+      "plik": "Karta_produktu_LH_Medica_LW_046_v4.pdf",
+      "bajty": 326879
+    },
+    {
+      "id": "7ed59d7e-b28e-45d4-9453-7124efa8de18",
+      "ubezpieczyciel": "leadenhall",
+      "symbol": "LW047/MEDICARE/PL/4",
+      "tytul": "Leadenhall MEDICARE",
+      "rodzaj": "owu",
+      "plik": "LW_047_MEDICARE_PL_4.pdf",
+      "bajty": 272698
+    },
+    {
+      "id": "56be98a8-8de6-4ee3-b6ae-437a5313b163",
+      "ubezpieczyciel": "leadenhall",
+      "symbol": "LW047/MEDICARE/PL/4",
+      "tytul": "Karta produktu — Leadenhall MEDICARE",
+      "rodzaj": "ipid",
+      "plik": "Karta_produktu_LH_Medicare_LW_047_v4.pdf",
+      "bajty": 327318
+    },
+    {
+      "id": "7134d025-4f2a-4f83-83ed-05e62e9774d6",
+      "ubezpieczyciel": "leadenhall",
+      "symbol": "LW048/NS_MEDICA/PL/2",
+      "tytul": "Leadenhall MEDICA — warunki szczególne HIV/WZW",
+      "rodzaj": "warunki-szczegolne",
+      "plik": "LW_048_NS_MEDICA_PL_2.pdf",
+      "bajty": 196271
+    },
+    {
+      "id": "2f015bc0-008d-4b87-811d-4264de1fb57b",
+      "ubezpieczyciel": "leadenhall",
+      "symbol": "LW049/NS_MEDICARE/PL/2",
+      "tytul": "Leadenhall MEDICARE — warunki szczególne HIV/WZW",
+      "rodzaj": "warunki-szczegolne",
+      "plik": "LW_049_NS_MEDICARE_PL_2.pdf",
+      "bajty": 196903
+    },
+    {
+      "id": "9c789312-17bd-4125-8e58-6b0ae2273fa8",
+      "ubezpieczyciel": "ceu",
+      "symbol": "OWU LOI PREMIUM 2026 _v_1_2",
+      "tytul": "CEU LOI Premium",
+      "rodzaj": "owu",
+      "plik": "OWU LOI PREMIUM 2026_v_1_2.pdf",
+      "bajty": 662533
+    },
+    {
+      "id": "5d388509-62f3-405b-81e1-e08b2bd46bce",
+      "ubezpieczyciel": "ceu",
+      "symbol": "OWU Utrata Dochodu 2026 _v_9_8",
+      "tytul": "CEU Utrata Dochodu",
+      "rodzaj": "owu",
+      "plik": "OWU Utrata Dochodu 2026 _v_9_8.pdf",
+      "bajty": 829972
+    },
+    {
+      "id": "e83dfeea-6b6e-44eb-9395-dd2297c0d247",
+      "ubezpieczyciel": "ceu",
+      "symbol": "OWU Utrata Dochodu dla zatrudniających 2026 _v_2_6",
+      "tytul": "CEU Utrata Dochodu dla zatrudniających",
+      "rodzaj": "owu",
+      "plik": "OWU Utrata dochodu dla zatrudniających 2026_v_2_6.pdf",
+      "bajty": 696350
+    }
+  ]
+}

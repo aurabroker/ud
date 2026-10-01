@@ -1,0 +1,5 @@
+{
+  "private": true,
+  "description": "Testy starego serwisu z katalogu głównego. Są w CommonJS (require), a główny package.json monorepo ma \"type\": \"module\" — bez tego pliku Node traktowałby je jako moduły ES i żaden by nie wystartował.",
+  "type": "commonjs"
+}

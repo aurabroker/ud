@@ -1,0 +1,152 @@
+@import "tailwindcss";
+
+/**
+ * Tokeny wzięte wprost z zatwierdzonej kanwy layoutu.
+ * Zasada, którą trzymamy: strona jest jasna, ciemny zostaje wyłącznie tekst.
+ */
+@theme {
+  /* Tła — od bieli do najciemniejszego cyjanu, jakiego używamy pod treścią. */
+  --color-tlo:        #FFFFFF;
+  --color-tlo-jasne:  #F4FBFE;
+  --color-tlo-cyjan:  #EDF7FC;
+  --color-tlo-mocne:  #DDF1FA;
+  --color-tlo-hero:   #CBE9F8;
+
+  /* Akcent — cyjan ze znaku marki. */
+  --color-akcent:        #1BAEE5;
+  --color-akcent-ciemny: #0E96D0;
+  --color-akcent-hover:  #0B7CAF;
+
+  /* Cyjan dla drobnego tekstu (etykiety mono nad zdjęciem).
+     --color-akcent-ciemny daje na bieli 3,34:1, a WCAG wymaga 4,5:1 dla tekstu
+     poniżej 24 px; --color-akcent-hover ma 4,65:1, czyli za mało zapasu, gdy
+     tło nie jest czystą bielą, tylko zasłoną nad zdjęciem. Ten daje 5,97:1. */
+  --color-akcent-tekst:  #0A6A96;
+
+  /* Linie. */
+  --color-linia:       #D3E9F4;
+  --color-linia-mocna: #BEDFF0;
+  --color-linia-lekka: #E6F4FA;
+
+  /* Obramowanie pól formularza.
+     Osobny, wyraźnie ciemniejszy token, bo linia rozdzielająca sekcje i krawędź
+     pola do wypełnienia mają różne zadania. --color-linia daje na bieli 1,26:1,
+     a WCAG wymaga 3:1 dla granic elementów interfejsu — pole było widoczne
+     głównie z pamięci o tym, gdzie stoi. Ten kolor daje 3,09:1. */
+  --color-linia-pole:  #5E9AB9;
+
+  /* Tekst — trzy poziomy ważności. */
+  --color-tekst:       #0F2E40;
+  --color-tekst-drugi: #4E6D7D;
+  --color-tekst-trzeci:#8AA3AF;
+
+  /* Ostrzeżenie — jedyny kolor spoza cyjanu, dla kwot „bez polisy". */
+  --color-alarm: #D6453D;
+
+  /* Fasety ikon — od najjaśniejszej do najciemniejszej. */
+  --color-faseta-1: #B3E3F8;
+  --color-faseta-2: #8FD5F3;
+  --color-faseta-3: #5CC6EF;
+  --color-faseta-4: #29ADE4;
+  --color-faseta-5: #1697CE;
+  --color-faseta-6: #0E86BC;
+
+  /* Kroje. Zmienne pochodzą z konfiguracji fontów Astro. */
+  --font-naglowek: var(--font-naglowek);
+  --font-tekst:    var(--font-tekst);
+  --font-mono:     var(--font-mono);
+
+  /* Zero zaokrągleń — spójnie z kanciastą geometrią ikon. */
+  --radius-none: 0;
+}
+
+/**
+ * Bez zaokrągleń w całym serwisie. Layout tego pilnuje, ale łatwo o wyjątek
+ * wpisany przez pomyłkę, więc wartość domyślna jest zerowa.
+ */
+@layer base {
+  html {
+    font-family: var(--font-tekst);
+    color: var(--color-tekst);
+    background: var(--color-tlo);
+    /* Bez tego przeglądarka na Androidzie sama powiększa tekst po obrocie. */
+    -webkit-text-size-adjust: 100%;
+  }
+
+  h1, h2, h3 {
+    font-family: var(--font-naglowek);
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+
+  /* Akapity nie zostawiają jednego słowa w ostatniej linii. */
+  p { text-wrap: pretty; }
+
+  /* Pola formularza dziedziczą krój po stronie.
+     Bez tego przeglądarka wstawia własny font systemowy — inny dla <input>,
+     inny dla <select>, jeszcze inny dla <textarea> — i kreator wygląda,
+     jakby każde okienko pochodziło z innego serwisu. */
+  input, select, textarea, button {
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+  }
+
+  /* Widoczny focus jest wymogiem dostępności, a domyślny bywa wygaszany. */
+  :focus-visible {
+    outline: 2px solid var(--color-akcent-ciemny);
+    outline-offset: 2px;
+  }
+
+  /* Szanujemy ustawienie systemowe — animacje nie są tu do niczego potrzebne. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/**
+ * Zasłona pod tekstem nagłówka ze zdjęciem.
+ *
+ * Tekst stoi na zdjęciu, a nie pod nim — inaczej pas ze zdjęciem musiałby być
+ * niski, żeby nie spychać treści poniżej ekranu, i przycinał bohatera w pół.
+ * Przy tekście na wierzchu pas może być wysoki, więc kadr 21:9 traci w pionie
+ * ok. jednej piątej zamiast połowy.
+ *
+ * Serwis zostaje jasny: zasłona rozjaśnia lewą stronę do praktycznie białej,
+ * a po prawej wypuszcza zdjęcie. Przy najciemniejszym możliwym zdjęciu pod
+ * spodem tło pod tekstem ma jasność ok. 0,92 — granatowy `--color-tekst`
+ * daje na tym ponad 15:1, z zapasem ponad wymagane 4,5:1.
+ */
+.zaslona-hero {
+  background: linear-gradient(
+    100deg,
+    rgb(255 255 255 / 0.97) 0%,
+    rgb(255 255 255 / 0.95) 46%,
+    rgb(237 247 252 / 0.90) 60%,
+    rgb(203 233 248 / 0.34) 80%,
+    rgb(203 233 248 / 0.12) 100%
+  );
+}
+
+/* Na wąskim ekranie kolumna tekstu zajmuje całą szerokość, więc zasłona idzie
+   z góry na dół. Stopnie w PIKSELACH, nie w procentach: wysokość pasa zależy
+   od długości tekstu, a ten jest inny na każdej ze 188 podstron — przy
+   procentach tekst potrafiłby wypaść tam, gdzie zasłona jeszcze przepuszcza
+   zdjęcie. Szablon odsuwa tekst od góry o 17rem (272 px), a zasłona osiąga
+   pełną siłę na 260 px. */
+@media (max-width: 1023px) {
+  .zaslona-hero {
+    background: linear-gradient(
+      180deg,
+      rgb(255 255 255 / 0.06) 0px,
+      rgb(255 255 255 / 0.24) 140px,
+      rgb(255 255 255 / 0.94) 260px,
+      rgb(255 255 255 / 0.97) 100%
+    );
+  }
+}

@@ -1,0 +1,119 @@
+---
+/**
+ * Wycofanie zgody na kontakt w sprawie niedokończonego wniosku.
+ *
+ * Tu prowadzi link z maila przypominającego. Wycofanie ma być tak łatwe jak
+ * udzielenie zgody (art. 7 ust. 3 RODO), więc strona nie pyta o nic: po
+ * wczytaniu sama woła funkcję `wniosek-szkic` i pokazuje wynik. Jedno kliknięcie
+ * w mailu — i po sprawie.
+ *
+ * Identyfikator szkicu i podpis HMAC idą we FRAGMENCIE adresu (#id=…&sig=…),
+ * a nie w zapytaniu (?id=…):
+ *  • fragment nie wychodzi do serwera ani do logów hostingu,
+ *  • nie trafia do `page_location` w analityce — a identyfikator szkicu wskazuje
+ *    wiersz z danymi osoby, więc nie ma prawa lądować w Google,
+ *  • strona usuwa go z paska adresu zaraz po odczytaniu (history.replaceState).
+ *
+ * Wycofanie robi POST, nie GET. Skaner linków w skrzynce pocztowej otwiera
+ * adresy z maili, ale nie wykonuje na nich akcji — tu zresztą nie ma czego
+ * wykonać po stronie serwera: akcję zleca dopiero skrypt w przeglądarce.
+ *
+ * noindex. Ma też statyczne wyjaśnienie nad statusem: integracja Markdown robi
+ * plik .md z każdej strony, a „Wycofuję zgodę…" samo w sobie nic nie mówi
+ * ani agentowi, który czyta Markdown, ani komuś bez JavaScriptu.
+ */
+import Baza from '../../layouts/Baza.astro';
+import { FIRMA } from '../../lib/firma';
+import { funkcja } from '../../lib/uslugi';
+
+const sciezka = '/wycofaj-zgode/';
+const tytul = 'Wycofanie zgody na kontakt | UtrataDochodu.pl';
+const opis = 'Wycofanie zgody na kontakt w sprawie niedokończonego wniosku.';
+const URL_SZKICU = funkcja('wniosek-szkic');
+/**
+ * Adres, z którego wychodzi mail przypominający (nadawca i reply-to), więc
+ * człowiek, który nie może kliknąć w link, pisze tam, skąd list przyszedł.
+ * Nie FIRMA.email — to jest ogólny adres biura, a nie nadawca przypomnień.
+ */
+const ADRES = 'info@utratadochodu.pl';
+---
+<Baza tytul={tytul} opis={opis} sciezka={sciezka} bezIndeksu>
+  <div class="max-w-[1200px] mx-auto px-5 py-20">
+    <div class="max-w-[42em]">
+      <p class="font-mono text-xs tracking-[0.16em] uppercase text-akcent-ciemny font-semibold m-0">
+        Zgoda na kontakt
+      </p>
+      <h1 class="mt-4 mb-5 text-[clamp(2rem,5vw,3rem)] leading-[1.07]">Wycofanie zgody</h1>
+
+      <p class="text-[1.1rem] leading-relaxed text-tekst-drugi m-0 mb-6">
+        Ta strona wycofuje zgodę na kontakt w sprawie niedokończonego wniosku
+        o ubezpieczenie utraty dochodu. Otwarta z linku w wiadomości e-mail wycofuje
+        ją od razu, bez dalszych kroków: usuwamy Twoje dane kontaktowe ze szkicu
+        wniosku i nie kontaktujemy się z Tobą w tej sprawie.
+      </p>
+
+      <div id="wynik" data-url={URL_SZKICU} role="status" aria-live="polite"
+           class="text-[1.1rem] leading-relaxed text-tekst-drugi">
+        <p id="wynik-trwa" class="m-0">Wycofuję zgodę…</p>
+      </div>
+
+      <p class="text-[1.1rem] leading-relaxed text-tekst-drugi mt-6 mb-0">
+        Nie działa albo wolisz inaczej? Napisz na
+        {' '}<a href={`mailto:${ADRES}`}>{ADRES}</a> albo zadzwoń pod
+        {' '}<a href={`tel:${FIRMA.telefon}`}>{FIRMA.telefonWyswietlany}</a> — wycofamy zgodę za Ciebie.
+        Do automatycznego wycofania ta strona potrzebuje JavaScriptu.
+      </p>
+    </div>
+  </div>
+
+  <template id="tpl-ok">
+    <p class="m-0 mb-3 font-bold text-tekst">Zgoda wycofana.</p>
+    <p class="m-0">
+      Usunęliśmy Twoje dane kontaktowe ze szkicu wniosku i nie będziemy się z Tobą
+      kontaktować w tej sprawie. Jeśli wniosek został już wysłany, nic w nim się nie zmienia.
+    </p>
+  </template>
+  <template id="tpl-blad">
+    <p class="m-0 mb-3 font-bold text-alarm">Nie udało się wycofać zgody.</p>
+    <p class="m-0">
+      Napisz na <a href={`mailto:${ADRES}`}>{ADRES}</a> albo zadzwoń pod
+      {' '}<a href={`tel:${FIRMA.telefon}`}>{FIRMA.telefonWyswietlany}</a> — wycofamy ją ręcznie.
+    </p>
+  </template>
+  <template id="tpl-niepelny">
+    <p class="m-0 mb-3 font-bold text-tekst">Ten link jest niepełny.</p>
+    <p class="m-0">
+      Otwórz go ponownie z wiadomości e-mail albo napisz na
+      {' '}<a href={`mailto:${ADRES}`}>{ADRES}</a> — wycofamy zgodę za Ciebie.
+    </p>
+  </template>
+
+  <script>
+    const pole = document.getElementById('wynik');
+    const pokaz = (szablon) => {
+      const tpl = document.getElementById(szablon);
+      if (pole && tpl) pole.replaceChildren(tpl.content.cloneNode(true));
+    };
+
+    if (pole) {
+      // #id=…&sig=… — usuwamy fragment z paska adresu i historii od razu, zanim
+      // cokolwiek innego zdąży go odczytać.
+      const parametry = new URLSearchParams(location.hash.replace(/^#/, ''));
+      const id = parametry.get('id');
+      const sig = parametry.get('sig');
+      history.replaceState(null, '', location.pathname);
+
+      if (!id || !sig) {
+        pokaz('tpl-niepelny');
+      } else {
+        fetch(pole.dataset.url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ akcja: 'wycofaj', id, sig }),
+        })
+          .then((r) => pokaz(r.ok ? 'tpl-ok' : 'tpl-blad'))
+          .catch(() => pokaz('tpl-blad'));
+      }
+    }
+  </script>
+</Baza>

@@ -1,0 +1,25 @@
+Zlecenie Artlist z 2026-09-18 — medycyna. Zostały CZTERY niewgrane:
+
+generationId                          slug zawodu
+01a0b2f8-22ee-7746-9fb2-75b33a57309b  urolog
+01a0b2f8-34c4-7f38-b88d-c99af9fd88b8  endokrynolog
+01a0b2f8-478e-7ade-b1fb-fc1604d1c0d1  gastroenterolog
+01a0b2f8-596f-7473-ae26-bb587d8a5dc2  pulmonolog
+
+Reszta tej partii i całe zlecenie Prawo/Finanse/IT/Biznes są już pod slugami.
+
+UWAGA — dlaczego tu stoją identyfikatory GENERACJI, a nie plików.
+
+Pliki pobrane z panelu Artlist przychodzą nazwane `_Seedream_50_<liczba>.jpg`.
+Nie ma w tej nazwie ani identyfikatora pliku, ani generacji, więc
+`przemianuj.mjs` nic z niej nie odczyta — skrypt działa tylko wtedy, gdy pliki
+zachowają nazwę z generatora (`-t-e-x-t_-t-o_-i-m-a-g-e-<uuid>.jpeg`).
+
+Gdy przyjdą przemianowane, dopasowanie robi się tak: `get_generation_status`
+na identyfikatorze generacji zwraca gotowy obraz. Mając tu parę
+generationId → slug widać, jak wygląda każdy zamówiony zawód, i porównuje się
+to z wgranymi plikami. To jest jedyny pewny sposób i nie jest to nadgorliwość:
+przy poprzedniej partii dwóch mężczyzn w tych samych niebieskich fartuchach
+okazało się weterynarzem i neurochirurgiem — różnica była w tle (gabinet
+zabiegowy kontra korytarz szpitalny), nie w postaci. Zgadywanie po wyglądzie
+dałoby podmianę, której żaden test nie złapie, bo nazwa pliku byłaby poprawna.
