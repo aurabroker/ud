@@ -25,9 +25,11 @@ nie wyniknie.
 - `20261001151739_leady_kanban_1_tabele.sql` — tabele, etapy, widok, karta.
   **Zastosowana** przez MCP 01.10.2026; nazwa pliku = wersja w bazie.
 - `20261001180000_leady_kanban_2_funkcje.sql` — funkcje zapisu i odczytu,
-  wyzwalacz na szkicach. **Stosuje się ją w Supabase SQL Editor** (cały plik
-  naraz), a potem odnotowuje wersję:
+  wyzwalacz na szkicach. **Zastosowana** w Supabase SQL Editor 01.10.2026
+  (cały plik naraz), wersja dopisana ręcznie:
   `insert into supabase_migrations.schema_migrations (version, name) values ('20261001180000', 'leady_kanban_2_funkcje');`
+  Editor zapisał funkcje z końcami linii CRLF — przy porównaniu `prosrc`
+  z plikiem usuń `chr(13)`.
 
 Dlaczego tak: MCP Supabase (`apply_migration` i `execute_sql`) wstrzymuje do
 ręcznego potwierdzenia każde `DROP` i każdą funkcję, która w treści robi

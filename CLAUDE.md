@@ -1300,13 +1300,18 @@ to nie jest regres.
 Wytyczne i scenariusze odbiorcze K01–K25: `KANBAN-CRM-WYTYCZNE.md` (v1.0,
 01.10.2026). Strona: `/panel/leady`, zakładka „Leady" w panelu.
 
-**Stan na 01.10.2026: panel v.0.58 na `REBUILD`, migracja w połowie.** Migracja
-jest w dwóch plikach (powód: `supabase/migrations/README.md`):
-`20261001151739_leady_kanban_1_tabele.sql` — **zastosowana** (tabele, etapy,
-widok); `20261001180000_leady_kanban_2_funkcje.sql` — **do wklejenia w Supabase
-SQL Editor** i odnotowania wersji (polecenie w README). Dopóki część 2 nie
-wejdzie, `/panel/leady` pokazuje komunikat o błędzie, reszta panelu działa,
-a wnioski nie są dotknięte (część 1 nie ma wyzwalaczy).
+**Stan na 01.10.2026: WDROŻONE.** Panel v.0.58 na `REBUILD` (app.utratadochodu.pl).
+Migracja w dwóch plikach (powód: `supabase/migrations/README.md`), obie części
+odnotowane w bazie pod nazwami plików: `20261001151739_leady_kanban_1_tabele`
+(przez MCP) i `20261001180000_leady_kanban_2_funkcje` (przez SQL Editor).
+Sprawdzone na produkcji: treść 15 funkcji = repozytorium, uprawnienia tylko
+`service_role`, zero wyzwalaczy na `ud_clients`; w transakcji wycofanej —
+ukończenie szkicu przechodzi, a wyzwalacz usuwa jego lead. Podgląd pierwszej
+synchronizacji: 52 klientów + 3 szkice ze zgodą (Nowy 36, Kontakt 3, Oferta 16).
+
+SQL Editor zapisał treść funkcji z końcami linii CRLF. Porównując `prosrc`
+z repozytorium, licz skrót z `replace(prosrc, chr(13), '')` — inaczej każda
+funkcja z części 2 wygląda na inną niż w repo, choć nie jest.
 
 ### Czym jest lead — decyzja właściciela z 01.10.2026
 
