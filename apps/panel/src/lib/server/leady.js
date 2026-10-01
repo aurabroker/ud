@@ -213,6 +213,7 @@ export async function odpowiedzKolumny(sb, userId, parametry) {
       filtr,
       sort,
       offset: parametry.get('offset'),
+      limit: parametry.get('limit') ?? ROZMIAR_STRONY,
     }),
     liczniki(sb, userId, plan.pipeline.id, filtr),
   ]);

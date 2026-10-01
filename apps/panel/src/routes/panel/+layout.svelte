@@ -7,6 +7,7 @@
   const isAdmin = role === 'admin';
 
   const tabs = [
+    { href: '/panel/leady', label: 'Leady' },
     { href: '/panel/klienci', label: 'Klienci' },
     { href: '/panel/niedokonczone', label: 'Niedokończone' },
     { href: '/panel', label: 'Oferty', exact: true },

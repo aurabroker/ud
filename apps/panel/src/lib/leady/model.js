@@ -61,6 +61,12 @@ export function formatKwota(n) {
   return `${new Intl.NumberFormat('pl-PL', { maximumFractionDigits: 2 }).format(Number(n))} zł`;
 }
 
+/** Kwota z pola tekstowego jak w SQL (ud_kwota): „8 000,50 zł" → 8000.5, cokolwiek innego → null. */
+export function kwotaZTekstu(tekst) {
+  const n = String(tekst ?? '').toLowerCase().replace(/(\s|\u00a0|zł|pln)/g, '').replace(',', '.');
+  return /^[0-9]{1,9}(\.[0-9]{1,2})?$/.test(n) ? Number(n) : null;
+}
+
 export function etykietaZrodla(zrodlo) {
   return ZRODLA[zrodlo] ?? zrodlo ?? '';
 }

@@ -42,6 +42,9 @@ importers:
         specifier: ^0.12.1
         version: 0.12.2
     devDependencies:
+      '@playwright/test':
+        specifier: ^1.62.1
+        version: 1.62.1
       '@sveltejs/adapter-cloudflare':
         specifier: ^4.7.4
         version: 4.9.0(@sveltejs/kit@2.70.3(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.56.10)(vite@5.4.21(@types/node@24.13.3)(lightningcss@1.33.0)))(svelte@5.56.10)(typescript@5.9.3)(vite@5.4.21(@types/node@24.13.3)(lightningcss@1.33.0)))(wrangler@4.127.0)
