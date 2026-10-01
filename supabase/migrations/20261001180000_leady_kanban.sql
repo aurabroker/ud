@@ -629,16 +629,27 @@ begin
       return jsonb_build_object('status', 'bledne_dane', 'komunikat', 'Powód utraty jest za długi (max 300 znaków).');
     end if;
 
+    -- Wejście do etapu zamykającego (Wygrany / Przegrany) kończy proces, więc
+    -- zaplanowane działanie znika: przeterminowane „zadzwoń" przy zamkniętej
+    -- sprawie krzyczałoby w nieskończoność. Poprzednie zostaje w historii.
     update public.ud_leady
        set etap_id = v_cel.id,
            etap_od = now(),
            powod_utraty = case when v_cel.rodzaj = 'przegrany' then v_powod end,
+           nastepne_dzialanie_typ   = case when v_cel.rodzaj = 'otwarty' then nastepne_dzialanie_typ end,
+           nastepne_dzialanie_at    = case when v_cel.rodzaj = 'otwarty' then nastepne_dzialanie_at end,
+           nastepne_dzialanie_opis  = case when v_cel.rodzaj = 'otwarty' then nastepne_dzialanie_opis end,
            wersja = wersja + 1,
            updated_at = now()
      where id = p_lead;
     insert into public.ud_leady_historia (lead_id, typ, z_etapu_id, do_etapu_id, wykonawca_id, wykonawca_nazwa, dane, klucz)
     values (p_lead, 'etap', l.etap_id, v_cel.id, p_user, v_wyk,
-            jsonb_build_object('zadanie', v_zadanie, 'powod_utraty', v_powod), p_klucz);
+            jsonb_build_object('zadanie', v_zadanie, 'powod_utraty', v_powod,
+                               'zamkniete_dzialanie',
+                               case when v_cel.rodzaj <> 'otwarty' and l.nastepne_dzialanie_typ is not null
+                                    then jsonb_build_object('typ', l.nastepne_dzialanie_typ,
+                                                            'termin', l.nastepne_dzialanie_at) end),
+            p_klucz);
 
   -- ── następne działanie ────────────────────────────────────────────────────
   elsif p_op = 'dzialanie' then

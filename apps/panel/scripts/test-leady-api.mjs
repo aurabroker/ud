@@ -21,6 +21,9 @@ import {
   kolumna,
   liczniki,
   notatka,
+  odpowiedzKolumny,
+  odpowiedzLicznikow,
+  odpowiedzSzczegolow,
   przetworz,
   synchronizuj,
   szczegoly,
@@ -239,6 +242,24 @@ try {
     const l = await liczniki(sbSql, ULA, P, {});
     assert.equal(Object.keys(l).length, 6);
     assert.equal(l[etap('decyzja')].ile, 1);
+  });
+
+  await t('odpowiedzKolumny: strona + liczniki, filtr z adresu, śmieciowy etap → 400', async () => {
+    const r = await odpowiedzKolumny(sbSql, ULA, new URLSearchParams(`etap=${etap('nowy')}&produkt=okresowa&sort=wartosc&offset=0`));
+    assert.equal(r.status, 200);
+    assert.equal(r.body.razem, 2);
+    assert.equal(r.body.karty[0].nazwa, 'Gabriel Podkreślnik');
+    assert.equal(r.body.liczniki[etap('nowy')].ile, 2);
+    await assert.rejects(odpowiedzKolumny(sbSql, ULA, new URLSearchParams('etap=x')), (e) => e.status === 400);
+    await assert.rejects(odpowiedzKolumny(sbSql, INES, new URLSearchParams(`etap=${etap('nowy')}`)), (e) => e.status === 403);
+  });
+  await t('odpowiedzLicznikow / odpowiedzSzczegolow: dostęp tylko dla agenta', async () => {
+    const r = await odpowiedzLicznikow(sbSql, ULA, new URLSearchParams('zrodlo=direct'));
+    assert.equal(Object.values(r.body.liczniki).reduce((a, x) => a + x.ile, 0), 2);
+    await assert.rejects(odpowiedzLicznikow(sbSql, INES, new URLSearchParams()), (e) => e.status === 403);
+    await assert.rejects(odpowiedzSzczegolow(sbSql, null, INES, lead('Anna Kowalska')), (e) => e.status === 403);
+    const s = await odpowiedzSzczegolow(sbSql, null, ULA, lead('Anna Kowalska'));
+    assert.equal(s.body.email, 'anna@x.pl');
   });
 
   // ═══ Zmiana stanu: jedna ścieżka ═════════════════════════════════════════

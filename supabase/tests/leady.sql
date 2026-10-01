@@ -279,6 +279,16 @@ begin
     r->>'status' = 'ok' and (select powod_utraty from public.ud_leady where id = c1) is null);
   perform tt.przenies(c1, 'nowy', 'mv-c1-powrot-2');
 
+  -- Zamknięcie sprawy kasuje zaplanowane działanie (historia je pamięta).
+  perform tt.ruch('dzialanie', c1, tt.wersja(c1), 'dz-c1-zamk-aaaa', tt.id_ula(), jsonb_build_object('typ', 'telefon', 'termin', now() + interval '2 days'));
+  v := tt.wersja(c1);
+  r := tt.przenies(c1, 'wygrany', 'mv-c1-wygr-aaaa');
+  perform tt.t('Wygrany: kasuje zaplanowane działanie, wersja +1, historia pamięta poprzednie',
+    r->>'status' = 'ok' and r->'lead'->'dzialanie' = 'null'::jsonb and tt.wersja(c1) = v + 1
+    and exists (select 1 from public.ud_leady_historia where lead_id = c1 and klucz = 'mv-c1-wygr-aaaa' and dane->'zamkniete_dzialanie'->>'typ' = 'telefon'));
+  r := tt.przenies(c1, 'nowy', 'mv-c1-wygr-bbbb');
+  perform tt.t('powrót do etapu otwartego nie przywraca działania', r->>'status' = 'ok' and r->'lead'->'dzialanie' = 'null'::jsonb);
+
   -- K12: niedozwolony etap — także bezpośrednio przez funkcję (to jest to samo „API").
   insert into public.ud_leady_pipeline (klucz, nazwa) values ('inny', 'Inny') returning id into inny_pipe;
   insert into public.ud_leady_etap (pipeline_id, klucz, nazwa, pozycja) values (inny_pipe, 'obcy', 'Obcy', 10) returning id into inny_etap;

@@ -202,6 +202,36 @@ export async function wczytajTablice(sb, userSb, userId, parametry) {
   };
 }
 
+/** GET …/kolumna: kolejna strona kart jednego etapu + świeże liczniki pipeline'u. */
+export async function odpowiedzKolumny(sb, userId, parametry) {
+  const { filtr, sort } = filtrZParametrow(parametry);
+  const plan = await wczytajPlan(sb, userId, parametry.get('pipeline'));
+  const [strona, licz] = await Promise.all([
+    kolumna(sb, userId, {
+      pipelineId: plan.pipeline.id,
+      etapId: parametry.get('etap'),
+      filtr,
+      sort,
+      offset: parametry.get('offset'),
+    }),
+    liczniki(sb, userId, plan.pipeline.id, filtr),
+  ]);
+  return { status: 200, body: { status: 'ok', ...strona, liczniki: licz } };
+}
+
+/** GET …/liczniki. */
+export async function odpowiedzLicznikow(sb, userId, parametry) {
+  const { filtr } = filtrZParametrow(parametry);
+  const plan = await wczytajPlan(sb, userId, parametry.get('pipeline'));
+  return { status: 200, body: { status: 'ok', liczniki: await liczniki(sb, userId, plan.pipeline.id, filtr) } };
+}
+
+/** GET …/lead/<id>: dostęp sprawdzamy, zanim ktokolwiek dostanie dane po samym identyfikatorze. */
+export async function odpowiedzSzczegolow(sb, userSb, userId, leadId) {
+  await wczytajPlan(sb, userId, null);
+  return { status: 200, body: { status: 'ok', ...(await szczegoly(sb, userSb, leadId)) } };
+}
+
 /** Status z funkcji SQL → kod HTTP. */
 const HTTP = {
   ok: 200,
