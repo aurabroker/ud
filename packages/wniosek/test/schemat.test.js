@@ -8,7 +8,7 @@ import assert from 'node:assert/strict';
 import {
   pesekPoprawny, dataZPesel, wiekZPesel, telefonPoprawny, emailPoprawny,
   sprawdzKrok, ankietaRozszerzona, doWysylki, HEALTH_SURVEY_THRESHOLD,
-  AKTYWNOSCI_RYZYKOWNE, POLA_LOGICZNE,
+  AKTYWNOSCI_RYZYKOWNE, POLA_LOGICZNE, KROKI, ZGODA_KONTAKT, krokiSlownie,
 } from '../src/schemat.js';
 
 /** Dokleja poprawną cyfrę kontrolną do dziesięciu cyfr. */
@@ -64,7 +64,7 @@ test('telefon i e-mail', () => {
 
 test('krok „dane" — wiek poza zakresem ochrony', () => {
   const maloletni = zCyfraKontrolna('1501011234'); // 2015
-  const bledy = sprawdzKrok('dane', { fullName: 'Jan Kowalski', profession: 'Lekarz', pesel: maloletni });
+  const bledy = sprawdzKrok('dane', { profession: 'Lekarz', pesel: maloletni });
   assert.match(bledy.pesel, /18 do 65/);
 });
 
@@ -84,14 +84,56 @@ test('krok „zdrowie" — TAK wymaga opisu', () => {
   assert.deepEqual(sprawdzKrok('zdrowie', { med_heart: 'no' }), {});
 });
 
-test('krok „zgody" — obie zgody obowiązkowe', () => {
-  const pelne = {
-    email: 'jan@example.com', phone: '504400901',
-    exclusions_accepted: true, informedAccepted: true,
-  };
+test('kolejność kroków: kontakt jest pierwszy, a PESEL zostaje w „dane"', () => {
+  assert.deepEqual(KROKI.map((k) => k.id), ['kontakt', 'dane', 'zakres', 'zdrowie', 'zgody']);
+  // Imię i nazwisko przeniesione do kroku kontakt — „dane" już o nie nie pyta.
+  assert.equal('fullName' in sprawdzKrok('dane', {}), false);
+  assert.ok('pesel' in sprawdzKrok('dane', {}));
+});
+
+test('krok „kontakt" — imię, e-mail i telefon wymagane, zgoda opcjonalna', () => {
+  const puste = sprawdzKrok('kontakt', {});
+  assert.ok(puste.fullName, 'imię i nazwisko');
+  assert.ok(puste.email, 'e-mail');
+  assert.ok(puste.phone, 'telefon');
+
+  const pelne = { fullName: 'Jan Kowalski', email: 'jan@example.com', phone: '504400901' };
+  // Zgoda niezaznaczona, zaznaczona, nieobecna — we wszystkich trzech przypadkach
+  // krok przechodzi. Zgoda nie może warunkować dalszej części wniosku.
+  assert.deepEqual(sprawdzKrok('kontakt', pelne), {});
+  assert.deepEqual(sprawdzKrok('kontakt', { ...pelne, zgodaKontakt: false }), {});
+  assert.deepEqual(sprawdzKrok('kontakt', { ...pelne, zgodaKontakt: true }), {});
+
+  assert.ok(sprawdzKrok('kontakt', { ...pelne, email: 'jan@example' }).email);
+  assert.ok(sprawdzKrok('kontakt', { ...pelne, phone: '12345' }).phone);
+});
+
+test('krok „zgody" — obie zgody obowiązkowe, e-maila i telefonu już nie ma', () => {
+  const pelne = { exclusions_accepted: true, informedAccepted: true };
   assert.deepEqual(sprawdzKrok('zgody', pelne), {});
   assert.ok(sprawdzKrok('zgody', { ...pelne, exclusions_accepted: false }).exclusions_accepted);
   assert.ok(sprawdzKrok('zgody', { ...pelne, informedAccepted: false }).informedAccepted);
+  // Pytanie o e-mail i telefon pada w pierwszym kroku; ostatni nie może go powtarzać.
+  const bledy = sprawdzKrok('zgody', {});
+  assert.equal('email' in bledy, false);
+  assert.equal('phone' in bledy, false);
+});
+
+test('zgoda na kontakt nie idzie do form-submit, a e-mail i telefon tak', () => {
+  const out = doWysylki({
+    fullName: 'Jan Kowalski', email: 'jan@example.com', phone: '504400901',
+    zgodaKontakt: true,
+  });
+  assert.equal('zgodaKontakt' in out, false, 'kontrakt z form-submit się nie zmienia');
+  assert.equal(out.email, 'jan@example.com');
+  assert.equal(out.phone, '504400901');
+  assert.equal(out.fullName, 'Jan Kowalski');
+});
+
+test('treść zgody na kontakt ma wersję i nazywa administratora', () => {
+  assert.match(ZGODA_KONTAKT.wersja, /^v\d+-\d{4}-\d{2}$/);
+  assert.match(ZGODA_KONTAKT.tresc, /Aura Expert sp\. z o\.o\./);
+  assert.match(ZGODA_KONTAKT.tresc, /wycofa/);
 });
 
 test('ankieta rozszerzona włącza się powyżej progu, nie na progu', () => {
@@ -115,7 +157,11 @@ test('doWysylki zachowuje kontrakt Yes/No starego backendu', () => {
   assert.equal(out.emp_contribution, '60%');
   assert.equal(out.fullName, 'Jan Kowalski', 'pola nielogiczne przechodzą bez zmian');
   // Pole logiczne, którego użytkownik nie dotknął, musi wyjść jako „No", nie undefined.
-  assert.equal(out.smoker, 'No');
+  assert.equal(out.risk_quad, 'No');
+  // `smoker` i spółka NIE są polami logicznymi kreatora (CLAUDE.md, „Czego nie
+  // wolno dopisać do POLA_LOGICZNE"): wpisane „No" nadpisałoby prawdziwą
+  // odpowiedź z ankiety rozszerzonej, bo funkcja brzegowa czyta `?? snake_case`.
+  assert.equal('smoker' in out, false);
 });
 
 test('klauzule dodatkowe otwierają się powyżej progu, nie na progu', async () => {
@@ -177,4 +223,13 @@ test('każda aktywność ma etykietę i trafia do wysyłki', () => {
   const wyslane = doWysylki({ risk_skydiving: true, risk_quad: false });
   assert.equal(wyslane.risk_skydiving, 'Yes');
   assert.equal(wyslane.risk_quad, 'No');
+});
+
+test('liczba kroków słowami idzie z KROKI i ma poprawną odmianę', () => {
+  assert.equal(krokiSlownie(), 'pięć kroków', 'obecna liczba kroków');
+  assert.equal(krokiSlownie(KROKI.length), krokiSlownie());
+  assert.equal(krokiSlownie(2), 'dwa kroki');
+  assert.equal(krokiSlownie(4), 'cztery kroki');
+  assert.equal(krokiSlownie(5), 'pięć kroków');
+  assert.equal(krokiSlownie(12), '12 kroków', 'poza słownikiem — cyfra, ale z dobrą odmianą');
 });

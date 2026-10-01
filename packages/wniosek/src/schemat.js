@@ -157,15 +157,52 @@ export const KLAUZULE_NW = [
  * informacyjnego z art. 13 RODO.
  */
 export const KROKI = [
+  { id: 'kontakt', tytul: 'Kontakt',
+    opis: 'imię i nazwisko, adres e-mail, numer telefonu oraz — jeśli ją zaznaczysz — zgoda na kontakt w sprawie wniosku' },
   { id: 'dane',    tytul: 'Dane podstawowe',
-    opis: 'imię i nazwisko, PESEL, zawód, forma zatrudnienia i opodatkowania, wysokość dochodu' },
+    opis: 'PESEL, zawód, forma zatrudnienia i opodatkowania, wysokość dochodu' },
   { id: 'zakres',  tytul: 'Zakres ochrony',
     opis: 'wybrane ryzyka, sumy ubezpieczenia i okres wypłaty świadczenia' },
   { id: 'zdrowie', tytul: 'Stan zdrowia',
     opis: 'ankieta medyczna — dane szczególnej kategorii, przetwarzane wyłącznie za wyraźną zgodą' },
-  { id: 'zgody',   tytul: 'Zgody i kontakt',
-    opis: 'adres e-mail, numer telefonu oraz zaznaczone zgody' },
+  { id: 'zgody',   tytul: 'Zgody',
+    opis: 'zaznaczone zgody i potwierdzenia' },
 ];
+
+/**
+ * Liczba kroków słowami, z poprawną odmianą — do tekstów, które nie mogą się
+ * rozjechać z KROKI („cztery kroki”, „pięć kroków”). Liczba kroków była wpisana
+ * na sztywno w kilku miejscach i przy dodaniu kroku `kontakt` wszystkie trzeba
+ * było poprawiać ręcznie; stąd jedno źródło prawdy.
+ */
+export function krokiSlownie(n = KROKI.length) {
+  const slowa = { 2: 'dwa', 3: 'trzy', 4: 'cztery', 5: 'pięć', 6: 'sześć', 7: 'siedem', 8: 'osiem' };
+  const rzeczownik = n >= 2 && n <= 4 ? 'kroki' : 'kroków';
+  return `${slowa[n] ?? n} ${rzeczownik}`;
+}
+
+/**
+ * Zgoda na kontakt w sprawie niedokończonego wniosku — osobny checkbox w kroku
+ * `kontakt`, domyślnie NIEZAZNACZONY i niewarunkujący dalszej części wniosku.
+ *
+ * E-mail zachęcający do dokończenia wniosku to marketing bezpośredni (art. 398
+ * Prawa komunikacji elektronicznej) i wymaga uprzedniej zgody — także na telefon.
+ * Bez zgody szkic wniosku służy wyłącznie lejkowi: ani imienia, ani e-maila,
+ * ani telefonu nie zapisujemy.
+ *
+ * `wersja` idzie do funkcji brzegowej `wniosek-szkic`, a TREŚĆ do bazy dopisuje
+ * ona sama z własnej mapy wersja → tekst (rozliczalność, art. 7 ust. 1 RODO).
+ * Zmiana treści = NOWA wersja w obu miejscach; test/szkice.spec.js pilnuje, żeby
+ * tekst tu i w funkcji był ten sam.
+ *
+ * TREŚĆ CZEKA NA AKCEPTACJĘ PRAWNIKA. Do tego czasu zadanie `wnioski-przypomnienia`
+ * w pg_cron zostaje wyłączone (patrz migracja 20261001120000_wnioski_szkice.sql).
+ */
+export const ZGODA_KONTAKT = {
+  wersja: 'v1-2026-10',
+  tresc: 'Zgadzam się na kontakt e-mailowy i telefoniczny ze strony Aura Expert sp. z o.o. '
+    + 'w sprawie mojego wniosku — także wtedy, gdy go nie dokończę. Zgodę mogę wycofać w każdej chwili.',
+};
 
 /* ── Walidacja ───────────────────────────────────────────────────────────── */
 
@@ -228,8 +265,17 @@ export function sprawdzKrok(krok, dane) {
     if (!String(dane[pole] ?? '').trim()) bledy[pole] = komunikat;
   };
 
-  if (krok === 'dane') {
+  // Krok `kontakt` jest pierwszy: kto odpadnie później, zostawia tu e-mail
+  // i telefon. Zgoda na kontakt (`zgodaKontakt`) jest OPCJONALNA i niczego tu
+  // nie blokuje — niezaznaczona znaczy tylko, że nie dzwonimy i nie piszemy
+  // o niedokończonym wniosku.
+  if (krok === 'kontakt') {
     wymagane('fullName', 'Podaj imię i nazwisko.');
+    if (!emailPoprawny(dane.email)) bledy.email = 'Podaj adres e-mail, na który wyślemy ofertę.';
+    if (!telefonPoprawny(dane.phone)) bledy.phone = 'Podaj numer telefonu — dziewięć cyfr.';
+  }
+
+  if (krok === 'dane') {
     wymagane('profession', 'Wybierz zawód z listy albo wpisz własny.');
     if (!pesekPoprawny(dane.pesel)) {
       bledy.pesel = 'PESEL ma 11 cyfr i musi się zgadzać z cyfrą kontrolną.';
@@ -287,8 +333,6 @@ export function sprawdzKrok(krok, dane) {
   }
 
   if (krok === 'zgody') {
-    if (!emailPoprawny(dane.email)) bledy.email = 'Podaj adres e-mail, na który wyślemy ofertę.';
-    if (!telefonPoprawny(dane.phone)) bledy.phone = 'Podaj numer telefonu — dziewięć cyfr.';
     if (!dane.exclusions_accepted) {
       bledy.exclusions_accepted = 'Potwierdź, że znasz główne wyłączenia odpowiedzialności.';
     }
@@ -341,6 +385,9 @@ export const POLA_LOGICZNE = [
 /** Zamienia stan formularza na kształt, którego oczekuje funkcja form-submit. */
 export function doWysylki(dane) {
   const out = { ...dane };
+  // Zgoda na kontakt w sprawie niedokończonego wniosku dotyczy szkicu
+  // (`wniosek-szkic`), nie wniosku. Kontrakt z form-submit się nie zmienia.
+  delete out.zgodaKontakt;
   // Gdy próg nie jest spełniony, klauzule nie mogą pójść dalej z żadną wartością.
   // Inaczej klient dostałby ofertę bez rozszerzeń, które wcześniej zaznaczył.
   if (!klauzuleDostepne(dane)) {

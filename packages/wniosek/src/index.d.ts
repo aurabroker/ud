@@ -1,7 +1,7 @@
 /** Typy pakietu @ud/wniosek. */
 
 export type Zatrudnienie = 'b2b' | 'uop' | 'zlecenie';
-export type IdKroku = 'dane' | 'zakres' | 'zdrowie' | 'zgody';
+export type IdKroku = 'kontakt' | 'dane' | 'zakres' | 'zdrowie' | 'zgody';
 
 export interface Opcja { wartosc: string; etykieta: string }
 export interface Pytanie { klucz: string; etykieta: string }
@@ -37,7 +37,9 @@ export const PYTANIA_MEDYCZNE: Pytanie[];
 export const AKTYWNOSCI_RYZYKOWNE: Pytanie[];
 export const RYZYKA: Ryzyko[];
 export const KLAUZULE_NW: Klauzula[];
-export const KROKI: { id: IdKroku; tytul: string }[];
+export const KROKI: { id: IdKroku; tytul: string; opis: string }[];
+/** Zgoda na kontakt w sprawie niedokończonego wniosku (wersja + dokładna treść). */
+export const ZGODA_KONTAKT: { wersja: string; tresc: string };
 export const POLA_LOGICZNE: string[];
 export const HEALTH_SURVEY_THRESHOLD: number;
 export const HEALTH_SURVEY_GROUPS: GrupaAnkiety[];
@@ -53,4 +55,6 @@ export function sprawdzKrok(krok: IdKroku, dane: Dane): Bledy;
 export function ankietaRozszerzona(dane: Dane): boolean;
 export function surveyRequired(suma: unknown): boolean;
 export function parseSum(raw: unknown): number | null;
+/** Liczba kroków słowami, z odmianą: „pięć kroków”. */
+export function krokiSlownie(n?: number): string;
 export function doWysylki(dane: Dane): Record<string, unknown>;

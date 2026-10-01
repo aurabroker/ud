@@ -34,6 +34,9 @@ test.describe('funkcje wołane przez cron wpuszczają tylko cron', () => {
   for (const [nazwa, pierwszyOdczyt] of [
     ['send-digest-email', '.from("udochodu_contacts")'],
     ['sync-beauty-companies', 'if (!BEAUTY_KEY)'],
+    // Przypomnienia o niedokończonych wnioskach: marketing bezpośredni, więc
+    // bramka musi stać przed odczytem kandydatów (adresów e-mail).
+    ['wniosek-przypomnienie', 'supabase.rpc("ud_wnioski_do_przypomnienia"'],
   ]) {
     test(`${nazwa}: token x-cron-token sprawdzany przed pierwszym odczytem`, () => {
       const zrodlo = funkcja(nazwa);
@@ -96,7 +99,9 @@ test.describe('send-offer-email nie rozsyła treści z żądania', () => {
 });
 
 test.describe('formularze: brak sekretu Turnstile to odmowa, nie przepustka', () => {
-  for (const nazwa of ['form-submit', 'contact-submit', 'review-submit']) {
+  // wniosek-szkic: tworzenie szkicu i udzielenie zgody na kontakt to wejście do
+  // rozsyłania naszych maili na cudze adresy — Turnstile przed pierwszym zapisem.
+  for (const nazwa of ['form-submit', 'contact-submit', 'review-submit', 'wniosek-szkic']) {
     test(nazwa, () => {
       const zrodlo = funkcja(nazwa);
       expect(zrodlo, 'wróciło `if (!secret) return true`').not.toMatch(/if \(!secret\) return true/);
