@@ -1135,8 +1135,12 @@ false`), domena `utratadochodu.pl` zweryfikowana w Resend. Sondy z zewnątrz:
 GET → 405, `wycofaj` ze złym podpisem → 403 (dowód, że sekret jest; bez niego
 byłoby 503), `start` z fałszywym tokenem → 400, przypomnienie bez tokenu → 401,
 pełna ścieżka crona przez `ud_wnioski_przypomnienia()` → `200 {"ok":true,
-"kandydatow":0,"wyslano":0}`. **Zostają:** portal (krok 4), zgoda prawnika
-i włączenie crona (krok 5), prawdziwy przebieg z żywej strony (krok 6).
+"kandydatow":0,"wyslano":0}`. Treść zgody `v1-2026-10` zaakceptowana
+przez prawnika bez zmian (01.10.2026), zadanie `wnioski-przypomnienia` **włączone**
+(co godzinę o :10), `ZGODA_ZATWIERDZONA = true` w panelu. **Zostają:** portal
+(krok 4) i prawdziwy przebieg z żywej strony (krok 6). Klauzula informacyjna
+i polityka prywatności (projekt zmian w repo) nie mają jeszcze potwierdzonej
+akceptacji — muszą ją mieć, zanim portal wyjdzie na domenę.
 
 1. Migracja `20261001101112_wnioski_szkice.sql` (zadanie `wnioski-przypomnienia`
    powstaje **wyłączone**).
@@ -1149,7 +1153,9 @@ i włączenie crona (krok 5), prawdziwy przebieg z żywej strony (krok 6).
    treść generuj skryptem z pliku w repo (patrz „Wdrażanie przez MCP").
 4. Dopiero potem portal. Kreator wołający nieistniejącą funkcję nic nie psuje
    (szkic jest dodatkiem), ale lejek zacznie się zbierać dopiero po kroku 3.
-5. **Przypomnienia włącz dopiero po akceptacji treści zgody przez prawnika**:
+5. **Przypomnienia włączone 01.10.2026 po akceptacji treści zgody przez prawnika**
+   (wykonane; przy zmianie treści zgody wyłącz je z powrotem tą samą funkcją,
+   `active := false`, do czasu nowej akceptacji):
    `select cron.alter_job((select jobid from cron.job where jobname =
    'wnioski-przypomnienia'), active := true);` oraz `ZGODA_ZATWIERDZONA = true`
    w `apps/panel/src/routes/panel/niedokonczone/+page.server.js` (do tego czasu

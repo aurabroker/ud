@@ -16,14 +16,17 @@ import { createAdminClient } from '$lib/server/supabase.js';
 import { lejek } from '$lib/lejek.js';
 
 /**
- * Czy prawnik zatwierdził treść zgody na kontakt (ZGODA_KONTAKT w @ud/wniosek).
+ * Czy treść zgody na kontakt (ZGODA_KONTAKT w @ud/wniosek) jest zatwierdzona.
  *
- * Do tego czasu strona pokazuje ostrzeżenie: z listy nie dzwonimy i nie piszemy.
- * Zadanie `wnioski-przypomnienia` w pg_cron jest wtedy wyłączone. Po akceptacji:
- * zmień na `true`, wdróż panel i włącz zadanie (migracja
- * 20261001101112_wnioski_szkice.sql, sekcja „Przypomnienie e-mailem").
+ * Gdy `false`, strona pokazuje ostrzeżenie: z listy nie dzwonimy i nie piszemy,
+ * a zadanie `wnioski-przypomnienia` w pg_cron jest wyłączone.
+ *
+ * 01.10.2026: właściciel potwierdził, że prawnik zaakceptował treść wersji
+ * `v1-2026-10` BEZ ZMIAN; zadanie w pg_cron włączone. Zmiana treści zgody =
+ * nowa wersja w `schemat.js` i w funkcji `wniosek-szkic` — wtedy wróć tu na
+ * `false`, dopóki nowej treści nie zatwierdzi prawnik.
  */
-const ZGODA_ZATWIERDZONA = false;
+const ZGODA_ZATWIERDZONA = true;
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
