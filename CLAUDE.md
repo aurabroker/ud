@@ -1300,11 +1300,13 @@ to nie jest regres.
 Wytyczne i scenariusze odbiorcze K01–K25: `KANBAN-CRM-WYTYCZNE.md` (v1.0,
 01.10.2026). Strona: `/panel/leady`, zakładka „Leady" w panelu.
 
-**Stan na 01.10.2026: zbudowane i przetestowane, NIEWDROŻONE.** Migracja
-`supabase/migrations/20261001180000_leady_kanban.sql` **nie jest zastosowana na
-produkcji**, nic nie poszło na `REBUILD` ani `main` (praca na gałęzi
-`claude/blissful-cannon-u72saa`). Po zastosowaniu zmień nazwę pliku na wersję,
-którą baza odnotuje (jak przy szkicach — patrz `supabase/migrations/README.md`).
+**Stan na 01.10.2026: panel v.0.58 na `REBUILD`, migracja w połowie.** Migracja
+jest w dwóch plikach (powód: `supabase/migrations/README.md`):
+`20261001151739_leady_kanban_1_tabele.sql` — **zastosowana** (tabele, etapy,
+widok); `20261001180000_leady_kanban_2_funkcje.sql` — **do wklejenia w Supabase
+SQL Editor** i odnotowania wersji (polecenie w README). Dopóki część 2 nie
+wejdzie, `/panel/leady` pokazuje komunikat o błędzie, reszta panelu działa,
+a wnioski nie są dotknięte (część 1 nie ma wyzwalaczy).
 
 ### Czym jest lead — decyzja właściciela z 01.10.2026
 
@@ -1425,8 +1427,11 @@ nie słuchał), schematu produkcji (atrapa ma tylko potrzebne kolumny) i PostgRE
 
 1. Migracja na produkcję **przed** panelem. Dodaje FK z `ud_leady` do `ud_clients`
    i wyzwalacz na `ud_wnioski_szkice` — na ułamek sekundy blokuje te tabele
-   (wstawianie wniosku też). Rób to poza godzinami ruchu.
-2. Zmień nazwę pliku migracji na wersję odnotowaną przez bazę.
+   (wstawianie wniosku też). Rób to poza godzinami ruchu. Część 2 ma
+   `lock_timeout` 5 s: przy zajętej tabeli odpada, zamiast trzymać wnioski
+   w kolejce. **MCP nie przyjmie części 2** (funkcje z `UPDATE`/`DELETE` czekają
+   na potwierdzenie, które nie dociera) — idzie przez SQL Editor.
+2. Nazwa pliku migracji = wersja odnotowana przez bazę.
 3. Panel (`REBUILD`, projekt `udappnew`, root `apps/panel`). Panel wdrożony przed
    migracją pokaże na `/panel/leady` komunikat o błędzie, reszta działa.
 4. Pierwsze otwarcie tablicy utworzy leady dla wszystkich klientów i szkiców ze

@@ -95,9 +95,15 @@ export async function uruchomKlaster(opcje = {}) {
     ]);
     if (r.status !== 0) throw new Error('pg_ctl start: ' + r.stderr);
 
+    // Migracja leadów leży w dwóch plikach (część 1 przez MCP, część 2 przez SQL
+    // Editor — patrz nagłówek części 2); kolejność = kolejność wersji w nazwie.
     const migracjaLeadow = process.env.LEADY_MIGRACJA
       ? readFileSync(resolve(process.env.LEADY_MIGRACJA), 'utf8')
-      : wczytaj('supabase/migrations/20261001180000_leady_kanban.sql');
+      : readdirSync(join(korzen, 'supabase/migrations'))
+          .filter((p) => /_leady_kanban_\d+_[a-z_]+\.sql$/.test(p))
+          .sort()
+          .map((p) => wczytaj(`supabase/migrations/${p}`))
+          .join('\n');
     const kroki = [
       ['stub', wczytaj('supabase/tests/stub.sql')],
       ['migracja szkiców', wczytaj('supabase/migrations/20261001101112_wnioski_szkice.sql')],

@@ -20,10 +20,22 @@ baza nie ma go odnotowanego jako migracji. Efekt w produkcji jest, ale
 `supabase db push` puści go jeszcze raz. Jest idempotentny, więc nic z tego
 nie wyniknie.
 
-## Migracje jeszcze niezastosowane
+## Tablica leadów — migracja w dwóch częściach
 
-`20261001180000_leady_kanban.sql` — tablica leadów (Kanban) w panelu. **Nie jest
-zastosowana na produkcji** (stan na 01.10.2026), więc ten plik nie jest kopią
-czegokolwiek z bazy. Po zastosowaniu zmień nazwę na wersję, którą baza odnotuje,
-jak przy `20261001101112_wnioski_szkice.sql`. Testy na jednorazowym Postgresie:
+- `20261001151739_leady_kanban_1_tabele.sql` — tabele, etapy, widok, karta.
+  **Zastosowana** przez MCP 01.10.2026; nazwa pliku = wersja w bazie.
+- `20261001180000_leady_kanban_2_funkcje.sql` — funkcje zapisu i odczytu,
+  wyzwalacz na szkicach. **Stosuje się ją w Supabase SQL Editor** (cały plik
+  naraz), a potem odnotowuje wersję:
+  `insert into supabase_migrations.schema_migrations (version, name) values ('20261001180000', 'leady_kanban_2_funkcje');`
+
+Dlaczego tak: MCP Supabase (`apply_migration` i `execute_sql`) wstrzymuje do
+ręcznego potwierdzenia każde `DROP` i każdą funkcję, która w treści robi
+`UPDATE`/`DELETE` na tabeli w `public` (na tabeli tymczasowej ta sama treść
+przechodzi). Potwierdzenie nie dociera do właściciela, a zapytanie przepada
+po 60 s bez śladu w bazie — sprawdzone sondami 01.10.2026. Nie obchodź tego
+dynamicznym SQL-em: to jest bramka na zgodę człowieka, nie usterka do
+wyminięcia. Migracja z takimi funkcjami idzie przez SQL Editor.
+
+Testy na jednorazowym Postgresie wczytują obie części po kolei:
 `pnpm test:leady-sql` w `apps/panel` (stub środowiska w `supabase/tests/`).
