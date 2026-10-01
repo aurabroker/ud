@@ -1068,6 +1068,13 @@ jest ignorowana. Nie dopisuj tam odczytu `pesel` ani `med_*` (test to łapie).
   `ud_lejek_wniosku_archiwum`, żeby lejek nie urywał się po miesiącu.
   Po wysłaniu wniosku dane kontaktowe znikają ze szkicu od razu.
 
+### Tablica leadów czyta szkice
+
+Tablica Kanban (sekcja „Panel — tablica leadów") traktuje szkic ze zgodą jako
+lead. Wyzwalacz `ud_leady_szkic_zmiana` na `ud_wnioski_szkice` przepina lead na
+klienta po ukończeniu wniosku albo go kasuje (zgoda cofnięta/wycofana). Nie zmieniaj
+`ud_wnioski_szkic_ukoncz` ani kolumn zgody bez uruchomienia `pnpm test:leady-sql`.
+
 ### „Wystrzel i zapomnij" — szkic nigdy nie zatrzymuje wniosku
 
 Wniosek to jedyna ścieżka, którą wpływają pieniądze (patrz ABSOLUTE_RULE). Każde
@@ -1285,6 +1292,147 @@ jako pokryta.
 Test: `pnpm test:owu` w `apps/panel`. `test:parser` z tego samego katalogu to
 narzędzie ręczne — bierze dwa pliki PDF jako argumenty i bez nich się wywala;
 to nie jest regres.
+
+---
+
+## Panel — tablica leadów (Kanban)
+
+Wytyczne i scenariusze odbiorcze K01–K25: `KANBAN-CRM-WYTYCZNE.md` (v1.0,
+01.10.2026). Strona: `/panel/leady`, zakładka „Leady" w panelu.
+
+**Stan na 01.10.2026: zbudowane i przetestowane, NIEWDROŻONE.** Migracja
+`supabase/migrations/20261001180000_leady_kanban.sql` **nie jest zastosowana na
+produkcji**, nic nie poszło na `REBUILD` ani `main` (praca na gałęzi
+`claude/blissful-cannon-u72saa`). Po zastosowaniu zmień nazwę pliku na wersję,
+którą baza odnotuje (jak przy szkicach — patrz `supabase/migrations/README.md`).
+
+### Czym jest lead — decyzja właściciela z 01.10.2026
+
+„Leady to ludzie, którzy wypełnili wniosek, albo porzucili formularz."
+Lead to więc klient z `ud_clients` **albo** szkic z `ud_wnioski_szkice`, który
+zostawił kontakt **za zgodą**. Szkic bez zgody nie ma imienia, e-maila ani
+telefonu — nie ma kogo pokazać, więc leadem nie jest (zostaje w anonimowym
+lejku). Brak zgody, wycofanie zgody albo ukończenie wniosku bez dopasowanego
+klienta kasuje lead razem z notatkami i historią.
+
+### Model danych (tylko stan procesu — dane osobowe czytamy ze źródła)
+
+| Obiekt | Rola |
+|---|---|
+| `ud_leady` | etap, opiekun, następne działanie, **wersja**, `etap_od`; dokładnie jedno z `klient_id` / `szkic_id` |
+| `ud_leady_historia` | wpis przy każdej zmianie + **dziennik idempotencji** (`unique (lead_id, klucz)`) |
+| `ud_leady_notatki`, `ud_leady_widok_uzytkownika` | notatki; osobisty stan zwinięcia etapów (per użytkownik × pipeline) |
+| `ud_leady_pipeline`, `ud_leady_etap` | jeden pipeline „Sprzedaż": Nowy → Kontakt → Oferta → Decyzja klienta → Wygrany / Przegrany (powód utraty wymagany) |
+| `ud_leady_baza` | widok z imieniem/e-mailem/telefonem ze źródła; **filtr zgody siedzi w widoku**, więc dane szkicu bez zgody nie wyjdą nawet zanim sprzątanie usunie wiersz |
+
+Dostęp: RLS bez polityk, wszystko tylko dla `service_role` (panel przez
+`createAdminClient`). `ud_leady` **nie ma kolumn z danymi osobowymi** — test SQL
+tego pilnuje.
+
+**Nie ma wyzwalacza na `ud_clients` i nie wolno go dodawać.** Wniosek to jedyna
+ścieżka, którą wpływają pieniądze (ABSOLUTE_RULE). Leady powstają w
+`ud_leady_synchronizuj()`, wołanej przy otwarciu tablicy: dokłada klientów
+(etap startowy z ofert: kupiona → Wygrany, wybrana → Decyzja, wysłana → Oferta,
+robocza → Kontakt, odrzucona → Przegrany, brak → Nowy) i szkice ze zgodą,
+domyka sprzątanie, przepina lead ukończonego szkicu na klienta. Jedyny
+wyzwalacz tablicy stoi na `ud_wnioski_szkice` (`ud_leady_szkic_zmiana`) i jest
+**odporny na wyjątki** — szkic zmienia się w „wystrzel i zapomnij" po wysłaniu
+wniosku, więc wyzwalacz nie może go zatrzymać; test wywraca go celowo i sprawdza,
+że `ud_wnioski_szkic_ukoncz` i tak przechodzi. Retencja szkiców (30 dni) usuwa
+lead kluczem obcym `on delete cascade` — obietnica z klauzuli informacyjnej
+dotyczy też tablicy.
+
+Zamknięcie sprawy (Wygrany / Przegrany) kasuje zaplanowane działanie (zostaje w
+historii) — inaczej przeterminowane „zadzwoń" krzyczałoby w nieskończoność.
+
+### Jedna ścieżka zmiany stanu
+
+Przeciąganie, menu, lista „Przenieś do…" i pole etapu w szczegółach wołają to
+samo: `POST /panel/leady/api/zmien` → `ud_lead_zmien()` w SQL. Tam, atomowo i pod
+blokadą wiersza: sprawdzenie aktywnego agenta, **wersji** (`expectedVersion`,
+konflikt zamiast cichego nadpisania), **klucza idempotencji** (ponowienie →
+ten sam wynik bez drugiego skutku; ten sam klucz do innej operacji →
+`klucz_uzyty`), etapu (z innego pipeline'u / wyłączony → `niedozwolony`; FK w bazie
+też go nie przepuści), pól wymaganych (`brak_danych`) i reguł opiekuna
+(administrator: dowolny; agent: przejmuje wolny lead albo zwalnia własny).
+Tożsamość wykonawcy bierze serwer z sesji — pola `userId`/`wykonawca` w ciele
+żądania są ignorowane, do SQL idą tylko pola z białej listy.
+
+Klient (`src/lib/leady/api.js`) po zerwanej odpowiedzi **ponawia tym samym
+kluczem**; po wyczerpaniu prób nie zakłada, że zapis się nie odbył — pyta o stan
+leada, a gdy i to się nie uda, oznacza kartę „Stan nieznany" z przyciskiem
+„Spróbuj ponownie". Rollback optymistycznej zmiany tylko wtedy, gdy nic nowszego
+nie zastąpiło karty; inaczej pobranie stanu serwera.
+
+### Decyzje, które łatwo „poprawić" na gorsze
+
+- **Wartość na karcie to MIESIĘCZNE świadczenie z okresowej niezdolności
+  (zł/mies.)** — jedyna jednoznaczna kwota z wniosku. To nie składka ani
+  przychód; etykiety mówią to wprost, suma kolumny też. Nie podpisuj jej „wartość
+  leada".
+- **Liczniki i sumy liczy SQL dla całego zbioru po filtrze** (`ud_leady_liczniki`),
+  nie przeglądarka z załadowanych kart (K23). Filtr jest zdefiniowany w jednym
+  miejscu (`ud_leady_dopasowane`); wyszukiwanie przez `strpos`, nie `ilike` —
+  `_` i `%` są poprawnymi znakami w adresie e-mail.
+- **Karta nie niesie e-maila ani PESEL-u**; szczegóły pokazują e-mail, zawód i
+  kwoty, nigdy PESEL. Oferty w szczegółach czyta klient **z sesją agenta**, nie
+  serwisowy — panel ma własne reguły dostępu do ofert.
+- **Prawy klik**: `preventDefault` tylko gdy otwieramy własne menu. Natywne zostaje
+  na linkach, polach, zaznaczonym tekście i przy Shift. Przycisk „…" i prawy klik
+  czytają jeden model akcji (`akcjeLeada` w `model.js`).
+- **Własny kontroler przeciągania** (`przeciaganie.js`), bez biblioteki: próg 7 px
+  (zwykły klik otwiera szczegóły), Esc / puszczenie poza celem / utrata fokusu
+  anulują, autoprzewijanie przy krawędziach, tymczasowy podgląd zwiniętego etapu
+  po 600 ms (nakładka, bez przesuwania układu), kliknięcie po upuszczeniu połykane
+  tylko na tej karcie. Na telefonie nie ma uchwytu — podstawą jest menu.
+- Uprawnienia w menu to **podpowiedź**; decyduje SQL. Pozycja niedostępna zostaje
+  widoczna z przyczyną (`aria-disabled` + opis), nie znika.
+
+### Czego nie ma (poza MVP z wytycznych, świadomie)
+
+Masowe przenoszenie i zaznaczanie, ręczna kolejność kart (sortowanie: działanie /
+data / wartość), tagi na karcie, duplikowanie, trwałe usuwanie, „Konfiguruj etap…" (administrator
+zmienia etapy w bazie), automatyzacje na zdarzeniach z historii, wysyłka e-maili
+i SMS z tablicy. „Dodaj lead" prowadzi do formularza nowego klienta — lead
+pojawia się w etapie Nowy po jego zapisaniu.
+
+### Testy — `apps/panel`
+
+```
+pnpm test:leady-model     # logika widoku + klient API (Node, bez bazy)
+pnpm test:leady-sql       # funkcje SQL na jednorazowym Postgresie (+ współbieżność)
+pnpm test:leady-api       # warstwa serwerowa na PRAWDZIWYM SQL (kontrakt nazw argumentów)
+npx playwright test       # K01–K25 i reszta, w przeglądarce
+```
+
+Testy SQL i przeglądarkowe stawiają własny klaster Postgresa (`initdb`; jako root
+przez `runuser -u postgres`). **Bez binariów Postgresa kończą się błędem, nie
+zielonym wynikiem.** Przeglądarkowe jadą po prawdziwych komponentach i prawdziwych
+funkcjach serwerowych; zastąpione są tylko sesja (nagłówek `x-test-user`) i
+transport do bazy (psql zamiast PostgREST). Awarie sieci są wstrzykiwane w
+`test/leady/serwer.mjs` (zgubiona odpowiedź, 502 po wykonaniu, zerwane połączenie).
+Wszystkie warstwy przeszły testy mutacyjne — celowo zepsuty kod (brak kontroli
+wersji, brak blokady wiersza, tożsamość z ciała, brak formularza powodu, brak
+zapisu zwinięcia…) daje czerwony wynik.
+
+**Czego testy NIE pokazują:** Firefoksa i Safari (K24 sprawdzono na Chromium —
+w Firefoksie Shift + prawy klik zwykle nie wysyła `contextmenu` w ogóle, wtedy
+aplikacja nie ma czego obsłużyć), dotyku na prawdziwym telefonie, czytnika
+ekranu (są role, nazwy, regiony `status`/`alert` i zarządzanie fokusem, ale nikt
+nie słuchał), schematu produkcji (atrapa ma tylko potrzebne kolumny) i PostgREST.
+
+### Wdrożenie — kolejność (dopiero po wyraźnym słowie właściciela)
+
+1. Migracja na produkcję **przed** panelem. Dodaje FK z `ud_leady` do `ud_clients`
+   i wyzwalacz na `ud_wnioski_szkice` — na ułamek sekundy blokuje te tabele
+   (wstawianie wniosku też). Rób to poza godzinami ruchu.
+2. Zmień nazwę pliku migracji na wersję odnotowaną przez bazę.
+3. Panel (`REBUILD`, projekt `udappnew`, root `apps/panel`). Panel wdrożony przed
+   migracją pokaże na `/panel/leady` komunikat o błędzie, reszta działa.
+4. Pierwsze otwarcie tablicy utworzy leady dla wszystkich klientów i szkiców ze
+   zgodą (etap startowy z ofert) — sprawdź to oczami.
+5. Po wdrożeniu `cd apps/portal && node test/obciazenie-formularza.mjs` jak po
+   każdej pracy.
 
 ---
 

@@ -25,6 +25,19 @@ test('wygląd startowy: kolumny w kolejności pipeline\'u, liczniki i sumy, pust
   await expect(page.locator('[data-zwiniete-panel]')).toHaveCount(0);   // lewy panel tylko gdy są zwinięte etapy
 });
 
+test('renderowanie po stronie serwera (SSR) nie sięga po window ani document i niesie dane', async ({ request }) => {
+  const r = await request.get(`${adres()}/__test/ssr?u=ula`);
+  expect(r.status()).toBe(200);
+  const html = await r.text();
+  expect(html).toContain('Anna Kowalska');
+  expect(html).toContain('Akcje leada Anna Kowalska');
+  expect(html).toContain('Brak leadów w tym etapie.');
+  expect(html).not.toContain('undefined');
+  expect(html).not.toContain('NaN');
+  expect(html).not.toContain('80010112345');                        // PESEL nie trafia do HTML
+  expect(html).not.toContain('anna@x.pl');                          // e-mail dopiero w szczegółach
+});
+
 test('K01: zwykły klik w kartę otwiera szczegóły i nie rozpoczyna przeciągania', async ({ page, request }) => {
   await otworz(page);
   const v = await wersjaLeada(request, 'Anna Kowalska');
@@ -71,6 +84,8 @@ test('K03: przeniesienie myszą — zapis, liczniki, sumy, historia i komunikat 
 
   await expect(toast(page)).toContainText('Anna Kowalska: Nowy → Kontakt');
   await expect(status(page)).toHaveText('Anna Kowalska: Nowy → Kontakt');
+  await page.waitForTimeout(400);
+  await expect(szczegoly(page)).toHaveCount(0);                  // upuszczenie nie jest kliknięciem w kartę
   await expect(kolumna(page, 'kontakt').locator('[data-karta-id]').filter({ hasText: 'Anna Kowalska' })).toHaveCount(1);
   await expect(kolumna(page, 'nowy').locator('[data-karta-id]').filter({ hasText: 'Anna Kowalska' })).toHaveCount(0);
 
@@ -161,6 +176,9 @@ test('K07: Esc podczas przeciągania nie zmienia danych', async ({ page, request
   await expect(page.locator('[data-duch]')).toHaveCount(0);
   await expect(page.locator('html')).not.toHaveAttribute('data-przeciaganie', '');
   await page.mouse.up();
+  // Przeglądarka po takim puszczeniu wysyła `click` na karcie — nie ma otwierać szczegółów.
+  await page.waitForTimeout(300);
+  await expect(szczegoly(page)).toHaveCount(0);
   await expect(status(page)).toContainText('anulowane');
   expect(await etapLeada(request, 'Anna Kowalska')).toBe('nowy');
   expect(await wersjaLeada(request, 'Anna Kowalska')).toBe(v);
@@ -175,6 +193,8 @@ test('K08: upuszczenie poza tablicą nie zmienia danych', async ({ page, request
   await przeciagnij(page, karta(page, 'Anna Kowalska'), kolumna(page, 'kontakt'), { puszczaj: false });
   await page.mouse.move(40, 20, { steps: 6 });          // nad nagłówkiem aplikacji — nie jest celem
   await page.mouse.up();
+  await page.waitForTimeout(300);                                // przeglądarka wysyła `click` na karcie — nie ma otwierać szczegółów
+  await expect(szczegoly(page)).toHaveCount(0);
   await expect(page.locator('[data-duch]')).toHaveCount(0);
   await expect(status(page)).toContainText('poza etapem');
   expect(await etapLeada(request, 'Anna Kowalska')).toBe('nowy');

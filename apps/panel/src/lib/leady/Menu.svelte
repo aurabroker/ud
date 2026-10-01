@@ -24,10 +24,11 @@
     const m = menu;
     if (!m || !el) return;
     let anulowano = false;
-    tick().then(() => {
+    tick().then(async () => {
       if (anulowano || !el) return;
-      const w = el.offsetWidth;
-      const h = el.scrollHeight;
+      const rect = el.getBoundingClientRect();
+      const w = rect.width;
+      const h = Math.max(rect.height, el.scrollHeight + (el.offsetHeight - el.clientHeight));
       const vw = window.innerWidth;
       const vh = window.innerHeight;
       let x = m.x;
@@ -43,6 +44,9 @@
       }
       poz = { x, y, maxWysokosc, gotowe: true };
       aktywny = m.klawiatura ? pierwszyAktywny() : -1;
+      // Fokus dopiero, gdy menu jest już widoczne — element z visibility:hidden nie przyjmuje fokusu.
+      await tick();
+      if (anulowano || !el) return;
       (m.klawiatura && aktywny >= 0 ? el.querySelectorAll('[role="menuitem"]')[aktywny] : el)?.focus({ preventScroll: true });
     });
     return () => { anulowano = true; };
@@ -54,6 +58,14 @@
     if (!wiersze.length) return;
     aktywny = (i + wiersze.length) % wiersze.length;
     el.querySelectorAll('[role="menuitem"]')[aktywny]?.focus({ preventScroll: true });
+  }
+
+  /** Aktywna pozycja = ta, która ma fokus (także po fokusie nadanym spoza menu, np. myszą czy kodem). */
+  function synchronizujFokus(e) {
+    const poz = e.target.closest?.('[role="menuitem"]');
+    if (!poz || !el) return;
+    const i = [...el.querySelectorAll('[role="menuitem"]')].indexOf(poz);
+    if (i >= 0) aktywny = i;
   }
 
   function klawisz(e) {
@@ -92,14 +104,18 @@
     if (!menu) return;
     const poza = (e) => { if (el && !el.contains(e.target)) onzamknij({ przywroc: false }); };
     const zamknij = () => onzamknij({ przywroc: false });
+    // Zdarzenia `scroll` dochodzą z opóźnieniem jednej klatki: przewinięcie tuż PRZED otwarciem
+    // menu (np. przeglądarka dowozi element do widoku przy kliknięciu) nie może go od razu zamknąć.
+    const otwartoO = performance.now();
+    const przewiniecie = () => { if (performance.now() - otwartoO > 200) zamknij(); };
     window.addEventListener('pointerdown', poza, true);
     window.addEventListener('resize', zamknij);
-    window.addEventListener('scroll', zamknij, true);
+    window.addEventListener('scroll', przewiniecie, true);
     window.addEventListener('blur', zamknij);
     return () => {
       window.removeEventListener('pointerdown', poza, true);
       window.removeEventListener('resize', zamknij);
-      window.removeEventListener('scroll', zamknij, true);
+      window.removeEventListener('scroll', przewiniecie, true);
       window.removeEventListener('blur', zamknij);
     };
   });
@@ -120,6 +136,7 @@
     style:max-height={poz.maxWysokosc ? `${poz.maxWysokosc}px` : undefined}
     style:visibility={poz.gotowe ? 'visible' : 'hidden'}
     onkeydown={klawisz}
+    onfocusin={synchronizujFokus}
     oncontextmenu={(e) => e.preventDefault()}
   >
     <div class="opis" role="presentation">{menu.tytul}</div>
@@ -154,7 +171,7 @@
             onclick={() => wybierz(p)}
           >
             {p.etykieta}
-            {#if p.zablokowana}<span class="powod" id="menu-powod-{p.id}">{p.zablokowana}</span>{/if}
+            {#if p.zablokowana}<span class="powod" id="menu-powod-{p.id}" aria-hidden="true">{p.zablokowana}</span>{/if}
           </button>
         {/if}
       {/if}

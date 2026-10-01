@@ -132,6 +132,16 @@ export async function startuj() {
             return odpowiedz(res, 200, { ok: true });
           }
           if (sciezka === '/__test/wywolania') return odpowiedz(res, 200, { wywolania });
+          if (sciezka === '/__test/ssr') {
+            // Renderowanie po stronie serwera (tak jak robi to SvelteKit na Cloudflare): bez window i document.
+            const { render } = await serwer.ssrLoadModule('svelte/server');
+            const Tablica = (await serwer.ssrLoadModule('/src/lib/leady/Tablica.svelte')).default;
+            const { utworzApi } = await serwer.ssrLoadModule('/src/lib/leady/api.js');
+            const dane = await wczytajTablice(sb, sbOferty, uzytkownik, url.searchParams);
+            const { body } = render(Tablica, { props: { dane, api: utworzApi({ fetch: async () => { throw new Error('SSR nie woła API'); } }), odUrl: () => {} } });
+            res.setHeader('content-type', 'text/html; charset=utf-8');
+            return res.end(body);
+          }
           if (sciezka === '/__test/tablica') {
             const wynik = await przetworz({ user, odczyt: true, wykonaj: async ({ userId }) =>
               ({ status: 200, body: await wczytajTablice(sb, sbOferty, userId, url.searchParams) }) });
@@ -155,6 +165,13 @@ export async function startuj() {
               return;
             }
             if (awaria.tryb === 'zerwij') { req.socket.destroy(); return; }
+            if (awaria.tryb === 'przetworzI502') {
+              // Wykonaj naprawdę, ale odpowiedz 502 (proxy zgubiło odpowiedź). Przeglądarka nie ponawia
+              // takiego żądania sama — ponowienie z tym samym kluczem musi zrobić aplikacja.
+              const cialo = await czytajCialo(req);
+              if (nazwa === 'zmien') await przetworz({ user, typTresci: 'application/json', czytajCialo: async () => cialo, wykonaj: ({ userId, body }) => zmien(sb, userId, body) });
+              return odpowiedz(res, 502, { status: 'blad', komunikat: 'Bad gateway', ponow: true });
+            }
             if (awaria.tryb === 'odpowiedz') return odpowiedz(res, awaria.status ?? 500, awaria.body ?? { status: 'blad', komunikat: 'Błąd serwera' });
           } else if (awaria?.tryb === 'opoznienie') {
             awaria.ile -= 1;

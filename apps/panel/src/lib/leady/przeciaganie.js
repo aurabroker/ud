@@ -244,10 +244,9 @@ export function utworzPrzeciaganie({
     const karta = start?.karta;
     if (!karta) return;
     const polkniecie = (e) => {
-      if (karta.contains(e.target)) {
-        e.stopPropagation();
-        e.preventDefault();
-      }
+      if (!karta.contains(e.target)) return;      // inne kliknięcia przechodzą; zdejmie nas timer
+      e.stopPropagation();
+      e.preventDefault();
       okno.removeEventListener('click', polkniecie, true);
     };
     okno.addEventListener('click', polkniecie, true);

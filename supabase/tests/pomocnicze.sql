@@ -18,6 +18,12 @@ create function tt.pipeline() returns uuid language sql as $$
 -- Lead po nazwie z widoku (nazwy w fixture są unikalne).
 create function tt.lead(p_nazwa text) returns uuid language sql as $$
   select id from public.ud_leady_baza where nazwa = p_nazwa $$;
+-- Lead po nazwie klienta/szkicu także wtedy, gdy jest zarchiwizowany (widok go ukrywa).
+create function tt.lead_wszystkie(p_nazwa text) returns uuid language sql as $$
+  select l.id from public.ud_leady l
+    left join public.ud_clients c on c.id = l.klient_id
+    left join public.ud_wnioski_szkice s on s.id = l.szkic_id
+   where coalesce(c.full_name, s.imie) = p_nazwa $$;
 create function tt.wersja(p_lead uuid) returns int language sql as $$
   select wersja from public.ud_leady where id = p_lead $$;
 create function tt.etap_leada(p_lead uuid) returns text language sql as $$

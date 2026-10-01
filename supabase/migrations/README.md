@@ -19,3 +19,11 @@ w `storage.buckets`, a nie schemat, i został puszczony zwykłym zapytaniem —
 baza nie ma go odnotowanego jako migracji. Efekt w produkcji jest, ale
 `supabase db push` puści go jeszcze raz. Jest idempotentny, więc nic z tego
 nie wyniknie.
+
+## Migracje jeszcze niezastosowane
+
+`20261001180000_leady_kanban.sql` — tablica leadów (Kanban) w panelu. **Nie jest
+zastosowana na produkcji** (stan na 01.10.2026), więc ten plik nie jest kopią
+czegokolwiek z bazy. Po zastosowaniu zmień nazwę na wersję, którą baza odnotuje,
+jak przy `20261001101112_wnioski_szkice.sql`. Testy na jednorazowym Postgresie:
+`pnpm test:leady-sql` w `apps/panel` (stub środowiska w `supabase/tests/`).

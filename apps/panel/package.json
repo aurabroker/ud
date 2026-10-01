@@ -14,7 +14,9 @@
     "test:lejek": "node scripts/test-lejek.mjs",
     "test:leady-sql": "node scripts/test-leady-sql.mjs",
     "test:leady-api": "node scripts/test-leady-api.mjs",
-    "test:leady-model": "node scripts/test-leady-model.mjs"
+    "test:leady-model": "node scripts/test-leady-model.mjs",
+    "test:leady-ui": "playwright test",
+    "test:leady": "node scripts/test-leady-model.mjs && node scripts/test-leady-sql.mjs && node scripts/test-leady-api.mjs && playwright test"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",
