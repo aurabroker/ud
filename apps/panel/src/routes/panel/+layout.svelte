@@ -8,6 +8,7 @@
 
   const tabs = [
     { href: '/panel/klienci', label: 'Klienci' },
+    { href: '/panel/niedokonczone', label: 'Niedokończone' },
     { href: '/panel', label: 'Oferty', exact: true },
     { href: '/panel/owu', label: 'Biblioteka OWU' },
     { href: '/panel/logi', label: 'Wysyłki' },
