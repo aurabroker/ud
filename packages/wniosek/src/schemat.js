@@ -196,7 +196,7 @@ export function krokiSlownie(n = KROKI.length) {
  * tekst tu i w funkcji był ten sam.
  *
  * TREŚĆ CZEKA NA AKCEPTACJĘ PRAWNIKA. Do tego czasu zadanie `wnioski-przypomnienia`
- * w pg_cron zostaje wyłączone (patrz migracja 20261001120000_wnioski_szkice.sql).
+ * w pg_cron zostaje wyłączone (patrz migracja 20261001101112_wnioski_szkice.sql).
  */
 export const ZGODA_KONTAKT = {
   wersja: 'v1-2026-10',

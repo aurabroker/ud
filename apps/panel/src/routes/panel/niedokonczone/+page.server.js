@@ -21,7 +21,7 @@ import { lejek } from '$lib/lejek.js';
  * Do tego czasu strona pokazuje ostrzeżenie: z listy nie dzwonimy i nie piszemy.
  * Zadanie `wnioski-przypomnienia` w pg_cron jest wtedy wyłączone. Po akceptacji:
  * zmień na `true`, wdróż panel i włącz zadanie (migracja
- * 20261001120000_wnioski_szkice.sql, sekcja „Przypomnienie e-mailem").
+ * 20261001101112_wnioski_szkice.sql, sekcja „Przypomnienie e-mailem").
  */
 const ZGODA_ZATWIERDZONA = false;
 

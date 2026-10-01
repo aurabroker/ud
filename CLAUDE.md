@@ -350,8 +350,8 @@ w panelu Supabase.
 
 ## Funkcje brzegowe — kto może je wołać
 
-Dziewięć z dwunastu funkcji ma `verify_jwt = false` (po wdrożeniu `wniosek-szkic`
-i `wniosek-przypomnienie` — jedenaście z czternastu), więc platforma wpuszcza
+Jedenaście z czternastu funkcji ma `verify_jwt = false` (do 01.10.2026 dziewięć
+z dwunastu — dołożyły `wniosek-szkic` i `wniosek-przypomnienie`), więc platforma wpuszcza
 do nich każdego, kto zna adres — a roboty te adresy znajdują (17.09 SemrushBot
 zapukał GET-em do `div-send-email`). Bramka musi siedzieć w kodzie funkcji.
 Stan po audycie z 24.09.2026:
@@ -1128,7 +1128,17 @@ zweryfikowana w Resend** (SPF/DKIM) — pozostałe funkcje wysyłają z
 
 ### Wdrożenie i włączenie — kolejność
 
-1. Migracja `20261001120000_wnioski_szkice.sql` (zadanie `wnioski-przypomnienia`
+**Stan na 01.10.2026:** kroki 1–3 wykonane na produkcji. Migracja zastosowana
+jako wersja `20261001101112` (plik w repo nosi tę samą nazwę), `SZKIC_HMAC_SECRET`
+wpisany, `wniosek-szkic` i `wniosek-przypomnienie` wdrożone (v1, `verify_jwt =
+false`), domena `utratadochodu.pl` zweryfikowana w Resend. Sondy z zewnątrz:
+GET → 405, `wycofaj` ze złym podpisem → 403 (dowód, że sekret jest; bez niego
+byłoby 503), `start` z fałszywym tokenem → 400, przypomnienie bez tokenu → 401,
+pełna ścieżka crona przez `ud_wnioski_przypomnienia()` → `200 {"ok":true,
+"kandydatow":0,"wyslano":0}`. **Zostają:** portal (krok 4), zgoda prawnika
+i włączenie crona (krok 5), prawdziwy przebieg z żywej strony (krok 6).
+
+1. Migracja `20261001101112_wnioski_szkice.sql` (zadanie `wnioski-przypomnienia`
    powstaje **wyłączone**).
 2. Sekret `SZKIC_HMAC_SECRET` w Edge Functions → Secrets (dowolny losowy ciąg,
    np. 32 bajty hex). **Bez niego `wniosek-szkic` odmawia** (503 + `ud_errors`):
