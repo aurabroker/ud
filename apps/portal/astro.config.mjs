@@ -156,7 +156,7 @@ export default defineConfig({
     sitemap({
       i18n: undefined,
       /** Wykluczamy adresy techniczne — nie ma po co ich zgłaszać. */
-      filter: (page) => !page.includes('/podziekowanie/'),
+      filter: (page) => !page.includes('/podziekowanie/') && !page.includes('/wycofaj-zgode/'),
       serialize(item) {
         // Priorytet mówi robotowi, co przeindeksować najpierw, gdy nie ma czasu
         // na wszystko. Strony prawne są na końcu tej kolejki celowo.

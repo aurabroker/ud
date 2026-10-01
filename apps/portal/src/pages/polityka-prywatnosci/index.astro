@@ -12,7 +12,10 @@ const opis = 'Jakie dane zbieramy we wniosku ubezpieczeniowym, na jakiej podstaw
   naglowek="Polityka prywatności"
   opis={opis}
   sciezka={sciezka}
-  zaktualizowano="2026-08-27">
+  zaktualizowano="2026-10-01">
+  {/* 01.10.2026: szkic wniosku — dwa nowe cele (pkt 3), skrót IP (pkt 2) i okres
+      przechowywania (pkt 5). PROJEKT DO AKCEPTACJI PRAWNIKA, w jednej paczce
+      z klauzulą informacyjną i treścią zgody (ZGODA_KONTAKT w @ud/wniosek). */}
 
   <p>
     Ta strona opisuje, co dzieje się z danymi, które zostawiasz w serwisie. Krótszą
@@ -38,7 +41,7 @@ const opis = 'Jakie dane zbieramy we wniosku ubezpieczeniowym, na jakiej podstaw
     <li><strong>Dane kontaktowe:</strong> adres e-mail, numer telefonu.</li>
     <li><strong>Dane zawodowe:</strong> forma zatrudnienia, zawód, forma opodatkowania, wysokość dochodu.</li>
     <li><strong>Dane o stanie zdrowia</strong> podane dobrowolnie w ankiecie medycznej we wniosku.</li>
-    <li><strong>Dane techniczne:</strong> adres IP, pliki cookies, informacje o przeglądarce.</li>
+    <li><strong>Dane techniczne:</strong> adres IP, pliki cookies, informacje o przeglądarce. Przy zakładaniu szkicu wniosku przechowujemy przez dobę wyłącznie skrót adresu IP, żeby ograniczyć nadużycia.</li>
   </ul>
 
   <h2>3. Cel i podstawa przetwarzania</h2>
@@ -46,6 +49,8 @@ const opis = 'Jakie dane zbieramy we wniosku ubezpieczeniowym, na jakiej podstaw
     <li>Realizacja wniosku ubezpieczeniowego — art. 6 ust. 1 lit. b RODO (działania przed zawarciem umowy).</li>
     <li>Przekazanie danych do ubezpieczyciela — art. 6 ust. 1 lit. b RODO.</li>
     <li>Marketing własny — art. 6 ust. 1 lit. f RODO (prawnie uzasadniony interes) albo zgoda.</li>
+    <li>Kontakt w sprawie niedokończonego wniosku (jedna wiadomość e-mail i telefon) — art. 6 ust. 1 lit. a RODO: zgoda udzielana odrębnym, domyślnie niezaznaczonym polem w pierwszym kroku wniosku; można ją wycofać w każdej chwili.</li>
+    <li>Statystyka kroków wniosku, bez danych osobowych (numer kroku i data) — art. 6 ust. 1 lit. f RODO.</li>
     <li>Obowiązki prawne ciążące na agencie ubezpieczeniowym — art. 6 ust. 1 lit. c RODO.</li>
     <li>Dane dotyczące zdrowia — art. 9 ust. 2 lit. a RODO (wyraźna zgoda udzielona przed złożeniem wniosku).</li>
   </ul>
@@ -64,6 +69,12 @@ const opis = 'Jakie dane zbieramy we wniosku ubezpieczeniowym, na jakiej podstaw
     Dane z wniosku ubezpieczeniowego przechowujemy przez czas trwania umowy ubezpieczenia
     oraz przez okres wynikający z obowiązków archiwizacyjnych po jej zakończeniu.
     Dane przetwarzane na podstawie zgody marketingowej — do czasu jej cofnięcia.
+  </p>
+  <p>
+    Szkic wniosku, czyli dane zapisane po pierwszym kroku: dane kontaktowe (tylko za
+    zgodą) — do jej cofnięcia, najdłużej 30 dni od ostatniej aktywności; po wysłaniu
+    wniosku usuwamy je ze szkicu od razu. Sam numer kroku, bez danych osobowych,
+    zostaje w zbiorczej statystyce.
   </p>
 
   <h2>6. Twoje prawa</h2>

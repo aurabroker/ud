@@ -3,10 +3,16 @@
  * Klauzula informacyjna z art. 13 RODO — obowiązek informacyjny wobec osoby,
  * która składa wniosek. Kreator linkuje tu ze zgód, więc treść musi
  * odpowiadać dokładnie temu, co formularz faktycznie zbiera.
+ *
+ * 01.10.2026: doszedł szkic wniosku (zgoda na kontakt w sprawie niedokończonego
+ * wniosku + statystyka kroków) — plan w PLAN-NIEDOKONCZONE-WNIOSKI.md. Dwa nowe
+ * cele, wzmianka o szkicu przy liście kroków i okres przechowywania 30 dni są
+ * PROJEKTEM DO AKCEPTACJI PRAWNIKA, w jednej paczce z treścią zgody
+ * (ZGODA_KONTAKT w packages/wniosek/src/schemat.js).
  */
 import Tekst from '../../layouts/Tekst.astro';
 import { FIRMA, UBEZPIECZYCIELE } from '../../lib/firma';
-import { KROKI } from '@ud/wniosek/schemat';
+import { KROKI, krokiSlownie } from '@ud/wniosek/schemat';
 
 const sciezka = '/klauzula-informacyjna/';
 const tytul = 'Klauzula informacyjna RODO | UtrataDochodu.pl';
@@ -18,7 +24,7 @@ const opis = 'Obowiązek informacyjny z art. 13 RODO dla osób składających wn
   naglowek="Klauzula informacyjna RODO"
   opis={opis}
   sciezka={sciezka}
-  zaktualizowano="2026-08-27"
+  zaktualizowano="2026-10-01"
   wOkruszkach="Klauzula informacyjna">
 
   <p data-odpowiedz>
@@ -72,13 +78,39 @@ const opis = 'Obowiązek informacyjny z art. 13 RODO dla osób składających wn
       odpowiednie pole. Zgoda na kontakt jest odrębna od zgody na przetwarzanie
       danych o zdrowiu i nie warunkuje przygotowania oferty.
     </dd>
+
+    <dt>Kontakt w sprawie niedokończonego wniosku</dt>
+    <dd>
+      Art. 6 ust. 1 lit. a RODO — Twoja zgoda, udzielana odrębnym polem w pierwszym
+      kroku wniosku (domyślnie niezaznaczonym). Jeśli nie dokończysz wniosku, możemy
+      wtedy wysłać Ci jedną wiadomość e-mail z propozycją pomocy (najwyżej raz na 30 dni)
+      i zadzwonić pod podany numer. Bez zgody nie piszemy i nie dzwonimy w tej sprawie,
+      a wniosek złożysz tak samo. Zgodę wycofasz w każdej chwili — linkiem w wiadomości
+      albo pisząc na {' '}<a href={`mailto:${FIRMA.email}`}>{FIRMA.email}</a>.
+    </dd>
+
+    <dt>Statystyka porzuconych wniosków</dt>
+    <dd>
+      Art. 6 ust. 1 lit. f RODO — nasz prawnie uzasadniony interes w ustaleniu, na którym
+      kroku użytkownicy rezygnują, żeby wniosek uprościć. Po pierwszym kroku zapisujemy
+      szkic wniosku z numerem ostatniego zaliczonego kroku i datą — bez imienia, e-maila,
+      telefonu, PESEL-u i odpowiedzi o stanie zdrowia. Przez dobę przechowujemy skrót
+      adresu IP, wyłącznie po to, by ograniczyć liczbę zapisów z jednego łącza. Niczego
+      nie zapisujemy na Twoim urządzeniu.
+    </dd>
   </dl>
 
   <h2>Jakie dane zbiera wniosek</h2>
-  <p>Formularz prowadzi przez {KROKI.length} kroki:</p>
+  <p>Formularz prowadzi przez {krokiSlownie()}:</p>
   <ol>
     {KROKI.map((k) => <li><strong>{k.tytul}</strong> — {k.opis}</li>)}
   </ol>
+  <p>
+    Dane z kroków trafiają do nas dopiero po wysłaniu wniosku. Wyjątkiem jest szkic
+    wniosku opisany wyżej: po pierwszym kroku zapisujemy w nim zawsze numer kroku,
+    a imię, e-mail i telefon — tylko jeśli zaznaczysz zgodę na kontakt. PESEL
+    i odpowiedzi z ankiety medycznej nie trafiają do szkicu nigdy.
+  </p>
   <p>
     Podanie danych jest dobrowolne, ale bez nich nie przygotujemy oferty.
     PESEL jest potrzebny, bo ubezpieczyciel identyfikuje po nim osobę ubezpieczoną
@@ -102,6 +134,11 @@ const opis = 'Obowiązek informacyjny z art. 13 RODO dla osób składających wn
     <li>Gdy dojdzie do zawarcia umowy — przez czas jej trwania i okres wynikający z obowiązków archiwizacyjnych.</li>
     <li>Gdy do umowy nie dojdzie — przez okres niezbędny do wykazania prawidłowej obsługi zapytania oraz do upływu terminów przedawnienia roszczeń.</li>
     <li>Dane przetwarzane na podstawie zgody — do jej cofnięcia.</li>
+    <li>
+      Szkic wniosku: dane kontaktowe — do cofnięcia zgody, najdłużej 30 dni od ostatniej
+      aktywności; po wysłaniu wniosku usuwamy je ze szkicu od razu. Sam numer kroku, bez
+      danych osobowych, zostaje w zbiorczej statystyce.
+    </li>
   </ul>
 
   <h2>Twoje prawa</h2>

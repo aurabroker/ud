@@ -12,10 +12,11 @@ import { ZAWODY } from '@ud/zawody';
 import { graf, organizacja, serwis, strona, okruszki } from '../../lib/seo';
 import { FIRMA } from '../../lib/firma';
 import { funkcja, TURNSTILE_KLUCZ } from '../../lib/uslugi';
+import { krokiSlownie } from '@ud/wniosek/schemat';
 
 const sciezka = '/wniosek/';
 const tytul = 'Wniosek o ubezpieczenie utraty dochodu | UtrataDochodu.pl';
-const opis = 'Wypełnij wniosek online w cztery kroki. Bezpłatna symulacja składki, '
+const opis = `Wypełnij wniosek online w ${krokiSlownie()}. Bezpłatna symulacja składki, `
   + 'oferta w 1–2 dni robocze, bez wychodzenia z domu.';
 
 const sciezkaOkruszkow = [
@@ -38,6 +39,8 @@ const nazwyZawodow = ZAWODY.map((z) => z.nazwa).sort((a, b) => a.localeCompare(b
  * sekretem; sekretem jest TURNSTILE_SECRET_KEY po stronie funkcji.
  */
 const URL_FUNKCJI = funkcja('form-submit');
+/** Szkic wniosku (lejek + kontakt za zgodą). Dodatek: kreator działa i bez niego. */
+const URL_SZKICU = funkcja('wniosek-szkic');
 const KLUCZ_TURNSTILE = TURNSTILE_KLUCZ;
 ---
 <Baza tytul={tytul} opis={opis} sciezka={sciezka} jsonld={jsonld}>
@@ -58,7 +61,7 @@ const KLUCZ_TURNSTILE = TURNSTILE_KLUCZ;
     <div class="lg:w-[52em] min-w-0">
       <h1 class="text-[clamp(1.9rem,4.5vw,2.8rem)] leading-[1.08] mb-4">Wniosek o ubezpieczenie</h1>
       <p data-odpowiedz class="text-[1.1rem] leading-relaxed text-tekst-drugi max-w-[38em] mt-0 mb-10">
-        Cztery kroki, około pięciu minut. Na końcu dostajesz symulację składki, a ofertę
+        {krokiSlownie().charAt(0).toUpperCase() + krokiSlownie().slice(1)}, około pięciu minut. Na końcu dostajesz symulację składki, a ofertę
         z realną stawką — w 1–2 dni robocze, po ocenie ryzyka przez ubezpieczyciela.
       </p>
 
@@ -66,6 +69,7 @@ const KLUCZ_TURNSTILE = TURNSTILE_KLUCZ;
         client:visible
         zawody={nazwyZawodow}
         urlFunkcji={URL_FUNKCJI}
+        urlSzkicu={URL_SZKICU}
         kluczTurnstile={KLUCZ_TURNSTILE}
       />
     </div>
@@ -99,8 +103,8 @@ const KLUCZ_TURNSTILE = TURNSTILE_KLUCZ;
     </aside>
   </div>
 
-  <!-- render=explicit: widget powstaje w ostatnim kroku kreatora, więc automatyczne
-       skanowanie DOM-u przy wczytaniu skryptu nigdy by go nie znalazło. -->
+  <!-- render=explicit: widgety powstają w krokach kreatora („kontakt” i „zgody”), więc
+       automatyczne skanowanie DOM-u przy wczytaniu skryptu nigdy by ich nie znalazło. -->
   <script is:inline async defer
           src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onloadTurnstileCallback"></script>
 </Baza>

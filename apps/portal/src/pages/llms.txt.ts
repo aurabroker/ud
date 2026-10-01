@@ -18,6 +18,7 @@ import { ZAWODY, kategorie, wKategorii, slugKategorii, tresc } from '@ud/zawody'
 import { ARTYKULY } from '../lib/artykuly';
 import { FIRMA, SERWIS, UBEZPIECZYCIELE } from '../lib/firma';
 import { ZUS_MIESIECZNIE, LIMIT, OKRESY, zl } from '../lib/symulacja';
+import { krokiSlownie } from '@ud/wniosek/schemat';
 
 export const GET: APIRoute = () => {
   const kat = kategorie();
@@ -94,7 +95,7 @@ ochrony, tylko dokłada osobną wypłatę za samo zakażenie.
 
 - [Jak to działa](${SERWIS.url}/jak-to-dziala/): pięć etapów od wniosku do polisy,
   z czasem trwania każdego z nich. Cała droga zajmuje zwykle 2–4 dni robocze.
-- [Wniosek online](${SERWIS.url}/wniosek/): cztery kroki, około pięciu minut.
+- [Wniosek online](${SERWIS.url}/wniosek/): ${krokiSlownie()}, około pięciu minut.
   Zbiera dane osobowe, formę zatrudnienia i opodatkowania, zakres ochrony,
   ankietę medyczną i zgody. Przy sumie trwałej niezdolności powyżej ${zl(1_000_000)}
   uruchamia się rozszerzona ankieta zdrowotna.

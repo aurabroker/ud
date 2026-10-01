@@ -25,7 +25,7 @@ export const TAGI = {
    * wypełnia wniosek o ubezpieczenie zdrowotne". Google Ads i GA4 zostają,
    * bo bez nich nie da się zmierzyć konwersji — ale bez remarketingu.
    */
-  bezPixela: ['/wniosek/', '/podziekowanie/'],
+  bezPixela: ['/wniosek/', '/podziekowanie/', '/wycofaj-zgode/'],
 
   /**
    * Etykieta konwersji Google Ads dla złożonego wniosku — przeniesiona

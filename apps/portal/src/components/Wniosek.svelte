@@ -1,6 +1,6 @@
 <script>
   /**
-   * Wniosek.svelte — kreator w czterech krokach.
+   * Wniosek.svelte — kreator wniosku (kroki: KROKI z @ud/wniosek).
    *
    * Wyspa: strona jest statyczna, ta jedna wysepka jest interaktywna. Ładuje się
    * dopiero, gdy wejdzie w pole widzenia (client:visible), więc nie kosztuje
@@ -16,9 +16,10 @@
     FORMY_ZATRUDNIENIA, FORMY_OPODATKOWANIA, LIMIT_DOCHODU,
     HEALTH_SURVEY_GROUPS, HEALTH_SURVEY_ITEMS, HEALTH_SURVEY_THRESHOLD,
     sprawdzKrok, ankietaRozszerzona, doWysylki, klauzuleDostepne, PROG_KLAUZUL_NW,
+    ZGODA_KONTAKT,
   } from '@ud/wniosek';
 
-  let { zawody = [], zawodPoczatkowy = '', urlFunkcji, kluczTurnstile } = $props();
+  let { zawody = [], zawodPoczatkowy = '', urlFunkcji, urlSzkicu = '', kluczTurnstile } = $props();
 
   let krok = $state(0);
   let dane = $state({
@@ -40,6 +41,9 @@
     ...Object.fromEntries(PYTANIA_MEDYCZNE.map((p) => [`${p.klucz}_notes`, ''])),
     ...Object.fromEntries(AKTYWNOSCI_RYZYKOWNE.map((a) => [a.klucz, false])),
     email: '', phone: '', exclusions_accepted: false, informedAccepted: false,
+    // Zgoda na kontakt w sprawie niedokończonego wniosku — opcjonalna, domyślnie
+    // NIEZAZNACZONA. Dotyczy szkicu, nie wniosku, więc doWysylki() ją wycina.
+    zgodaKontakt: false,
   });
   let bledy = $state({});
   let wysylanie = $state(false);
@@ -54,9 +58,19 @@
   const identyfikatorWniosku = () =>
     crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
-  /** Uchwyt widgetu Turnstile — potrzebny do reset() po nieudanej wysyłce. */
-  let widgetTurnstile = null;
+  /**
+   * Dwa widgety Turnstile, bo dwa różne tokeny do dwóch różnych celów:
+   *   • krok „kontakt" — token na utworzenie szkicu (`wniosek-szkic`),
+   *   • krok „zgody"   — token na wniosek (`form-submit`).
+   * Token jest jednorazowy, więc jeden widget z `reset()` w środku kreatora
+   * mógłby zostawić końcówkę bez świeżego tokenu. Osobne widgety nie wchodzą
+   * sobie w drogę: ścieżka wysyłki (widget „zgody") jest dokładnie taka jak
+   * przed dodaniem szkiców.
+   */
+  let widgetTurnstile = null;                 // krok „zgody"
   let kontenerTurnstile = $state(null);
+  let widgetStart = null;                     // krok „kontakt"
+  let kontenerStart = $state(null);
 
   const idKroku = $derived(KROKI[krok].id);
   const rozszerzona = $derived(ankietaRozszerzona(dane));
@@ -90,6 +104,12 @@
   function dalej() {
     bledy = sprawdzKrok(idKroku, dane);
     if (Object.keys(bledy).length > 0) { pokazPierwszyBlad(); return; }
+    // Szkic: wystrzel i zapomnij. Nic tu nie czeka na odpowiedź, a wyjątek nie
+    // wyjdzie poza try — przejście do kolejnego kroku nie zależy od szkicu.
+    try {
+      if (idKroku === 'kontakt') szkicPoKontakcie();
+      else szkicKrok(idKroku);
+    } catch { /* szkic nigdy nie zatrzymuje wniosku */ }
     if (krok < KROKI.length - 1) {
       krok += 1;
       document.getElementById('wniosek-gora')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -109,21 +129,23 @@
   /**
    * Turnstile renderujemy JAWNIE, a nie przez automatyczne skanowanie DOM.
    *
-   * Skrypt api.js szuka elementów .cf-turnstile raz, przy wczytaniu. Kontener
-   * z ostatniego kroku powstaje później — dopiero gdy użytkownik do niego dojdzie
-   * — więc automat nigdy by go nie zobaczył i przycisk „Wyślij" byłby martwy.
+   * Skrypt api.js szuka elementów .cf-turnstile raz, przy wczytaniu. Kontenery
+   * kroków powstają później — dopiero gdy użytkownik do nich dojdzie — więc
+   * automat nigdy by ich nie zobaczył i przycisk „Wyślij" byłby martwy.
    * Stąd render=explicit w adresie skryptu i wywołanie render() stąd.
    */
-  function zamontujTurnstile() {
+  function zamontuj(kontener, opcje = {}) {
     // Bez klucza witryny render() rzuca wyjątkiem i wywraca hydratację kroku,
     // przez co przycisk „Wyślij" przestaje reagować. Brak konfiguracji ma
     // pogorszyć ochronę przed botami, a nie zepsuć formularz.
-    if (!kluczTurnstile || !kontenerTurnstile || widgetTurnstile !== null) return;
-    if (!window.turnstile?.render) return;   // skrypt jeszcze nie doszedł
-    widgetTurnstile = window.turnstile.render(kontenerTurnstile, {
-      sitekey: kluczTurnstile,
-      language: 'pl',
-    });
+    if (!kluczTurnstile || !kontener) return null;
+    if (!window.turnstile?.render) return null;   // skrypt jeszcze nie doszedł
+    return window.turnstile.render(kontener, { sitekey: kluczTurnstile, language: 'pl', ...opcje });
+  }
+
+  function usunWidget(uchwyt) {
+    if (uchwyt === null) return;
+    try { window.turnstile?.remove?.(uchwyt); } catch { /* już go nie ma */ }
   }
 
   /**
@@ -137,14 +159,133 @@
     }
   }
 
-  /** Montujemy widget, gdy kontener pojawi się w DOM-ie. */
+  /**
+   * Widget żyje dokładnie tak długo, jak jego kontener.
+   *
+   * Kontener siedzi w bloku {#if}, więc wyjście z kroku niszczy element, a powrót
+   * (Wstecz, potem Dalej) tworzy NOWY, pusty. Wcześniej uchwyt zostawał w pamięci
+   * i montowanie uznawało robotę za zrobioną: po powrocie do ostatniego kroku
+   * kontener był pusty, a po wygaśnięciu starego tokenu (300 s) przycisk „Wyślij"
+   * odpowiadał „Potwierdź, że nie jesteś robotem", choć nie było czego kliknąć.
+   * Teraz posprzątanie w efekcie zdejmuje widget przy wyjściu z kroku.
+   *
+   * Krok „zgody" — token na wniosek. Ścieżka wysyłki jak przed szkicami.
+   */
   $effect(() => {
     if (idKroku !== 'zgody' || !kontenerTurnstile || !kluczTurnstile) return;
-    zamontujTurnstile();
-    if (widgetTurnstile !== null) return;
+    const kontener = kontenerTurnstile;
+    widgetTurnstile = zamontuj(kontener);
     // Skrypt Cloudflare jest async — dokładamy się do jego kolejki onload.
-    window.onloadTurnstileCallback = () => zamontujTurnstile();
+    if (widgetTurnstile === null) {
+      window.onloadTurnstileCallback = () => {
+        if (kontener.isConnected && widgetTurnstile === null) widgetTurnstile = zamontuj(kontener);
+      };
+    }
+    return () => { usunWidget(widgetTurnstile); widgetTurnstile = null; };
   });
+
+  /**
+   * Krok „kontakt" — token na utworzenie szkicu. `interaction-only`: widget jest
+   * niewidoczny, dopóki Cloudflare nie zażąda kliknięcia, więc pierwszy ekran
+   * nie dostaje CAPTCHA, której zwykle nikt by nie zauważył.
+   */
+  $effect(() => {
+    if (idKroku !== 'kontakt' || !kontenerStart || !kluczTurnstile || !urlSzkicu) return;
+    const kontener = kontenerStart;
+    const opcje = { appearance: 'interaction-only' };
+    widgetStart = zamontuj(kontener, opcje);
+    if (widgetStart === null) {
+      window.onloadTurnstileCallback = () => {
+        if (kontener.isConnected && widgetStart === null) widgetStart = zamontuj(kontener, opcje);
+      };
+    }
+    return () => { usunWidget(widgetStart); widgetStart = null; };
+  });
+
+  /* ── Szkic wniosku — „wystrzel i zapomnij" ─────────────────────────────────
+   *
+   * Po zaliczeniu kroku „kontakt" kreator zakłada szkic (lejek + kontakt za
+   * zgodą), a po każdym kolejnym kroku przesuwa jego `ostatni_krok`.
+   *
+   * ŻADNE z tych wywołań nie może zablokować ani opóźnić wniosku: nikt na nie
+   * nie czeka na ścieżce przejścia dalej, każde ma limit czasu, a błąd jest
+   * połykany. Wniosek to jedyna ścieżka, którą wpływają pieniądze — szkic jest
+   * dodatkiem i ma prawo się nie udać.
+   *
+   * Identyfikator szkicu trzymamy WYŁĄCZNIE w pamięci komponentu: kreator to
+   * jedna strona, więc to wystarcza, a zapis w urządzeniu na potrzeby lejka
+   * wymagałby zgody (art. 399 Prawa komunikacji elektronicznej). Przeładowanie
+   * strony zaczyna nowy szkic.
+   *
+   * Do szkicu nigdy nie idzie PESEL ani odpowiedzi z ankiety medycznej —
+   * wysyłamy wyłącznie krok, a przy zgodzie imię, e-mail i telefon.
+   */
+  const LIMIT_SZKICU_MS = 3000;
+  let szkicId = null;        // Promise<string | null> — odpowiedź `start`
+  let szkicIdGotowe = null;  // string — id po odpowiedzi, do zamknięcia szkicu przy wysyłce
+  let kontaktWyslany = '';   // co ostatnio powiedzieliśmy szkicowi o zgodzie i kontakcie
+
+  function szkic(cialo, { keepalive = false } = {}) {
+    if (!urlSzkicu) return Promise.resolve(null);
+    try {
+      const kontroler = new AbortController();
+      const licznik = setTimeout(() => kontroler.abort(), LIMIT_SZKICU_MS);
+      return fetch(urlSzkicu, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(cialo),
+        signal: kontroler.signal,
+        keepalive,
+      })
+        .then((r) => (r.ok ? r.json() : null))
+        .catch(() => null)
+        .finally(() => clearTimeout(licznik));
+    } catch {
+      return Promise.resolve(null);
+    }
+  }
+
+  /** Po kroku „kontakt": utwórz szkic, a po powrocie Wstecz — popraw zgodę i dane. */
+  function szkicPoKontakcie() {
+    const zgoda = dane.zgodaKontakt === true;
+    const kontakt = { imie: dane.fullName.trim(), email: dane.email.trim(), phone: dane.phone.trim() };
+    const zgodaCialo = { zgoda, zgoda_wersja: ZGODA_KONTAKT.wersja };
+    const token = widgetStart !== null ? window.turnstile?.getResponse?.(widgetStart) : null;
+    const opis = JSON.stringify([zgoda, zgoda ? kontakt : null]);
+
+    if (szkicId === null) {
+      // Bez tokenu funkcja i tak odrzuciłaby szkic, więc nie wołamy jej na darmo.
+      if (!token) return;
+      kontaktWyslany = opis;
+      szkicId = szkic({
+        akcja: 'start', 'cf-turnstile-response': token, ...zgodaCialo, ...(zgoda ? kontakt : {}),
+      }).then((w) => {
+        szkicIdGotowe = w?.id ?? null;
+        if (!szkicIdGotowe) { szkicId = null; kontaktWyslany = ''; }  // kolejne wejście spróbuje jeszcze raz
+        return szkicIdGotowe;
+      });
+      return;
+    }
+
+    if (opis === kontaktWyslany) return;   // po Wstecz nic się nie zmieniło
+    kontaktWyslany = opis;
+    szkicId.then((id) => {
+      if (!id) return;
+      if (zgoda && token) {
+        void szkic({ akcja: 'kontakt', id, 'cf-turnstile-response': token, ...zgodaCialo, ...kontakt });
+      } else {
+        // Zgoda zmieniona albo cofnięta, a świeżego tokenu brak: bezpieczniej
+        // wyczyścić dane kontaktowe szkicu, niż zostawić w nim stary adres.
+        if (zgoda) kontaktWyslany = '';    // następne wejście spróbuje jeszcze raz
+        void szkic({ akcja: 'kontakt', id, zgoda: false });
+      }
+    });
+  }
+
+  /** Po każdym kolejnym kroku: przesuń szkic do przodu. */
+  function szkicKrok(zaliczony) {
+    szkicId?.then((id) => { if (id) void szkic({ akcja: 'krok', id, krok: zaliczony }); });
+  }
 
   async function wyslij(e) {
     e.preventDefault();
@@ -176,6 +317,12 @@
         try {
           sessionStorage.setItem('ud:wniosek', identyfikatorWniosku());
         } catch { /* zostaje niepoliczona konwersja, nie zgubiony wniosek */ }
+        // Szkic oznaczamy jako ukończony — NIGDY nie jest to warunek przekierowania.
+        // `keepalive` pozwala żądaniu przeżyć przejście na inną stronę; gdyby mimo
+        // to zginęło, bezpiecznik w cronie zamknie szkic po e-mailu z ud_clients.
+        try {
+          if (szkicIdGotowe) void szkic({ akcja: 'ukoncz', id: szkicIdGotowe }, { keepalive: true });
+        } catch { /* j.w. */ }
         window.location.href = '/podziekowanie/';
         return;
       }
@@ -194,7 +341,8 @@
 
 <div id="wniosek-gora" class="scroll-mt-6">
   <!-- Pasek kroków. aria-current mówi czytnikowi, gdzie stoimy. -->
-  <ol class="grid grid-cols-2 sm:grid-cols-4 gap-3 list-none m-0 p-0 mb-10">
+  <ol class="grid grid-cols-2 sm:grid-cols-[repeat(var(--kroki),minmax(0,1fr))] gap-3 list-none m-0 p-0 mb-10"
+      style="--kroki: {KROKI.length}">
     {#each KROKI as k, i}
       <li class="border-t-2 pt-3
                  {i < krok ? 'border-akcent' : i === krok ? 'border-akcent-ciemny' : 'border-linia'}">
@@ -210,20 +358,64 @@
 
   <form onsubmit={wyslij} novalidate>
 
-    <!-- ── KROK 1 ────────────────────────────────────────────────────── -->
-    {#if idKroku === 'dane'}
+    <!-- ── KROK: KONTAKT ─────────────────────────────────────────────── -->
+    <!-- Pierwszy, bo kto odpadnie później, zostawia tu e-mail i telefon.
+         Imię, e-mail i telefon są wymagane do wniosku; zgoda na kontakt w sprawie
+         niedokończonego wniosku jest OPCJONALNA i niczego nie blokuje. -->
+    {#if idKroku === 'kontakt'}
       <fieldset class="border-0 p-0 m-0">
-        <legend class="sr-only">Dane podstawowe</legend>
+        <legend class="sr-only">Kontakt</legend>
+
+        <p class="text-[16px] leading-relaxed text-tekst-drugi mt-0 mb-6">
+          Zaczynamy od kontaktu — na ten adres e-mail i numer telefonu odezwiemy się z ofertą.
+        </p>
 
         <div class="grid gap-5 sm:grid-cols-2">
-          <label class="block">
+          <label class="block sm:col-span-2">
             <span class="block text-sm font-semibold mb-1.5">Imię i nazwisko</span>
             <input name="fullName" bind:value={dane.fullName} autocomplete="name"
                    aria-invalid={!!bledy.fullName} aria-describedby={bledy.fullName ? 'e-fullName' : undefined}
                    class="w-full border border-linia-pole p-3 bg-tlo focus:border-akcent">
             {#if bledy.fullName}<span id="e-fullName" class="block text-[13px] text-alarm mt-1.5">{bledy.fullName}</span>{/if}
           </label>
+          <label class="block">
+            <span class="block text-sm font-semibold mb-1.5">Adres e-mail</span>
+            <input name="email" type="email" bind:value={dane.email} autocomplete="email"
+                   aria-invalid={!!bledy.email} class="w-full border border-linia-pole p-3 bg-tlo focus:border-akcent">
+            {#if bledy.email}<span class="block text-[13px] text-alarm mt-1.5">{bledy.email}</span>{/if}
+          </label>
+          <label class="block">
+            <span class="block text-sm font-semibold mb-1.5">Telefon</span>
+            <input name="phone" type="tel" bind:value={dane.phone} autocomplete="tel"
+                   aria-invalid={!!bledy.phone} class="w-full border border-linia-pole p-3 bg-tlo focus:border-akcent">
+            {#if bledy.phone}<span class="block text-[13px] text-alarm mt-1.5">{bledy.phone}</span>{/if}
+          </label>
+        </div>
 
+        <label class="flex items-start gap-3.5 mt-7 border border-linia-mocna bg-tlo-jasne p-5 cursor-pointer">
+          <input type="checkbox" name="zgodaKontakt" bind:checked={dane.zgodaKontakt}
+                 class="w-5 h-5 mt-0.5 accent-akcent-ciemny shrink-0">
+          <span>
+            <span class="block text-[15px] leading-relaxed">{ZGODA_KONTAKT.tresc}</span>
+            <span class="block text-[13px] text-tekst-trzeci mt-1.5">
+              Zgoda jest dobrowolna — wniosek możesz złożyć bez niej.
+            </span>
+          </span>
+        </label>
+
+        <!-- Token na szkic. Niewidoczny, dopóki Cloudflare nie zażąda kliknięcia. -->
+        {#if kluczTurnstile && urlSzkicu}
+          <div bind:this={kontenerStart} class="mt-5"></div>
+        {/if}
+      </fieldset>
+    {/if}
+
+    <!-- ── KROK: DANE ────────────────────────────────────────────────── -->
+    {#if idKroku === 'dane'}
+      <fieldset class="border-0 p-0 m-0">
+        <legend class="sr-only">Dane podstawowe</legend>
+
+        <div class="grid gap-5 sm:grid-cols-2">
           <label class="block">
             <span class="block text-sm font-semibold mb-1.5">PESEL</span>
             <input name="pesel" bind:value={dane.pesel} inputmode="numeric" maxlength="11" autocomplete="off"
@@ -340,7 +532,7 @@
       </fieldset>
     {/if}
 
-    <!-- ── KROK 2 ────────────────────────────────────────────────────── -->
+    <!-- ── KROK: ZAKRES ─────────────────────────────────────────────── -->
     {#if idKroku === 'zakres'}
       <fieldset class="border-0 p-0 m-0">
         <legend class="sr-only">Zakres ochrony</legend>
@@ -425,7 +617,7 @@
       </fieldset>
     {/if}
 
-    <!-- ── KROK 3 ────────────────────────────────────────────────────── -->
+    <!-- ── KROK: ZDROWIE ────────────────────────────────────────────── -->
     {#if idKroku === 'zdrowie'}
       <fieldset class="border-0 p-0 m-0">
         <legend class="sr-only">Stan zdrowia</legend>
@@ -532,27 +724,12 @@
       </fieldset>
     {/if}
 
-    <!-- ── KROK 4 ────────────────────────────────────────────────────── -->
+    <!-- ── KROK: ZGODY ───────────────────────────────────────────────── -->
     {#if idKroku === 'zgody'}
       <fieldset class="border-0 p-0 m-0">
-        <legend class="sr-only">Zgody i kontakt</legend>
+        <legend class="sr-only">Zgody</legend>
 
-        <div class="grid gap-5 sm:grid-cols-2">
-          <label class="block">
-            <span class="block text-sm font-semibold mb-1.5">Adres e-mail</span>
-            <input name="email" type="email" bind:value={dane.email} autocomplete="email"
-                   aria-invalid={!!bledy.email} class="w-full border border-linia-pole p-3 bg-tlo focus:border-akcent">
-            {#if bledy.email}<span class="block text-[13px] text-alarm mt-1.5">{bledy.email}</span>{/if}
-          </label>
-          <label class="block">
-            <span class="block text-sm font-semibold mb-1.5">Telefon</span>
-            <input name="phone" type="tel" bind:value={dane.phone} autocomplete="tel"
-                   aria-invalid={!!bledy.phone} class="w-full border border-linia-pole p-3 bg-tlo focus:border-akcent">
-            {#if bledy.phone}<span class="block text-[13px] text-alarm mt-1.5">{bledy.phone}</span>{/if}
-          </label>
-        </div>
-
-        <div class="flex flex-col gap-4 mt-7">
+        <div class="flex flex-col gap-4">
           <label class="flex items-start gap-3.5 cursor-pointer">
             <input type="checkbox" name="exclusions_accepted" bind:checked={dane.exclusions_accepted}
                    aria-invalid={!!bledy.exclusions_accepted} class="w-5 h-5 mt-0.5 accent-akcent-ciemny shrink-0">

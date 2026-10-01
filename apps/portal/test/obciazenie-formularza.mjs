@@ -154,8 +154,14 @@ async function wypelnijWidoczne(page) {
 }
 
 async function przejdzKreator(page) {
+  // Krok „kontakt" jest pierwszy: imię, e-mail, telefon (zgoda na kontakt jest
+  // opcjonalna i niczego nie blokuje). Dopiero potem „dane" z PESEL-em.
   await page.waitForSelector('input[name="fullName"]', { timeout: 15000 });
   await page.fill('input[name="fullName"]', 'Jan Kowalski');
+  await page.fill('input[name="email"]', 'jan.kowalski@example.com');
+  await page.fill('input[name="phone"]', '500100200');
+  await page.getByRole('button', { name: 'Dalej' }).click();
+  await page.waitForSelector('input[name="pesel"]', { timeout: 5000 });
   await page.fill('input[name="profession"]', 'Lekarz');
   await page.fill('input[name="pesel"]', PESEL);
   await page.getByRole('button', { name: 'Dalej' }).click();
@@ -273,6 +279,11 @@ console.log('\nC. Co widzi klient, gdy funkcja brzegowa nie działa');
       };
     });
 
+    // Szkic odpowiada poprawnie — tu mierzymy awarie form-submit. Bez atrapy
+    // kreator wołałby produkcyjną funkcję szkicu z fałszywym tokenem.
+    await page.route('**/functions/v1/wniosek-szkic', (route) => route.fulfill({
+      status: 200, contentType: 'application/json', body: '{"status":"success","id":"11111111-1111-4111-8111-111111111111"}',
+    }));
     await page.route('**/functions/v1/form-submit', (route) => { wywolan += 1; return handler(route); });
     await page.goto(ADRES, { waitUntil: 'domcontentloaded' });
 
@@ -288,16 +299,30 @@ console.log('\nC. Co widzi klient, gdy funkcja brzegowa nie działa');
     await page.waitForTimeout(nazwa.includes('5 sekund') ? 6500 : 1500);
 
     const odblokowany = !(await przycisk.isDisabled().catch(() => true));
-    const daneSaNadal = await page.inputValue('input[name="email"]').catch(() => '');
     const widacBlad = (await page.locator('text=/Nie udało się|błąd|Błąd|boom|wolno|Weryfikacja/').count()) > 0
       || (await page.locator('.awaria, [class*="awaria"], [id*="awaria"]').count()) > 0;
+
+    // Czy wypełnione dane przetrwały błąd. E-mail i telefon siedzą w PIERWSZYM
+    // kroku (kontakt), więc sama zgoda z ostatniego ekranu nie wystarcza — wracamy
+    // do początku i sprawdzamy to, co klient wpisał na samym starcie. Sonda czytała
+    // wcześniej `input[name="email"]` z ostatniego kroku; po przeniesieniu pola
+    // zawsze zgłaszała „UTRACONE", choć nic nie zginęło.
+    const zgodaNadal = await page.isChecked('input[name="exclusions_accepted"]').catch(() => false);
+    // Po błędzie otwiera się modal awarii i zasłania przyciski — klient musi go
+    // najpierw zamknąć (Escape albo „Zamknij"), dokładnie jak tu.
+    await page.keyboard.press('Escape');
+    for (let i = 0; i < 4; i += 1) {
+      await page.getByRole('button', { name: 'Wstecz' }).click({ timeout: 2000 }).catch(() => {});
+    }
+    const emailNadal = await page.inputValue('input[name="email"]').catch(() => '');
+    const daneSaNadal = zgodaNadal && emailNadal === 'jan.kowalski@example.com';
 
     // Blokadę „w trakcie" da się zaobserwować tylko przy wolnej odpowiedzi —
     // przy błędzie w 200 ms żądanie jest już po wszystkim, gdy pytamy o stan.
     // Dlatego liczy się ona wyłącznie w scenariuszu pięciosekundowym.
     const wolny = nazwa.includes('5 sekund');
     const ok = odblokowany && wywolan === 1
-      && (daneSaNadal !== '' || nazwa.includes('zerwane'))
+      && daneSaNadal
       && (!wolny || zablokowanyWTrakcie);
     zapisz('C', nazwa, ok,
       `żądań: ${wywolan}` +
@@ -325,6 +350,9 @@ console.log('\nC2. Co się dzieje po udanej wysyłce');
       reset() {},
     };
   });
+  await page.route('**/functions/v1/wniosek-szkic', (route) => route.fulfill({
+    status: 200, contentType: 'application/json', body: '{"status":"success","id":"11111111-1111-4111-8111-111111111111"}',
+  }));
   await page.route('**/functions/v1/form-submit', (route) => route.fulfill({
     status: 200, contentType: 'application/json', body: '{"status":"success"}',
   }));
@@ -349,6 +377,64 @@ console.log('\nC2. Co się dzieje po udanej wysyłce');
   }
   zapisz('C2', 'wniosek ląduje na podziękowaniu ze znacznikiem konwersji', ok, opis);
   await page.close();
+}
+
+// ── C3. Szkic wniosku nie może zablokować wniosku ────────────────────────────
+//
+// Kreator woła `wniosek-szkic` po każdym kroku (lejek i kontakt za zgodą).
+// To dodatek: gdy funkcja szkicu zwraca 500, nie odpowiada wcale albo wisi,
+// wniosek ma przejść do końca, zapisać znacznik konwersji i przekierować na
+// podziękowanie. Szkic, który zatrzymuje wniosek, kosztuje więcej, niż daje.
+console.log('\nC3. Funkcja szkicu nie działa — czy wniosek mimo to przechodzi');
+{
+  const awarie = [
+    ['szkic: awaria serwera (500)', (route) => route.fulfill({ status: 500, contentType: 'application/json', body: '{"status":"error"}' })],
+    ['szkic: zerwane połączenie', (route) => route.abort('connectionfailed')],
+    ['szkic: brak odpowiedzi (10 s)', async (route) => {
+      await new Promise((r) => setTimeout(r, 10000));
+      await route.abort().catch(() => {});
+    }],
+  ];
+
+  for (const [nazwa, handler] of awarie) {
+    const page = await browser.newPage();
+    let szkicow = 0;
+    let wniosekow = 0;
+    await page.addInitScript(() => {
+      window.turnstile = { render: () => 'widget-testowy', getResponse: () => 'token-testowy', reset() {} };
+    });
+    await page.route('**/functions/v1/wniosek-szkic', (route) => { szkicow += 1; return handler(route); });
+    await page.route('**/functions/v1/form-submit', (route) => {
+      wniosekow += 1;
+      return route.fulfill({ status: 200, contentType: 'application/json', body: '{"status":"success"}' });
+    });
+    await page.goto(ADRES, { waitUntil: 'domcontentloaded' });
+
+    const t0 = Date.now();
+    const doszedl = await przejdzKreator(page);
+    const czasKreatora = Date.now() - t0;
+
+    let ok = false;
+    let opis = 'nie doszedł do wysyłki';
+    if (doszedl) {
+      await page.getByRole('button', { name: /Wyślij wniosek|Wysyłam/ }).click();
+      await page.waitForURL('**/podziekowanie/', { timeout: 8000 }).catch(() => {});
+      const naPodziekowaniu = page.url().includes('/podziekowanie/');
+      const znacznik = await page.evaluate(() => {
+        try { return sessionStorage.getItem('ud:wniosek'); } catch { return null; }
+      });
+      // Dowodem, że scenariusz coś mierzy, jest to, że kreator FAKTYCZNIE
+      // zawołał funkcję szkicu (szkicow > 0). Przy wiszącej odpowiedzi kreator
+      // nie wolno czekać: cały przebieg musi zmieścić się znacznie poniżej 10 s.
+      const wisi = nazwa.includes('10 s');
+      ok = naPodziekowaniu && !!znacznik && wniosekow === 1 && szkicow > 0 && (!wisi || czasKreatora < 8000);
+      opis = `szkic wołany ${szkicow}×, wniosek ${wniosekow}×, kreator ${czasKreatora} ms`
+        + (naPodziekowaniu ? ', przekierowanie ✓' : ', BRAK przekierowania')
+        + (znacznik ? ', znacznik konwersji ✓' : ', BRAK ZNACZNIKA konwersji');
+    }
+    zapisz('C3', nazwa, ok, opis);
+    await page.close();
+  }
 }
 
 await browser.close();

@@ -2,7 +2,7 @@
 import Baza from '../../layouts/Baza.astro';
 import { graf, organizacja, serwis, strona, okruszki, faq, usluga } from '../../lib/seo';
 import { symuluj, zl, ZUS_MIESIECZNIE, LIMIT } from '../../lib/symulacja';
-import { KROKI, PROG_KLAUZUL_NW } from '@ud/wniosek/schemat';
+import { KROKI, PROG_KLAUZUL_NW, krokiSlownie } from '@ud/wniosek/schemat';
 import { HEALTH_SURVEY_THRESHOLD } from '@ud/wniosek/ankieta';
 import { FIRMA, UBEZPIECZYCIELE } from '../../lib/firma';
 
@@ -17,7 +17,7 @@ const ETAPY = [
   {
     tytul: 'Wypełniasz wniosek',
     czas: 'około 5 minut',
-    opis: `Cztery kroki: ${KROKI.map((k) => k.tytul.toLowerCase()).join(', ')}. `
+    opis: `${krokiSlownie().charAt(0).toUpperCase() + krokiSlownie().slice(1)}: ${KROKI.map((k) => k.tytul.toLowerCase()).join(', ')}. `
       + 'Wszystko online, bez skanowania dokumentów i bez wizyty w oddziale.',
   },
   {
