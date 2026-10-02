@@ -43,8 +43,14 @@ export const TERMINY = [
   { id: 'brak', nazwa: 'Brak zaplanowanego działania' },
 ];
 
-/** Ile dni w jednym etapie to już „długo". Parametr startowy z wytycznych, do korekty po pierwszych tygodniach. */
-export const DNI_DLUGO_W_ETAPIE = 7;
+/**
+ * Ile dni lead może stać w jednym otwartym etapie, zanim karta zrobi się
+ * czerwona (decyzja właściciela z 02.10.2026: „dłużej niż 5 dni"). W pierwszej
+ * kolumnie karta idzie od zieleni (dzień 0) przez żółć i pomarańcz do czerwieni.
+ * Licznik zeruje tylko przeniesienie do innego etapu — notatka ani zaplanowany
+ * telefon nie zmieniają tego, że lead stoi w miejscu.
+ */
+export const DNI_DLUGO_W_ETAPIE = 5;
 /** Ile dni przed usunięciem danych szkicu karta zaczyna to wyraźnie sygnalizować. */
 export const DNI_OSTRZEZENIA_RETENCJI = 7;
 /** Liczba kroków kreatora wniosku (do „krok 2 z 5"). */
@@ -80,9 +86,44 @@ export function kontekstKarty(karta) {
   return produkty.length ? produkty.join(' + ') : 'Zakres ochrony nieokreślony';
 }
 
-/** Kwota na karcie z jednoznacznym znaczeniem (patrz widok ud_leady_baza). */
-export function wartoscKarty(karta) {
+/**
+ * Kwota na karcie z jednoznacznym znaczeniem. W „Wygrany" liczy się składka
+ * sprzedanego wariantu; wszędzie indziej — miesięczne świadczenie z wniosku.
+ */
+export function wartoscKarty(karta, etap = null) {
+  if (etap?.rodzaj === 'wygrany') {
+    const sk = karta.sprzedaz?.skladka_roczna;
+    return sk == null ? 'Brak danych sprzedaży' : `Składka ${formatKwota(sk)} / rok`;
+  }
   return karta.wartosc == null ? null : `Świadczenie ${formatKwota(karta.wartosc)} / mies.`;
+}
+
+/**
+ * Opiekun pokazywany na karcie. Administratora nie pokazujemy (decyzja
+ * właściciela z 02.10.2026) — w szczegółach i w filtrze nadal jest.
+ * null = nic nie pokazuj.
+ */
+export function opiekunNaKarcie(karta) {
+  if (karta.opiekun_admin) return null;
+  return karta.opiekun_nazwa ?? 'Bez opiekuna';
+}
+
+/**
+ * „Wiek" karty w otwartym etapie, do koloru i napisu „3 dni w etapie".
+ * Etap zamknięty (Wygrany / Przegrany) — null: sprawa skończona, nic nie świeci.
+ *   poziom 0–5  pierwsza kolumna: od zieleni (0) przez żółć do ciemnego pomarańczu (5)
+ *   czerwony    ponad DNI_DLUGO_W_ETAPIE dni — w KAŻDEJ otwartej kolumnie
+ */
+export function wiekKarty(karta, etap, pierwszy = false, teraz = new Date()) {
+  if ((etap?.rodzaj ?? 'otwarty') !== 'otwarty') return null;
+  const dni = dniWEtapie(karta, teraz);
+  const czerwony = dni > DNI_DLUGO_W_ETAPIE;
+  return {
+    dni,
+    czerwony,
+    poziom: pierwszy && !czerwony ? Math.min(dni, DNI_DLUGO_W_ETAPIE) : null,
+    tekst: dni === 0 ? 'Dziś w etapie' : `${liczbaDni(dni)} w etapie`,
+  };
 }
 
 /**
@@ -115,12 +156,12 @@ export function dataGodzina(iso) {
   });
 }
 
+const liczbaDni = (n) => `${n} ${n === 1 ? 'dzień' : 'dni'}`;
+
 export function dniWEtapie(karta, teraz = new Date()) {
   if (!karta.etap_od) return 0;
   return Math.max(0, Math.floor((new Date(teraz).getTime() - new Date(karta.etap_od).getTime()) / DZIEN_MS));
 }
-
-const liczbaDni = (n) => `${n} ${n === 1 ? 'dzień' : 'dni'}`;
 
 /**
  * Ostrzeżenia z tekstem (sam kolor nie wystarcza). Kolejność = ważność.
@@ -139,8 +180,8 @@ export function ostrzezenia(karta, etap, teraz = new Date()) {
     }
     if (!dz) wynik.push({ id: 'brak_dzialania', tekst: 'Brak zaplanowanego działania', ikona: '○', waga: 'uwaga' });
     if (!karta.opiekun_id) wynik.push({ id: 'brak_opiekuna', tekst: 'Brak opiekuna', ikona: '○', waga: 'uwaga' });
-    const dni = dniWEtapie(karta, teraz);
-    if (dni >= DNI_DLUGO_W_ETAPIE) wynik.push({ id: 'dlugo_w_etapie', tekst: `W etapie od ${liczbaDni(dni)}`, ikona: '⏱', waga: 'uwaga' });
+    // Czas w etapie nie jest tu ostrzeżeniem: karta ma stały napis „N dni w etapie"
+    // i kolor (wiekKarty), więc drugi komunikat o tym samym byłby szumem.
   }
 
   if (karta.dane_do) {
@@ -245,6 +286,35 @@ export function czyMoznaPrzeniesc(karta, etap, { zapisWToku = false } = {}) {
 
 /** Czy etap wymaga danych, które trzeba zebrać PRZED zapisem. */
 export const wymagaPowodu = (etap) => (etap?.wymagane_pola ?? []).includes('powod_utraty');
+export const wymagaSprzedazy = (etap) => (etap?.wymagane_pola ?? []).includes('skladka_roczna');
+
+/** Pola danych sprzedaży — kolejność jak w formularzu „Wygrany". */
+export const POLA_SPRZEDAZY = [
+  { id: 'skladka_roczna', nazwa: 'Składka roczna', jednostka: 'zł / rok', wymagane: true },
+  { id: 'skladka_mies', nazwa: 'Składka miesięczna', jednostka: 'zł / mies.' },
+  { id: 'swiadczenie_okresowa', nazwa: 'Świadczenie — okresowa niezdolność', jednostka: 'zł / mies.' },
+  { id: 'swiadczenie_trwala', nazwa: 'Suma — trwała niezdolność', jednostka: 'zł' },
+  { id: 'swiadczenie_zgon', nazwa: 'Suma — zgon', jednostka: 'zł' },
+];
+
+/**
+ * Dane sprzedaży z formularza → to, co idzie do serwera i na kartę
+ * optymistycznie. Kwoty jak w SQL („3 036,00 zł" → 3036); puste pole = brak.
+ * `bledne` = pola z czymś, czego nie da się odczytać jako kwoty.
+ */
+export function daneSprzedazyZFormularza(pola, wariantId = null) {
+  const sprzedaz = {};
+  const bledne = [];
+  for (const { id } of POLA_SPRZEDAZY) {
+    const t = String(pola[id] ?? '').trim();
+    if (!t) continue;
+    const n = kwotaZTekstu(t);
+    if (n == null || n <= 0) bledne.push(id);
+    else sprzedaz[id] = n;
+  }
+  if (wariantId) sprzedaz.wariant_id = wariantId;
+  return { sprzedaz, bledne };
+}
 
 /**
  * Czy bieżący użytkownik może zmienić opiekuna leada — podpowiedź dla UI.
@@ -292,6 +362,13 @@ export function akcjeLeada({ karta, etap, plan, zapisWToku = false }) {
       zablokowana: w_toku ?? (opiekun.ok ? undefined : opiekun.powod),
     },
   ];
+  if (etap?.rodzaj === 'wygrany') {
+    // Obok notatki: to też obsługa sprawy, nie zmiana procesu.
+    pozycje.splice(pozycje.findIndex((p) => p.id === 'notatka') + 1, 0, {
+      id: 'sprzedaz', etykieta: karta.sprzedaz?.skladka_roczna != null ? 'Dane sprzedaży…' : 'Uzupełnij dane sprzedaży…',
+      grupa: 'obsluga', zablokowana: w_toku,
+    });
+  }
   if (karta.telefon) pozycje.push({ id: 'zadzwon', etykieta: `Zadzwoń: ${karta.telefon}`, grupa: 'kontakt', href: `tel:${String(karta.telefon).replace(/[^\d+]/g, '')}` });
   pozycje.push(
     { id: 'link', etykieta: 'Kopiuj link do leada', grupa: 'udostepnianie' },

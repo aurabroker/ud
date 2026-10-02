@@ -57,7 +57,7 @@
     <label class="f">Źródło
       <select class="pole" value={stan.filtr.zrodlo ?? ''} onchange={(e) => stan.ustawFiltr({ zrodlo: e.currentTarget.value })}>
         <option value="">Wszystkie</option>
-        {#each Object.entries(ZRODLA) as [k, n] (k)}<option value={k}>{n}</option>{/each}
+        {#each Object.entries(ZRODLA).filter(([k]) => k !== 'szkic') as [k, n] (k)}<option value={k}>{n}</option>{/each}
       </select>
     </label>
     <label class="f">Zakres ochrony

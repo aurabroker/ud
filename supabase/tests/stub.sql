@@ -1,7 +1,7 @@
 -- Atrapa środowiska Supabase dla testów SQL na zwykłym Postgresie 16.
 --
 -- NIE jest to schemat produkcji. To minimum potrzebne migracjom z tego
--- repozytorium: role, schematy rozszerzeń (cron, vault, net) i trzy tabele, na
+-- repozytorium: role, schematy rozszerzeń (cron, vault, net) i cztery tabele, na
 -- których opiera się tablica leadów — z kolumnami i ograniczeniami zgodnymi
 -- z produkcją tam, gdzie testy na nich polegają (NOT NULL na full_name, status
 -- oferty, `role`/`active` profilu).
@@ -59,11 +59,34 @@ create table public.ud_offers (
   id           uuid primary key default gen_random_uuid(),
   user_id      uuid,
   name         text not null default 'oferta',
+  offer_number text,
   client_id    uuid references public.ud_clients(id) on delete set null,
   status       text not null,
   created_at   timestamptz default now(),
   sent_at      timestamptz,
   viewed_at    timestamptz,
   decided_at   timestamptz,
-  archived_at  timestamptz
+  archived_at  timestamptz,
+  client_choice jsonb
+);
+
+-- Warianty oferty (pliki PDF ubezpieczyciela po parsowaniu) — kolumny, z których
+-- tablica leadów bierze kwoty sprzedaży.
+create table public.ud_offer_documents (
+  id                      uuid primary key default gen_random_uuid(),
+  offer_id                uuid not null references public.ud_offers(id) on delete cascade,
+  insurer_type            text,
+  offer_number            text,
+  product_name            text,
+  death_covered           boolean,
+  temp_incapacity_covered boolean,
+  temp_monthly_benefit    numeric,
+  perm_incapacity_covered boolean,
+  perm_sum_insured        numeric,
+  premium_total           numeric,
+  premium_monthly         numeric,
+  installments            integer,
+  parsed_raw              jsonb,
+  sort_order              integer default 0,
+  created_at              timestamptz default now()
 );

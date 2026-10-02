@@ -31,6 +31,12 @@ nie wyniknie.
   Editor zapisał funkcje z końcami linii CRLF — przy porównaniu `prosrc`
   z plikiem usuń `chr(13)`.
 
+- `20261002120000_leady_kanban_3_sprzedaz.sql` — zmiany z 02.10.2026: Nowy
+  i Kontakt w jednym etapie, porzucone wnioski poza tablicą (wyzwalacz na
+  szkicach zdjęty), dane sprzedaży przy Wygrany, statystyki, opiekun-administrator
+  na karcie. **Przez SQL Editor** (DROP i funkcje z UPDATE/DELETE), potem:
+  `insert into supabase_migrations.schema_migrations (version, name) values ('20261002120000', 'leady_kanban_3_sprzedaz');`
+
 Dlaczego tak: MCP Supabase (`apply_migration` i `execute_sql`) wstrzymuje do
 ręcznego potwierdzenia każde `DROP` i każdą funkcję, która w treści robi
 `UPDATE`/`DELETE` na tabeli w `public` (na tabeli tymczasowej ta sama treść
@@ -39,5 +45,5 @@ po 60 s bez śladu w bazie — sprawdzone sondami 01.10.2026. Nie obchodź tego
 dynamicznym SQL-em: to jest bramka na zgodę człowieka, nie usterka do
 wyminięcia. Migracja z takimi funkcjami idzie przez SQL Editor.
 
-Testy na jednorazowym Postgresie wczytują obie części po kolei:
+Testy na jednorazowym Postgresie wczytują wszystkie części po kolei:
 `pnpm test:leady-sql` w `apps/panel` (stub środowiska w `supabase/tests/`).

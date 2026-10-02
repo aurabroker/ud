@@ -28,6 +28,7 @@
   import Powiadomienia from './Powiadomienia.svelte';
   import DialogPrzenies from './DialogPrzenies.svelte';
   import DialogPowodu from './DialogPowodu.svelte';
+  import DialogSprzedazy from './DialogSprzedazy.svelte';
   import DialogDzialania from './DialogDzialania.svelte';
   import DialogNotatki from './DialogNotatki.svelte';
   import DialogOpiekuna from './DialogOpiekuna.svelte';
@@ -172,7 +173,7 @@
     const m = menu;
     menu = null;
     const trigger = m.trigger;
-    const dialogi = { przenies: 'przenies', dzialanie: 'dzialanie', notatka: 'notatka', opiekun: 'opiekun', archiwizuj: 'archiwum' };
+    const dialogi = { przenies: 'przenies', dzialanie: 'dzialanie', notatka: 'notatka', opiekun: 'opiekun', archiwizuj: 'archiwum', sprzedaz: 'sprzedaz' };
     if (m.typ === 'lead') {
       if (p.id === 'otworz') return otworzSzczegoly(m.id, trigger);
       if (dialogi[p.id]) { dialog = { typ: dialogi[p.id], leadId: m.id, fokusPo: trigger }; return; }
@@ -223,7 +224,8 @@
   async function przeniesZUi(leadId, etapId, fokusPo) {
     const r = await stan.przenies(leadId, etapId);
     if (r.status === 'potrzebne_dane') {
-      dialog = { typ: 'powod', leadId, etapId, fokusPo: fokusPo ?? document.activeElement };
+      const typ = r.pola?.includes('skladka_roczna') ? 'sprzedaz' : 'powod';
+      dialog = { typ, leadId, etapId, fokusPo: fokusPo ?? document.activeElement };
     }
     return r;
   }
@@ -391,6 +393,7 @@
     {#key dialog}
       {#if dialog.typ === 'przenies'}<DialogPrzenies {dialog} onzamknij={zamknijDialog} />
       {:else if dialog.typ === 'powod'}<DialogPowodu {dialog} onzamknij={zamknijDialog} />
+      {:else if dialog.typ === 'sprzedaz'}<DialogSprzedazy {dialog} onzamknij={zamknijDialog} />
       {:else if dialog.typ === 'dzialanie'}<DialogDzialania {dialog} onzamknij={zamknijDialog} />
       {:else if dialog.typ === 'notatka'}<DialogNotatki {dialog} onzamknij={zamknijDialog} />
       {:else if dialog.typ === 'opiekun'}<DialogOpiekuna {dialog} onzamknij={zamknijDialog} />

@@ -19,8 +19,10 @@ import { createServer } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { uruchomKlaster, wczytaj } from '../../scripts/lib/pg-tymczasowy.mjs';
 import {
-  notatka, odpowiedzKolumny, odpowiedzLicznikow, odpowiedzSzczegolow, przetworz, wczytajTablice, zmien, zwin,
+  BladApi, notatka, odpowiedzKolumny, odpowiedzLicznikow, odpowiedzSzczegolow, odpowiedzWariantow, przetworz, statystyki, wczytajTablice,
+  zmien, zwin,
 } from '../../src/lib/server/leady.js';
+import { liczNiedokonczone } from '../../src/lib/server/niedokonczone.js';
 
 const panel = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -44,7 +46,7 @@ export async function startuj() {
                   public.ud_offers, public.ud_wnioski_szkice, public.ud_clients, public.ud_user_profiles restart identity cascade;
          delete from public.ud_leady_etap where pipeline_id in (select id from public.ud_leady_pipeline where klucz <> 'sprzedaz');
          delete from public.ud_leady_pipeline where klucz <> 'sprzedaz';
-         update public.ud_leady_etap set aktywny = true;`);
+         update public.ud_leady_etap set aktywny = (klucz <> 'kontakt');`);
     wywolania.length = 0;
     sql(fixture);
     awarie.length = 0;
@@ -86,8 +88,35 @@ export async function startuj() {
       return { data: r.stdout.trim() ? JSON.parse(r.stdout.trim()) : null, error: null };
     },
   };
+  // Klient „z sesją agenta" do ofert i wariantów: czyta prawdziwe wiersze z bazy
+  // testowej (bez RLS — uprawnienia ofert to osobny temat, nie tablicy leadów).
+  // Ten sam kształt służy też licznikowi „Niedokończone" (select z count/head + is null).
   const sbOferty = {
-    from: () => ({ select: () => ({ eq: () => ({ order: () => ({ limit: async () => ({ data: [] }) }) }) }) }),
+    from: (tabela) => {
+      const warunki = [];
+      let tylkoLiczba = false;
+      const zapytanie = {
+        select: (_kolumny, opcje) => { tylkoLiczba = Boolean(opcje?.head && opcje?.count); return zapytanie; },
+        eq: (k, v) => { warunki.push(`${k}::text = ${literal(String(v))}::jsonb #>> '{}'`); return zapytanie; },
+        in: (k, v) => { warunki.push(`${k}::text in (select jsonb_array_elements_text(${literal(v.map(String))}::jsonb))`); return zapytanie; },
+        is: (k, v) => {
+          if (v !== null) throw new Error('Atrapa obsługuje tylko .is(kolumna, null)');
+          warunki.push(`${k} is null`);
+          return zapytanie;
+        },
+        order: () => zapytanie,
+        limit: () => zapytanie,
+        then: (rozwiaz, odrzuc) => {
+          try {
+            const zrodlo = `select * from public.${tabela}${warunki.length ? ` where ${warunki.join(' and ')}` : ''}`;
+            if (tylkoLiczba) { rozwiaz({ data: null, count: Number(sql(`select count(*) from (${zrodlo}) t`)), error: null }); return; }
+            const w = sql(`select coalesce(jsonb_agg(to_jsonb(t) order by t.created_at), '[]'::jsonb) from (${zrodlo}) t`);
+            rozwiaz({ data: JSON.parse(w), error: null });
+          } catch (e) { odrzuc(e); }
+        },
+      };
+      return zapytanie;
+    },
   };
 
   // ── Awarie wstrzykiwane przez testy ───────────────────────────────────────
@@ -142,6 +171,35 @@ export async function startuj() {
             res.setHeader('content-type', 'text/html; charset=utf-8');
             return res.end(body);
           }
+          if (sciezka === '/__test/ssr-statystyki') {
+            // Strona /panel/statystyki z danymi z tej samej funkcji co jej load (+page.server.js).
+            const { render } = await serwer.ssrLoadModule('svelte/server');
+            const Strona = (await serwer.ssrLoadModule('/src/routes/panel/statystyki/+page.svelte')).default;
+            let st;
+            try {
+              st = await statystyki(sb, uzytkownik, url.searchParams);
+            } catch (e) {
+              if (e instanceof BladApi) return odpowiedz(res, e.status, { komunikat: e.message });
+              throw e;
+            }
+            const { body } = render(Strona, { props: { data: { st, blad: '' } } });
+            res.setHeader('content-type', 'text/html; charset=utf-8');
+            return res.end(`<!doctype html><meta charset="utf-8"><body>${body}</body>`);
+          }
+          if (sciezka === '/__test/ssr-uklad') {
+            // Układ panelu (menu z zakładką „Niedokończone") z licznikiem z tej samej funkcji co jego load.
+            const { render } = await serwer.ssrLoadModule('svelte/server');
+            const { createRawSnippet } = await serwer.ssrLoadModule('svelte');
+            const Uklad = (await serwer.ssrLoadModule('/src/routes/panel/+layout.svelte')).default;
+            const niedokonczone = await liczNiedokonczone(sbOferty);
+            const children = createRawSnippet(() => ({ render: () => '<p>treść</p>' }));
+            const { body } = render(Uklad, { props: {
+              data: { user: { id: uzytkownik, email: 'ula@x.pl' }, profile: { full_name: 'Ula Agent', role: 'agent' }, niedokonczone },
+              children,
+            } });
+            res.setHeader('content-type', 'text/html; charset=utf-8');
+            return res.end(`<!doctype html><meta charset="utf-8"><body>${body}</body>`);
+          }
           if (sciezka === '/__test/tablica') {
             const wynik = await przetworz({ user, odczyt: true, wykonaj: async ({ userId }) =>
               ({ status: 200, body: await wczytajTablice(sb, sbOferty, userId, url.searchParams) }) });
@@ -191,6 +249,7 @@ export async function startuj() {
               if (nazwa === 'kolumna') return odpowiedzKolumny(sb, userId, url.searchParams);
               if (nazwa === 'liczniki') return odpowiedzLicznikow(sb, userId, url.searchParams);
               if (nazwa.startsWith('lead/')) return odpowiedzSzczegolow(sb, sbOferty, userId, decodeURIComponent(nazwa.slice(5)));
+              if (nazwa.startsWith('warianty/')) return odpowiedzWariantow(sb, sbOferty, userId, decodeURIComponent(nazwa.slice(9)));
               return { status: 404, body: { status: 'blad', komunikat: 'Nieznana ścieżka.' } };
             },
           });
@@ -208,7 +267,11 @@ export async function startuj() {
     root: panel,
     configFile: false,
     logLevel: 'warn',
-    resolve: { alias: { $lib: join(panel, 'src/lib') } },
+    resolve: { alias: {
+      $lib: join(panel, 'src/lib'),
+      '$app/stores': join(panel, 'test/leady/app-zaslepka.js'),
+      '$app/navigation': join(panel, 'test/leady/app-zaslepka.js'),
+    } },
     plugins: [svelte({ configFile: false }), wtyczka],
     server: { host: '127.0.0.1', port: 0, strictPort: false, fs: { allow: [resolve(panel, '../..')] } },
     optimizeDeps: { noDiscovery: true },

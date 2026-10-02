@@ -1,7 +1,7 @@
 /**
  * Pozostałe operacje i zachowania interfejsu: panel szczegółów, dialogi
  * (działanie, notatka, opiekun, archiwizacja), blokada równoległych zapisów,
- * wyszukiwanie, filtry w adresie, lead ze szkicu, brak dostępu i sesja.
+ * wyszukiwanie, filtry w adresie, porzucony wniosek poza tablicą, brak dostępu i sesja.
  */
 import { test, expect } from '@playwright/test';
 import {
@@ -69,19 +69,19 @@ test.describe('panel szczegółów', () => {
     await otworz(page);
     await karta(page, 'Anna Kowalska').locator('.kontekst').click();
     const pole = szczegoly(page).getByLabel('Etap');
-    await pole.selectOption({ label: 'Kontakt' });
-    await expect(toast(page)).toContainText('Anna Kowalska: Nowy → Kontakt');
-    expect(await etapLeada(request, 'Anna Kowalska')).toBe('kontakt');
-    await expect(pole).toHaveValue(await etapId(request, 'kontakt'));
-    await expect(szczegoly(page).locator('[data-historia]')).toContainText('Nowy → Kontakt');
+    await pole.selectOption({ label: 'Oferta' });
+    await expect(toast(page)).toContainText('Anna Kowalska: Nowy → Oferta');
+    expect(await etapLeada(request, 'Anna Kowalska')).toBe('oferta');
+    await expect(pole).toHaveValue(await etapId(request, 'oferta'));
+    await expect(szczegoly(page).locator('[data-historia]')).toContainText('Nowy → Oferta');
 
     await pole.selectOption({ label: 'Przegrany' });
     const dialog = page.getByRole('dialog', { name: 'Powód utraty' });
     await expect(dialog).toBeVisible();
     await page.keyboard.press('Escape');
     await expect(dialog).toHaveCount(0);
-    expect(await etapLeada(request, 'Anna Kowalska')).toBe('kontakt');
-    await expect(pole).toHaveValue(await etapId(request, 'kontakt'));
+    expect(await etapLeada(request, 'Anna Kowalska')).toBe('oferta');
+    await expect(pole).toHaveValue(await etapId(request, 'oferta'));
   });
 
   test('notatki: dodanie, lista, historia; odświeżenie pokazuje zapisane', async ({ page, request }) => {
@@ -199,7 +199,7 @@ test.describe('dialogi', () => {
     await expect(karta(page, 'Ewa Mazur')).toHaveCount(0);
     await expect(szczegoly(page)).toHaveCount(0);
     await expect(toast(page)).toContainText('Lead zarchiwizowany');
-    await expect(licznik(page, 'nowy')).toHaveText('5');
+    await expect(licznik(page, 'nowy')).toHaveText('6');
     expect(await sql(request, `select zarchiwizowano_at is not null from public.ud_leady where id = tt.lead_wszystkie('Ewa Mazur')`)).toBe('t');
     await page.getByRole('button', { name: 'Odśwież' }).click();
     await expect(karta(page, 'Ewa Mazur')).toHaveCount(0);
@@ -219,9 +219,9 @@ test.describe('dialogi', () => {
 test.describe('blokady i cele przeciągania', () => {
   test('lead jest już w tym etapie: cel oznaczony jako niedostępny z powodem, upuszczenie nic nie robi', async ({ page, request }) => {
     await otworz(page);
-    await przeciagnij(page, karta(page, 'Anna Kowalska'), kolumna(page, 'kontakt'), { puszczaj: false });
-    await expect(page.locator('[data-cel-podpowiedz]')).toContainText('Przenieś do: Kontakt');
-    await expect(kolumna(page, 'kontakt')).toHaveClass(/cel-ok/);
+    await przeciagnij(page, karta(page, 'Anna Kowalska'), kolumna(page, 'oferta'), { puszczaj: false });
+    await expect(page.locator('[data-cel-podpowiedz]')).toContainText('Przenieś do: Oferta');
+    await expect(kolumna(page, 'oferta')).toHaveClass(/cel-ok/);
     const nowy = await kolumna(page, 'nowy').boundingBox();
     await page.mouse.move(nowy.x + nowy.width / 2, nowy.y + 120, { steps: 6 });
     await expect(kolumna(page, 'nowy')).toHaveClass(/cel-blokada/);
@@ -235,8 +235,8 @@ test.describe('blokady i cele przeciągania', () => {
   test('równoległe operacje na tym samym leadzie są blokowane do rozstrzygnięcia zapisu', async ({ page, request }) => {
     await otworz(page);
     await awaria(request, { sciezka: 'zmien', tryb: 'opoznienie', opoznienieMs: 1500 });
-    await przeciagnij(page, karta(page, 'Anna Kowalska'), kolumna(page, 'kontakt'));
-    await expect(karta(page, 'Anna Kowalska').locator('[data-stan-zapisu]')).toContainText('Przenoszę do: Kontakt');
+    await przeciagnij(page, karta(page, 'Anna Kowalska'), kolumna(page, 'decyzja'));
+    await expect(karta(page, 'Anna Kowalska').locator('[data-stan-zapisu]')).toContainText('Przenoszę do: Decyzja klienta');
     await expect(karta(page, 'Anna Kowalska')).toHaveAttribute('aria-busy', 'true');
 
     // Druga próba na tej samej karcie: cel zablokowany, menu ma zablokowane pozycje zmieniające stan.
@@ -248,10 +248,10 @@ test.describe('blokady i cele przeciągania', () => {
     await expect(page.getByRole('menuitem', { name: 'Dodaj notatkę…' })).not.toHaveAttribute('aria-disabled', 'true');
     await page.keyboard.press('Escape');
 
-    await expect(toast(page)).toContainText('Anna Kowalska: Nowy → Kontakt', { timeout: 6000 });
+    await expect(toast(page)).toContainText('Anna Kowalska: Nowy → Decyzja klienta', { timeout: 6000 });
     await expect(karta(page, 'Anna Kowalska').locator('[data-stan-zapisu]')).toHaveCount(0);
     expect((await wywolania(request)).filter((w) => w.sciezka === 'zmien')).toHaveLength(1);       // druga próba nie poszła do serwera
-    expect(await etapLeada(request, 'Anna Kowalska')).toBe('kontakt');
+    expect(await etapLeada(request, 'Anna Kowalska')).toBe('decyzja');
   });
 
   test('autoprzewijanie przy prawej krawędzi dowozi dalekie kolumny', async ({ page }) => {
@@ -275,7 +275,7 @@ test.describe('wyszukiwanie i filtry', () => {
     await otworz(page);
     const pole = page.getByLabel('Szukaj leada');
     await pole.pressSequentially('anna', { delay: 40 });
-    await expect(licznik(page, 'nowy')).toHaveText('1 z 6');
+    await expect(licznik(page, 'nowy')).toHaveText('1 z 7');
     await expect(page).toHaveURL(/q=anna/);
     const zapytania = (await wywolania(request)).filter((w) => w.sciezka === 'kolumna').map((w) => new URLSearchParams(w.zapytanie).get('q'));
     expect(zapytania).toContain('anna');
@@ -300,47 +300,36 @@ test.describe('wyszukiwanie i filtry', () => {
   test('filtry: opiekun „Ja", źródło, zakres i termin; wyczyść; stan wraca po odświeżeniu z adresu', async ({ page }) => {
     await otworz(page);
     await page.getByLabel('Opiekun').selectOption('ja');
-    await expect(licznik(page, 'nowy')).toHaveText('2 z 6');
-    await expect.poll(async () => (await nazwyKart(page, 'nowy')).sort()).toEqual(['Anna Kowalska', 'Dariusz Wójcik']);
+    await expect(licznik(page, 'nowy')).toHaveText('3 z 7');
+    await expect.poll(async () => (await nazwyKart(page, 'nowy')).sort()).toEqual(['Anna Kowalska', 'Dariusz Wójcik', 'Filip Lis']);
     await page.getByLabel('Zakres ochrony').selectOption({ label: 'Zgon / inwalidztwo' });
-    await expect(licznik(page, 'nowy')).toHaveText('1 z 6');
+    await expect(licznik(page, 'nowy')).toHaveText('1 z 7');
     await expect(page.locator('[data-aktywne-filtry]')).toContainText('opiekun: ja');
     await expect(page.locator('[data-aktywne-filtry]')).toContainText('zakres: Zgon / inwalidztwo');
     await page.reload();
     await page.waitForSelector('html[data-gotowe]');
     await expect(page.getByLabel('Opiekun')).toHaveValue('ja');
-    await expect(licznik(page, 'nowy')).toHaveText('1 z 6');
+    await expect(licznik(page, 'nowy')).toHaveText('1 z 7');
     await page.getByRole('button', { name: 'Wyczyść filtry' }).click();
-    await expect(licznik(page, 'nowy')).toHaveText('6');
+    await expect(licznik(page, 'nowy')).toHaveText('7');
     await expect(page).not.toHaveURL(/opiekun=/);
 
-    await page.getByLabel('Źródło').selectOption({ label: 'Porzucony wniosek' });
-    await expect(page.locator('[data-karta-id]')).toHaveCount(1);
-    await expect(karta(page, 'Szymon Szkic')).toBeVisible();
+    await page.getByLabel('Źródło').selectOption({ label: 'Dodany w panelu' });
+    await expect(page.locator('[data-karta-id]')).toHaveCount(3);
+    await expect(karta(page, 'Irena Kubiak')).toBeVisible();
     await page.getByRole('button', { name: 'Wyczyść filtry' }).click();
     await page.getByLabel('Następne działanie').selectOption({ label: 'Przeterminowane' });
     await expect.poll(() => page.locator('[data-karta-id]').count()).toBe(1);
   });
 });
 
-test.describe('szkic wniosku jako lead', () => {
-  test('karta i szczegóły mówią, że to porzucony wniosek i kiedy dane zostaną usunięte; cofnięta zgoda usuwa lead', async ({ page, request }) => {
+test.describe('porzucony wniosek nie jest leadem', () => {
+  test('szkic ze zgodą nie ma karty, filtr źródła nie ma „Porzucony wniosek" (lista „Niedokończone" to osobna zakładka)', async ({ page, request }) => {
     await otworz(page);
-    const k = karta(page, 'Szymon Szkic');
-    await expect(k).toContainText('Niedokończony wniosek — zaliczono krok 2 z 5');
-    await expect(k).toContainText('Dane z formularza usuniemy');
-    await expect(k).toContainText('Porzucony wniosek');
-    await expect(k).not.toContainText('Świadczenie');                            // szkic nie ma kwot
-    await k.locator('.kontekst').click();
-    await expect(szczegoly(page).locator('[data-dane-do]')).toContainText('usuniemy automatycznie');
-    await expect(szczegoly(page)).toContainText('szymon@x.pl');
-    await expect(szczegoly(page).getByRole('link', { name: /Karta klienta/ })).toHaveCount(0);
-
-    // Zgoda wycofana linkiem z maila (tak robi funkcja brzegowa) → po odświeżeniu leada nie ma, dane nie wychodzą do przeglądarki.
-    await sql(request, `update public.ud_wnioski_szkice set zgoda_kontakt = false, zgoda_wycofana_at = now(), imie = null, email = null, phone = null where id = '50000000-0000-0000-0000-000000000001'`);
-    await page.getByRole('button', { name: 'Odśwież' }).click();
+    expect(await sql(request, `select count(*) from public.ud_wnioski_szkice where zgoda_kontakt and ukonczony_at is null`)).toBe('1');
     await expect(karta(page, 'Szymon Szkic')).toHaveCount(0);
-    await expect(licznik(page, 'nowy')).toHaveText('5');
+    await expect(page.getByLabel('Źródło').locator('option', { hasText: 'Porzucony wniosek' })).toHaveCount(0);
+    expect(await sql(request, `select count(*) from public.ud_leady where szkic_id is not null`)).toBe('0');
   });
 });
 
@@ -355,7 +344,7 @@ test.describe('dostęp i sesja', () => {
   test('wygasła sesja w trakcie pracy: baner, wycofanie zmiany, żadnego zapisu', async ({ page, request }) => {
     await otworz(page);
     await awaria(request, { sciezka: 'zmien', tryb: 'odpowiedz', status: 401, body: { status: 'blad', komunikat: 'Sesja wygasła.', sesja: true } });
-    await przeciagnij(page, karta(page, 'Anna Kowalska'), kolumna(page, 'kontakt'));
+    await przeciagnij(page, karta(page, 'Anna Kowalska'), kolumna(page, 'oferta'));
     await expect(page.locator('[data-baner-sesji]')).toContainText('Zaloguj się ponownie');
     await expect(page.locator('[data-baner-sesji] a')).toHaveAttribute('href', '/login');
     await expect(kolumna(page, 'nowy').locator('[data-karta-id]').filter({ hasText: 'Anna Kowalska' })).toHaveCount(1);
@@ -365,13 +354,16 @@ test.describe('dostęp i sesja', () => {
 
 test('wszystkie etapy zwinięte: komunikat z akcją, a upuszczenie na zwinięty etap nadal działa', async ({ page, request }) => {
   await otworz(page);
-  for (const nazwa of ['Nowy', 'Kontakt', 'Oferta', 'Decyzja klienta', 'Wygrany']) await page.getByRole('button', { name: `Zwiń etap ${nazwa}` }).click();
-  await expect(page.locator('[data-zw-id]')).toHaveCount(5);
+  for (const nazwa of ['Nowy', 'Oferta', 'Decyzja klienta', 'Wygrany']) await page.getByRole('button', { name: `Zwiń etap ${nazwa}` }).click();
+  await expect(page.locator('[data-zw-id]')).toHaveCount(4);
   await expect(kolumna(page, 'przegrany')).toBeVisible();
   await page.getByRole('button', { name: 'Zwiń etap Przegrany' }).click();
   await expect(page.getByText('Wszystkie etapy są zwinięte.')).toBeVisible();
   await page.getByRole('button', { name: 'Rozwiń etap Nowy' }).click();
   await przeciagnij(page, karta(page, 'Anna Kowalska'), zwiniety(page, 'Wygrany'));
+  const sprzedaz = page.getByRole('dialog', { name: 'Dane sprzedaży' });
+  await sprzedaz.getByLabel('Składka roczna *').fill('1500');
+  await sprzedaz.getByRole('button', { name: /Przenieś do/ }).click();
   await expect(toast(page)).toContainText('Anna Kowalska: Nowy → Wygrany');
   expect(await etapLeada(request, 'Anna Kowalska')).toBe('wygrany');
   await expect(zwiniety(page, 'Wygrany').locator('[data-licznik]')).toHaveText('2');

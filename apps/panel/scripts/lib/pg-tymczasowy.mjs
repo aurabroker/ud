@@ -95,8 +95,8 @@ export async function uruchomKlaster(opcje = {}) {
     ]);
     if (r.status !== 0) throw new Error('pg_ctl start: ' + r.stderr);
 
-    // Migracja leadów leży w dwóch plikach (część 1 przez MCP, część 2 przez SQL
-    // Editor — patrz nagłówek części 2); kolejność = kolejność wersji w nazwie.
+    // Migracja leadów leży w kilku plikach (część 1 przez MCP, kolejne przez SQL
+    // Editor — patrz supabase/migrations/README.md); kolejność = wersja w nazwie.
     const migracjaLeadow = process.env.LEADY_MIGRACJA
       ? readFileSync(resolve(process.env.LEADY_MIGRACJA), 'utf8')
       : readdirSync(join(korzen, 'supabase/migrations'))

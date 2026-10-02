@@ -21,6 +21,9 @@
   const ileSlowo = $derived(licznik.ile === 1 ? 'lead' : 'leadów');
   const menuOtwarte = $derived(ctx.menuEtapuOtwarteDla === etap.id);
   const sumaTekst = $derived(filtr ? licznik.suma : licznik.sumaWszystkich);
+  const skladkiTekst = $derived(filtr ? (licznik.skladki ?? 0) : (licznik.skladkiWszystkich ?? 0));
+  // Pierwsza otwarta kolumna świeci od zieleni do czerwieni (Karta → wiekKarty).
+  const pierwszy = $derived(stan.etapy.find((e) => e.rodzaj === 'otwarty')?.id === etap.id);
   const maWiecej = $derived(kol.karty.length < kol.razem);
 </script>
 
@@ -54,9 +57,15 @@
         >…</button>
       </span>
     </div>
-    <p class="suma" title="Suma miesięcznych świadczeń z okresowej niezdolności do pracy — {filtr ? 'dla leadów spełniających filtr' : 'wszystkich leadów w etapie'}, w złotych miesięcznie">
-      Σ świadczeń{filtr ? ' (po filtrze)' : ''}: {formatKwota(sumaTekst) || '0 zł'} / mies.
-    </p>
+    {#if etap.rodzaj === 'wygrany'}
+      <p class="suma" data-suma-skladek title="Suma rocznych składek sprzedanych wariantów — {filtr ? 'dla leadów spełniających filtr' : 'wszystkich leadów w etapie'}">
+        Σ składek{filtr ? ' (po filtrze)' : ''}: {formatKwota(skladkiTekst) || '0 zł'} / rok
+      </p>
+    {:else if etap.rodzaj === 'otwarty'}
+      <p class="suma" title="Suma miesięcznych świadczeń z okresowej niezdolności do pracy — {filtr ? 'dla leadów spełniających filtr' : 'wszystkich leadów w etapie'}, w złotych miesięcznie">
+        Σ świadczeń{filtr ? ' (po filtrze)' : ''}: {formatKwota(sumaTekst) || '0 zł'} / mies.
+      </p>
+    {/if}
   </header>
 
   <div class="lista-kart" data-przewijanie-kolumny>
@@ -67,7 +76,7 @@
     {#if kol.karty.length}
       <ul aria-label="Leady w etapie {etap.nazwa}">
         {#each kol.karty as karta (karta.id)}
-          <li><Karta {karta} {etap} {uklad} /></li>
+          <li><Karta {karta} {etap} {uklad} {pierwszy} zwijana={etap.rodzaj === 'przegrany'} /></li>
         {/each}
       </ul>
     {:else if kol.ladowanie}

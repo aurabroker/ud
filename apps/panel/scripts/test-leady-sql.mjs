@@ -67,14 +67,14 @@ try {
     // A: dwie różne zmiany na tej samej wersji — druga czeka na blokadę i dostaje konflikt.
     const v = wersja();
     const [s1, s2] = await Promise.all([
-      sesja(`begin;\n${zmien('conc-a-aaaaaaaa', ula, 'kontakt', v)}\nselect pg_sleep(1.5);\ncommit;`),
-      sesja(zmien('conc-a-bbbbbbbb', olek, 'wygrany', v), 400),
+      sesja(`begin;\n${zmien('conc-a-aaaaaaaa', ula, 'decyzja', v)}\nselect pg_sleep(1.5);\ncommit;`),
+      sesja(zmien('conc-a-bbbbbbbb', olek, 'oferta', v), 400),
     ]);
     sprawdz('współbieżność: pierwsza zmiana przechodzi', s1.out.startsWith('ok:'), s1.out + s1.err);
     sprawdz('współbieżność: druga (ta sama wersja) dostaje konflikt, nie nadpisuje', s2.out === 'konflikt:-', s2.out + s2.err);
     sprawdz('współbieżność: druga naprawdę czekała na blokadę wiersza', s2.ms > 900, `${s2.ms} ms`);
     sprawdz('współbieżność: stan końcowy = wynik pierwszej, wersja +1',
-      etapLeada() === 'kontakt' && wersja() === v + 1, `${etapLeada()} v${wersja()}`);
+      etapLeada() === 'decyzja' && wersja() === v + 1, `${etapLeada()} v${wersja()}`);
   }
   {
     // B: ten sam klucz i ta sama treść jednocześnie — druga sesja to ponowienie, nie błąd unikalności.

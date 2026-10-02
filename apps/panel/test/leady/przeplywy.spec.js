@@ -37,15 +37,15 @@ test.describe('K20: telefon', () => {
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
 
     // Przełącznik etapów.
-    await page.locator('.etapy-mobilne').getByRole('button', { name: /^Kontakt/ }).click();
-    await expect(kolumna(page, 'kontakt')).toBeVisible();
+    await page.locator('.etapy-mobilne').getByRole('button', { name: /^Nowy/ }).click();
+    await expect(kolumna(page, 'nowy')).toBeVisible();
     await expect(karta(page, 'Filip Lis')).toBeVisible();
 
     // Zmiana etapu przez menu „…" → „Przenieś do…" (podstawa na telefonie).
     await page.getByRole('button', { name: 'Akcje leada Filip Lis' }).click();
     await page.getByRole('menuitem', { name: 'Przenieś do…' }).click();
     await page.getByRole('dialog', { name: 'Przenieś do…' }).getByRole('button', { name: /^Oferta/ }).click();
-    await expect(toast(page)).toContainText('Filip Lis: Kontakt → Oferta');
+    await expect(toast(page)).toContainText('Filip Lis: Nowy → Oferta');
     expect(await etapLeada(request, 'Filip Lis')).toBe('oferta');
     await expect(karta(page, 'Filip Lis')).toHaveCount(0);                       // znikł z oglądanego etapu
 
@@ -76,7 +76,7 @@ test.describe('K20: telefon', () => {
   test('widok listy: wszystkie etapy jeden pod drugim', async ({ page }) => {
     await otworz(page);
     await page.getByRole('button', { name: 'Lista', exact: true }).click();
-    await expect(page.locator('section[data-etap-klucz]')).toHaveCount(6);
+    await expect(page.locator('section[data-etap-klucz]')).toHaveCount(5);
     await expect(karta(page, 'Henryk Sikora')).toBeVisible();
     await expect(karta(page, 'Jerzy Duda')).toBeVisible();
     await expect(page.locator('[data-uchwyt]')).toHaveCount(0);
@@ -89,24 +89,24 @@ test('K21: ponowione żądanie po utracie odpowiedzi — brak podwójnego efektu
   const h = await liczbaHistorii(request, 'Anna Kowalska');
   // Serwer wykonuje zmianę, ale odpowiedź ginie (połączenie zerwane).
   await awaria(request, { sciezka: 'zmien', tryb: 'zgubOdpowiedz' });
-  await przeciagnij(page, karta(page, 'Anna Kowalska'), kolumna(page, 'kontakt'));
+  await przeciagnij(page, karta(page, 'Anna Kowalska'), kolumna(page, 'oferta'));
 
-  await expect(toast(page)).toContainText('Anna Kowalska: Nowy → Kontakt');
+  await expect(toast(page)).toContainText('Anna Kowalska: Nowy → Oferta');
   await expect(toast(page)).toHaveAttribute('data-toast-typ', 'ok');
   await expect(page.locator('[data-stan-zapisu]')).toHaveCount(0);
-  expect(await etapLeada(request, 'Anna Kowalska')).toBe('kontakt');
+  expect(await etapLeada(request, 'Anna Kowalska')).toBe('oferta');
   expect(await wersjaLeada(request, 'Anna Kowalska')).toBe(v + 1);                    // jedna zmiana, nie dwie
   expect(await liczbaHistorii(request, 'Anna Kowalska')).toBe(h + 1);
   expect((await wywolania(request)).filter((w) => w.sciezka === 'zmien').length).toBeGreaterThanOrEqual(2);   // było ponowienie
-  await expect(kolumna(page, 'kontakt').locator('[data-karta-id]').filter({ hasText: 'Anna Kowalska' })).toHaveCount(1);
+  await expect(kolumna(page, 'oferta').locator('[data-karta-id]').filter({ hasText: 'Anna Kowalska' })).toHaveCount(1);
 });
 
 test('K21b: 502 z proxy zanim żądanie dotarło do bazy — ponowienie przechodzi raz', async ({ page, request }) => {
   await otworz(page);
   const v = await wersjaLeada(request, 'Anna Kowalska');
   await awaria(request, { sciezka: 'zmien', tryb: 'odpowiedz', status: 502, body: { status: 'blad', komunikat: 'Bad gateway', ponow: true } });
-  await przeciagnij(page, karta(page, 'Anna Kowalska'), kolumna(page, 'kontakt'));
-  await expect(toast(page)).toContainText('Anna Kowalska: Nowy → Kontakt');
+  await przeciagnij(page, karta(page, 'Anna Kowalska'), kolumna(page, 'oferta'));
+  await expect(toast(page)).toContainText('Anna Kowalska: Nowy → Oferta');
   expect(await wersjaLeada(request, 'Anna Kowalska')).toBe(v + 1);
   expect((await wywolania(request)).filter((w) => w.sciezka === 'zmien')).toHaveLength(2);
 });
@@ -116,48 +116,51 @@ test('K21c: serwer wykonał zmianę, ale odpowiedź 502 zginęła — aplikacja 
   const v = await wersjaLeada(request, 'Anna Kowalska');
   const h = await liczbaHistorii(request, 'Anna Kowalska');
   await awaria(request, { sciezka: 'zmien', tryb: 'przetworzI502' });
-  await przeciagnij(page, karta(page, 'Anna Kowalska'), kolumna(page, 'kontakt'));
-  await expect(toast(page)).toContainText('Anna Kowalska: Nowy → Kontakt');
+  await przeciagnij(page, karta(page, 'Anna Kowalska'), kolumna(page, 'oferta'));
+  await expect(toast(page)).toContainText('Anna Kowalska: Nowy → Oferta');
   await expect(toast(page)).toHaveAttribute('data-toast-typ', 'ok');         // nie „konflikt" i nie „błąd"
   await expect(page.locator('[data-stan-zapisu]')).toHaveCount(0);
   expect(await wersjaLeada(request, 'Anna Kowalska')).toBe(v + 1);
   expect(await liczbaHistorii(request, 'Anna Kowalska')).toBe(h + 1);
   expect((await wywolania(request)).filter((w) => w.sciezka === 'zmien')).toHaveLength(2);
-  await expect(kolumna(page, 'kontakt').locator('[data-karta-id]').filter({ hasText: 'Anna Kowalska' })).toHaveCount(1);
+  await expect(kolumna(page, 'oferta').locator('[data-karta-id]').filter({ hasText: 'Anna Kowalska' })).toHaveCount(1);
 });
 
 test('K22: zmiana sortowania — pozycja zgodna z wybranym sortowaniem (także po przeniesieniu)', async ({ page, request }) => {
   await otworz(page);
-  // Domyślnie: najbliższe działanie. Przeterminowane Anny pierwsze, potem Celina (jutro) i Dariusz (za 3 dni).
-  expect((await nazwyKart(page, 'nowy')).slice(0, 3)).toEqual(['Anna Kowalska', 'Celina Zielińska', 'Dariusz Wójcik']);
+  // Domyślnie: najbliższe działanie. Przeterminowane Anny pierwsze, potem Filip (za 2 h) i Celina (jutro).
+  expect((await nazwyKart(page, 'nowy')).slice(0, 3)).toEqual(['Anna Kowalska', 'Filip Lis', 'Celina Zielińska']);
 
   await page.getByLabel('Sortuj').selectOption({ label: 'Wartość malejąco' });
   await expect(page).toHaveURL(/sort=wartosc/);
-  await expect.poll(() => nazwyKart(page, 'nowy')).toEqual(expect.arrayContaining(['Celina Zielińska']));
-  await expect.poll(async () => (await nazwyKart(page, 'nowy')).slice(0, 4)).toEqual(['Celina Zielińska', 'Dariusz Wójcik', 'Bartek Nowak', 'Anna Kowalska']);
-  expect((await nazwyKart(page, 'nowy')).slice(4).sort()).toEqual(['Ewa Mazur', 'Szymon Szkic']);   // bez kwoty — na końcu
+  await expect.poll(async () => (await nazwyKart(page, 'nowy')).slice(0, 6))
+    .toEqual(['Filip Lis', 'Celina Zielińska', 'Dariusz Wójcik', 'Grażyna Pawlak', 'Bartek Nowak', 'Anna Kowalska']);
+  expect((await nazwyKart(page, 'nowy')).slice(6)).toEqual(['Ewa Mazur']);   // bez kwoty — na końcu
 
   await page.getByLabel('Sortuj').selectOption({ label: 'Najnowsze zgłoszenia' });
-  await expect.poll(() => nazwyKart(page, 'nowy')).toEqual(['Szymon Szkic', 'Ewa Mazur', 'Dariusz Wójcik', 'Celina Zielińska', 'Bartek Nowak', 'Anna Kowalska']);
+  await expect.poll(() => nazwyKart(page, 'nowy'))
+    .toEqual(['Grażyna Pawlak', 'Filip Lis', 'Ewa Mazur', 'Dariusz Wójcik', 'Celina Zielińska', 'Bartek Nowak', 'Anna Kowalska']);
 
   // Po przeniesieniu karta trafia tam, gdzie postawiłoby ją sortowanie, a nie na początek ani koniec.
   await page.getByLabel('Sortuj').selectOption({ label: 'Wartość malejąco' });
-  await expect.poll(async () => (await nazwyKart(page, 'kontakt'))).toEqual(['Filip Lis', 'Grażyna Pawlak']);
-  await przeciagnij(page, karta(page, 'Anna Kowalska'), kolumna(page, 'kontakt'));
-  await expect(toast(page)).toContainText('Anna Kowalska: Nowy → Kontakt');
-  expect(await nazwyKart(page, 'kontakt')).toEqual(['Filip Lis', 'Grażyna Pawlak', 'Anna Kowalska']);     // 20000, 10000, 8000
+  await expect.poll(() => nazwyKart(page, 'oferta')).toEqual(['Henryk Sikora', 'Irena Kubiak']);
+  await przeciagnij(page, karta(page, 'Henryk Sikora'), kolumna(page, 'nowy'));
+  await expect(toast(page)).toContainText('Henryk Sikora: Oferta → Nowy');
+  expect(await nazwyKart(page, 'nowy')).toEqual(['Filip Lis', 'Celina Zielińska', 'Dariusz Wójcik', 'Grażyna Pawlak', 'Bartek Nowak',
+    'Anna Kowalska', 'Henryk Sikora', 'Ewa Mazur']);                                // … 8000, 7000, bez kwoty
 
   await page.getByLabel('Sortuj').selectOption({ label: 'Najbliższe działanie' });
-  await expect.poll(() => nazwyKart(page, 'kontakt')).toEqual(['Anna Kowalska', 'Filip Lis', 'Grażyna Pawlak']);   // wczoraj, za 2 h, za 5 dni
+  await expect.poll(async () => (await nazwyKart(page, 'nowy')).slice(0, 6)).toEqual(['Anna Kowalska', 'Filip Lis', 'Celina Zielińska',
+    'Henryk Sikora', 'Dariusz Wójcik', 'Grażyna Pawlak']);                          // wczoraj, za 2 h, jutro, za 2 dni, za 3 dni, za 5 dni; bez terminu — na końcu
 
   // Sortowanie jednej kolumny z menu etapu nie rusza pozostałych.
-  const nowyPrzed = await nazwyKart(page, 'nowy');
-  await page.getByRole('button', { name: 'Akcje etapu Kontakt' }).click();
+  const ofertaPrzed = await nazwyKart(page, 'oferta');
+  await page.getByRole('button', { name: 'Akcje etapu Nowy' }).click();
   await page.getByRole('menuitem', { name: 'Sortowanie…' }).click();
   await page.getByRole('dialog').locator('[data-sort-opcja="wartosc"]').click();
-  await expect.poll(() => nazwyKart(page, 'kontakt')).toEqual(['Filip Lis', 'Grażyna Pawlak', 'Anna Kowalska']);
-  expect(await nazwyKart(page, 'nowy')).toEqual(nowyPrzed);                           // sąsiednia kolumna bez zmian
-  expect(await etapLeada(request, 'Anna Kowalska')).toBe('kontakt');
+  await expect.poll(async () => (await nazwyKart(page, 'nowy')).slice(0, 2)).toEqual(['Filip Lis', 'Celina Zielińska']);
+  expect(await nazwyKart(page, 'oferta')).toEqual(ofertaPrzed);                      // sąsiednia kolumna bez zmian
+  expect(await etapLeada(request, 'Henryk Sikora')).toBe('nowy');
 });
 
 test('K23: filtry i częściowo załadowana kolumna — licznik i suma dotyczą całego filtrowanego zbioru', async ({ page, request }) => {
@@ -204,20 +207,20 @@ test('K23: filtry i częściowo załadowana kolumna — licznik i suma dotyczą 
 test('K25: odświeżenie aplikacji przywraca osobisty stan zwinięcia etapów (per użytkownik)', async ({ page, request }) => {
   await otworz(page);
   await page.getByRole('button', { name: 'Zwiń etap Decyzja klienta' }).click();
-  await page.getByRole('button', { name: 'Zwiń etap Kontakt' }).click();
+  await page.getByRole('button', { name: 'Zwiń etap Oferta' }).click();
   await expect(page.locator('[data-zwiniete-panel]')).toBeVisible();
 
   await page.reload();
   await page.waitForSelector('html[data-gotowe]');
-  await expect(kolumna(page, 'kontakt')).toHaveCount(0);
+  await expect(kolumna(page, 'oferta')).toHaveCount(0);
   await expect(kolumna(page, 'decyzja')).toHaveCount(0);
-  expect(await page.locator('[data-zw-id] .nazwa').allInnerTexts()).toEqual(['Kontakt', 'Decyzja klienta']);   // kolejność pipeline'u
-  await expect(zwiniety(page, 'Kontakt').locator('[data-licznik]')).toHaveText('2');
-  await expect(page.locator('section[data-etap-klucz]')).toHaveCount(4);
+  expect(await page.locator('[data-zw-id] .nazwa').allInnerTexts()).toEqual(['Oferta', 'Decyzja klienta']);   // kolejność pipeline'u
+  await expect(zwiniety(page, 'Oferta').locator('[data-licznik]')).toHaveText('2');
+  await expect(page.locator('section[data-etap-klucz]')).toHaveCount(3);
 
   // Inny użytkownik ma własny, niezależny stan.
   await otworz(page, { u: 'olek' });
-  await expect(page.locator('section[data-etap-klucz]')).toHaveCount(6);
+  await expect(page.locator('section[data-etap-klucz]')).toHaveCount(5);
   await expect(page.locator('[data-zwiniete-panel]')).toHaveCount(0);
 
   // „Rozwiń wszystkie" też jest zapamiętane.
@@ -225,7 +228,7 @@ test('K25: odświeżenie aplikacji przywraca osobisty stan zwinięcia etapów (p
   await page.locator('[data-zwiniete-panel]').getByRole('button', { name: 'Rozwiń wszystkie' }).click();
   await page.reload();
   await page.waitForSelector('html[data-gotowe]');
-  await expect(page.locator('section[data-etap-klucz]')).toHaveCount(6);
+  await expect(page.locator('section[data-etap-klucz]')).toHaveCount(5);
   expect(await sql(request, `select cardinality(zwiniete) from public.ud_leady_widok_uzytkownika where user_id = tt.id_ula()`)).toBe('0');
 });
 

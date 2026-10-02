@@ -96,5 +96,6 @@ export function utworzApi({
     kolumna: (parametry, sygnal) => get('kolumna', parametryFiltra(parametry), sygnal),
     liczniki: (parametry, sygnal) => get('liczniki', parametryFiltra(parametry), sygnal),
     lead: (id, sygnal) => get(`lead/${encodeURIComponent(id)}`, {}, sygnal),
+    warianty: (id, sygnal) => get(`warianty/${encodeURIComponent(id)}`, {}, sygnal),
   };
 }

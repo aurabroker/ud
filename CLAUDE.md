@@ -1068,12 +1068,16 @@ jest ignorowana. Nie dopisuj tam odczytu `pesel` ani `med_*` (test to łapie).
   `ud_lejek_wniosku_archiwum`, żeby lejek nie urywał się po miesiącu.
   Po wysłaniu wniosku dane kontaktowe znikają ze szkicu od razu.
 
-### Tablica leadów czyta szkice
+### Szkice NIE są leadami (od 02.10.2026)
 
-Tablica Kanban (sekcja „Panel — tablica leadów") traktuje szkic ze zgodą jako
-lead. Wyzwalacz `ud_leady_szkic_zmiana` na `ud_wnioski_szkice` przepina lead na
-klienta po ukończeniu wniosku albo go kasuje (zgoda cofnięta/wycofana). Nie zmieniaj
-`ud_wnioski_szkic_ukoncz` ani kolumn zgody bez uruchomienia `pnpm test:leady-sql`.
+Przez jeden dzień tablica Kanban pokazywała szkic ze zgodą jako lead. Decyzja
+właściciela z 02.10.2026: porzucone wnioski nie wpadają do kolumn — zostają na
+liście „Niedokończone", a zakładka w menu miga na czerwono, dopóki czeka tam
+kontakt bez „Obsłużony". Wyzwalacz na `ud_wnioski_szkice` został zdjęty
+(migracja `…_leady_kanban_3_sprzedaz.sql`), więc **ani `ud_clients`, ani
+`ud_wnioski_szkice` nie mają wyzwalaczy od tablicy** — test SQL tego pilnuje.
+Nie dokładaj go z powrotem „żeby lead przeszedł na klienta": klient staje się
+leadem przy najbliższej synchronizacji.
 
 ### „Wystrzel i zapomnij" — szkic nigdy nie zatrzymuje wniosku
 
@@ -1300,37 +1304,70 @@ to nie jest regres.
 Wytyczne i scenariusze odbiorcze K01–K25: `KANBAN-CRM-WYTYCZNE.md` (v1.0,
 01.10.2026). Strona: `/panel/leady`, zakładka „Leady" w panelu.
 
-**Stan na 01.10.2026: WDROŻONE.** Panel v.0.58 na `REBUILD` (app.utratadochodu.pl).
-Migracja w dwóch plikach (powód: `supabase/migrations/README.md`), obie części
-odnotowane w bazie pod nazwami plików: `20261001151739_leady_kanban_1_tabele`
-(przez MCP) i `20261001180000_leady_kanban_2_funkcje` (przez SQL Editor).
-Sprawdzone na produkcji: treść 15 funkcji = repozytorium, uprawnienia tylko
-`service_role`, zero wyzwalaczy na `ud_clients`; w transakcji wycofanej —
-ukończenie szkicu przechodzi, a wyzwalacz usuwa jego lead. Podgląd pierwszej
-synchronizacji: 52 klientów + 3 szkice ze zgodą (Nowy 36, Kontakt 3, Oferta 16).
+**Stan na 02.10.2026.** Wersja 1 wdrożona 01.10 (panel v.0.58, części 1 i 2
+migracji odnotowane w bazie: `20261001151739_leady_kanban_1_tabele` przez MCP,
+`20261001180000_leady_kanban_2_funkcje` przez SQL Editor). Zmiany z 02.10
+(sekcja niżej) to część 3, `20261002120000_leady_kanban_3_sprzedaz.sql` —
+**też przez SQL Editor** (funkcje z UPDATE/DELETE i DROP), potem panel v.0.59.
+Panel v.0.59 bez części 3 w bazie nie zadziała na `/panel/leady` (woła nowe
+kolumny i funkcje) — kolejność: baza, potem panel.
 
 SQL Editor zapisał treść funkcji z końcami linii CRLF. Porównując `prosrc`
 z repozytorium, licz skrót z `replace(prosrc, chr(13), '')` — inaczej każda
 funkcja z części 2 wygląda na inną niż w repo, choć nie jest.
 
-### Czym jest lead — decyzja właściciela z 01.10.2026
+### Czym jest lead — decyzje właściciela z 01 i 02.10.2026
 
-„Leady to ludzie, którzy wypełnili wniosek, albo porzucili formularz."
-Lead to więc klient z `ud_clients` **albo** szkic z `ud_wnioski_szkice`, który
-zostawił kontakt **za zgodą**. Szkic bez zgody nie ma imienia, e-maila ani
-telefonu — nie ma kogo pokazać, więc leadem nie jest (zostaje w anonimowym
-lejku). Brak zgody, wycofanie zgody albo ukończenie wniosku bez dopasowanego
-klienta kasuje lead razem z notatkami i historią.
+Lead to **klient z `ud_clients`** (złożony wniosek albo klient dodany w panelu).
+01.10 leadem był też porzucony wniosek ze zgodą; 02.10 właściciel to cofnął:
+„Niedokończone wnioski nie wpadają do kolumny." Zostają na liście
+„Niedokończone", a ograniczenie `lead_tylko_klient` (`szkic_id is null`) nie
+wpuści leada ze szkicu nawet przy bezpośrednim zapisie. Kolumna `szkic_id`
+została, żeby nie przebudowywać widoku i wszystkich funkcji naraz.
+
+### Zmiany z 02.10.2026 — czego nie „poprawiać" z powrotem
+
+- **Nowy i Kontakt to jeden etap.** Kontakt jest WYŁĄCZONY (`aktywny = false`),
+  nie usunięty — historia na niego wskazuje. Jego leady przeszły do Nowego bez
+  zerowania `etap_od`. Oferta robocza przy synchronizacji też daje Nowy.
+- **Kolor wieku karty** (`wiekKarty` w `model.js`): pierwsza otwarta kolumna od
+  zieleni (dzień 0) przez żółć do pomarańczu (dzień 5), **ponad 5 dni w etapie —
+  czerwień w każdej otwartej kolumnie**. Wygrany i Przegrany nie świecą. Licznik
+  zeruje tylko przeniesienie do innego etapu; notatka ani zaplanowany telefon
+  nie. Obok koloru zawsze stoi napis „N dni w etapie" — sam kolor nic nie znaczy.
+- **Administrator jako opiekun nie jest pokazywany na karcie** (`opiekun_admin`
+  z widoku, `opiekunNaKarcie`). W szczegółach jest — z dopiskiem „(administrator)".
+- **Przegrany**: karty zwinięte do samej nazwy; kliknięcie rozwija kartę
+  w miejscu, „▴" zwija.
+- **Wygrany wymaga składki rocznej** (`wymagane_pola = {skladka_roczna}`).
+  Żadna oferta nie ma zapisanego wyboru klienta, więc to agent wskazuje
+  sprzedany wariant w oknie „Dane sprzedaży" (warianty z JEGO ofert — RLS;
+  administrator widzi wszystkie) albo wpisuje kwoty ręcznie. Kwoty: składka
+  roczna i miesięczna, świadczenie okresowe (zł/mies.), sumy trwałej
+  niezdolności i zgonu. Wyjście z Wygrany zeruje dane sprzedaży (historia je
+  pamięta); operacja `sprzedaz` poprawia je bez zmiany etapu.
+- **Sprzedawca** to opiekun w chwili wygrania, a bez opiekuna — ten, kto
+  przeniósł. Nie zmienia się razem z opiekunem: statystyka pamięta, kto sprzedał.
+- **Nagłówek Wygrany pokazuje Σ składek rocznych**, nie Σ świadczeń (Przegrany
+  nie pokazuje żadnej sumy).
+- **Statystyki** (`/panel/statystyki`, `ud_leady_statystyki`): administrator —
+  wszyscy z podziałem na agentów i wybór agenta; agent — wyłącznie swoje, także
+  gdy poda cudzy identyfikator w adresie. Sprzedaż = lead w Wygrany, także
+  zarchiwizowany. Składka miesięczna bez zapisanej wartości = 1/12 rocznej
+  i strona mówi, ile takich jest (raty bywają droższe niż 1/12).
+- **Zakładka „Niedokończone" miga** (layout panelu, odpytywanie co minutę),
+  dopóki na liście jest kontakt bez „Obsłużony". Przy ograniczonych animacjach
+  w systemie — stała czerwień.
 
 ### Model danych (tylko stan procesu — dane osobowe czytamy ze źródła)
 
 | Obiekt | Rola |
 |---|---|
-| `ud_leady` | etap, opiekun, następne działanie, **wersja**, `etap_od`; dokładnie jedno z `klient_id` / `szkic_id` |
+| `ud_leady` | etap, opiekun, następne działanie, **wersja**, `etap_od`, dane sprzedaży (`skladka_roczna`, `skladka_mies`, świadczenia, `sprzedaz_wariant_id`, `sprzedawca_id`, `sprzedano_at`); zawsze `klient_id` |
 | `ud_leady_historia` | wpis przy każdej zmianie + **dziennik idempotencji** (`unique (lead_id, klucz)`) |
 | `ud_leady_notatki`, `ud_leady_widok_uzytkownika` | notatki; osobisty stan zwinięcia etapów (per użytkownik × pipeline) |
-| `ud_leady_pipeline`, `ud_leady_etap` | jeden pipeline „Sprzedaż": Nowy → Kontakt → Oferta → Decyzja klienta → Wygrany / Przegrany (powód utraty wymagany) |
-| `ud_leady_baza` | widok z imieniem/e-mailem/telefonem ze źródła; **filtr zgody siedzi w widoku**, więc dane szkicu bez zgody nie wyjdą nawet zanim sprzątanie usunie wiersz |
+| `ud_leady_pipeline`, `ud_leady_etap` | jeden pipeline „Sprzedaż": Nowy → Oferta → Decyzja klienta → Wygrany (składka roczna wymagana) / Przegrany (powód utraty wymagany); Kontakt wyłączony |
+| `ud_leady_baza` | widok z imieniem/e-mailem/telefonem z kartoteki klienta, `opiekun_admin` i danymi sprzedaży; tylko leady klientów |
 
 Dostęp: RLS bez polityk, wszystko tylko dla `service_role` (panel przez
 `createAdminClient`). `ud_leady` **nie ma kolumn z danymi osobowymi** — test SQL
@@ -1339,15 +1376,10 @@ tego pilnuje.
 **Nie ma wyzwalacza na `ud_clients` i nie wolno go dodawać.** Wniosek to jedyna
 ścieżka, którą wpływają pieniądze (ABSOLUTE_RULE). Leady powstają w
 `ud_leady_synchronizuj()`, wołanej przy otwarciu tablicy: dokłada klientów
-(etap startowy z ofert: kupiona → Wygrany, wybrana → Decyzja, wysłana → Oferta,
-robocza → Kontakt, odrzucona → Przegrany, brak → Nowy) i szkice ze zgodą,
-domyka sprzątanie, przepina lead ukończonego szkicu na klienta. Jedyny
-wyzwalacz tablicy stoi na `ud_wnioski_szkice` (`ud_leady_szkic_zmiana`) i jest
-**odporny na wyjątki** — szkic zmienia się w „wystrzel i zapomnij" po wysłaniu
-wniosku, więc wyzwalacz nie może go zatrzymać; test wywraca go celowo i sprawdza,
-że `ud_wnioski_szkic_ukoncz` i tak przechodzi. Retencja szkiców (30 dni) usuwa
-lead kluczem obcym `on delete cascade` — obietnica z klauzuli informacyjnej
-dotyczy też tablicy.
+(etap startowy z ofert: kupiona → Wygrany, wybrana → Decyzja, wysłana albo
+obejrzana → Oferta, odrzucona → Przegrany, robocza albo brak → Nowy). Kupiona
+z zapisanym wyborem wariantu wnosi od razu dane sprzedaży. Tablica nie ma
+**żadnego** wyzwalacza (od 02.10 także na szkicach).
 
 Zamknięcie sprawy (Wygrany / Przegrany) kasuje zaplanowane działanie (zostaje w
 historii) — inaczej przeterminowane „zadzwoń" krzyczałoby w nieskończoność.
@@ -1376,7 +1408,8 @@ nie zastąpiło karty; inaczej pobranie stanu serwera.
 - **Wartość na karcie to MIESIĘCZNE świadczenie z okresowej niezdolności
   (zł/mies.)** — jedyna jednoznaczna kwota z wniosku. To nie składka ani
   przychód; etykiety mówią to wprost, suma kolumny też. Nie podpisuj jej „wartość
-  leada".
+  leada". Wyjątek: w Wygrany karta i nagłówek pokazują **składkę roczną**
+  sprzedanego wariantu.
 - **Liczniki i sumy liczy SQL dla całego zbioru po filtrze** (`ud_leady_liczniki`),
   nie przeglądarka z załadowanych kart (K23). Filtr jest zdefiniowany w jednym
   miejscu (`ud_leady_dopasowane`); wyszukiwanie przez `strpos`, nie `ilike` —
@@ -1421,6 +1454,13 @@ transport do bazy (psql zamiast PostgREST). Awarie sieci są wstrzykiwane w
 Wszystkie warstwy przeszły testy mutacyjne — celowo zepsuty kod (brak kontroli
 wersji, brak blokady wiersza, tożsamość z ciała, brak formularza powodu, brak
 zapisu zwinięcia…) daje czerwony wynik.
+
+Strona statystyk i menu panelu (migająca zakładka) nie siedzą w harnessie
+tablicy — `statystyki.spec.js` renderuje je po stronie serwera z prawdziwych
+komponentów (`/__test/ssr-statystyki`, `/__test/ssr-uklad`), z danymi z tych
+samych funkcji co ich `load`. `$app/stores` i `$app/navigation` podmienia
+`test/leady/app-zaslepka.js`. Odpytywania co minutę w przeglądarce to nie
+sprawdza — tylko to, co pokazuje świeżo wczytana strona.
 
 **Czego testy NIE pokazują:** Firefoksa i Safari (K24 sprawdzono na Chromium —
 w Firefoksie Shift + prawy klik zwykle nie wysyła `contextmenu` w ogóle, wtedy

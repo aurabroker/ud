@@ -18,9 +18,9 @@ const suma = (page, klucz) => kolumna(page, klucz).locator('.suma');
 test('wygląd startowy: kolumny w kolejności pipeline\'u, liczniki i sumy, pusta kolumna', async ({ page }) => {
   await otworz(page);
   const klucze = await page.locator('section[data-etap-klucz]').evaluateAll((els) => els.map((e) => e.dataset.etapKlucz));
-  expect(klucze).toEqual(['nowy', 'kontakt', 'oferta', 'decyzja', 'wygrany', 'przegrany']);
-  await expect(licznik(page, 'nowy')).toHaveText('6');
-  await expect(suma(page, 'nowy')).toContainText('44');
+  expect(klucze).toEqual(['nowy', 'oferta', 'decyzja', 'wygrany', 'przegrany']);
+  await expect(licznik(page, 'nowy')).toHaveText('7');
+  await expect(suma(page, 'nowy')).toContainText('74');
   await expect(kolumna(page, 'decyzja').getByText('Brak leadów w tym etapie.')).toBeVisible();
   await expect(page.locator('[data-zwiniete-panel]')).toHaveCount(0);   // lewy panel tylko gdy są zwinięte etapy
 });
@@ -80,29 +80,29 @@ test('K02: klik w „…" otwiera menu i nie otwiera szczegółów; klik w telef
 test('K03: przeniesienie myszą — zapis, liczniki, sumy, historia i komunikat zgodne', async ({ page, request }) => {
   await otworz(page);
   const v = await wersjaLeada(request, 'Anna Kowalska');
-  await przeciagnij(page, karta(page, 'Anna Kowalska'), kolumna(page, 'kontakt'));
+  await przeciagnij(page, karta(page, 'Anna Kowalska'), kolumna(page, 'oferta'));
 
-  await expect(toast(page)).toContainText('Anna Kowalska: Nowy → Kontakt');
-  await expect(status(page)).toHaveText('Anna Kowalska: Nowy → Kontakt');
+  await expect(toast(page)).toContainText('Anna Kowalska: Nowy → Oferta');
+  await expect(status(page)).toHaveText('Anna Kowalska: Nowy → Oferta');
   await page.waitForTimeout(400);
   await expect(szczegoly(page)).toHaveCount(0);                  // upuszczenie nie jest kliknięciem w kartę
-  await expect(kolumna(page, 'kontakt').locator('[data-karta-id]').filter({ hasText: 'Anna Kowalska' })).toHaveCount(1);
+  await expect(kolumna(page, 'oferta').locator('[data-karta-id]').filter({ hasText: 'Anna Kowalska' })).toHaveCount(1);
   await expect(kolumna(page, 'nowy').locator('[data-karta-id]').filter({ hasText: 'Anna Kowalska' })).toHaveCount(0);
 
   // Baza.
-  expect(await etapLeada(request, 'Anna Kowalska')).toBe('kontakt');
+  expect(await etapLeada(request, 'Anna Kowalska')).toBe('oferta');
   expect(await wersjaLeada(request, 'Anna Kowalska')).toBe(v + 1);
   expect(await sql(request, `select count(*) from public.ud_leady_historia where lead_id = tt.lead('Anna Kowalska') and typ = 'etap' and wykonawca_nazwa = 'Ula Agent'`)).toBe('1');
 
   // Liczniki i sumy po stronie interfejsu = po stronie serwera.
-  await expect(licznik(page, 'nowy')).toHaveText('5');
-  await expect(licznik(page, 'kontakt')).toHaveText('3');
-  await expect(suma(page, 'nowy')).toContainText('36 000');
-  await expect(suma(page, 'kontakt')).toContainText('38 000');
+  await expect(licznik(page, 'nowy')).toHaveText('6');
+  await expect(licznik(page, 'oferta')).toHaveText('3');
+  await expect(suma(page, 'nowy')).toContainText('66 000');
+  await expect(suma(page, 'oferta')).toContainText('21 000');
   await page.getByRole('button', { name: 'Odśwież' }).click();
-  await expect(licznik(page, 'nowy')).toHaveText('5');
-  await expect(suma(page, 'kontakt')).toContainText('38 000');
-  await expect(karta(page, 'Anna Kowalska')).toHaveAttribute('data-etap-id', await etapId(request, 'kontakt'));
+  await expect(licznik(page, 'nowy')).toHaveText('6');
+  await expect(suma(page, 'oferta')).toContainText('21 000');
+  await expect(karta(page, 'Anna Kowalska')).toHaveAttribute('data-etap-id', await etapId(request, 'oferta'));
 });
 
 test('K04: upuszczenie do pustej kolumny zmienia etap', async ({ page, request }) => {
@@ -147,29 +147,29 @@ test('K06: zwinięcie i rozwinięcie przywraca kolumnę na jej miejsce; panel w 
   const kolejnosc = () => page.locator('section[data-etap-klucz]').evaluateAll((els) => els.map((e) => e.dataset.etapKlucz));
 
   // Zwijamy w odwrotnej kolejności niż pipeline — panel ma i tak pokazać go po kolei.
+  await page.getByRole('button', { name: 'Zwiń etap Decyzja klienta' }).click();
   await page.getByRole('button', { name: 'Zwiń etap Oferta' }).click();
-  await page.getByRole('button', { name: 'Zwiń etap Kontakt' }).click();
-  expect(await kolejnosc()).toEqual(['nowy', 'decyzja', 'wygrany', 'przegrany']);
+  expect(await kolejnosc()).toEqual(['nowy', 'wygrany', 'przegrany']);
   const wPanelu = await page.locator('[data-zw-id] .nazwa').allInnerTexts();
-  expect(wPanelu).toEqual(['Kontakt', 'Oferta']);
+  expect(wPanelu).toEqual(['Oferta', 'Decyzja klienta']);
   await expect(page.locator('[data-zw-id]').first().locator('.nr')).toHaveText('2');
 
   await page.getByRole('button', { name: 'Rozwiń etap Oferta' }).click();
-  await page.getByRole('button', { name: 'Rozwiń etap Kontakt' }).click();
-  expect(await kolejnosc()).toEqual(['nowy', 'kontakt', 'oferta', 'decyzja', 'wygrany', 'przegrany']);
+  await page.getByRole('button', { name: 'Rozwiń etap Decyzja klienta' }).click();
+  expect(await kolejnosc()).toEqual(['nowy', 'oferta', 'decyzja', 'wygrany', 'przegrany']);
   await expect(page.locator('[data-zwiniete-panel]')).toHaveCount(0);
 
   // „Rozwiń wszystkie" z panelu.
   await page.getByRole('button', { name: 'Zwiń etap Wygrany' }).click();
   await page.getByRole('button', { name: 'Zwiń etap Przegrany' }).click();
   await page.locator('[data-zwiniete-panel]').getByRole('button', { name: 'Rozwiń wszystkie' }).click();
-  expect(await kolejnosc()).toEqual(['nowy', 'kontakt', 'oferta', 'decyzja', 'wygrany', 'przegrany']);
+  expect(await kolejnosc()).toEqual(['nowy', 'oferta', 'decyzja', 'wygrany', 'przegrany']);
 });
 
 test('K07: Esc podczas przeciągania nie zmienia danych', async ({ page, request }) => {
   await otworz(page);
   const v = await wersjaLeada(request, 'Anna Kowalska');
-  await przeciagnij(page, karta(page, 'Anna Kowalska'), kolumna(page, 'kontakt'), { puszczaj: false });
+  await przeciagnij(page, karta(page, 'Anna Kowalska'), kolumna(page, 'oferta'), { puszczaj: false });
   await expect(page.locator('[data-duch]')).toHaveCount(1);
   await expect(page.locator('html')).toHaveAttribute('data-przeciaganie', '');
   await page.keyboard.press('Escape');
@@ -190,7 +190,7 @@ test('K07: Esc podczas przeciągania nie zmienia danych', async ({ page, request
 
 test('K08: upuszczenie poza tablicą nie zmienia danych', async ({ page, request }) => {
   await otworz(page);
-  await przeciagnij(page, karta(page, 'Anna Kowalska'), kolumna(page, 'kontakt'), { puszczaj: false });
+  await przeciagnij(page, karta(page, 'Anna Kowalska'), kolumna(page, 'oferta'), { puszczaj: false });
   await page.mouse.move(40, 20, { steps: 6 });          // nad nagłówkiem aplikacji — nie jest celem
   await page.mouse.up();
   await page.waitForTimeout(300);                                // przeglądarka wysyła `click` na karcie — nie ma otwierać szczegółów
@@ -205,20 +205,20 @@ test('K08: upuszczenie poza tablicą nie zmienia danych', async ({ page, request
 test('K09: błąd zapisu — spójny powrót i komunikat (liczniki wracają)', async ({ page, request }) => {
   await otworz(page);
   await awaria(request, { sciezka: 'zmien', tryb: 'odpowiedz', status: 500, body: { status: 'blad', komunikat: 'Baza chwilowo niedostępna.' } });
-  await przeciagnij(page, karta(page, 'Anna Kowalska'), kolumna(page, 'kontakt'));
+  await przeciagnij(page, karta(page, 'Anna Kowalska'), kolumna(page, 'oferta'));
   await expect(toast(page)).toContainText('Baza chwilowo niedostępna');
   await expect(alert(page)).toContainText('Baza chwilowo niedostępna');
   await expect(kolumna(page, 'nowy').locator('[data-karta-id]').filter({ hasText: 'Anna Kowalska' })).toHaveCount(1);
-  await expect(kolumna(page, 'kontakt').locator('[data-karta-id]').filter({ hasText: 'Anna Kowalska' })).toHaveCount(0);
-  await expect(licznik(page, 'nowy')).toHaveText('6');
-  await expect(licznik(page, 'kontakt')).toHaveText('2');
-  await expect(suma(page, 'nowy')).toContainText('44');
+  await expect(kolumna(page, 'oferta').locator('[data-karta-id]').filter({ hasText: 'Anna Kowalska' })).toHaveCount(0);
+  await expect(licznik(page, 'nowy')).toHaveText('7');
+  await expect(licznik(page, 'oferta')).toHaveText('2');
+  await expect(suma(page, 'nowy')).toContainText('74');
   await expect(page.locator('[data-stan-zapisu]')).toHaveCount(0);
   expect(await etapLeada(request, 'Anna Kowalska')).toBe('nowy');
   // Po błędzie można spróbować ponownie.
-  await przeciagnij(page, karta(page, 'Anna Kowalska'), kolumna(page, 'kontakt'));
-  await expect(toast(page)).toContainText('Anna Kowalska: Nowy → Kontakt');
-  expect(await etapLeada(request, 'Anna Kowalska')).toBe('kontakt');
+  await przeciagnij(page, karta(page, 'Anna Kowalska'), kolumna(page, 'oferta'));
+  await expect(toast(page)).toContainText('Anna Kowalska: Nowy → Oferta');
+  expect(await etapLeada(request, 'Anna Kowalska')).toBe('oferta');
 });
 
 test('K09b: zerwana sieć, a zapis NIE przeszedł — sprawdzamy stan i wycofujemy zmianę', async ({ page, request }) => {
@@ -226,11 +226,11 @@ test('K09b: zerwana sieć, a zapis NIE przeszedł — sprawdzamy stan i wycofuje
   // Każda próba zmiany pada, zanim dotrze do bazy (przeglądarka sama ponawia POST na zerwanym
   // połączeniu, więc liczba prób po stronie serwera jest większa niż po stronie aplikacji); odczyt stanu działa.
   await awaria(request, { sciezka: 'zmien', tryb: 'zerwij', ile: 99 });
-  await przeciagnij(page, karta(page, 'Anna Kowalska'), kolumna(page, 'kontakt'));
+  await przeciagnij(page, karta(page, 'Anna Kowalska'), kolumna(page, 'oferta'));
   await expect(toast(page)).toContainText('Nie udało się zapisać zmiany', { timeout: 10_000 });
   await expect(kolumna(page, 'nowy').locator('[data-karta-id]').filter({ hasText: 'Anna Kowalska' })).toHaveCount(1);
   expect(await etapLeada(request, 'Anna Kowalska')).toBe('nowy');
-  await expect(licznik(page, 'nowy')).toHaveText('6');
+  await expect(licznik(page, 'nowy')).toHaveText('7');
 });
 
 test('K09c: zerwana sieć i nie wiadomo, czy zapis przeszedł — karta oznaczona, „spróbuj ponownie" nie dubluje', async ({ page, request }) => {
@@ -239,21 +239,21 @@ test('K09c: zerwana sieć i nie wiadomo, czy zapis przeszedł — karta oznaczon
   await awaria(request, { sciezka: 'zmien', tryb: 'zgubOdpowiedz' });
   await awaria(request, { sciezka: 'zmien', tryb: 'zerwij', ile: 99 });
   await awaria(request, { sciezka: 'lead', tryb: 'zerwij', ile: 99 });
-  await przeciagnij(page, karta(page, 'Anna Kowalska'), kolumna(page, 'kontakt'));
+  await przeciagnij(page, karta(page, 'Anna Kowalska'), kolumna(page, 'oferta'));
 
   const stanZapisu = karta(page, 'Anna Kowalska').locator('[data-stan-zapisu="niepewny"]');
   await expect(stanZapisu).toBeVisible({ timeout: 10_000 });
   await expect(stanZapisu).toContainText('Stan nieznany');
   await expect(toast(page)).toContainText('nie wiemy, czy zmiana została zapisana');
   // Zapis faktycznie przeszedł (pierwsza próba) — interfejs tego jeszcze nie wie.
-  expect(await etapLeada(request, 'Anna Kowalska')).toBe('kontakt');
+  expect(await etapLeada(request, 'Anna Kowalska')).toBe('oferta');
   const v = await wersjaLeada(request, 'Anna Kowalska');
   const h = await liczbaHistorii(request, 'Anna Kowalska');
 
   await wyczyscAwarie(request);                                              // sieć wróciła
   await stanZapisu.getByRole('button', { name: 'Spróbuj ponownie' }).click();
   await expect(karta(page, 'Anna Kowalska').locator('[data-stan-zapisu]')).toHaveCount(0);
-  await expect(toast(page)).toContainText('Anna Kowalska: Nowy → Kontakt');
+  await expect(toast(page)).toContainText('Anna Kowalska: Nowy → Oferta');
   expect(await wersjaLeada(request, 'Anna Kowalska')).toBe(v);              // ten sam klucz: bez drugiego skutku
   expect(await liczbaHistorii(request, 'Anna Kowalska')).toBe(h);
 });
@@ -261,20 +261,20 @@ test('K09c: zerwana sieć i nie wiadomo, czy zapis przeszedł — karta oznaczon
 test('K10: równoległa zmiana przez inną osobę — konflikt, bez cichego nadpisania', async ({ page, request }) => {
   await otworz(page);
   // Olek (inna sesja) przenosi Annę, zanim Ula coś zrobi.
-  await sql(request, `select public.ud_lead_zmien('przenies', tt.lead('Anna Kowalska'), tt.wersja(tt.lead('Anna Kowalska')), 'olek-rownolegle-1', tt.id_olek(), jsonb_build_object('etap_id', tt.etap('kontakt')))`);
+  await sql(request, `select public.ud_lead_zmien('przenies', tt.lead('Anna Kowalska'), tt.wersja(tt.lead('Anna Kowalska')), 'olek-rownolegle-1', tt.id_olek(), jsonb_build_object('etap_id', tt.etap('decyzja')))`);
   const vOlka = await wersjaLeada(request, 'Anna Kowalska');
 
   await przeciagnij(page, karta(page, 'Anna Kowalska'), kolumna(page, 'oferta'));
   await expect(toast(page)).toContainText('ktoś zmienił ten lead');
   await expect(alert(page)).toContainText('Anna Kowalska');
-  // Interfejs pokazuje stan serwera (Kontakt), nie próbę Uli (Oferta).
-  await expect(kolumna(page, 'kontakt').locator('[data-karta-id]').filter({ hasText: 'Anna Kowalska' })).toHaveCount(1);
+  // Interfejs pokazuje stan serwera (Decyzja klienta), nie próbę Uli (Oferta).
+  await expect(kolumna(page, 'decyzja').locator('[data-karta-id]').filter({ hasText: 'Anna Kowalska' })).toHaveCount(1);
   await expect(kolumna(page, 'oferta').locator('[data-karta-id]').filter({ hasText: 'Anna Kowalska' })).toHaveCount(0);
-  expect(await etapLeada(request, 'Anna Kowalska')).toBe('kontakt');
+  expect(await etapLeada(request, 'Anna Kowalska')).toBe('decyzja');
   expect(await wersjaLeada(request, 'Anna Kowalska')).toBe(vOlka);
   expect(await sql(request, `select count(*) from public.ud_leady_historia where lead_id = tt.lead('Anna Kowalska') and typ = 'etap'`)).toBe('1');
   await expect(licznik(page, 'oferta')).toHaveText('2');
-  await expect(licznik(page, 'kontakt')).toHaveText('3');
+  await expect(licznik(page, 'decyzja')).toHaveText('1');
 });
 
 test('K11: etap z polem wymaganym — formularz przed zapisem; anulowanie zostawia stary etap', async ({ page, request }) => {
@@ -302,6 +302,8 @@ test('K11: etap z polem wymaganym — formularz przed zapisem; anulowanie zostaw
   await expect(toast(page)).toContainText('Anna Kowalska: Nowy → Przegrany');
   expect(await etapLeada(request, 'Anna Kowalska')).toBe('przegrany');
   expect(await sql(request, `select powod_utraty from public.ud_leady where id = tt.lead('Anna Kowalska')`)).toBe('Wybrał konkurencję');
+  // W „Przegrany" karta jest zwinięta do nazwy — powód widać po rozwinięciu.
+  await karta(page, 'Anna Kowalska').getByRole('button', { name: 'Anna Kowalska', exact: true }).click();
   await expect(karta(page, 'Anna Kowalska')).toContainText('Powód utraty: Wybrał konkurencję');
 });
 
@@ -321,16 +323,16 @@ test('K12: niedozwolony etap i brak uprawnień — odmowa także przy bezpośred
   expect((await r.json()).status).toBe('niedozwolony');
   r = await wyslij('ula', { ...baza(2), targetStageId: '00000000-0000-4000-8000-000000000000' });
   expect(r.status()).toBe(422);
-  r = await wyslij('ines', { ...baza(3), targetStageId: await etapId(request, 'kontakt') });
+  r = await wyslij('ines', { ...baza(3), targetStageId: await etapId(request, 'oferta') });
   expect(r.status()).toBe(403);
   r = await wyslij('brak', baza(4));
   expect(r.status()).toBe(401);
   r = await request.post(`${adres()}/panel/leady/api/zmien`, { headers: { 'x-test-user': 'ula', 'content-type': 'text/plain' }, data: JSON.stringify(baza(5)) });
   expect(r.status()).toBe(415);
-  r = await wyslij('ula', { ...baza(6), targetStageId: await etapId(request, 'kontakt'), userId: 'a0000000-0000-0000-0000-0000000000a1' });
+  r = await wyslij('ula', { ...baza(6), targetStageId: await etapId(request, 'oferta'), userId: 'a0000000-0000-0000-0000-0000000000a1' });
   expect(r.status()).toBe(200);
   expect(await sql(request, `select wykonawca_id from public.ud_leady_historia where lead_id = '${lead}' order by id desc limit 1`)).toBe('a0000000-0000-0000-0000-0000000000a2');
-  expect(await etapLeada(request, 'Anna Kowalska')).toBe('kontakt');
+  expect(await etapLeada(request, 'Anna Kowalska')).toBe('oferta');
   expect(await wersjaLeada(request, 'Anna Kowalska')).toBe(v + 1);                 // tylko to jedno, poprawne żądanie
 });
 
@@ -338,18 +340,22 @@ test('K13: lead przestaje pasować do filtra po przeniesieniu — znika z wyjaś
   await otworz(page, { zapytanie: 'termin=przeterminowane' });
   await expect(page.locator('[data-aktywne-filtry]')).toContainText('działanie: Przeterminowane');
   await expect(karta(page, 'Anna Kowalska')).toBeVisible();
-  await expect(licznik(page, 'nowy')).toHaveText('1 z 6');
+  await expect(licznik(page, 'nowy')).toHaveText('1 z 7');
 
   await page.getByRole('button', { name: 'Akcje leada Anna Kowalska' }).click();
   await page.getByRole('menuitem', { name: 'Przenieś do…' }).click();
   await page.getByRole('dialog', { name: 'Przenieś do…' }).getByRole('button', { name: /^Wygrany/ }).click();
+  // „Wygrany" wymaga danych sprzedaży — najpierw okno, dopiero potem zmiana etapu.
+  const sprzedaz = page.getByRole('dialog', { name: 'Dane sprzedaży' });
+  await sprzedaz.getByLabel('Składka roczna *').fill('1200');
+  await sprzedaz.getByRole('button', { name: /Przenieś do/ }).click();
 
   // Zamknięcie sprawy kasuje zaplanowane działanie, więc lead nie jest już „przeterminowany".
   await expect(karta(page, 'Anna Kowalska')).toHaveCount(0);
   await expect(toast(page)).toContainText('nie pasuje już do filtrów');
   await expect(toast(page)).toContainText('działanie: Przeterminowane');
   expect(await etapLeada(request, 'Anna Kowalska')).toBe('wygrany');
-  await expect(licznik(page, 'nowy')).toHaveText('0 z 5');
+  await expect(licznik(page, 'nowy')).toHaveText('0 z 6');
 
   await page.getByRole('button', { name: /^Otwórz szczegóły:/ }).click();
   await expect(szczegoly(page).getByRole('heading', { name: 'Anna Kowalska' })).toBeVisible();

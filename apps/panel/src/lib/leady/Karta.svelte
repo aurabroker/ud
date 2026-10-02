@@ -3,17 +3,25 @@
    * Karta leada. Struktura celowo NIE jest jednym <button> z przyciskami w środku:
    * osobny element otwiera szczegóły (nazwa), osobny przycisk „…" otwiera menu,
    * uchwyt jest tylko dla wskaźnika. Sam kolor niczego nie znaczy — każde
-   * ostrzeżenie ma tekst i ikonę.
+   * ostrzeżenie ma tekst i ikonę, a kolor wieku ma obok napis „N dni w etapie".
+   *
+   * `pierwszy`: karta w pierwszej kolumnie — kolor od zieleni do czerwieni,
+   * z każdym dniem w etapie. `zwijana`: etap „Przegrany" — karta pokazuje samą
+   * nazwę, kliknięcie rozwija ją w miejscu (decyzje właściciela z 02.10.2026).
    */
   import { getContext } from 'svelte';
-  import { DZIALANIA, etykietaZrodla, kontekstKarty, ostrzezenia, terminTekst, wartoscKarty } from './model.js';
+  import { DZIALANIA, etykietaZrodla, kontekstKarty, opiekunNaKarcie, ostrzezenia, terminTekst, wartoscKarty, wiekKarty } from './model.js';
 
-  let { karta, etap, uklad = 'kolumna' } = $props();
+  let { karta, etap, uklad = 'kolumna', pierwszy = false, zwijana = false } = $props();
   const ctx = getContext('tablica');
 
+  let rozwinieta = $state(false);
+  const zwinieta = $derived(zwijana && !rozwinieta);
   const zapis = $derived(ctx.stan.zapisy[karta.id]);
   const ostrz = $derived(ostrzezenia(karta, etap, ctx.teraz));
-  const wartosc = $derived(wartoscKarty(karta));
+  const wartosc = $derived(wartoscKarty(karta, etap));
+  const wiek = $derived(wiekKarty(karta, etap, pierwszy, ctx.teraz));
+  const opiekun = $derived(opiekunNaKarcie(karta));
   const menuOtwarte = $derived(ctx.menuOtwarteDla === karta.id);
   const brakDzialania = $derived(!karta.dzialanie);
   const ikonaDzialania = { telefon: '☎', email: '✉', spotkanie: '◷', inne: '•' };
@@ -21,10 +29,28 @@
   function klik(e) {
     // Klik w telefon, przycisk albo pole nie otwiera szczegółów (K02).
     if (e.target.closest('a, button, input, textarea, select, [data-bez-szczegolow]')) return;
+    if (zwinieta) { rozwinieta = true; return; }
     ctx.otworzSzczegoly(karta.id, e.currentTarget.querySelector('.otworz'));
   }
 </script>
 
+{#if zwinieta}
+<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
+<!-- Klawiaturą: przycisk z nazwą rozwija kartę; klik w resztę karty to udogodnienie dla myszy. -->
+<article
+  class="karta zwinieta"
+  class:zapis={Boolean(zapis)}
+  data-karta-id={karta.id}
+  data-etap-id={karta.etap_id}
+  data-zwinieta
+  onclick={klik}
+  oncontextmenu={(e) => ctx.kontekstKarty(e, karta)}
+>
+  <button type="button" class="otworz" aria-expanded="false" onclick={() => (rozwinieta = true)} title="Pokaż szczegóły karty">
+    <span class="nazwa">{karta.nazwa}</span>
+  </button>
+</article>
+{:else}
 <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
 <!-- Klik w całą kartę i prawy klik to udogodnienia dla myszy. Klawiaturą: przycisk z nazwą (szczegóły) i „…" (menu). -->
 <article
@@ -33,6 +59,10 @@
   class:niepewny={zapis?.niepewny}
   class:otwarta={ctx.stan.otwartyId === karta.id}
   class:lista={uklad === 'lista'}
+  class:czerwona={wiek?.czerwony}
+  data-wiek={wiek ? (wiek.czerwony ? 'czerwony' : wiek.poziom ?? 'neutralny') : undefined}
+  style:--wiek-kolor={wiek?.poziom != null ? `var(--wiek-${wiek.poziom})` : undefined}
+  style:--wiek-tlo={wiek?.poziom != null ? `var(--wiek-${wiek.poziom}-tlo)` : undefined}
   data-karta-id={karta.id}
   data-etap-id={karta.etap_id}
   aria-busy={zapis ? 'true' : undefined}
@@ -47,6 +77,9 @@
       <span class="nazwa">{karta.nazwa}</span>
       <span class="sr-only"> — otwórz szczegóły</span>
     </button>
+    {#if zwijana}
+      <button type="button" class="menu-btn" aria-expanded="true" aria-label="Zwiń kartę {karta.nazwa}" title="Zwiń" onclick={() => (rozwinieta = false)}>▴</button>
+    {/if}
     <button
       type="button"
       class="menu-btn"
@@ -58,7 +91,12 @@
   </div>
 
   <p class="kontekst">{kontekstKarty(karta)}</p>
-  {#if wartosc}<p class="wartosc">{wartosc}</p>{/if}
+  {#if wartosc}<p class="wartosc" class:brak-danych={etap?.rodzaj === 'wygrany' && karta.sprzedaz?.skladka_roczna == null}>{wartosc}</p>{/if}
+  {#if wiek}
+    <p class="wiek" data-wiek-tekst>
+      <span class="ikona" aria-hidden="true">⏱</span>{wiek.tekst}{#if wiek.czerwony}<span class="sr-only"> — za długo bez ruchu</span>{/if}
+    </p>
+  {/if}
 
   {#if karta.dzialanie || etap?.rodzaj === 'otwarty' || !etap || karta.powod_utraty}
   <p class="dzialanie" class:brak={brakDzialania}>
@@ -86,9 +124,9 @@
   {/if}
 
   <footer class="stopka">
-    <span class="opiekun" class:brak={!karta.opiekun_id} title="Opiekun">
-      {karta.opiekun_nazwa ?? 'Bez opiekuna'}
-    </span>
+    {#if opiekun}
+      <span class="opiekun" class:brak={!karta.opiekun_id} title="Opiekun">{opiekun}</span>
+    {/if}
     <span class="zrodlo">{etykietaZrodla(karta.zrodlo)}</span>
     {#if karta.telefon}
       <a class="tel" href="tel:{String(karta.telefon).replace(/[^\d+]/g, '')}" aria-label="Zadzwoń do {karta.nazwa}: {karta.telefon}">{karta.telefon}</a>
@@ -104,6 +142,7 @@
     </div>
   {/if}
 </article>
+{/if}
 
 <style>
   .karta {
@@ -118,6 +157,36 @@
   /* Miejsce, z którego wzięto kartę: pusta rama zamiast karty (placeholder). */
   .karta:global([data-przeciagana]) { opacity: .35; border-style: dashed; box-shadow: none; }
   .karta.lista { cursor: default; }
+
+  /*
+   * Wiek karty. Pierwsza kolumna: zieleń → żółć → pomarańcz z każdym dniem;
+   * ponad 5 dni w etapie — czerwień w każdej otwartej kolumnie. Kolor niesie
+   * pasek z lewej i tło; treść zostaje ciemna na jasnym (kontrast ≥ 4,5:1),
+   * a liczba dni stoi napisem.
+   */
+  .karta {
+    --wiek-0: #16a34a; --wiek-0-tlo: #f0fdf4;
+    --wiek-1: #65a30d; --wiek-1-tlo: #f7fee7;
+    --wiek-2: #ca8a04; --wiek-2-tlo: #fefce8;
+    --wiek-3: #d97706; --wiek-3-tlo: #fffbeb;
+    --wiek-4: #ea580c; --wiek-4-tlo: #fff7ed;
+    --wiek-5: #c2410c; --wiek-5-tlo: #ffedd5;
+  }
+  .karta[style*='--wiek-kolor'] {
+    border-left: 6px solid var(--wiek-kolor); background: var(--wiek-tlo);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--wiek-kolor) 35%, transparent), 0 1px 3px rgba(15, 23, 42, .08);
+  }
+  .karta.czerwona {
+    border-left: 6px solid #dc2626; background: #fef2f2;
+    box-shadow: 0 0 0 1px rgba(220, 38, 38, .45), 0 0 10px rgba(220, 38, 38, .25);
+  }
+  .wiek { margin: 0; font-size: .76rem; font-weight: 600; color: var(--slate-700); display: flex; align-items: baseline; gap: .15rem; }
+  .czerwona .wiek { color: #991b1b; }
+  .wartosc.brak-danych { color: #92400e; }
+
+  /* Przegrany: sama nazwa, bez uchwytu i stopki. */
+  .karta.zwinieta { padding: .45rem .7rem; gap: 0; background: var(--slate-50, #f8fafc); cursor: pointer; }
+  .karta.zwinieta .otworz { font-weight: 600; font-size: .88rem; color: var(--slate-700); }
 
   .gora { display: flex; align-items: flex-start; gap: .3rem; }
   .uchwyt { flex: none; color: var(--slate-400); font-size: .9rem; line-height: 1.25; letter-spacing: -.12em; cursor: grab; user-select: none; touch-action: none; padding: .1rem .15rem; }

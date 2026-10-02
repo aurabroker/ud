@@ -25,8 +25,11 @@ import {
   odpowiedzLicznikow,
   odpowiedzSzczegolow,
   przetworz,
+  graniceOkresu,
+  statystyki,
   synchronizuj,
   szczegoly,
+  warianty,
   wczytajPlan,
   wczytajTablice,
   zmien,
@@ -158,17 +161,17 @@ try {
 
   await sbSql.rpc('ud_leady_zwin', { p_user: ULA, p_pipeline: sql('select tt.pipeline()'), p_etap: etap('oferta'), p_zwin: true });
   const tablica = await wczytajTablice(sbSql, null, ULA, new URLSearchParams());
-  await t('tablica: synchronizacja dopisała 8 klientów i szkic ze zgodą', () => {
+  await t('tablica: synchronizacja dopisała 8 klientów (porzucone wnioski nie są leadami)', () => {
     assert.equal(tablica.synchronizacja, true);
-    assert.equal(sql('select count(*) from public.ud_leady'), '9');
+    assert.equal(sql('select count(*) from public.ud_leady'), '8');
   });
-  await t('tablica: plan z sześcioma etapami i zwiniętą „Ofertą" tego użytkownika', () => {
-    assert.deepEqual(tablica.plan.etapy.map((e) => e.klucz), ['nowy', 'kontakt', 'oferta', 'decyzja', 'wygrany', 'przegrany']);
+  await t('tablica: plan z pięcioma etapami (Kontakt scalony z Nowym) i zwiniętą „Ofertą" tego użytkownika', () => {
+    assert.deepEqual(tablica.plan.etapy.map((e) => e.klucz), ['nowy', 'oferta', 'decyzja', 'wygrany', 'przegrany']);
     assert.deepEqual(tablica.plan.zwiniete, [etap('oferta')]);
     assert.equal(tablica.plan.rola, 'user');
   });
   await t('tablica: karty tylko dla rozwiniętych kolumn, liczniki dla wszystkich', () => {
-    assert.equal(Object.keys(tablica.kolumny).length, 5);
+    assert.equal(Object.keys(tablica.kolumny).length, 4);
     assert.ok(!(etap('oferta') in tablica.kolumny), 'zwinięta kolumna nie ładuje kart');
     assert.equal(tablica.liczniki[etap('oferta')].ile, 1, 'ale licznik jest');
     assert.equal(tablica.liczniki[etap('nowy')].ile, 4);
@@ -207,7 +210,7 @@ try {
     const zepsuty = { rpc: (n, a) => (n === 'ud_leady_synchronizuj' ? Promise.resolve({ data: null, error: { message: 'boom' } }) : sbSql.rpc(n, a)) };
     const t6 = await wczytajTablice(zepsuty, null, ULA, new URLSearchParams());
     assert.equal(t6.synchronizacja, false);
-    assert.equal(t6.plan.etapy.length, 6);
+    assert.equal(t6.plan.etapy.length, 5);
   });
   await t('synchronizuj: zwraca false przy błędzie, nie rzuca', async () => {
     assert.equal(await synchronizuj({ rpc: async () => { throw new Error('sieć'); } }), false);
@@ -240,8 +243,9 @@ try {
   });
   await t('liczniki: mapa po etapie', async () => {
     const l = await liczniki(sbSql, ULA, P, {});
-    assert.equal(Object.keys(l).length, 6);
+    assert.equal(Object.keys(l).length, 5);
     assert.equal(l[etap('decyzja')].ile, 1);
+    assert.equal(l[etap('wygrany')].skladkiWszystkich, 6000, 'składki w Wygrany (Celina z wariantu)');
   });
 
   await t('odpowiedzKolumny: strona + liczniki, filtr z adresu, śmieciowy etap → 400', async () => {
@@ -275,9 +279,9 @@ try {
   await t('zmien: ponowienie z tym samym kluczem → 200 powtorzone, bez drugiego skutku', async () => {
     const v = wersja(bartek);
     const k = klucz();
-    await zmien(sbSql, ULA, { leadId: bartek, targetStageId: etap('kontakt'), expectedVersion: v, idempotencyKey: k });
+    await zmien(sbSql, ULA, { leadId: bartek, targetStageId: etap('nowy'), expectedVersion: v, idempotencyKey: k });
     const h = historia(bartek);
-    const r = await zmien(sbSql, ULA, { leadId: bartek, targetStageId: etap('kontakt'), expectedVersion: v, idempotencyKey: k });
+    const r = await zmien(sbSql, ULA, { leadId: bartek, targetStageId: etap('nowy'), expectedVersion: v, idempotencyKey: k });
     assert.equal(r.status, 200);
     assert.equal(r.body.powtorzone, true);
     assert.equal(historia(bartek), h);
@@ -455,15 +459,86 @@ try {
     assert.equal(wolane[0][3], s.klient_id);
     assert.ok(!JSON.stringify(s).includes('81010112345'), 'bez PESEL-u');
   });
-  await t('szczegóły: szkic nie odpytuje ofert; nieistniejący → 404; śmieciowy id → 400', async () => {
+  await t('szczegóły: nieistniejący → 404 bez pytania o oferty; śmieciowy id → 400', async () => {
     let wolane = 0;
     const userSb = { from: () => { wolane++; throw new Error('nie powinno być wołane'); } };
-    const s = await szczegoly(sbSql, userSb, lead('Szymon Szkic'));
-    assert.equal(s.klient_id, null);
-    assert.deepEqual(s.oferty, []);
     assert.equal(wolane, 0);
     await assert.rejects(szczegoly(sbSql, userSb, '00000000-0000-4000-8000-000000000000'), (e) => e.status === 404);
     await assert.rejects(szczegoly(sbSql, userSb, 'x'), (e) => e.status === 400);
+  });
+
+  // ═══ Dane sprzedaży (Wygrany) i statystyki ═══════════════════════════════
+  const darek = lead('Darek Decyzja');
+  await t('sprzedaż: Wygrany bez danych → 422 brak_danych z polem składki', async () => {
+    const r = await zmien(sbSql, OLEK, { leadId: darek, targetStageId: etap('wygrany'), expectedVersion: wersja(darek), idempotencyKey: klucz() });
+    assert.equal(r.status, 422);
+    assert.equal(r.body.status, 'brak_danych');
+    assert.deepEqual(r.body.pola, ['skladka_roczna']);
+    assert.equal(etapLeada(darek), 'decyzja');
+  });
+  await t('sprzedaż: kwoty tekstem i liczbą przechodzą; pola spoza listy i zły wariant są odrzucane przed SQL', async () => {
+    const r = await zmien(sbSql, OLEK, {
+      leadId: darek, targetStageId: etap('wygrany'), expectedVersion: wersja(darek), idempotencyKey: klucz(),
+      transitionData: { sprzedaz: { skladka_roczna: '2 400,00 zł', skladka_mies: 210, wariant_id: 'nie-uuid', sprzedawca_id: ULA, swiadczenie_zgon: '' } },
+    });
+    assert.equal(r.status, 200, JSON.stringify(r.body));
+    assert.equal(r.body.lead.sprzedaz.skladka_roczna, 2400);
+    assert.equal(r.body.lead.sprzedaz.skladka_mies, 210);
+    assert.equal(r.body.lead.sprzedaz.wariant_id, null);
+    assert.equal(sql(`select sprzedawca_id from public.ud_leady where id = '${darek}'`), OLEK, 'sprzedawca z opiekuna, nie z ciała żądania');
+  });
+  await t('sprzedaż: poprawka operacją „sprzedaz", śmieciowa kwota → 400', async () => {
+    const r = await zmien(sbSql, OLEK, { op: 'sprzedaz', leadId: darek, expectedVersion: wersja(darek), idempotencyKey: klucz(),
+      sprzedaz: { skladka_roczna: 2520, skladka_mies: 210 } });
+    assert.equal(r.status, 200);
+    assert.equal(r.body.lead.sprzedaz.skladka_roczna, 2520);
+    const zla = await zmien(sbSql, OLEK, { op: 'sprzedaz', leadId: darek, expectedVersion: wersja(darek), idempotencyKey: klucz(),
+      sprzedaz: { skladka_roczna: 'dużo' } });
+    assert.equal(zla.status, 400);
+  });
+  await t('statystyki: agent widzi swoje (Olek: Darek), administrator wszystkich z podziałem', async () => {
+    const o = await statystyki(sbSql, OLEK, new URLSearchParams(`agent=${ULA}`));
+    assert.equal(o.agent, OLEK, 'parametr agenta u zwykłego agenta jest ignorowany');
+    assert.equal(o.podsumowanie.sprzedaze, 1);
+    assert.equal(Number(o.podsumowanie.skladka_roczna_suma), 2520);
+    assert.equal(o.wg_agentow, null);
+    const a = await statystyki(sbSql, ADM, new URLSearchParams());
+    assert.equal(a.podsumowanie.sprzedaze, 2);
+    assert.equal(Number(a.podsumowanie.skladka_roczna_suma), 8520);
+    assert.equal(a.wg_agentow.length, 2);
+    assert.equal(a.okres, 'wszystko');
+    const wybrany = await statystyki(sbSql, ADM, new URLSearchParams(`agent=${OLEK}&okres=miesiac`));
+    assert.equal(wybrany.podsumowanie.sprzedaze, 1);
+    assert.equal(wybrany.okres, 'miesiac');
+    await assert.rejects(statystyki(sbSql, INES, new URLSearchParams()), (e) => e.status === 403);
+  });
+  await t('statystyki: granice okresu w czasie polskim', () => {
+    const teraz = new Date('2026-03-31T23:30:00Z');   // w Polsce już 1 kwietnia
+    assert.deepEqual(graniceOkresu('miesiac', teraz), { od: '2026-04-01 00:00:00 Europe/Warsaw', do: '2026-05-01 00:00:00 Europe/Warsaw' });
+    assert.deepEqual(graniceOkresu('poprzedni', new Date('2026-01-10T10:00:00Z')), { od: '2025-12-01 00:00:00 Europe/Warsaw', do: '2026-01-01 00:00:00 Europe/Warsaw' });
+    assert.deepEqual(graniceOkresu('kwartal', teraz), { od: '2026-04-01 00:00:00 Europe/Warsaw', do: '2026-07-01 00:00:00 Europe/Warsaw' });
+    assert.deepEqual(graniceOkresu('cokolwiek', teraz), { od: null, do: null });
+  });
+  await t('warianty: z ofert klienta, sesją agenta; kwoty z wariantu, zgon z parsed_raw', async () => {
+    const wolane = [];
+    const userSb = {
+      from: (tabela) => ({
+        select: () => ({
+          eq: (k, v) => ({ order: () => ({ limit: async () => { wolane.push([tabela, k, v]); return { data: [{ id: 'o1', offer_number: 'UD/7', status: 'sent' }] }; } }) }),
+          in: (k, v) => ({ order: async () => { wolane.push([tabela, k, v]); return { data: [
+            { id: 'w1', offer_id: 'o1', insurer_type: 'ceu', product_name: 'LOI Premium', offer_number: 'LOIP/2', premium_total: '4200.00', premium_monthly: null,
+              temp_incapacity_covered: true, temp_monthly_benefit: 12000, perm_incapacity_covered: true, perm_sum_insured: 240000, death_covered: true,
+              parsed_raw: { death_sum_insured: '100 000' } },
+          ] }; } }),
+        }),
+      }),
+    };
+    const w = await warianty(sbSql, userSb, lead('Gabriel Podkreślnik'));
+    assert.deepEqual(w, [{ id: 'w1', oferta: 'UD/7', ubezpieczyciel: 'LOI Premium', numer: 'LOIP/2', skladka_roczna: 4200, skladka_mies: null,
+      swiadczenie_okresowa: 12000, swiadczenie_trwala: 240000, swiadczenie_zgon: 100000 }]);
+    assert.deepEqual(wolane.map((x) => x[0]), ['ud_offers', 'ud_offer_documents']);
+    await assert.rejects(warianty(sbSql, userSb, '00000000-0000-4000-8000-000000000000'), (e) => e.status === 404);
+    await assert.rejects(warianty(sbSql, userSb, 'x'), (e) => e.status === 400);
   });
 
   // ═══ Archiwizacja przez API ══════════════════════════════════════════════
@@ -483,12 +558,12 @@ try {
 
   // ═══ Zwijanie ════════════════════════════════════════════════════════════
   await t('zwin: zwinięcie, rozwinięcie, rozwiń wszystkie', async () => {
-    let r = await zwin(sbSql, OLEK, { pipelineId: P, etapId: etap('kontakt'), zwin: true });
-    assert.deepEqual(r.body.zwiniete, [etap('kontakt')]);
+    let r = await zwin(sbSql, OLEK, { pipelineId: P, etapId: etap('nowy'), zwin: true });
+    assert.deepEqual(r.body.zwiniete, [etap('nowy')]);
     r = await zwin(sbSql, OLEK, { pipelineId: P, etapId: etap('decyzja'), zwin: true });
-    assert.deepEqual(r.body.zwiniete.sort(), [etap('decyzja'), etap('kontakt')].sort());
+    assert.deepEqual(r.body.zwiniete.sort(), [etap('decyzja'), etap('nowy')].sort());
     r = await zwin(sbSql, OLEK, { pipelineId: P, etapId: etap('decyzja'), zwin: false });
-    assert.deepEqual(r.body.zwiniete, [etap('kontakt')]);
+    assert.deepEqual(r.body.zwiniete, [etap('nowy')]);
     r = await zwin(sbSql, OLEK, { pipelineId: P, etapId: null, zwin: false });
     assert.deepEqual(r.body.zwiniete, []);
   });

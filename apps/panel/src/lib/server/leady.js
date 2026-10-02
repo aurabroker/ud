@@ -24,7 +24,9 @@ const KLUCZ = /^[A-Za-z0-9._:-]{8,80}$/;
 const PRODUKTY = ['okresowa', 'trwala', 'zgon', 'nieznany'];
 const TERMINY = ['przeterminowane', 'dzisiaj', 'tydzien', 'brak'];
 const DZIALANIA = ['telefon', 'email', 'spotkanie', 'inne'];
-const OPERACJE = ['przenies', 'dzialanie', 'opiekun', 'archiwizuj'];
+const OPERACJE = ['przenies', 'dzialanie', 'opiekun', 'archiwizuj', 'sprzedaz'];
+const POLA_SPRZEDAZY = ['skladka_roczna', 'skladka_mies', 'swiadczenie_okresowa', 'swiadczenie_trwala', 'swiadczenie_zgon'];
+export const OKRESY_STATYSTYK = ['wszystko', 'miesiac', 'poprzedni', 'kwartal', 'rok'];
 
 /** Błąd, który endpoint zamienia na odpowiedź HTTP bez dalszej obróbki. */
 export class BladApi extends Error {
@@ -95,8 +97,9 @@ export async function wczytajPlan(sb, userId, pipelineId) {
 }
 
 /**
- * Dokłada leady z kartoteki i szkiców. Awaria synchronizacji nie blokuje
- * tablicy — pokazujemy to, co jest, i ostrzeżenie.
+ * Dokłada leady z kartoteki klientów (porzucone wnioski od 02.10.2026 nie są
+ * leadami). Awaria synchronizacji nie blokuje tablicy — pokazujemy to, co jest,
+ * i ostrzeżenie.
  */
 export async function synchronizuj(sb) {
   try {
@@ -111,7 +114,7 @@ export async function synchronizuj(sb) {
 
 export async function liczniki(sb, userId, pipelineId, filtr) {
   const wiersze = await rpc(sb, 'ud_leady_liczniki', { p_pipeline: pipelineId, p_filtr: filtr, p_user: userId });
-  /** @type {Record<string, {ile: number, ileWszystkich: number, suma: number, sumaWszystkich: number}>} */
+  /** @type {Record<string, {ile: number, ileWszystkich: number, suma: number, sumaWszystkich: number, skladki: number, skladkiWszystkich: number}>} */
   const wynik = {};
   for (const w of wiersze || []) {
     wynik[w.etap_id] = {
@@ -119,6 +122,8 @@ export async function liczniki(sb, userId, pipelineId, filtr) {
       ileWszystkich: Number(w.ile_wszystkich),
       suma: Number(w.suma),
       sumaWszystkich: Number(w.suma_wszystkich),
+      skladki: Number(w.skladki ?? 0),
+      skladkiWszystkich: Number(w.skladki_wszystkich ?? 0),
     };
   }
   return wynik;
@@ -159,6 +164,106 @@ export async function szczegoly(sb, userSb, leadId) {
     oferty = data || [];
   }
   return { ...s, oferty };
+}
+
+/** Kwota z pola tekstowego wariantu („50 000", „50000,00 zł") albo null. */
+function kwotaZTekstu(v) {
+  if (typeof v === 'number') return Number.isFinite(v) && v > 0 ? v : null;
+  if (typeof v !== 'string') return null;
+  const t = v.toLowerCase().replace(/[\s\u00a0]|zł|pln/g, '').replace(',', '.');
+  if (!/^\d{1,12}(\.\d{1,2})?$/.test(t)) return null;
+  const n = Number(t);
+  return n > 0 ? n : null;
+}
+
+/**
+ * Warianty z ofert klienta danego leada — do okna „Wygrany" (wybór sprzedanego
+ * wariantu wypełnia kwoty). Oferty i warianty czytamy klientem Z SESJĄ agenta:
+ * RLS pokazuje agentowi jego oferty, administratorowi wszystkie. Gdy nic nie
+ * widać, agent wpisuje kwoty ręcznie.
+ */
+export async function warianty(sb, userSb, leadId) {
+  if (!jestUuid(leadId)) throw blad(400, 'Nieprawidłowy identyfikator leada.');
+  // Klient leada przez tę samą funkcję co szczegóły: klucz serwisowy idzie
+  // wyłącznie przez RPC, a lead spoza widoku (archiwum) daje 404 jak wszędzie.
+  const s = await rpc(sb, 'ud_lead_szczegoly', { p_lead: leadId });
+  if (!s) throw blad(404, 'Lead nie istnieje albo został zarchiwizowany.');
+  if (!s.klient_id || !userSb) return [];
+  const lead = { klient_id: s.klient_id };
+
+  const { data: oferty } = await userSb
+    .from('ud_offers')
+    .select('id, offer_number, name, status, created_at')
+    .eq('client_id', lead.klient_id)
+    .order('created_at', { ascending: false })
+    .limit(10);
+  if (!oferty?.length) return [];
+
+  const { data: dokumenty } = await userSb
+    .from('ud_offer_documents')
+    .select('id, offer_id, insurer_type, product_name, offer_number, premium_total, premium_monthly, temp_incapacity_covered, temp_monthly_benefit, perm_incapacity_covered, perm_sum_insured, death_covered, parsed_raw')
+    .in('offer_id', oferty.map((o) => o.id))
+    .order('sort_order', { ascending: true });
+
+  const ofertaPo = new Map(oferty.map((o) => [o.id, o]));
+  return (dokumenty || []).map((d) => {
+    const o = ofertaPo.get(d.offer_id);
+    return {
+      id: d.id,
+      oferta: o?.offer_number || o?.name || 'Oferta',
+      ubezpieczyciel: d.product_name || d.insurer_type || 'Wariant',
+      numer: d.offer_number || '',
+      skladka_roczna: kwotaZTekstu(Number(d.premium_total)),
+      skladka_mies: kwotaZTekstu(Number(d.premium_monthly)),
+      swiadczenie_okresowa: d.temp_incapacity_covered === false ? null : kwotaZTekstu(Number(d.temp_monthly_benefit)),
+      swiadczenie_trwala: d.perm_incapacity_covered ? kwotaZTekstu(Number(d.perm_sum_insured)) : null,
+      swiadczenie_zgon: d.death_covered ? kwotaZTekstu(d.parsed_raw?.death_sum_insured ?? null) : null,
+    };
+  });
+}
+
+/** GET …/warianty/<id>. */
+export async function odpowiedzWariantow(sb, userSb, userId, leadId) {
+  await wczytajPlan(sb, userId, null);
+  return { status: 200, body: { status: 'ok', warianty: await warianty(sb, userSb, leadId) } };
+}
+
+/** Granice okresu w czasie polskim, jako tekst, który Postgres czyta jako timestamptz. */
+export function graniceOkresu(okres, teraz = new Date()) {
+  const [r, m] = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Warsaw', year: 'numeric', month: '2-digit' })
+    .format(teraz)
+    .split('-')
+    .map(Number);
+  const poczatek = (rok, mies) => {
+    const rr = rok + Math.floor((mies - 1) / 12);
+    const mm = ((((mies - 1) % 12) + 12) % 12) + 1;
+    return `${rr}-${String(mm).padStart(2, '0')}-01 00:00:00 Europe/Warsaw`;
+  };
+  if (okres === 'miesiac') return { od: poczatek(r, m), do: poczatek(r, m + 1) };
+  if (okres === 'poprzedni') return { od: poczatek(r, m - 1), do: poczatek(r, m) };
+  if (okres === 'kwartal') {
+    const k = Math.floor((m - 1) / 3) * 3 + 1;
+    return { od: poczatek(r, k), do: poczatek(r, k + 3) };
+  }
+  if (okres === 'rok') return { od: poczatek(r, 1), do: poczatek(r + 1, 1) };
+  return { od: null, do: null };
+}
+
+/**
+ * Statystyki sprzedaży. Kto co widzi, decyduje SQL (agent: tylko swoje,
+ * parametr agenta działa wyłącznie u administratora) — tu tylko kształt.
+ */
+export async function statystyki(sb, userId, parametry) {
+  const pobierz = (k) => {
+    const v = parametry instanceof URLSearchParams ? parametry.get(k) : parametry?.[k];
+    return typeof v === 'string' ? v : '';
+  };
+  const okres = OKRESY_STATYSTYK.includes(pobierz('okres')) ? pobierz('okres') : 'wszystko';
+  const agent = jestUuid(pobierz('agent')) ? pobierz('agent') : null;
+  const { od, do: doo } = graniceOkresu(okres);
+  const wynik = await rpc(sb, 'ud_leady_statystyki', { p_user: userId, p_od: od, p_do: doo, p_agent: agent });
+  if (!wynik) throw blad(403, 'Brak dostępu do statystyk.');
+  return { ...wynik, okres };
 }
 
 /** Pierwsze ładowanie tablicy: plan, liczniki i pierwsza strona każdej rozwiniętej kolumny. */
@@ -255,6 +360,22 @@ function wynikZmiany(wynik) {
   return { status, body: wynik };
 }
 
+/**
+ * Dane sprzedaży z ciała żądania: tylko znane pola, kwota jako liczba albo
+ * krótki tekst (SQL ją sprawdza i odrzuca śmieci), wariant jako uuid.
+ */
+function daneSprzedazy(src) {
+  if (!src || typeof src !== 'object') return undefined;
+  const wynik = {};
+  for (const k of POLA_SPRZEDAZY) {
+    const v = src[k];
+    if (typeof v === 'number' && Number.isFinite(v)) wynik[k] = v;
+    else if (typeof v === 'string' && v.trim()) wynik[k] = v.slice(0, 30);
+  }
+  if (jestUuid(src.wariant_id)) wynik.wariant_id = src.wariant_id;
+  return Object.keys(wynik).length ? wynik : undefined;
+}
+
 /** Przeniesienie wymaga etapu docelowego; reszta operacji ma własne pola. */
 function daneOperacji(op, body) {
   const tekst = (v, max) => (typeof v === 'string' ? v.slice(0, max) : undefined);
@@ -264,7 +385,12 @@ function daneOperacji(op, body) {
     if (przejscie && typeof przejscie === 'object' && typeof przejscie.powod_utraty === 'string') {
       dane.powod_utraty = przejscie.powod_utraty.slice(0, 400);
     }
+    const sprzedaz = daneSprzedazy(przejscie?.sprzedaz);
+    if (sprzedaz) dane.sprzedaz = sprzedaz;
     return dane;
+  }
+  if (op === 'sprzedaz') {
+    return daneSprzedazy(body.sprzedaz) ?? {};
   }
   if (op === 'dzialanie') {
     return { typ: tekst(body.typ, 20), termin: tekst(body.termin, 40), opis: tekst(body.opis, 400) };
@@ -278,7 +404,8 @@ function daneOperacji(op, body) {
 /**
  * Jedna ścieżka zmiany stanu leada. Kontrakt (MoveLeadCommand + pozostałe operacje):
  *   { op = 'przenies', leadId, expectedVersion, idempotencyKey,
- *     targetStageId, transitionData? | typ, termin, opis | opiekunId }
+ *     targetStageId, transitionData? { powod_utraty?, sprzedaz? }
+ *     | typ, termin, opis | opiekunId | sprzedaz }
  */
 export async function zmien(sb, userId, body) {
   if (!body || typeof body !== 'object') throw blad(400, 'Nieprawidłowe żądanie.');

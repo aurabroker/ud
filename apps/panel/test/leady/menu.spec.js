@@ -110,7 +110,7 @@ test('K17: menu mieści się w oknie — przy prawej i dolnej krawędzi zmienia 
   const okno = page.viewportSize();
 
   // Prawa krawędź: karta w drugiej kolumnie, klik blisko jej prawego brzegu.
-  const k = await karta(page, 'Filip Lis').boundingBox();
+  const k = await karta(page, 'Henryk Sikora').boundingBox();
   const klik = { x: k.x + k.width - 12, y: k.y + 40 };
   await page.mouse.click(klik.x, klik.y, { button: 'right' });
   await expect(menu(page)).toBeVisible();
@@ -122,8 +122,10 @@ test('K17: menu mieści się w oknie — przy prawej i dolnej krawędzi zmienia 
   await page.keyboard.press('Escape');
 
   // Dolna krawędź: klik nisko na karcie w pierwszej kolumnie — menu wyżej niż wskaźnik.
-  const a = await karta(page, 'Anna Kowalska').boundingBox();
-  const nisko = { x: a.x + 30, y: Math.min(a.y + a.height - 10, okno.height - 12) };
+  // Celujemy w opiekuna (zwykły tekst w dolnym wierszu), a nie w róg karty: tam
+  // bywa link tel:, a na linkach zostaje natywne menu przeglądarki (K24).
+  const a = await karta(page, 'Anna Kowalska').locator('.opiekun').boundingBox();
+  const nisko = { x: a.x + Math.min(10, a.width / 2), y: Math.min(a.y + a.height / 2, okno.height - 12) };
   await page.mouse.click(nisko.x, nisko.y, { button: 'right' });
   await expect(menu(page)).toBeVisible();
   m = await menu(page).boundingBox();
@@ -167,9 +169,9 @@ test('K18: Shift+F10 i klawisz menu na karcie otwierają menu bez myszy; Esc odd
   await page.keyboard.press('Escape');
   await expect(trzy).toBeFocused();
 
-  await kolumna(page, 'kontakt').getByRole('button', { name: 'Akcje etapu Kontakt' }).focus();
+  await kolumna(page, 'oferta').getByRole('button', { name: 'Akcje etapu Oferta' }).focus();
   await page.keyboard.press('Shift+F10');
-  await expect(page.getByRole('menu', { name: 'Etap: Kontakt' })).toBeVisible();
+  await expect(page.getByRole('menu', { name: 'Etap: Oferta' })).toBeVisible();
 });
 
 test('K19: strzałki, Home/End, Enter, Esc, Tab — pełna obsługa i prawidłowy fokus', async ({ page }) => {

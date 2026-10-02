@@ -5,7 +5,7 @@
    * poleceniem co przeciągnięciem i menu — przez ctx.przeniesZUi.
    */
   import { getContext } from 'svelte';
-  import { DZIALANIA, dataGodzina, dataKrotka, dniWEtapie, etykietaZrodla, formatKwota, kontekstKarty, kwotaZTekstu, terminTekst, wartoscKarty } from './model.js';
+  import { DZIALANIA, POLA_SPRZEDAZY, dataGodzina, dataKrotka, dniWEtapie, etykietaZrodla, formatKwota, kontekstKarty, kwotaZTekstu, terminTekst, wartoscKarty } from './model.js';
 
   let { onzamknij } = $props();
   const ctx = getContext('tablica');
@@ -49,6 +49,7 @@
     archiwum: () => 'zarchiwizowano',
     notatka: () => 'dodano notatkę',
     przepieto: () => 'wniosek ukończony — lead przypisany do klienta',
+    sprzedaz: (h) => `zmieniono dane sprzedaży${h.dane?.sprzedaz?.skladka_roczna != null ? ` (składka ${formatKwota(h.dane.sprzedaz.skladka_roczna)} / rok)` : ''}`,
   };
 </script>
 
@@ -96,10 +97,30 @@
       <p class="wiersz"><span class="et">W etapie od</span> {dataKrotka(lead.etap_od)} ({dniWEtapie(lead, ctx.teraz)} dn.)</p>
     </section>
 
+    {#if etap?.rodzaj === 'wygrany'}
+      <section aria-label="Sprzedaż" data-sprzedaz>
+        <h3>Sprzedaż</h3>
+        {#if lead.sprzedaz?.skladka_roczna != null}
+          {#each POLA_SPRZEDAZY as p (p.id)}
+            {#if lead.sprzedaz[p.id] != null}
+              <p class="wiersz"><span class="et">{p.nazwa}</span> {formatKwota(lead.sprzedaz[p.id])}{p.jednostka.startsWith('zł /') ? p.jednostka.slice(2) : ''}</p>
+            {/if}
+          {/each}
+        {:else}
+          <p class="uwaga">Brak danych sprzedaży — bez nich ta sprzedaż nie liczy się w statystykach składek.</p>
+        {/if}
+        <p class="wiersz">
+          <button type="button" class="link" onclick={() => ctx.otworzDialog({ typ: 'sprzedaz', leadId: lead.id })}>
+            {lead.sprzedaz?.skladka_roczna != null ? 'Zmień dane sprzedaży…' : 'Uzupełnij dane sprzedaży…'}
+          </button>
+        </p>
+      </section>
+    {/if}
+
     <section aria-label="Obsługa">
       <p class="wiersz">
         <span class="et">Opiekun</span>
-        <span data-opiekun>{lead.opiekun_nazwa ?? 'Bez opiekuna'}</span>
+        <span data-opiekun>{lead.opiekun_nazwa ?? 'Bez opiekuna'}{lead.opiekun_admin ? ' (administrator)' : ''}</span>
         <button type="button" class="link" onclick={() => ctx.otworzDialog({ typ: 'opiekun', leadId: lead.id })}>Zmień…</button>
       </p>
       <p class="wiersz">
@@ -123,7 +144,7 @@
       {#if s?.kontakt?.forma_zatrudnienia}<p class="wiersz"><span class="et">Forma zatrudnienia</span> {s.kontakt.forma_zatrudnienia}</p>{/if}
       <p class="wiersz"><span class="et">Źródło</span> {etykietaZrodla(lead.zrodlo)}</p>
       <p class="wiersz"><span class="et">Zgłoszono</span> {dataGodzina(lead.zgloszono)}</p>
-      {#if wartoscKarty(lead)}<p class="wiersz"><span class="et">Wartość</span> {wartoscKarty(lead)}</p>{/if}
+      {#if wartoscKarty(lead)}<p class="wiersz"><span class="et">Wnioskowane świadczenie</span> {wartoscKarty(lead)}</p>{/if}
       {#if s?.kontakt?.kwoty}
         <p class="wiersz">
           <span class="et">Wnioskowane sumy</span>

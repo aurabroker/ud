@@ -1,5 +1,5 @@
 -- Testy SQL tablicy leadów. Uruchamia je apps/panel/scripts/test-leady-sql.mjs
--- na jednorazowym klastrze, po stub.sql, obu migracjach (szkice + leady),
+-- na jednorazowym klastrze, po stub.sql, migracjach (szkice + trzy części leadów),
 -- pomocnicze.sql i fixture.sql.
 
 -- ─── 1. Synchronizacja ──────────────────────────────────────────────────────
@@ -8,10 +8,10 @@ declare
   w jsonb; w2 jsonb;
 begin
   w := public.ud_leady_synchronizuj();
-  perform tt.t('sync: 8 klientów i 1 szkic ze zgodą', (w->>'klienci')::int = 8 and (w->>'szkice')::int = 1);
+  perform tt.t('sync: 8 klientów, żadnego szkicu', (w->>'klienci')::int = 8 and (select count(*) from public.ud_leady) = 8);
   w2 := public.ud_leady_synchronizuj();
   perform tt.t('sync: drugie wywołanie niczego nie dokłada (idempotencja)',
-               (w2->>'klienci')::int = 0 and (w2->>'szkice')::int = 0 and (select count(*) from public.ud_leady) = 9);
+               (w2->>'klienci')::int = 0 and (select count(*) from public.ud_leady) = 8);
 
   perform tt.t('sync: klient bez ofert → Nowy',                  tt.etap_leada(tt.lead('Anna Kowalska')) = 'nowy');
   perform tt.t('sync: oferta wysłana → Oferta',                  tt.etap_leada(tt.lead('Bartek Nowak')) = 'oferta');
@@ -21,8 +21,14 @@ begin
   perform tt.t('sync: odrzucona → Przegrany z powodem',
                tt.etap_leada(tt.lead('Filip Odrzucony')) = 'przegrany'
                and (select powod_utraty from public.ud_leady where id = tt.lead('Filip Odrzucony')) is not null);
-  perform tt.t('sync: oferta robocza → Kontakt',                 tt.etap_leada(tt.lead('Hanna Szkicowa')) = 'kontakt');
-  perform tt.t('sync: szkic ze zgodą → Nowy',                    tt.etap_leada(tt.lead('Szymon Szkic')) = 'nowy');
+  perform tt.t('sync: oferta robocza → Nowy (Kontakt scalony z Nowym)', tt.etap_leada(tt.lead('Hanna Szkicowa')) = 'nowy');
+  perform tt.t('etap Kontakt wyłączony, nie usunięty',
+               exists (select 1 from public.ud_leady_etap where klucz = 'kontakt' and not aktywny));
+  perform tt.t('sync: kupiona oferta z wyborem wnosi dane sprzedaży z wariantu',
+               (select skladka_roczna = 6000 and skladka_mies = 500 and swiadczenie_okresowa = 8000 and swiadczenie_zgon = 50000
+                       and swiadczenie_trwala is null and sprzedaz_wariant_id = '0d000000-0000-0000-0000-000000000003'
+                       and sprzedano_at is not null
+                  from public.ud_leady where id = tt.lead('Celina Wygrana')));
 
   perform tt.t('sync: opiekun z referred_by',
                (select opiekun_id from public.ud_leady where id = tt.lead('Bartek Nowak')) = tt.id_ula());
@@ -31,9 +37,9 @@ begin
   perform tt.t('sync: nieaktywny agent nie zostaje opiekunem',
                (select opiekun_id from public.ud_leady where id = tt.lead('Hanna Szkicowa')) is null);
 
-  perform tt.t('sync: szkic bez zgody nie jest leadem', not exists (select 1 from public.ud_leady where szkic_id = '50000000-0000-0000-0000-000000000002'));
-  perform tt.t('sync: ukończony szkic nie jest leadem',  not exists (select 1 from public.ud_leady where szkic_id = '50000000-0000-0000-0000-000000000003'));
-  perform tt.t('sync: szkic z wycofaną zgodą nie jest leadem', not exists (select 1 from public.ud_leady where szkic_id = '50000000-0000-0000-0000-000000000004'));
+  perform tt.t('sync: żaden szkic — także ze zgodą — nie jest leadem',
+               not exists (select 1 from public.ud_leady where szkic_id is not null)
+               and exists (select 1 from public.ud_wnioski_szkice where zgoda_kontakt and ukonczony_at is null));
 end $$;
 
 -- ─── 2. Kwoty, karta, prywatność, uprawnienia ───────────────────────────────
@@ -54,9 +60,11 @@ begin
   perform tt.t('karta: nazwa, telefon, wartość', k->>'nazwa' = 'Anna Kowalska' and k->>'telefon' = '500100200' and (k->>'wartosc')::numeric = 8000);
   perform tt.t('karta: BEZ e-maila i PESEL-u', not (k ? 'email') and not (k ? 'pesel') and k::text not like '%80010112345%' and k::text not like '%anna@x.pl%');
   perform tt.t('karta: produkty i źródło', k->'produkty' = '["okresowa"]'::jsonb and k->>'zrodlo' = 'form');
-  k := public.ud_lead_karta(tt.lead('Szymon Szkic'));
-  perform tt.t('karta szkicu: krok i data usunięcia danych, bez wartości',
-               (k->>'krok_nr')::int = 1 and k->>'dane_do' is not null and k->>'wartosc' is null and k->>'zrodlo' = 'szkic');
+  perform tt.t('karta: opiekun nie jest administratorem, brak danych sprzedaży',
+               k->'opiekun_admin' = 'false'::jsonb and k->'sprzedaz' = 'null'::jsonb);
+  k := public.ud_lead_karta(tt.lead('Celina Wygrana'));
+  perform tt.t('karta Wygranego: dane sprzedaży',
+               (k->'sprzedaz'->>'skladka_roczna')::numeric = 6000 and (k->'sprzedaz'->>'skladka_mies')::numeric = 500);
 
   -- ud_leady nie ma kopii danych osobowych ani PESEL-u.
   select array_agg(column_name::text) into kolumny from information_schema.columns
@@ -85,7 +93,7 @@ begin
     perform tt.t('uprawnienia: authenticated nie czyta ' || r, wyjatek);
   end loop;
 
-  foreach r in array array['ud_lead_zmien', 'ud_lead_notatka', 'ud_leady_synchronizuj', 'ud_leady_kolumna', 'ud_leady_liczniki', 'ud_lead_szczegoly', 'ud_leady_zwin']
+  foreach r in array array['ud_lead_zmien', 'ud_lead_notatka', 'ud_leady_synchronizuj', 'ud_leady_kolumna', 'ud_leady_liczniki', 'ud_lead_szczegoly', 'ud_leady_zwin', 'ud_leady_statystyki', 'ud_leady_liczba']
   loop
     perform tt.t('uprawnienia: anon i authenticated nie wołają ' || r,
       (select not has_function_privilege('anon', p.oid, 'execute') and not has_function_privilege('authenticated', p.oid, 'execute')
@@ -119,7 +127,7 @@ begin
   perform tt.t('działanie: błędne żądania nie zmieniają leada', tt.wersja(tt.lead('Ewa Archiwalna')) = 1 and tt.hist(tt.lead('Ewa Archiwalna')) = 0);
 end $$;
 
--- Wartości do testu sum: Anna 8000, Gabriel 12000, Ewa 5000 (bez znacznika ryzyka), szkic bez kwoty.
+-- Wartości do testu sum: Anna 8000, Gabriel 12000, Ewa 5000 (bez znacznika ryzyka), Hanna bez kwoty.
 do $$
 declare
   p uuid := tt.pipeline();
@@ -129,21 +137,24 @@ begin
   -- Liczniki bez filtra.
   perform tt.t('liczniki: bez filtra — rozkład po etapach',
     (select jsonb_object_agg(e.klucz, l.ile) from public.ud_leady_liczniki(p, '{}', tt.id_ula()) l join public.ud_leady_etap e on e.id = l.etap_id)
-    = '{"nowy":4,"kontakt":1,"oferta":1,"decyzja":1,"wygrany":1,"przegrany":1}'::jsonb);
+    = '{"nowy":4,"oferta":1,"decyzja":1,"wygrany":1,"przegrany":1}'::jsonb);
+  perform tt.t('liczniki: składki — Wygrany 6000, reszta 0',
+    (select skladki = 6000 and skladki_wszystkich = 6000 from public.ud_leady_liczniki(p, '{}', tt.id_ula()) where etap_id = tt.etap('wygrany'))
+    and (select sum(skladki) from public.ud_leady_liczniki(p, '{}', tt.id_ula())) = 6000);
   perform tt.t('liczniki: sumy bez filtra (Nowy = 8000 + 5000 + 12000)',
     (select suma from public.ud_leady_liczniki(p, '{}', tt.id_ula()) where etap_id = tt.etap('nowy')) = 25000);
 
   -- Filtry.
   perform tt.t('filtr opiekun=ja', (select sum(ile) from public.ud_leady_liczniki(p, '{"opiekun":"ja"}', tt.id_ula())) = 1);
-  perform tt.t('filtr opiekun=brak', (select sum(ile) from public.ud_leady_liczniki(p, '{"opiekun":"brak"}', tt.id_ula())) = 7);
+  perform tt.t('filtr opiekun=brak', (select sum(ile) from public.ud_leady_liczniki(p, '{"opiekun":"brak"}', tt.id_ula())) = 6);
   perform tt.t('filtr opiekun=<uuid>', (select sum(ile) from public.ud_leady_liczniki(p, jsonb_build_object('opiekun', tt.id_olek()), tt.id_ula())) = 1);
   perform tt.t('filtr źródło=direct', (select sum(ile) from public.ud_leady_liczniki(p, '{"zrodlo":"direct"}', tt.id_ula())) = 2);
-  perform tt.t('filtr źródło=szkic',  (select sum(ile) from public.ud_leady_liczniki(p, '{"zrodlo":"szkic"}', tt.id_ula())) = 1);
+  perform tt.t('filtr źródło=szkic → nic (porzucone wnioski nie są leadami)', (select sum(ile) from public.ud_leady_liczniki(p, '{"zrodlo":"szkic"}', tt.id_ula())) = 0);
   perform tt.t('filtr produkt=okresowa', (select sum(ile) from public.ud_leady_liczniki(p, '{"produkt":"okresowa"}', tt.id_ula())) = 4);
   perform tt.t('filtr produkt=trwala',   (select sum(ile) from public.ud_leady_liczniki(p, '{"produkt":"trwala"}', tt.id_ula())) = 1);
   perform tt.t('filtr produkt=zgon',     (select sum(ile) from public.ud_leady_liczniki(p, '{"produkt":"zgon"}', tt.id_ula())) = 1);
-  perform tt.t('filtr produkt=nieznany', (select sum(ile) from public.ud_leady_liczniki(p, '{"produkt":"nieznany"}', tt.id_ula())) = 5);
-  perform tt.t('filtr termin=brak', (select sum(ile) from public.ud_leady_liczniki(p, '{"termin":"brak"}', tt.id_ula())) = 6);
+  perform tt.t('filtr produkt=nieznany', (select sum(ile) from public.ud_leady_liczniki(p, '{"produkt":"nieznany"}', tt.id_ula())) = 4);
+  perform tt.t('filtr termin=brak', (select sum(ile) from public.ud_leady_liczniki(p, '{"termin":"brak"}', tt.id_ula())) = 5);
   perform tt.t('filtr termin=przeterminowane zawiera Annę, nie zawiera Darka',
     exists (select 1 from public.ud_leady_dopasowane(p, '{"termin":"przeterminowane"}', tt.id_ula()) where id = tt.lead('Anna Kowalska'))
     and not exists (select 1 from public.ud_leady_dopasowane(p, '{"termin":"przeterminowane"}', tt.id_ula()) where id = tt.lead('Darek Decyzja')));
@@ -159,11 +170,11 @@ begin
   perform tt.t('q: imię bez względu na wielkość liter', (select array_agg(nazwa) from public.ud_leady_dopasowane(p, '{"q":"ANNA kow"}', tt.id_ula())) = array['Anna Kowalska']);
   perform tt.t('q: fragment telefonu (same cyfry)',     (select array_agg(nazwa) from public.ud_leady_dopasowane(p, '{"q":"500 100"}', tt.id_ula())) = array['Anna Kowalska']);
   perform tt.t('q: fragment e-maila',                   (select array_agg(nazwa) from public.ud_leady_dopasowane(p, '{"q":"bartek@"}', tt.id_ula())) = array['Bartek Nowak']);
-  perform tt.t('q: telefon szkicu ze spacjami',         (select array_agg(nazwa) from public.ud_leady_dopasowane(p, '{"q":"600 700 8"}', tt.id_ula())) = array['Szymon Szkic']);
+  perform tt.t('q: telefon szkicu nie trafia (szkic nie jest leadem)', (select count(*) from public.ud_leady_dopasowane(p, '{"q":"600 700 8"}', tt.id_ula())) = 0);
   perform tt.t('q: "%" nie jest wzorcem',               (select count(*) from public.ud_leady_dopasowane(p, '{"q":"%"}', tt.id_ula())) = 0);
   perform tt.t('q: "_" trafia tylko w literalny podkreślnik', (select array_agg(nazwa) from public.ud_leady_dopasowane(p, '{"q":"_"}', tt.id_ula())) = array['Gabriel Podkreślnik']);
   perform tt.t('q: "a%b" nie jest wzorcem',             (select count(*) from public.ud_leady_dopasowane(p, '{"q":"a%b"}', tt.id_ula())) = 0);
-  perform tt.t('q: puste = bez filtra',                 (select count(*) from public.ud_leady_dopasowane(p, '{"q":"   "}', tt.id_ula())) = 9);
+  perform tt.t('q: puste = bez filtra',                 (select count(*) from public.ud_leady_dopasowane(p, '{"q":"   "}', tt.id_ula())) = 8);
 
   -- K23: licznik i suma dotyczą całego filtrowanego zbioru, nie załadowanych kart.
   perform tt.t('K23: licznik po filtrze vs bez filtra ("2 z 4") i suma po filtrze (20000 z 25000)',
@@ -183,9 +194,9 @@ begin
     strona->'karty'->0->>'nazwa' = 'Anna Kowalska' and strona->'karty'->1->'dzialanie' = 'null'::jsonb);
   update public.ud_clients set created_at = now() - interval '10 days' where id = 'c0000000-0000-0000-0000-000000000007';
   strona := public.ud_leady_kolumna(p, tt.etap('nowy'), '{}', 'data', 10, 0, tt.id_ula());
-  perform tt.t('sort: data — najnowsze pierwsze (szkic, potem Gabriel, Ewa, Anna)',
+  perform tt.t('sort: data — najnowsze pierwsze (Hanna, Gabriel, Ewa, Anna)',
     (select array_agg(k->>'nazwa' order by o) from jsonb_array_elements(strona->'karty') with ordinality as t(k, o))
-    = array['Szymon Szkic', 'Gabriel Podkreślnik', 'Ewa Archiwalna', 'Anna Kowalska']);
+    = array['Hanna Szkicowa', 'Gabriel Podkreślnik', 'Ewa Archiwalna', 'Anna Kowalska']);
 
   -- Stronicowanie: rozłączne strony, razem komplet, stała kolejność.
   select array_agg((k->>'id')::uuid order by o) into s1
@@ -224,14 +235,14 @@ begin
        from public.ud_leady_historia where lead_id = c2 and typ = 'etap'));
   perform tt.t('K03: liczniki zgodne po przeniesieniu',
     (select jsonb_object_agg(e.klucz, l.ile) from public.ud_leady_liczniki(tt.pipeline(), '{}', tt.id_ula()) l join public.ud_leady_etap e on e.id = l.etap_id)
-    = '{"nowy":4,"kontakt":1,"oferta":0,"decyzja":2,"wygrany":1,"przegrany":1}'::jsonb);
+    = '{"nowy":4,"oferta":0,"decyzja":2,"wygrany":1,"przegrany":1}'::jsonb);
 
   -- K21: ponowienie z tym samym kluczem po utracie odpowiedzi.
   v := tt.wersja(c2); h := tt.hist(c2);
   r := public.ud_lead_zmien('przenies', c2, v - 1, 'mv-c2-aaaaaaaa', tt.id_ula(), jsonb_build_object('etap_id', tt.etap('decyzja')));
   perform tt.t('K21: ponowienie (nawet ze starą wersją) → ok/powtorzone, bez drugiego skutku',
     r->>'status' = 'ok' and (r->>'powtorzone')::boolean and tt.wersja(c2) = v and tt.hist(c2) = h);
-  r := public.ud_lead_zmien('przenies', c2, v - 1, 'mv-c2-aaaaaaaa', tt.id_ula(), jsonb_build_object('etap_id', tt.etap('kontakt')));
+  r := public.ud_lead_zmien('przenies', c2, v - 1, 'mv-c2-aaaaaaaa', tt.id_ula(), jsonb_build_object('etap_id', tt.etap('oferta')));
   perform tt.t('K21: ten sam klucz do innej operacji → klucz_uzyty, bez zmian',
     r->>'status' = 'klucz_uzyty' and tt.etap_leada(c2) = 'decyzja' and tt.hist(c2) = h);
   r := public.ud_lead_zmien('opiekun', c2, v, 'mv-c2-aaaaaaaa', tt.id_ula(), jsonb_build_object('opiekun_id', tt.id_ula()));
@@ -274,7 +285,7 @@ begin
     r->>'status' = 'ok' and (select powod_utraty from public.ud_leady where id = c1) is null);
   perform tt.t('powód utraty zostaje w historii',
     exists (select 1 from public.ud_leady_historia where lead_id = c1 and dane->>'powod_utraty' = 'Wybrał konkurencję'));
-  r := public.ud_lead_zmien('przenies', c1, tt.wersja(c1), 'mv-c1-nie-przegr', tt.id_ula(), jsonb_build_object('etap_id', tt.etap('kontakt'), 'powod_utraty', 'zbędny'));
+  r := public.ud_lead_zmien('przenies', c1, tt.wersja(c1), 'mv-c1-nie-przegr', tt.id_ula(), jsonb_build_object('etap_id', tt.etap('oferta'), 'powod_utraty', 'zbędny'));
   perform tt.t('powód podany przy etapie, który go nie wymaga, nie jest zapisywany',
     r->>'status' = 'ok' and (select powod_utraty from public.ud_leady where id = c1) is null);
   perform tt.przenies(c1, 'nowy', 'mv-c1-powrot-2');
@@ -282,12 +293,18 @@ begin
   -- Zamknięcie sprawy kasuje zaplanowane działanie (historia je pamięta).
   perform tt.ruch('dzialanie', c1, tt.wersja(c1), 'dz-c1-zamk-aaaa', tt.id_ula(), jsonb_build_object('typ', 'telefon', 'termin', now() + interval '2 days'));
   v := tt.wersja(c1);
-  r := tt.przenies(c1, 'wygrany', 'mv-c1-wygr-aaaa');
+  r := public.ud_lead_zmien('przenies', c1, v, 'mv-c1-wygr-aaaa', tt.id_ula(),
+         jsonb_build_object('etap_id', tt.etap('wygrany'), 'sprzedaz', jsonb_build_object('skladka_roczna', 1800)));
   perform tt.t('Wygrany: kasuje zaplanowane działanie, wersja +1, historia pamięta poprzednie',
     r->>'status' = 'ok' and r->'lead'->'dzialanie' = 'null'::jsonb and tt.wersja(c1) = v + 1
     and exists (select 1 from public.ud_leady_historia where lead_id = c1 and klucz = 'mv-c1-wygr-aaaa' and dane->'zamkniete_dzialanie'->>'typ' = 'telefon'));
   r := tt.przenies(c1, 'nowy', 'mv-c1-wygr-bbbb');
   perform tt.t('powrót do etapu otwartego nie przywraca działania', r->>'status' = 'ok' and r->'lead'->'dzialanie' = 'null'::jsonb);
+  perform tt.t('wyjście z Wygrany zeruje dane sprzedaży, historia je pamięta',
+    (select skladka_roczna is null and sprzedawca_id is null and sprzedano_at is null from public.ud_leady where id = c1)
+    and r->'lead'->'sprzedaz' = 'null'::jsonb
+    and exists (select 1 from public.ud_leady_historia where lead_id = c1 and klucz = 'mv-c1-wygr-bbbb'
+                  and (dane->'poprzednia_sprzedaz'->>'skladka_roczna')::numeric = 1800));
 
   -- K12: niedozwolony etap — także bezpośrednio przez funkcję (to jest to samo „API").
   insert into public.ud_leady_pipeline (klucz, nazwa) values ('inny', 'Inny') returning id into inny_pipe;
@@ -297,10 +314,8 @@ begin
   perform tt.t('K12: etap z innego pipeline''u → niedozwolony', r->>'status' = 'niedozwolony' and tt.etap_leada(c1) = 'nowy' and tt.wersja(c1) = v);
   r := public.ud_lead_zmien('przenies', c1, v, 'mv-losowy-aaaaaa', tt.id_ula(), jsonb_build_object('etap_id', gen_random_uuid()));
   perform tt.t('K12: nieistniejący etap → niedozwolony', r->>'status' = 'niedozwolony');
-  update public.ud_leady_etap set aktywny = false where id = tt.etap('kontakt');
   r := tt.przenies(c1, 'kontakt', 'mv-wylaczony-aa');
-  perform tt.t('K12: wyłączony etap → niedozwolony', r->>'status' = 'niedozwolony' and tt.etap_leada(c1) = 'nowy');
-  update public.ud_leady_etap set aktywny = true where id = tt.etap('kontakt');
+  perform tt.t('K12: wyłączony etap (Kontakt po scaleniu) → niedozwolony', r->>'status' = 'niedozwolony' and tt.etap_leada(c1) = 'nowy');
   r := public.ud_lead_zmien('przenies', c1, v, 'mv-zly-uuid-aaaa', tt.id_ula(), '{"etap_id":"nie-uuid"}');
   perform tt.t('K12: śmieciowy etap_id → błędne dane, nie wyjątek', r->>'status' = 'bledne_dane');
   r := public.ud_lead_zmien('przenies', c1, v, 'mv-brak-etapu-aa', tt.id_ula(), '{}');
@@ -419,24 +434,24 @@ do $$
 declare
   p uuid := tt.pipeline(); w uuid[]; inny_etap uuid; wyjatek boolean;
 begin
-  w := public.ud_leady_zwin(tt.id_ula(), p, tt.etap('kontakt'), true);
-  perform tt.t('zwijanie: dodaje etap', w = array[tt.etap('kontakt')]);
-  w := public.ud_leady_zwin(tt.id_ula(), p, tt.etap('kontakt'), true);
+  w := public.ud_leady_zwin(tt.id_ula(), p, tt.etap('nowy'), true);
+  perform tt.t('zwijanie: dodaje etap', w = array[tt.etap('nowy')]);
+  w := public.ud_leady_zwin(tt.id_ula(), p, tt.etap('nowy'), true);
   perform tt.t('zwijanie: powtórka nie dubluje', cardinality(w) = 1);
   w := public.ud_leady_zwin(tt.id_ula(), p, tt.etap('oferta'), true);
-  perform tt.t('zwijanie: dwa etapy', w @> array[tt.etap('kontakt'), tt.etap('oferta')] and cardinality(w) = 2);
+  perform tt.t('zwijanie: dwa etapy', w @> array[tt.etap('nowy'), tt.etap('oferta')] and cardinality(w) = 2);
   perform tt.t('zwijanie: osobno dla użytkownika — Olek nie ma zwiniętych',
     (select count(*) from public.ud_leady_widok_uzytkownika where user_id = tt.id_olek()) = 0);
   w := public.ud_leady_zwin(tt.id_olek(), p, tt.etap('decyzja'), true);
   perform tt.t('zwijanie: stan Oleka nie dotyka stanu Uli',
-    w = array[tt.etap('decyzja')] and (select zwiniete from public.ud_leady_widok_uzytkownika where user_id = tt.id_ula()) @> array[tt.etap('kontakt')]);
-  w := public.ud_leady_zwin(tt.id_ula(), p, tt.etap('kontakt'), false);
+    w = array[tt.etap('decyzja')] and (select zwiniete from public.ud_leady_widok_uzytkownika where user_id = tt.id_ula()) @> array[tt.etap('nowy')]);
+  w := public.ud_leady_zwin(tt.id_ula(), p, tt.etap('nowy'), false);
   perform tt.t('rozwijanie: zdejmuje etap', w = array[tt.etap('oferta')]);
   w := public.ud_leady_zwin(tt.id_ula(), p, null, false);
   perform tt.t('rozwiń wszystkie: pusty zbiór', cardinality(w) = 0);
   perform tt.t('zwijanie nie zmienia danych leadów ani kolejności etapów',
     (select array_agg(klucz order by pozycja) from public.ud_leady_etap where pipeline_id = p) = array['nowy','kontakt','oferta','decyzja','wygrany','przegrany']
-    and (select count(*) from public.ud_leady) = 9);
+    and (select count(*) from public.ud_leady) = 8);
 
   insert into public.ud_leady_etap (pipeline_id, klucz, nazwa, pozycja)
     select id, 'obcy2', 'Obcy', 10 from public.ud_leady_pipeline where klucz = 'inny' returning id into inny_etap;
@@ -444,168 +459,53 @@ begin
   begin perform public.ud_leady_zwin(tt.id_ula(), p, inny_etap, true); exception when invalid_parameter_value then wyjatek := true; end;
   perform tt.t('zwijanie: etap z innego pipeline''u odrzucony', wyjatek);
   wyjatek := false;
-  begin perform public.ud_leady_zwin(tt.id_ines(), p, tt.etap('kontakt'), true); exception when insufficient_privilege then wyjatek := true; end;
+  begin perform public.ud_leady_zwin(tt.id_ula(), p, tt.etap('kontakt'), true); exception when invalid_parameter_value then wyjatek := true; end;
+  perform tt.t('zwijanie: wyłączony etap (Kontakt) odrzucony', wyjatek);
+  wyjatek := false;
+  begin perform public.ud_leady_zwin(tt.id_ines(), p, tt.etap('nowy'), true); exception when insufficient_privilege then wyjatek := true; end;
   perform tt.t('zwijanie: nieaktywny agent odrzucony', wyjatek);
 end $$;
 
--- ─── 9. Szkice: zgoda, ukończenie, retencja, wyzwalacz ──────────────────────
+-- ─── 9. Porzucone wnioski nie są leadami (decyzja z 02.10.2026) ────────────
 do $$
-declare
-  s1 uuid := '50000000-0000-0000-0000-000000000001'; lead_s uuid; n int;
-  k uuid;
+declare ok boolean;
 begin
-  -- Notatka na leadzie szkicu — ma zniknąć razem z nim.
-  lead_s := tt.lead('Szymon Szkic');
-  perform public.ud_lead_notatka(lead_s, 'nt-s1-aaaaaaaa', tt.id_ula(), 'Dzwoniłam, nie odebrał');
-  perform tt.przenies(lead_s, 'kontakt', 'mv-s1-aaaaaaaa');
-
-  -- Wycofanie zgody dokładnie tak, jak robi to funkcja brzegowa.
-  update public.ud_wnioski_szkice
-     set zgoda_kontakt = false, zgoda_wycofana_at = now(), imie = null, email = null, phone = null, updated_at = now()
-   where id = s1;
-  perform tt.t('wycofanie zgody: lead znika od razu (wyzwalacz)', not exists (select 1 from public.ud_leady where szkic_id = s1));
-  perform tt.t('wycofanie zgody: notatki i historia znikają razem z leadem',
-    not exists (select 1 from public.ud_leady_notatki where lead_id = lead_s) and not exists (select 1 from public.ud_leady_historia where lead_id = lead_s));
-  perform tt.t('wycofanie zgody: synchronizacja go nie odtwarza', (public.ud_leady_synchronizuj()->>'szkice')::int = 0);
+  perform tt.t('szkice: żaden nie ma leada, synchronizacja ich nie dokłada',
+    (public.ud_leady_synchronizuj()->>'klienci')::int = 0 and not exists (select 1 from public.ud_leady where szkic_id is not null));
+  ok := false;
+  begin
+    insert into public.ud_leady (pipeline_id, etap_id, szkic_id)
+      values (tt.pipeline(), tt.etap('nowy'), '50000000-0000-0000-0000-000000000001');
+  exception when check_violation then ok := true;
+  end;
+  perform tt.t('szkice: bezpośredni zapis leada ze szkicu odrzuca baza', ok);
 end $$;
 
--- Cofnięcie zaznaczenia zgody w kroku kontakt (bez wycofania z maila) też usuwa lead.
-insert into public.ud_wnioski_szkice (id, ostatni_krok, imie, email, phone, zgoda_kontakt, zgoda_wersja, zgoda_tresc, zgoda_at) values
-  ('50000000-0000-0000-0000-000000000005', 'kontakt', 'Ola Odznacz', 'ola@x.pl', '111222333', true, 'v1', 'treść', now());
-select public.ud_leady_synchronizuj();
-do $$
-declare s uuid := '50000000-0000-0000-0000-000000000005';
-begin
-  perform tt.t('szkic ze zgodą dostaje lead', exists (select 1 from public.ud_leady where szkic_id = s));
-  update public.ud_wnioski_szkice set zgoda_kontakt = false, imie = null, email = null, phone = null where id = s;
-  perform tt.t('cofnięcie zaznaczenia zgody: lead znika', not exists (select 1 from public.ud_leady where szkic_id = s));
-end $$;
-
--- Ukończenie wniosku z dopasowanym klientem → lead przechodzi na klienta, notatki zostają.
+-- Ukończenie wniosku: działa bez żadnego wyzwalacza; klient staje się leadem
+-- przy najbliższej synchronizacji, a retencja szkicu go nie rusza.
 insert into public.ud_wnioski_szkice (id, created_at, updated_at, ostatni_krok, imie, email, phone, zgoda_kontakt, zgoda_wersja, zgoda_tresc, zgoda_at) values
   ('50000000-0000-0000-0000-000000000006', now() - interval '2 hours', now() - interval '1 hour', 'zakres', 'Ignacy Ukończy', 'ignacy@x.pl', '444555666', true, 'v1', 'treść', now() - interval '2 hours');
-select public.ud_leady_synchronizuj();
 do $$
-declare s uuid := '50000000-0000-0000-0000-000000000006'; ls uuid; v int; klient uuid := 'c0000000-0000-0000-0000-000000000009';
+declare s uuid := '50000000-0000-0000-0000-000000000006'; klient uuid := 'c0000000-0000-0000-0000-000000000009';
 begin
-  select id into ls from public.ud_leady where szkic_id = s;
-  perform public.ud_lead_notatka(ls, 'nt-s6-aaaaaaaa', tt.id_ula(), 'Obiecał dokończyć wieczorem');
-  perform tt.przenies(ls, 'kontakt', 'mv-s6-aaaaaaaa');
-  v := tt.wersja(ls);
-
-  -- Klient składa wniosek (form-submit zapisuje ud_clients), potem kreator woła ukoncz.
+  perform public.ud_leady_synchronizuj();
+  perform tt.t('szkic ze zgodą nie dostaje leada', not exists (select 1 from public.ud_leady where szkic_id = s));
   insert into public.ud_clients (id, full_name, email, phone, source, risk_temp_incapacity, temp_incapacity_sum)
     values (klient, 'Ignacy Ukończyłem', 'IGNACY@x.pl', '444555666', 'form', true, '9000');
   perform public.ud_wnioski_szkic_ukoncz(s);
-
-  perform tt.t('ukończenie: ten sam lead przepięty na klienta (id leada bez zmian)',
-    exists (select 1 from public.ud_leady where id = ls and klient_id = klient and szkic_id is null));
-  perform tt.t('ukończenie: notatka, etap i historia zostają',
-    (select count(*) from public.ud_leady_notatki where lead_id = ls) = 1 and tt.etap_leada(ls) = 'kontakt' and tt.hist(ls) >= 3);
-  perform tt.t('ukończenie: wersja wzrosła (otwarte karty zgłoszą konflikt, nie nadpiszą)', tt.wersja(ls) = v + 1);
-  perform tt.t('ukończenie: karta pokazuje już dane klienta i kwotę',
-    (public.ud_lead_karta(ls)->>'nazwa') = 'Ignacy Ukończyłem' and (public.ud_lead_karta(ls)->>'wartosc')::numeric = 9000 and public.ud_lead_karta(ls)->>'dane_do' is null);
-  perform tt.t('ukończenie: synchronizacja nie tworzy drugiego leada dla tego klienta',
-    (public.ud_leady_synchronizuj()->>'klienci')::int = 0 and (select count(*) from public.ud_leady where klient_id = klient) = 1);
+  perform tt.t('ukończenie: szkic zamknięty i powiązany z klientem, dane kontaktowe usunięte',
+    (select ukonczony_at is not null and client_id = klient and email is null from public.ud_wnioski_szkice where id = s));
+  perform tt.t('ukończenie: synchronizacja dokłada klienta', (public.ud_leady_synchronizuj()->>'klienci')::int = 1);
+  perform tt.t('ukończenie: klient jest leadem w Nowym', tt.etap_leada((select id from public.ud_leady where klient_id = klient)) = 'nowy');
 end $$;
 update public.ud_wnioski_szkice set updated_at = now() - interval '40 days' where id = '50000000-0000-0000-0000-000000000006';
 select public.ud_wnioski_szkice_retencja();
 do $$
 begin
-  perform tt.t('retencja: szkic usunięty, lead klienta (z notatką) przeżywa',
+  perform tt.t('retencja: szkic usunięty, lead klienta przeżywa',
     not exists (select 1 from public.ud_wnioski_szkice where id = '50000000-0000-0000-0000-000000000006')
-    and exists (select 1 from public.ud_leady l join public.ud_leady_notatki n on n.lead_id = l.id where l.klient_id = 'c0000000-0000-0000-0000-000000000009'));
+    and exists (select 1 from public.ud_leady where klient_id = 'c0000000-0000-0000-0000-000000000009'));
 end $$;
-
--- Scalenie: lead klienta powstał (synchronizacja) zanim szkic został oznaczony jako ukończony.
-insert into public.ud_wnioski_szkice (id, created_at, updated_at, ostatni_krok, imie, email, phone, zgoda_kontakt, zgoda_wersja, zgoda_tresc, zgoda_at) values
-  ('50000000-0000-0000-0000-000000000007', now() - interval '2 hours', now() - interval '1 hour', 'dane', 'Jola Dubel', 'jola@x.pl', '777888999', true, 'v1', 'treść', now() - interval '2 hours');
-select public.ud_leady_synchronizuj();
-do $$
-declare s uuid := '50000000-0000-0000-0000-000000000007'; ls uuid; klient uuid := 'c0000000-0000-0000-0000-00000000000a'; lk uuid;
-begin
-  select id into ls from public.ud_leady where szkic_id = s;
-  perform public.ud_lead_notatka(ls, 'nt-s7-aaaaaaaa', tt.id_ula(), 'Notatka ze szkicu');
-  insert into public.ud_clients (id, full_name, email, source) values (klient, 'Jola Dubel', 'jola@x.pl', 'form');
-  perform public.ud_leady_synchronizuj();                              -- lead klienta powstaje, szkic jeszcze „otwarty"
-  select id into lk from public.ud_leady where klient_id = klient;
-  perform tt.t('scalenie: przed ukończeniem są dwa leady (szkic i klient)', ls is not null and lk is not null and ls <> lk);
-  perform public.ud_wnioski_szkic_ukoncz(s);
-  perform tt.t('scalenie: zostaje jeden lead klienta, notatka ze szkicu do niego przeniesiona',
-    not exists (select 1 from public.ud_leady where id = ls)
-    and (select count(*) from public.ud_leady_notatki where lead_id = lk) = 1);
-end $$;
-
--- Ukończenie bez dopasowanego klienta (inny e-mail) → lead znika, nie wisi bez tożsamości.
-insert into public.ud_wnioski_szkice (id, ostatni_krok, imie, email, phone, zgoda_kontakt, zgoda_wersja, zgoda_tresc, zgoda_at) values
-  ('50000000-0000-0000-0000-000000000008', 'zdrowie', 'Kuba Bez Dopasowania', 'kuba@x.pl', '123123123', true, 'v1', 'treść', now());
-select public.ud_leady_synchronizuj();
-do $$
-declare s uuid := '50000000-0000-0000-0000-000000000008';
-begin
-  perform tt.t('szkic ma lead przed ukończeniem', exists (select 1 from public.ud_leady where szkic_id = s));
-  perform public.ud_wnioski_szkic_ukoncz(s);
-  perform tt.t('ukończenie bez klienta: lead znika', not exists (select 1 from public.ud_leady where szkic_id = s));
-end $$;
-
--- Retencja szkicu bez klienta: lead znika razem z nim (obietnica 30 dni).
-insert into public.ud_wnioski_szkice (id, ostatni_krok, imie, email, phone, zgoda_kontakt, zgoda_wersja, zgoda_tresc, zgoda_at) values
-  ('50000000-0000-0000-0000-000000000009', 'kontakt', 'Lena Retencja', 'lena@x.pl', '321321321', true, 'v1', 'treść', now());
-select public.ud_leady_synchronizuj();
-do $$
-declare s uuid := '50000000-0000-0000-0000-000000000009'; ls uuid;
-begin
-  select id into ls from public.ud_leady where szkic_id = s;
-  perform public.ud_lead_notatka(ls, 'nt-s9-aaaaaaaa', tt.id_ula(), 'Do usunięcia razem ze szkicem');
-  perform tt.t('retencja: dane szkicu żyją do updated_at + 30 dni', (public.ud_lead_karta(ls)->>'dane_do')::timestamptz > now() + interval '29 days');
-  update public.ud_wnioski_szkice set updated_at = now() - interval '31 days' where id = s;
-  perform public.ud_wnioski_szkice_retencja();
-  perform tt.t('retencja: szkic > 30 dni → lead, notatki i historia znikają',
-    not exists (select 1 from public.ud_leady where id = ls)
-    and not exists (select 1 from public.ud_leady_notatki where lead_id = ls)
-    and not exists (select 1 from public.ud_leady_historia where lead_id = ls));
-end $$;
-
--- Wyzwalacz nie może zepsuć ukończenia wniosku — nawet gdy sam się wywróci.
-begin;
-create or replace function public.ud_leady_przepnij_szkic(p_szkic uuid, p_klient uuid) returns void language plpgsql as $$
-begin raise exception 'awaria wyzwalacza (test)'; end $$;
-insert into public.ud_wnioski_szkice (id, ostatni_krok, imie, email, zgoda_kontakt, zgoda_wersja, zgoda_tresc, zgoda_at) values
-  ('50000000-0000-0000-0000-00000000000b', 'dane', 'Wiktor Awaria', 'wiktor@x.pl', true, 'v1', 'treść', now());
-insert into public.ud_clients (id, full_name, email, source) values ('c0000000-0000-0000-0000-00000000000b', 'Wiktor Awaria', 'wiktor@x.pl', 'form');
-do $$
-declare ok boolean := true;
-begin
-  begin
-    perform public.ud_wnioski_szkic_ukoncz('50000000-0000-0000-0000-00000000000b');
-  exception when others then ok := false;
-  end;
-  perform tt.t('wyzwalacz: awaria przepięcia NIE przerywa ukończenia wniosku',
-    ok and (select ukonczony_at is not null and client_id = 'c0000000-0000-0000-0000-00000000000b'
-              from public.ud_wnioski_szkice where id = '50000000-0000-0000-0000-00000000000b'));
-end $$;
-rollback;
-
--- Siatka bezpieczeństwa: bez wyzwalacza widok i tak nie pokazuje danych szkicu bez zgody.
-insert into public.ud_wnioski_szkice (id, ostatni_krok, imie, email, phone, zgoda_kontakt, zgoda_wersja, zgoda_tresc, zgoda_at) values
-  ('50000000-0000-0000-0000-00000000000c', 'kontakt', 'Zofia Siatka', 'zofia@x.pl', '999000111', true, 'v1', 'treść', now());
-select public.ud_leady_synchronizuj();
-alter table public.ud_wnioski_szkice disable trigger ud_leady_szkic_zmiana;
-update public.ud_wnioski_szkice set zgoda_kontakt = false, zgoda_wycofana_at = now(), imie = null, email = null, phone = null
- where id = '50000000-0000-0000-0000-00000000000c';
-do $$
-declare s uuid := '50000000-0000-0000-0000-00000000000c';
-begin
-  perform tt.t('bez wyzwalacza: wiersz leada jeszcze jest, ale widok go nie pokazuje',
-    exists (select 1 from public.ud_leady where szkic_id = s) and not exists (select 1 from public.ud_leady_baza where szkic_id = s));
-  perform tt.t('bez wyzwalacza: liczniki go nie liczą', (select sum(ile_wszystkich) from public.ud_leady_liczniki(tt.pipeline(), '{}', tt.id_ula())) =
-    (select count(*) from public.ud_leady_baza where pipeline_id = tt.pipeline()));
-  perform tt.t('bez wyzwalacza: nie da się go ruszyć',
-    public.ud_lead_zmien('przenies', (select id from public.ud_leady where szkic_id = s), 1, 'mv-siatka-aaaa', tt.id_ula(), jsonb_build_object('etap_id', tt.etap('kontakt')))->>'status' = 'brak_leada');
-  perform public.ud_leady_synchronizuj();
-  perform tt.t('bez wyzwalacza: synchronizacja domyka sprzątanie', not exists (select 1 from public.ud_leady where szkic_id = s));
-end $$;
-alter table public.ud_wnioski_szkice enable trigger ud_leady_szkic_zmiana;
 
 -- Usunięcie klienta z kartoteki usuwa lead (prawo do usunięcia danych).
 do $$
@@ -619,14 +519,15 @@ begin
     and not exists (select 1 from public.ud_leady_notatki where lead_id = ls));
 end $$;
 
--- Wyzwalacz sprzątający nie dotyka ścieżki zapisu wniosku: żadnych wyzwalaczy na ud_clients.
+-- Tablica nie dotyka ścieżki zapisu wniosku: żadnych wyzwalaczy — ani na ud_clients,
+-- ani (od części 3) na szkicach.
 do $$
 begin
-  perform tt.t('ud_clients nie ma żadnych wyzwalaczy od tablicy leadów',
+  perform tt.t('ud_clients nie ma żadnych wyzwalaczy',
     not exists (select 1 from pg_trigger t where t.tgrelid = 'public.ud_clients'::regclass and not t.tgisinternal));
-  perform tt.t('jedyny wyzwalacz tablicy leadów stoi na szkicach',
-    (select array_agg(c.relname::text) from pg_trigger t join pg_proc p on p.oid = t.tgfoid join pg_class c on c.oid = t.tgrelid
-      where not t.tgisinternal and p.proname like 'ud_leady%') = array['ud_wnioski_szkice']);
+  perform tt.t('tablica leadów nie ma żadnego wyzwalacza (także na szkicach)',
+    not exists (select 1 from pg_trigger t join pg_proc p on p.oid = t.tgfoid
+                 where not t.tgisinternal and (p.proname like 'ud_lead%' or t.tgrelid = 'public.ud_wnioski_szkice'::regclass)));
 end $$;
 
 -- Dwa pipeline'y: kolumna leadów jednego nie miesza się z drugim.
@@ -643,10 +544,11 @@ declare pl jsonb; p uuid := tt.pipeline();
 begin
   perform public.ud_leady_zwin(tt.id_ula(), p, tt.etap('oferta'), true);
   pl := public.ud_leady_plan(tt.id_ula(), null);
-  perform tt.t('plan: rola, pipeline, sześć etapów w kolejności',
+  perform tt.t('plan: rola, pipeline, pięć etapów w kolejności (bez Kontaktu)',
     pl->>'rola' = 'user' and pl->'pipeline'->>'klucz' = 'sprzedaz'
     and (select array_agg(e->>'klucz' order by o) from jsonb_array_elements(pl->'etapy') with ordinality t(e, o))
-        = array['nowy', 'kontakt', 'oferta', 'decyzja', 'wygrany', 'przegrany']);
+        = array['nowy', 'oferta', 'decyzja', 'wygrany', 'przegrany']);
+  perform tt.t('plan: etap „Wygrany" wymaga składki rocznej', (select e->'wymagane_pola' from jsonb_array_elements(pl->'etapy') e where e->>'klucz' = 'wygrany') = '["skladka_roczna"]'::jsonb);
   perform tt.t('plan: zwinięte etapy tego użytkownika', pl->'zwiniete' = jsonb_build_array(tt.etap('oferta')));
   perform tt.t('plan: inny użytkownik ma własne zwinięcia (Olek: tylko Decyzja)', public.ud_leady_plan(tt.id_olek(), null)->'zwiniete' = jsonb_build_array(tt.etap('decyzja')));
   perform tt.t('plan: etap „Przegrany" niesie wymagane pola', (select e->'wymagane_pola' from jsonb_array_elements(pl->'etapy') e where e->>'klucz' = 'przegrany') = '["powod_utraty"]'::jsonb);
@@ -655,8 +557,150 @@ begin
   perform tt.t('plan: nieaktywny agent i obcy uuid → null', public.ud_leady_plan(tt.id_ines(), null) is null and public.ud_leady_plan(gen_random_uuid(), null) is null);
   update public.ud_leady_etap set aktywny = false where id = tt.etap('oferta');
   perform tt.t('plan: wyłączony etap znika z planu i ze zwiniętych',
-    jsonb_array_length(public.ud_leady_plan(tt.id_ula(), null)->'etapy') = 5 and public.ud_leady_plan(tt.id_ula(), null)->'zwiniete' = '[]'::jsonb);
+    jsonb_array_length(public.ud_leady_plan(tt.id_ula(), null)->'etapy') = 4 and public.ud_leady_plan(tt.id_ula(), null)->'zwiniete' = '[]'::jsonb);
   update public.ud_leady_etap set aktywny = true where id = tt.etap('oferta');
+end $$;
+
+-- ─── 10. Dane sprzedaży i statystyki ───────────────────────────────────────
+-- Stan wejściowy: Celina w Wygrany z danymi z wariantu (bez opiekuna), Bartek
+-- w Decyzji (opiekun Ula), Darek w Ofercie (opiekun Olek), Gabriel w Nowym
+-- (bez opiekuna), Anna w Nowym, Ignacy w Nowym.
+do $$
+declare
+  c2 uuid := tt.lead('Bartek Nowak'); c4 uuid := tt.lead('Darek Decyzja'); c7 uuid := tt.lead('Gabriel Podkreślnik');
+  c1 uuid := tt.lead('Anna Kowalska');
+  r jsonb; v int; h int;
+  wyg uuid := tt.etap('wygrany');
+begin
+  -- Wejście do Wygrany wymaga składki rocznej.
+  v := tt.wersja(c4);
+  r := public.ud_lead_zmien('przenies', c4, v, 'sp-c4-brak-aaaa', tt.id_olek(), jsonb_build_object('etap_id', wyg));
+  perform tt.t('sprzedaż: Wygrany bez składki → brak_danych, lead bez zmian',
+    r->>'status' = 'brak_danych' and r->'pola' = '["skladka_roczna"]'::jsonb and tt.etap_leada(c4) = 'oferta' and tt.wersja(c4) = v);
+  r := public.ud_lead_zmien('przenies', c4, v, 'sp-c4-abc-aaaaa', tt.id_olek(),
+         jsonb_build_object('etap_id', wyg, 'sprzedaz', jsonb_build_object('skladka_roczna', 'abc')));
+  perform tt.t('sprzedaż: kwota „abc" → błędne dane', r->>'status' = 'bledne_dane' and tt.etap_leada(c4) = 'oferta');
+  r := public.ud_lead_zmien('przenies', c4, v, 'sp-c4-zero-aaaa', tt.id_olek(),
+         jsonb_build_object('etap_id', wyg, 'sprzedaz', jsonb_build_object('skladka_roczna', 0)));
+  perform tt.t('sprzedaż: kwota 0 → błędne dane', r->>'status' = 'bledne_dane');
+  r := public.ud_lead_zmien('przenies', c4, v, 'sp-c4-minus-aaa', tt.id_olek(),
+         jsonb_build_object('etap_id', wyg, 'sprzedaz', jsonb_build_object('skladka_roczna', '-5')));
+  perform tt.t('sprzedaż: kwota ujemna → błędne dane', r->>'status' = 'bledne_dane');
+  r := public.ud_lead_zmien('przenies', c4, v, 'sp-c4-cudzy-aaa', tt.id_olek(),
+         jsonb_build_object('etap_id', wyg, 'sprzedaz', jsonb_build_object('skladka_roczna', 4200,
+                            'wariant_id', '0d000000-0000-0000-0000-00000000002b')));
+  perform tt.t('sprzedaż: wariant z oferty innego klienta → błędne dane', r->>'status' = 'bledne_dane' and tt.etap_leada(c4) = 'oferta');
+  perform tt.t('sprzedaż: odrzucone żądania nie zostawiają historii',
+    not exists (select 1 from public.ud_leady_historia where klucz like 'sp-c4-%'));
+
+  r := public.ud_lead_zmien('przenies', c4, v, 'sp-c4-ok-aaaaaa', tt.id_olek(),
+         jsonb_build_object('etap_id', wyg, 'sprzedaz', jsonb_build_object('skladka_roczna', 2400)));
+  perform tt.t('sprzedaż: sama składka roczna wystarcza; sprzedawca = opiekun (Olek)',
+    r->>'status' = 'ok' and tt.etap_leada(c4) = 'wygrany'
+    and (select skladka_roczna = 2400 and skladka_mies is null and sprzedawca_id = tt.id_olek() and sprzedano_at is not null
+           from public.ud_leady where id = c4));
+
+  -- Wariant z ofert klienta, kwoty tekstem jak z formularza.
+  r := public.ud_lead_zmien('przenies', c2, tt.wersja(c2), 'sp-c2-ok-aaaaaa', tt.id_adm(),
+         jsonb_build_object('etap_id', wyg, 'sprzedaz', jsonb_build_object(
+           'wariant_id', '0d000000-0000-0000-0000-00000000002a', 'skladka_roczna', '3 036,00 zł', 'skladka_mies', '253',
+           'swiadczenie_okresowa', 10000)));
+  perform tt.t('sprzedaż: wariant klienta i kwoty tekstem; sprzedawca = opiekun (Ula), nie wykonawca (admin)',
+    r->>'status' = 'ok' and (r->'lead'->'sprzedaz'->>'skladka_roczna')::numeric = 3036
+    and (select sprzedaz_wariant_id = '0d000000-0000-0000-0000-00000000002a' and skladka_mies = 253
+                and swiadczenie_okresowa = 10000 and sprzedawca_id = tt.id_ula() from public.ud_leady where id = c2));
+  perform tt.t('sprzedaż: historia zapisuje dane sprzedaży',
+    exists (select 1 from public.ud_leady_historia where lead_id = c2 and klucz = 'sp-c2-ok-aaaaaa'
+              and (dane->'sprzedaz'->>'skladka_roczna')::numeric = 3036));
+  r := public.ud_lead_zmien('przenies', c2, tt.wersja(c2) - 1, 'sp-c2-ok-aaaaaa', tt.id_adm(),
+         jsonb_build_object('etap_id', wyg, 'sprzedaz', jsonb_build_object(
+           'wariant_id', '0d000000-0000-0000-0000-00000000002a', 'skladka_roczna', 3036, 'skladka_mies', 253,
+           'swiadczenie_okresowa', '10 000')));
+  perform tt.t('sprzedaż: ponowienie z tymi samymi kwotami w innym zapisie → powtórzone', r->>'status' = 'ok' and (r->>'powtorzone')::boolean);
+
+  -- Lead bez opiekuna: sprzedawca = ten, kto przeniósł.
+  r := public.ud_lead_zmien('przenies', c7, tt.wersja(c7), 'sp-c7-ok-aaaaaa', tt.id_ula(),
+         jsonb_build_object('etap_id', wyg, 'sprzedaz', jsonb_build_object('skladka_roczna', 1200)));
+  perform tt.t('sprzedaż: lead bez opiekuna → sprzedawcą jest przenoszący',
+    r->>'status' = 'ok' and (select sprzedawca_id from public.ud_leady where id = c7) = tt.id_ula());
+
+  -- Uzupełnienie / poprawka danych w Wygrany.
+  v := tt.wersja(c7); h := tt.hist(c7);
+  r := public.ud_lead_zmien('sprzedaz', c7, v, 'sp-c7-mies-aaaa', tt.id_ula(), jsonb_build_object('skladka_roczna', 1200, 'skladka_mies', 110));
+  perform tt.t('sprzedaż: poprawka — wersja +1, wpis „sprzedaz" z poprzednimi kwotami',
+    r->>'status' = 'ok' and tt.wersja(c7) = v + 1 and tt.hist(c7) = h + 1
+    and exists (select 1 from public.ud_leady_historia where lead_id = c7 and typ = 'sprzedaz'
+                  and (dane->'poprzednia_sprzedaz'->>'skladka_roczna')::numeric = 1200));
+  r := public.ud_lead_zmien('sprzedaz', c7, v + 1, 'sp-c7-same-aaaa', tt.id_ula(), jsonb_build_object('skladka_roczna', 1200, 'skladka_mies', 110));
+  perform tt.t('sprzedaż: te same kwoty → bez_zmiany', r->>'status' = 'bez_zmiany' and tt.wersja(c7) = v + 1);
+  r := public.ud_lead_zmien('sprzedaz', c7, v + 1, 'sp-c7-bez-aaaaa', tt.id_ula(), jsonb_build_object('skladka_mies', 110));
+  perform tt.t('sprzedaż: poprawka bez składki rocznej → brak_danych', r->>'status' = 'brak_danych');
+  r := public.ud_lead_zmien('sprzedaz', c1, tt.wersja(c1), 'sp-c1-nie-aaaaa', tt.id_ula(), jsonb_build_object('skladka_roczna', 100));
+  perform tt.t('sprzedaż: dane sprzedaży poza Wygrany → niedozwolony', r->>'status' = 'niedozwolony');
+
+  -- Kupiona oferta bez zapisanego wyboru: Wygrany „bez danych", do uzupełnienia.
+  insert into public.ud_clients (id, created_at, full_name, email, source) values
+    ('c0000000-0000-0000-0000-00000000000d', now() - interval '3 days', 'Olga Bezdanych', 'olga@x.pl', 'form');
+  insert into public.ud_offers (user_id, client_id, status, created_at, decided_at) values
+    ('a0000000-0000-0000-0000-0000000000a3', 'c0000000-0000-0000-0000-00000000000d', 'bought', now() - interval '3 days', now() - interval '2 days');
+  perform public.ud_leady_synchronizuj();
+  perform tt.t('sync: kupiona bez wyboru wariantu → Wygrany bez danych sprzedaży',
+    tt.etap_leada(tt.lead('Olga Bezdanych')) = 'wygrany'
+    and (select skladka_roczna is null and sprzedawca_id is null from public.ud_leady where id = tt.lead('Olga Bezdanych')));
+
+  -- Opiekun-administrator: karta to mówi (panel go wtedy nie pokazuje).
+  perform public.ud_lead_zmien('opiekun', c1, tt.wersja(c1), 'op-c1-admin-aaa', tt.id_adm(), jsonb_build_object('opiekun_id', tt.id_adm()));
+  perform tt.t('karta: opiekun-administrator oznaczony', public.ud_lead_karta(c1)->'opiekun_admin' = 'true'::jsonb
+    and public.ud_lead_karta(c1)->>'opiekun_nazwa' = 'Ada Admin');
+end $$;
+
+do $$
+declare
+  st jsonb; a jsonb;
+  c7 uuid := tt.lead('Gabriel Podkreślnik');
+begin
+  -- Wygrane: Celina 6000/500 (bez opiekuna), Bartek 3036/253 (Ula), Darek 2400/— (Olek),
+  -- Gabriel 1200/110 (Ula), Olga bez danych (opiekun Olek z oferty).
+  st := public.ud_leady_statystyki(tt.id_adm());
+  perform tt.t('statystyki admina: liczba sprzedaży i komplet danych',
+    (st->'podsumowanie'->>'sprzedaze')::int = 5 and (st->'podsumowanie'->>'z_danymi')::int = 4);
+  perform tt.t('statystyki admina: składka roczna (suma) = 12636',
+    (st->'podsumowanie'->>'skladka_roczna_suma')::numeric = 12636);
+  perform tt.t('statystyki admina: składki miesięczne — suma 1063 (Darek 2400/12 = 200), średnia 265.75, 1 wyliczona',
+    (st->'podsumowanie'->>'skladka_mies_suma')::numeric = 1063 and (st->'podsumowanie'->>'skladka_mies_srednia')::numeric = 265.75
+    and (st->'podsumowanie'->>'skladka_mies_wyliczonych')::int = 1);
+  perform tt.t('statystyki admina: świadczenia per ryzyko (łącznie, średnio)',
+    (st->'podsumowanie'->'okresowa'->>'n')::int = 2 and (st->'podsumowanie'->'okresowa'->>'suma')::numeric = 18000
+    and (st->'podsumowanie'->'okresowa'->>'srednia')::numeric = 9000
+    and (st->'podsumowanie'->'zgon'->>'suma')::numeric = 50000 and (st->'podsumowanie'->'trwala'->>'n')::int = 0);
+  perform tt.t('statystyki admina: lista „bez danych" = Olga',
+    (select array_agg(x->>'nazwa') from jsonb_array_elements(st->'bez_danych') x) = array['Olga Bezdanych']);
+  perform tt.t('statystyki admina: podział na agentów (Bez opiekuna 6000, Ula 4236, Olek 2400 + Olga)',
+    (select jsonb_agg(jsonb_build_array(x->>'nazwa', (x->>'sprzedaze')::int, (x->>'skladka_roczna_suma')::numeric))
+       from jsonb_array_elements(st->'wg_agentow') x)
+    = '[["Bez opiekuna", 1, 6000], ["Ula Agent", 2, 4236], ["Olek Agent", 2, 2400]]'::jsonb);
+  perform tt.t('statystyki admina: lista agentów do wyboru', jsonb_array_length(st->'agenci') = 3);
+
+  st := public.ud_leady_statystyki(tt.id_adm(), null, null, tt.id_olek());
+  perform tt.t('statystyki admina dla wybranego agenta (Olek): tylko jego, bez podziału',
+    (st->'podsumowanie'->>'sprzedaze')::int = 2 and (st->'podsumowanie'->>'skladka_roczna_suma')::numeric = 2400
+    and st->'wg_agentow' = 'null'::jsonb);
+
+  st := public.ud_leady_statystyki(tt.id_ula(), null, null, tt.id_olek());
+  perform tt.t('statystyki agenta: wyłącznie swoje, nawet gdy prosi o cudze',
+    (st->'podsumowanie'->>'sprzedaze')::int = 2 and (st->'podsumowanie'->>'skladka_roczna_suma')::numeric = 4236
+    and st->>'agent' = tt.id_ula()::text and st->'wg_agentow' = 'null'::jsonb and st->'agenci' = 'null'::jsonb);
+  perform tt.t('statystyki: nieaktywny agent i obcy → null',
+    public.ud_leady_statystyki(tt.id_ines()) is null and public.ud_leady_statystyki(gen_random_uuid()) is null);
+  perform tt.t('statystyki: okres w przyszłości → zero sprzedaży',
+    (public.ud_leady_statystyki(tt.id_adm(), now() + interval '1 day', null)->'podsumowanie'->>'sprzedaze')::int = 0);
+
+  -- Archiwizacja nie kasuje sprzedaży ze statystyk.
+  perform public.ud_lead_zmien('archiwizuj', c7, tt.wersja(c7), 'ar-c7-aaaaaaaa', tt.id_ula(), '{}');
+  perform tt.t('statystyki: zarchiwizowana sprzedaż dalej się liczy',
+    (public.ud_leady_statystyki(tt.id_ula())->'podsumowanie'->>'sprzedaze')::int = 2);
+  perform tt.t('liczniki: składki w Wygrany bez zarchiwizowanych (6000 + 3036 + 2400)',
+    (select skladki_wszystkich from public.ud_leady_liczniki(tt.pipeline(), '{}', tt.id_ula()) where etap_id = tt.etap('wygrany')) = 11436);
 end $$;
 
 -- ─── Podsumowanie ───────────────────────────────────────────────────────────

@@ -23,6 +23,7 @@ import {
   opisFiltra,
   pasujeDoFiltra,
   wymagaPowodu,
+  wymagaSprzedazy,
 } from './model.js';
 
 const ROZMIAR_STRONY = 25;
@@ -404,17 +405,25 @@ export class StanTablicy {
     }
   }
 
-  /** Przesuwa liczniki o jedną kartę (optymistycznie); prawdę przynosi odswiezLiczniki(). */
-  #przesunLiczniki(zEtapId, doEtapId, wartosc) {
+  /**
+   * Przesuwa liczniki o jedną kartę (optymistycznie); prawdę przynosi odswiezLiczniki().
+   * Składki: ta, którą karta wnosi do etapu docelowego, i ta, którą zabiera ze źródłowego.
+   */
+  #przesunLiczniki(zEtapId, doEtapId, wartosc, { skladkaZ = 0, skladkaDo = 0 } = {}) {
     const w = Number(wartosc ?? 0);
     const nowe = { ...this.liczniki };
-    const zmien = (id, d) => {
+    const zmien = (id, d, sk) => {
       const l = nowe[id];
       if (!l) return;
-      nowe[id] = { ...l, ile: Math.max(0, l.ile + d), ileWszystkich: Math.max(0, l.ileWszystkich + d), suma: l.suma + d * w, sumaWszystkich: l.sumaWszystkich + d * w };
+      nowe[id] = {
+        ...l,
+        ile: Math.max(0, l.ile + d), ileWszystkich: Math.max(0, l.ileWszystkich + d),
+        suma: l.suma + d * w, sumaWszystkich: l.sumaWszystkich + d * w,
+        skladki: (l.skladki ?? 0) + d * sk, skladkiWszystkich: (l.skladkiWszystkich ?? 0) + d * sk,
+      };
     };
-    if (zEtapId) zmien(zEtapId, -1);
-    if (doEtapId) zmien(doEtapId, +1);
+    if (zEtapId) zmien(zEtapId, -1, Number(skladkaZ ?? 0));
+    if (doEtapId) zmien(doEtapId, +1, Number(skladkaDo ?? 0));
     this.liczniki = nowe;
   }
 
@@ -444,8 +453,9 @@ export class StanTablicy {
   /**
    * Przeniesienie leada na etap. Optymistyczne. Zwraca { status }:
    *   'ok' | 'bez_zmiany' | 'zablokowany' | 'potrzebne_dane' (pola) | statusy serwera.
-   * 'potrzebne_dane' = etap wymaga pól (np. powód utraty), NIC nie zmieniono —
-   * wołający zbiera dane i woła ponownie z `dane`.
+   * 'potrzebne_dane' = etap wymaga pól (powód utraty, składka roczna), NIC nie
+   * zmieniono — wołający zbiera dane i woła ponownie z `dane`
+   * ({ powod_utraty } albo { sprzedaz: { skladka_roczna, …, wariant_id? } }).
    */
   async przenies(leadId, etapId, { dane = null } = {}) {
     const z = this.znajdz(leadId);
@@ -459,6 +469,8 @@ export class StanTablicy {
     }
     const powod = typeof dane?.powod_utraty === 'string' ? dane.powod_utraty.trim() : '';
     if (wymagaPowodu(cel) && powod.length < 3) return { status: 'potrzebne_dane', pola: ['powod_utraty'] };
+    const sprzedaz = cel.rodzaj === 'wygrany' && dane?.sprzedaz && typeof dane.sprzedaz === 'object' ? dane.sprzedaz : null;
+    if (wymagaSprzedazy(cel) && !(Number(sprzedaz?.skladka_roczna) > 0)) return { status: 'potrzebne_dane', pola: ['skladka_roczna'] };
 
     const zEtap = this.etap(z.karta.etap_id);
     const snapshot = { karta: $state.snapshot(z.karta), etapId: z.etapId, epoka: this.#epoka(leadId), zEtap };
@@ -470,9 +482,11 @@ export class StanTablicy {
       etap_od: this.#teraz().toISOString(),
       powod_utraty: cel.rodzaj === 'przegrany' ? powod : null,
       dzialanie: cel.rodzaj === 'otwarty' ? snapshot.karta.dzialanie : null,
+      sprzedaz: sprzedaz ? { ...sprzedaz } : null,
     };
     this.#umiesc(optymistyczna);
-    this.#przesunLiczniki(z.etapId, cel.id, snapshot.karta.wartosc);
+    this.#przesunLiczniki(z.etapId, cel.id, snapshot.karta.wartosc,
+      { skladkaZ: snapshot.karta.sprzedaz?.skladka_roczna, skladkaDo: sprzedaz?.skladka_roczna });
 
     const body = {
       op: 'przenies',
@@ -480,7 +494,9 @@ export class StanTablicy {
       targetStageId: cel.id,
       expectedVersion: snapshot.karta.wersja,
       idempotencyKey: this.#klucz(),
-      ...(wymagaPowodu(cel) ? { transitionData: { powod_utraty: powod } } : {}),
+      ...(wymagaPowodu(cel) || sprzedaz
+        ? { transitionData: { ...(wymagaPowodu(cel) ? { powod_utraty: powod } : {}), ...(sprzedaz ? { sprzedaz } : {}) } }
+        : {}),
     };
     const opis = (lead) => ({
       tekst: komunikatPrzeniesienia(lead.nazwa, zEtap?.nazwa ?? '?', cel.nazwa),
@@ -498,6 +514,22 @@ export class StanTablicy {
   zmienOpiekuna(leadId, opiekunId, klucz) {
     return this.#zmienZFormularza(leadId, { op: 'opiekun', opiekunId }, klucz,
       (lead) => ({ tekst: lead.opiekun_nazwa ? `${lead.nazwa}: opiekun — ${lead.opiekun_nazwa}.` : `${lead.nazwa}: zdjęto opiekuna.` }));
+  }
+
+  /** Dane sprzedaży leada w „Wygrany" (uzupełnienie albo poprawka). Czeka na serwer. */
+  zapiszSprzedaz(leadId, sprzedaz, klucz) {
+    return this.#zmienZFormularza(leadId, { op: 'sprzedaz', sprzedaz }, klucz,
+      (lead) => ({ tekst: `${lead.nazwa}: zapisano dane sprzedaży.` }));
+  }
+
+  /** Warianty z ofert klienta (do wyboru sprzedanego). Błąd = pusta lista: zostaje wpisanie ręczne. */
+  async warianty(leadId) {
+    try {
+      const { status, body } = await this.#api.warianty(leadId);
+      return status === 200 ? (body.warianty ?? []) : [];
+    } catch {
+      return [];
+    }
   }
 
   archiwizuj(leadId, klucz) {
@@ -679,7 +711,8 @@ export class StanTablicy {
     if (this.#epoka(leadId) === snapshot.epoka) {
       const biezaca = this.znajdz(leadId);
       this.#umiesc(snapshot.karta);
-      this.#przesunLiczniki(biezaca?.etapId ?? null, snapshot.etapId, snapshot.karta.wartosc);
+      this.#przesunLiczniki(biezaca?.etapId ?? null, snapshot.etapId, snapshot.karta.wartosc,
+        { skladkaZ: biezaca?.karta?.sprzedaz?.skladka_roczna, skladkaDo: snapshot.karta.sprzedaz?.skladka_roczna });
     } else {
       this.#odswiezLead(leadId);
     }

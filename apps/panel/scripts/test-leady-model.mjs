@@ -8,9 +8,9 @@ process.env.TZ = 'Europe/Warsaw';
 
 import assert from 'node:assert/strict';
 import {
-  akcjeEtapu, akcjeLeada, czyMoznaPrzeniesc, dniWEtapie, indeksWstawienia, kontekstKarty, mozeZmienicOpiekuna,
-  opcjeOpiekuna, opisFiltra, ostrzezenia, pasujeDoFiltra, porownajKarty, terminTekst, wartoscKarty, wymagaPowodu,
-  zSeparatorami,
+  akcjeEtapu, akcjeLeada, czyMoznaPrzeniesc, daneSprzedazyZFormularza, dniWEtapie, indeksWstawienia, kontekstKarty,
+  mozeZmienicOpiekuna, opcjeOpiekuna, opiekunNaKarcie, opisFiltra, ostrzezenia, pasujeDoFiltra, porownajKarty,
+  terminTekst, wartoscKarty, wiekKarty, wymagaPowodu, wymagaSprzedazy, zSeparatorami,
 } from '../src/lib/leady/model.js';
 import { BladSieci, utworzApi } from '../src/lib/leady/api.js';
 
@@ -47,10 +47,50 @@ await t('ostrzeżenia: przeterminowane jest pierwsze i błędem', () => {
 await t('ostrzeżenia: działanie w przyszłości nie ostrzega', () => {
   assert.deepEqual(ostrzezenia(karta({ dzialanie: { typ: 'email', termin: dni(2) } }), OTWARTY, TERAZ), []);
 });
-await t('ostrzeżenia: długo w etapie od 7 dni (1 dzień / dni)', () => {
-  assert.ok(!ostrzezenia(karta({ etap_od: dni(-6), dzialanie: { typ: 'inne', termin: dni(1) } }), OTWARTY, TERAZ).some((x) => x.id === 'dlugo_w_etapie'));
-  const o = ostrzezenia(karta({ etap_od: dni(-9), dzialanie: { typ: 'inne', termin: dni(1) } }), OTWARTY, TERAZ);
-  assert.equal(o.find((x) => x.id === 'dlugo_w_etapie').tekst, 'W etapie od 9 dni');
+await t('wiek karty: pierwsza kolumna od zieleni (0) do 5, potem czerwień; napis z liczbą dni', () => {
+  assert.deepEqual(wiekKarty(karta({ etap_od: TERAZ.toISOString() }), OTWARTY, true, TERAZ), { dni: 0, czerwony: false, poziom: 0, tekst: 'Dziś w etapie' });
+  assert.equal(wiekKarty(karta({ etap_od: dni(-1) }), OTWARTY, true, TERAZ).tekst, '1 dzień w etapie');
+  assert.equal(wiekKarty(karta({ etap_od: dni(-3) }), OTWARTY, true, TERAZ).poziom, 3);
+  const piec = wiekKarty(karta({ etap_od: dni(-5) }), OTWARTY, true, TERAZ);
+  assert.ok(piec.poziom === 5 && !piec.czerwony, 'pięć dni to jeszcze nie „dłużej niż 5"');
+  const szesc = wiekKarty(karta({ etap_od: dni(-6) }), OTWARTY, true, TERAZ);
+  assert.ok(szesc.czerwony && szesc.poziom === null && szesc.tekst === '6 dni w etapie');
+});
+await t('wiek karty: inne otwarte kolumny bez koloru do 5 dni, potem czerwień; zamknięte — nic', () => {
+  const trzy = wiekKarty(karta({ etap_od: dni(-3) }), OTWARTY, false, TERAZ);
+  assert.ok(!trzy.czerwony && trzy.poziom === null && trzy.dni === 3);
+  assert.ok(wiekKarty(karta({ etap_od: dni(-6) }), OTWARTY, false, TERAZ).czerwony);
+  assert.equal(wiekKarty(karta({ etap_od: dni(-30) }), PRZEGRANY, false, TERAZ), null);
+  assert.equal(wiekKarty(karta({ etap_od: dni(-30) }), { rodzaj: 'wygrany' }, true, TERAZ), null);
+});
+await t('ostrzeżenia: czas w etapie nie dubluje napisu na karcie', () => {
+  assert.ok(!ostrzezenia(karta({ etap_od: dni(-30), dzialanie: { typ: 'inne', termin: dni(1) } }), OTWARTY, TERAZ).some((x) => x.id === 'dlugo_w_etapie'));
+});
+await t('opiekun na karcie: administrator ukryty, brak → „Bez opiekuna"', () => {
+  assert.equal(opiekunNaKarcie(karta({ opiekun_admin: true, opiekun_nazwa: 'Ada Admin' })), null);
+  assert.equal(opiekunNaKarcie(karta({ opiekun_admin: false })), 'Ula');
+  assert.equal(opiekunNaKarcie(karta({ opiekun_id: null, opiekun_nazwa: null })), 'Bez opiekuna');
+});
+await t('wartość karty: w Wygrany składka roczna albo prośba o dane; gdzie indziej świadczenie', () => {
+  const WYG = { rodzaj: 'wygrany' };
+  assert.equal(wartoscKarty(karta({ sprzedaz: { skladka_roczna: 3036 } }), WYG), `Składka 3036 zł / rok`.replace('3036', new Intl.NumberFormat('pl-PL').format(3036)));
+  assert.equal(wartoscKarty(karta({ sprzedaz: null }), WYG), 'Brak danych sprzedaży');
+  assert.match(wartoscKarty(karta(), OTWARTY), /^Świadczenie .* \/ mies\.$/);
+});
+await t('menu leada: w Wygrany pozycja danych sprzedaży obok notatki; gdzie indziej jej nie ma', () => {
+  const WYG = { id: 'e5', nazwa: 'Wygrany', rodzaj: 'wygrany', wymagane_pola: ['skladka_roczna'] };
+  const ids = akcjeLeada({ karta: karta({ sprzedaz: null }), etap: WYG, plan: plan() }).map((p) => p.id);
+  assert.equal(ids[ids.indexOf('notatka') + 1], 'sprzedaz');
+  assert.equal(akcjeLeada({ karta: karta({ sprzedaz: null }), etap: WYG, plan: plan() }).find((p) => p.id === 'sprzedaz').etykieta, 'Uzupełnij dane sprzedaży…');
+  assert.equal(akcjeLeada({ karta: karta({ sprzedaz: { skladka_roczna: 100 } }), etap: WYG, plan: plan() }).find((p) => p.id === 'sprzedaz').etykieta, 'Dane sprzedaży…');
+  assert.ok(!akcjeLeada({ karta: karta(), etap: OTWARTY, plan: plan() }).some((p) => p.id === 'sprzedaz'));
+});
+await t('dane sprzedaży z formularza: kwoty jak w SQL, puste pomija, śmieci zgłasza', () => {
+  const { sprzedaz, bledne } = daneSprzedazyZFormularza(
+    { skladka_roczna: '3 036,50 zł', skladka_mies: '', swiadczenie_okresowa: '10000', swiadczenie_trwala: 'abc', swiadczenie_zgon: '0' }, 'w-1');
+  assert.deepEqual(sprzedaz, { skladka_roczna: 3036.5, swiadczenie_okresowa: 10000, wariant_id: 'w-1' });
+  assert.deepEqual(bledne, ['swiadczenie_trwala', 'swiadczenie_zgon']);
+  assert.ok(wymagaSprzedazy({ wymagane_pola: ['skladka_roczna'] }) && !wymagaSprzedazy(OTWARTY));
 });
 await t('ostrzeżenia: etap zamykający nie ostrzega o braku działania ani opiekuna', () => {
   assert.deepEqual(ostrzezenia(karta({ opiekun_id: null, etap_od: dni(-30) }), PRZEGRANY, TERAZ), []);
