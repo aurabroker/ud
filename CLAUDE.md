@@ -1304,13 +1304,18 @@ to nie jest regres.
 Wytyczne i scenariusze odbiorcze K01–K25: `KANBAN-CRM-WYTYCZNE.md` (v1.0,
 01.10.2026). Strona: `/panel/leady`, zakładka „Leady" w panelu.
 
-**Stan na 02.10.2026.** Wersja 1 wdrożona 01.10 (panel v.0.58, części 1 i 2
-migracji odnotowane w bazie: `20261001151739_leady_kanban_1_tabele` przez MCP,
+**Stan na 02.10.2026: WDROŻONE w wersji 2.** Wersja 1 weszła 01.10 (panel
+v.0.58, części 1 i 2 migracji: `20261001151739_leady_kanban_1_tabele` przez MCP,
 `20261001180000_leady_kanban_2_funkcje` przez SQL Editor). Zmiany z 02.10
-(sekcja niżej) to część 3, `20261002120000_leady_kanban_3_sprzedaz.sql` —
-**też przez SQL Editor** (funkcje z UPDATE/DELETE i DROP), potem panel v.0.59.
+(sekcja niżej) to część 3, `20261002120000_leady_kanban_3_sprzedaz` — wklejona
+przez właściciela w SQL Editor (funkcje z UPDATE/DELETE i DROP), wersja
+odnotowana w bazie ręcznie; potem panel v.0.59. Sprawdzone na produkcji: treść
+15 funkcji = repozytorium, uprawnienia tylko `service_role`, wyzwalacz na
+szkicach zdjęty (na `ud_clients` stoi tylko stary `send-confirmation-email-full`,
+niezwiązany z tablicą), Kontakt wyłączony, jego 4 leady w Nowym z wpisem
+w historii, 3 leady ze szkiców usunięte — 52 leady, wszystkie z kartoteki.
 Panel v.0.59 bez części 3 w bazie nie zadziała na `/panel/leady` (woła nowe
-kolumny i funkcje) — kolejność: baza, potem panel.
+kolumny i funkcje) — kolejność zawsze: baza, potem panel.
 
 SQL Editor zapisał treść funkcji z końcami linii CRLF. Porównując `prosrc`
 z repozytorium, licz skrót z `replace(prosrc, chr(13), '')` — inaczej każda
