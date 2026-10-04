@@ -61,6 +61,8 @@ export class StanTablicy {
   toast = $state(null);
   sesjaWygasla = $state(false);
   synchronizacja = $state(true);
+  /** Link agenta do wniosku (/wniosek/?agent=<kod>); null, gdy kodu nie ma. */
+  linkAgenta = $state(null);
   ladowanie = $state(false);
 
   #api;
@@ -95,6 +97,7 @@ export class StanTablicy {
     this.liczniki = dane.liczniki;
     this.zwiniete = [...dane.plan.zwiniete];
     this.synchronizacja = dane.synchronizacja !== false;
+    this.linkAgenta = dane.linkAgenta ?? null;
     this.etapMobilny = dane.plan.etapy.find((e) => !dane.plan.zwiniete.includes(e.id))?.id ?? dane.plan.etapy[0]?.id ?? null;
 
     for (const e of dane.plan.etapy) {

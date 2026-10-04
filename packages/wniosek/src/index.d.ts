@@ -58,3 +58,5 @@ export function parseSum(raw: unknown): number | null;
 /** Liczba kroków słowami, z odmianą: „pięć kroków”. */
 export function krokiSlownie(n?: number): string;
 export function doWysylki(dane: Dane): Record<string, unknown>;
+/** Kod agenta z linku /wniosek/?agent=<kod> → { affiliateCode } albo {}. */
+export function zLinkuAgenta(search: string): { affiliateCode?: string };

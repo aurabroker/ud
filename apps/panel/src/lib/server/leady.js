@@ -377,6 +377,26 @@ export async function statystyki(sb, userId, parametry) {
   return { ...wynik, okres };
 }
 
+/** Adres wniosku na portalu — link agenta dokłada do niego ?agent=<kod>. */
+export const ADRES_WNIOSKU = 'https://utratadochodu.pl/wniosek/';
+
+/**
+ * Link agenta do wniosku. Klient, który złoży z niego wniosek, trafia na
+ * tablicę jako lead tego agenta: kreator wysyła kod jako affiliateCode,
+ * form-submit zapisuje go w ud_clients.affiliate_code_used, a synchronizacja
+ * ustawia opiekuna po ud_user_profiles.affiliate_code. Kod nadaje SQL przy
+ * pierwszym wywołaniu (ud_agent_kod). Błąd → null: tablica działa bez linku.
+ */
+export async function linkAgenta(sb, userId) {
+  try {
+    const { data, error } = await sb.rpc('ud_agent_kod', { p_user: userId });
+    if (error || typeof data !== 'string' || !data) return null;
+    return `${ADRES_WNIOSKU}?agent=${encodeURIComponent(data)}`;
+  } catch {
+    return null;
+  }
+}
+
 /** Pierwsze ładowanie tablicy: plan, liczniki i pierwsza strona każdej rozwiniętej kolumny. */
 export async function wczytajTablice(sb, userSb, userId, parametry) {
   const { filtr, sort, aktywny } = filtrZParametrow(parametry);
@@ -386,7 +406,8 @@ export async function wczytajTablice(sb, userSb, userId, parametry) {
   const pipelineId = plan.pipeline.id;
   const zwiniete = new Set(plan.zwiniete);
 
-  const [licz, ...strony] = await Promise.all([
+  const [link, licz, ...strony] = await Promise.all([
+    linkAgenta(sb, userId),
     liczniki(sb, userId, pipelineId, filtr),
     ...plan.etapy
       .filter((e) => !zwiniete.has(e.id))
@@ -415,6 +436,7 @@ export async function wczytajTablice(sb, userSb, userId, parametry) {
     synchronizacja,
     otwarty,
     otwartyBrak,
+    linkAgenta: link,
   };
 }
 

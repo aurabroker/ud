@@ -850,5 +850,53 @@ begin
   perform tt.t('kwota: ujemna w tekście dalej jest błędem', wyjatek);
 end $$;
 
+-- ─── 12. Link agenta do wniosku: /wniosek/?agent=<kod> → opiekun leada ──────
+do $$
+declare k_ula text; k_olek text;
+begin
+  k_ula := public.ud_agent_kod(tt.id_ula());
+  k_olek := public.ud_agent_kod(tt.id_olek());
+  perform tt.t('kod agenta: nadany kolejno, czterocyfrowy, stały przy kolejnym wywołaniu',
+    k_ula ~ '^[0-9]{4}$' and k_olek ~ '^[0-9]{4}$' and k_olek::int = k_ula::int + 1
+    and public.ud_agent_kod(tt.id_ula()) = k_ula);
+  perform tt.t('kod agenta: nieaktywny i nieznany → brak (nic nie nadane)',
+    public.ud_agent_kod(tt.id_ines()) is null and public.ud_agent_kod(gen_random_uuid()) is null
+    and (select affiliate_code from public.ud_user_profiles where id = tt.id_ines()) is null);
+  update public.ud_user_profiles set affiliate_code = '0777' where id = tt.id_adm();
+  perform tt.t('kod agenta: istniejący kod zostaje (np. „0001" Centrali)', public.ud_agent_kod(tt.id_adm()) = '0777');
+  update public.ud_user_profiles set affiliate_code = null where id = tt.id_olek();
+  perform tt.t('kod agenta: kolejny bierze numer po najwyższym (po 0777 → 0778)', public.ud_agent_kod(tt.id_olek()) = '0778');
+end $$;
+
+update public.ud_user_profiles set affiliate_code = '0099' where id = 'a0000000-0000-0000-0000-0000000000a4';   -- Ines (nieaktywna)
+insert into public.ud_clients (id, created_at, full_name, email, source, affiliate_code_used, referred_by) values
+  ('c0000000-0000-0000-0000-0000000000f1', now(), 'Lena Zlinku',     'lena@x.pl',  'form', (select ' ' || affiliate_code || ' ' from public.ud_user_profiles where id = 'a0000000-0000-0000-0000-0000000000a3'), null),
+  ('c0000000-0000-0000-0000-0000000000f2', now(), 'Marek Nieaktywny','marek@x.pl', 'form', '0099', null),
+  ('c0000000-0000-0000-0000-0000000000f3', now(), 'Nina Polecona',   'nina@x.pl',  'manual', (select affiliate_code from public.ud_user_profiles where id = 'a0000000-0000-0000-0000-0000000000a3'), 'a0000000-0000-0000-0000-0000000000a2'),
+  ('c0000000-0000-0000-0000-0000000000f4', now(), 'Oskar Zlykod',    'oskar@x.pl', 'form', '9999', null);
+do $$
+declare
+  lena uuid := 'c0000000-0000-0000-0000-0000000000f1';
+begin
+  perform tt.t('link: klient z kodem, jeszcze bez leada — widoczny dla agenta z tym kodem, nie dla innego',
+    public.ud_klient_widoczny(tt.id_olek(), lena) and not public.ud_klient_widoczny(tt.id_ula(), lena));
+  perform public.ud_leady_synchronizuj();
+  perform tt.t('link: lead z wniosku z kodem agenta ma tego agenta jako opiekuna (spacje wokół kodu nie przeszkadzają)',
+    (select opiekun_id from public.ud_leady where klient_id = lena) = tt.id_olek());
+  perform tt.t('link: kod nieaktywnego agenta → lead bez opiekuna (czeka na przydział)',
+    (select opiekun_id from public.ud_leady where klient_id = 'c0000000-0000-0000-0000-0000000000f2') is null);
+  perform tt.t('link: dodany w panelu przez agenta ma pierwszeństwo przed kodem',
+    (select opiekun_id from public.ud_leady where klient_id = 'c0000000-0000-0000-0000-0000000000f3') = tt.id_ula());
+  perform tt.t('link: nieznany kod → bez opiekuna',
+    (select opiekun_id from public.ud_leady where klient_id = 'c0000000-0000-0000-0000-0000000000f4') is null);
+  perform tt.t('link: agent widzi lead z linku na tablicy',
+    exists (select 1 from public.ud_leady_dopasowane(tt.pipeline(), '{}', tt.id_olek()) where klient_id = lena)
+    and not exists (select 1 from public.ud_leady_dopasowane(tt.pipeline(), '{}', tt.id_ula()) where klient_id = lena));
+  perform tt.t('uprawnienia: ud_agent_kod tylko dla service_role',
+    (select not has_function_privilege('anon', p.oid, 'execute') and not has_function_privilege('authenticated', p.oid, 'execute')
+            and has_function_privilege('service_role', p.oid, 'execute')
+       from pg_proc p where p.proname = 'ud_agent_kod' and p.pronamespace = 'public'::regnamespace));
+end $$;
+
 -- ─── Podsumowanie ───────────────────────────────────────────────────────────
 select format('WYNIK: %s PASS, %s FAIL', count(*) filter (where ok), count(*) filter (where not ok)) from tt.wyniki;

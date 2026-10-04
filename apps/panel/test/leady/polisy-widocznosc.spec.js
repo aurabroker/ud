@@ -99,3 +99,17 @@ test('polisa: nie-PDF i za duży plik — komunikat, nic nie zapisane', async ({
   await dialog.getByRole('button', { name: 'Dodaj ręcznie' }).click();
   await expect(dialog.getByLabel('Składka roczna *')).toBeFocused();
 });
+
+test('link agenta: „Mój link do wniosku" kopiuje adres wniosku z kodem tego agenta', async ({ page, request }) => {
+  await otworz(page, { u: 'ula' });
+  const przycisk = page.getByRole('button', { name: 'Mój link do wniosku' });
+  await expect(przycisk).toBeVisible();
+  const kod = await sql(request, `select affiliate_code from public.ud_user_profiles where id = tt.id_ula()`);
+  expect(kod).toMatch(/^\d{4}$/);
+  await przycisk.click();
+  await expect(toast(page)).toContainText('Skopiowano Twój link do wniosku');
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(`https://utratadochodu.pl/wniosek/?agent=${kod}`);
+  // Inny agent — inny kod.
+  await otworz(page, { u: 'olek' });
+  await expect(page.getByRole('button', { name: 'Mój link do wniosku' })).not.toHaveAttribute('data-link-agenta', new RegExp(`=${kod}$`));
+});

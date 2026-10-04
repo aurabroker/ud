@@ -17,6 +17,7 @@
    *    PRZED zapisem — anulowanie niczego nie zmienia.
    */
   import { onMount, setContext, tick } from 'svelte';
+  import { kopiujDoSchowka } from './schowek.js';
   import { StanTablicy } from './stan.svelte.js';
   import { utworzPrzeciaganie } from './przeciaganie.js';
   import { akcjeEtapu, akcjeLeada, czyMoznaPrzeniesc, komunikatPrzeniesienia, zSeparatorami } from './model.js';
@@ -152,20 +153,8 @@
   }
 
   async function kopiujLink(leadId) {
-    const url = `${window.location.origin}${window.location.pathname}?lead=${encodeURIComponent(leadId)}`;
-    try {
-      await navigator.clipboard.writeText(url);
-    } catch {
-      const pole = document.createElement('textarea');
-      pole.value = url;
-      pole.setAttribute('readonly', '');
-      pole.style.position = 'fixed';
-      pole.style.opacity = '0';
-      document.body.append(pole);
-      pole.select();
-      try { document.execCommand('copy'); } catch { /* brak schowka — link i tak jest w pasku adresu po otwarciu szczegółów */ }
-      pole.remove();
-    }
+    // Bez schowka link i tak jest w pasku adresu po otwarciu szczegółów.
+    await kopiujDoSchowka(`${window.location.origin}${window.location.pathname}?lead=${encodeURIComponent(leadId)}`);
     stan.ogloc('Skopiowano link do leada. Dostęp do niego nadal wymaga zalogowania.');
   }
 

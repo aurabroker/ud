@@ -37,6 +37,15 @@ nie wyniknie.
   na karcie. **Przez SQL Editor** (DROP i funkcje z UPDATE/DELETE), potem:
   `insert into supabase_migrations.schema_migrations (version, name) values ('20261002120000', 'leady_kanban_3_sprzedaz');`
 
+- `20261002160000_leady_kanban_4_widocznosc.sql` — agent widzi i obsługuje
+  tylko swoje leady (opiekuna przydziela administrator), klienci w panelu
+  według tej samej reguły, polisy przy leadzie (tabela `ud_leady_pliki`,
+  prywatny kubełek `ud-polisy`), kwota 0 = brak ryzyka, link agenta do
+  wniosku (`ud_agent_kod`, opiekun z `affiliate_code_used`). Zmienia sygnaturę
+  `ud_lead_szczegoly` — kolejność: baza, potem panel v.0.60. **Przez SQL
+  Editor**, potem:
+  `insert into supabase_migrations.schema_migrations (version, name) values ('20261002160000', 'leady_kanban_4_widocznosc');`
+
 Dlaczego tak: MCP Supabase (`apply_migration` i `execute_sql`) wstrzymuje do
 ręcznego potwierdzenia każde `DROP` i każdą funkcję, która w treści robi
 `UPDATE`/`DELETE` na tabeli w `public` (na tabeli tymczasowej ta sama treść

@@ -11,6 +11,8 @@
 --   * Przy wygranej można wgrać polisę (PDF) — plik leży w prywatnym kubełku
 --     ud-polisy, wiersz w ud_leady_pliki, wpis w historii.
 --   * Kwota 0 w danych sprzedaży znaczy „tego ryzyka nie ma", a nie „błąd".
+--   * Link agenta do wniosku (/wniosek/?agent=<kod>): lead z takiego wniosku
+--     dostaje tego agenta jako opiekuna (sekcja 7).
 --
 -- Stosuje się ją w Supabase SQL Editor (cały plik naraz — jedna transakcja),
 -- bo MCP wstrzymuje DROP i funkcje z UPDATE/DELETE do potwierdzenia, które nie
@@ -695,9 +697,10 @@ $fn$;
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 6. Klienci widoczni dla użytkownika (zakładka „Klienci", wybór klienta
---    w ofercie). Administrator: wszyscy. Agent: klienci jego leadów oraz
---    dodani przez niego, którzy leada jeszcze nie mają (synchronizacja założy
---    go z nim jako opiekunem przy najbliższym otwarciu tablicy).
+--    w ofercie). Administrator: wszyscy. Agent: klienci jego leadów oraz ci,
+--    którzy leada jeszcze nie mają, a są jego — dodani przez niego w panelu
+--    albo z jego kodem z linku do wniosku (synchronizacja założy lead z nim
+--    jako opiekunem przy najbliższym otwarciu tablicy).
 
 create or replace function public.ud_klienci_widoczni(p_user uuid)
 returns setof uuid
@@ -706,13 +709,15 @@ stable
 security definer
 set search_path = ''
 as $fn$
-  with r as (select public.ud_leady_rola(p_user) as rola)
+  with r as (select public.ud_leady_rola(p_user) as rola,
+                    (select nullif(btrim(affiliate_code), '') from public.ud_user_profiles where id = p_user) as kod)
   select c.id
     from public.ud_clients c, r
    where r.rola = 'admin'
       or (r.rola is not null and (
             exists (select 1 from public.ud_leady l where l.klient_id = c.id and l.opiekun_id = p_user)
-         or (c.referred_by = p_user and not exists (select 1 from public.ud_leady l where l.klient_id = c.id))))
+         or ((c.referred_by = p_user or (c.referred_by is null and btrim(c.affiliate_code_used) = r.kod))
+             and not exists (select 1 from public.ud_leady l where l.klient_id = c.id))))
 $fn$;
 
 create or replace function public.ud_klient_widoczny(p_user uuid, p_klient uuid)
@@ -722,18 +727,158 @@ stable
 security definer
 set search_path = ''
 as $fn$
-  with r as (select public.ud_leady_rola(p_user) as rola)
+  with r as (select public.ud_leady_rola(p_user) as rola,
+                    (select nullif(btrim(affiliate_code), '') from public.ud_user_profiles where id = p_user) as kod)
   select coalesce((
     select r.rola = 'admin'
         or (r.rola is not null and (
               exists (select 1 from public.ud_leady l where l.klient_id = c.id and l.opiekun_id = p_user)
-           or (c.referred_by = p_user and not exists (select 1 from public.ud_leady l where l.klient_id = c.id))))
+           or ((c.referred_by = p_user or (c.referred_by is null and btrim(c.affiliate_code_used) = r.kod))
+               and not exists (select 1 from public.ud_leady l where l.klient_id = c.id))))
       from public.ud_clients c, r
      where c.id = p_klient), false)
 $fn$;
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- 7. Uprawnienia: wszystko tylko dla klucza serwisowego.
+-- 7. Link agenta do wniosku (decyzja właściciela z 02.10.2026): klient, który
+--    wejdzie na /wniosek/?agent=<kod> i złoży wniosek, trafia na tablicę jako
+--    lead tego agenta. form-submit już zapisuje kod (affiliateCode →
+--    ud_clients.affiliate_code_used) — ścieżka wniosku się nie zmienia, kod
+--    czyta dopiero synchronizacja tablicy.
+
+create or replace function public.ud_leady_synchronizuj()
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $fn$
+declare
+  v_pipeline  uuid;
+  v_start     uuid;
+  n_klienci   int := 0;
+begin
+  perform pg_advisory_xact_lock(hashtext('ud_leady_synchronizuj'));
+
+  select id into v_pipeline
+    from public.ud_leady_pipeline where aktywny order by created_at, id limit 1;
+  if v_pipeline is null then
+    return jsonb_build_object('klienci', 0);
+  end if;
+
+  select e.id into v_start
+    from public.ud_leady_etap e
+   where e.pipeline_id = v_pipeline and e.aktywny and e.rodzaj = 'otwarty'
+   order by (e.klucz = 'nowy') desc, e.pozycja, e.id
+   limit 1;
+  if v_start is null then
+    return jsonb_build_object('klienci', 0);
+  end if;
+
+  with nowi as (
+    insert into public.ud_leady (pipeline_id, etap_id, klient_id, opiekun_id, etap_od, powod_utraty,
+                                 sprzedaz_wariant_id, skladka_roczna, skladka_mies, swiadczenie_okresowa,
+                                 swiadczenie_trwala, swiadczenie_zgon, sprzedawca_id, sprzedano_at)
+    select v_pipeline,
+           coalesce(e.id, v_start),
+           c.id,
+           op.id,
+           coalesce(o.zdarzenie, c.created_at, now()),
+           case when e.rodzaj = 'przegrany' then 'Klient odrzucił ofertę (stan przeniesiony z ofert)' end,
+           w.id,
+           case when w.premium_total > 0 and w.premium_total < 1e10 then round(w.premium_total, 2) end,
+           case when w.premium_monthly > 0 and w.premium_monthly < 1e10 then round(w.premium_monthly, 2) end,
+           case when w.temp_incapacity_covered is not false and w.temp_monthly_benefit > 0
+                 and w.temp_monthly_benefit < 1e10 then round(w.temp_monthly_benefit, 2) end,
+           case when w.perm_incapacity_covered and w.perm_sum_insured > 0
+                 and w.perm_sum_insured < 1e12 then round(w.perm_sum_insured, 2) end,
+           case when w.death_covered then public.ud_kwota(w.parsed_raw->>'death_sum_insured') end,
+           case when w.id is not null then op.id end,
+           case when w.id is not null then o.zdarzenie end
+      from public.ud_clients c
+      left join lateral (
+        select x.status, x.user_id, x.client_choice,
+               coalesce(x.decided_at, x.viewed_at, x.sent_at, x.created_at) as zdarzenie
+          from public.ud_offers x
+         where x.client_id = c.id
+           and (x.archived_at is null or x.status = 'bought')
+         order by case x.status
+                    when 'bought' then 6 when 'chosen' then 5 when 'viewed' then 4
+                    when 'sent' then 3 when 'draft' then 2 when 'rejected' then 1 else 0 end desc,
+                  coalesce(x.decided_at, x.viewed_at, x.sent_at, x.created_at) desc
+         limit 1
+      ) o on true
+      -- Opiekun: dodany przez agenta w panelu (referred_by), potem kod z jego
+      -- linku do wniosku (affiliate_code_used — zapisuje go form-submit), potem
+      -- autor oferty. Konto nieaktywne nie zostaje opiekunem: lead czeka na
+      -- przydział administratora.
+      left join lateral (
+        select pr.id from public.ud_user_profiles pr
+         where pr.id = coalesce(c.referred_by,
+                                (select a.id from public.ud_user_profiles a
+                                  where nullif(btrim(c.affiliate_code_used), '') is not null
+                                    and a.affiliate_code = btrim(c.affiliate_code_used)),
+                                o.user_id)
+           and coalesce(pr.active, true)
+      ) op on true
+      left join public.ud_leady_etap e
+        on e.pipeline_id = v_pipeline and e.aktywny
+       and e.klucz = case o.status
+                       when 'bought' then 'wygrany' when 'chosen' then 'decyzja'
+                       when 'viewed' then 'oferta'  when 'sent' then 'oferta'
+                       when 'rejected' then 'przegrany' end
+      left join public.ud_offer_documents w
+        on e.rodzaj = 'wygrany'
+       and o.client_choice->>'document_id' ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+       and w.id = (o.client_choice->>'document_id')::uuid
+     where not exists (select 1 from public.ud_leady x where x.klient_id = c.id)
+    on conflict (klient_id) do nothing
+    returning id
+  )
+  select count(*) into n_klienci from nowi;
+
+  return jsonb_build_object('klienci', n_klienci);
+end
+$fn$;
+
+-- Kod agenta do linku: istniejący albo kolejny wolny (0004, 0005…). Konto
+-- nieaktywne albo nieznane — null. Unikalność pilnuje indeks na affiliate_code;
+-- przy wyścigu dwóch nowych agentów druga próba bierze następny numer.
+create or replace function public.ud_agent_kod(p_user uuid)
+returns text
+language plpgsql
+security definer
+set search_path = ''
+as $fn$
+declare
+  v_kod text;
+  n     integer;
+begin
+  if public.ud_leady_rola(p_user) is null then
+    return null;
+  end if;
+  select nullif(btrim(affiliate_code), '') into v_kod from public.ud_user_profiles where id = p_user;
+  if v_kod is not null then
+    return v_kod;
+  end if;
+  for proba in 1..5 loop
+    select coalesce(max(affiliate_code::integer), 0) + 1 into n
+      from public.ud_user_profiles where affiliate_code ~ '^[0-9]{1,9}$';
+    begin
+      update public.ud_user_profiles
+         set affiliate_code = lpad(n::text, 4, '0')
+       where id = p_user and nullif(btrim(affiliate_code), '') is null
+      returning affiliate_code into v_kod;
+      return coalesce(v_kod, (select affiliate_code from public.ud_user_profiles where id = p_user));
+    exception when unique_violation then
+      null;
+    end;
+  end loop;
+  return null;
+end
+$fn$;
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- 8. Uprawnienia: wszystko tylko dla klucza serwisowego.
 
 do $$
 declare
@@ -745,7 +890,8 @@ begin
      where p.pronamespace = 'public'::regnamespace
        and p.proname in ('ud_leady_widzi', 'ud_leady_liczba', 'ud_lead_plik_dodaj', 'ud_lead_plik',
                          'ud_leady_dopasowane', 'ud_leady_liczniki', 'ud_lead_szczegoly', 'ud_lead_zmien',
-                         'ud_lead_notatka', 'ud_klienci_widoczni', 'ud_klient_widoczny')
+                         'ud_lead_notatka', 'ud_klienci_widoczni', 'ud_klient_widoczny',
+                         'ud_leady_synchronizuj', 'ud_agent_kod')
   loop
     execute format('revoke all on function %s from public, anon, authenticated', f);
     execute format('grant execute on function %s to service_role', f);

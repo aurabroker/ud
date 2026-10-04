@@ -7,9 +7,18 @@
    */
   import { getContext } from 'svelte';
   import { PRODUKTY, SORTOWANIA, TERMINY, ZRODLA, opisFiltra } from './model.js';
+  import { kopiujDoSchowka } from './schowek.js';
 
   const ctx = getContext('tablica');
   const stan = ctx.stan;
+
+  /** Link agenta do wniosku: klient, który złoży z niego wniosek, trafia do niego jako lead. */
+  async function kopiujLinkAgenta() {
+    const ok = await kopiujDoSchowka(stan.linkAgenta);
+    stan.ogloc(ok
+      ? 'Skopiowano Twój link do wniosku. Klient, który złoży z niego wniosek, trafi na Twoją tablicę.'
+      : `Nie udało się skopiować. Twój link: ${stan.linkAgenta}`);
+  }
   const opisAktywnych = $derived(opisFiltra(stan.filtr, stan.plan));
 </script>
 
@@ -42,7 +51,14 @@
       <button type="button" aria-pressed={stan.widok === 'lista'} onclick={() => ctx.ustawWidok('lista')}>Lista</button>
     </div>
 
-    <a class="btn btn-primary dodaj" href="/panel/klienci/nowy" title="Nowy klient trafia do etapu Nowy">+ Dodaj lead</a>
+    <div class="akcje">
+      {#if stan.linkAgenta}
+        <button type="button" class="btn btn-ghost" onclick={kopiujLinkAgenta} title={stan.linkAgenta} data-link-agenta={stan.linkAgenta}>
+          Mój link do wniosku
+        </button>
+      {/if}
+      <a class="btn btn-primary dodaj" href="/panel/klienci/nowy" title="Nowy klient trafia do etapu Nowy">+ Dodaj lead</a>
+    </div>
   </div>
 
   <div class="wiersz filtry">
@@ -117,7 +133,8 @@
   .przelacznik button { border: 0; background: transparent; padding: .45rem .8rem; font: inherit; font-size: .85rem; font-weight: 700; color: var(--slate-600); cursor: pointer; }
   .przelacznik button[aria-pressed='true'] { background: var(--slate-800); color: #fff; }
   .przelacznik button:focus-visible { outline: 2px solid var(--blue-600); outline-offset: -2px; }
-  .dodaj { margin-left: auto; white-space: nowrap; }
+  .akcje { margin-left: auto; display: flex; gap: .5rem; flex-wrap: wrap; }
+  .akcje > * { white-space: nowrap; }
   .akcje { display: flex; gap: .4rem; margin-left: auto; flex-wrap: wrap; }
   .maly { padding: .4rem .75rem; font-size: .8rem; }
   .aktywne { margin: 0; font-size: .78rem; color: var(--slate-600); }

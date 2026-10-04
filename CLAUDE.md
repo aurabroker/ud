@@ -1317,6 +1317,12 @@ w historii, 3 leady ze szkiców usunięte — 52 leady, wszystkie z kartoteki.
 Panel v.0.59 bez części 3 w bazie nie zadziała na `/panel/leady` (woła nowe
 kolumny i funkcje) — kolejność zawsze: baza, potem panel.
 
+**Wersja 3 (zmiany z 02.10, sekcja „Widoczność, polisy i link agenta")** to
+część 4, `20261002160000_leady_kanban_4_widocznosc.sql` — też przez SQL Editor
+(DROP starej sygnatury `ud_lead_szczegoly`, funkcje z UPDATE), potem panel
+v.0.60 i portal (kreator wysyła kod agenta). Panel v.0.60 bez części 4 nie
+otworzy szczegółów leada (woła `ud_lead_szczegoly(p_lead, p_user)`).
+
 SQL Editor zapisał treść funkcji z końcami linii CRLF. Porównując `prosrc`
 z repozytorium, licz skrót z `replace(prosrc, chr(13), '')` — inaczej każda
 funkcja z części 2 wygląda na inną niż w repo, choć nie jest.
@@ -1364,6 +1370,55 @@ została, żeby nie przebudowywać widoku i wszystkich funkcji naraz.
   dopóki na liście jest kontakt bez „Obsłużony". Przy ograniczonych animacjach
   w systemie — stała czerwień.
 
+### Widoczność, polisy i link agenta (część 4, decyzje z 02.10.2026)
+
+- **Agent widzi i obsługuje wyłącznie leady, których jest opiekunem.** Starych
+  ani wolnych nie widzi; dopiero przydział przez administratora daje dostęp.
+  Opiekuna zmienia **tylko administrator** (agent nie przejmuje wolnych i nie
+  zwalnia własnych). Jedno źródło reguły: `ud_leady_widzi(p_user, p_opiekun)`
+  — używają jej filtr tablicy, liczniki (także „wszystkich", żeby nie zdradzać
+  liczby cudzych), szczegóły, zmiany, notatki i pliki. Dla agenta cudzy lead
+  „nie istnieje" (`brak_leada` / 404), także pod linkiem `?lead=`. Konto
+  nieaktywne nie widzi nic, nawet leada, którego jest opiekunem.
+- **Ta sama reguła w zakładce „Klienci", na stronie klienta i w wyborze
+  klienta na stronie oferty** (`ud_klienci_widoczni`, `ud_klient_widoczny`,
+  `src/lib/server/widocznosc.js`). Te strony czytają klientów kluczem
+  serwisowym, więc bez filtra nowy agent widziałby wszystkich z pełnymi danymi.
+  Klient już przypięty do oferty zostaje w wyborze — inaczej zapis formularza
+  odpiąłby go po cichu. **Sama strona `/panel/offer/<id>` nadal otwiera każdą
+  ofertę każdemu zalogowanemu** — to osobna, starsza dziura do zamknięcia.
+- **„Niedokończone" widzi każdy agent** (decyzja z 01.10 bez zmian) — porzucone
+  wnioski nie mają opiekuna.
+- **Okno „Dane sprzedaży"**: wariant opisany numerem dokumentu ubezpieczyciela
+  i składkami (bez nazwy produktu). Klient bez ofert w panelu — dwa przyciski:
+  „Wgraj polisę (PDF)" i „Dodaj ręcznie"; pola kwot dopiero po wyborze.
+- **Polisa** idzie jako sam plik (`application/pdf`, nie multipart — typ
+  „prosty" przeszedłby z cudzej strony bez preflightu CORS), do 10 MB, do
+  prywatnego kubełka `ud-polisy` (`<lead>/<uuid>.pdf`), wiersz w
+  `ud_leady_pliki` i wpis „plik" w historii. Kwoty czyta ten sam czytnik co
+  oferty (Leadenhall/CEU); Leadenhall szyfruje PDF 4 ostatnimi cyframi
+  PESEL-u — serwer próbuje ich sam, PESEL nie wychodzi do przeglądarki.
+  Polisa w innym układzie zapisuje się bez kwot, agent wpisuje je ręcznie.
+  Pobranie: `/panel/leady/api/plik/<id>` → adres podpisany na minutę, tylko
+  dla kogoś, kto widzi lead. Nie ma usuwania plików (świadomie).
+- **Kwota 0 w danych sprzedaży = brak tego ryzyka** (np. sprzedana sama
+  okresowa niezdolność), nie błąd — w formularzu i w `ud_leady_liczba`.
+  Składka roczna dalej musi być większa od zera.
+- **Link agenta do wniosku: `https://utratadochodu.pl/wniosek/?agent=<kod>`.**
+  Przycisk „Mój link do wniosku" na tablicy; kod nadaje `ud_agent_kod()`
+  (istniejący `ud_user_profiles.affiliate_code` albo kolejny wolny numer).
+  Kreator czyta kod **wyłącznie z adresu** (`zLinkuAgenta` w `@ud/wniosek`,
+  bez ciasteczek i sessionStorage — art. 399 PKE) i wysyła go jako
+  `affiliateCode`; `form-submit` zapisywał go już wcześniej do
+  `ud_clients.affiliate_code_used` — **funkcja brzegowa się nie zmieniła**.
+  Synchronizacja tablicy ustawia opiekuna: dodany w panelu (`referred_by`) →
+  kod z linku → autor oferty; nieaktywny albo nieznany kod — lead bez opiekuna,
+  czeka na przydział. Link prowadzi wprost na `/wniosek/`: kod nie przechodzi
+  przez inne strony portalu.
+- Konto „Marek Cieśla" (administrator) nazywa się od 02.10.2026 **„Centrala"**.
+  Inicjały w numerach nowych ofert z tego konta to więc `CE`
+  (`UD/2026/CE/00025/…`), nie `MC` — numeracja jest globalna, bez kolizji.
+
 ### Model danych (tylko stan procesu — dane osobowe czytamy ze źródła)
 
 | Obiekt | Rola |
@@ -1373,6 +1428,7 @@ została, żeby nie przebudowywać widoku i wszystkich funkcji naraz.
 | `ud_leady_notatki`, `ud_leady_widok_uzytkownika` | notatki; osobisty stan zwinięcia etapów (per użytkownik × pipeline) |
 | `ud_leady_pipeline`, `ud_leady_etap` | jeden pipeline „Sprzedaż": Nowy → Oferta → Decyzja klienta → Wygrany (składka roczna wymagana) / Przegrany (powód utraty wymagany); Kontakt wyłączony |
 | `ud_leady_baza` | widok z imieniem/e-mailem/telefonem z kartoteki klienta, `opiekun_admin` i danymi sprzedaży; tylko leady klientów |
+| `ud_leady_pliki` | polisy przy leadzie: kubełek `ud-polisy`, ścieżka `<lead>/<uuid>.pdf`, nazwa, kto dodał; kasowane razem z leadem (obiekt w kubełku zostaje) |
 
 Dostęp: RLS bez polityk, wszystko tylko dla `service_role` (panel przez
 `createAdminClient`). `ud_leady` **nie ma kolumn z danymi osobowymi** — test SQL
@@ -1398,7 +1454,8 @@ konflikt zamiast cichego nadpisania), **klucza idempotencji** (ponowienie →
 ten sam wynik bez drugiego skutku; ten sam klucz do innej operacji →
 `klucz_uzyty`), etapu (z innego pipeline'u / wyłączony → `niedozwolony`; FK w bazie
 też go nie przepuści), pól wymaganych (`brak_danych`) i reguł opiekuna
-(administrator: dowolny; agent: przejmuje wolny lead albo zwalnia własny).
+(od 02.10 opiekuna zmienia wyłącznie administrator; agent działa tylko na
+swoich leadach — cudzy i wolny to dla niego `brak_leada`).
 Tożsamość wykonawcy bierze serwer z sesji — pola `userId`/`wykonawca` w ciele
 żądania są ignorowane, do SQL idą tylko pola z białej listy.
 
@@ -1459,6 +1516,13 @@ transport do bazy (psql zamiast PostgREST). Awarie sieci są wstrzykiwane w
 Wszystkie warstwy przeszły testy mutacyjne — celowo zepsuty kod (brak kontroli
 wersji, brak blokady wiersza, tożsamość z ciała, brak formularza powodu, brak
 zapisu zwinięcia…) daje czerwony wynik.
+
+Testy przeglądarkowe działają domyślnie jako administrator (`otworz()` bez
+`u`), bo on widzi wszystkie leady; reguły agenta mają własne scenariusze
+(`polisy-widocznosc.spec.js`, K19 jako Olek). Czytnik PDF w serwerze testowym
+rozpoznaje znaczniki w treści pliku (`UD-TEST-KWOTY`, `UD-TEST-HASLO`) —
+prawdziwej polisy w repozytorium nie ma, więc **odczytu kwot z prawdziwej
+polisy Leadenhall testy nie sprawdzają**.
 
 Strona statystyk i menu panelu (migająca zakładka) nie siedzą w harnessie
 tablicy — `statystyki.spec.js` renderuje je po stronie serwera z prawdziwych

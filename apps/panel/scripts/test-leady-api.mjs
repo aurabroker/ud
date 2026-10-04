@@ -260,6 +260,19 @@ try {
     await assert.rejects(odpowiedzKolumny(sbSql, ADM, new URLSearchParams('etap=x')), (e) => e.status === 400);
     await assert.rejects(odpowiedzKolumny(sbSql, INES, new URLSearchParams(`etap=${etap('nowy')}`)), (e) => e.status === 403);
   });
+  await t('link agenta: tablica podaje link do wniosku z kodem agenta; kod stały; awaria → bez linku, tablica działa', async () => {
+    const t1 = await wczytajTablice(sbSql, null, ULA, new URLSearchParams());
+    assert.match(t1.linkAgenta, /^https:\/\/utratadochodu\.pl\/wniosek\/\?agent=\d{4}$/);
+    const kod = t1.linkAgenta.split('=').pop();
+    assert.equal(sql(`select affiliate_code from public.ud_user_profiles where id = '${ULA}'`), kod);
+    assert.equal((await wczytajTablice(sbSql, null, ULA, new URLSearchParams())).linkAgenta, t1.linkAgenta);
+    const t2 = await wczytajTablice(sbSql, null, OLEK, new URLSearchParams());
+    assert.notEqual(t2.linkAgenta, t1.linkAgenta);
+    const zepsuty = { rpc: (n, a) => (n === 'ud_agent_kod' ? Promise.reject(new Error('sieć')) : sbSql.rpc(n, a)) };
+    const t3 = await wczytajTablice(zepsuty, null, ULA, new URLSearchParams());
+    assert.equal(t3.linkAgenta, null);
+    assert.equal(t3.plan.etapy.length, 5);
+  });
   await t('agent widzi tylko swoje leady: tablica, kolumna, liczniki, szczegóły (02.10.2026)', async () => {
     const tu = await wczytajTablice(sbSql, null, ULA, new URLSearchParams());
     const karty = Object.values(tu.kolumny).flatMap((k) => k.karty);

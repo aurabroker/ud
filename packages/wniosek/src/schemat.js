@@ -385,6 +385,25 @@ export const POLA_LOGICZNE = [
  */
 
 /** Zamienia stan formularza na kształt, którego oczekuje funkcja form-submit. */
+/**
+ * Kod agenta z jego linku do wniosku (/wniosek/?agent=0004). Idzie do
+ * form-submit jako `affiliateCode` — funkcja już zapisuje go w
+ * ud_clients.affiliate_code_used — a tablica leadów w panelu przypisuje po nim
+ * opiekuna. Bierzemy go wyłącznie z adresu strony: bez ciasteczek
+ * i sessionStorage (zapis w urządzeniu wymagałby zgody, art. 399 PKE).
+ * Niepoprawny kod jest pomijany — wniosek idzie zawsze, najwyżej bez agenta.
+ * @param {string} search location.search
+ * @returns {{ affiliateCode?: string }}
+ */
+export function zLinkuAgenta(search) {
+  try {
+    const kod = (new URLSearchParams(search ?? '').get('agent') ?? '').trim();
+    return /^[A-Za-z0-9_-]{1,20}$/.test(kod) ? { affiliateCode: kod } : {};
+  } catch {
+    return {};
+  }
+}
+
 export function doWysylki(dane) {
   const out = { ...dane };
   // Zgoda na kontakt w sprawie niedokończonego wniosku dotyczy szkicu

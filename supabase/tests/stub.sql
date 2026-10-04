@@ -32,7 +32,7 @@ create table public.ud_user_profiles (
   role         text,
   active       boolean default true,
   created_at   timestamptz default now(),
-  affiliate_code text,
+  affiliate_code text unique,
   leader_id    uuid
 );
 
@@ -47,6 +47,7 @@ create table public.ud_clients (
   profession             text,
   source                 text,
   referred_by            uuid,
+  affiliate_code_used    text,
   risk_death_invalidity  boolean,
   risk_temp_incapacity   boolean,
   risk_perm_incapacity   boolean,

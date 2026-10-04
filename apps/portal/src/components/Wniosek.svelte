@@ -15,7 +15,7 @@
     KROKI, RYZYKA, KLAUZULE_NW, PYTANIA_MEDYCZNE, AKTYWNOSCI_RYZYKOWNE,
     FORMY_ZATRUDNIENIA, FORMY_OPODATKOWANIA, LIMIT_DOCHODU,
     HEALTH_SURVEY_GROUPS, HEALTH_SURVEY_ITEMS, HEALTH_SURVEY_THRESHOLD,
-    sprawdzKrok, ankietaRozszerzona, doWysylki, klauzuleDostepne, PROG_KLAUZUL_NW,
+    sprawdzKrok, ankietaRozszerzona, doWysylki, zLinkuAgenta, klauzuleDostepne, PROG_KLAUZUL_NW,
     ZGODA_KONTAKT,
   } from '@ud/wniosek';
 
@@ -306,7 +306,8 @@
       const res = await fetch(urlFunkcji, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...doWysylki(dane), 'cf-turnstile-response': token }),
+        // Link agenta (?agent=<kod>) przypisuje lead temu agentowi w panelu.
+        body: JSON.stringify({ ...doWysylki(dane), ...zLinkuAgenta(window.location.search), 'cf-turnstile-response': token }),
       });
       const wynik = await res.json().catch(() => ({}));
       if (res.ok && wynik.status !== 'error') {

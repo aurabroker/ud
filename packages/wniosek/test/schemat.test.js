@@ -233,3 +233,14 @@ test('liczba kroków słowami idzie z KROKI i ma poprawną odmianę', () => {
   assert.equal(krokiSlownie(5), 'pięć kroków');
   assert.equal(krokiSlownie(12), '12 kroków', 'poza słownikiem — cyfra, ale z dobrą odmianą');
 });
+
+test('zLinkuAgenta: kod z ?agent= idzie jako affiliateCode; brak albo śmieci → nic (wniosek i tak idzie)', async () => {
+  const { zLinkuAgenta } = await import('../src/schemat.js');
+  assert.deepEqual(zLinkuAgenta('?agent=0004'), { affiliateCode: '0004' });
+  assert.deepEqual(zLinkuAgenta('?zawod=lekarz&agent=%200007%20'), { affiliateCode: '0007' });
+  assert.deepEqual(zLinkuAgenta(''), {});
+  assert.deepEqual(zLinkuAgenta('?agent='), {});
+  assert.deepEqual(zLinkuAgenta('?agent=<script>'), {});
+  assert.deepEqual(zLinkuAgenta('?agent=' + 'x'.repeat(21)), {});
+  assert.deepEqual(zLinkuAgenta(undefined), {});
+});
