@@ -95,8 +95,11 @@ test('Wygrany: nagłówek liczy składki, uzupełnienie danych z wariantu oferty
   await page.getByRole('button', { name: 'Akcje leada Jerzy Duda' }).click();
   await page.getByRole('menuitem', { name: 'Uzupełnij dane sprzedaży…' }).click();
   const dialog = page.getByRole('dialog', { name: 'Dane sprzedaży' });
-  const wariant = dialog.getByRole('radio', { name: /Leadenhall Utrata Dochodu · LHQ7\/1/ });
+  // Numer dokumentu i składki — bez nazwy produktu (decyzja z 02.10.2026).
+  const wariant = dialog.getByRole('radio', { name: /^LHQ7\/1 — 3[\s ]?600 zł \/ rok — 300 zł \/ mies\.$/ });
   await expect(wariant).toBeVisible();
+  await expect(dialog).not.toContainText('Leadenhall');
+  await expect(dialog).not.toContainText('UD/2026/10');
   await wariant.check();
   await expect(dialog.getByLabel('Składka roczna *')).toHaveValue('3600');
   await expect(dialog.getByLabel('Składka miesięczna')).toHaveValue('300');
@@ -116,7 +119,10 @@ test('przeniesienie do Wygrany: okno danych przed zapisem, anulowanie nic nie zm
   await przeciagnijZPrzewijaniem(page, karta(page, 'Anna Kowalska'), 'wygrany');
   const dialog = page.getByRole('dialog', { name: 'Dane sprzedaży' });
   await expect(dialog).toBeVisible();
-  await expect(dialog).toContainText('Brak wariantów');                         // Anna nie ma ofert — kwoty ręcznie
+  await expect(dialog).toContainText('Ten klient nie ma ofert w panelu.');      // Anna nie ma ofert: polisa albo ręcznie
+  await expect(dialog.getByRole('button', { name: 'Wgraj polisę (PDF)' })).toBeVisible();
+  await expect(dialog.getByRole('button', { name: 'Dodaj ręcznie' })).toBeVisible();
+  await expect(dialog.getByLabel('Składka roczna *')).toHaveCount(0);           // pola dopiero po wyborze
   expect((await wywolania(request)).filter((w) => w.sciezka === 'zmien')).toHaveLength(0);
   await page.keyboard.press('Escape');
   await expect(dialog).toHaveCount(0);
@@ -130,7 +136,9 @@ test('przeniesienie do Wygrany: okno danych przed zapisem, anulowanie nic nie zm
   await dialog.getByRole('button', { name: /Przenieś do/ }).click();
   await expect(dialog.getByText('Wpisz kwotę')).toBeVisible();
   expect(await etapLeada(request, 'Anna Kowalska')).toBe('nowy');
-  await dialog.getByLabel('Suma — trwała niezdolność').fill('');
+  // Sama okresowa niezdolność: zera w trwałej i zgonie to brak ryzyka, nie błąd (zgłoszenie z 02.10.2026).
+  await dialog.getByLabel('Suma — trwała niezdolność').fill('0');
+  await dialog.getByLabel('Suma — zgon').fill('0');
   await dialog.getByRole('button', { name: /Przenieś do/ }).click();
 
   await expect(toast(page)).toContainText('Anna Kowalska: Nowy → Wygrany');

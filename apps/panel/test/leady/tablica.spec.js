@@ -92,7 +92,7 @@ test('K03: przeniesienie myszą — zapis, liczniki, sumy, historia i komunikat 
   // Baza.
   expect(await etapLeada(request, 'Anna Kowalska')).toBe('oferta');
   expect(await wersjaLeada(request, 'Anna Kowalska')).toBe(v + 1);
-  expect(await sql(request, `select count(*) from public.ud_leady_historia where lead_id = tt.lead('Anna Kowalska') and typ = 'etap' and wykonawca_nazwa = 'Ula Agent'`)).toBe('1');
+  expect(await sql(request, `select count(*) from public.ud_leady_historia where lead_id = tt.lead('Anna Kowalska') and typ = 'etap' and wykonawca_nazwa = 'Ada Admin'`)).toBe('1');
 
   // Liczniki i sumy po stronie interfejsu = po stronie serwera.
   await expect(licznik(page, 'nowy')).toHaveText('6');
@@ -139,7 +139,7 @@ test('K05: upuszczenie na zwinięty etap — zmiana etapu bez trwałego rozwini�
   await expect(page.locator('[data-podglad]')).toHaveCount(0);
   await expect(kolumna(page, 'oferta')).toHaveCount(0);
   await expect(pozycja.locator('[data-licznik]')).toHaveText('3');
-  expect(await sql(request, `select count(*) from public.ud_leady_widok_uzytkownika where user_id = tt.id_ula() and cardinality(zwiniete) = 1`)).toBe('1');
+  expect(await sql(request, `select count(*) from public.ud_leady_widok_uzytkownika where user_id = tt.id_adm() and cardinality(zwiniete) = 1`)).toBe('1');
 });
 
 test('K06: zwinięcie i rozwinięcie przywraca kolumnę na jej miejsce; panel w kolejności pipeline\'u', async ({ page }) => {
@@ -260,8 +260,8 @@ test('K09c: zerwana sieć i nie wiadomo, czy zapis przeszedł — karta oznaczon
 
 test('K10: równoległa zmiana przez inną osobę — konflikt, bez cichego nadpisania', async ({ page, request }) => {
   await otworz(page);
-  // Olek (inna sesja) przenosi Annę, zanim Ula coś zrobi.
-  await sql(request, `select public.ud_lead_zmien('przenies', tt.lead('Anna Kowalska'), tt.wersja(tt.lead('Anna Kowalska')), 'olek-rownolegle-1', tt.id_olek(), jsonb_build_object('etap_id', tt.etap('decyzja')))`);
+  // Ula (opiekunka, inna sesja) przenosi Annę, zanim administrator coś zrobi.
+  await sql(request, `select public.ud_lead_zmien('przenies', tt.lead('Anna Kowalska'), tt.wersja(tt.lead('Anna Kowalska')), 'ula-rownolegle-1', tt.id_ula(), jsonb_build_object('etap_id', tt.etap('decyzja')))`);
   const vOlka = await wersjaLeada(request, 'Anna Kowalska');
 
   await przeciagnij(page, karta(page, 'Anna Kowalska'), kolumna(page, 'oferta'));
@@ -347,6 +347,7 @@ test('K13: lead przestaje pasować do filtra po przeniesieniu — znika z wyjaś
   await page.getByRole('dialog', { name: 'Przenieś do…' }).getByRole('button', { name: /^Wygrany/ }).click();
   // „Wygrany" wymaga danych sprzedaży — najpierw okno, dopiero potem zmiana etapu.
   const sprzedaz = page.getByRole('dialog', { name: 'Dane sprzedaży' });
+  await sprzedaz.getByRole('button', { name: 'Dodaj ręcznie' }).click();
   await sprzedaz.getByLabel('Składka roczna *').fill('1200');
   await sprzedaz.getByRole('button', { name: /Przenieś do/ }).click();
 

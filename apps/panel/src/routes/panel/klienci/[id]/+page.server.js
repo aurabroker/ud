@@ -1,11 +1,16 @@
 import { error, redirect } from '@sveltejs/kit';
 import { createAdminClient } from '$lib/server/supabase.js';
+import { klientWidoczny } from '$lib/server/widocznosc.js';
 
 export async function load({ params, locals }) {
   const { user } = await locals.safeGetSession();
   if (!user) throw redirect(303, '/login');
 
   const sb = createAdminClient();
+  // Cudzy klient wygląda dla agenta jak nieistniejący — bez zdradzania, że jest.
+  if (!/^[0-9a-f-]{36}$/i.test(params.id) || !(await klientWidoczny(sb, user.id, params.id))) {
+    throw error(404, 'Klient nie znaleziony');
+  }
   const { data: client } = await sb.from('ud_clients').select('*').eq('id', params.id).maybeSingle();
   if (!client) throw error(404, 'Klient nie znaleziony');
 

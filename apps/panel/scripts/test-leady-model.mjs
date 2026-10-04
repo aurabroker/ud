@@ -85,11 +85,17 @@ await t('menu leada: w Wygrany pozycja danych sprzedaży obok notatki; gdzie ind
   assert.equal(akcjeLeada({ karta: karta({ sprzedaz: { skladka_roczna: 100 } }), etap: WYG, plan: plan() }).find((p) => p.id === 'sprzedaz').etykieta, 'Dane sprzedaży…');
   assert.ok(!akcjeLeada({ karta: karta(), etap: OTWARTY, plan: plan() }).some((p) => p.id === 'sprzedaz'));
 });
-await t('dane sprzedaży z formularza: kwoty jak w SQL, puste pomija, śmieci zgłasza', () => {
+await t('dane sprzedaży z formularza: kwoty jak w SQL, puste i zero pomija (brak ryzyka), śmieci zgłasza', () => {
   const { sprzedaz, bledne } = daneSprzedazyZFormularza(
     { skladka_roczna: '3 036,50 zł', skladka_mies: '', swiadczenie_okresowa: '10000', swiadczenie_trwala: 'abc', swiadczenie_zgon: '0' }, 'w-1');
   assert.deepEqual(sprzedaz, { skladka_roczna: 3036.5, swiadczenie_okresowa: 10000, wariant_id: 'w-1' });
-  assert.deepEqual(bledne, ['swiadczenie_trwala', 'swiadczenie_zgon']);
+  assert.deepEqual(bledne, ['swiadczenie_trwala']);
+  // Sama okresowa niezdolność: zera w trwałej i zgonie nie są błędem (zgłoszenie z 02.10.2026).
+  const okresowa = daneSprzedazyZFormularza(
+    { skladka_roczna: '1500', skladka_mies: '0', swiadczenie_okresowa: '4000', swiadczenie_trwala: '0', swiadczenie_zgon: '0,00 zł' });
+  assert.deepEqual(okresowa, { sprzedaz: { skladka_roczna: 1500, swiadczenie_okresowa: 4000 }, bledne: [] });
+  // Zero w składce rocznej to brak składki — okno i SQL żądają jej osobno.
+  assert.deepEqual(daneSprzedazyZFormularza({ skladka_roczna: '0' }).sprzedaz, {});
   assert.ok(wymagaSprzedazy({ wymagane_pola: ['skladka_roczna'] }) && !wymagaSprzedazy(OTWARTY));
 });
 await t('ostrzeżenia: etap zamykający nie ostrzega o braku działania ani opiekuna', () => {
@@ -185,27 +191,28 @@ await t('wymagaPowodu: tylko etap z polem powod_utraty', () => {
   assert.equal(wymagaPowodu(OTWARTY), false);
   assert.equal(wymagaPowodu(undefined), false);
 });
-await t('opiekun: agent — wolny i własny tak, cudzy nie (z powodem); administrator zawsze', () => {
-  assert.equal(mozeZmienicOpiekuna(plan(), karta({ opiekun_id: null })).ok, true);
-  assert.equal(mozeZmienicOpiekuna(plan(), karta({ opiekun_id: 'u1' })).ok, true);
-  const cudzy = mozeZmienicOpiekuna(plan(), karta({ opiekun_id: 'u2', opiekun_nazwa: 'Olek' }));
-  assert.equal(cudzy.ok, false);
-  assert.match(cudzy.powod, /Olek.*administrator/);
+await t('opiekun: przydziela wyłącznie administrator — agent nie przejmuje ani nie zwalnia (z powodem)', () => {
+  for (const opiekun_id of [null, 'u1', 'u2']) {
+    const r = mozeZmienicOpiekuna(plan(), karta({ opiekun_id }));
+    assert.equal(r.ok, false);
+    assert.match(r.powod, /administrator/);
+  }
   assert.equal(mozeZmienicOpiekuna(plan('admin'), karta({ opiekun_id: 'u2' })).ok, true);
 });
-await t('opcjeOpiekuna: administrator widzi wszystkich, agent tylko siebie i „bez opiekuna" (gdy to własny)', () => {
+await t('opcjeOpiekuna: administrator widzi wszystkich, agent nic', () => {
   assert.deepEqual(opcjeOpiekuna(plan('admin'), karta()).map((o) => o.nazwa), ['Bez opiekuna', 'Ula (ja)', 'Olek']);
-  assert.deepEqual(opcjeOpiekuna(plan(), karta({ opiekun_id: null })).map((o) => o.nazwa), ['Ula (ja)']);
-  assert.deepEqual(opcjeOpiekuna(plan(), karta({ opiekun_id: 'u1' })).map((o) => o.nazwa), ['Bez opiekuna', 'Ula (ja)']);
+  assert.deepEqual(opcjeOpiekuna(plan(), karta({ opiekun_id: 'u1' })), []);
 });
 await t('akcjeLeada: komplet pozycji, telefon tylko gdy jest, zablokowane z przyczyną', () => {
-  const a = akcjeLeada({ karta: karta(), etap: OTWARTY, plan: plan() });
+  const a = akcjeLeada({ karta: karta(), etap: OTWARTY, plan: plan('admin') });
   assert.deepEqual(a.map((x) => x.id), ['otworz', 'przenies', 'dzialanie', 'notatka', 'opiekun', 'zadzwon', 'link', 'archiwizuj']);
   assert.ok(a.every((x) => !x.zablokowana));
   assert.equal(a.find((x) => x.id === 'zadzwon').href, 'tel:500100200');
   assert.ok(!akcjeLeada({ karta: karta({ telefon: null }), etap: OTWARTY, plan: plan() }).some((x) => x.id === 'zadzwon'));
-  const cudzy = akcjeLeada({ karta: karta({ opiekun_id: 'u2', opiekun_nazwa: 'Olek' }), etap: OTWARTY, plan: plan() });
-  assert.match(cudzy.find((x) => x.id === 'opiekun').zablokowana, /administrator/);
+  // Agent: zmiana opiekuna widoczna, ale zablokowana z przyczyną (nawet na własnym leadzie).
+  const agent = akcjeLeada({ karta: karta({ opiekun_id: 'u1' }), etap: OTWARTY, plan: plan() });
+  assert.match(agent.find((x) => x.id === 'opiekun').zablokowana, /administrator/);
+  assert.ok(agent.filter((x) => x.id !== 'opiekun').every((x) => !x.zablokowana));
   const zamkniety = akcjeLeada({ karta: karta(), etap: PRZEGRANY, plan: plan() });
   assert.match(zamkniety.find((x) => x.id === 'dzialanie').zablokowana, /zamknięta/);
 });
@@ -253,6 +260,25 @@ await t('api: POST niesie JSON, ten sam klucz przy ponowieniu po zerwaniu sieci'
   assert.equal(new Set(wywolania.map((w) => JSON.parse(w.opcje.body).idempotencyKey)).size, 1, 'jeden klucz we wszystkich próbach');
   assert.equal(wywolania[0].opcje.headers['content-type'], 'application/json');
   assert.equal(wywolania[0].opcje.method, 'POST');
+});
+await t('api: polisa — sam plik jako application/pdf, nazwa w nagłówku, JEDNA próba (bez ponawiania)', async () => {
+  const wywolania = [];
+  const plik = new Blob(['%PDF-1.4'], { type: 'application/pdf' });
+  plik.name = 'Polisa żółw.pdf';
+  const api = utworzApi({ fetch: async (url, opcje) => { wywolania.push({ url, opcje }); return odp(200, { status: 'ok' }); }, czekaj: bezOczekiwania });
+  await api.polisa('lead-1', plik);
+  assert.equal(wywolania[0].url, '/panel/leady/api/polisa/lead-1');
+  assert.equal(wywolania[0].opcje.headers['content-type'], 'application/pdf');
+  assert.equal(decodeURIComponent(wywolania[0].opcje.headers['x-nazwa-pliku']), 'Polisa żółw.pdf');
+  assert.equal(wywolania[0].opcje.body, plik);
+  let n = 0;
+  const zerwane = utworzApi({ fetch: async () => { n++; throw new TypeError('Failed to fetch'); }, czekaj: bezOczekiwania, proby: 3 });
+  await assert.rejects(() => zerwane.polisa('lead-1', plik), BladSieci);
+  assert.equal(n, 1, 'wgranie pliku nie jest idempotentne — bez ponowienia');
+  n = 0;
+  const blad502 = utworzApi({ fetch: async () => { n++; return odp(502, { status: 'blad', ponow: true }); }, czekaj: bezOczekiwania });
+  assert.equal((await blad502.polisa('lead-1', plik)).status, 502);
+  assert.equal(n, 1);
 });
 await t('api: po wyczerpaniu prób rzuca BladSieci (stan niejednoznaczny), nie „błąd zapisu"', async () => {
   const api = utworzApi({ fetch: async () => { throw new TypeError('Failed to fetch'); }, czekaj: bezOczekiwania, proby: 3 });

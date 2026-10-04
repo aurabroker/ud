@@ -91,7 +91,7 @@ test.describe('panel szczegółów', () => {
     await sz.getByLabel('Nowa notatka').fill('Prosi o ofertę z okresem 36 mies.');
     await sz.getByRole('button', { name: 'Dodaj notatkę' }).click();
     await expect(sz.locator('[data-notatki]')).toContainText('Prosi o ofertę z okresem 36 mies.');
-    await expect(sz.locator('[data-notatki]')).toContainText('Ula Agent');
+    await expect(sz.locator('[data-notatki]')).toContainText('Ada Admin');
     await expect(sz.getByLabel('Nowa notatka')).toHaveValue('');
     expect(await sql(request, `select count(*) from public.ud_leady_notatki where lead_id = tt.lead('Celina Zielińska')`)).toBe('1');
     await page.reload();
@@ -152,27 +152,34 @@ test.describe('dialogi', () => {
     await expect(karta(page, 'Ewa Mazur')).toContainText('Brak zaplanowanego działania');
   });
 
-  test('opiekun: agent przejmuje wolny lead; cudzy zablokowany z przyczyną; administrator przepisuje', async ({ page, request }) => {
-    // Ula: Bartek (bez opiekuna) — może przejąć.
+  test('opiekun: przydziela tylko administrator; przydział otwiera agentowi dostęp do leada', async ({ page, request }) => {
+    // Ula (agent): na własnym leadzie zmiana opiekuna widoczna, ale zablokowana z powodem; w szczegółach bez „Zmień…".
+    await otworz(page, { u: 'ula' });
+    await expect(karta(page, 'Bartek Nowak')).toHaveCount(0);                      // wolny lead — agent go nie widzi
+    await page.getByRole('button', { name: 'Akcje leada Anna Kowalska' }).click();
+    const poz = page.getByRole('menuitem', { name: 'Zmień opiekuna…' });
+    await expect(poz).toHaveAttribute('aria-disabled', 'true');
+    await expect(poz).toContainText('Opiekuna przydziela administrator');
+    await page.keyboard.press('Escape');
+    await karta(page, 'Anna Kowalska').locator('.kontekst').click();
+    await expect(page.locator('[data-szczegoly] [data-opiekun]')).toHaveText('Ula Agent');
+    await expect(page.locator('[data-szczegoly]').getByRole('button', { name: 'Zmień…' })).toHaveCount(1);   // tylko przy działaniu, nie przy opiekunie
+    await page.getByRole('button', { name: 'Zamknij szczegóły' }).click();
+
+    // Administrator przydziela Bartka Uli — od tej chwili Ula go widzi.
     await otworz(page);
     await page.getByRole('button', { name: 'Akcje leada Bartek Nowak' }).click();
     await page.getByRole('menuitem', { name: 'Zmień opiekuna…' }).click();
     const dialog = page.getByRole('dialog', { name: 'Zmień opiekuna' });
-    await expect(dialog.getByRole('radio')).toHaveCount(1);                    // tylko „Ula (ja)" — „bez opiekuna" nie ma sensu dla wolnego
-    await dialog.getByRole('radio', { name: 'Ula Agent (ja)' }).check();
+    await dialog.getByRole('radio', { name: 'Ula Agent' }).check();
     await dialog.getByRole('button', { name: 'Zapisz' }).click();
     await expect(karta(page, 'Bartek Nowak')).toContainText('Ula Agent');
     expect(await sql(request, `select opiekun_id from public.ud_leady where id = tt.lead('Bartek Nowak')`)).toBe(await sql(request, 'select tt.id_ula()'));
-
-    // Cudzy lead (Celina — Olek): pozycja widoczna, ale zablokowana z powodem.
-    await page.getByRole('button', { name: 'Akcje leada Celina Zielińska' }).click();
-    const poz = page.getByRole('menuitem', { name: 'Zmień opiekuna…' });
-    await expect(poz).toHaveAttribute('aria-disabled', 'true');
-    await expect(poz).toContainText('Olek Agent');
-    await page.keyboard.press('Escape');
+    await otworz(page, { u: 'ula' });
+    await expect(karta(page, 'Bartek Nowak')).toBeVisible();
 
     // Administrator: wszyscy aktywni agenci (bez Ines), przepisuje cudzy lead.
-    await otworz(page, { u: 'adm' });
+    await otworz(page);
     await page.getByRole('button', { name: 'Akcje leada Celina Zielińska' }).click();
     await page.getByRole('menuitem', { name: 'Zmień opiekuna…' }).click();
     const d2 = page.getByRole('dialog', { name: 'Zmień opiekuna' });
@@ -297,18 +304,18 @@ test.describe('wyszukiwanie i filtry', () => {
     await expect(karta(page, 'Bartek Nowak')).toHaveCount(0);
   });
 
-  test('filtry: opiekun „Ja", źródło, zakres i termin; wyczyść; stan wraca po odświeżeniu z adresu', async ({ page }) => {
+  test('filtry: opiekun (administrator), źródło, zakres i termin; wyczyść; stan wraca po odświeżeniu z adresu', async ({ page }) => {
     await otworz(page);
-    await page.getByLabel('Opiekun').selectOption('ja');
+    await page.getByLabel('Opiekun').selectOption({ label: 'Ula Agent' });
     await expect(licznik(page, 'nowy')).toHaveText('3 z 7');
     await expect.poll(async () => (await nazwyKart(page, 'nowy')).sort()).toEqual(['Anna Kowalska', 'Dariusz Wójcik', 'Filip Lis']);
     await page.getByLabel('Zakres ochrony').selectOption({ label: 'Zgon / inwalidztwo' });
     await expect(licznik(page, 'nowy')).toHaveText('1 z 7');
-    await expect(page.locator('[data-aktywne-filtry]')).toContainText('opiekun: ja');
+    await expect(page.locator('[data-aktywne-filtry]')).toContainText('opiekun: Ula Agent');
     await expect(page.locator('[data-aktywne-filtry]')).toContainText('zakres: Zgon / inwalidztwo');
     await page.reload();
     await page.waitForSelector('html[data-gotowe]');
-    await expect(page.getByLabel('Opiekun')).toHaveValue('ja');
+    await expect(page.getByLabel('Opiekun')).toHaveValue('a0000000-0000-0000-0000-0000000000a2');
     await expect(licznik(page, 'nowy')).toHaveText('1 z 7');
     await page.getByRole('button', { name: 'Wyczyść filtry' }).click();
     await expect(licznik(page, 'nowy')).toHaveText('7');
@@ -362,6 +369,7 @@ test('wszystkie etapy zwinięte: komunikat z akcją, a upuszczenie na zwinięty 
   await page.getByRole('button', { name: 'Rozwiń etap Nowy' }).click();
   await przeciagnij(page, karta(page, 'Anna Kowalska'), zwiniety(page, 'Wygrany'));
   const sprzedaz = page.getByRole('dialog', { name: 'Dane sprzedaży' });
+  await sprzedaz.getByRole('button', { name: 'Dodaj ręcznie' }).click();      // Anna nie ma ofert: polisa albo ręcznie
   await sprzedaz.getByLabel('Składka roczna *').fill('1500');
   await sprzedaz.getByRole('button', { name: /Przenieś do/ }).click();
   await expect(toast(page)).toContainText('Anna Kowalska: Nowy → Wygrany');

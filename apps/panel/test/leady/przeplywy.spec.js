@@ -189,8 +189,8 @@ test('K23: filtry i częściowo załadowana kolumna — licznik i suma dotyczą 
   await expect(kolumna(page, 'oferta').getByRole('button', { name: /Pokaż więcej \(25 z 41\)/ })).toBeVisible();
   await expect(page).toHaveURL(/opiekun=brak/);
 
-  // Filtr „ja": jeden lead, reszta kolumny poza zbiorem.
-  await page.getByLabel('Opiekun').selectOption('ja');
+  // Filtr na jednego agenta (Ula): jeden lead, reszta kolumny poza zbiorem.
+  await page.getByLabel('Opiekun').selectOption({ label: 'Ula Agent' });
   await expect(licznik(page, 'oferta')).toHaveText('1 z 42');
   await expect(kolumna(page, 'oferta').locator('[data-karta-id]')).toHaveCount(1);
   await expect(suma(page, 'oferta')).toContainText('7000');
@@ -224,12 +224,12 @@ test('K25: odświeżenie aplikacji przywraca osobisty stan zwinięcia etapów (p
   await expect(page.locator('[data-zwiniete-panel]')).toHaveCount(0);
 
   // „Rozwiń wszystkie" też jest zapamiętane.
-  await otworz(page, { u: 'ula' });
+  await otworz(page);
   await page.locator('[data-zwiniete-panel]').getByRole('button', { name: 'Rozwiń wszystkie' }).click();
   await page.reload();
   await page.waitForSelector('html[data-gotowe]');
   await expect(page.locator('section[data-etap-klucz]')).toHaveCount(5);
-  expect(await sql(request, `select cardinality(zwiniete) from public.ud_leady_widok_uzytkownika where user_id = tt.id_ula()`)).toBe('0');
+  expect(await sql(request, `select cardinality(zwiniete) from public.ud_leady_widok_uzytkownika where user_id = tt.id_adm()`)).toBe('0');
 });
 
 test('K25b: zwinięcie nie zmienia danych leadów ani kolejności etapów', async ({ page, request }) => {

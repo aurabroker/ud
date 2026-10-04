@@ -90,3 +90,13 @@ create table public.ud_offer_documents (
   sort_order              integer default 0,
   created_at              timestamptz default now()
 );
+
+-- Storage Supabase: tylko tabela kubełków (część 4 zakłada w niej ud-polisy).
+create schema if not exists storage;
+create table if not exists storage.buckets (
+  id                 text primary key,
+  name               text not null,
+  public             boolean default false,
+  file_size_limit    bigint,
+  allowed_mime_types text[]
+);

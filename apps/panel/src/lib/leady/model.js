@@ -309,8 +309,10 @@ export function daneSprzedazyZFormularza(pola, wariantId = null) {
     const t = String(pola[id] ?? '').trim();
     if (!t) continue;
     const n = kwotaZTekstu(t);
-    if (n == null || n <= 0) bledne.push(id);
-    else sprzedaz[id] = n;
+    // Zero = „tego ryzyka nie ma" (np. sprzedana sama okresowa niezdolność) —
+    // jak puste pole, nie błąd. Składkę roczną > 0 wymaga osobno okno i SQL.
+    if (n == null) bledne.push(id);
+    else if (n > 0) sprzedaz[id] = n;
   }
   if (wariantId) sprzedaz.wariant_id = wariantId;
   return { sprzedaz, bledne };
@@ -318,24 +320,20 @@ export function daneSprzedazyZFormularza(pola, wariantId = null) {
 
 /**
  * Czy bieżący użytkownik może zmienić opiekuna leada — podpowiedź dla UI.
- * Administrator: kogokolwiek. Agent: przejąć wolny lead albo zwolnić własny.
+ * Od 02.10.2026 opiekuna przydziela wyłącznie administrator: agent widzi tylko
+ * swoje leady, więc nie ma czego przejmować, a zwolnić własnego nie może.
  */
 export function mozeZmienicOpiekuna(plan, karta) {
   if (plan.rola === 'admin') return { ok: true };
-  const ja = plan.uzytkownik.id;
-  if (!karta.opiekun_id || karta.opiekun_id === ja) return { ok: true };
-  return { ok: false, powod: `Opiekunem jest ${karta.opiekun_nazwa ?? 'inna osoba'}. Zmienić go może administrator.` };
+  return { ok: false, powod: 'Opiekuna przydziela administrator.' };
 }
 
-/** Opcje do okna „Zmień opiekuna". */
+/** Opcje do okna „Zmień opiekuna" (tylko administrator). */
 export function opcjeOpiekuna(plan, karta) {
+  if (plan.rola !== 'admin') return [];
   const ja = plan.uzytkownik.id;
-  const baza = [{ id: null, nazwa: 'Bez opiekuna' }];
-  if (plan.rola === 'admin') {
-    return [...baza, ...plan.agenci.map((a) => ({ id: a.id, nazwa: a.id === ja ? `${a.nazwa} (ja)` : a.nazwa }))];
-  }
-  const opcje = [{ id: ja, nazwa: `${plan.uzytkownik.nazwa} (ja)` }];
-  return [...baza, ...opcje].filter((o) => (o.id === null ? karta.opiekun_id === ja : !karta.opiekun_id || karta.opiekun_id === ja));
+  return [{ id: null, nazwa: 'Bez opiekuna' },
+          ...plan.agenci.map((a) => ({ id: a.id, nazwa: a.id === ja ? `${a.nazwa} (ja)` : a.nazwa }))];
 }
 
 /**

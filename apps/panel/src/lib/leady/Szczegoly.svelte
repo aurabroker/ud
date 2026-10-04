@@ -50,6 +50,7 @@
     notatka: () => 'dodano notatkę',
     przepieto: () => 'wniosek ukończony — lead przypisany do klienta',
     sprzedaz: (h) => `zmieniono dane sprzedaży${h.dane?.sprzedaz?.skladka_roczna != null ? ` (składka ${formatKwota(h.dane.sprzedaz.skladka_roczna)} / rok)` : ''}`,
+    plik: (h) => `dodano polisę${h.dane?.nazwa ? `: ${h.dane.nazwa}` : ''}`,
   };
 </script>
 
@@ -117,11 +118,27 @@
       </section>
     {/if}
 
+    {#if s?.pliki?.length}
+      <section aria-label="Polisy" data-pliki>
+        <h3>Polisy</h3>
+        <ul class="lista">
+          {#each s.pliki as f (f.id)}
+            <li>
+              <a href="/panel/leady/api/plik/{f.id}" target="_blank" rel="noopener" data-polisa>{f.nazwa}</a>
+              <span class="mala">{f.dodal_nazwa ?? ''}{f.created_at ? ` · ${dataKrotka(f.created_at)}` : ''}</span>
+            </li>
+          {/each}
+        </ul>
+      </section>
+    {/if}
+
     <section aria-label="Obsługa">
       <p class="wiersz">
         <span class="et">Opiekun</span>
         <span data-opiekun>{lead.opiekun_nazwa ?? 'Bez opiekuna'}{lead.opiekun_admin ? ' (administrator)' : ''}</span>
-        <button type="button" class="link" onclick={() => ctx.otworzDialog({ typ: 'opiekun', leadId: lead.id })}>Zmień…</button>
+        {#if stan.plan.rola === 'admin'}
+          <button type="button" class="link" onclick={() => ctx.otworzDialog({ typ: 'opiekun', leadId: lead.id })}>Zmień…</button>
+        {/if}
       </p>
       <p class="wiersz">
         <span class="et">Następne działanie</span>

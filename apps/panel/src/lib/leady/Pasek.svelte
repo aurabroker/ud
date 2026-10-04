@@ -46,14 +46,17 @@
   </div>
 
   <div class="wiersz filtry">
-    <label class="f">Opiekun
-      <select class="pole" value={stan.filtr.opiekun ?? ''} onchange={(e) => stan.ustawFiltr({ opiekun: e.currentTarget.value })}>
-        <option value="">Wszyscy</option>
-        <option value="ja">Ja</option>
-        <option value="brak">Bez opiekuna</option>
-        {#each stan.plan.agenci as a (a.id)}<option value={a.id}>{a.nazwa}</option>{/each}
-      </select>
-    </label>
+    <!-- Agent widzi tylko swoje leady (02.10.2026), więc filtr opiekuna ma sens wyłącznie u administratora. -->
+    {#if stan.plan.rola === 'admin'}
+      <label class="f">Opiekun
+        <select class="pole" value={stan.filtr.opiekun ?? ''} onchange={(e) => stan.ustawFiltr({ opiekun: e.currentTarget.value })}>
+          <option value="">Wszyscy</option>
+          <option value="ja">Ja</option>
+          <option value="brak">Bez opiekuna</option>
+          {#each stan.plan.agenci as a (a.id)}<option value={a.id}>{a.nazwa}</option>{/each}
+        </select>
+      </label>
+    {/if}
     <label class="f">Źródło
       <select class="pole" value={stan.filtr.zrodlo ?? ''} onchange={(e) => stan.ustawFiltr({ zrodlo: e.currentTarget.value })}>
         <option value="">Wszystkie</option>

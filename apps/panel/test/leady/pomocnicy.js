@@ -34,8 +34,8 @@ export async function wywolania(request) {
   return (await r.json()).wywolania;
 }
 
-/** Otwiera tablicę jako dany użytkownik (ula | adm | olek | ines | brak). */
-export async function otworz(page, { u = 'ula', zapytanie = '' } = {}) {
+/** Otwiera tablicę jako dany użytkownik (adm | ula | olek | ines | brak). Domyślnie administrator: widzi wszystkie leady (od 02.10.2026 agent tylko swoje). */
+export async function otworz(page, { u = 'adm', zapytanie = '' } = {}) {
   await page.goto(`${adres()}/test/leady/harness.html?u=${u}${zapytanie ? `&${zapytanie}` : ''}`);
   await page.waitForSelector('html[data-gotowe]');
 }

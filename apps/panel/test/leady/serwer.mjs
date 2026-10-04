@@ -19,8 +19,8 @@ import { createServer } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { uruchomKlaster, wczytaj } from '../../scripts/lib/pg-tymczasowy.mjs';
 import {
-  BladApi, notatka, odpowiedzKolumny, odpowiedzLicznikow, odpowiedzSzczegolow, odpowiedzWariantow, przetworz, statystyki, wczytajTablice,
-  zmien, zwin,
+  BladApi, adresPliku, notatka, odpowiedzKolumny, odpowiedzLicznikow, odpowiedzSzczegolow, odpowiedzWariantow, przetworz, statystyki,
+  wczytajTablice, wgrajPolise, zmien, zwin,
 } from '../../src/lib/server/leady.js';
 import { liczNiedokonczone } from '../../src/lib/server/niedokonczone.js';
 
@@ -48,6 +48,7 @@ export async function startuj() {
          delete from public.ud_leady_pipeline where klucz <> 'sprzedaz';
          update public.ud_leady_etap set aktywny = (klucz <> 'kontakt');`);
     wywolania.length = 0;
+    magazyn.clear();
     sql(fixture);
     awarie.length = 0;
   };
@@ -106,6 +107,11 @@ export async function startuj() {
         },
         order: () => zapytanie,
         limit: () => zapytanie,
+        maybeSingle: async () => {
+          const zrodlo = `select * from public.${tabela}${warunki.length ? ` where ${warunki.join(' and ')}` : ''} limit 1`;
+          const w = sql(`select to_jsonb(t) from (${zrodlo}) t`);
+          return { data: w ? JSON.parse(w) : null, error: null };
+        },
         then: (rozwiaz, odrzuc) => {
           try {
             const zrodlo = `select * from public.${tabela}${warunki.length ? ` where ${warunki.join(' and ')}` : ''}`;
@@ -118,6 +124,39 @@ export async function startuj() {
       return zapytanie;
     },
   };
+
+  // ── Kubełek polis w pamięci; adres podpisany = ścieżka serwera testowego ────
+  const magazyn = new Map();
+  const kubelki = {
+    from: (kubelek) => ({
+      upload: async (sciezka, bajty) => { magazyn.set(`${kubelek}/${sciezka}`, Buffer.from(bajty)); return { data: {}, error: null }; },
+      remove: async (sciezki) => { for (const x of sciezki) magazyn.delete(`${kubelek}/${x}`); return { data: [], error: null }; },
+      createSignedUrl: async (sciezka, sekundy, opcje) =>
+        ({ data: { signedUrl: `/__test/magazyn/${kubelek}/${sciezka}?nazwa=${encodeURIComponent(opcje?.download ?? '')}` }, error: null }),
+    }),
+  };
+  // Klucz serwisowy w trasach polis: rpc + odczyt PESEL-u + kubełek.
+  const sbPolisy = { rpc: (n, a) => sb.rpc(n, a), from: (t) => sbOferty.from(t), storage: kubelki };
+  // Czytnik testowy: prawdziwego PDF-u polisy tu nie ma, więc rozpoznaje znaczniki
+  // w treści pliku. „UD-TEST-KWOTY" → kwoty jak z Leadenhall; „UD-TEST-HASLO" →
+  // wymaga 4 ostatnich cyfr PESEL-u; reszta → nieznany układ (jak prawdziwy czytnik).
+  const odczytajTestowo = async (bajty, haslo) => {
+    const tekst = Buffer.from(bajty).toString('latin1');
+    if (tekst.includes('UD-TEST-HASLO') && haslo !== '2345') {
+      throw Object.assign(new Error('No password given'), { name: 'PasswordException' });
+    }
+    if (tekst.includes('UD-TEST-KWOTY') || tekst.includes('UD-TEST-HASLO')) {
+      return { offer_number: 'LHQ9/1', premium_total: '1500.00', premium_monthly: '125', temp_incapacity_covered: true,
+               temp_monthly_benefit: 4000, perm_incapacity_covered: false, death_covered: false };
+    }
+    throw new Error('Nie rozpoznano szablonu oferty (Leadenhall/CEU).');
+  };
+  const czytajBajty = (req) => new Promise((rozwiaz, odrzuc) => {
+    const kawalki = [];
+    req.on('data', (d) => kawalki.push(d));
+    req.on('end', () => rozwiaz(new Uint8Array(Buffer.concat(kawalki))));
+    req.on('error', odrzuc);
+  });
 
   // ── Awarie wstrzykiwane przez testy ───────────────────────────────────────
   /** @type {{ sciezka: string, tryb: string, ile: number, status?: number, body?: any, opoznienieMs?: number }[]} */
@@ -161,6 +200,13 @@ export async function startuj() {
             return odpowiedz(res, 200, { ok: true });
           }
           if (sciezka === '/__test/wywolania') return odpowiedz(res, 200, { wywolania });
+          if (sciezka.startsWith('/__test/magazyn/')) {
+            const plik = magazyn.get(decodeURIComponent(sciezka.slice('/__test/magazyn/'.length)));
+            if (!plik) return odpowiedz(res, 404, { status: 'blad' });
+            res.setHeader('content-type', 'application/pdf');
+            return res.end(plik);
+          }
+          if (sciezka === '/__test/magazyn') return odpowiedz(res, 200, { pliki: [...magazyn.keys()] });
           if (sciezka === '/__test/ssr') {
             // Renderowanie po stronie serwera (tak jak robi to SvelteKit na Cloudflare): bez window i document.
             const { render } = await serwer.ssrLoadModule('svelte/server');
@@ -233,6 +279,35 @@ export async function startuj() {
             if (awaria.tryb === 'odpowiedz') return odpowiedz(res, awaria.status ?? 500, awaria.body ?? { status: 'blad', komunikat: 'Błąd serwera' });
           } else if (awaria?.tryb === 'opoznienie') {
             awaria.ile -= 1;
+          }
+
+          // ── polisy (te same funkcje co w src/routes/panel/leady/api/polisa|plik) ──
+          if (nazwa.startsWith('polisa/')) {
+            const wynik = await przetworz({
+              user,
+              oczekiwanyTyp: 'application/pdf',
+              typTresci: req.headers['content-type'],
+              czytajCialo: () => czytajBajty(req),
+              wykonaj: ({ userId, body }) => {
+                let nazwaPliku = req.headers['x-nazwa-pliku'] || '';
+                try { nazwaPliku = decodeURIComponent(nazwaPliku); } catch { /* jak przyszło */ }
+                return wgrajPolise(sbPolisy, userId, decodeURIComponent(nazwa.slice(7)), { nazwa: nazwaPliku, bajty: body },
+                  { odczytaj: odczytajTestowo });
+              },
+            });
+            return odpowiedz(res, wynik.status, wynik.body);
+          }
+          if (nazwa.startsWith('plik/')) {
+            if (!user) { res.statusCode = 303; res.setHeader('location', '/login'); return res.end(); }
+            try {
+              const adresPodpisany = await adresPliku(sbPolisy, user.id, decodeURIComponent(nazwa.slice(5)));
+              res.statusCode = 303;
+              res.setHeader('location', adresPodpisany);
+              return res.end();
+            } catch (e) {
+              if (e instanceof BladApi) return odpowiedz(res, e.status, e.body);
+              throw e;
+            }
           }
 
           // ── trasy (te same funkcje co w src/routes/panel/leady/api/*) ──

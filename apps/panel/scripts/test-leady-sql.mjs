@@ -50,7 +50,9 @@ try {
   // ── Współbieżność: dwie sesje, prawdziwe blokady wierszy ──────────────────
   const dla = (sql) => psql(sql).stdout.trim();
   const ula = dla(`select tt.id_ula()`);
-  const olek = dla(`select tt.id_olek()`);
+  // Druga sesja jako administrator: Bartek jest leadem Uli, a innego agenta reguła
+  // widoczności zatrzymałaby przed blokadą wiersza (brak_leada zamiast konfliktu).
+  const adm = dla(`select tt.id_adm()`);
   const lead = dla(`select tt.lead('Bartek Nowak')`);
   const etap = (k) => dla(`select tt.etap('${k}')`);
   const wersja = () => Number(dla(`select tt.wersja('${lead}')`));
@@ -68,7 +70,7 @@ try {
     const v = wersja();
     const [s1, s2] = await Promise.all([
       sesja(`begin;\n${zmien('conc-a-aaaaaaaa', ula, 'decyzja', v)}\nselect pg_sleep(1.5);\ncommit;`),
-      sesja(zmien('conc-a-bbbbbbbb', olek, 'oferta', v), 400),
+      sesja(zmien('conc-a-bbbbbbbb', adm, 'oferta', v), 400),
     ]);
     sprawdz('współbieżność: pierwsza zmiana przechodzi', s1.out.startsWith('ok:'), s1.out + s1.err);
     sprawdz('współbieżność: druga (ta sama wersja) dostaje konflikt, nie nadpisuje', s2.out === 'konflikt:-', s2.out + s2.err);

@@ -32,10 +32,11 @@ create function tt.hist(p_lead uuid) returns int language sql as $$
   select count(*)::int from public.ud_leady_historia where lead_id = p_lead $$;
 create function tt.ruch(p_op text, p_lead uuid, p_wersja int, p_klucz text, p_user uuid, p_dane jsonb default '{}')
   returns jsonb language sql as $$ select public.ud_lead_zmien(p_op, p_lead, p_wersja, p_klucz, p_user, p_dane) $$;
-create function tt.przenies(p_lead uuid, p_cel text, p_klucz text, p_user uuid default 'a0000000-0000-0000-0000-0000000000a2')
+create function tt.przenies(p_lead uuid, p_cel text, p_klucz text, p_user uuid default 'a0000000-0000-0000-0000-0000000000a1')
   returns jsonb language sql as $$
   select public.ud_lead_zmien('przenies', p_lead, tt.wersja(p_lead), p_klucz, p_user,
                               jsonb_build_object('etap_id', tt.etap(p_cel))) $$;
+-- tt.przenies działa jako administrator (widzi każdy lead); reguły agenta testuje sekcja 11.
 -- Identyfikatory agentów: a1 admin, a2 Ula (user), a3 Olek (user), a4 Ines (nieaktywna).
 create function tt.id_ula() returns uuid language sql as $$ select 'a0000000-0000-0000-0000-0000000000a2'::uuid $$;
 create function tt.id_adm() returns uuid language sql as $$ select 'a0000000-0000-0000-0000-0000000000a1'::uuid $$;

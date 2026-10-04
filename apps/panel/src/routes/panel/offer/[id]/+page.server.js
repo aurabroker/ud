@@ -1,5 +1,6 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { createAdminClient } from '$lib/server/supabase.js';
+import { klienciWidoczni } from '$lib/server/widocznosc.js';
 import { sendOfferToClient, deleteOffer, deleteOfferDocument, addDocumentsToOffer, refreshOfferDocuments, addAttachmentsToOffer, oznaczKupiona, ustawArchiwum, historiaWysylek } from '$lib/server/offers.js';
 import { clientBaseUrl } from '$lib/server/appUrl.js';
 
@@ -11,13 +12,19 @@ export async function load({ params, locals }) {
   const { data: offer } = await sb.from('ud_offers').select('*').eq('id', params.id).maybeSingle();
   if (!offer) throw error(404, 'Oferta nie znaleziona');
 
+  // Lista do przypisania klienta: agent dostaje tylko swoich (null = administrator).
+  // Klient już przypięty do oferty zostaje na liście — inaczej zapis formularza
+  // odpiąłby go po cichu (pole wyboru nie miałoby tej wartości).
+  const swoi = await klienciWidoczni(sb, user.id);
+  const widoczni = swoi && offer.client_id && !swoi.includes(offer.client_id) ? [...swoi, offer.client_id] : swoi;
+  const klienci = sb.from('ud_clients').select('id, full_name, email, phone').order('created_at', { ascending: false }).limit(500);
   const [{ data: documents }, { data: files }, { data: questions }, { data: pin }, { data: clients }] =
     await Promise.all([
       sb.from('ud_offer_documents').select('*').eq('offer_id', offer.id).order('sort_order'),
       sb.from('ud_offer_files').select('*').eq('offer_id', offer.id),
       sb.from('ud_offer_questions').select('*').eq('offer_id', offer.id).order('asked_at', { ascending: false }),
       sb.from('ud_offer_pins').select('expires_at, verified_at, attempts').eq('offer_id', offer.id).maybeSingle(),
-      sb.from('ud_clients').select('id, full_name, email, phone').order('created_at', { ascending: false }).limit(500)
+      widoczni === null ? klienci : widoczni.length ? klienci.in('id', widoczni) : Promise.resolve({ data: [] })
     ]);
 
   const wysylki = await historiaWysylek(offer.id);

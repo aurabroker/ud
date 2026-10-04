@@ -148,10 +148,11 @@ export async function kolumna(sb, userId, { pipelineId, etapId, filtr, sort, off
  * serwisowym: panel ma już swoje reguły dostępu do ofert i tablica leadów nie
  * jest drogą na skróty do cudzych.
  */
-export async function szczegoly(sb, userSb, leadId) {
+export async function szczegoly(sb, userSb, userId, leadId) {
   if (!jestUuid(leadId)) throw blad(400, 'Nieprawidłowy identyfikator leada.');
-  const s = await rpc(sb, 'ud_lead_szczegoly', { p_lead: leadId });
-  if (!s) throw blad(404, 'Lead nie istnieje albo został zarchiwizowany.');
+  // Widoczność rozstrzyga SQL: agent dostaje null dla cudzego i wolnego leada.
+  const s = await rpc(sb, 'ud_lead_szczegoly', { p_lead: leadId, p_user: userId });
+  if (!s) throw blad(404, NIEWIDOCZNY);
 
   let oferty = [];
   if (s.klient_id && userSb) {
@@ -165,6 +166,8 @@ export async function szczegoly(sb, userSb, leadId) {
   }
   return { ...s, oferty };
 }
+
+const NIEWIDOCZNY = 'Lead nie istnieje, został zarchiwizowany albo nie jest przypisany do Ciebie.';
 
 /** Kwota z pola tekstowego wariantu („50 000", „50000,00 zł") albo null. */
 function kwotaZTekstu(v) {
@@ -182,12 +185,12 @@ function kwotaZTekstu(v) {
  * RLS pokazuje agentowi jego oferty, administratorowi wszystkie. Gdy nic nie
  * widać, agent wpisuje kwoty ręcznie.
  */
-export async function warianty(sb, userSb, leadId) {
+export async function warianty(sb, userSb, userId, leadId) {
   if (!jestUuid(leadId)) throw blad(400, 'Nieprawidłowy identyfikator leada.');
   // Klient leada przez tę samą funkcję co szczegóły: klucz serwisowy idzie
-  // wyłącznie przez RPC, a lead spoza widoku (archiwum) daje 404 jak wszędzie.
-  const s = await rpc(sb, 'ud_lead_szczegoly', { p_lead: leadId });
-  if (!s) throw blad(404, 'Lead nie istnieje albo został zarchiwizowany.');
+  // wyłącznie przez RPC, a lead spoza widoku (archiwum, cudzy) daje 404 jak wszędzie.
+  const s = await rpc(sb, 'ud_lead_szczegoly', { p_lead: leadId, p_user: userId });
+  if (!s) throw blad(404, NIEWIDOCZNY);
   if (!s.klient_id || !userSb) return [];
   const lead = { klient_id: s.klient_id };
 
@@ -208,24 +211,132 @@ export async function warianty(sb, userSb, leadId) {
   const ofertaPo = new Map(oferty.map((o) => [o.id, o]));
   return (dokumenty || []).map((d) => {
     const o = ofertaPo.get(d.offer_id);
-    return {
-      id: d.id,
-      oferta: o?.offer_number || o?.name || 'Oferta',
-      ubezpieczyciel: d.product_name || d.insurer_type || 'Wariant',
-      numer: d.offer_number || '',
-      skladka_roczna: kwotaZTekstu(Number(d.premium_total)),
-      skladka_mies: kwotaZTekstu(Number(d.premium_monthly)),
-      swiadczenie_okresowa: d.temp_incapacity_covered === false ? null : kwotaZTekstu(Number(d.temp_monthly_benefit)),
-      swiadczenie_trwala: d.perm_incapacity_covered ? kwotaZTekstu(Number(d.perm_sum_insured)) : null,
-      swiadczenie_zgon: d.death_covered ? kwotaZTekstu(d.parsed_raw?.death_sum_insured ?? null) : null,
-    };
+    // Numer dokumentu ubezpieczyciela (LHQ…/1) jest inny dla każdego wariantu;
+    // numer oferty panelu (UD/…) wspólny dla wszystkich — tylko na zapas.
+    return { id: d.id, ...kwotyZDokumentu(d), numer: d.offer_number || o?.offer_number || o?.name || 'Oferta' };
   });
+}
+
+/**
+ * Kwoty sprzedaży z dokumentu ubezpieczyciela: wiersz ud_offer_documents albo
+ * wynik czytnika PDF (te same nazwy pól — createOfferFromPdfs zapisuje wynik
+ * czytnika wprost). Pole bez kwoty albo z zerem → null.
+ */
+export function kwotyZDokumentu(d) {
+  return {
+    numer: d.offer_number || '',
+    skladka_roczna: kwotaZTekstu(Number(d.premium_total)),
+    skladka_mies: kwotaZTekstu(Number(d.premium_monthly)),
+    swiadczenie_okresowa: d.temp_incapacity_covered === false ? null : kwotaZTekstu(Number(d.temp_monthly_benefit)),
+    swiadczenie_trwala: d.perm_incapacity_covered ? kwotaZTekstu(Number(d.perm_sum_insured)) : null,
+    swiadczenie_zgon: d.death_covered ? kwotaZTekstu(d.parsed_raw?.death_sum_insured ?? null) : null,
+  };
+}
+
+// ── Polisy ───────────────────────────────────────────────────────────────────
+export const KUBELEK_POLIS = 'ud-polisy';
+export const POLISA_MAX_BAJTOW = 10 * 1024 * 1024;
+
+/** Nazwa pliku do wyświetlenia: bez ścieżki i znaków sterujących, do 200 znaków. */
+function czystaNazwa(nazwa) {
+  const n = String(nazwa ?? '').split(/[\\/]/).pop().replace(/[\u0000-\u001f\u007f]/g, '').trim();
+  return (n || 'polisa.pdf').slice(0, 200);
+}
+
+/**
+ * Kwoty z polisy tym samym czytnikiem co oferty (Leadenhall/CEU). Leadenhall
+ * szyfruje pliki 4 ostatnimi cyframi PESEL-u — przy odmowie hasła próbujemy
+ * ich (PESEL czyta tylko serwer, do przeglądarki nie wychodzi). Dokument
+ * w innym układzie po prostu nie daje kwot: agent wpisze je ręcznie.
+ */
+async function odczytajKwoty(sb, klientId, bajty, odczytaj) {
+  const sprobuj = async (haslo) => {
+    try {
+      return { dokument: await odczytaj(bajty, haslo) };
+    } catch (e) {
+      return { haslo: /password/i.test(`${e?.name ?? ''} ${e?.message ?? ''}`) };
+    }
+  };
+  let r = await sprobuj();
+  if (r.haslo && klientId) {
+    const { data } = await sb.from('ud_clients').select('pesel').eq('id', klientId).maybeSingle();
+    const pin = String(data?.pesel ?? '').replace(/\D/g, '').slice(-4);
+    if (pin.length === 4) r = await sprobuj(pin);
+  }
+  if (r.dokument) {
+    const kwoty = kwotyZDokumentu(r.dokument);
+    if (POLA_SPRZEDAZY.some((p) => kwoty[p] != null)) {
+      return { kwoty, komunikat: 'Polisa zapisana. Kwoty odczytane z pliku — sprawdź je przed zapisem.' };
+    }
+  }
+  return {
+    kwoty: null,
+    komunikat: r.haslo
+      ? 'Polisa zapisana. Plik ma hasło inne niż 4 ostatnie cyfry PESEL-u — wpisz kwoty ręcznie.'
+      : 'Polisa zapisana. Kwot nie udało się odczytać z pliku — wpisz je ręcznie.',
+  };
+}
+
+/**
+ * Polisa do leada: PDF w prywatnym kubełku + wiersz w ud_leady_pliki. Czy
+ * użytkownik widzi lead, rozstrzyga SQL — przed zapisem (szczegóły) i przy
+ * zapisie wiersza (ud_lead_plik_dodaj; przy odmowie obiekt jest usuwany).
+ * `odczytaj(bajty, haslo)` podaje trasa (czytnik PDF), żeby ten plik nie
+ * importował niczego spoza Node.
+ */
+export async function wgrajPolise(sb, userId, leadId, { nazwa, bajty }, { odczytaj } = {}) {
+  if (!jestUuid(leadId)) throw blad(400, 'Nieprawidłowy identyfikator leada.');
+  if (!(bajty instanceof Uint8Array) || bajty.length === 0) throw blad(400, 'Plik jest pusty.');
+  if (bajty.length > POLISA_MAX_BAJTOW) throw blad(413, 'Plik jest za duży — limit to 10 MB.');
+  if (!(bajty[0] === 0x25 && bajty[1] === 0x50 && bajty[2] === 0x44 && bajty[3] === 0x46)) {
+    throw blad(415, 'To nie jest plik PDF.');
+  }
+  await wczytajPlan(sb, userId, null);
+  const s = await rpc(sb, 'ud_lead_szczegoly', { p_lead: leadId, p_user: userId });
+  if (!s) throw blad(404, NIEWIDOCZNY);
+
+  const odczyt = odczytaj ? await odczytajKwoty(sb, s.klient_id, bajty, odczytaj) : { kwoty: null, komunikat: 'Polisa zapisana.' };
+
+  const sciezka = `${leadId}/${globalThis.crypto.randomUUID()}.pdf`;
+  const kubelek = sb.storage.from(KUBELEK_POLIS);
+  const { error: eZapis } = await kubelek.upload(sciezka, bajty, { contentType: 'application/pdf', upsert: false });
+  if (eZapis) {
+    console.error('[leady] zapis polisy:', eZapis.message || eZapis);
+    throw blad(502, 'Nie udało się zapisać pliku. Spróbuj ponownie.', { ponow: true });
+  }
+  let wynik;
+  try {
+    wynik = await rpc(sb, 'ud_lead_plik_dodaj', {
+      p_lead: leadId, p_user: userId, p_sciezka: sciezka, p_nazwa: czystaNazwa(nazwa), p_rozmiar: bajty.length,
+    });
+  } catch (e) {
+    await kubelek.remove([sciezka]).catch(() => {});
+    throw e;
+  }
+  if (wynik?.status !== 'ok') {
+    await kubelek.remove([sciezka]).catch(() => {});
+    return wynikZmiany(wynik);
+  }
+  return { status: 200, body: { status: 'ok', plik: wynik.plik, kwoty: odczyt.kwoty, komunikat: odczyt.komunikat } };
+}
+
+/** Adres pobrania pliku leada (podpisany na minutę) — tylko dla kogoś, kto widzi lead. */
+export async function adresPliku(sb, userId, plikId) {
+  if (!jestUuid(plikId)) throw blad(400, 'Nieprawidłowy identyfikator pliku.');
+  const f = await rpc(sb, 'ud_lead_plik', { p_plik: plikId, p_user: userId });
+  if (!f) throw blad(404, 'Plik nie istnieje albo nie masz do niego dostępu.');
+  const { data, error } = await sb.storage.from(f.bucket).createSignedUrl(f.sciezka, 60, { download: f.nazwa });
+  if (error || !data?.signedUrl) {
+    console.error('[leady] adres polisy:', error?.message || error);
+    throw blad(502, 'Nie udało się przygotować pliku do pobrania.');
+  }
+  return data.signedUrl;
 }
 
 /** GET …/warianty/<id>. */
 export async function odpowiedzWariantow(sb, userSb, userId, leadId) {
   await wczytajPlan(sb, userId, null);
-  return { status: 200, body: { status: 'ok', warianty: await warianty(sb, userSb, leadId) } };
+  return { status: 200, body: { status: 'ok', warianty: await warianty(sb, userSb, userId, leadId) } };
 }
 
 /** Granice okresu w czasie polskim, jako tekst, który Postgres czyta jako timestamptz. */
@@ -287,7 +398,7 @@ export async function wczytajTablice(sb, userSb, userId, parametry) {
   let otwartyBrak = false;
   if (jestUuid(leadParam)) {
     try {
-      otwarty = await szczegoly(sb, userSb, leadParam);
+      otwarty = await szczegoly(sb, userSb, userId, leadParam);
     } catch (e) {
       if (e instanceof BladApi && e.status === 404) otwartyBrak = true;
       else throw e;
@@ -335,7 +446,7 @@ export async function odpowiedzLicznikow(sb, userId, parametry) {
 /** GET …/lead/<id>: dostęp sprawdzamy, zanim ktokolwiek dostanie dane po samym identyfikatorze. */
 export async function odpowiedzSzczegolow(sb, userSb, userId, leadId) {
   await wczytajPlan(sb, userId, null);
-  return { status: 200, body: { status: 'ok', ...(await szczegoly(sb, userSb, leadId)) } };
+  return { status: 200, body: { status: 'ok', ...(await szczegoly(sb, userSb, userId, leadId)) } };
 }
 
 /** Status z funkcji SQL → kod HTTP. */
@@ -477,22 +588,24 @@ export async function zwin(sb, userId, body) {
  * leady-http.js zamienia to na Response. Osobno od SvelteKita, żeby dało się to
  * przetestować w Node.
  *
- * Treść musi być application/json: żądania o typach „prostych" (formularz,
- * text/plain) mogą przyjść z cudzej strony bez preflightu CORS, JSON — nie.
+ * Treść musi być application/json (polisa: application/pdf): żądania o typach
+ * „prostych" (formularz, text/plain) mogą przyjść z cudzej strony bez
+ * preflightu CORS, te dwa — nie.
  */
-export async function przetworz({ user, odczyt = false, typTresci, czytajCialo, wykonaj }) {
+export async function przetworz({ user, odczyt = false, typTresci, czytajCialo, wykonaj, oczekiwanyTyp = 'application/json' }) {
   if (!user) {
     return { status: 401, body: { status: 'blad', komunikat: 'Sesja wygasła. Zaloguj się ponownie.', sesja: true } };
   }
   let body;
   if (!odczyt) {
-    if (!String(typTresci || '').toLowerCase().startsWith('application/json')) {
-      return { status: 415, body: { status: 'blad', komunikat: 'Oczekiwano application/json.' } };
+    if (!String(typTresci || '').toLowerCase().startsWith(oczekiwanyTyp)) {
+      return { status: 415, body: { status: 'blad', komunikat: `Oczekiwano ${oczekiwanyTyp}.` } };
     }
     try {
       body = await czytajCialo();
-    } catch {
-      return { status: 400, body: { status: 'blad', komunikat: 'Nieprawidłowy JSON.' } };
+    } catch (e) {
+      if (e instanceof BladApi) return { status: e.status, body: e.body };
+      return { status: 400, body: { status: 'blad', komunikat: 'Nieprawidłowa treść żądania.' } };
     }
   }
   try {

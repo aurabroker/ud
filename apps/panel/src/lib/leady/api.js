@@ -67,6 +67,24 @@ export function utworzApi({
     }
   }
 
+  /**
+   * Jedna próba, bez ponawiania: wgranie pliku nie jest idempotentne (każde
+   * udane dokłada plik), więc po zerwanym połączeniu decyduje człowiek.
+   */
+  async function wyslijRaz(url, opcje) {
+    let odpowiedz;
+    try {
+      odpowiedz = await f(url, opcje);
+    } catch {
+      throw new BladSieci(1);
+    }
+    try {
+      return { status: odpowiedz.status, body: await odpowiedz.json() };
+    } catch {
+      throw new BladSieci(1);
+    }
+  }
+
   const post = (sciezka, tresc) =>
     wyslij(`${baza}/${sciezka}`, {
       method: 'POST',
@@ -97,5 +115,12 @@ export function utworzApi({
     liczniki: (parametry, sygnal) => get('liczniki', parametryFiltra(parametry), sygnal),
     lead: (id, sygnal) => get(`lead/${encodeURIComponent(id)}`, {}, sygnal),
     warianty: (id, sygnal) => get(`warianty/${encodeURIComponent(id)}`, {}, sygnal),
+    /** Polisa: sam plik w treści (application/pdf), nazwa w nagłówku. */
+    polisa: (id, plik) =>
+      wyslijRaz(`${baza}/polisa/${encodeURIComponent(id)}`, {
+        method: 'POST',
+        headers: { ...naglowki, 'content-type': 'application/pdf', 'x-nazwa-pliku': encodeURIComponent(plik?.name || 'polisa.pdf') },
+        body: plik,
+      }),
   };
 }

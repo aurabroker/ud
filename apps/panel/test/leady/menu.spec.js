@@ -175,7 +175,7 @@ test('K18: Shift+F10 i klawisz menu na karcie otwierają menu bez myszy; Esc odd
 });
 
 test('K19: strzałki, Home/End, Enter, Esc, Tab — pełna obsługa i prawidłowy fokus', async ({ page }) => {
-  await otworz(page);
+  await otworz(page, { u: 'olek' });                                        // agent: zmiana opiekuna zablokowana
   const przycisk = page.getByRole('button', { name: 'Akcje leada Celina Zielińska' });
   await przycisk.focus();
   await page.keyboard.press('Enter');
@@ -204,8 +204,8 @@ test('K19: strzałki, Home/End, Enter, Esc, Tab — pełna obsługa i prawidłow
   // Pozycja zablokowana: widoczna, z przyczyną, nie wykonuje akcji.
   const opiekun = page.getByRole('menuitem', { name: 'Zmień opiekuna…' });
   await expect(opiekun).toHaveAttribute('aria-disabled', 'true');
-  await expect(opiekun).toContainText('Zmienić go może administrator');           // przyczyna widoczna
-  await expect(opiekun).toHaveAccessibleDescription(/Zmienić go może administrator/);   // i czytana jako opis
+  await expect(opiekun).toContainText('Opiekuna przydziela administrator');        // przyczyna widoczna
+  await expect(opiekun).toHaveAccessibleDescription(/Opiekuna przydziela administrator/);   // i czytana jako opis
   await opiekun.click({ force: true });                                       // aria-disabled nie blokuje kliknięcia — akcja po prostu się nie wykonuje
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(menu(page)).toBeVisible();

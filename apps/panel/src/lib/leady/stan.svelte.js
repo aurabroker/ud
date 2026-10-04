@@ -532,6 +532,29 @@ export class StanTablicy {
     }
   }
 
+  /**
+   * Polisa (PDF) do leada. Wynik: { ok, plik?, kwoty?, komunikat }. Bez
+   * ponawiania — po zerwanym połączeniu nie wiadomo, czy plik doszedł, więc
+   * mówimy to wprost, a agent sprawdza w szczegółach.
+   */
+  async wgrajPolise(leadId, plik) {
+    let odp;
+    try {
+      odp = await this.#api.polisa(leadId, plik);
+    } catch {
+      return { ok: false, komunikat: 'Połączenie zerwane — nie wiadomo, czy plik doszedł. Sprawdź listę polis w szczegółach leada.' };
+    }
+    const { status, body } = odp;
+    if (status !== 200 || body?.status !== 'ok') {
+      if (status === 401) this.alert = 'Sesja wygasła. Zaloguj się ponownie.';
+      return { ok: false, komunikat: body?.komunikat ?? 'Nie udało się wgrać pliku.' };
+    }
+    if (this.otwarty?.lead?.id === leadId) {
+      this.otwarty = { ...this.otwarty, pliki: [body.plik, ...(this.otwarty.pliki ?? [])] };
+    }
+    return { ok: true, plik: body.plik, kwoty: body.kwoty ?? null, komunikat: body.komunikat ?? 'Polisa zapisana.' };
+  }
+
   archiwizuj(leadId, klucz) {
     return this.#zmienZFormularza(leadId, { op: 'archiwizuj' }, klucz,
       () => ({ tekst: 'Lead zarchiwizowany. Dane klienta zostają w kartotece.' }));

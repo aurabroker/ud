@@ -30,12 +30,15 @@ import {
   synchronizuj,
   szczegoly,
   warianty,
+  wgrajPolise,
+  adresPliku,
   wczytajPlan,
   wczytajTablice,
   zmien,
   zwin,
 } from '../src/lib/server/leady.js';
 import { uruchomKlaster } from './lib/pg-tymczasowy.mjs';
+import { klienciWidoczni, klientWidoczny } from '../src/lib/server/widocznosc.js';
 
 let klaster;
 try {
@@ -159,8 +162,8 @@ try {
     assert.equal(sql('select count(*) from public.ud_leady'), '0');
   });
 
-  await sbSql.rpc('ud_leady_zwin', { p_user: ULA, p_pipeline: sql('select tt.pipeline()'), p_etap: etap('oferta'), p_zwin: true });
-  const tablica = await wczytajTablice(sbSql, null, ULA, new URLSearchParams());
+  await sbSql.rpc('ud_leady_zwin', { p_user: ADM, p_pipeline: sql('select tt.pipeline()'), p_etap: etap('oferta'), p_zwin: true });
+  const tablica = await wczytajTablice(sbSql, null, ADM, new URLSearchParams());
   await t('tablica: synchronizacja dopisała 8 klientów (porzucone wnioski nie są leadami)', () => {
     assert.equal(tablica.synchronizacja, true);
     assert.equal(sql('select count(*) from public.ud_leady'), '8');
@@ -168,7 +171,7 @@ try {
   await t('tablica: plan z pięcioma etapami (Kontakt scalony z Nowym) i zwiniętą „Ofertą" tego użytkownika', () => {
     assert.deepEqual(tablica.plan.etapy.map((e) => e.klucz), ['nowy', 'oferta', 'decyzja', 'wygrany', 'przegrany']);
     assert.deepEqual(tablica.plan.zwiniete, [etap('oferta')]);
-    assert.equal(tablica.plan.rola, 'user');
+    assert.equal(tablica.plan.rola, 'admin');
   });
   await t('tablica: karty tylko dla rozwiniętych kolumn, liczniki dla wszystkich', () => {
     assert.equal(Object.keys(tablica.kolumny).length, 4);
@@ -186,7 +189,7 @@ try {
     assert.ok(!wszystko.includes('pesel'));
   });
   await t('tablica: filtr zawęża karty I liczniki, „ileWszystkich" zostaje', async () => {
-    const t2 = await wczytajTablice(sbSql, null, ULA, new URLSearchParams('produkt=okresowa'));
+    const t2 = await wczytajTablice(sbSql, null, ADM, new URLSearchParams('produkt=okresowa'));
     assert.equal(t2.filtrAktywny, true);
     assert.equal(t2.liczniki[etap('nowy')].ile, 2);
     assert.equal(t2.liczniki[etap('nowy')].ileWszystkich, 4);
@@ -194,21 +197,21 @@ try {
     assert.equal(t2.kolumny[etap('nowy')].karty.length, 2);
   });
   await t('tablica: nieznany pipeline w adresie → domyślny, bez błędu', async () => {
-    const t3 = await wczytajTablice(sbSql, null, ULA, new URLSearchParams('pipeline=00000000-0000-4000-8000-000000000000'));
+    const t3 = await wczytajTablice(sbSql, null, ADM, new URLSearchParams('pipeline=00000000-0000-4000-8000-000000000000'));
     assert.equal(t3.plan.pipeline.klucz, 'sprzedaz');
   });
   await t('tablica: ?lead=<id> otwiera szczegóły, nieistniejący → otwartyBrak', async () => {
     const id = lead('Anna Kowalska');
-    const t4 = await wczytajTablice(sbSql, null, ULA, new URLSearchParams(`lead=${id}`));
+    const t4 = await wczytajTablice(sbSql, null, ADM, new URLSearchParams(`lead=${id}`));
     assert.equal(t4.otwarty.lead.id, id);
     assert.equal(t4.otwarty.email, 'anna@x.pl');
-    const t5 = await wczytajTablice(sbSql, null, ULA, new URLSearchParams('lead=00000000-0000-4000-8000-000000000000'));
+    const t5 = await wczytajTablice(sbSql, null, ADM, new URLSearchParams('lead=00000000-0000-4000-8000-000000000000'));
     assert.equal(t5.otwarty, null);
     assert.equal(t5.otwartyBrak, true);
   });
   await t('tablica: awaria synchronizacji nie blokuje tablicy', async () => {
     const zepsuty = { rpc: (n, a) => (n === 'ud_leady_synchronizuj' ? Promise.resolve({ data: null, error: { message: 'boom' } }) : sbSql.rpc(n, a)) };
-    const t6 = await wczytajTablice(zepsuty, null, ULA, new URLSearchParams());
+    const t6 = await wczytajTablice(zepsuty, null, ADM, new URLSearchParams());
     assert.equal(t6.synchronizacja, false);
     assert.equal(t6.plan.etapy.length, 5);
   });
@@ -217,52 +220,63 @@ try {
   });
 
   // ═══ Kolumny: stronicowanie ══════════════════════════════════════════════
-  const plan = await wczytajPlan(sbSql, ULA, null);
+  const plan = await wczytajPlan(sbSql, ADM, null);
   const P = plan.pipeline.id;
   await t('kolumna: strony po 2 — rozłączne, komplet, razem stałe', async () => {
-    const a = await kolumna(sbSql, ULA, { pipelineId: P, etapId: etap('nowy'), filtr: {}, sort: 'data', limit: 2, offset: 0 });
-    const b = await kolumna(sbSql, ULA, { pipelineId: P, etapId: etap('nowy'), filtr: {}, sort: 'data', limit: 2, offset: 2 });
+    const a = await kolumna(sbSql, ADM, { pipelineId: P, etapId: etap('nowy'), filtr: {}, sort: 'data', limit: 2, offset: 0 });
+    const b = await kolumna(sbSql, ADM, { pipelineId: P, etapId: etap('nowy'), filtr: {}, sort: 'data', limit: 2, offset: 2 });
     assert.equal(a.razem, 4);
     assert.equal(b.razem, 4);
     const ids = [...a.karty, ...b.karty].map((k) => k.id);
     assert.equal(new Set(ids).size, 4);
   });
   await t('kolumna: limit ograniczony do 100, śmieciowe offset/limit → domyślne', async () => {
-    const k = await kolumna(sbSql, ULA, { pipelineId: P, etapId: etap('nowy'), filtr: {}, sort: 'zly', limit: 'abc', offset: -5 });
+    const k = await kolumna(sbSql, ADM, { pipelineId: P, etapId: etap('nowy'), filtr: {}, sort: 'zly', limit: 'abc', offset: -5 });
     assert.equal(k.karty.length, 4);
-    const k2 = await kolumna(sbSql, ULA, { pipelineId: P, etapId: etap('nowy'), filtr: {}, sort: 'data', limit: 10_000_000, offset: 0 });
+    const k2 = await kolumna(sbSql, ADM, { pipelineId: P, etapId: etap('nowy'), filtr: {}, sort: 'data', limit: 10_000_000, offset: 0 });
     assert.equal(k2.karty.length, 4);
   });
   await t('kolumna: etap spoza uuid → 400', async () => {
-    await assert.rejects(kolumna(sbSql, ULA, { pipelineId: P, etapId: 'x', filtr: {}, sort: 'data' }), (e) => e.status === 400);
+    await assert.rejects(kolumna(sbSql, ADM, { pipelineId: P, etapId: 'x', filtr: {}, sort: 'data' }), (e) => e.status === 400);
   });
   await t('kolumna: etap obcego pipeline\'u daje pustą kolumnę, nie cudze karty', async () => {
-    const k = await kolumna(sbSql, ULA, { pipelineId: P, etapId: '00000000-0000-4000-8000-000000000000', filtr: {}, sort: 'data' });
+    const k = await kolumna(sbSql, ADM, { pipelineId: P, etapId: '00000000-0000-4000-8000-000000000000', filtr: {}, sort: 'data' });
     assert.equal(k.karty.length, 0);
     assert.equal(k.razem, 0);
   });
   await t('liczniki: mapa po etapie', async () => {
-    const l = await liczniki(sbSql, ULA, P, {});
+    const l = await liczniki(sbSql, ADM, P, {});
     assert.equal(Object.keys(l).length, 5);
     assert.equal(l[etap('decyzja')].ile, 1);
     assert.equal(l[etap('wygrany')].skladkiWszystkich, 6000, 'składki w Wygrany (Celina z wariantu)');
   });
 
   await t('odpowiedzKolumny: strona + liczniki, filtr z adresu, śmieciowy etap → 400', async () => {
-    const r = await odpowiedzKolumny(sbSql, ULA, new URLSearchParams(`etap=${etap('nowy')}&produkt=okresowa&sort=wartosc&offset=0`));
+    const r = await odpowiedzKolumny(sbSql, ADM, new URLSearchParams(`etap=${etap('nowy')}&produkt=okresowa&sort=wartosc&offset=0`));
     assert.equal(r.status, 200);
     assert.equal(r.body.razem, 2);
     assert.equal(r.body.karty[0].nazwa, 'Gabriel Podkreślnik');
     assert.equal(r.body.liczniki[etap('nowy')].ile, 2);
-    await assert.rejects(odpowiedzKolumny(sbSql, ULA, new URLSearchParams('etap=x')), (e) => e.status === 400);
+    await assert.rejects(odpowiedzKolumny(sbSql, ADM, new URLSearchParams('etap=x')), (e) => e.status === 400);
     await assert.rejects(odpowiedzKolumny(sbSql, INES, new URLSearchParams(`etap=${etap('nowy')}`)), (e) => e.status === 403);
   });
+  await t('agent widzi tylko swoje leady: tablica, kolumna, liczniki, szczegóły (02.10.2026)', async () => {
+    const tu = await wczytajTablice(sbSql, null, ULA, new URLSearchParams());
+    const karty = Object.values(tu.kolumny).flatMap((k) => k.karty);
+    assert.ok(karty.length >= 1 && karty.every((k) => k.opiekun_id === ULA), 'tylko karty Uli');
+    assert.equal(Object.values(tu.liczniki).reduce((a, x) => a + x.ileWszystkich, 0), 1, 'liczniki nie zdradzają cudzych');
+    await assert.rejects(odpowiedzSzczegolow(sbSql, null, ULA, lead('Anna Kowalska')), (e) => e.status === 404, 'wolny lead');
+    await assert.rejects(odpowiedzSzczegolow(sbSql, null, ULA, lead('Darek Decyzja')), (e) => e.status === 404, 'lead Olka');
+    const t7 = await wczytajTablice(sbSql, null, ULA, new URLSearchParams(`lead=${lead('Darek Decyzja')}`));
+    assert.equal(t7.otwarty, null);
+    assert.equal(t7.otwartyBrak, true, 'link do cudzego leada wygląda jak nieistniejący');
+  });
   await t('odpowiedzLicznikow / odpowiedzSzczegolow: dostęp tylko dla agenta', async () => {
-    const r = await odpowiedzLicznikow(sbSql, ULA, new URLSearchParams('zrodlo=direct'));
+    const r = await odpowiedzLicznikow(sbSql, ADM, new URLSearchParams('zrodlo=direct'));
     assert.equal(Object.values(r.body.liczniki).reduce((a, x) => a + x.ile, 0), 2);
     await assert.rejects(odpowiedzLicznikow(sbSql, INES, new URLSearchParams()), (e) => e.status === 403);
     await assert.rejects(odpowiedzSzczegolow(sbSql, null, INES, lead('Anna Kowalska')), (e) => e.status === 403);
-    const s = await odpowiedzSzczegolow(sbSql, null, ULA, lead('Anna Kowalska'));
+    const s = await odpowiedzSzczegolow(sbSql, null, ADM, lead('Anna Kowalska'));
     assert.equal(s.body.email, 'anna@x.pl');
   });
 
@@ -408,14 +422,15 @@ try {
     r = await zmien(sbSql, ULA, { op: 'dzialanie', leadId: bartek, expectedVersion: wersja(bartek), idempotencyKey: klucz(), typ: 'telefon' });
     assert.equal(r.status, 400, 'rodzaj bez terminu');
   });
-  await t('zmien: opiekun — zwolnienie własnego i przejęcie; administrator przepisuje', async () => {
+  await t('zmien: opiekuna przydziela tylko administrator — agent nie zwalnia, nie przejmuje', async () => {
     let r = await zmien(sbSql, ULA, { op: 'opiekun', leadId: bartek, expectedVersion: wersja(bartek), idempotencyKey: klucz(), opiekunId: null });
-    assert.equal(r.status, 200);
-    assert.equal(r.body.lead.opiekun_id, null);
+    assert.equal(r.status, 403, 'własnego nie zwolni');
     r = await zmien(sbSql, OLEK, { op: 'opiekun', leadId: bartek, expectedVersion: wersja(bartek), idempotencyKey: klucz(), opiekunId: OLEK });
+    assert.equal(r.status, 404, 'cudzego nie widzi, więc nie przejmie');
+    r = await zmien(sbSql, ADM, { op: 'opiekun', leadId: bartek, expectedVersion: wersja(bartek), idempotencyKey: klucz(), opiekunId: OLEK });
     assert.equal(r.status, 200);
-    r = await zmien(sbSql, ULA, { op: 'opiekun', leadId: bartek, expectedVersion: wersja(bartek), idempotencyKey: klucz(), opiekunId: ULA });
-    assert.equal(r.status, 403, 'cudzego opiekuna agent nie przejmie');
+    r = await zmien(sbSql, ULA, { leadId: bartek, targetStageId: etap('oferta'), expectedVersion: wersja(bartek), idempotencyKey: klucz() });
+    assert.equal(r.status, 404, 'po przepisaniu Ula traci dostęp');
     r = await zmien(sbSql, ADM, { op: 'opiekun', leadId: bartek, expectedVersion: wersja(bartek), idempotencyKey: klucz(), opiekunId: ULA });
     assert.equal(r.status, 200);
     assert.equal(r.body.lead.opiekun_id, ULA);
@@ -449,7 +464,7 @@ try {
         }),
       }),
     };
-    const s = await szczegoly(sbSql, userSb, bartek);
+    const s = await szczegoly(sbSql, userSb, ULA, bartek);
     assert.equal(s.email, 'bartek@x.pl');
     assert.equal(s.kontakt.zawod, 'Kierowca');
     assert.ok(s.notatki.length >= 1);
@@ -463,8 +478,9 @@ try {
     let wolane = 0;
     const userSb = { from: () => { wolane++; throw new Error('nie powinno być wołane'); } };
     assert.equal(wolane, 0);
-    await assert.rejects(szczegoly(sbSql, userSb, '00000000-0000-4000-8000-000000000000'), (e) => e.status === 404);
-    await assert.rejects(szczegoly(sbSql, userSb, 'x'), (e) => e.status === 400);
+    await assert.rejects(szczegoly(sbSql, userSb, ADM, '00000000-0000-4000-8000-000000000000'), (e) => e.status === 404);
+    await assert.rejects(szczegoly(sbSql, userSb, ULA, lead('Darek Decyzja')), (e) => e.status === 404, 'cudzy lead jak nieistniejący');
+    await assert.rejects(szczegoly(sbSql, userSb, ADM, 'x'), (e) => e.status === 400);
   });
 
   // ═══ Dane sprzedaży (Wygrany) i statystyki ═══════════════════════════════
@@ -529,31 +545,38 @@ try {
             { id: 'w1', offer_id: 'o1', insurer_type: 'ceu', product_name: 'LOI Premium', offer_number: 'LOIP/2', premium_total: '4200.00', premium_monthly: null,
               temp_incapacity_covered: true, temp_monthly_benefit: 12000, perm_incapacity_covered: true, perm_sum_insured: 240000, death_covered: true,
               parsed_raw: { death_sum_insured: '100 000' } },
+            { id: 'w2', offer_id: 'o1', insurer_type: 'leadenhall', product_name: 'Utrata dochodu (Leadenhall)', offer_number: null, premium_total: 1903,
+              premium_monthly: 0, temp_incapacity_covered: true, temp_monthly_benefit: 5000, perm_incapacity_covered: false, death_covered: false },
           ] }; } }),
         }),
       }),
     };
-    const w = await warianty(sbSql, userSb, lead('Gabriel Podkreślnik'));
-    assert.deepEqual(w, [{ id: 'w1', oferta: 'UD/7', ubezpieczyciel: 'LOI Premium', numer: 'LOIP/2', skladka_roczna: 4200, skladka_mies: null,
-      swiadczenie_okresowa: 12000, swiadczenie_trwala: 240000, swiadczenie_zgon: 100000 }]);
+    const w = await warianty(sbSql, userSb, ADM, lead('Gabriel Podkreślnik'));
+    // Okno pokazuje numer dokumentu i składki — bez nazwy produktu (decyzja z 02.10.2026).
+    assert.deepEqual(w, [
+      { id: 'w1', numer: 'LOIP/2', skladka_roczna: 4200, skladka_mies: null, swiadczenie_okresowa: 12000, swiadczenie_trwala: 240000, swiadczenie_zgon: 100000 },
+      { id: 'w2', numer: 'UD/7', skladka_roczna: 1903, skladka_mies: null, swiadczenie_okresowa: 5000, swiadczenie_trwala: null, swiadczenie_zgon: null },
+    ]);
+    assert.ok(!JSON.stringify(w).includes('Utrata dochodu') && !JSON.stringify(w).includes('LOI Premium'));
     assert.deepEqual(wolane.map((x) => x[0]), ['ud_offers', 'ud_offer_documents']);
-    await assert.rejects(warianty(sbSql, userSb, '00000000-0000-4000-8000-000000000000'), (e) => e.status === 404);
-    await assert.rejects(warianty(sbSql, userSb, 'x'), (e) => e.status === 400);
+    await assert.rejects(warianty(sbSql, userSb, ULA, lead('Gabriel Podkreślnik')), (e) => e.status === 404, 'wolny lead — agent nie widzi');
+    await assert.rejects(warianty(sbSql, userSb, ADM, '00000000-0000-4000-8000-000000000000'), (e) => e.status === 404);
+    await assert.rejects(warianty(sbSql, userSb, ADM, 'x'), (e) => e.status === 400);
   });
 
   // ═══ Archiwizacja przez API ══════════════════════════════════════════════
   await t('archiwizacja: 200, lead znika z kolumny i liczników; ponowienie → 200; szczegóły → 404', async () => {
     const ewa = lead('Ewa Archiwalna');
     const k = klucz();
-    const r = await zmien(sbSql, ULA, { op: 'archiwizuj', leadId: ewa, expectedVersion: wersja(ewa), idempotencyKey: k });
+    const r = await zmien(sbSql, ADM, { op: 'archiwizuj', leadId: ewa, expectedVersion: wersja(ewa), idempotencyKey: k });
     assert.equal(r.status, 200);
     assert.equal(r.body.zarchiwizowano, true);
-    const r2 = await zmien(sbSql, ULA, { op: 'archiwizuj', leadId: ewa, expectedVersion: wersja(ewa) - 1, idempotencyKey: k });
+    const r2 = await zmien(sbSql, ADM, { op: 'archiwizuj', leadId: ewa, expectedVersion: wersja(ewa) - 1, idempotencyKey: k });
     assert.equal(r2.status, 200);
     assert.equal(r2.body.powtorzone, true);
-    const kol = await kolumna(sbSql, ULA, { pipelineId: P, etapId: etap('nowy'), filtr: {}, sort: 'data' });
+    const kol = await kolumna(sbSql, ADM, { pipelineId: P, etapId: etap('nowy'), filtr: {}, sort: 'data' });
     assert.ok(!kol.karty.some((x) => x.id === ewa));
-    await assert.rejects(szczegoly(sbSql, null, ewa), (e) => e.status === 404);
+    await assert.rejects(szczegoly(sbSql, null, ADM, ewa), (e) => e.status === 404);
   });
 
   // ═══ Zwijanie ════════════════════════════════════════════════════════════
@@ -568,7 +591,7 @@ try {
     assert.deepEqual(r.body.zwiniete, []);
   });
   await t('zwin: stan jest osobny dla użytkownika (K25: wraca po „odświeżeniu")', async () => {
-    const t7 = await wczytajTablice(sbSql, null, ULA, new URLSearchParams());
+    const t7 = await wczytajTablice(sbSql, null, ADM, new URLSearchParams());
     assert.deepEqual(t7.plan.zwiniete, [etap('oferta')]);
     const t8 = await wczytajTablice(sbSql, null, OLEK, new URLSearchParams());
     assert.deepEqual(t8.plan.zwiniete, []);
@@ -580,6 +603,134 @@ try {
     }
     await assert.rejects(zwin(sbSql, ULA, { pipelineId: P, etapId: obcy, zwin: true }), (e) => e.status === 422);
     await assert.rejects(zwin(sbSql, INES, { pipelineId: P, etapId: etap('nowy'), zwin: true }), (e) => e.status === 403);
+  });
+
+  // ═══ Polisy (PDF przy leadzie) ═══════════════════════════════════════════
+  // Kubełek w pamięci; `from` czyta z bazy testowej (PESEL do hasła PDF).
+  const magazyn = new Map();
+  const zKubelkiem = ({ rpc = (n, a) => sbSql.rpc(n, a), zepsujZapis = false } = {}) => ({
+    rpc,
+    from: (tabela) => ({
+      select: (kol) => ({
+        eq: (k, v) => ({
+          maybeSingle: async () => {
+            const w = sql(`select to_jsonb(t) from (select ${kol} from public.${tabela} where ${k}::text = '${v}') t`);
+            return { data: w ? JSON.parse(w) : null, error: null };
+          },
+        }),
+      }),
+    }),
+    storage: {
+      from: (kubelek) => ({
+        upload: async (sciezka, bajty) => {
+          if (zepsujZapis) return { data: null, error: { message: 'storage down' } };
+          magazyn.set(`${kubelek}/${sciezka}`, bajty);
+          return { data: {}, error: null };
+        },
+        remove: async (sciezki) => { for (const x of sciezki) magazyn.delete(`${kubelek}/${x}`); return { data: [], error: null }; },
+        createSignedUrl: async (sciezka, sekundy, opcje) =>
+          ({ data: { signedUrl: `https://storage.test/${kubelek}/${sciezka}?ttl=${sekundy}&nazwa=${encodeURIComponent(opcje?.download ?? '')}` }, error: null }),
+      }),
+    },
+  });
+  const PDF = new TextEncoder().encode('%PDF-1.4\n%polisa testowa\n');
+  const ZPOLISY = { offer_number: 'LHQ1/1', premium_total: '1500.00', premium_monthly: '125', temp_incapacity_covered: true,
+    temp_monthly_benefit: 4000, perm_incapacity_covered: false, death_covered: false };
+  const bartekPlik = lead('Bartek Nowak');
+  let plikBartka;
+
+  await t('polisa: opiekun wgrywa — plik w prywatnym kubełku, wiersz i historia; kwoty z czytnika do sprawdzenia', async () => {
+    const h = historia(bartekPlik);
+    const r = await wgrajPolise(zKubelkiem(), ULA, bartekPlik, { nazwa: 'C:\\skany\\polisa  Bartka.pdf', bajty: PDF },
+      { odczytaj: async () => ZPOLISY });
+    assert.equal(r.status, 200, JSON.stringify(r.body));
+    plikBartka = r.body.plik.id;
+    assert.equal(r.body.plik.nazwa, 'polisa  Bartka.pdf', 'bez ścieżki z dysku');
+    assert.deepEqual(r.body.kwoty, { numer: 'LHQ1/1', skladka_roczna: 1500, skladka_mies: 125, swiadczenie_okresowa: 4000,
+      swiadczenie_trwala: null, swiadczenie_zgon: null });
+    assert.match(r.body.komunikat, /sprawdź/);
+    const klucze = [...magazyn.keys()];
+    assert.equal(klucze.length, 1);
+    assert.match(klucze[0], new RegExp(`^ud-polisy/${bartekPlik}/[0-9a-f-]{36}\\.pdf$`));
+    assert.equal(sql(`select sciezka from public.ud_leady_pliki where id = '${plikBartka}'`), klucze[0].slice('ud-polisy/'.length));
+    assert.equal(historia(bartekPlik), h + 1);
+  });
+  await t('polisa: hasło PDF = 4 ostatnie cyfry PESEL-u, czytane na serwerze; inne hasło → zapis bez kwot', async () => {
+    const hasla = [];
+    const zHaslem = (dobre) => async (_b, haslo) => {
+      hasla.push(haslo);
+      if (haslo !== dobre) throw Object.assign(new Error('No password given'), { name: 'PasswordException' });
+      return ZPOLISY;
+    };
+    const r = await wgrajPolise(zKubelkiem(), ULA, bartekPlik, { nazwa: 'p.pdf', bajty: PDF }, { odczytaj: zHaslem('2345') });
+    assert.deepEqual(hasla, [undefined, '2345']);
+    assert.equal(r.body.kwoty.skladka_roczna, 1500);
+    const r2 = await wgrajPolise(zKubelkiem(), ULA, bartekPlik, { nazwa: 'p.pdf', bajty: PDF }, { odczytaj: zHaslem('9999') });
+    assert.equal(r2.status, 200, 'plik i tak zapisany');
+    assert.equal(r2.body.kwoty, null);
+    assert.match(r2.body.komunikat, /hasło/);
+    assert.ok(!JSON.stringify([r.body, r2.body]).includes('81010112345'), 'PESEL nie wychodzi w odpowiedzi');
+  });
+  await t('polisa: dokument w nieznanym układzie → zapis bez kwot, z prośbą o wpisanie ręcznie', async () => {
+    const r = await wgrajPolise(zKubelkiem(), ULA, bartekPlik, { nazwa: 'p.pdf', bajty: PDF },
+      { odczytaj: async () => { throw new Error('Nie rozpoznano szablonu oferty (Leadenhall/CEU).'); } });
+    assert.equal(r.status, 200);
+    assert.equal(r.body.kwoty, null);
+    assert.match(r.body.komunikat, /ręcznie/);
+  });
+  await t('polisa: cudzy lead → 404, nie-PDF → 415, pusty → 400, za duży → 413, nieaktywny → 403 — nic w kubełku', async () => {
+    const przed = magazyn.size;
+    const odczytaj = async () => ZPOLISY;
+    await assert.rejects(wgrajPolise(zKubelkiem(), ULA, lead('Darek Decyzja'), { nazwa: 'p.pdf', bajty: PDF }, { odczytaj }), (e) => e.status === 404);
+    await assert.rejects(wgrajPolise(zKubelkiem(), ULA, bartekPlik, { nazwa: 'p.pdf', bajty: new TextEncoder().encode('<html>') }), (e) => e.status === 415);
+    await assert.rejects(wgrajPolise(zKubelkiem(), ULA, bartekPlik, { nazwa: 'p.pdf', bajty: new Uint8Array() }), (e) => e.status === 400);
+    const duzy = new Uint8Array(10 * 1024 * 1024 + 1); duzy.set(PDF);
+    await assert.rejects(wgrajPolise(zKubelkiem(), ULA, bartekPlik, { nazwa: 'p.pdf', bajty: duzy }), (e) => e.status === 413);
+    await assert.rejects(wgrajPolise(zKubelkiem(), INES, bartekPlik, { nazwa: 'p.pdf', bajty: PDF }), (e) => e.status === 403);
+    await assert.rejects(wgrajPolise(zKubelkiem(), ULA, 'x', { nazwa: 'p.pdf', bajty: PDF }), (e) => e.status === 400);
+    assert.equal(magazyn.size, przed);
+  });
+  await t('polisa: SQL odmawia zapisu wiersza → obiekt usunięty z kubełka; awaria kubełka → 502 bez wiersza', async () => {
+    const przed = magazyn.size;
+    const wiersze = sql(`select count(*) from public.ud_leady_pliki`);
+    const odmowa = zKubelkiem({ rpc: (n, a) => (n === 'ud_lead_plik_dodaj'
+      ? Promise.resolve({ data: { status: 'brak_leada', komunikat: 'x' }, error: null }) : sbSql.rpc(n, a)) });
+    const r = await wgrajPolise(odmowa, ULA, bartekPlik, { nazwa: 'p.pdf', bajty: PDF });
+    assert.equal(r.status, 404);
+    assert.equal(magazyn.size, przed, 'osierocony plik sprzątnięty');
+    await assert.rejects(wgrajPolise(zKubelkiem({ zepsujZapis: true }), ULA, bartekPlik, { nazwa: 'p.pdf', bajty: PDF }),
+      (e) => e.status === 502 && e.body.ponow === true && !JSON.stringify(e.body).includes('storage down'));
+    assert.equal(sql(`select count(*) from public.ud_leady_pliki`), wiersze);
+  });
+  await t('plik: adres podpisany na minutę dla opiekuna i administratora; inny agent → 404', async () => {
+    const u = await adresPliku(zKubelkiem(), ULA, plikBartka);
+    assert.match(u, /^https:\/\/storage\.test\/ud-polisy\/.+\.pdf\?ttl=60&nazwa=polisa%20%20Bartka\.pdf$/);
+    assert.ok(await adresPliku(zKubelkiem(), ADM, plikBartka));
+    await assert.rejects(adresPliku(zKubelkiem(), OLEK, plikBartka), (e) => e.status === 404);
+    await assert.rejects(adresPliku(zKubelkiem(), ULA, 'x'), (e) => e.status === 400);
+  });
+  await t('szczegóły: lista polis leada', async () => {
+    const s = await szczegoly(sbSql, null, ULA, bartekPlik);
+    assert.ok(s.pliki.length >= 3 && s.pliki.every((f) => f.id && f.nazwa && f.dodal_nazwa === 'Ula Agent'));
+    assert.ok(!JSON.stringify(s.pliki).includes('ud-polisy/'), 'ścieżki w kubełku nie wychodzą do przeglądarki');
+  });
+  await t('przetworz: polisa przyjmuje tylko application/pdf (formularz z cudzej strony → 415)', async () => {
+    const r = await przetworz({ user: { id: ULA }, oczekiwanyTyp: 'application/pdf', typTresci: 'multipart/form-data; boundary=x',
+      czytajCialo: async () => { throw new Error('nie powinno być czytane'); }, wykonaj: async () => ({ status: 200, body: {} }) });
+    assert.equal(r.status, 415);
+  });
+
+  // ═══ Klienci widoczni (zakładka „Klienci", wybór klienta w ofercie) ══════
+  await t('klienci: administrator — wszyscy (null), agent — klienci swoich leadów, nieaktywny — nikt', async () => {
+    assert.equal(await klienciWidoczni(sbSql, ADM), null);
+    const ula = await klienciWidoczni(sbSql, ULA);
+    const bartekKlient = sql(`select klient_id from public.ud_leady where id = '${bartekPlik}'`);
+    const darekKlient = sql(`select klient_id from public.ud_leady where id = '${lead('Darek Decyzja')}'`);
+    assert.ok(ula.includes(bartekKlient) && !ula.includes(darekKlient));
+    assert.deepEqual(await klienciWidoczni(sbSql, INES), []);
+    assert.equal(await klientWidoczny(sbSql, ULA, bartekKlient), true);
+    assert.equal(await klientWidoczny(sbSql, ULA, darekKlient), false);
+    assert.equal(await klientWidoczny(sbSql, ADM, darekKlient), true);
   });
 
   // ═══ Błędy infrastruktury i obsługa żądania ══════════════════════════════
