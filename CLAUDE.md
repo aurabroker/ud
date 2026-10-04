@@ -1317,11 +1317,19 @@ w historii, 3 leady ze szkiców usunięte — 52 leady, wszystkie z kartoteki.
 Panel v.0.59 bez części 3 w bazie nie zadziała na `/panel/leady` (woła nowe
 kolumny i funkcje) — kolejność zawsze: baza, potem panel.
 
-**Wersja 3 (zmiany z 02.10, sekcja „Widoczność, polisy i link agenta")** to
-część 4, `20261002160000_leady_kanban_4_widocznosc.sql` — też przez SQL Editor
-(DROP starej sygnatury `ud_lead_szczegoly`, funkcje z UPDATE), potem panel
-v.0.60 i portal (kreator wysyła kod agenta). Panel v.0.60 bez części 4 nie
-otworzy szczegółów leada (woła `ud_lead_szczegoly(p_lead, p_user)`).
+**Wersja 3 WDROŻONA 04.10.2026 (zmiany z 02.10, sekcja „Widoczność, polisy
+i link agenta")**: część 4, `20261002160000_leady_kanban_4_widocznosc` —
+wklejona przez właściciela w SQL Editor (DROP starej sygnatury
+`ud_lead_szczegoly`, funkcje z UPDATE), wersja odnotowana ręcznie; potem panel
+v.0.60 i portal (kreator wysyła kod agenta, `Wniosek.*.js` z `affiliateCode`).
+Sprawdzone na produkcji: treść 21 funkcji = repozytorium, uprawnienia tylko
+`service_role`, `ud_leady_pliki` z RLS bez polityk, kubełek `ud-polisy`
+prywatny (PDF, 10 MB), wyzwalaczy bez zmian; agent bez przydziału (Andrzej Cur)
+widzi 0 leadów i 0 klientów, administrator wszystkie. Panel v.0.60 bez części 4
+nie otworzy szczegółów leada (woła `ud_lead_szczegoly(p_lead, p_user)`).
+Wklejając plik w SQL Editor, kopiuj go przyciskiem „Copy raw file" na GitHubie:
+04.10 zaznaczenie strony zabrało ze sobą datę i całość padła na linii 1
+(bez skutków — błąd składni nie wykonuje niczego).
 
 SQL Editor zapisał treść funkcji z końcami linii CRLF. Porównując `prosrc`
 z repozytorium, licz skrót z `replace(prosrc, chr(13), '')` — inaczej każda
