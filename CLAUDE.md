@@ -1331,6 +1331,17 @@ Wklejając plik w SQL Editor, kopiuj go przyciskiem „Copy raw file" na GitHubi
 04.10 zaznaczenie strony zabrało ze sobą datę i całość padła na linii 1
 (bez skutków — błąd składni nie wykonuje niczego).
 
+**Wersja 4 WDROŻONA 04.10.2026 (sekcja „Statystyki: prowizja, składka bez
+opłaty, polisa spoza formularza")**: część 5,
+`20261004200000_leady_kanban_5_prowizja_polisy` — wklejona przez właściciela
+w SQL Editor, wersja odnotowana ręcznie; potem panel v.0.61. Sprawdzone na
+produkcji: treść 7 funkcji = repozytorium, uprawnienia tylko `service_role`,
+wyzwalaczy bez zmian, Centrala 20%, pozostali agenci bez stawki; korekta objęła
+jedną sprzedaż skopiowaną z wariantu (7 176 / 598 → 6 528 / 544, wpis
+w historii). Druga sprzedaż z tamtego dnia (3 876 zł, odczytana z polisy przed
+zmianą) czeka na „Odczytaj kwoty z polisy" — pliku w prywatnym kubełku stąd
+odczytać się nie da.
+
 SQL Editor zapisał treść funkcji z końcami linii CRLF. Porównując `prosrc`
 z repozytorium, licz skrót z `replace(prosrc, chr(13), '')` — inaczej każda
 funkcja z części 2 wygląda na inną niż w repo, choć nie jest.
