@@ -5,10 +5,7 @@
  */
 import { obsluz } from '$lib/server/leady-http.js';
 import { wgrajPolise } from '$lib/server/leady.js';
-import { parseOfferPdf } from '$lib/pdf/index.js';
-
-/** Czytnik ofert Leadenhall/CEU; wynik ma te same pola co wiersz ud_offer_documents. */
-const odczytaj = async (bajty, haslo) => (await parseOfferPdf(bajty, { password: haslo })).offer;
+import { odczytajPdf as odczytaj } from '$lib/server/czytnik-polis.js';
 
 function nazwaZNaglowka(request) {
   const surowa = request.headers.get('x-nazwa-pliku') || '';

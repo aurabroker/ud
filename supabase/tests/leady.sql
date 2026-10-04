@@ -898,5 +898,152 @@ begin
        from pg_proc p where p.proname = 'ud_agent_kod' and p.pronamespace = 'public'::regnamespace));
 end $$;
 
+-- ─── 13. Część 5: składka bez opłaty dystrybucyjnej, prowizja, polisa spoza formularza ──
+insert into public.ud_clients (id, created_at, full_name, email, source) values
+  ('c0000000-0000-0000-0000-0000000000e1', now(), 'Piotr Prowizja', 'piotr@x.pl', 'form');
+insert into public.ud_offers (id, user_id, client_id, status, created_at, sent_at, decided_at, client_choice) values
+  ('0f000000-0000-0000-0000-0000000000e1', 'a0000000-0000-0000-0000-0000000000a2', 'c0000000-0000-0000-0000-0000000000e1',
+   'bought', now() - interval '3 days', now() - interval '3 days', now() - interval '2 days',
+   '{"document_id": "0d000000-0000-0000-0000-0000000000e1"}');
+insert into public.ud_offer_documents (id, offer_id, insurer_type, offer_number, death_covered, temp_incapacity_covered,
+                                       temp_monthly_benefit, perm_incapacity_covered, perm_sum_insured,
+                                       premium_total, premium_monthly, distribution_fee, parsed_raw) values
+  ('0d000000-0000-0000-0000-0000000000e1', '0f000000-0000-0000-0000-0000000000e1', 'leadenhall', 'LHQ9/1', false, true,
+   5000, false, null, 3036, 253, 276, '{}');
+do $$
+declare
+  piotr uuid; r jsonb; r2 jsonb; s jsonb; k text := 'polisa-0001'; lead uuid; klient uuid; n_klientow int;
+  wej jsonb := jsonb_build_object(
+    'imie_nazwisko', '  Robert   Polisowy ', 'email', 'Robert@X.pl', 'telefon', '600 700 800', 'pesel', '85010112345',
+    'sprzedaz', jsonb_build_object('skladka_roczna', '2 760 zł', 'skladka_mies', 230, 'swiadczenie_okresowa', 4000,
+                                   'swiadczenie_trwala', 0, 'swiadczenie_zgon', ''));
+begin
+  perform tt.t('składka netto: 3036 z opłatą 276 → 2760; rata 253 → 230',
+    public.ud_skladka_netto(3036, 276) = 2760 and public.ud_skladka_mies_netto(253, 3036, 276) = 230);
+  perform tt.t('składka netto: bez opłaty (CEU), opłata 0 albo większa od składki → kwota bez zmian',
+    public.ud_skladka_netto(4200, null) = 4200 and public.ud_skladka_netto(4200, 0) = 4200
+    and public.ud_skladka_netto(100, 150) = 100 and public.ud_skladka_mies_netto(null, 4200, null) is null
+    and public.ud_skladka_netto(0, 0) is null);
+
+  -- Stawki: Ula 15%, Olek bez stawki (nieustawiona), administrator 20%.
+  update public.ud_user_profiles set prowizja_procent = 15 where id = tt.id_ula();
+  update public.ud_user_profiles set prowizja_procent = 20 where id = tt.id_adm();
+
+  perform public.ud_leady_synchronizuj();
+  piotr := (select id from public.ud_leady where klient_id = 'c0000000-0000-0000-0000-0000000000e1');
+  perform tt.t('sync: kupiona z wyborem — składka bez opłaty dystrybucyjnej, stawka sprzedawcy zapisana',
+    (select skladka_roczna = 2760 and skladka_mies = 230 and swiadczenie_okresowa = 5000
+            and sprzedawca_id = tt.id_ula() and prowizja_procent = 15
+       from public.ud_leady where id = piotr));
+
+  -- Zmiana stawki agenta nie przepisuje sprzedaży z zapisaną stawką; poprawka danych jej nie zmienia.
+  update public.ud_user_profiles set prowizja_procent = 18 where id = tt.id_ula();
+  r := tt.ruch('sprzedaz', piotr, tt.wersja(piotr), 'prow-0001', tt.id_ula(),
+               jsonb_build_object('skladka_roczna', 3000, 'swiadczenie_okresowa', 5000));
+  perform tt.t('zmiana: poprawka danych sprzedaży zostawia stawkę z chwili sprzedaży',
+    r->>'status' = 'ok' and (select prowizja_procent = 15 and skladka_roczna = 3000 from public.ud_leady where id = piotr));
+  r := tt.przenies(piotr, 'oferta', 'prow-0002');
+  perform tt.t('zmiana: wyjście z Wygrany zeruje stawkę', r->>'status' = 'ok'
+    and (select prowizja_procent from public.ud_leady where id = piotr) is null);
+  r := tt.ruch('przenies', piotr, tt.wersja(piotr), 'prow-0003', tt.id_ula(),
+               jsonb_build_object('etap_id', tt.etap('wygrany'), 'sprzedaz', jsonb_build_object('skladka_roczna', 2760)));
+  perform tt.t('zmiana: ponowne wejście do Wygrany bierze aktualną stawkę opiekuna (18%)',
+    r->>'status' = 'ok' and (select prowizja_procent from public.ud_leady where id = piotr) = 18);
+
+  s := public.ud_leady_statystyki(tt.id_ula());
+  perform tt.t('statystyki agenta: prowizja = składka × stawka, własna stawka w odpowiedzi',
+    -- Ula: Piotr 2760 (stawka zapisana 18%), Bartek 3036 i zarchiwizowany Gabriel 1200 (sprzedane przed
+    -- ustawieniem stawki — liczą się aktualną, 18%).
+    (s->>'stawka')::numeric = 18
+    and (s->'podsumowanie'->>'prowizja_suma')::numeric = round(2760 * 0.18, 2) + round(3036 * 0.18, 2) + round(1200 * 0.18, 2)
+    and (s->'podsumowanie'->>'z_prowizja')::int = 3 and (s->'podsumowanie'->>'bez_stawki')::int = 0);
+  s := public.ud_leady_statystyki(tt.id_olek());
+  perform tt.t('statystyki agenta bez stawki: sprzedaże z kwotami liczone jako „bez stawki", prowizja 0',
+    (s->>'stawka') is null and (s->'podsumowanie'->>'prowizja_suma')::numeric = 0
+    and (s->'podsumowanie'->>'bez_stawki')::int = (s->'podsumowanie'->>'z_danymi')::int);
+  s := public.ud_leady_statystyki(tt.id_adm());
+  perform tt.t('statystyki administratora: prowizja i stawka w podziale na agentów',
+    exists (select 1 from jsonb_array_elements(s->'wg_agentow') a
+             where a->>'agent_id' = tt.id_ula()::text and (a->>'stawka')::numeric = 18
+               and (a->>'prowizja_suma')::numeric = round(2760 * 0.18, 2) + round(3036 * 0.18, 2) + round(1200 * 0.18, 2))
+    and (s->>'stawka') is null);
+
+  -- Polisa spoza formularza.
+  n_klientow := (select count(*) from public.ud_clients);
+  r := public.ud_lead_polisa_reczna(tt.id_ula(), k, wej);
+  lead := (r->>'lead_id')::uuid;
+  klient := (select klient_id from public.ud_leady where id = lead);
+  perform tt.t('polisa: nowy klient i lead w Wygrany z danymi sprzedaży, opiekun i sprzedawca = agent, jego stawka',
+    r->>'status' = 'ok' and tt.etap_leada(lead) = 'wygrany'
+    and (select opiekun_id = tt.id_ula() and sprzedawca_id = tt.id_ula() and skladka_roczna = 2760 and skladka_mies = 230
+               and swiadczenie_okresowa = 4000 and swiadczenie_trwala is null and swiadczenie_zgon is null
+               and prowizja_procent = 18 and sprzedano_at > now() - interval '1 minute' and etap_od = sprzedano_at
+          from public.ud_leady where id = lead));
+  perform tt.t('polisa: kartoteka — nazwa uporządkowana, źródło „polisa", dane kontaktowe i PESEL zapisane',
+    (select full_name = 'Robert Polisowy' and source = 'polisa' and referred_by = tt.id_ula()
+            and email = 'robert@x.pl' and phone = '600 700 800' and pesel = '85010112345'
+       from public.ud_clients where id = klient));
+  perform tt.t('polisa: historia bez danych osobowych (tylko odcisk), z kluczem',
+    (select count(*) = 1 and bool_and(typ = 'etap' and do_etapu_id = tt.etap('wygrany') and z_etapu_id is null
+                                      and dane->>'zrodlo' = 'polisa' and dane::text !~ '85010112345|robert@x|600 700'
+                                      and klucz = k)
+       from public.ud_leady_historia where lead_id = lead));
+  perform tt.t('polisa: agent widzi lead i klienta, inny agent nie',
+    public.ud_lead_szczegoly(lead, tt.id_ula()) is not null and public.ud_lead_szczegoly(lead, tt.id_olek()) is null
+    and public.ud_klient_widoczny(tt.id_ula(), klient) and not public.ud_klient_widoczny(tt.id_olek(), klient));
+  r2 := public.ud_lead_polisa_reczna(tt.id_ula(), k, wej);
+  perform tt.t('polisa: ponowienie tym samym kluczem → ten sam lead, bez drugiego klienta',
+    r2->>'status' = 'ok' and (r2->>'powtorzone')::boolean and (r2->>'lead_id')::uuid = lead
+    and (select count(*) from public.ud_clients) = n_klientow + 1);
+  r2 := public.ud_lead_polisa_reczna(tt.id_ula(), k, wej || '{"telefon": "600 700 801"}');
+  perform tt.t('polisa: ten sam klucz, inna treść → klucz_uzyty', r2->>'status' = 'klucz_uzyty');
+  r2 := public.ud_lead_polisa_reczna(tt.id_ula(), 'polisa-0002', wej);
+  perform tt.t('polisa: ten sam PESEL drugi raz → klient_istnieje z odnośnikiem do widocznego leada',
+    r2->>'status' = 'klient_istnieje' and (r2->>'lead_id')::uuid = lead and (select count(*) from public.ud_clients) = n_klientow + 1);
+  r2 := public.ud_lead_polisa_reczna(tt.id_olek(), 'polisa-0003', wej);
+  perform tt.t('polisa: ten sam PESEL u innego agenta → klient_istnieje bez odnośnika',
+    r2->>'status' = 'klient_istnieje' and r2->>'lead_id' is null and r2->>'komunikat' ~ 'administratora');
+
+  r2 := public.ud_lead_polisa_reczna(tt.id_olek(), 'polisa-0004',
+          jsonb_build_object('imie_nazwisko', 'Sara Bezmaila', 'agent_id', tt.id_ula(), 'sprzedaz', jsonb_build_object('skladka_roczna', 1000)));
+  perform tt.t('polisa: agent nie dodaje sprzedaży innemu agentowi', r2->>'status' = 'brak_uprawnien');
+  r2 := public.ud_lead_polisa_reczna(tt.id_adm(), 'polisa-0005',
+          jsonb_build_object('imie_nazwisko', 'Sara Bezmaila', 'agent_id', tt.id_olek(), 'data_sprzedazy', '2026-01-15',
+                             'sprzedaz', jsonb_build_object('skladka_roczna', 1000)));
+  perform tt.t('polisa: administrator dla agenta — opiekun i sprzedawca to agent; data z przeszłości w południe czasu polskiego; bez e-maila i PESEL-u',
+    r2->>'status' = 'ok'
+    and (select opiekun_id = tt.id_olek() and sprzedawca_id = tt.id_olek() and prowizja_procent is null
+               and sprzedano_at = '2026-01-15 12:00 Europe/Warsaw'::timestamptz
+          from public.ud_leady where id = (r2->>'lead_id')::uuid)
+    and (select email is null and pesel is null and referred_by = tt.id_olek()
+           from public.ud_clients c join public.ud_leady l on l.klient_id = c.id where l.id = (r2->>'lead_id')::uuid));
+  perform tt.t('polisa: brak składki rocznej → brak_danych',
+    public.ud_lead_polisa_reczna(tt.id_ula(), 'polisa-0006', '{"imie_nazwisko": "Tomasz Brak"}')->'pola' = '["skladka_roczna"]');
+  perform tt.t('polisa: brak nazwy → brak_danych',
+    public.ud_lead_polisa_reczna(tt.id_ula(), 'polisa-0007', '{"imie_nazwisko": " A ", "sprzedaz": {"skladka_roczna": 1}}')->'pola' = '["imie_nazwisko"]');
+  perform tt.t('polisa: zły PESEL, e-mail, telefon, data z przyszłości, nieaktywny agent → błędne dane z polem',
+    public.ud_lead_polisa_reczna(tt.id_ula(), 'polisa-0008', '{"imie_nazwisko": "Ula Test", "pesel": "1234", "sprzedaz": {"skladka_roczna": 1}}')->'pola' = '["pesel"]'
+    and public.ud_lead_polisa_reczna(tt.id_ula(), 'polisa-0009', '{"imie_nazwisko": "Ula Test", "email": "nie-mail", "sprzedaz": {"skladka_roczna": 1}}')->'pola' = '["email"]'
+    and public.ud_lead_polisa_reczna(tt.id_ula(), 'polisa-0010', '{"imie_nazwisko": "Ula Test", "telefon": "<b>", "sprzedaz": {"skladka_roczna": 1}}')->'pola' = '["telefon"]'
+    and public.ud_lead_polisa_reczna(tt.id_ula(), 'polisa-0011', jsonb_build_object('imie_nazwisko', 'Ula Test', 'data_sprzedazy', (current_date + 2)::text, 'sprzedaz', '{"skladka_roczna": 1}'::jsonb))->'pola' = '["data_sprzedazy"]'
+    and public.ud_lead_polisa_reczna(tt.id_adm(), 'polisa-0012', jsonb_build_object('imie_nazwisko', 'Ula Test', 'agent_id', tt.id_ines(), 'sprzedaz', '{"skladka_roczna": 1}'::jsonb))->'pola' = '["agent_id"]'
+    and public.ud_lead_polisa_reczna(tt.id_ula(), 'polisa-0013', '{"imie_nazwisko": "Ula Test", "data_sprzedazy": "2026-02-31", "sprzedaz": {"skladka_roczna": 1}}')->>'status' = 'bledne_dane'
+    and public.ud_lead_polisa_reczna(tt.id_ula(), 'polisa-0014', '{"imie_nazwisko": "Ula Test", "sprzedaz": {"skladka_roczna": "abc"}}')->>'status' = 'bledne_dane');
+  perform tt.t('polisa: odrzucone żądania nie zostawiły klientów',
+    not exists (select 1 from public.ud_clients where full_name in ('Tomasz Brak', 'Ula Test', 'A')));
+  perform tt.t('polisa: nieaktywny i nieznany użytkownik → brak_uprawnien; brak klucza → błędne dane',
+    public.ud_lead_polisa_reczna(tt.id_ines(), 'polisa-0015', wej)->>'status' = 'brak_uprawnien'
+    and public.ud_lead_polisa_reczna(gen_random_uuid(), 'polisa-0016', wej)->>'status' = 'brak_uprawnien'
+    and public.ud_lead_polisa_reczna(tt.id_ula(), 'krotki', wej)->>'status' = 'bledne_dane');
+  perform tt.t('polisa: klucz użyty wcześniej przy zmianie leada → klucz_uzyty',
+    public.ud_lead_polisa_reczna(tt.id_ula(), 'prow-0001', wej || '{"pesel": null}')->>'status' = 'klucz_uzyty');
+  perform tt.t('uprawnienia: funkcje części 5 tylko dla service_role',
+    (select bool_and(not has_function_privilege('anon', p.oid, 'execute') and not has_function_privilege('authenticated', p.oid, 'execute')
+                     and has_function_privilege('service_role', p.oid, 'execute'))
+       from pg_proc p where p.pronamespace = 'public'::regnamespace
+        and p.proname in ('ud_lead_polisa_reczna', 'ud_skladka_netto', 'ud_skladka_mies_netto', 'ud_stawka_prowizji',
+                          'ud_leady_statystyki')));
+end $$;
+
 -- ─── Podsumowanie ───────────────────────────────────────────────────────────
 select format('WYNIK: %s PASS, %s FAIL', count(*) filter (where ok), count(*) filter (where not ok)) from tt.wyniki;

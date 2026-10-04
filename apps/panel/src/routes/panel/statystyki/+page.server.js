@@ -12,10 +12,10 @@ export async function load({ locals, url }) {
   if (!user) throw redirect(303, '/login');
 
   try {
-    return { st: await statystyki(createAdminClient(), user.id, url.searchParams), blad: '' };
+    return { st: await statystyki(createAdminClient(), user.id, url.searchParams), blad: '', ja: user.id };
   } catch (e) {
     if (e instanceof BladApi && e.status === 403) throw error(403, e.message);
     console.error('[statystyki] load:', e?.message || e);
-    return { st: null, blad: 'Nie udało się wczytać statystyk. Odśwież stronę za chwilę.' };
+    return { st: null, blad: 'Nie udało się wczytać statystyk. Odśwież stronę za chwilę.', ja: user.id };
   }
 }

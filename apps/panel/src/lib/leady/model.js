@@ -14,6 +14,8 @@
 export const ZRODLA = {
   form: 'Wniosek z formularza',
   direct: 'Dodany w panelu',
+  manual: 'Dodany w panelu',
+  polisa: 'Polisa dodana w panelu',
   szkic: 'Porzucony wniosek',
 };
 

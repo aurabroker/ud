@@ -525,14 +525,33 @@ export class StanTablicy {
       (lead) => ({ tekst: `${lead.nazwa}: zapisano dane sprzedaży.` }));
   }
 
-  /** Warianty z ofert klienta (do wyboru sprzedanego). Błąd = pusta lista: zostaje wpisanie ręczne. */
+  /**
+   * Warianty z ofert klienta (do wyboru sprzedanego) i polisy wgrane przy
+   * leadzie (do ponownego odczytu kwot). Błąd = puste listy: zostaje wpisanie ręczne.
+   */
   async warianty(leadId) {
     try {
       const { status, body } = await this.#api.warianty(leadId);
-      return status === 200 ? (body.warianty ?? []) : [];
+      return status === 200 ? { warianty: body.warianty ?? [], polisy: body.polisy ?? [] } : { warianty: [], polisy: [] };
     } catch {
-      return [];
+      return { warianty: [], polisy: [] };
     }
+  }
+
+  /** Kwoty z polisy wgranej wcześniej przy leadzie. Wynik: { ok, kwoty?, komunikat }. */
+  async odczytajPolise(leadId, plikId) {
+    let odp;
+    try {
+      odp = await this.#api.odczytPolisy(leadId, plikId);
+    } catch {
+      return { ok: false, komunikat: 'Brak połączenia — spróbuj ponownie.' };
+    }
+    const { status, body } = odp;
+    if (status !== 200 || body?.status !== 'ok') {
+      if (status === 401) this.alert = 'Sesja wygasła. Zaloguj się ponownie.';
+      return { ok: false, komunikat: body?.komunikat ?? 'Nie udało się odczytać polisy.' };
+    }
+    return { ok: true, kwoty: body.kwoty ?? null, komunikat: body.komunikat ?? '' };
   }
 
   /**

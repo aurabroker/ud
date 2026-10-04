@@ -43,7 +43,9 @@
   }
 
   const etykietyHistorii = {
-    etap: (h) => `${h.z_etap ?? '?'} → ${h.do_etap ?? '?'}${h.dane?.powod_utraty ? ` (powód: ${h.dane.powod_utraty})` : ''}`,
+    etap: (h) => h.dane?.zrodlo === 'polisa'
+      ? `dodano polisę spoza formularza → ${h.do_etap ?? '?'}`
+      : `${h.z_etap ?? '?'} → ${h.do_etap ?? '?'}${h.dane?.powod_utraty ? ` (powód: ${h.dane.powod_utraty})` : ''}`,
     dzialanie: () => 'zmieniono następne działanie',
     opiekun: () => 'zmieniono opiekuna',
     archiwum: () => 'zarchiwizowano',

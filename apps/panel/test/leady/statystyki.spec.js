@@ -102,6 +102,45 @@ test('agent widzi wyłącznie swoje — także z cudzym agentem w adresie; nieak
   expect(r.status()).toBe(403);
 });
 
+test('prowizja = składka roczna × stawka sprzedawcy: agent widzi swoją, administrator stawki i prowizje agentów', async ({ page, request }) => {
+  await sprzedaze(request);
+  await sql(request, `update public.ud_user_profiles set prowizja_procent = 15 where id = tt.id_ula()`);
+  await wczytaj(page, request, '/__test/ssr-statystyki', 'ula');
+  await expect(page.locator('.kafel').nth(3)).toContainText('Twoja prowizja');
+  await expect(stat(page, 'prowizja')).toHaveText('540 zł');                     // 3 600 × 15%
+  await expect(page.locator('[data-stawka]')).toHaveText('15% składki rocznej');
+  await expect(page.locator('[data-bez-stawki]')).toHaveCount(0);
+
+  await wczytaj(page, request, '/__test/ssr-statystyki', 'adm');
+  await expect(page.locator('.kafel').nth(3)).toContainText('Prowizja');
+  await expect(stat(page, 'prowizja')).toHaveText('540 zł');                     // Olek bez stawki, Bartek bez kwot
+  await expect(page.locator('[data-stawka]')).toHaveText('według stawek agentów');
+  await expect(page.locator('[data-bez-stawki]')).toHaveText('1 sprzedaż bez stawki — ustaw ją w Panelu Admina.');
+  const ula = page.locator('tr[data-agent="a0000000-0000-0000-0000-0000000000a2"] td');
+  await expect(ula.nth(3)).toHaveText('15%');
+  await expect(ula.nth(4)).toHaveText('540 zł');
+  const olek = page.locator(`tr[data-agent="${OLEK}"] td`);
+  await expect(olek.nth(3)).toHaveText('—');
+  await expect(olek.nth(4)).toHaveText('—');
+
+  // Stawka zapisana przy sprzedaży zostaje, choć agent ma już inną.
+  await sql(request, `update public.ud_leady set prowizja_procent = 10 where id = tt.lead('Jerzy Duda')`);
+  await wczytaj(page, request, '/__test/ssr-statystyki', 'ula');
+  await expect(stat(page, 'prowizja')).toHaveText('360 zł');
+  await expect(page.locator('[data-stawka]')).toHaveText('15% składki rocznej');
+});
+
+test('ryzyka bez „niezdolność do pracy" i „świadczenie miesięczne"; okresowa z jednostką „/ mies."', async ({ page, request }) => {
+  await sprzedaze(request);
+  await wczytaj(page, request, '/__test/ssr-statystyki', 'adm');
+  await expect(ryzyko(page, 'okresowa').locator('th')).toHaveText('Okresowa');
+  await expect(ryzyko(page, 'trwala').locator('th')).toHaveText('Trwała · suma ubezpieczenia');
+  await expect(ryzyko(page, 'zgon').locator('th')).toHaveText('Zgon · suma ubezpieczenia');
+  await expect(ryzyko(page, 'okresowa').locator('td').nth(1)).toHaveText(/zł \/ mies\.$/);
+  const tekst = await page.locator('body').innerText();
+  expect(tekst).not.toMatch(/niezdolność do pracy|świadczenie miesięczne/i);
+});
+
 test('zakładka „Niedokończone" miga, dopóki czeka kontakt ze zgodą; obsłużone, bez zgody i ukończone się nie liczą', async ({ page, request }) => {
   const zakladka = () => page.locator('a[data-zakladka="/panel/niedokonczone"]');
 

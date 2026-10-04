@@ -122,5 +122,12 @@ export function utworzApi({
         headers: { ...naglowki, 'content-type': 'application/pdf', 'x-nazwa-pliku': encodeURIComponent(plik?.name || 'polisa.pdf') },
         body: plik,
       }),
+    /** Kwoty z polisy już wgranej przy leadzie (niczego nie zapisuje). */
+    odczytPolisy: (id, plikId) =>
+      wyslijRaz(`${baza}/polisa/${encodeURIComponent(id)}/odczyt`, {
+        method: 'POST',
+        headers: { ...naglowki, 'content-type': 'application/json' },
+        body: JSON.stringify({ plikId }),
+      }),
   };
 }

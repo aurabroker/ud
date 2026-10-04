@@ -13,6 +13,7 @@ import {
   terminTekst, wartoscKarty, wiekKarty, wymagaPowodu, wymagaSprzedazy, zSeparatorami,
 } from '../src/lib/leady/model.js';
 import { BladSieci, utworzApi } from '../src/lib/leady/api.js';
+import { stawkaZFormularza } from '../src/lib/prowizja.js';
 
 let pass = 0;
 const bledy = [];
@@ -331,6 +332,23 @@ await t('api: nazwy ścieżek — baza konfigurowalna, pozostałe operacje', asy
   const api = utworzApi({ baza: '/x/api', fetch: async (u) => { urle.push(u); return odp(200, { status: 'ok' }); }, czekaj: bezOczekiwania });
   await api.notatka({}); await api.zwin({}); await api.lead('abc'); await api.liczniki({ filtr: {}, sort: 'data' });
   assert.deepEqual(urle.map((u) => u.split('?')[0]), ['/x/api/notatka', '/x/api/zwin', '/x/api/lead/abc', '/x/api/liczniki']);
+});
+
+await t('stawka prowizji z formularza: procent 0–100, przecinek albo kropka, pusto = nieustawiona', () => {
+  assert.equal(stawkaZFormularza('20'), 20);
+  assert.equal(stawkaZFormularza(' 12,5 % '), 12.5);
+  assert.equal(stawkaZFormularza('0'), 0);
+  assert.equal(stawkaZFormularza('100'), 100);
+  assert.equal(stawkaZFormularza(''), null);
+  assert.equal(stawkaZFormularza(null), null);
+  for (const zle of ['100,01', '-5', 'abc', '20,555', '1e2', '1000']) assert.equal(stawkaZFormularza(zle), undefined, zle);
+});
+
+await t('API klienta: ponowny odczyt polisy leada — POST JSON pod …/polisa/<id>/odczyt', async () => {
+  const wolane = [];
+  const api = utworzApi({ baza: '/x/api', fetch: async (u, o) => { wolane.push([u, o.method, o.headers['content-type'], o.body]); return odp(200, { status: 'ok' }); }, czekaj: bezOczekiwania });
+  await api.odczytPolisy('l 1', 'p1');
+  assert.deepEqual(wolane, [['/x/api/polisa/l%201/odczyt', 'POST', 'application/json', JSON.stringify({ plikId: 'p1' })]]);
 });
 
 for (const b of bledy) console.log(b);

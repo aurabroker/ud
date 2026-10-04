@@ -8,3 +8,7 @@ import { readable } from 'svelte/store';
 
 export const page = readable({ url: new URL('http://127.0.0.1/panel/leady') });
 export async function goto() {}
+/** Harness statystyk w przeglądarce podstawia tu ponowne pobranie danych strony. */
+export async function invalidateAll() {
+  if (typeof window !== 'undefined' && window.__invalidateAll) await window.__invalidateAll();
+}

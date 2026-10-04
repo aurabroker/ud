@@ -1427,6 +1427,49 @@ została, żeby nie przebudowywać widoku i wszystkich funkcji naraz.
   Inicjały w numerach nowych ofert z tego konta to więc `CE`
   (`UD/2026/CE/00025/…`), nie `MC` — numeracja jest globalna, bez kolizji.
 
+### Statystyki: prowizja, składka bez opłaty, polisa spoza formularza (część 5, decyzje z 04.10.2026)
+
+- **Prowizja = składka roczna × stawka sprzedawcy.** Stawka jest cechą AGENTA
+  (`ud_user_profiles.prowizja_procent`, % składki rocznej), ustawia ją
+  administrator w Panelu Admina — przy dodawaniu konta albo w kolumnie
+  „Prowizja". **Centrala: 20%.** Agent widzi w Statystykach tylko swoją
+  prowizję i stawkę. Stawka zapisuje się przy sprzedaży
+  (`ud_leady.prowizja_procent`: wejście do „Wygrany", „Dodaj polisę",
+  synchronizacja kupionej oferty), więc późniejsza zmiana stawki nie
+  przepisuje historii; sprzedaż sprzed ustawienia stawki liczy się stawką
+  aktualną, a bez żadnej — „bez stawki" (kafel to mówi). Poprawka danych
+  sprzedaży stawki nie zmienia; wyjście z „Wygrany" ją zeruje.
+- **Opłata dystrybucyjna NIE jest prowizją i nie wchodzi do składki.**
+  Leadenhall: „Składka 2 760 zł, Opłata dystrybucyjna 276 zł, razem 3 036 zł
+  w 12 ratach po 253". Czytnik PDF zapisuje w `premium_total` kwotę DO ZAPŁATY
+  i tak zostaje (oferta pokazuje, ile płaci klient); w danych sprzedaży jest
+  2 760 / 230. Ta sama reguła w JS (`kwotyZDokumentu`) i SQL (`ud_skladka_netto`,
+  `ud_skladka_mies_netto`) — rata × netto / razem. Migracja skorygowała
+  sprzedaże skopiowane wprost z wariantu (wpis w historii). Kwot wpisanych
+  ręcznie albo odczytanych z polisy przed tą zmianą baza nie rozpozna — te
+  poprawia się w „Dane sprzedaży" → **„Odczytaj kwoty z polisy"** (ponowny
+  odczyt pliku już wgranego przy leadzie, z hasłem z PESEL-u klienta).
+- **„Dodaj polisę"** (przycisk na Statystykach): klient, który nie składał
+  wniosku, trafia do kartoteki (`source = 'polisa'`) i od razu do „Wygrany"
+  (`ud_lead_polisa_reczna`). Agent dodaje sobie; administrator — sobie albo
+  wybranemu agentowi (ten zostaje opiekunem i sprzedawcą). Data sprzedaży może
+  być z przeszłości (zapis w południe czasu polskiego). Ten sam PESEL drugi raz
+  → `klient_istnieje` z odnośnikiem do leada, jeśli użytkownik go widzi.
+  Odczyt PDF przed zapisem: `/panel/statystyki/api/odczyt`, hasło = 4 ostatnie
+  cyfry z pola PESEL (nagłówek `x-haslo`, do przeglądarki nic nie wraca);
+  wpisanie PESEL-u po pliku czyta go ponownie. Plik idzie do nowego leada tą
+  samą drogą co na tablicy, PO zapisie sprzedaży — gdy się nie uda, sprzedaż
+  już jest, a okno ma „Wgraj plik ponownie".
+- **E-mail klienta z polisą zapisuje się osobnym UPDATE-em, nie w INSERT-cie.**
+  Stary wyzwalacz `send-confirmation-email-full` (tylko INSERT na `ud_clients`)
+  wysłałby mu „Twój kompletny wniosek ubezpieczeniowy dotarł…" i SMS do doradcy
+  „nowy wniosek" — klientowi, który żadnego wniosku nie składał. Nie „upraszczaj"
+  tego do jednego INSERT-a. (Ręczne „Nowy klient" w panelu nadal wstawia z
+  e-mailem i list wychodzi — to stare zachowanie, osobna decyzja.)
+- Ryzyka w Statystykach: „Okresowa", „Trwała · suma ubezpieczenia",
+  „Zgon · suma ubezpieczenia" — bez „niezdolność do pracy" i „świadczenie
+  miesięczne"; miesięczność mówi jednostka „/ mies." przy kwocie.
+
 ### Model danych (tylko stan procesu — dane osobowe czytamy ze źródła)
 
 | Obiekt | Rola |
@@ -1437,6 +1480,7 @@ została, żeby nie przebudowywać widoku i wszystkich funkcji naraz.
 | `ud_leady_pipeline`, `ud_leady_etap` | jeden pipeline „Sprzedaż": Nowy → Oferta → Decyzja klienta → Wygrany (składka roczna wymagana) / Przegrany (powód utraty wymagany); Kontakt wyłączony |
 | `ud_leady_baza` | widok z imieniem/e-mailem/telefonem z kartoteki klienta, `opiekun_admin` i danymi sprzedaży; tylko leady klientów |
 | `ud_leady_pliki` | polisy przy leadzie: kubełek `ud-polisy`, ścieżka `<lead>/<uuid>.pdf`, nazwa, kto dodał; kasowane razem z leadem (obiekt w kubełku zostaje) |
+| `ud_user_profiles.prowizja_procent` | stawka prowizji agenta (% składki rocznej); `ud_leady.prowizja_procent` — jej migawka z chwili sprzedaży |
 
 Dostęp: RLS bez polityk, wszystko tylko dla `service_role` (panel przez
 `createAdminClient`). `ud_leady` **nie ma kolumn z danymi osobowymi** — test SQL
@@ -1537,7 +1581,11 @@ tablicy — `statystyki.spec.js` renderuje je po stronie serwera z prawdziwych
 komponentów (`/__test/ssr-statystyki`, `/__test/ssr-uklad`), z danymi z tych
 samych funkcji co ich `load`. `$app/stores` i `$app/navigation` podmienia
 `test/leady/app-zaslepka.js`. Odpytywania co minutę w przeglądarce to nie
-sprawdza — tylko to, co pokazuje świeżo wczytana strona.
+sprawdza — tylko to, co pokazuje świeżo wczytana strona. Okno „Dodaj polisę"
+jedzie w przeglądarce na własnym harnessie (`test/leady/statystyki.html`,
+`statystyki-polisa.spec.js`): prawdziwa strona, prawdziwe funkcje serwera i SQL;
+`invalidateAll` z zaślepki pobiera dane strony ponownie. Panelu Admina (pole
+stawki) harness nie ma — parser stawki sprawdza `test:leady-model`.
 
 **Czego testy NIE pokazują:** Firefoksa i Safari (K24 sprawdzono na Chromium —
 w Firefoksie Shift + prawy klik zwykle nie wysyła `contextmenu` w ogóle, wtedy

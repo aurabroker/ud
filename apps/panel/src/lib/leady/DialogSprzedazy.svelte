@@ -10,6 +10,9 @@
    * rozpozna) albo „Dodaj ręcznie". Składka roczna jest wymagana (ta sama
    * reguła stoi w ud_lead_zmien); 0 w pozostałych polach = brak tego ryzyka.
    * Anulowanie przy przenoszeniu nie zmienia etapu (wgrana polisa zostaje).
+   *
+   * Polisa wgrana wcześniej przy leadzie: „Odczytaj kwoty z polisy" czyta ją
+   * ponownie (składka bez opłaty dystrybucyjnej — decyzja z 04.10.2026).
    */
   import { getContext, onMount, tick } from 'svelte';
   import Dialog from './Dialog.svelte';
@@ -42,14 +45,38 @@
   let polisa = $state(null);
   let komunikatPolisy = $state('');
   let bladPolisy = $state('');
+  let wgrane = $state([]);
+  let odczytywanie = $state(false);
 
   const polaWidoczne = $derived(tryb === 'warianty' || tryb === 'reczne');
 
   onMount(async () => {
-    warianty = await stan.warianty(dialog.leadId);
+    const w = await stan.warianty(dialog.leadId);
+    wgrane = w.polisy;
+    warianty = w.warianty;
     if (warianty.length) tryb = 'warianty';
     else if (!tryb) tryb = 'wybor';
   });
+
+  function wpiszKwoty(kwoty) {
+    wariantId = '';
+    for (const p of POLA_SPRZEDAZY) pola[p.id] = naTekst(kwoty[p.id]);
+    bledy = {};
+  }
+
+  async function odczytajWgrana(f) {
+    bladPolisy = '';
+    komunikatPolisy = '';
+    odczytywanie = true;
+    const r = await stan.odczytajPolise(dialog.leadId, f.id);
+    odczytywanie = false;
+    if (!r.ok) { bladPolisy = r.komunikat; return; }
+    komunikatPolisy = r.komunikat;
+    if (r.kwoty) wpiszKwoty(r.kwoty);
+    if (tryb === 'wybor' || tryb === null) tryb = 'reczne';
+    await tick();
+    document.getElementById('dlg-sp-skladka_roczna')?.focus();
+  }
 
   function wybierzWariant(w) {
     wariantId = w?.id ?? '';
@@ -77,6 +104,7 @@
     wgrywanie = false;
     if (!r.ok) { bladPolisy = r.komunikat; return; }
     polisa = r.plik;
+    wgrane = [r.plik, ...wgrane.filter((f) => f.id !== r.plik.id)];
     komunikatPolisy = r.komunikat;
     if (r.kwoty) {
       wariantId = '';
@@ -168,7 +196,17 @@
       {#if wgrywanie}<p class="mala" role="status">Wgrywam polisę…</p>{/if}
       {#if polisa}
         <p class="mala" data-polisa-wgrana>Polisa: <a href="/panel/leady/api/plik/{polisa.id}" target="_blank" rel="noopener">{polisa.nazwa}</a></p>
+      {:else if wgrane.length}
+        <ul class="wgrane" data-polisy-leada>
+          {#each wgrane as f (f.id)}
+            <li>
+              <a href="/panel/leady/api/plik/{f.id}" target="_blank" rel="noopener">{f.nazwa}</a>
+              <button type="button" class="link" disabled={odczytywanie || wgrywanie} onclick={() => odczytajWgrana(f)}>Odczytaj kwoty z polisy</button>
+            </li>
+          {/each}
+        </ul>
       {/if}
+      {#if odczytywanie}<p class="mala" role="status">Czytam polisę…</p>{/if}
       {#if komunikatPolisy}<p class="mala" role="status" data-komunikat-polisy>{komunikatPolisy}</p>{/if}
       {#if bladPolisy}<p class="blad-pola" role="alert">{bladPolisy}</p>{/if}
     </div>
@@ -202,7 +240,7 @@
   </form>
   {#snippet stopka()}
     <button type="button" class="btn btn-ghost" onclick={() => onzamknij({ przywroc: true })}>Anuluj</button>
-    <button type="submit" form="dlg-sprzedaz-form" class="btn btn-primary" disabled={trwa || wgrywanie}>
+    <button type="submit" form="dlg-sprzedaz-form" class="btn btn-primary" disabled={trwa || wgrywanie || odczytywanie}>
       {przenoszenie ? `Przenieś do „${etap?.nazwa ?? 'Wygrany'}"` : trwa ? 'Zapisuję…' : 'Zapisz'}
     </button>
   {/snippet}
@@ -221,6 +259,8 @@
   .link:disabled { color: var(--slate-600); cursor: default; }
   .link:focus-visible { outline: 2px solid var(--blue-600); outline-offset: 2px; }
   .zero { margin: 0 0 .5rem; }
+  .wgrane { list-style: none; margin: .35rem 0 0; padding: 0; display: flex; flex-direction: column; gap: .25rem; font-size: .8rem; }
+  .wgrane li { display: flex; gap: .6rem; flex-wrap: wrap; align-items: baseline; }
   .pola { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: .6rem .9rem; }
   .z-jednostka { display: flex; align-items: center; gap: .4rem; }
   .pole { flex: 1; min-width: 0; padding: .45rem .6rem; border: 1px solid var(--slate-300); border-radius: 8px; font: inherit; font-size: .9rem; }

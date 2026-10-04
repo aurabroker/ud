@@ -35,6 +35,8 @@
           <input class="input" id="n_pass" name="password" type="text" required /></div>
         <div class="field"><label class="label" for="n_role">Rola</label>
           <select class="input" id="n_role" name="role"><option value="user">user</option><option value="admin">admin</option></select></div>
+        <div class="field"><label class="label" for="n_prow">Prowizja (% składki rocznej)</label>
+          <input class="input" id="n_prow" name="prowizja" inputmode="decimal" placeholder="np. 20" /></div>
       </div>
       <button class="btn btn-primary" type="submit">Utwórz</button>
     </form>
@@ -43,7 +45,7 @@
 
 <div class="card">
   <table>
-    <thead><tr><th>Użytkownik</th><th>Email</th><th>Rola</th><th>Aktywny</th><th>Dodano</th><th></th></tr></thead>
+    <thead><tr><th>Użytkownik</th><th>Email</th><th>Rola</th><th>Prowizja</th><th>Aktywny</th><th>Dodano</th><th></th></tr></thead>
     <tbody>
       {#each data.users as u}
         <tr style={u.active ? '' : 'opacity:.55;'}>
@@ -56,6 +58,17 @@
                 <option value="user" selected={u.role !== 'admin'}>user</option>
                 <option value="admin" selected={u.role === 'admin'}>admin</option>
               </select>
+            </form>
+          </td>
+          <td>
+            <!-- Stawka prowizji: % składki rocznej; statystyki liczą z niej prowizję agenta. -->
+            <form method="POST" action="?/update" use:enhance style="display:inline-flex;align-items:center;gap:.25rem;">
+              <input type="hidden" name="id" value={u.id} />
+              <input class="input" name="prowizja" inputmode="decimal" aria-label="Prowizja {u.full_name || u.email || ''} (%)"
+                value={u.prowizja_procent == null ? '' : String(u.prowizja_procent).replace('.', ',')} placeholder="—"
+                style="padding:.3rem .45rem;font-size:.82rem;width:4.5rem;text-align:right;"
+                onchange={(e) => e.currentTarget.form.requestSubmit()} />
+              <span class="muted">%</span>
             </form>
           </td>
           <td>

@@ -186,13 +186,23 @@ function kwotaZTekstu(v) {
  * widać, agent wpisuje kwoty ręcznie.
  */
 export async function warianty(sb, userSb, userId, leadId) {
+  return (await wariantyIPolisy(sb, userSb, userId, leadId)).warianty;
+}
+
+/** Warianty z ofert i polisy wgrane przy leadzie (do „Odczytaj kwoty z polisy"). */
+async function wariantyIPolisy(sb, userSb, userId, leadId) {
   if (!jestUuid(leadId)) throw blad(400, 'Nieprawidłowy identyfikator leada.');
   // Klient leada przez tę samą funkcję co szczegóły: klucz serwisowy idzie
   // wyłącznie przez RPC, a lead spoza widoku (archiwum, cudzy) daje 404 jak wszędzie.
   const s = await rpc(sb, 'ud_lead_szczegoly', { p_lead: leadId, p_user: userId });
   if (!s) throw blad(404, NIEWIDOCZNY);
-  if (!s.klient_id || !userSb) return [];
-  const lead = { klient_id: s.klient_id };
+  const polisy = (s.pliki ?? []).map((f) => ({ id: f.id, nazwa: f.nazwa, created_at: f.created_at }));
+  return { warianty: await wariantyKlienta(userSb, s.klient_id), polisy };
+}
+
+async function wariantyKlienta(userSb, klientId) {
+  if (!klientId || !userSb) return [];
+  const lead = { klient_id: klientId };
 
   const { data: oferty } = await userSb
     .from('ud_offers')
@@ -204,7 +214,7 @@ export async function warianty(sb, userSb, userId, leadId) {
 
   const { data: dokumenty } = await userSb
     .from('ud_offer_documents')
-    .select('id, offer_id, insurer_type, product_name, offer_number, premium_total, premium_monthly, temp_incapacity_covered, temp_monthly_benefit, perm_incapacity_covered, perm_sum_insured, death_covered, parsed_raw')
+    .select('id, offer_id, insurer_type, product_name, offer_number, premium_total, premium_monthly, distribution_fee, temp_incapacity_covered, temp_monthly_benefit, perm_incapacity_covered, perm_sum_insured, death_covered, parsed_raw')
     .in('offer_id', oferty.map((o) => o.id))
     .order('sort_order', { ascending: true });
 
@@ -221,12 +231,22 @@ export async function warianty(sb, userSb, userId, leadId) {
  * Kwoty sprzedaży z dokumentu ubezpieczyciela: wiersz ud_offer_documents albo
  * wynik czytnika PDF (te same nazwy pól — createOfferFromPdfs zapisuje wynik
  * czytnika wprost). Pole bez kwoty albo z zerem → null.
+ *
+ * Składka BEZ opłaty dystrybucyjnej (decyzja właściciela z 04.10.2026: „opłaty
+ * dystrybucyjnej nie doliczaj do składki"). Czytnik zapisuje w premium_total
+ * kwotę do zapłaty (Leadenhall: składka 2 760 + opłata 276 = 3 036, 12 rat po
+ * 253) — tu wraca 2 760 i 230. Ta sama reguła stoi w SQL (ud_skladka_netto).
  */
 export function kwotyZDokumentu(d) {
+  const razem = Number(d.premium_total);
+  const oplata = Number(d.distribution_fee ?? d.parsed_raw?.distribution_fee);
+  const netto = razem > 0 && oplata > 0 && oplata < razem ? razem - oplata : razem;
+  const mies = Number(d.premium_monthly);
+  const grosze = (x) => Math.round(x * 100) / 100;
   return {
     numer: d.offer_number || '',
-    skladka_roczna: kwotaZTekstu(Number(d.premium_total)),
-    skladka_mies: kwotaZTekstu(Number(d.premium_monthly)),
+    skladka_roczna: kwotaZTekstu(grosze(netto)),
+    skladka_mies: mies > 0 && razem > 0 ? kwotaZTekstu(grosze((mies * netto) / razem)) : null,
     swiadczenie_okresowa: d.temp_incapacity_covered === false ? null : kwotaZTekstu(Number(d.temp_monthly_benefit)),
     swiadczenie_trwala: d.perm_incapacity_covered ? kwotaZTekstu(Number(d.perm_sum_insured)) : null,
     swiadczenie_zgon: d.death_covered ? kwotaZTekstu(d.parsed_raw?.death_sum_insured ?? null) : null,
@@ -246,10 +266,12 @@ function czystaNazwa(nazwa) {
 /**
  * Kwoty z polisy tym samym czytnikiem co oferty (Leadenhall/CEU). Leadenhall
  * szyfruje pliki 4 ostatnimi cyframi PESEL-u — przy odmowie hasła próbujemy
- * ich (PESEL czyta tylko serwer, do przeglądarki nie wychodzi). Dokument
- * w innym układzie po prostu nie daje kwot: agent wpisze je ręcznie.
+ * ich (`pin()` podaje je serwer: z kartoteki klienta albo z pola formularza).
+ * Dokument w innym układzie po prostu nie daje kwot: agent wpisze je ręcznie.
+ * `haslo`: null (bez hasła albo pasowało), 'brak' (nie było czego spróbować),
+ * 'zle' (4 cyfry nie otworzyły pliku).
  */
-async function odczytajKwoty(sb, klientId, bajty, odczytaj) {
+async function czytajPolise(bajty, odczytaj, pin) {
   const sprobuj = async (haslo) => {
     try {
       return { dokument: await odczytaj(bajty, haslo) };
@@ -258,23 +280,41 @@ async function odczytajKwoty(sb, klientId, bajty, odczytaj) {
     }
   };
   let r = await sprobuj();
-  if (r.haslo && klientId) {
-    const { data } = await sb.from('ud_clients').select('pesel').eq('id', klientId).maybeSingle();
-    const pin = String(data?.pesel ?? '').replace(/\D/g, '').slice(-4);
-    if (pin.length === 4) r = await sprobuj(pin);
-  }
-  if (r.dokument) {
-    const kwoty = kwotyZDokumentu(r.dokument);
-    if (POLA_SPRZEDAZY.some((p) => kwoty[p] != null)) {
-      return { kwoty, komunikat: 'Polisa zapisana. Kwoty odczytane z pliku — sprawdź je przed zapisem.' };
+  let haslo = null;
+  if (r.haslo) {
+    const p = String((await pin()) ?? '').replace(/\D/g, '').slice(-4);
+    if (p.length === 4) {
+      r = await sprobuj(p);
+      if (r.haslo) haslo = 'zle';
+    } else {
+      haslo = 'brak';
     }
   }
-  return {
-    kwoty: null,
-    komunikat: r.haslo
-      ? 'Polisa zapisana. Plik ma hasło inne niż 4 ostatnie cyfry PESEL-u — wpisz kwoty ręcznie.'
-      : 'Polisa zapisana. Kwot nie udało się odczytać z pliku — wpisz je ręcznie.',
-  };
+  const kwoty = r.dokument ? kwotyZDokumentu(r.dokument) : null;
+  return { kwoty: kwoty && POLA_SPRZEDAZY.some((p) => kwoty[p] != null) ? kwoty : null, haslo };
+}
+
+/** Komunikat o odczycie kwot; `brakPeselu` mówi, co zrobić, gdy plik ma hasło, a PESEL-u nie ma. */
+function komunikatOdczytu(o, { przedrostek = '', brakPeselu }) {
+  if (o.kwoty) return `${przedrostek}Kwoty odczytane z pliku — sprawdź je przed zapisem.`;
+  if (o.haslo === 'brak') return `${przedrostek}${brakPeselu}`;
+  if (o.haslo === 'zle') return `${przedrostek}Plik ma hasło inne niż 4 ostatnie cyfry PESEL-u — wpisz kwoty ręcznie.`;
+  return `${przedrostek}Kwot nie udało się odczytać z pliku — wpisz je ręcznie.`;
+}
+
+/** 4 ostatnie cyfry PESEL-u klienta z kartoteki — czyta tylko serwer. */
+async function pinKlienta(sb, klientId) {
+  if (!klientId) return null;
+  const { data } = await sb.from('ud_clients').select('pesel').eq('id', klientId).maybeSingle();
+  return data?.pesel ?? null;
+}
+
+function sprawdzPdf(bajty) {
+  if (!(bajty instanceof Uint8Array) || bajty.length === 0) throw blad(400, 'Plik jest pusty.');
+  if (bajty.length > POLISA_MAX_BAJTOW) throw blad(413, 'Plik jest za duży — limit to 10 MB.');
+  if (!(bajty[0] === 0x25 && bajty[1] === 0x50 && bajty[2] === 0x44 && bajty[3] === 0x46)) {
+    throw blad(415, 'To nie jest plik PDF.');
+  }
 }
 
 /**
@@ -286,16 +326,19 @@ async function odczytajKwoty(sb, klientId, bajty, odczytaj) {
  */
 export async function wgrajPolise(sb, userId, leadId, { nazwa, bajty }, { odczytaj } = {}) {
   if (!jestUuid(leadId)) throw blad(400, 'Nieprawidłowy identyfikator leada.');
-  if (!(bajty instanceof Uint8Array) || bajty.length === 0) throw blad(400, 'Plik jest pusty.');
-  if (bajty.length > POLISA_MAX_BAJTOW) throw blad(413, 'Plik jest za duży — limit to 10 MB.');
-  if (!(bajty[0] === 0x25 && bajty[1] === 0x50 && bajty[2] === 0x44 && bajty[3] === 0x46)) {
-    throw blad(415, 'To nie jest plik PDF.');
-  }
+  sprawdzPdf(bajty);
   await wczytajPlan(sb, userId, null);
   const s = await rpc(sb, 'ud_lead_szczegoly', { p_lead: leadId, p_user: userId });
   if (!s) throw blad(404, NIEWIDOCZNY);
 
-  const odczyt = odczytaj ? await odczytajKwoty(sb, s.klient_id, bajty, odczytaj) : { kwoty: null, komunikat: 'Polisa zapisana.' };
+  let odczyt = { kwoty: null, komunikat: 'Polisa zapisana.' };
+  if (odczytaj) {
+    const o = await czytajPolise(bajty, odczytaj, () => pinKlienta(sb, s.klient_id));
+    odczyt = { kwoty: o.kwoty, komunikat: komunikatOdczytu(o, {
+      przedrostek: 'Polisa zapisana. ',
+      brakPeselu: 'Plik ma hasło, a klient nie ma PESEL-u w kartotece — wpisz kwoty ręcznie.',
+    }) };
+  }
 
   const sciezka = `${leadId}/${globalThis.crypto.randomUUID()}.pdf`;
   const kubelek = sb.storage.from(KUBELEK_POLIS);
@@ -333,10 +376,77 @@ export async function adresPliku(sb, userId, plikId) {
   return data.signedUrl;
 }
 
-/** GET …/warianty/<id>. */
+/**
+ * Ponowny odczyt kwot z polisy już wgranej przy leadzie — np. sprzedaż
+ * zapisana przed 04.10.2026 ze składką z doliczoną opłatą dystrybucyjną.
+ * Niczego nie zapisuje: kwoty wracają do okna „Dane sprzedaży" do sprawdzenia.
+ */
+export async function odczytajWgranaPolise(sb, userId, leadId, plikId, { odczytaj }) {
+  if (!jestUuid(leadId) || !jestUuid(plikId)) throw blad(400, 'Nieprawidłowy identyfikator.');
+  await wczytajPlan(sb, userId, null);
+  const s = await rpc(sb, 'ud_lead_szczegoly', { p_lead: leadId, p_user: userId });
+  if (!s) throw blad(404, NIEWIDOCZNY);
+  const f = await rpc(sb, 'ud_lead_plik', { p_plik: plikId, p_user: userId });
+  if (!f?.sciezka || !f.sciezka.startsWith(`${leadId}/`)) throw blad(404, 'Nie ma takiej polisy przy tym leadzie.');
+  const { data, error } = await sb.storage.from(f.bucket).download(f.sciezka);
+  if (error || !data) {
+    console.error('[leady] odczyt polisy z kubełka:', error?.message || error);
+    throw blad(502, 'Nie udało się wczytać pliku polisy. Spróbuj ponownie.', { ponow: true });
+  }
+  const o = await czytajPolise(new Uint8Array(await data.arrayBuffer()), odczytaj, () => pinKlienta(sb, s.klient_id));
+  return { status: 200, body: { status: 'ok', kwoty: o.kwoty, komunikat: komunikatOdczytu(o, {
+    brakPeselu: 'Plik ma hasło, a klient nie ma PESEL-u w kartotece — wpisz kwoty ręcznie.',
+  }) } };
+}
+
+/**
+ * „Dodaj polisę" (Statystyki), krok 1: kwoty z pliku, zanim klient istnieje.
+ * Niczego nie zapisuje. Hasło (4 ostatnie cyfry PESEL-u) przychodzi z pola
+ * formularza, bo kartoteki jeszcze nie ma; plik wgrywa się dopiero po zapisie
+ * sprzedaży, tą samą drogą co przy leadzie.
+ */
+export async function odczytajPoliseNowa(sb, userId, bajty, pin, { odczytaj }) {
+  sprawdzPdf(bajty);
+  await wczytajPlan(sb, userId, null);
+  const o = await czytajPolise(bajty, odczytaj, () => (/^\d{4}$/.test(String(pin ?? '')) ? pin : null));
+  return { status: 200, body: { status: 'ok', kwoty: o.kwoty, haslo: o.haslo, komunikat: komunikatOdczytu(o, {
+    brakPeselu: 'Plik jest zabezpieczony hasłem — wpisz PESEL klienta (hasłem są 4 ostatnie cyfry), a odczytam go ponownie.',
+  }) } };
+}
+
+/**
+ * „Dodaj polisę", krok 2: klient spoza formularza → kartoteka + lead
+ * w „Wygrany" z danymi sprzedaży (ud_lead_polisa_reczna). Kto może dodać komu,
+ * rozstrzyga SQL: agent — sobie, administrator — sobie albo wskazanemu agentowi.
+ */
+export async function dodajPolise(sb, userId, body) {
+  if (!body || typeof body !== 'object') throw blad(400, 'Nieprawidłowe żądanie.');
+  if (typeof body.idempotencyKey !== 'string' || !KLUCZ.test(body.idempotencyKey)) {
+    throw blad(400, 'Brak klucza idempotencji.');
+  }
+  if (body.agentId != null && !jestUuid(body.agentId)) throw blad(400, 'Nieprawidłowy agent.');
+  const tekst = (v, max) => (typeof v === 'string' ? v.slice(0, max) : undefined);
+  const k = body.klient && typeof body.klient === 'object' ? body.klient : {};
+  const wynik = await rpc(sb, 'ud_lead_polisa_reczna', {
+    p_user: userId,
+    p_klucz: body.idempotencyKey,
+    p_dane: {
+      imie_nazwisko: tekst(k.imieNazwisko, 300),
+      email: tekst(k.email, 300),
+      telefon: tekst(k.telefon, 60),
+      pesel: tekst(k.pesel, 30),
+      agent_id: body.agentId ?? undefined,
+      data_sprzedazy: tekst(body.dataSprzedazy, 20),
+      sprzedaz: daneSprzedazy(body.sprzedaz) ?? {},
+    },
+  });
+  return wynikZmiany(wynik);
+}
+
+/** GET …/warianty/<id>: warianty z ofert i polisy wgrane przy leadzie. */
 export async function odpowiedzWariantow(sb, userSb, userId, leadId) {
   await wczytajPlan(sb, userId, null);
-  return { status: 200, body: { status: 'ok', warianty: await warianty(sb, userSb, userId, leadId) } };
+  return { status: 200, body: { status: 'ok', ...(await wariantyIPolisy(sb, userSb, userId, leadId)) } };
 }
 
 /** Granice okresu w czasie polskim, jako tekst, który Postgres czyta jako timestamptz. */
@@ -477,6 +587,7 @@ const HTTP = {
   bez_zmiany: 200,
   konflikt: 409,
   klucz_uzyty: 409,
+  klient_istnieje: 409,
   brak_leada: 404,
   brak_uprawnien: 403,
   niedozwolony: 422,

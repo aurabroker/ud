@@ -45,6 +45,14 @@ nie wyniknie.
   `ud_lead_szczegoly` — kolejność: baza, potem panel v.0.60. **Przez SQL
   Editor**, potem:
   `insert into supabase_migrations.schema_migrations (version, name) values ('20261002160000', 'leady_kanban_4_widocznosc');`
+- `20261004200000_leady_kanban_5_prowizja_polisy.sql` — stawka prowizji agenta
+  (`ud_user_profiles.prowizja_procent`, Centrala 20%) i jej migawka przy
+  sprzedaży (`ud_leady.prowizja_procent`), składka w danych sprzedaży bez
+  opłaty dystrybucyjnej (`ud_skladka_netto`; korekta sprzedaży skopiowanych
+  z wariantu oferty), statystyki z prowizją, „Dodaj polisę" dla klienta spoza
+  formularza (`ud_lead_polisa_reczna`). Kolejność: baza, potem panel v.0.61.
+  **Przez SQL Editor**, potem:
+  `insert into supabase_migrations.schema_migrations (version, name) values ('20261004200000', 'leady_kanban_5_prowizja_polisy');`
 
 Dlaczego tak: MCP Supabase (`apply_migration` i `execute_sql`) wstrzymuje do
 ręcznego potwierdzenia każde `DROP` i każdą funkcję, która w treści robi

@@ -32,6 +32,11 @@ import {
   warianty,
   wgrajPolise,
   adresPliku,
+  dodajPolise,
+  kwotyZDokumentu,
+  odczytajPoliseNowa,
+  odczytajWgranaPolise,
+  odpowiedzWariantow,
   wczytajPlan,
   wczytajTablice,
   zmien,
@@ -643,6 +648,10 @@ try {
         remove: async (sciezki) => { for (const x of sciezki) magazyn.delete(`${kubelek}/${x}`); return { data: [], error: null }; },
         createSignedUrl: async (sciezka, sekundy, opcje) =>
           ({ data: { signedUrl: `https://storage.test/${kubelek}/${sciezka}?ttl=${sekundy}&nazwa=${encodeURIComponent(opcje?.download ?? '')}` }, error: null }),
+        download: async (sciezka) => {
+          const b = magazyn.get(`${kubelek}/${sciezka}`);
+          return b ? { data: new Blob([b]), error: null } : { data: null, error: { message: 'Object not found' } };
+        },
       }),
     },
   });
@@ -727,6 +736,100 @@ try {
     assert.ok(s.pliki.length >= 3 && s.pliki.every((f) => f.id && f.nazwa && f.dodal_nazwa === 'Ula Agent'));
     assert.ok(!JSON.stringify(s.pliki).includes('ud-polisy/'), 'ścieżki w kubełku nie wychodzą do przeglądarki');
   });
+  // ═══ Część 5: składka bez opłaty dystrybucyjnej, odczyt polis, „Dodaj polisę" ═
+  await t('kwoty z dokumentu: składka bez opłaty dystrybucyjnej (3036/253 z opłatą 276 → 2760/230)', () => {
+    assert.deepEqual(kwotyZDokumentu({ offer_number: 'LHQ1/1', premium_total: '3036.00', premium_monthly: 253, distribution_fee: 276,
+      temp_incapacity_covered: true, temp_monthly_benefit: 4000 }),
+    { numer: 'LHQ1/1', skladka_roczna: 2760, skladka_mies: 230, swiadczenie_okresowa: 4000, swiadczenie_trwala: null, swiadczenie_zgon: null });
+    // Wynik czytnika z opłatą w parsed_raw (jak w createOfferFromPdfs).
+    const z = kwotyZDokumentu({ premium_total: 7176, premium_monthly: 598, parsed_raw: { distribution_fee: 648 } });
+    assert.deepEqual([z.skladka_roczna, z.skladka_mies], [6528, 544]);
+    // CEU bez opłaty; opłata nie mniejsza od składki to śmieci z czytnika — kwota bez zmian.
+    assert.equal(kwotyZDokumentu({ premium_total: 4200, distribution_fee: null }).skladka_roczna, 4200);
+    assert.equal(kwotyZDokumentu({ premium_total: 100, distribution_fee: 150 }).skladka_roczna, 100);
+  });
+  await t('warianty: odpowiedź niesie polisy leada (bez ścieżek w kubełku); kwoty wariantu bez opłaty', async () => {
+    const userSb = {
+      from: () => ({
+        select: () => ({
+          eq: () => ({ order: () => ({ limit: async () => ({ data: [{ id: 'o1', offer_number: 'UD/7' }] }) }) }),
+          in: () => ({ order: async () => ({ data: [{ id: 'w1', offer_id: 'o1', offer_number: 'LHQ1/1', premium_total: 3036, premium_monthly: 253,
+            distribution_fee: 276, temp_incapacity_covered: true, temp_monthly_benefit: 4000 }] }) }),
+        }),
+      }),
+    };
+    const r = await odpowiedzWariantow(sbSql, userSb, ULA, bartekPlik);
+    assert.equal(r.status, 200);
+    assert.deepEqual([r.body.warianty[0].skladka_roczna, r.body.warianty[0].skladka_mies], [2760, 230]);
+    assert.ok(r.body.polisy.length >= 3 && r.body.polisy.every((f) => f.id && f.nazwa && !('sciezka' in f)));
+  });
+  await t('odczyt wgranej polisy: kwoty bez opłaty, hasło z PESEL-u klienta; cudzy lead albo plik innego leada → 404', async () => {
+    const hasla = [];
+    const odczytaj = async (_b, haslo) => {
+      hasla.push(haslo);
+      if (haslo !== '2345') throw Object.assign(new Error('No password given'), { name: 'PasswordException' });
+      return { ...ZPOLISY, premium_total: '3036.00', premium_monthly: '253', distribution_fee: 276 };
+    };
+    const przed = magazyn.size;
+    const r = await odczytajWgranaPolise(zKubelkiem(), ULA, bartekPlik, plikBartka, { odczytaj });
+    assert.equal(r.status, 200, JSON.stringify(r.body));
+    assert.deepEqual([r.body.kwoty.skladka_roczna, r.body.kwoty.skladka_mies], [2760, 230]);
+    assert.deepEqual(hasla, [undefined, '2345']);
+    assert.match(r.body.komunikat, /sprawdź/);
+    assert.ok(!JSON.stringify(r.body).includes('81010112345'), 'PESEL nie wychodzi w odpowiedzi');
+    assert.equal(magazyn.size, przed, 'odczyt niczego nie zapisuje');
+    await assert.rejects(odczytajWgranaPolise(zKubelkiem(), OLEK, bartekPlik, plikBartka, { odczytaj }), (e) => e.status === 404);
+    await assert.rejects(odczytajWgranaPolise(zKubelkiem(), ADM, lead('Darek Decyzja'), plikBartka, { odczytaj }), (e) => e.status === 404);
+    await assert.rejects(odczytajWgranaPolise(zKubelkiem(), ULA, bartekPlik, 'x', { odczytaj }), (e) => e.status === 400);
+  });
+  await t('nowa polisa, odczyt przed zapisem: hasło z pola PESEL; bez hasła „brak", złe „zle"; nic nie zapisuje', async () => {
+    const zHaslem = async (_b, haslo) => {
+      if (haslo !== '2345') throw Object.assign(new Error('Incorrect Password'), { name: 'PasswordException' });
+      return { ...ZPOLISY, distribution_fee: 150 };
+    };
+    const przed = magazyn.size;
+    let r = await odczytajPoliseNowa(sbSql, ULA, PDF, '2345', { odczytaj: zHaslem });
+    assert.deepEqual([r.body.kwoty.skladka_roczna, r.body.kwoty.skladka_mies, r.body.haslo], [1350, 112.5, null]);
+    r = await odczytajPoliseNowa(sbSql, ULA, PDF, null, { odczytaj: zHaslem });
+    assert.deepEqual([r.body.kwoty, r.body.haslo], [null, 'brak']);
+    assert.match(r.body.komunikat, /PESEL/);
+    r = await odczytajPoliseNowa(sbSql, ULA, PDF, '9999', { odczytaj: zHaslem });
+    assert.equal(r.body.haslo, 'zle');
+    r = await odczytajPoliseNowa(sbSql, ULA, PDF, '12ab', { odczytaj: zHaslem });
+    assert.equal(r.body.haslo, 'brak', 'nagłówek spoza 4 cyfr nie jest hasłem');
+    await assert.rejects(odczytajPoliseNowa(sbSql, ULA, new TextEncoder().encode('<html>'), null, { odczytaj: zHaslem }), (e) => e.status === 415);
+    await assert.rejects(odczytajPoliseNowa(sbSql, INES, PDF, null, { odczytaj: zHaslem }), (e) => e.status === 403);
+    assert.equal(magazyn.size, przed);
+  });
+  await t('dodaj polisę: klient i lead w Wygrany; ponowienie tym samym kluczem; ten sam PESEL → 409; błędy → 400/403/422', async () => {
+    const body = { idempotencyKey: klucz(), userId: ADM, dataSprzedazy: '2026-09-15',
+      klient: { imieNazwisko: 'Zenon Polisa', pesel: '90010154321', email: 'zenon@x.pl', telefon: '600 100 200' },
+      sprzedaz: { skladka_roczna: '2 760', skladka_mies: 230, swiadczenie_okresowa: 4000, wariant_id: 'nie-uuid' } };
+    const r = await dodajPolise(sbSql, ULA, body);
+    assert.equal(r.status, 200, JSON.stringify(r.body));
+    const l = r.body.lead_id;
+    assert.equal(sql(`select tt.etap_leada('${l}')`), 'wygrany');
+    assert.equal(sql(`select opiekun_id || '|' || sprzedawca_id || '|' || skladka_roczna from public.ud_leady where id = '${l}'`), `${ULA}|${ULA}|2760.00`,
+      'użytkownik z sesji, nie z ciała');
+    const r2 = await dodajPolise(sbSql, ULA, body);
+    assert.deepEqual([r2.status, r2.body.lead_id, r2.body.powtorzone], [200, l, true]);
+    const r3 = await dodajPolise(sbSql, ULA, { ...body, idempotencyKey: klucz() });
+    assert.deepEqual([r3.status, r3.body.status, r3.body.lead_id], [409, 'klient_istnieje', l]);
+    const r4 = await dodajPolise(sbSql, ULA, { ...body, idempotencyKey: klucz(), klient: { imieNazwisko: 'Bez Skladki' }, sprzedaz: {} });
+    assert.deepEqual([r4.status, r4.body.pola], [422, ['skladka_roczna']]);
+    const r5 = await dodajPolise(sbSql, ULA, { ...body, idempotencyKey: klucz(), klient: { imieNazwisko: 'Dla Olka' }, agentId: OLEK });
+    assert.equal(r5.status, 403);
+    await assert.rejects(dodajPolise(sbSql, ULA, { ...body, idempotencyKey: 'x' }), (e) => e.status === 400);
+    await assert.rejects(dodajPolise(sbSql, ULA, { ...body, idempotencyKey: klucz(), agentId: 'x' }), (e) => e.status === 400);
+    await assert.rejects(dodajPolise(sbSql, ULA, null), (e) => e.status === 400);
+  });
+  await t('statystyki: prowizja i stawka w odpowiedzi (agent: własna stawka)', async () => {
+    sql(`update public.ud_user_profiles set prowizja_procent = 20 where id = '${ULA}'`);
+    const s = await statystyki(sbSql, ULA, new URLSearchParams());
+    assert.equal(Number(s.stawka), 20);
+    assert.ok(Number(s.podsumowanie.prowizja_suma) > 0 && s.podsumowanie.bez_stawki === 0);
+    sql(`update public.ud_user_profiles set prowizja_procent = null where id = '${ULA}'`);
+  });
   await t('przetworz: polisa przyjmuje tylko application/pdf (formularz z cudzej strony → 415)', async () => {
     const r = await przetworz({ user: { id: ULA }, oczekiwanyTyp: 'application/pdf', typTresci: 'multipart/form-data; boundary=x',
       czytajCialo: async () => { throw new Error('nie powinno być czytane'); }, wykonaj: async () => ({ status: 200, body: {} }) });
@@ -790,7 +893,8 @@ try {
   // Kontrakt: każda funkcja SQL wołana przez warstwę serwerową istniała w teście.
   await t('kontrakt: wszystkie funkcje SQL z leady.js były wołane (nazwy argumentów zgodne z sygnaturą)', () => {
     const wolane = new Set(sbSql.wywolania.map(([n]) => n));
-    for (const f of ['ud_leady_plan', 'ud_leady_synchronizuj', 'ud_leady_liczniki', 'ud_leady_kolumna', 'ud_lead_szczegoly', 'ud_lead_zmien', 'ud_lead_notatka', 'ud_leady_zwin']) {
+    for (const f of ['ud_leady_plan', 'ud_leady_synchronizuj', 'ud_leady_liczniki', 'ud_leady_kolumna', 'ud_lead_szczegoly', 'ud_lead_zmien', 'ud_lead_notatka', 'ud_leady_zwin',
+                     'ud_lead_plik', 'ud_lead_plik_dodaj', 'ud_lead_polisa_reczna', 'ud_leady_statystyki']) {
       assert.ok(wolane.has(f), `nie wołano ${f}`);
     }
   });

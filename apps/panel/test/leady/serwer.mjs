@@ -19,8 +19,8 @@ import { createServer } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { uruchomKlaster, wczytaj } from '../../scripts/lib/pg-tymczasowy.mjs';
 import {
-  BladApi, adresPliku, notatka, odpowiedzKolumny, odpowiedzLicznikow, odpowiedzSzczegolow, odpowiedzWariantow, przetworz, statystyki,
-  wczytajTablice, wgrajPolise, zmien, zwin,
+  BladApi, adresPliku, dodajPolise, notatka, odczytajPoliseNowa, odczytajWgranaPolise, odpowiedzKolumny, odpowiedzLicznikow,
+  odpowiedzSzczegolow, odpowiedzWariantow, przetworz, statystyki, wczytajTablice, wgrajPolise, zmien, zwin,
 } from '../../src/lib/server/leady.js';
 import { liczNiedokonczone } from '../../src/lib/server/niedokonczone.js';
 
@@ -133,17 +133,27 @@ export async function startuj() {
       remove: async (sciezki) => { for (const x of sciezki) magazyn.delete(`${kubelek}/${x}`); return { data: [], error: null }; },
       createSignedUrl: async (sciezka, sekundy, opcje) =>
         ({ data: { signedUrl: `/__test/magazyn/${kubelek}/${sciezka}?nazwa=${encodeURIComponent(opcje?.download ?? '')}` }, error: null }),
+      download: async (sciezka) => {
+        const b = magazyn.get(`${kubelek}/${sciezka}`);
+        return b ? { data: new Blob([b]), error: null } : { data: null, error: { message: 'Object not found' } };
+      },
     }),
   };
   // Klucz serwisowy w trasach polis: rpc + odczyt PESEL-u + kubełek.
   const sbPolisy = { rpc: (n, a) => sb.rpc(n, a), from: (t) => sbOferty.from(t), storage: kubelki };
   // Czytnik testowy: prawdziwego PDF-u polisy tu nie ma, więc rozpoznaje znaczniki
   // w treści pliku. „UD-TEST-KWOTY" → kwoty jak z Leadenhall; „UD-TEST-HASLO" →
-  // wymaga 4 ostatnich cyfr PESEL-u; reszta → nieznany układ (jak prawdziwy czytnik).
+  // wymaga 4 ostatnich cyfr PESEL-u; „UD-TEST-OPLATA" → składka 3 036 / 253 z opłatą
+  // dystrybucyjną 276 (jak w prawdziwej ofercie Leadenhall); reszta → nieznany
+  // układ (jak prawdziwy czytnik).
   const odczytajTestowo = async (bajty, haslo) => {
     const tekst = Buffer.from(bajty).toString('latin1');
     if (tekst.includes('UD-TEST-HASLO') && haslo !== '2345') {
       throw Object.assign(new Error('No password given'), { name: 'PasswordException' });
+    }
+    if (tekst.includes('UD-TEST-OPLATA')) {
+      return { offer_number: 'LHQ8/1', premium_total: 3036, premium_monthly: 253, distribution_fee: 276, installments: 12,
+               temp_incapacity_covered: true, temp_monthly_benefit: 5000, perm_incapacity_covered: false, death_covered: false };
     }
     if (tekst.includes('UD-TEST-KWOTY') || tekst.includes('UD-TEST-HASLO')) {
       return { offer_number: 'LHQ9/1', premium_total: '1500.00', premium_monthly: '125', temp_incapacity_covered: true,
@@ -232,6 +242,31 @@ export async function startuj() {
             res.setHeader('content-type', 'text/html; charset=utf-8');
             return res.end(`<!doctype html><meta charset="utf-8"><body>${body}</body>`);
           }
+          if (sciezka === '/__test/statystyki-dane') {
+            // Dane strony /panel/statystyki dla harnessu w przeglądarce (odpowiednik load).
+            try {
+              return odpowiedz(res, 200, { st: await statystyki(sb, uzytkownik, url.searchParams), blad: '', ja: uzytkownik });
+            } catch (e) {
+              if (e instanceof BladApi) return odpowiedz(res, e.status, e.body);
+              throw e;
+            }
+          }
+          // ── „Dodaj polisę" (te same funkcje co w src/routes/panel/statystyki/api/*) ──
+          if (sciezka === '/panel/statystyki/api/odczyt') {
+            const wynik = await przetworz({
+              user, oczekiwanyTyp: 'application/pdf', typTresci: req.headers['content-type'],
+              czytajCialo: () => czytajBajty(req),
+              wykonaj: ({ userId, body }) => odczytajPoliseNowa(sbPolisy, userId, body, req.headers['x-haslo'] ?? null, { odczytaj: odczytajTestowo }),
+            });
+            return odpowiedz(res, wynik.status, wynik.body);
+          }
+          if (sciezka === '/panel/statystyki/api/polisa') {
+            const wynik = await przetworz({
+              user, typTresci: req.headers['content-type'], czytajCialo: () => czytajCialo(req),
+              wykonaj: ({ userId, body }) => dodajPolise(sb, userId, body),
+            });
+            return odpowiedz(res, wynik.status, wynik.body);
+          }
           if (sciezka === '/__test/ssr-uklad') {
             // Układ panelu (menu z zakładką „Niedokończone") z licznikiem z tej samej funkcji co jego load.
             const { render } = await serwer.ssrLoadModule('svelte/server');
@@ -282,6 +317,14 @@ export async function startuj() {
           }
 
           // ── polisy (te same funkcje co w src/routes/panel/leady/api/polisa|plik) ──
+          if (/^polisa\/[^/]+\/odczyt$/.test(nazwa)) {
+            const wynik = await przetworz({
+              user, typTresci: req.headers['content-type'], czytajCialo: () => czytajCialo(req),
+              wykonaj: ({ userId, body }) => odczytajWgranaPolise(sbPolisy, userId, decodeURIComponent(nazwa.split('/')[1]), body?.plikId,
+                { odczytaj: odczytajTestowo }),
+            });
+            return odpowiedz(res, wynik.status, wynik.body);
+          }
           if (nazwa.startsWith('polisa/')) {
             const wynik = await przetworz({
               user,
