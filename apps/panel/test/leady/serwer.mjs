@@ -23,6 +23,7 @@ import {
   odpowiedzSzczegolow, odpowiedzWariantow, polisy, przetworz, statystyki, uzupelnijZPolisy, wczytajTablice, wgrajPolise, zmien, zwin,
 } from '../../src/lib/server/leady.js';
 import { liczNiedokonczone } from '../../src/lib/server/niedokonczone.js';
+import { listaKlientow } from '../../src/lib/server/klienci.js';
 
 const panel = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -116,7 +117,8 @@ export async function startuj() {
           try {
             const zrodlo = `select * from public.${tabela}${warunki.length ? ` where ${warunki.join(' and ')}` : ''}`;
             if (tylkoLiczba) { rozwiaz({ data: null, count: Number(sql(`select count(*) from (${zrodlo}) t`)), error: null }); return; }
-            const w = sql(`select coalesce(jsonb_agg(to_jsonb(t) order by t.created_at), '[]'::jsonb) from (${zrodlo}) t`);
+            // Kolejność po created_at, gdy tabela ją ma (ud_leady_etap jej nie ma).
+            const w = sql(`select coalesce(jsonb_agg(to_jsonb(t) order by to_jsonb(t)->>'created_at'), '[]'::jsonb) from (${zrodlo}) t`);
             rozwiaz({ data: JSON.parse(w), error: null });
           } catch (e) { odrzuc(e); }
         },
@@ -245,6 +247,15 @@ export async function startuj() {
               throw e;
             }
             const { body } = render(Strona, { props: { data: { st, blad: '' } } });
+            res.setHeader('content-type', 'text/html; charset=utf-8');
+            return res.end(`<!doctype html><meta charset="utf-8"><body>${body}</body>`);
+          }
+          if (sciezka === '/__test/ssr-klienci') {
+            // Zakładka „Klienci" z danymi z tej samej funkcji co jej load (+page.server.js).
+            const { render } = await serwer.ssrLoadModule('svelte/server');
+            const Strona = (await serwer.ssrLoadModule('/src/routes/panel/klienci/+page.svelte')).default;
+            const clients = await listaKlientow({ rpc: (n, a) => sb.rpc(n, a), from: (t) => sbOferty.from(t) }, uzytkownik);
+            const { body } = render(Strona, { props: { data: { clients } } });
             res.setHeader('content-type', 'text/html; charset=utf-8');
             return res.end(`<!doctype html><meta charset="utf-8"><body>${body}</body>`);
           }

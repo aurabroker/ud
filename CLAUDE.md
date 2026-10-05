@@ -1612,6 +1612,22 @@ Krawędzie mają ≥ 3:1 do bieli, tekst ≥ 7:1 do swojego tła.
 Uruchomione przez właściciela 05.10.2026: pięć polis dostało numer i okres
 ochrony, Iwona Buza składkę 3 528 / 294 zamiast 3 876 / 323 (z opłatą 348 zł).
 
+### Klienci → kolumna „Akcja" zamiast „Zawód" (v.0.65, 05.10.2026)
+
+Zakładka „Klienci" pokazuje, gdzie klient jest w procesie — **z etapu jego
+leada na tablicy** (jeden lead na klienta), nie ze statusów ofert. Tablica to
+jedno miejsce prowadzenia sprawy, a synchronizacja i tak ustawia etap z ofert;
+dwa źródła dawałyby dwie prawdy. Mapa w `src/lib/klienci/akcja.js`:
+Nowy → „Do kontaktu", Oferta → „Oferta wysłana", Decyzja klienta → „Czeka na
+decyzję klienta", Wygrany → „Klient ubezpieczony" (po końcu ochrony —
+„Polisa wygasła"), Przegrany → „Klient zrezygnował" (powód w podpowiedzi);
+etap spoza mapy — jego nazwa. Odznaka prowadzi do leada na tablicy;
+zarchiwizowany lead ma dopisek „archiwum" i bez odnośnika. Lista
+(`listaKlientow` w `src/lib/server/klienci.js`) woła przy wejściu tę samą
+synchronizację co tablica, więc nowy klient od razu ma etap. Widoczność bez
+zmian (`klienciWidoczni`). Test: `klienci.spec.js` (SSR na prawdziwym SQL,
+`/__test/ssr-klienci`) i `test:leady-model`.
+
 ### Model danych (tylko stan procesu — dane osobowe czytamy ze źródła)
 
 | Obiekt | Rola |

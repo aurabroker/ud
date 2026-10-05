@@ -17,6 +17,7 @@ import { stawkaZFormularza } from '../src/lib/prowizja.js';
 import { danePolisyZFormularza, dataPL, dataSprzedazyZOchrony, doCsv, dzienPL, pasujeStatus, pasujeSzukanie, przesunDzien, rokOchrony, sortuj, statusPolisy, sumy } from '../src/lib/polisy/model.js';
 import { adresFiltra } from '../src/lib/statystyki/filtr.js';
 import { dataZPolisy, daneZPolisy, numerZNazwy } from '../src/lib/pdf/polisa.js';
+import { akcjaKlienta } from '../src/lib/klienci/akcja.js';
 import { coOdczytano, polisaZDokumentu } from '../src/lib/server/leady.js';
 
 let pass = 0;
@@ -426,6 +427,25 @@ await t('data sprzedaży = dzień przed początkiem ochrony (przełom miesiąca,
   assert.equal(dataSprzedazyZOchrony(''), null);
   assert.equal(dataSprzedazyZOchrony('2026-02-31'), null);
   assert.equal(przesunDzien('2026-09-01', 1), '2026-09-02');
+});
+
+await t('Klienci → „Akcja": etap leada po polsku, wygasła polisa, powód rezygnacji, archiwum bez odnośnika', () => {
+  const e = (klucz, rodzaj = 'otwarty', nazwa = klucz) => ({ klucz, rodzaj, nazwa });
+  const L = { id: 'L1' };
+  assert.equal(akcjaKlienta(L, e('nowy'), '2026-10-05').etykieta, 'Do kontaktu');
+  assert.equal(akcjaKlienta(L, e('oferta'), '2026-10-05').etykieta, 'Oferta wysłana');
+  assert.equal(akcjaKlienta(L, e('decyzja'), '2026-10-05').etykieta, 'Czeka na decyzję klienta');
+  const ub = akcjaKlienta({ ...L, ochrona_do: '2027-01-01' }, e('wygrany', 'wygrany'), '2026-10-05');
+  assert.deepEqual([ub.etykieta, ub.klasa, ub.link], ['Klient ubezpieczony', 'badge-bought', '/panel/leady?lead=L1']);
+  assert.equal(akcjaKlienta({ ...L, ochrona_do: '2026-10-05' }, e('wygrany', 'wygrany'), '2026-10-05').etykieta, 'Klient ubezpieczony', 'ostatni dzień ochrony');
+  assert.equal(akcjaKlienta({ ...L, ochrona_do: '2026-10-04' }, e('wygrany', 'wygrany'), '2026-10-05').etykieta, 'Polisa wygasła');
+  assert.equal(akcjaKlienta(L, e('wygrany', 'wygrany'), '2026-10-05').etykieta, 'Klient ubezpieczony', 'bez dat — ubezpieczony');
+  const rez = akcjaKlienta({ ...L, powod_utraty: 'Za drogo' }, e('przegrany', 'przegrany'), '2026-10-05');
+  assert.deepEqual([rez.etykieta, rez.tytul], ['Klient zrezygnował', 'Powód: Za drogo']);
+  assert.equal(akcjaKlienta(L, e('inny', 'otwarty', 'Etap własny'), '2026-10-05').etykieta, 'Etap własny');
+  const arch = akcjaKlienta({ ...L, zarchiwizowano_at: '2026-10-01' }, e('oferta'), '2026-10-05');
+  assert.deepEqual([arch.archiwum, arch.link], [true, null]);
+  assert.deepEqual([akcjaKlienta(null, null, '2026-10-05').etykieta, akcjaKlienta(null, null, '2026-10-05').link], ['—', null]);
 });
 
 // ── Dane polisy z PDF (src/lib/pdf/polisa.js) ────────────────────────────────
