@@ -6,15 +6,7 @@
 import { obsluz } from '$lib/server/leady-http.js';
 import { wgrajPolise } from '$lib/server/leady.js';
 import { odczytajPdf as odczytaj } from '$lib/server/czytnik-polis.js';
-
-function nazwaZNaglowka(request) {
-  const surowa = request.headers.get('x-nazwa-pliku') || '';
-  try {
-    return decodeURIComponent(surowa);
-  } catch {
-    return surowa;
-  }
-}
+import { nazwaZNaglowka } from '$lib/server/nazwa-pliku.js';
 
 export const POST = (zdarzenie) =>
   obsluz(

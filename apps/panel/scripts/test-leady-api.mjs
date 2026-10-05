@@ -36,6 +36,7 @@ import {
   kwotyZDokumentu,
   odczytajPoliseNowa,
   odczytajWgranaPolise,
+  uzupelnijZPolisy,
   odpowiedzWariantow,
   polisy,
   wczytajPlan,
@@ -801,6 +802,64 @@ try {
     await assert.rejects(odczytajPoliseNowa(sbSql, ULA, new TextEncoder().encode('<html>'), null, { odczytaj: zHaslem }), (e) => e.status === 415);
     await assert.rejects(odczytajPoliseNowa(sbSql, INES, PDF, null, { odczytaj: zHaslem }), (e) => e.status === 403);
     assert.equal(magazyn.size, przed);
+  });
+  await t('uzupełnij z polisy: tylko PUSTE pola (numer ręczny zostaje), okres z PDF, składka z opłatą → bez; historia; drugi raz bez zmian', async () => {
+    const przed = sql(`select to_jsonb(l) - 'updated_at' - 'wersja' from public.ud_leady l where id = '${bartekPlik}'`);
+    sql(`update public.ud_leady set etap_id = tt.etap('wygrany'), skladka_roczna = 3036, skladka_mies = 253, swiadczenie_okresowa = 4000,
+           polisa_numer = 'RECZNY 1', ochrona_od = null, ochrona_do = null, sprzedano_at = now() where id = '${bartekPlik}'`);
+    const hasla = [];
+    const odczytaj = async (_b, haslo) => {
+      hasla.push(haslo);
+      if (haslo !== '2345') throw Object.assign(new Error('No password given'), { name: 'PasswordException' });
+      return { ...ZPOLISY, premium_total: 3036, premium_monthly: 253, distribution_fee: 276,
+               polisa: { polisa_numer: 'LHC3100906', ochrona_od: '2026-02-05', ochrona_do: '2027-02-04' } };
+    };
+    try {
+      const h = historia(bartekPlik);
+      const r = await uzupelnijZPolisy(zKubelkiem(), ULA, bartekPlik, { odczytaj });
+      assert.equal(r.status, 200, JSON.stringify(r.body));
+      assert.equal(r.body.status, 'ok');
+      assert.deepEqual(r.body.zmiany, ['okres ochrony', 'składka bez opłaty dystrybucyjnej']);
+      assert.deepEqual(hasla, [undefined, '2345'], 'hasło z PESEL-u klienta, czytane na serwerze');
+      assert.equal(sql(`select concat_ws('|', polisa_numer, ochrona_od, ochrona_do, skladka_roczna, skladka_mies, swiadczenie_okresowa)
+                          from public.ud_leady where id = '${bartekPlik}'`), 'RECZNY 1|2026-02-05|2027-02-04|2760.00|230.00|4000.00');
+      assert.equal(historia(bartekPlik), h + 1);
+      assert.equal(sql(`select dane->'poprzednia_sprzedaz'->>'skladka_roczna' from public.ud_leady_historia
+                         where lead_id = '${bartekPlik}' order by id desc limit 1`), '3036.00', 'historia pamięta kwotę z opłatą');
+      assert.ok(!JSON.stringify(r.body).includes('81010112345'), 'PESEL nie wychodzi w odpowiedzi');
+      // Drugi raz: wszystko już jest → bez zapisu.
+      const r2 = await uzupelnijZPolisy(zKubelkiem(), ULA, bartekPlik, { odczytaj });
+      assert.equal(r2.body.status, 'bez_zmiany');
+      assert.equal(historia(bartekPlik), h + 1);
+
+      // Sprzedaż bez kwot: kwoty z polisy, numer z polisy.
+      sql(`update public.ud_leady set skladka_roczna = null, skladka_mies = null, swiadczenie_okresowa = null, polisa_numer = null
+            where id = '${bartekPlik}'`);
+      const r3 = await uzupelnijZPolisy(zKubelkiem(), ULA, bartekPlik, { odczytaj });
+      assert.deepEqual(r3.body.zmiany, ['numer polisy', 'kwoty']);
+      assert.equal(sql(`select concat_ws('|', polisa_numer, skladka_roczna, skladka_mies, swiadczenie_okresowa)
+                          from public.ud_leady where id = '${bartekPlik}'`), 'LHC3100906|2760.00|230.00|4000.00');
+
+      // Plik, którego nie da się otworzyć (złe hasło, nazwa bez numeru) → nic nie zapisane, powód w odpowiedzi.
+      sql(`update public.ud_leady set polisa_numer = null where id = '${bartekPlik}'`);
+      const h4 = historia(bartekPlik);
+      const zleHaslo = async () => { throw Object.assign(new Error('Incorrect Password'), { name: 'PasswordException' }); };
+      const r4 = await uzupelnijZPolisy(zKubelkiem(), ULA, bartekPlik, { odczytaj: zleHaslo });
+      assert.equal(r4.body.status, 'nieodczytany');
+      assert.match(r4.body.komunikat, /hasło inne/);
+      assert.equal(historia(bartekPlik), h4);
+
+      await assert.rejects(uzupelnijZPolisy(zKubelkiem(), OLEK, bartekPlik, { odczytaj }), (e) => e.status === 404);
+      await assert.rejects(uzupelnijZPolisy(zKubelkiem(), INES, bartekPlik, { odczytaj }), (e) => e.status === 403);
+      await assert.rejects(uzupelnijZPolisy(zKubelkiem(), ULA, 'x', { odczytaj }), (e) => e.status === 400);
+      const r5 = await uzupelnijZPolisy(zKubelkiem(), ADM, lead('Darek Decyzja'), { odczytaj });
+      assert.equal(r5.body.status, 'brak_pliku');
+    } finally {
+      sql(`update public.ud_leady l set etap_id = p.etap_id, skladka_roczna = p.skladka_roczna, skladka_mies = p.skladka_mies,
+             swiadczenie_okresowa = p.swiadczenie_okresowa, polisa_numer = p.polisa_numer, ochrona_od = p.ochrona_od,
+             ochrona_do = p.ochrona_do, sprzedano_at = p.sprzedano_at, sprzedawca_id = p.sprzedawca_id, prowizja_procent = p.prowizja_procent
+           from jsonb_populate_record(null::public.ud_leady, '${przed.replace(/'/g, "''")}'::jsonb) p where l.id = '${bartekPlik}'`);
+    }
   });
   await t('dodaj polisę: klient i lead w Wygrany; ponowienie tym samym kluczem; ten sam PESEL → 409; błędy → 400/403/422', async () => {
     const body = { idempotencyKey: klucz(), userId: ADM, dataSprzedazy: '2026-09-15',

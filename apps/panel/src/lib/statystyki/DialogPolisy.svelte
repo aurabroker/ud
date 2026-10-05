@@ -3,7 +3,8 @@
    * „Dodaj polisę" — sprzedaż klienta, który nie zgłosił się przez formularz
    * (decyzja właściciela z 04.10.2026). Trzy kroki, z czego użytkownik widzi
    * jeden formularz:
-   *  1. wybór PDF → serwer czyta kwoty (POST /panel/statystyki/api/odczyt).
+   *  1. wybór PDF → serwer czyta kwoty, numer polisy i okres ochrony
+   *     (POST /panel/statystyki/api/odczyt).
    *     Leadenhall szyfruje plik 4 ostatnimi cyframi PESEL-u: idą w nagłówku
    *     x-haslo z pola PESEL; wpisanie PESEL-u po pliku czyta go ponownie.
    *     Składka wraca BEZ opłaty dystrybucyjnej;
@@ -77,7 +78,11 @@
     try {
       r = await wyslij('/panel/statystyki/api/odczyt', {
         method: 'POST',
-        headers: { 'content-type': 'application/pdf', ...(cyfryPeselu.length === 11 ? { 'x-haslo': cyfryPeselu.slice(-4) } : {}) },
+        headers: {
+          'content-type': 'application/pdf',
+          'x-nazwa-pliku': encodeURIComponent(plik.name || 'polisa.pdf'),
+          ...(cyfryPeselu.length === 11 ? { 'x-haslo': cyfryPeselu.slice(-4) } : {}),
+        },
         body: plik,
       });
     } catch {
@@ -96,6 +101,10 @@
       for (const p of POLA_SPRZEDAZY) pola[p.id] = naTekst(r.body.kwoty[p.id]);
       bledy = {};
     }
+    // Numer i okres ochrony z polisy (05.10.2026) — do sprawdzenia jak kwoty.
+    const p = r.body.polisa;
+    if (p?.polisa_numer) numer = p.polisa_numer;
+    if (p?.ochrona_od && p?.ochrona_do) { ochronaOd = p.ochrona_od; ochronaDo = p.ochrona_do; }
   }
 
   /** PESEL wpisany po pliku, który chciał hasła — czytamy plik jeszcze raz. */

@@ -11,8 +11,10 @@
    * reguła stoi w ud_lead_zmien); 0 w pozostałych polach = brak tego ryzyka.
    * Anulowanie przy przenoszeniu nie zmienia etapu (wgrana polisa zostaje).
    *
-   * Polisa wgrana wcześniej przy leadzie: „Odczytaj kwoty z polisy" czyta ją
+   * Polisa wgrana wcześniej przy leadzie: „Odczytaj dane z polisy" czyta ją
    * ponownie (składka bez opłaty dystrybucyjnej — decyzja z 04.10.2026).
+   * Z pliku przychodzą też numer polisy i okres ochrony (05.10.2026) — wpisują
+   * się w pola tak samo jak kwoty: do sprawdzenia, zapis dopiero przyciskiem.
    */
   import { getContext, onMount, tick } from 'svelte';
   import Dialog from './Dialog.svelte';
@@ -70,6 +72,13 @@
     bledy = {};
   }
 
+  /** Numer i okres ochrony z pliku — tylko to, co czytnik znalazł. */
+  function wpiszPolise(p) {
+    if (!p) return;
+    if (p.polisa_numer) numer = p.polisa_numer;
+    if (p.ochrona_od && p.ochrona_do) { ochronaOd = p.ochrona_od; ochronaDo = p.ochrona_do; }
+  }
+
   async function odczytajWgrana(f) {
     bladPolisy = '';
     komunikatPolisy = '';
@@ -79,6 +88,7 @@
     if (!r.ok) { bladPolisy = r.komunikat; return; }
     komunikatPolisy = r.komunikat;
     if (r.kwoty) wpiszKwoty(r.kwoty);
+    wpiszPolise(r.polisa);
     if (tryb === 'wybor' || tryb === null) tryb = 'reczne';
     await tick();
     document.getElementById('dlg-sp-skladka_roczna')?.focus();
@@ -117,6 +127,7 @@
       for (const p of POLA_SPRZEDAZY) if (r.kwoty[p.id] != null) pola[p.id] = naTekst(r.kwoty[p.id]);
       bledy = {};
     }
+    wpiszPolise(r.polisa);
     if (tryb === 'wybor') tryb = 'reczne';
     await tick();
     document.getElementById('dlg-sp-skladka_roczna')?.focus();
@@ -210,7 +221,7 @@
           {#each wgrane as f (f.id)}
             <li>
               <a href="/panel/leady/api/plik/{f.id}" target="_blank" rel="noopener">{f.nazwa}</a>
-              <button type="button" class="link" disabled={odczytywanie || wgrywanie} onclick={() => odczytajWgrana(f)}>Odczytaj kwoty z polisy</button>
+              <button type="button" class="link" disabled={odczytywanie || wgrywanie} onclick={() => odczytajWgrana(f)}>Odczytaj dane z polisy</button>
             </li>
           {/each}
         </ul>

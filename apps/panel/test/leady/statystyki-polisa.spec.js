@@ -167,7 +167,7 @@ test('„Dane sprzedaży": kwoty ponownie z polisy wgranej wcześniej — bez op
   const dialog = page.getByRole('dialog', { name: 'Dane sprzedaży' });
   const lista = dialog.locator('[data-polisy-leada]');
   await expect(lista).toContainText('polisa Jerzego.pdf');
-  await lista.getByRole('button', { name: 'Odczytaj kwoty z polisy' }).click();
+  await lista.getByRole('button', { name: 'Odczytaj dane z polisy' }).click();
   await expect(dialog.locator('[data-komunikat-polisy]')).toContainText('sprawdź je przed zapisem');
   await expect(dialog.getByLabel('Składka roczna *')).toHaveValue('2760');
   await expect(dialog.getByLabel('Składka miesięczna')).toHaveValue('230');

@@ -1500,10 +1500,11 @@ agent — swoje sprzedaże, także z cudzym agentem w adresie). Okres w filtrze 
 z całego wczytanego wykazu (`src/lib/polisy/model.js`), więc sumy dotyczą
 dokładnie tego, co widać.
 
-- **Numer polisy i daty ochrony wpisuje agent** — w „Dane sprzedaży" albo
-  „Dodaj polisę" (wspólne pola `PolaPolisy.svelte`). Z PDF-u ich nie
-  zgadujemy: czytnik zna układ OFERTY, nie polisy, a zła data końca ochrony
-  to przegapione wznowienie. Przycisk „Ochrona na rok" jest jawnym skrótem
+- **Numer polisy i daty ochrony** stoją w „Dane sprzedaży" i „Dodaj polisę"
+  (wspólne pola `PolaPolisy.svelte`). Od v.0.63 **wgrany PDF polisy wpisuje je
+  sam** — patrz „Odczyt polis z PDF" niżej; czego czytnik nie znajdzie, agent
+  przepisuje z polisy. Dat nie zgadujemy: zła data końca ochrony to
+  przegapione wznowienie. Przycisk „Ochrona na rok" jest jawnym skrótem
   (od + rok − 1 dzień; 29.02 → 28.02), nie domyślną wartością.
 - **Status** liczy się od „dziś" w czasie polskim, które podaje serwer
   (`dzis` z `ud_leady_polisy`), nie z zegara przeglądarki: bez dat ochrony,
@@ -1520,6 +1521,52 @@ dokładnie tego, co widać.
   razem z kwotami (historia je pamięta).
 - Filtry okresu i agenta są wspólne ze Statystykami
   (`src/lib/statystyki/Filtry.svelte`, `filtr.js`).
+
+### Odczyt polis z PDF (v.0.63, 05.10.2026)
+
+Pytanie właściciela: „nie odczytasz z polis numerów polis???". Zmapowane na
+pięciu prawdziwych polisach Leadenhall z produkcji (kopie na Dysku Google,
+`Nazwisko_LHC…[_PIN].pdf`): LW044/AD_D_TTD_PTD, LW047/MEDICARE i
+LW050/TTD/UNIPRO („Beauty"). Wszystkie mają ten sam zapis:
+
+```
+Polisa nr LHC3100906
+4. Okres ubezpieczenia 5 lutego 2026 - 4 lutego 2027      (Beauty: pozycja 3)
+Składka 3 432 zł / Opłata dystrybucyjna 336 zł / 3 768 zł płatne w 12 ratach
+Świadczenie 7 000 zł miesięcznie                          (tylko Beauty)
+```
+
+- **Kwoty z polisy czyta zwykły czytnik ofert** (`parseLeadenhall`) — działał
+  na polisach od początku. Brakowało numeru, okresu i świadczenia z polisy
+  „Beauty" — to robi `src/lib/pdf/polisa.js` (`daneZPolisy`), wołany
+  z `czytnik-polis.js` na tym samym tekście. Dokument, którego czytnik ofert
+  nie rozpozna, nadal oddaje numer i daty.
+- **Numer awaryjnie z nazwy pliku** — tylko wzorzec `LHC` + 6–8 cyfr
+  (`numerZNazwy`), tylko gdy w treści go nie ma (np. skan bez warstwy tekstu).
+- **Data niepewna = pusta.** Jedna data bez drugiej, koniec przed początkiem
+  albo nieistniejący dzień — obie zostają puste.
+- **Polisy CEU nie widzieliśmy** (na Dysku są tylko oferty `LOIP/…`) — wzorce
+  są ogólne („Polisa nr / Numer polisy", „od … do …", DD-MM-RRRR i DD.MM.RRRR).
+  Przy pierwszej polisie CEU sprawdź, co wyszło, i dopisz jej układ do testu.
+- Odczyt przy wgraniu („Dane sprzedaży", „Dodaj polisę") **wypełnia pola do
+  sprawdzenia** — zapis dopiero przyciskiem agenta, jak przy kwotach.
+- **Wykaz polis → „Uzupełnij z plików PDF (N)"** — dla polis z plikiem, którym
+  brakuje numeru albo dat (bez zarchiwizowanych). Po jednym leadzie na żądanie
+  (`POST /panel/polisy/api/uzupelnij`, `uzupelnijZPolisy`) — PDF polisy ma
+  ~25 stron, a strona pokazuje postęp. Serwer czyta NAJNOWSZY plik przy leadzie
+  (hasło z PESEL-u klienta) i wpisuje **tylko puste pola**: numer, okres,
+  a sprzedaży bez kwot — kwoty. Jedno nadpisanie jest celowe: składka roczna
+  równa kwocie DO ZAPŁATY z polisy to sprzedaż zapisana z opłatą
+  dystrybucyjną (sprzed 04.10.2026) — dostaje składki bez opłaty. Zapis idzie
+  operacją `sprzedaz` (`ud_lead_zmien`: wersja, uprawnienia, historia
+  z poprzednimi wartościami) — **bez migracji**.
+- **Data sprzedaży z polisy NIE jest czytana.** Polisa ma datę wystawienia
+  („Warszawa, 4 lutego 2026"), ale data sprzedaży decyduje o okresie
+  w statystykach i prowizji — zmienia ją agent.
+
+Stan produkcji przed pierwszym uruchomieniem (05.10.2026): pięć polis z plikami,
+żadna bez numeru i dat; Iwona Buza ma 3 876 / 323 (z opłatą 348 zł), w polisie
+składka 3 528 zł — przycisk poprawi ją na 3 528 / 294.
 
 ### Model danych (tylko stan procesu — dane osobowe czytamy ze źródła)
 
@@ -1624,9 +1671,12 @@ zapisu zwinięcia…) daje czerwony wynik.
 Testy przeglądarkowe działają domyślnie jako administrator (`otworz()` bez
 `u`), bo on widzi wszystkie leady; reguły agenta mają własne scenariusze
 (`polisy-widocznosc.spec.js`, K19 jako Olek). Czytnik PDF w serwerze testowym
-rozpoznaje znaczniki w treści pliku (`UD-TEST-KWOTY`, `UD-TEST-HASLO`) —
-prawdziwej polisy w repozytorium nie ma, więc **odczytu kwot z prawdziwej
-polisy Leadenhall testy nie sprawdzają**.
+rozpoznaje znaczniki w treści pliku (`UD-TEST-KWOTY`, `UD-TEST-HASLO`,
+`UD-TEST-OPLATA`, `UD-TEST-POLISA`) — prawdziwej polisy w repozytorium nie ma
+(dane osobowe), więc **odczytu z prawdziwego pliku Leadenhall testy nie
+sprawdzają**. Układ tekstu polis pilnuje `test:leady-model` na fragmentach
+przepisanych z prawdziwych polis (z wymyślonymi danymi); sam odczyt pięciu
+prawdziwych plików sprawdzono ręcznie 05.10.2026 (numer, okres, kwoty — 5/5).
 
 Strona statystyk i menu panelu (migająca zakładka) nie siedzą w harnessie
 tablicy — `statystyki.spec.js` renderuje je po stronie serwera z prawdziwych

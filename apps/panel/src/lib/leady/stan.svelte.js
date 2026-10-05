@@ -538,7 +538,7 @@ export class StanTablicy {
     }
   }
 
-  /** Kwoty z polisy wgranej wcześniej przy leadzie. Wynik: { ok, kwoty?, komunikat }. */
+  /** Kwoty, numer i okres ochrony z polisy wgranej wcześniej przy leadzie. Wynik: { ok, kwoty?, polisa?, komunikat }. */
   async odczytajPolise(leadId, plikId) {
     let odp;
     try {
@@ -551,11 +551,11 @@ export class StanTablicy {
       if (status === 401) this.alert = 'Sesja wygasła. Zaloguj się ponownie.';
       return { ok: false, komunikat: body?.komunikat ?? 'Nie udało się odczytać polisy.' };
     }
-    return { ok: true, kwoty: body.kwoty ?? null, komunikat: body.komunikat ?? '' };
+    return { ok: true, kwoty: body.kwoty ?? null, polisa: body.polisa ?? null, komunikat: body.komunikat ?? '' };
   }
 
   /**
-   * Polisa (PDF) do leada. Wynik: { ok, plik?, kwoty?, komunikat }. Bez
+   * Polisa (PDF) do leada. Wynik: { ok, plik?, kwoty?, polisa?, komunikat }. Bez
    * ponawiania — po zerwanym połączeniu nie wiadomo, czy plik doszedł, więc
    * mówimy to wprost, a agent sprawdza w szczegółach.
    */
@@ -574,7 +574,7 @@ export class StanTablicy {
     if (this.otwarty?.lead?.id === leadId) {
       this.otwarty = { ...this.otwarty, pliki: [body.plik, ...(this.otwarty.pliki ?? [])] };
     }
-    return { ok: true, plik: body.plik, kwoty: body.kwoty ?? null, komunikat: body.komunikat ?? 'Polisa zapisana.' };
+    return { ok: true, plik: body.plik, kwoty: body.kwoty ?? null, polisa: body.polisa ?? null, komunikat: body.komunikat ?? 'Polisa zapisana.' };
   }
 
   archiwizuj(leadId, klucz) {

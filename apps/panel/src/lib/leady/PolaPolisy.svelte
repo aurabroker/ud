@@ -1,9 +1,10 @@
 <script>
   /**
    * Numer polisy i okres ochrony — w oknie „Dane sprzedaży" i „Dodaj polisę".
-   * Daty wpisuje agent z polisy; z pliku ich nie zgadujemy (czytnik zna układ
-   * oferty, nie polisy). „Rok ochrony" to tylko skrót dla typowej polisy
-   * rocznej — wypełnia koniec, nic nie zapisuje sam z siebie.
+   * Wgrany PDF polisy wpisuje je sam (src/lib/pdf/polisa.js: „Polisa nr …",
+   * „Okres ubezpieczenia … - …"); czego czytnik nie znajdzie, agent przepisuje
+   * z polisy — dat nie zgadujemy. „Rok ochrony" to tylko skrót dla typowej
+   * polisy rocznej — wypełnia koniec, nic nie zapisuje sam z siebie.
    */
   import { rokOchrony } from '$lib/polisy/model.js';
 
@@ -38,7 +39,7 @@
     {#if bledy.ochrona_do}<p id="{prefiks}-ochrona_do-blad" class="blad-pola">{bledy.ochrona_do}</p>{/if}
   </div>
   <p class="mala podpowiedz">
-    Daty przepisz z polisy.
+    Wgrany PDF polisy wpisuje numer i daty sam — inaczej przepisz je z polisy.
     <button type="button" class="link" onclick={rok} data-rok-ochrony>Ochrona na rok{od ? ` od ${od.split('-').reverse().join('.')}` : ''}</button>
   </p>
 </div>

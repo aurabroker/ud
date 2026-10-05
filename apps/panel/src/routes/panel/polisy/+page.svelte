@@ -43,6 +43,42 @@
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
+  // „Uzupełnij z plików PDF" (05.10.2026): polisy z wgranym plikiem, którym
+  // brakuje numeru albo dat ochrony. Jeden lead na żądanie, po kolei — PDF polisy
+  // ma ~25 stron, a postęp widać od razu. Serwer wpisuje tylko PUSTE pola (i
+  // składkę zapisaną razem z opłatą), zwykłą operacją `sprzedaz` z wpisem w historii.
+  const doUzupelnienia = $derived((w?.polisy ?? []).filter((p) => p.plik && !p.archiwum && (!p.numer || !p.ochrona_od || !p.ochrona_do)));
+  let uzupelnianie = $state(null);
+  let wynikUzup = $state(null);
+
+  async function uzupelnij() {
+    const lista = doUzupelnienia.map((p) => ({ id: p.lead_id, klient: p.klient }));
+    const ok = [];
+    const bez = [];
+    const bledy = [];
+    dodano = null;
+    wynikUzup = null;
+    for (const [i, p] of lista.entries()) {
+      uzupelnianie = { nr: i + 1, z: lista.length, klient: p.klient };
+      let r;
+      try {
+        const odp = await fetch('/panel/polisy/api/uzupelnij', {
+          method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ leadId: p.id }),
+        });
+        r = { status: odp.status, body: await odp.json().catch(() => null) };
+      } catch {
+        r = { status: 0, body: null };
+      }
+      const st = r.body?.status;
+      if (r.status === 200 && st === 'ok') ok.push({ ...p, zmiany: r.body.zmiany ?? [] });
+      else if (r.status === 200 && st === 'bez_zmiany') bez.push(p);
+      else bledy.push({ ...p, komunikat: r.body?.komunikat ?? (r.status ? 'Nie udało się zapisać.' : 'Brak połączenia.') });
+    }
+    uzupelnianie = null;
+    wynikUzup = { ok, bez, bledy };
+    await invalidateAll();
+  }
+
   let dodawanie = $state(false);
   let dodano = $state(null);
   async function zapisano(wynik) {
@@ -66,6 +102,12 @@
   </div>
   {#if w}
     <div class="akcje">
+      {#if doUzupelnienia.length || uzupelnianie}
+        <button type="button" class="btn btn-ghost" onclick={uzupelnij} disabled={Boolean(uzupelnianie)} data-uzupelnij
+                title="Numer polisy i okres ochrony z wgranych plików PDF — tylko puste pola">
+          Uzupełnij z plików PDF ({uzupelnianie?.z ?? doUzupelnienia.length})
+        </button>
+      {/if}
       <button type="button" class="btn btn-ghost" onclick={pobierzCsv} disabled={!widoczne.length} data-csv>Pobierz CSV</button>
       <button type="button" class="btn btn-primary" onclick={() => { dodano = null; dodawanie = true; }} data-dodaj-polise>+ Dodaj polisę</button>
     </div>
@@ -74,6 +116,29 @@
 
 {#if w}
   <Filtry okres={w.okres} agent={w.agent} agenci={w.agenci} {admin} />
+{/if}
+
+<div role="status">
+  {#if uzupelnianie}
+    <p class="postep" data-postep>Czytam polisę {uzupelnianie.nr} z {uzupelnianie.z}: {uzupelnianie.klient}…</p>
+  {/if}
+</div>
+{#if wynikUzup}
+  <div class={wynikUzup.bledy.length ? 'error-box' : 'ok-box'} data-uzupelniono>
+    {#if wynikUzup.ok.length}
+      Uzupełniono z plików PDF: {polis(wynikUzup.ok.length)}.
+      <ul class="lista-uzup">
+        {#each wynikUzup.ok as p (p.id)}<li>{p.klient} — {p.zmiany.join(', ')}</li>{/each}
+      </ul>
+    {/if}
+    {#if wynikUzup.bez.length}<p class="bez-zmian">Bez zmian — w pliku nie ma więcej danych: {wynikUzup.bez.map((p) => p.klient).join(', ')}.</p>{/if}
+    {#if wynikUzup.bledy.length}
+      <p>Nie udało się uzupełnić:</p>
+      <ul class="lista-uzup">
+        {#each wynikUzup.bledy as p (p.id)}<li>{p.klient} — {p.komunikat}</li>{/each}
+      </ul>
+    {/if}
+  </div>
 {/if}
 
 {#if dodano}
@@ -159,7 +224,7 @@
   {#if liczniki.bez_dat && filtrStatusu !== 'bez_dat'}
     <p class="muted uwaga">
       {polis(liczniki.bez_dat)} bez dat ochrony — bez nich wykaz nie pokaże, kiedy wygasają.
-      Uzupełnij je w oknie „Zmień dane sprzedaży" przy leadzie.
+      {doUzupelnienia.length ? 'Przycisk „Uzupełnij z plików PDF" wpisze je z wgranych polis, resztę uzupełnij' : 'Uzupełnij je'} w oknie „Zmień dane sprzedaży" przy leadzie.
     </p>
   {/if}
 {/if}
@@ -226,6 +291,10 @@
   .przypis { margin: .5rem .3rem 0; font-size: .78rem; }
   .pusto { text-align: center; margin: 1.5rem 0; }
   .uwaga { margin: .2rem 0 1rem; }
+  .postep { margin: 0 0 1rem; padding: .6rem .9rem; border-radius: 8px; background: #dbeafe; color: var(--blue-700); font-size: .88rem; font-weight: 600; }
+  .lista-uzup { margin: .35rem 0 0 1.1rem; padding: 0; }
+  .lista-uzup li { margin: .1rem 0; }
+  .bez-zmian { margin: .4rem 0 0; }
   .sr-only { position: absolute; top: 0; left: 0; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   a { color: var(--blue-700); }
   @media (max-width: 40rem) {

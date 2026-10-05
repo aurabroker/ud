@@ -15,6 +15,7 @@
  *    więc nie ma ścieżki „na skróty". Tu sprawdzamy tylko kształt żądania.
  *  - Błędy bazy nie wychodzą do przeglądarki surowym komunikatem.
  */
+import { numerZNazwy } from '../pdf/polisa.js';
 
 export const SORTOWANIA = ['dzialanie', 'data', 'wartosc'];
 export const ROZMIAR_STRONY = 25;
@@ -190,7 +191,7 @@ export async function warianty(sb, userSb, userId, leadId) {
   return (await wariantyIPolisy(sb, userSb, userId, leadId)).warianty;
 }
 
-/** Warianty z ofert i polisy wgrane przy leadzie (do „Odczytaj kwoty z polisy"). */
+/** Warianty z ofert i polisy wgrane przy leadzie (do „Odczytaj dane z polisy"). */
 async function wariantyIPolisy(sb, userSb, userId, leadId) {
   if (!jestUuid(leadId)) throw blad(400, 'Nieprawidłowy identyfikator leada.');
   // Klient leada przez tę samą funkcję co szczegóły: klucz serwisowy idzie
@@ -265,14 +266,18 @@ function czystaNazwa(nazwa) {
 }
 
 /**
- * Kwoty z polisy tym samym czytnikiem co oferty (Leadenhall/CEU). Leadenhall
- * szyfruje pliki 4 ostatnimi cyframi PESEL-u — przy odmowie hasła próbujemy
- * ich (`pin()` podaje je serwer: z kartoteki klienta albo z pola formularza).
- * Dokument w innym układzie po prostu nie daje kwot: agent wpisze je ręcznie.
+ * Kwoty i dane polisy z pliku tym samym czytnikiem co oferty (Leadenhall/CEU).
+ * Leadenhall szyfruje pliki 4 ostatnimi cyframi PESEL-u — przy odmowie hasła
+ * próbujemy ich (`pin()` podaje je serwer: z kartoteki klienta albo z pola
+ * formularza). Dokument w innym układzie po prostu nie daje kwot: agent wpisze
+ * je ręcznie.
+ * `kwoty`: składki BEZ opłaty i świadczenia; `brutto`: kwota do zapłaty z pliku
+ * (do rozpoznania sprzedaży zapisanej z opłatą); `polisa`: numer i okres ochrony
+ * (numer awaryjnie z nazwy pliku „…_LHC3100906….pdf").
  * `haslo`: null (bez hasła albo pasowało), 'brak' (nie było czego spróbować),
  * 'zle' (4 cyfry nie otworzyły pliku).
  */
-async function czytajPolise(bajty, odczytaj, pin) {
+async function czytajPolise(bajty, odczytaj, pin, nazwa) {
   const sprobuj = async (haslo) => {
     try {
       return { dokument: await odczytaj(bajty, haslo) };
@@ -292,15 +297,47 @@ async function czytajPolise(bajty, odczytaj, pin) {
     }
   }
   const kwoty = r.dokument ? kwotyZDokumentu(r.dokument) : null;
-  return { kwoty: kwoty && POLA_SPRZEDAZY.some((p) => kwoty[p] != null) ? kwoty : null, haslo };
+  const brutto = Number(r.dokument?.premium_total);
+  return {
+    kwoty: kwoty && POLA_SPRZEDAZY.some((p) => kwoty[p] != null) ? kwoty : null,
+    brutto: brutto > 0 ? brutto : null,
+    polisa: polisaZDokumentu(r.dokument, nazwa),
+    haslo,
+  };
 }
 
-/** Komunikat o odczycie kwot; `brakPeselu` mówi, co zrobić, gdy plik ma hasło, a PESEL-u nie ma. */
+/** Numer i okres ochrony z wyniku czytnika; null, gdy nic nie znaleziono. */
+export function polisaZDokumentu(d, nazwa) {
+  const p = d?.polisa ?? {};
+  const wynik = {
+    polisa_numer: (typeof p.polisa_numer === 'string' && p.polisa_numer.trim()) || numerZNazwy(nazwa),
+    ochrona_od: p.ochrona_od && p.ochrona_do ? p.ochrona_od : null,
+    ochrona_do: p.ochrona_od && p.ochrona_do ? p.ochrona_do : null,
+  };
+  return POLA_POLISY.some((k) => wynik[k]) ? wynik : null;
+}
+
+/** Co odczytano z pliku, po polsku: „Kwoty, numer polisy i okres ochrony odczytane". */
+export function coOdczytano(o) {
+  const co = [
+    o.kwoty && 'kwoty',
+    o.polisa?.polisa_numer && 'numer polisy',
+    o.polisa?.ochrona_od && 'okres ochrony',
+  ].filter(Boolean);
+  if (!co.length) return '';
+  const lista = co.length === 1 ? co[0] : `${co.slice(0, -1).join(', ')} i ${co.at(-1)}`;
+  const forma = co.length === 1 && co[0] !== 'kwoty' ? 'odczytany' : 'odczytane';
+  return `${lista[0].toUpperCase()}${lista.slice(1)} ${forma} z pliku`;
+}
+
+/** Komunikat o odczycie; `brakPeselu` mówi, co zrobić, gdy plik ma hasło, a PESEL-u nie ma. */
 function komunikatOdczytu(o, { przedrostek = '', brakPeselu }) {
-  if (o.kwoty) return `${przedrostek}Kwoty odczytane z pliku — sprawdź je przed zapisem.`;
-  if (o.haslo === 'brak') return `${przedrostek}${brakPeselu}`;
-  if (o.haslo === 'zle') return `${przedrostek}Plik ma hasło inne niż 4 ostatnie cyfry PESEL-u — wpisz kwoty ręcznie.`;
-  return `${przedrostek}Kwot nie udało się odczytać z pliku — wpisz je ręcznie.`;
+  const co = coOdczytano(o);
+  if (o.kwoty) return `${przedrostek}${co} — sprawdź je przed zapisem.`;
+  const dopisek = co ? ` ${co}.` : '';
+  if (o.haslo === 'brak') return `${przedrostek}${brakPeselu}${dopisek}`;
+  if (o.haslo === 'zle') return `${przedrostek}Plik ma hasło inne niż 4 ostatnie cyfry PESEL-u — wpisz kwoty ręcznie.${dopisek}`;
+  return `${przedrostek}Kwot nie udało się odczytać z pliku — wpisz je ręcznie.${dopisek}`;
 }
 
 /** 4 ostatnie cyfry PESEL-u klienta z kartoteki — czyta tylko serwer. */
@@ -332,10 +369,10 @@ export async function wgrajPolise(sb, userId, leadId, { nazwa, bajty }, { odczyt
   const s = await rpc(sb, 'ud_lead_szczegoly', { p_lead: leadId, p_user: userId });
   if (!s) throw blad(404, NIEWIDOCZNY);
 
-  let odczyt = { kwoty: null, komunikat: 'Polisa zapisana.' };
+  let odczyt = { kwoty: null, polisa: null, komunikat: 'Polisa zapisana.' };
   if (odczytaj) {
-    const o = await czytajPolise(bajty, odczytaj, () => pinKlienta(sb, s.klient_id));
-    odczyt = { kwoty: o.kwoty, komunikat: komunikatOdczytu(o, {
+    const o = await czytajPolise(bajty, odczytaj, () => pinKlienta(sb, s.klient_id), nazwa);
+    odczyt = { kwoty: o.kwoty, polisa: o.polisa, komunikat: komunikatOdczytu(o, {
       przedrostek: 'Polisa zapisana. ',
       brakPeselu: 'Plik ma hasło, a klient nie ma PESEL-u w kartotece — wpisz kwoty ręcznie.',
     }) };
@@ -361,7 +398,7 @@ export async function wgrajPolise(sb, userId, leadId, { nazwa, bajty }, { odczyt
     await kubelek.remove([sciezka]).catch(() => {});
     return wynikZmiany(wynik);
   }
-  return { status: 200, body: { status: 'ok', plik: wynik.plik, kwoty: odczyt.kwoty, komunikat: odczyt.komunikat } };
+  return { status: 200, body: { status: 'ok', plik: wynik.plik, kwoty: odczyt.kwoty, polisa: odczyt.polisa, komunikat: odczyt.komunikat } };
 }
 
 /** Adres pobrania pliku leada (podpisany na minutę) — tylko dla kogoś, kto widzi lead. */
@@ -377,16 +414,8 @@ export async function adresPliku(sb, userId, plikId) {
   return data.signedUrl;
 }
 
-/**
- * Ponowny odczyt kwot z polisy już wgranej przy leadzie — np. sprzedaż
- * zapisana przed 04.10.2026 ze składką z doliczoną opłatą dystrybucyjną.
- * Niczego nie zapisuje: kwoty wracają do okna „Dane sprzedaży" do sprawdzenia.
- */
-export async function odczytajWgranaPolise(sb, userId, leadId, plikId, { odczytaj }) {
-  if (!jestUuid(leadId) || !jestUuid(plikId)) throw blad(400, 'Nieprawidłowy identyfikator.');
-  await wczytajPlan(sb, userId, null);
-  const s = await rpc(sb, 'ud_lead_szczegoly', { p_lead: leadId, p_user: userId });
-  if (!s) throw blad(404, NIEWIDOCZNY);
+/** Plik polisy wgrany przy leadzie: wiersz (kto widzi, rozstrzyga SQL) i bajty z kubełka. */
+async function plikLeada(sb, userId, leadId, plikId) {
   const f = await rpc(sb, 'ud_lead_plik', { p_plik: plikId, p_user: userId });
   if (!f?.sciezka || !f.sciezka.startsWith(`${leadId}/`)) throw blad(404, 'Nie ma takiej polisy przy tym leadzie.');
   const { data, error } = await sb.storage.from(f.bucket).download(f.sciezka);
@@ -394,10 +423,92 @@ export async function odczytajWgranaPolise(sb, userId, leadId, plikId, { odczyta
     console.error('[leady] odczyt polisy z kubełka:', error?.message || error);
     throw blad(502, 'Nie udało się wczytać pliku polisy. Spróbuj ponownie.', { ponow: true });
   }
-  const o = await czytajPolise(new Uint8Array(await data.arrayBuffer()), odczytaj, () => pinKlienta(sb, s.klient_id));
-  return { status: 200, body: { status: 'ok', kwoty: o.kwoty, komunikat: komunikatOdczytu(o, {
-    brakPeselu: 'Plik ma hasło, a klient nie ma PESEL-u w kartotece — wpisz kwoty ręcznie.',
-  }) } };
+  return { nazwa: f.nazwa, bajty: new Uint8Array(await data.arrayBuffer()) };
+}
+
+const BRAK_PESELU_LEADA = 'Plik ma hasło, a klient nie ma PESEL-u w kartotece — wpisz kwoty ręcznie.';
+
+/**
+ * Ponowny odczyt polisy już wgranej przy leadzie — kwoty (np. sprzedaż
+ * zapisana przed 04.10.2026 ze składką z doliczoną opłatą dystrybucyjną),
+ * numer i okres ochrony. Niczego nie zapisuje: dane wracają do okna
+ * „Dane sprzedaży" do sprawdzenia.
+ */
+export async function odczytajWgranaPolise(sb, userId, leadId, plikId, { odczytaj }) {
+  if (!jestUuid(leadId) || !jestUuid(plikId)) throw blad(400, 'Nieprawidłowy identyfikator.');
+  await wczytajPlan(sb, userId, null);
+  const s = await rpc(sb, 'ud_lead_szczegoly', { p_lead: leadId, p_user: userId });
+  if (!s) throw blad(404, NIEWIDOCZNY);
+  const { nazwa, bajty } = await plikLeada(sb, userId, leadId, plikId);
+  const o = await czytajPolise(bajty, odczytaj, () => pinKlienta(sb, s.klient_id), nazwa);
+  return { status: 200, body: { status: 'ok', kwoty: o.kwoty, polisa: o.polisa,
+    komunikat: komunikatOdczytu(o, { brakPeselu: BRAK_PESELU_LEADA }) } };
+}
+
+/**
+ * Wykaz polis → „Uzupełnij z plików PDF": najnowsza polisa wgrana przy leadzie
+ * uzupełnia PUSTE pola sprzedaży — numer, okres ochrony, a gdy sprzedaż nie ma
+ * kwot, także kwoty. Jedno nadpisanie jest celowe: składka roczna równa kwocie
+ * DO ZAPŁATY z polisy to sprzedaż zapisana z opłatą dystrybucyjną (sprzed
+ * 04.10.2026) — wtedy składki roczna i miesięczna dostają wartości bez opłaty.
+ *
+ * Zapis idzie zwykłą operacją `sprzedaz` (ud_lead_zmien: wersja, uprawnienia,
+ * wpis w historii z poprzednimi wartościami). Jeden lead na żądanie — PDF
+ * polisy to ~25 stron, a przeglądarka i tak pokazuje postęp po kolei.
+ */
+export async function uzupelnijZPolisy(sb, userId, leadId, { odczytaj }) {
+  if (!jestUuid(leadId)) throw blad(400, 'Nieprawidłowy identyfikator leada.');
+  await wczytajPlan(sb, userId, null);
+  const s = await rpc(sb, 'ud_lead_szczegoly', { p_lead: leadId, p_user: userId });
+  if (!s) throw blad(404, NIEWIDOCZNY);
+  const lead = s.lead;
+  const plik = (s.pliki ?? [])[0];
+  if (!plik) return { status: 200, body: { status: 'brak_pliku', komunikat: 'Przy tym leadzie nie ma wgranej polisy.' } };
+
+  const { nazwa, bajty } = await plikLeada(sb, userId, leadId, plik.id);
+  const o = await czytajPolise(bajty, odczytaj, () => pinKlienta(sb, s.klient_id), nazwa);
+
+  const teraz = lead?.sprzedaz ?? {};
+  const nowe = { wariant_id: teraz.wariant_id ?? undefined };
+  for (const k of [...POLA_SPRZEDAZY, ...POLA_POLISY]) nowe[k] = teraz[k] ?? undefined;
+  const zmiany = [];
+  if (!teraz.polisa_numer && o.polisa?.polisa_numer) {
+    nowe.polisa_numer = o.polisa.polisa_numer;
+    zmiany.push('numer polisy');
+  }
+  if (!teraz.ochrona_od && !teraz.ochrona_do && o.polisa?.ochrona_od) {
+    nowe.ochrona_od = o.polisa.ochrona_od;
+    nowe.ochrona_do = o.polisa.ochrona_do;
+    zmiany.push('okres ochrony');
+  }
+  if (o.kwoty) {
+    const zapisana = Number(teraz.skladka_roczna);
+    if (!(zapisana > 0)) {
+      for (const k of POLA_SPRZEDAZY) if (nowe[k] == null && o.kwoty[k] != null) nowe[k] = o.kwoty[k];
+      zmiany.push('kwoty');
+    } else if (o.brutto && zapisana === o.brutto && o.kwoty.skladka_roczna != null && o.kwoty.skladka_roczna !== zapisana) {
+      nowe.skladka_roczna = o.kwoty.skladka_roczna;
+      nowe.skladka_mies = o.kwoty.skladka_mies ?? undefined;
+      zmiany.push('składka bez opłaty dystrybucyjnej');
+    }
+  }
+
+  if (!zmiany.length) {
+    if (coOdczytano(o)) return { status: 200, body: { status: 'bez_zmiany', komunikat: 'Dane z polisy są już zapisane.' } };
+    return { status: 200, body: { status: 'nieodczytany', komunikat:
+      o.haslo === 'brak' ? 'Plik ma hasło, a klient nie ma PESEL-u w kartotece.'
+      : o.haslo === 'zle' ? 'Plik ma hasło inne niż 4 ostatnie cyfry PESEL-u klienta.'
+      : 'Z pliku nie udało się odczytać numeru polisy ani okresu ochrony.' } };
+  }
+  const wynik = await zmien(sb, userId, {
+    op: 'sprzedaz',
+    leadId,
+    expectedVersion: lead.wersja,
+    idempotencyKey: `polisa-pdf:${plik.id.slice(0, 8)}:${lead.wersja}:${leadId.slice(0, 8)}`,
+    sprzedaz: nowe,
+  });
+  if (wynik.body?.status !== 'ok') return wynik;
+  return { status: 200, body: { status: 'ok', zmiany, polisa: o.polisa, lead: wynik.body.lead } };
 }
 
 /**
@@ -406,11 +517,11 @@ export async function odczytajWgranaPolise(sb, userId, leadId, plikId, { odczyta
  * formularza, bo kartoteki jeszcze nie ma; plik wgrywa się dopiero po zapisie
  * sprzedaży, tą samą drogą co przy leadzie.
  */
-export async function odczytajPoliseNowa(sb, userId, bajty, pin, { odczytaj }) {
+export async function odczytajPoliseNowa(sb, userId, bajty, pin, { odczytaj, nazwa }) {
   sprawdzPdf(bajty);
   await wczytajPlan(sb, userId, null);
-  const o = await czytajPolise(bajty, odczytaj, () => (/^\d{4}$/.test(String(pin ?? '')) ? pin : null));
-  return { status: 200, body: { status: 'ok', kwoty: o.kwoty, haslo: o.haslo, komunikat: komunikatOdczytu(o, {
+  const o = await czytajPolise(bajty, odczytaj, () => (/^\d{4}$/.test(String(pin ?? '')) ? pin : null), nazwa);
+  return { status: 200, body: { status: 'ok', kwoty: o.kwoty, polisa: o.polisa, haslo: o.haslo, komunikat: komunikatOdczytu(o, {
     brakPeselu: 'Plik jest zabezpieczony hasłem — wpisz PESEL klienta (hasłem są 4 ostatnie cyfry), a odczytam go ponownie.',
   }) } };
 }

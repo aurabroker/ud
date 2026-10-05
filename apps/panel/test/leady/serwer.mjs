@@ -20,7 +20,7 @@ import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { uruchomKlaster, wczytaj } from '../../scripts/lib/pg-tymczasowy.mjs';
 import {
   BladApi, adresPliku, dodajPolise, notatka, odczytajPoliseNowa, odczytajWgranaPolise, odpowiedzKolumny, odpowiedzLicznikow,
-  odpowiedzSzczegolow, odpowiedzWariantow, polisy, przetworz, statystyki, wczytajTablice, wgrajPolise, zmien, zwin,
+  odpowiedzSzczegolow, odpowiedzWariantow, polisy, przetworz, statystyki, uzupelnijZPolisy, wczytajTablice, wgrajPolise, zmien, zwin,
 } from '../../src/lib/server/leady.js';
 import { liczNiedokonczone } from '../../src/lib/server/niedokonczone.js';
 
@@ -144,21 +144,27 @@ export async function startuj() {
   // Czytnik testowy: prawdziwego PDF-u polisy tu nie ma, więc rozpoznaje znaczniki
   // w treści pliku. „UD-TEST-KWOTY" → kwoty jak z Leadenhall; „UD-TEST-HASLO" →
   // wymaga 4 ostatnich cyfr PESEL-u; „UD-TEST-OPLATA" → składka 3 036 / 253 z opłatą
-  // dystrybucyjną 276 (jak w prawdziwej ofercie Leadenhall); reszta → nieznany
+  // dystrybucyjną 276 (jak w prawdziwej ofercie Leadenhall); „UD-TEST-POLISA" →
+  // numer LHC3100906 i ochrona 05.02.2026–04.02.2027 (jak z prawdziwej polisy,
+  // pole `polisa` czytnika z src/lib/server/czytnik-polis.js); reszta → nieznany
   // układ (jak prawdziwy czytnik).
   const odczytajTestowo = async (bajty, haslo) => {
     const tekst = Buffer.from(bajty).toString('latin1');
     if (tekst.includes('UD-TEST-HASLO') && haslo !== '2345') {
       throw Object.assign(new Error('No password given'), { name: 'PasswordException' });
     }
+    const polisa = tekst.includes('UD-TEST-POLISA')
+      ? { polisa_numer: 'LHC3100906', ochrona_od: '2026-02-05', ochrona_do: '2027-02-04', swiadczenie_okresowa: null }
+      : undefined;
     if (tekst.includes('UD-TEST-OPLATA')) {
       return { offer_number: 'LHQ8/1', premium_total: 3036, premium_monthly: 253, distribution_fee: 276, installments: 12,
-               temp_incapacity_covered: true, temp_monthly_benefit: 5000, perm_incapacity_covered: false, death_covered: false };
+               temp_incapacity_covered: true, temp_monthly_benefit: 5000, perm_incapacity_covered: false, death_covered: false, polisa };
     }
     if (tekst.includes('UD-TEST-KWOTY') || tekst.includes('UD-TEST-HASLO')) {
       return { offer_number: 'LHQ9/1', premium_total: '1500.00', premium_monthly: '125', temp_incapacity_covered: true,
-               temp_monthly_benefit: 4000, perm_incapacity_covered: false, death_covered: false };
+               temp_monthly_benefit: 4000, perm_incapacity_covered: false, death_covered: false, polisa };
     }
+    if (polisa) return { polisa };
     throw new Error('Nie rozpoznano szablonu oferty (Leadenhall/CEU).');
   };
   const czytajBajty = (req) => new Promise((rozwiaz, odrzuc) => {
@@ -265,7 +271,20 @@ export async function startuj() {
             const wynik = await przetworz({
               user, oczekiwanyTyp: 'application/pdf', typTresci: req.headers['content-type'],
               czytajCialo: () => czytajBajty(req),
-              wykonaj: ({ userId, body }) => odczytajPoliseNowa(sbPolisy, userId, body, req.headers['x-haslo'] ?? null, { odczytaj: odczytajTestowo }),
+              wykonaj: ({ userId, body }) => {
+                let nazwaPliku = req.headers['x-nazwa-pliku'] || '';
+                try { nazwaPliku = decodeURIComponent(nazwaPliku); } catch { /* jak przyszło */ }
+                return odczytajPoliseNowa(sbPolisy, userId, body, req.headers['x-haslo'] ?? null,
+                  { odczytaj: odczytajTestowo, nazwa: nazwaPliku });
+              },
+            });
+            return odpowiedz(res, wynik.status, wynik.body);
+          }
+          // ── wykaz polis: „Uzupełnij z plików PDF" (src/routes/panel/polisy/api/uzupelnij) ──
+          if (sciezka === '/panel/polisy/api/uzupelnij') {
+            const wynik = await przetworz({
+              user, typTresci: req.headers['content-type'], czytajCialo: () => czytajCialo(req),
+              wykonaj: ({ userId, body }) => uzupelnijZPolisy(sbPolisy, userId, body?.leadId, { odczytaj: odczytajTestowo }),
             });
             return odpowiedz(res, wynik.status, wynik.body);
           }

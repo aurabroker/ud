@@ -16,6 +16,8 @@ import { BladSieci, utworzApi } from '../src/lib/leady/api.js';
 import { stawkaZFormularza } from '../src/lib/prowizja.js';
 import { danePolisyZFormularza, dataPL, doCsv, dzienPL, pasujeStatus, pasujeSzukanie, rokOchrony, sortuj, statusPolisy, sumy } from '../src/lib/polisy/model.js';
 import { adresFiltra } from '../src/lib/statystyki/filtr.js';
+import { dataZPolisy, daneZPolisy, numerZNazwy } from '../src/lib/pdf/polisa.js';
+import { coOdczytano, polisaZDokumentu } from '../src/lib/server/leady.js';
 
 let pass = 0;
 const bledy = [];
@@ -414,6 +416,91 @@ await t('filtry: adres zostawia drugi filtr; „Cały czas" bez parametru', () =
   assert.equal(adresFiltra({ okres: 'miesiac', agent: 'A' }, { okres: 'rok' }), '?okres=rok&agent=A');
   assert.equal(adresFiltra({ okres: 'miesiac', agent: 'A' }, { agent: null }), '?okres=miesiac');
   assert.equal(adresFiltra({ okres: 'rok', agent: null }, { okres: 'wszystko' }), '?');
+});
+
+// ── Dane polisy z PDF (src/lib/pdf/polisa.js) ────────────────────────────────
+// Fragmenty w układzie prawdziwych polis Leadenhall zmapowanych 05.10.2026
+// (tekst z unpdf, dane osobowe zmyślone). Pełnych plików w repozytorium nie ma.
+const POLISA_MEDICARE = `Leadenhall Insurance S.A., Coverholder at Polisa LHC3100906 Strona z| 1 3
+Polisa nr LHC3100906
+Leadenhall Medicare
+2. Ubezpieczający Jan Testowy
+00-001 Warszawa, Testowa 1
+PESEL: 00000000000
+4. Okres ubezpieczenia 5 lutego 2026 - 4 lutego 2027
+5. Świadczenia - Objęta ubezpieczeniemPozycja A
+Śmierć i Inwalidztwo wskutek Nieszczęśliwego wypadku
+100 000 zł, z zastrzeżeniem postanowień pozycji 6 poniżej
+Składka 3 432 zł
+Opłata dystrybucyjna 336 zł
+3 768 zł płatne w 12 ratach,Łącznie do zapłaty
+pierwsza rata płatna najpóźniej w dniu 4 lutego 2026 na rachunek Leadenhall Insurance S.A.:
+314 zł płatne do 4 lutego 2026
+Warszawa, 4 lutego 2026`;
+const POLISA_BEAUTY = `Polisa nr LHC3040875
+Ubezpieczenie specjalistów branży ‘Beauty’ od utraty dochodu
+3. Okres ubezpieczenia 28 października 2025 - 27 października 2026
+4. Zakres ubezpieczenia Całkowita okresowa niezdolność do pracy w zawodzie Kosmetolog
+Świadczenie 7\u00a0000 zł miesięcznie, jednak nie więcej niż 80% przychodu miesięcznego w
+rozumieniu warunków LW050/TTD/UNIPRO_01/PL/2
+Okres wyczekiwania 14 dni dla nieszczęśliwego wypadku i 21 dni dla choroby`;
+// Oferta CEU (prawdziwy układ): okres w miesiącach, numer oferty — z polisy nic.
+const OFERTA_CEU = `Oferta nr LOIP/2026/000239 z dnia 13-05-2026 ważna do 29-05-2026
+1. Ubezpieczyciel Ochrona ubezpieczeniowa w ramach polisy udzielana jest przez Lloyd's Insurance Company S.A.
+5. Okres Ubezpieczenia 12 miesięcy
+Warszawa, 13-05-2026`;
+
+await t('polisa PDF: Leadenhall MEDICARE — numer i okres ochrony z pozycji 4', () => {
+  assert.deepEqual(daneZPolisy(POLISA_MEDICARE),
+    { polisa_numer: 'LHC3100906', ochrona_od: '2026-02-05', ochrona_do: '2027-02-04', swiadczenie_okresowa: null });
+});
+
+await t('polisa PDF: Leadenhall „Beauty" — okres w pozycji 3, świadczenie zdaniem „Świadczenie 7 000 zł miesięcznie"', () => {
+  assert.deepEqual(daneZPolisy(POLISA_BEAUTY),
+    { polisa_numer: 'LHC3040875', ochrona_od: '2025-10-28', ochrona_do: '2026-10-27', swiadczenie_okresowa: 7000 });
+});
+
+await t('polisa PDF: oferta to nie polisa — numeru oferty i „12 miesięcy" nie bierzemy', () => {
+  assert.deepEqual(daneZPolisy(OFERTA_CEU), { polisa_numer: null, ochrona_od: null, ochrona_do: null, swiadczenie_okresowa: null });
+  assert.deepEqual(daneZPolisy(''), { polisa_numer: null, ochrona_od: null, ochrona_do: null, swiadczenie_okresowa: null });
+});
+
+await t('polisa PDF: ogólne wzorce — „Numer polisy:", „od … do …", daty z kropkami i myślnikami, przełamanie wiersza', () => {
+  assert.deepEqual(daneZPolisy('Numer polisy: LOIP/2026/000301\nOkres ubezpieczenia: od 01.06.2026 r. do 31.05.2027'),
+    { polisa_numer: 'LOIP/2026/000301', ochrona_od: '2026-06-01', ochrona_do: '2027-05-31', swiadczenie_okresowa: null });
+  assert.equal(daneZPolisy('Okres ochrony od 1-6-2026\ndo 31-05-2027').ochrona_do, '2027-05-31');
+  assert.equal(daneZPolisy('Okres ubezpieczenia 1 kwietnia\n2026 - 31 marca 2027').ochrona_od, '2026-04-01');
+});
+
+await t('polisa PDF: koniec przed początkiem albo nieistniejąca data — obie daty puste, nie zgadujemy', () => {
+  const zle = daneZPolisy('Okres ubezpieczenia 5 lutego 2027 - 4 lutego 2026');
+  assert.equal(zle.ochrona_od, null);
+  assert.equal(zle.ochrona_do, null);
+  assert.equal(daneZPolisy('Okres ubezpieczenia 31.02.2026 - 30.01.2027').ochrona_od, null);
+  assert.equal(dataZPolisy('29.02.2028'), '2028-02-29');
+  assert.equal(dataZPolisy('29.02.2027'), null);
+  assert.equal(dataZPolisy('7 Października 2026'), '2026-10-07');
+});
+
+await t('polisa PDF: numer awaryjnie z nazwy pliku (tylko LHC…), w treści — pierwszeństwo', () => {
+  assert.equal(numerZNazwy('Szubka_LHC3100906_8347.pdf'), 'LHC3100906');
+  assert.equal(numerZNazwy('BUZA_POLISA_lhc3179897.pdf'), 'LHC3179897');
+  assert.equal(numerZNazwy('polisa_000008.pdf'), null);
+  assert.equal(numerZNazwy('XLHC3100906.pdf'), null);
+  assert.equal(numerZNazwy(undefined), null);
+  assert.deepEqual(polisaZDokumentu({ polisa: { polisa_numer: 'LHC1', ochrona_od: null, ochrona_do: null } }, 'X_LHC3100906.pdf'),
+    { polisa_numer: 'LHC1', ochrona_od: null, ochrona_do: null });
+  assert.deepEqual(polisaZDokumentu(undefined, 'X_LHC3100906.pdf'), { polisa_numer: 'LHC3100906', ochrona_od: null, ochrona_do: null });
+  assert.equal(polisaZDokumentu({}, 'polisa.pdf'), null);
+  // Jedna data bez drugiej nie przechodzi.
+  assert.equal(polisaZDokumentu({ polisa: { ochrona_od: '2026-01-01', ochrona_do: null } }), null);
+});
+
+await t('polisa PDF: komunikat mówi, co odczytano', () => {
+  assert.equal(coOdczytano({ kwoty: {}, polisa: { polisa_numer: 'L', ochrona_od: 'x' } }), 'Kwoty, numer polisy i okres ochrony odczytane z pliku');
+  assert.equal(coOdczytano({ kwoty: {} }), 'Kwoty odczytane z pliku');
+  assert.equal(coOdczytano({ kwoty: null, polisa: { polisa_numer: 'L' } }), 'Numer polisy odczytany z pliku');
+  assert.equal(coOdczytano({ kwoty: null, polisa: null }), '');
 });
 
 for (const b of bledy) console.log(b);

@@ -14,6 +14,16 @@ async function wykaz(page, u = 'adm') {
   await page.waitForSelector('html[data-gotowe]');
 }
 const wiersz = (page, nazwa) => page.locator('tr[data-polisa-wiersz]', { hasText: nazwa });
+const pdf = (znacznik, name = 'polisa.pdf') => ({ name, mimeType: 'application/pdf', buffer: Buffer.from(`%PDF-1.4\n% ${znacznik}\n%%EOF\n`) });
+
+/** Polisa wgrana przy leadzie tą samą trasą co z okna „Dane sprzedaży". */
+async function wgraj(request, leadId, znacznik, nazwa) {
+  const r = await request.post(`${adres()}/panel/leady/api/polisa/${leadId}`, {
+    headers: { 'x-test-user': 'adm', 'content-type': 'application/pdf', 'x-nazwa-pliku': encodeURIComponent(nazwa) },
+    data: Buffer.from(`%PDF-1.4\n% ${znacznik}\n%%EOF\n`),
+  });
+  expect(r.status()).toBe(200);
+}
 
 /**
  * Jerzy (Ula): aktywna, numer, rata zapisana. Grażyna (Olek): wygasa za 10 dni,
@@ -158,4 +168,87 @@ test('telefon (390 px): strona nie rozjeżdża się w bok — tabela przewija si
   await page.setViewportSize({ width: 390, height: 800 });
   await wykaz(page);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+});
+
+test('„Uzupełnij z plików PDF": numer i okres z polisy, składka z opłatą poprawiona, numer z nazwy pliku; postęp i wynik', async ({ page, request }) => {
+  const jerzy = await sql(request, `select tt.lead('Jerzy Duda')`);
+  const grazyna = await sql(request, `select tt.lead('Grażyna Pawlak')`);
+  // Jerzy: sprzedaż zapisana ze składką Z opłatą (3 036 / 253), bez numeru i dat.
+  await sql(request, `update public.ud_leady set skladka_roczna = 3036, skladka_mies = 253, sprzedano_at = now() where id = '${jerzy}';
+    update public.ud_leady set etap_id = tt.etap('wygrany'), skladka_roczna = 2400, sprzedano_at = now() where id = '${grazyna}';`);
+  await wgraj(request, jerzy, 'UD-TEST-OPLATA UD-TEST-POLISA', 'polisa Jerzego.pdf');
+  // Grażyna: plik w układzie, którego czytnik nie zna — numer tylko z nazwy pliku.
+  await wgraj(request, grazyna, 'skan', 'Pawlak_LHC3000001.pdf');
+
+  await wykaz(page);
+  const przycisk = page.locator('[data-uzupelnij]');
+  await expect(przycisk).toHaveText('Uzupełnij z plików PDF (2)');
+  await przycisk.click();
+  const wynik = page.locator('[data-uzupelniono]');
+  await expect(wynik).toContainText('Uzupełniono z plików PDF: 2 polisy.');
+  await expect(wynik).toContainText('Jerzy Duda — numer polisy, okres ochrony, składka bez opłaty dystrybucyjnej');
+  await expect(wynik).toContainText('Grażyna Pawlak — numer polisy');
+
+  const w = wiersz(page, 'Jerzy Duda');
+  await expect(w).toContainText('LHC3100906');
+  await expect(w.locator('.daty')).toHaveText('05.02.2026 – 04.02.2027');
+  await expect(w.locator('td').nth(4)).toHaveText(/^2[\s\u00a0]?760 zł$/);
+  await expect(wiersz(page, 'Grażyna Pawlak')).toContainText('LHC3000001');
+  await expect(wiersz(page, 'Grażyna Pawlak').locator('[data-status]')).toHaveText('Bez dat ochrony');
+  expect(await sql(request, `select concat_ws('|', polisa_numer, ochrona_od, ochrona_do, skladka_roczna, skladka_mies) from public.ud_leady where id = '${jerzy}'`))
+    .toBe('LHC3100906|2026-02-05|2027-02-04|2760.00|230.00');
+
+  // Grażynie dalej brakuje dat — przycisk zostaje, drugi przebieg mówi „bez zmian", nic nie zapisuje.
+  const hist = await sql(request, `select tt.hist('${grazyna}')`);
+  await expect(przycisk).toHaveText('Uzupełnij z plików PDF (1)');
+  await przycisk.click();
+  await expect(wynik).toContainText('Bez zmian — w pliku nie ma więcej danych: Grażyna Pawlak.');
+  expect(await sql(request, `select tt.hist('${grazyna}')`)).toBe(hist);
+});
+
+test('„Uzupełnij z plików PDF": plik, którego nie da się odczytać — powód przy kliencie, reszta idzie dalej', async ({ page, request }) => {
+  const jerzy = await sql(request, `select tt.lead('Jerzy Duda')`);
+  const grazyna = await sql(request, `select tt.lead('Grażyna Pawlak')`);
+  await sql(request, `update public.ud_leady set skladka_roczna = 3000, sprzedano_at = now() where id = '${jerzy}';
+    update public.ud_leady set etap_id = tt.etap('wygrany'), skladka_roczna = 2400, sprzedano_at = now() where id = '${grazyna}';`);
+  await wgraj(request, jerzy, 'skan', 'skan.pdf');
+  await wgraj(request, grazyna, 'UD-TEST-KWOTY UD-TEST-POLISA', 'polisa.pdf');
+  await wykaz(page);
+  await page.locator('[data-uzupelnij]').click();
+  const wynik = page.locator('[data-uzupelniono]');
+  await expect(wynik).toContainText('Uzupełniono z plików PDF: 1 polisa.');
+  await expect(wynik).toContainText('Nie udało się uzupełnić:');
+  await expect(wynik).toContainText('Jerzy Duda — Z pliku nie udało się odczytać numeru polisy ani okresu ochrony.');
+  await expect(wiersz(page, 'Grażyna Pawlak')).toContainText('LHC3100906');
+});
+
+test('„Dane sprzedaży": wgrana polisa wpisuje numer i okres ochrony obok kwot', async ({ page, request }) => {
+  const jerzy = await sql(request, `select tt.lead('Jerzy Duda')`);
+  await otworz(page, { u: 'ula', zapytanie: `lead=${jerzy}` });
+  await page.locator('[data-szczegoly]').getByRole('button', { name: 'Uzupełnij dane sprzedaży…' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Dane sprzedaży' });
+  await dialog.locator('[data-plik-polisy]').setInputFiles(pdf('UD-TEST-KWOTY UD-TEST-POLISA'));
+  await expect(dialog.locator('[data-komunikat-polisy]')).toContainText('Kwoty, numer polisy i okres ochrony odczytane z pliku — sprawdź je przed zapisem.');
+  await expect(dialog.getByLabel('Numer polisy')).toHaveValue('LHC3100906');
+  await expect(dialog.getByLabel('Ochrona od')).toHaveValue('2026-02-05');
+  await expect(dialog.getByLabel('Ochrona do')).toHaveValue('2027-02-04');
+  await dialog.getByRole('button', { name: 'Zapisz' }).click();
+  await expect(dialog).toHaveCount(0);
+  expect(await sql(request, `select concat_ws('|', polisa_numer, ochrona_od, ochrona_do, skladka_roczna) from public.ud_leady where id = '${jerzy}'`))
+    .toBe('LHC3100906|2026-02-05|2027-02-04|1500.00');
+});
+
+test('„Dodaj polisę": plik wpisuje numer i okres ochrony, numer awaryjnie z nazwy pliku', async ({ page }) => {
+  await wykaz(page, 'ula');
+  await page.getByRole('button', { name: '+ Dodaj polisę' }).click();
+  const okno = page.getByRole('dialog', { name: 'Dodaj polisę' });
+  await okno.locator('[data-plik-polisy]').setInputFiles(pdf('UD-TEST-KWOTY UD-TEST-POLISA'));
+  await expect(okno.getByLabel('Numer polisy')).toHaveValue('LHC3100906');
+  await expect(okno.getByLabel('Ochrona od')).toHaveValue('2026-02-05');
+  await expect(okno.getByLabel('Ochrona do')).toHaveValue('2027-02-04');
+  // Inny plik: układ nieznany, numer tylko w nazwie.
+  await okno.getByLabel('Numer polisy').fill('');
+  await okno.locator('[data-plik-polisy]').setInputFiles(pdf('skan', 'Nowak_LHC3222222_1234.pdf'));
+  await expect(okno.getByLabel('Numer polisy')).toHaveValue('LHC3222222');
+  await expect(okno.locator('[data-komunikat-polisy]')).toContainText('Numer polisy odczytany z pliku.');
 });
