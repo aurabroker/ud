@@ -1628,6 +1628,19 @@ synchronizację co tablica, więc nowy klient od razu ma etap. Widoczność bez
 zmian (`klienciWidoczni`). Test: `klienci.spec.js` (SSR na prawdziwym SQL,
 `/__test/ssr-klienci`) i `test:leady-model`.
 
+### Nagłówek: „Ustawienia" zamiast trzech zakładek (v.0.66, 05.10.2026)
+
+Wysyłki, Panel Admina i dawne Ustawienia są jedną pozycją **„Ustawienia"
+w prawej części nagłówka, tuż przed nazwą konta** (decyzja właściciela).
+Strony zostały pod swoimi adresami (`/panel/logi`, `/panel/admin`,
+`/panel/ustawienia`) — siedzą w zakładkach przeglądarki, w odnośnikach
+i w akcjach formularzy; łączy je pasek sekcji `UstawieniaNav.svelte`
+(Wysyłki · Panel Admina · Ustawienia systemu). Lista sekcji i reguła
+podświetlenia: `src/lib/ustawienia.js`. Agent ma tylko Wysyłki, więc
+przycisk prowadzi go tam, a pasek z jedną pozycją się nie pokazuje.
+Nagłówek zawija się na telefonie (`.header` z `flex-wrap`) — wcześniej nazwa
+konta i „Wyloguj" wychodziły poza ekran. Test: `ustawienia.spec.js`.
+
 ### Model danych (tylko stan procesu — dane osobowe czytamy ze źródła)
 
 | Obiekt | Rola |

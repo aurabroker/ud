@@ -313,12 +313,36 @@ export async function startuj() {
             const Uklad = (await serwer.ssrLoadModule('/src/routes/panel/+layout.svelte')).default;
             const niedokonczone = await liczNiedokonczone(sbOferty);
             const children = createRawSnippet(() => ({ render: () => '<p>treść</p>' }));
-            const { body } = render(Uklad, { props: {
-              data: { user: { id: uzytkownik, email: 'ula@x.pl' }, profile: { full_name: 'Ula Agent', role: 'agent' }, niedokonczone },
-              children,
-            } });
-            res.setHeader('content-type', 'text/html; charset=utf-8');
-            return res.end(`<!doctype html><meta charset="utf-8"><body>${body}</body>`);
+            // ?rola=admin — konto administratora; ?sciezka= — adres bieżącej strony ($app/stores).
+            const profile = url.searchParams.get('rola') === 'admin'
+              ? { full_name: 'Centrala', role: 'admin' } : { full_name: 'Ula Agent', role: 'agent' };
+            globalThis.__zaslepkaStrony = { url: new URL(`http://127.0.0.1${url.searchParams.get('sciezka') || '/panel/leady'}`), data: { profile } };
+            try {
+              const { body } = render(Uklad, { props: {
+                data: { user: { id: uzytkownik, email: 'ula@x.pl' }, profile, niedokonczone },
+                children,
+              } });
+              res.setHeader('content-type', 'text/html; charset=utf-8');
+              return res.end(`<!doctype html><meta charset="utf-8"><body>${body}</body>`);
+            } finally {
+              globalThis.__zaslepkaStrony = undefined;
+            }
+          }
+          if (sciezka === '/__test/ssr-ustawienia-nav') {
+            // Pasek sekcji „Ustawień" (Wysyłki · Panel Admina · Ustawienia systemu).
+            const { render } = await serwer.ssrLoadModule('svelte/server');
+            const Nav = (await serwer.ssrLoadModule('/src/lib/components/UstawieniaNav.svelte')).default;
+            globalThis.__zaslepkaStrony = {
+              url: new URL(`http://127.0.0.1${url.searchParams.get('sciezka') || '/panel/logi'}`),
+              data: { profile: { role: url.searchParams.get('rola') === 'admin' ? 'admin' : 'user' } },
+            };
+            try {
+              const { body } = render(Nav, { props: {} });
+              res.setHeader('content-type', 'text/html; charset=utf-8');
+              return res.end(`<!doctype html><meta charset="utf-8"><body>${body}</body>`);
+            } finally {
+              globalThis.__zaslepkaStrony = undefined;
+            }
           }
           if (sciezka === '/__test/tablica') {
             const wynik = await przetworz({ user, odczyt: true, wykonaj: async ({ userId }) =>

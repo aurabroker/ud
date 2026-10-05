@@ -27,7 +27,7 @@ h1,h2,h3 { margin:0; }
 .input:focus { outline:2px solid var(--blue-600); border-color:transparent; }
 .label { display:block; font-size:.8rem; font-weight:600; color:var(--slate-600); margin-bottom:.35rem; }
 .field { margin-bottom:1rem; }
-.header { background:var(--slate-800); color:#fff; padding:.9rem 1.5rem; display:flex; align-items:center; justify-content:space-between; }
+.header { background:var(--slate-800); color:#fff; padding:.9rem 1.5rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:.75rem 1rem; }
 .logo { font-weight:800; font-size:1.15rem; }
 .logo span { color:var(--sky-400); }
 .badge { display:inline-block; font-size:.72rem; font-weight:700; padding:.2rem .55rem; border-radius:999px; text-transform:uppercase; letter-spacing:.03em; }

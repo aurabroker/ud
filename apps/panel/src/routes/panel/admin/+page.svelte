@@ -1,4 +1,5 @@
 <script>
+  import UstawieniaNav from '$lib/components/UstawieniaNav.svelte';
   import { enhance } from '$app/forms';
   import { dateP } from '$lib/format.js';
   let { data, form } = $props();
@@ -7,6 +8,8 @@
 </script>
 
 <svelte:head><title>Panel Admina — Panel</title></svelte:head>
+
+<UstawieniaNav />
 
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
   <div>

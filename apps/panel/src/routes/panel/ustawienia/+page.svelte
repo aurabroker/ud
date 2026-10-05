@@ -1,4 +1,5 @@
 <script>
+  import UstawieniaNav from '$lib/components/UstawieniaNav.svelte';
   import { enhance } from '$app/forms';
   let { data, form } = $props();
   const s = data.settings;
@@ -7,9 +8,11 @@
   let diagRunning = $state(false);
 </script>
 
-<svelte:head><title>Ustawienia — Panel</title></svelte:head>
+<svelte:head><title>Ustawienia systemu — Panel</title></svelte:head>
 
-<h1 style="font-size:1.5rem;margin-bottom:.25rem;">Ustawienia panelu</h1>
+<UstawieniaNav />
+
+<h1 style="font-size:1.5rem;margin-bottom:.25rem;">Ustawienia systemu</h1>
 <p class="muted" style="margin-bottom:1.25rem;">Dane i treści widoczne dla klientów</p>
 
 {#if form?.error}<div class="error-box">{form.error}</div>{/if}
