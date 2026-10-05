@@ -1350,6 +1350,17 @@ uprawnienia tylko `service_role`, ograniczenie `lead_ochrona_kolejnosc`,
 wyzwalaczy bez zmian. Sprzedaże sprzed tej wersji nie mają numeru ani dat —
 wykaz pokazuje je jako „Bez dat ochrony", do uzupełnienia w „Dane sprzedaży".
 
+**Wersja 6 WDROŻONA 05.10.2026 (sekcje „Odczyt polis z PDF", „Data sprzedaży
+= dzień przed początkiem ochrony", „Status polisy to kolor ramki dat")**:
+panel v.0.63 (odczyt numeru i okresu z PDF, „Uzupełnij z plików PDF" — bez
+migracji; właściciel uruchomił go na pięciu polisach), potem część 7,
+`20261005140000_leady_kanban_7_data_sprzedazy` — wklejona przez właściciela
+w SQL Editor, wersja odnotowana ręcznie — i panel v.0.64. Sprawdzone na
+produkcji: treść 3 funkcji = repozytorium, uprawnienia tylko `service_role`,
+wyzwalaczy bez zmian (na `ud_clients` tylko `send-confirmation-email-full`),
+sześć sprzedaży z datą ochrony ma datę sprzedaży = dzień przed nią, każda
+z wpisem „Korekta…" i poprzednią datą w historii.
+
 SQL Editor zapisał treść funkcji z końcami linii CRLF. Porównując `prosrc`
 z repozytorium, licz skrót z `replace(prosrc, chr(13), '')` — inaczej każda
 funkcja z części 2 wygląda na inną niż w repo, choć nie jest.
