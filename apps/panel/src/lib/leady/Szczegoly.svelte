@@ -5,7 +5,7 @@
    * poleceniem co przeciągnięciem i menu — przez ctx.przeniesZUi.
    */
   import { getContext } from 'svelte';
-  import { dataPL } from '$lib/polisy/model.js';
+  import { dataPL, dzienPL } from '$lib/polisy/model.js';
   import { DZIALANIA, POLA_SPRZEDAZY, dataGodzina, dataKrotka, dniWEtapie, etykietaZrodla, formatKwota, kontekstKarty, kwotaZTekstu, terminTekst, wartoscKarty } from './model.js';
 
   let { onzamknij } = $props();
@@ -52,7 +52,9 @@
     archiwum: () => 'zarchiwizowano',
     notatka: () => 'dodano notatkę',
     przepieto: () => 'wniosek ukończony — lead przypisany do klienta',
-    sprzedaz: (h) => `zmieniono dane sprzedaży${h.dane?.sprzedaz?.skladka_roczna != null ? ` (składka ${formatKwota(h.dane.sprzedaz.skladka_roczna)} / rok)` : ''}`,
+    sprzedaz: (h) => h.dane?.sprzedaz?.skladka_roczna == null && h.dane?.sprzedaz?.sprzedano_at
+      ? `zmieniono datę sprzedaży na ${dataPL(dzienPL(h.dane.sprzedaz.sprzedano_at))}`
+      : `zmieniono dane sprzedaży${h.dane?.sprzedaz?.skladka_roczna != null ? ` (składka ${formatKwota(h.dane.sprzedaz.skladka_roczna)} / rok)` : ''}`,
     plik: (h) => `dodano polisę${h.dane?.nazwa ? `: ${h.dane.nazwa}` : ''}`,
   };
 </script>

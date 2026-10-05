@@ -173,6 +173,13 @@
     <div><span class="et">{admin ? 'Prowizja' : 'Twoja prowizja'}</span><strong data-suma="prowizja">{kwota(suma.prowizja)}</strong></div>
   </section>
 
+  <p class="legenda" aria-hidden="true" data-legenda>
+    <span class="daty s-aktywna">aktywna</span>
+    <span class="daty s-wygasa">wygasa w 30 dni</span>
+    <span class="daty s-wygasla">wygasła</span>
+    <span class="daty s-przyszla">jeszcze się nie zaczęła</span>
+  </p>
+
   {#if widoczne.length}
     <div class="card tabela">
       <div class="przewijanie">
@@ -199,8 +206,16 @@
                 </th>
                 <td>{#if p.numer}{p.numer}{:else}<span class="brak">brak numeru</span>{/if}</td>
                 <td class="ochrona">
-                  {#if p.ochrona_od || p.ochrona_do}<span class="daty">{dataPL(p.ochrona_od)} – {dataPL(p.ochrona_do)}</span>{/if}
-                  <span class="status s-{p.status.id}" data-status={p.status.id}>{p.status.etykieta}</span>
+                  <!-- Status to kolor ramki wokół dat (decyzja z 05.10.2026): zielona — aktywna,
+                       pomarańczowa — wygasa w 30 dni, czerwona — wygasła, niebieska — jeszcze
+                       się nie zaczęła. Słowo zostaje w podpowiedzi i dla czytnika ekranu. -->
+                  {#if p.status.id === 'bez_dat'}
+                    <span class="bez-dat" data-status={p.status.id}>Bez dat ochrony</span>
+                  {:else}
+                    <span class="daty s-{p.status.id}" data-status={p.status.id} title={p.status.etykieta}>
+                      {dataPL(p.ochrona_od)} – {dataPL(p.ochrona_do)}<span class="sr-only">, {p.status.etykieta.toLowerCase()}</span>
+                    </span>
+                  {/if}
                 </td>
                 <td>{dataPL(dzienPL(p.sprzedano))}</td>
                 <td class="liczb">
@@ -271,7 +286,7 @@
   tbody tr:last-child th, tbody tr:last-child td { border-bottom: 0; }
   tbody tr:hover { background: var(--slate-50); }
   tbody th { font-weight: 600; text-transform: none; letter-spacing: 0; color: var(--slate-800); font-size: .88rem; }
-  tr.wygasla th, tr.wygasla td { color: var(--slate-500); }
+  tr.wygasla th, tr.wygasla td:not(.ochrona) { color: var(--slate-500); }
   .liczb { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
   .sort { background: none; border: 0; padding: 0; font: inherit; color: inherit; text-transform: inherit; letter-spacing: inherit; cursor: pointer; }
   .sort:hover { color: var(--slate-900); text-decoration: underline; }
@@ -279,13 +294,17 @@
   th[aria-sort='ascending'] .sort::after { content: ' ▲'; font-size: .6rem; }
   th[aria-sort='descending'] .sort::after { content: ' ▼'; font-size: .6rem; }
   .ochrona { white-space: nowrap; }
-  .daty { display: block; font-variant-numeric: tabular-nums; }
-  .status { display: inline-block; margin-top: .2rem; font-size: .72rem; font-weight: 700; padding: .1rem .5rem; border-radius: 999px; }
-  .s-aktywna { background: #dcfce7; color: #166534; }
-  .s-wygasa { background: #fef3c7; color: #92400e; }
-  .s-wygasla { background: var(--slate-200); color: var(--slate-700); }
-  .s-przyszla { background: #dbeafe; color: var(--blue-700); }
-  .s-bez_dat { background: #fee2e2; color: var(--red-700); }
+  /* Ramka dat = status polisy. Krawędzie ≥ 3:1 do bieli, tekst ≥ 7:1 do swojego tła. */
+  .daty { display: inline-block; font-variant-numeric: tabular-nums; font-weight: 600; padding: .15rem .5rem;
+          border: 2px solid transparent; border-radius: 7px; position: relative; }
+  .s-aktywna  { border-color: #16a34a; background: #f0fdf4; color: #14532d; }
+  .s-wygasa   { border-color: #ea580c; background: #fff7ed; color: #7c2d12; }
+  .s-wygasla  { border-color: #dc2626; background: #fef2f2; color: #7f1d1d; }
+  .s-przyszla { border-color: #2563eb; background: #eff6ff; color: #1e3a8a; }
+  .bez-dat { display: inline-block; font-size: .78rem; font-weight: 600; color: var(--slate-600); padding: .15rem .5rem;
+             border: 2px dashed var(--slate-300); border-radius: 7px; }
+  .legenda { display: flex; flex-wrap: wrap; gap: .4rem .6rem; margin: -.3rem 0 .8rem; font-size: .76rem; }
+  .legenda .daty { font-weight: 600; padding: .05rem .45rem; }
   .brak { color: var(--slate-500); font-style: italic; }
   .pdf { font-size: .75rem; font-weight: 800; text-decoration: none; border: 1px solid var(--slate-300); border-radius: 6px; padding: .1rem .4rem; }
   .przypis { margin: .5rem .3rem 0; font-size: .78rem; }

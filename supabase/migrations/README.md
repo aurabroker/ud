@@ -59,6 +59,12 @@ nie wyniknie.
   i funkcja `ud_leady_polisy` dla strony `/panel/polisy`. Kolejność: baza,
   potem panel v.0.62. **Przez SQL Editor**, potem:
   `insert into supabase_migrations.schema_migrations (version, name) values ('20261005090000', 'leady_kanban_6_wykaz_polis');`
+- `20261005140000_leady_kanban_7_data_sprzedazy.sql` — data sprzedaży = dzień
+  przed początkiem ochrony (`ud_data_sprzedazy`; `ud_lead_zmien`,
+  `ud_lead_polisa_reczna`) i korekta sprzedaży już zapisanych, z wpisem
+  w historii. Panel v.0.64 działa z nią i bez niej (nic nowego nie woła).
+  **Przez SQL Editor**, potem:
+  `insert into supabase_migrations.schema_migrations (version, name) values ('20261005140000', 'leady_kanban_7_data_sprzedazy');`
 
 Dlaczego tak: MCP Supabase (`apply_migration` i `execute_sql`) wstrzymuje do
 ręcznego potwierdzenia każde `DROP` i każdą funkcję, która w treści robi

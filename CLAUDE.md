@@ -1560,13 +1560,46 @@ Składka 3 432 zł / Opłata dystrybucyjna 336 zł / 3 768 zł płatne w 12 rata
   dystrybucyjną (sprzed 04.10.2026) — dostaje składki bez opłaty. Zapis idzie
   operacją `sprzedaz` (`ud_lead_zmien`: wersja, uprawnienia, historia
   z poprzednimi wartościami) — **bez migracji**.
-- **Data sprzedaży z polisy NIE jest czytana.** Polisa ma datę wystawienia
-  („Warszawa, 4 lutego 2026"), ale data sprzedaży decyduje o okresie
-  w statystykach i prowizji — zmienia ją agent.
+- **Data wystawienia z polisy NIE jest czytana** („Warszawa, 4 lutego 2026").
+  Data sprzedaży bierze się z początku ochrony — patrz niżej.
 
-Stan produkcji przed pierwszym uruchomieniem (05.10.2026): pięć polis z plikami,
-żadna bez numeru i dat; Iwona Buza ma 3 876 / 323 (z opłatą 348 zł), w polisie
-składka 3 528 zł — przycisk poprawi ją na 3 528 / 294.
+### Data sprzedaży = dzień przed początkiem ochrony (część 7, decyzja z 05.10.2026)
+
+„Data sprzedaży to zawsze dzień przed początkiem ochrony." Regułę trzyma SQL
+(`ud_data_sprzedazy(ochrona_od)` — południe czasu polskiego dnia przed
+ochroną, jak „Dodaj polisę"), więc działa w każdej ścieżce zapisu:
+
+- wejście do „Wygrany" i „Dane sprzedaży" (`ud_lead_zmien`) z datą początku
+  ochrony ustawiają z niej datę sprzedaży; bez daty ochrony — jak dawniej
+  (chwila wejścia do „Wygrany", poprawka jej nie rusza). Zapis z tymi samymi
+  danymi, ale złą datą sprzedaży, ją naprawia (nie kończy się `bez_zmiany`),
+  a poprzednia data idzie do historii;
+- „Dodaj polisę" (`ud_lead_polisa_reczna`): z datą ochrony pole „Data
+  sprzedaży" jest tylko do odczytu i pokazuje dzień przed ochroną — także
+  w przyszłości, gdy polisa jest wystawiona z wyprzedzeniem (wtedy nie
+  obowiązuje zakaz przyszłej daty). „Ochrona na rok" bez daty ochrony liczy
+  ją od dnia PO dacie sprzedaży;
+- „Uzupełnij z plików PDF" wpisuje datę ochrony, więc przestawia też datę
+  sprzedaży.
+
+Okno „Dane sprzedaży" pokazuje pod datami podpowiedź „Data sprzedaży: … —
+dzień przed początkiem ochrony" (`PolaPolisy.svelte`, `dataSprzedazyZOchrony`
+w `src/lib/polisy/model.js` — tylko do pokazania, zapisuje baza). Prowizji
+i składek reguła nie rusza; zmienia okres, do którego sprzedaż wpada
+w statystykach i w wykazie. Migracja poprawiła sprzedaże już zapisane z datą
+ochrony (wpis „Korekta: data sprzedaży = dzień przed początkiem ochrony").
+
+### Status polisy to kolor ramki dat (05.10.2026)
+
+W wykazie zamiast słowa pod datą cały okres ochrony stoi w ramce: **zielona**
+— aktywna, **pomarańczowa** — wygasa w ciągu 30 dni, **czerwona** — wygasła,
+**niebieska** — ochrona jeszcze się nie zaczęła. Bez dat — szara przerywana
+ramka „Bez dat ochrony". Słowo zostaje w podpowiedzi (`title`) i w tekście dla
+czytnika ekranu (sam kolor nic by mu nie powiedział); nad tabelą stoi legenda.
+Krawędzie mają ≥ 3:1 do bieli, tekst ≥ 7:1 do swojego tła.
+
+Uruchomione przez właściciela 05.10.2026: pięć polis dostało numer i okres
+ochrony, Iwona Buza składkę 3 528 / 294 zamiast 3 876 / 323 (z opłatą 348 zł).
 
 ### Model danych (tylko stan procesu — dane osobowe czytamy ze źródła)
 

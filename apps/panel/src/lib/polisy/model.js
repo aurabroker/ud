@@ -2,8 +2,8 @@
  * Wykaz polis — logika bez DOM-u (testy: scripts/test-leady-model.mjs).
  *
  * Polisa = sprzedaż z tablicy leadów (lead w „Wygrany"). Daty ochrony wpisuje
- * agent; „dziś" przychodzi z serwera w czasie polskim (ud_leady_polisy.dzis),
- * żeby status nie zależał od strefy czasowej przeglądarki.
+ * agent albo czytnik PDF polisy; „dziś" przychodzi z serwera w czasie polskim
+ * (ud_leady_polisy.dzis), żeby status nie zależał od strefy czasowej przeglądarki.
  */
 
 export const STATUSY = [
@@ -46,6 +46,22 @@ export function rokOchrony(od) {
   else koniec.setUTCDate(koniec.getUTCDate() - 1);
   return zDaty(koniec);
 }
+
+/** Dzień przesunięty o n dni: 2026-02-05, −1 → 2026-02-04. Zła data → null. */
+export function przesunDzien(dzien, n) {
+  if (!dzien || !DATA.test(dzien)) return null;
+  const d = naDate(dzien);
+  if (Number.isNaN(d.getTime()) || zDaty(d) !== dzien) return null;
+  d.setUTCDate(d.getUTCDate() + n);
+  return zDaty(d);
+}
+
+/**
+ * Data sprzedaży = dzień przed początkiem ochrony (decyzja właściciela
+ * z 05.10.2026). Ta sama reguła stoi w SQL (ud_data_sprzedazy) — tu tylko
+ * do pokazania w formularzu, zapisuje baza.
+ */
+export const dataSprzedazyZOchrony = (ochronaOd) => przesunDzien(ochronaOd, -1);
 
 function dniMiedzy(od, doo) {
   return Math.round((naDate(doo) - naDate(od)) / 86_400_000);

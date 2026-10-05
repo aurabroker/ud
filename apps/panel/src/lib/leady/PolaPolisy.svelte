@@ -5,10 +5,14 @@
    * „Okres ubezpieczenia … - …"); czego czytnik nie znajdzie, agent przepisuje
    * z polisy — dat nie zgadujemy. „Rok ochrony" to tylko skrót dla typowej
    * polisy rocznej — wypełnia koniec, nic nie zapisuje sam z siebie.
+   * Data sprzedaży to dzień przed początkiem ochrony (05.10.2026) — ustawia ją
+   * baza; tu tylko podpowiedź (`pokazSprzedaz`), bo okno „Dodaj polisę" ma
+   * własne pole daty sprzedaży.
    */
-  import { rokOchrony } from '$lib/polisy/model.js';
+  import { dataPL, dataSprzedazyZOchrony, rokOchrony } from '$lib/polisy/model.js';
 
-  let { numer = $bindable(''), od = $bindable(''), do: doo = $bindable(''), bledy = {}, prefiks, poczatek = '' } = $props();
+  let { numer = $bindable(''), od = $bindable(''), do: doo = $bindable(''), bledy = {}, prefiks, poczatek = '', pokazSprzedaz = true } = $props();
+  const sprzedaz = $derived(dataSprzedazyZOchrony(od));
 
   function rok() {
     if (!od) od = poczatek || new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Warsaw' }).format(new Date());
@@ -42,6 +46,9 @@
     Wgrany PDF polisy wpisuje numer i daty sam — inaczej przepisz je z polisy.
     <button type="button" class="link" onclick={rok} data-rok-ochrony>Ochrona na rok{od ? ` od ${od.split('-').reverse().join('.')}` : ''}</button>
   </p>
+  {#if pokazSprzedaz && sprzedaz}
+    <p class="mala podpowiedz" data-data-sprzedazy>Data sprzedaży: <strong>{dataPL(sprzedaz)}</strong> — dzień przed początkiem ochrony.</p>
+  {/if}
 </div>
 
 <style>

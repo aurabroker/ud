@@ -48,12 +48,14 @@ test('administrator: wszystkie polisy z numerem, okresem ochrony, statusem, skł
 
   const jerzy = wiersz(page, 'Jerzy Duda');
   await expect(jerzy).toContainText('LHP 1/2026');
-  await expect(jerzy.locator('[data-status]')).toHaveText('Aktywna');
+  await expect(jerzy.locator('[data-status]')).toHaveAttribute('data-status', 'aktywna');
+  await expect(jerzy.locator('[data-status]')).toHaveAttribute('title', 'Aktywna');
   await expect(jerzy.locator('td').nth(3)).toHaveText(/^300 zł$/);
   await expect(jerzy.locator('td').nth(5)).toHaveText('540 zł');           // 3 600 × 15%
   await expect(jerzy.locator('td').nth(6)).toHaveText('Ula Agent');
   const grazyna = wiersz(page, 'Grażyna Pawlak');
-  await expect(grazyna.locator('[data-status]')).toHaveText('Wygasa za 10 dni');
+  await expect(grazyna.locator('[data-status]')).toHaveAttribute('data-status', 'wygasa');
+  await expect(grazyna.locator('[data-status]')).toHaveAttribute('title', 'Wygasa za 10 dni');
   await expect(grazyna.locator('td').nth(3)).toHaveText('≈ 200 zł');         // 2 400 / 12
   await expect(wiersz(page, 'Bartek Nowak').locator('[data-status]')).toHaveText('Bez dat ochrony');
   await expect(wiersz(page, 'Bartek Nowak')).toContainText('brak numeru');
@@ -121,18 +123,22 @@ test('Dodaj polisę z wykazu: numer i „Ochrona na rok" — nowy wiersz od razu
   await okno.getByLabel('Składka roczna *').fill('1200');
   await okno.getByLabel('Numer polisy').fill('LHP 55/2026');
   await okno.getByLabel('Data sprzedaży *').fill('2026-09-01');
+  // Sprzedaż 01.09 → ochrona od następnego dnia (data sprzedaży = dzień przed ochroną).
   await okno.locator('[data-rok-ochrony]').click();
-  await expect(okno.getByLabel('Ochrona od')).toHaveValue('2026-09-01');
-  await expect(okno.getByLabel('Ochrona do')).toHaveValue('2027-08-31');
+  await expect(okno.getByLabel('Ochrona od')).toHaveValue('2026-09-02');
+  await expect(okno.getByLabel('Ochrona do')).toHaveValue('2027-09-01');
+  await expect(okno.locator('[data-data-z-ochrony]')).toHaveValue('2026-09-01');
   await okno.getByRole('button', { name: 'Zapisz sprzedaż' }).click();
   await expect(page.locator('[data-dodano]')).toContainText('Nowa Polisa');
   const w = wiersz(page, 'Nowa Polisa');
   await expect(w).toContainText('LHP 55/2026');
-  await expect(w.locator('.daty')).toHaveText('01.09.2026 – 31.08.2027');
+  await expect(w.locator('.daty')).toContainText('02.09.2026 – 01.09.2027');
+  await expect(w.locator('td').nth(2)).toHaveText('01.09.2026');
   await expect(w.locator('td').nth(3)).toHaveText('≈ 100 zł');
-  expect(await sql(request, `select polisa_numer || '|' || ochrona_od || '|' || ochrona_do from public.ud_leady
+  expect(await sql(request, `select polisa_numer || '|' || ochrona_od || '|' || ochrona_do || '|' || (sprzedano_at at time zone 'Europe/Warsaw')
+                               from public.ud_leady
                               where id = (select l.id from public.ud_leady l join public.ud_clients c on c.id = l.klient_id where c.full_name = 'Nowa Polisa')`))
-    .toBe('LHP 55/2026|2026-09-01|2027-08-31');
+    .toBe('LHP 55/2026|2026-09-02|2027-09-01|2026-09-01 12:00:00');
 });
 
 test('„Dane sprzedaży" na tablicy: numer i okres ochrony; koniec przed początkiem — błąd przy polu, nic nie zapisane', async ({ page, request }) => {
@@ -151,10 +157,12 @@ test('„Dane sprzedaży" na tablicy: numer i okres ochrony; koniec przed począ
 
   await dialog.locator('[data-rok-ochrony]').click();
   await expect(dialog.getByLabel('Ochrona do')).toHaveValue('2027-09-30');
+  await expect(dialog.locator('[data-data-sprzedazy]')).toHaveText('Data sprzedaży: 30.09.2026 — dzień przed początkiem ochrony.');
   await dialog.getByRole('button', { name: 'Zapisz' }).click();
   await expect(dialog).toHaveCount(0);
-  expect(await sql(request, `select polisa_numer || '|' || ochrona_od || '|' || ochrona_do from public.ud_leady where id = '${jerzy}'`))
-    .toBe('LHP 7/2026|2026-10-01|2027-09-30');
+  expect(await sql(request, `select polisa_numer || '|' || ochrona_od || '|' || ochrona_do || '|' || (sprzedano_at at time zone 'Europe/Warsaw')
+                               from public.ud_leady where id = '${jerzy}'`))
+    .toBe('LHP 7/2026|2026-10-01|2027-09-30|2026-09-30 12:00:00');
   const szczegoly = page.locator('[data-szczegoly]');
   await expect(szczegoly.locator('[data-polisa-numer]')).toContainText('LHP 7/2026');
   await expect(szczegoly.locator('[data-ochrona]')).toContainText('01.10.2026 – 30.09.2027');
@@ -191,7 +199,8 @@ test('„Uzupełnij z plików PDF": numer i okres z polisy, składka z opłatą 
 
   const w = wiersz(page, 'Jerzy Duda');
   await expect(w).toContainText('LHC3100906');
-  await expect(w.locator('.daty')).toHaveText('05.02.2026 – 04.02.2027');
+  await expect(w.locator('.daty')).toContainText('05.02.2026 – 04.02.2027');
+  await expect(w.locator('td').nth(2)).toHaveText('04.02.2026');            // sprzedaż = dzień przed ochroną
   await expect(w.locator('td').nth(4)).toHaveText(/^2[\s\u00a0]?760 zł$/);
   await expect(wiersz(page, 'Grażyna Pawlak')).toContainText('LHC3000001');
   await expect(wiersz(page, 'Grażyna Pawlak').locator('[data-status]')).toHaveText('Bez dat ochrony');
@@ -251,4 +260,29 @@ test('„Dodaj polisę": plik wpisuje numer i okres ochrony, numer awaryjnie z n
   await okno.locator('[data-plik-polisy]').setInputFiles(pdf('skan', 'Nowak_LHC3222222_1234.pdf'));
   await expect(okno.getByLabel('Numer polisy')).toHaveValue('LHC3222222');
   await expect(okno.locator('[data-komunikat-polisy]')).toContainText('Numer polisy odczytany z pliku.');
+});
+
+test('status polisy to kolor ramki dat: zielona, pomarańczowa, czerwona, niebieska; słowo w podpowiedzi i dla czytnika', async ({ page, request }) => {
+  await polisyTestowe(request);
+  await sql(request, `update public.ud_leady set ochrona_od = current_date - 400, ochrona_do = current_date - 35 where id = tt.lead('Bartek Nowak');
+    update public.ud_leady set etap_id = tt.etap('wygrany'), skladka_roczna = 1000, sprzedano_at = now(),
+           ochrona_od = current_date + 20, ochrona_do = current_date + 384 where id = tt.lead('Anna Kowalska');`);
+  await wykaz(page);
+  const ramka = (nazwa) => wiersz(page, nazwa).locator('.ochrona [data-status]');
+  const kolory = {
+    'Jerzy Duda': ['aktywna', 'rgb(22, 163, 74)'],
+    'Grażyna Pawlak': ['wygasa', 'rgb(234, 88, 12)'],
+    'Bartek Nowak': ['wygasla', 'rgb(220, 38, 38)'],
+    'Anna Kowalska': ['przyszla', 'rgb(37, 99, 235)'],
+  };
+  for (const [nazwa, [status, kolor]] of Object.entries(kolory)) {
+    await expect(ramka(nazwa)).toHaveAttribute('data-status', status);
+    await expect(ramka(nazwa)).toHaveCSS('border-top-color', kolor);
+  }
+  // Słowa „Aktywna" nie ma na ekranie, jest w podpowiedzi i w tekście dla czytnika ekranu.
+  await expect(ramka('Jerzy Duda')).toHaveAttribute('title', 'Aktywna');
+  await expect(wiersz(page, 'Jerzy Duda').getByText('Aktywna', { exact: true })).toHaveCount(0);
+  await expect(ramka('Jerzy Duda').locator('.sr-only')).toHaveText(', aktywna');
+  await expect(page.locator('[data-legenda]')).toContainText('aktywna');
+  await expect(page.locator('[data-legenda] .s-przyszla')).toHaveText('jeszcze się nie zaczęła');
 });

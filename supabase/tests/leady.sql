@@ -1129,5 +1129,95 @@ begin
        from pg_proc p where p.proname = 'ud_leady_polisy' and p.pronamespace = 'public'::regnamespace));
 end $$;
 
+-- ─── 15. Część 7: data sprzedaży = dzień przed początkiem ochrony ───────────
+do $$
+declare
+  piotr uuid := (select id from public.ud_leady where klient_id = 'c0000000-0000-0000-0000-0000000000e1');
+  r jsonb; lead uuid; przed timestamptz; h int;
+  sp jsonb := '{"skladka_roczna": 2760, "skladka_mies": 230, "polisa_numer": "LHC7", "ochrona_od": "2026-02-05", "ochrona_do": "2027-02-04"}';
+begin
+  perform tt.t('reguła: południe (czas polski) dnia przed początkiem ochrony; bez daty — null',
+    public.ud_data_sprzedazy('2026-02-05') = '2026-02-04 12:00 Europe/Warsaw'::timestamptz
+    and public.ud_data_sprzedazy('2026-04-01') = '2026-03-31 12:00 Europe/Warsaw'::timestamptz
+    and public.ud_data_sprzedazy(null) is null);
+
+  -- Wejście do „Wygrany" z datą ochrony.
+  r := tt.ruch('przenies', piotr, tt.wersja(piotr), 'ds7-0001', tt.id_ula(),
+              jsonb_build_object('etap_id', tt.etap('wygrany'), 'sprzedaz', sp));
+  perform tt.t('wejście do Wygrany z ochroną od 05.02 → sprzedaż 04.02 (nie dziś)',
+    r->>'status' = 'ok' and (select sprzedano_at = '2026-02-04 12:00 Europe/Warsaw'::timestamptz from public.ud_leady where id = piotr));
+
+  -- Poprawka: nowa data ochrony przestawia datę sprzedaży; poprzednia w historii.
+  r := tt.ruch('sprzedaz', piotr, tt.wersja(piotr), 'ds7-0002', tt.id_ula(), sp || '{"ochrona_od": "2026-04-01", "ochrona_do": "2027-03-31"}');
+  perform tt.t('poprawka: ochrona od 01.04 → sprzedaż 31.03; historia pamięta poprzednią datę sprzedaży',
+    r->>'status' = 'ok'
+    and (select sprzedano_at = '2026-03-31 12:00 Europe/Warsaw'::timestamptz from public.ud_leady where id = piotr)
+    and (select (dane->'poprzednia_sprzedaz'->>'sprzedano_at')::timestamptz = '2026-02-04 12:00 Europe/Warsaw'::timestamptz
+           from public.ud_leady_historia where lead_id = piotr and klucz = 'ds7-0002'));
+
+  -- Te same dane, ale zła data sprzedaży (np. sprzed tej części) → zapis ją naprawia.
+  update public.ud_leady set sprzedano_at = now() where id = piotr;
+  r := tt.ruch('sprzedaz', piotr, tt.wersja(piotr), 'ds7-0003', tt.id_ula(), sp || '{"ochrona_od": "2026-04-01", "ochrona_do": "2027-03-31"}');
+  perform tt.t('te same dane przy złej dacie sprzedaży → zapis (naprawa), nie bez_zmiany',
+    r->>'status' = 'ok' and (select sprzedano_at = '2026-03-31 12:00 Europe/Warsaw'::timestamptz from public.ud_leady where id = piotr));
+  r := tt.ruch('sprzedaz', piotr, tt.wersja(piotr), 'ds7-0004', tt.id_ula(), sp || '{"ochrona_od": "2026-04-01", "ochrona_do": "2027-03-31"}');
+  perform tt.t('a drugi raz już bez_zmiany', r->>'status' = 'bez_zmiany');
+
+  -- Bez daty ochrony: data sprzedaży zostaje.
+  select sprzedano_at into przed from public.ud_leady where id = piotr;
+  r := tt.ruch('sprzedaz', piotr, tt.wersja(piotr), 'ds7-0005', tt.id_ula(), '{"skladka_roczna": 2800}');
+  perform tt.t('poprawka bez daty ochrony nie rusza daty sprzedaży',
+    r->>'status' = 'ok' and (select sprzedano_at = przed and ochrona_od is null from public.ud_leady where id = piotr));
+
+  -- „Dodaj polisę": data z formularza ustępuje dacie z ochrony, także w przyszłości.
+  r := public.ud_lead_polisa_reczna(tt.id_ula(), 'ds7-1001', jsonb_build_object('imie_nazwisko', 'Ola Przyszla',
+         'data_sprzedazy', to_char(now() at time zone 'Europe/Warsaw', 'YYYY-MM-DD'),
+         'sprzedaz', jsonb_build_object('skladka_roczna', 1200, 'ochrona_od', (current_date + 27)::text,
+                                        'ochrona_do', (current_date + 27 + 364)::text)));
+  lead := (r->>'lead_id')::uuid;
+  perform tt.t('dodaj polisę: ochrona za 27 dni → sprzedaż dzień wcześniej (w przyszłości), etap od nie w przyszłości',
+    r->>'status' = 'ok'
+    and (select sprzedano_at = public.ud_data_sprzedazy(current_date + 27) and etap_od <= now() from public.ud_leady where id = lead));
+  r := public.ud_lead_polisa_reczna(tt.id_ula(), 'ds7-1002', jsonb_build_object('imie_nazwisko', 'Ola Formularz',
+         'data_sprzedazy', '2026-09-15', 'sprzedaz', jsonb_build_object('skladka_roczna', 1200)));
+  perform tt.t('dodaj polisę bez daty ochrony: data z formularza jak dotąd',
+    (select sprzedano_at = '2026-09-15 12:00 Europe/Warsaw'::timestamptz from public.ud_leady where id = (r->>'lead_id')::uuid));
+  perform tt.t('dodaj polisę bez daty ochrony: przyszła data z formularza dalej odrzucona',
+    public.ud_lead_polisa_reczna(tt.id_ula(), 'ds7-1003', jsonb_build_object('imie_nazwisko', 'Ola Jutro',
+      'data_sprzedazy', (current_date + 3)::text, 'sprzedaz', jsonb_build_object('skladka_roczna', 1200)))->'pola' = '["data_sprzedazy"]');
+
+  -- Korekta z migracji: ten sam blok co w pliku części 7, drugi raz nic nie zmienia.
+  update public.ud_leady set sprzedano_at = now() where id = piotr;
+  update public.ud_leady set ochrona_od = '2026-04-01', ochrona_do = '2027-03-31' where id = piotr;
+  select count(*) into h from public.ud_leady_historia where lead_id = piotr;
+  with korekta as (
+    select l.id, l.sprzedano_at as przed, public.ud_data_sprzedazy(l.ochrona_od) as po
+      from public.ud_leady l
+      join public.ud_leady_etap e on e.id = l.etap_id and e.rodzaj = 'wygrany'
+     where l.ochrona_od is not null
+       and l.sprzedano_at is distinct from public.ud_data_sprzedazy(l.ochrona_od)
+  ), zmiana as (
+    update public.ud_leady l
+       set sprzedano_at = k.po, wersja = l.wersja + 1, updated_at = now()
+      from korekta k
+     where l.id = k.id
+    returning l.id, k.przed, k.po
+  )
+  insert into public.ud_leady_historia (lead_id, typ, wykonawca_nazwa, dane)
+  select z.id, 'sprzedaz', 'Korekta: data sprzedaży = dzień przed początkiem ochrony',
+         jsonb_build_object('sprzedaz', jsonb_build_object('sprzedano_at', z.po),
+                            'poprzednia_sprzedaz', jsonb_build_object('sprzedano_at', z.przed))
+    from zmiana z;
+  perform tt.t('korekta: zła data poprawiona, wpis w historii',
+    (select sprzedano_at = '2026-03-31 12:00 Europe/Warsaw'::timestamptz from public.ud_leady where id = piotr)
+    and (select count(*) from public.ud_leady_historia where lead_id = piotr) = h + 1
+    and not exists (select 1 from public.ud_leady l join public.ud_leady_etap e on e.id = l.etap_id and e.rodzaj = 'wygrany'
+                     where l.ochrona_od is not null and l.sprzedano_at is distinct from public.ud_data_sprzedazy(l.ochrona_od)));
+  perform tt.t('uprawnienia: ud_data_sprzedazy tylko dla service_role',
+    (select not has_function_privilege('anon', p.oid, 'execute') and not has_function_privilege('authenticated', p.oid, 'execute')
+            and has_function_privilege('service_role', p.oid, 'execute')
+       from pg_proc p where p.proname = 'ud_data_sprzedazy' and p.pronamespace = 'public'::regnamespace));
+end $$;
+
 -- ─── Podsumowanie ───────────────────────────────────────────────────────────
 select format('WYNIK: %s PASS, %s FAIL', count(*) filter (where ok), count(*) filter (where not ok)) from tt.wyniki;

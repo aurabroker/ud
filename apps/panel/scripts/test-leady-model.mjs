@@ -14,7 +14,7 @@ import {
 } from '../src/lib/leady/model.js';
 import { BladSieci, utworzApi } from '../src/lib/leady/api.js';
 import { stawkaZFormularza } from '../src/lib/prowizja.js';
-import { danePolisyZFormularza, dataPL, doCsv, dzienPL, pasujeStatus, pasujeSzukanie, rokOchrony, sortuj, statusPolisy, sumy } from '../src/lib/polisy/model.js';
+import { danePolisyZFormularza, dataPL, dataSprzedazyZOchrony, doCsv, dzienPL, pasujeStatus, pasujeSzukanie, przesunDzien, rokOchrony, sortuj, statusPolisy, sumy } from '../src/lib/polisy/model.js';
 import { adresFiltra } from '../src/lib/statystyki/filtr.js';
 import { dataZPolisy, daneZPolisy, numerZNazwy } from '../src/lib/pdf/polisa.js';
 import { coOdczytano, polisaZDokumentu } from '../src/lib/server/leady.js';
@@ -416,6 +416,16 @@ await t('filtry: adres zostawia drugi filtr; „Cały czas" bez parametru', () =
   assert.equal(adresFiltra({ okres: 'miesiac', agent: 'A' }, { okres: 'rok' }), '?okres=rok&agent=A');
   assert.equal(adresFiltra({ okres: 'miesiac', agent: 'A' }, { agent: null }), '?okres=miesiac');
   assert.equal(adresFiltra({ okres: 'rok', agent: null }, { okres: 'wszystko' }), '?');
+});
+
+await t('data sprzedaży = dzień przed początkiem ochrony (przełom miesiąca, roku, 1 marca w roku przestępnym); zła data → null', () => {
+  assert.equal(dataSprzedazyZOchrony('2026-02-05'), '2026-02-04');
+  assert.equal(dataSprzedazyZOchrony('2026-04-01'), '2026-03-31');
+  assert.equal(dataSprzedazyZOchrony('2026-01-01'), '2025-12-31');
+  assert.equal(dataSprzedazyZOchrony('2028-03-01'), '2028-02-29');
+  assert.equal(dataSprzedazyZOchrony(''), null);
+  assert.equal(dataSprzedazyZOchrony('2026-02-31'), null);
+  assert.equal(przesunDzien('2026-09-01', 1), '2026-09-02');
 });
 
 // ── Dane polisy z PDF (src/lib/pdf/polisa.js) ────────────────────────────────

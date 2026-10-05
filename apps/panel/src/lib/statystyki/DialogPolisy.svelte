@@ -17,7 +17,7 @@
   import { tick } from 'svelte';
   import Dialog from '$lib/leady/Dialog.svelte';
   import { POLA_SPRZEDAZY, daneSprzedazyZFormularza } from '$lib/leady/model.js';
-  import { danePolisyZFormularza } from '$lib/polisy/model.js';
+  import { danePolisyZFormularza, dataSprzedazyZOchrony, przesunDzien } from '$lib/polisy/model.js';
   import PolaPolisy from '$lib/leady/PolaPolisy.svelte';
 
   let { admin = false, agenci = [], ja, onzamknij, onzapisano } = $props();
@@ -37,6 +37,8 @@
   let numer = $state('');
   let ochronaOd = $state('');
   let ochronaDo = $state('');
+  // Data sprzedaży = dzień przed początkiem ochrony (05.10.2026); bez daty ochrony — z pola.
+  const zOchrony = $derived(dataSprzedazyZOchrony(ochronaOd));
 
   let plik = $state(null);
   let inputPliku = $state(null);
@@ -117,7 +119,7 @@
     if (imie.trim().replace(/\s+/g, ' ').length < 3) b.imie = 'Podaj imię i nazwisko klienta.';
     if (pesel.trim() && cyfryPeselu.length !== 11) b.pesel = 'PESEL ma 11 cyfr.';
     if (email.trim() && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())) b.email = 'Niepoprawny adres e-mail.';
-    if (!data || data > dzis) b.data = 'Data sprzedaży nie może być z przyszłości.';
+    if (!zOchrony && (!data || data > dzis)) b.data = 'Data sprzedaży nie może być z przyszłości.';
     const { sprzedaz: kwoty, bledne } = daneSprzedazyZFormularza(pola);
     for (const id of bledne) b[id] = 'Wpisz kwotę cyframi, np. 2 760 albo 2760,50 — albo 0, jeśli tego ryzyka nie ma.';
     if (!kwoty.skladka_roczna && !b.skladka_roczna) b.skladka_roczna = 'Składka roczna jest wymagana.';
@@ -151,7 +153,7 @@
           idempotencyKey: klucz,
           klient: { imieNazwisko: imie, pesel, email, telefon },
           agentId: admin && agentId ? agentId : undefined,
-          dataSprzedazy: data,
+          dataSprzedazy: zOchrony ?? data,
           sprzedaz,
         }),
       });
@@ -261,9 +263,15 @@
       <div class="siatka">
         <div class="pole-wiersz">
           <label for="dp-data" class="et">Data sprzedaży *</label>
-          <input id="dp-data" class="pole" type="date" bind:value={data} max={dzis}
-                 aria-invalid={bledy.data ? 'true' : undefined} aria-describedby={bledy.data ? 'dp-data-blad' : undefined} />
-          {#if bledy.data}<p id="dp-data-blad" class="blad-pola">{bledy.data}</p>{/if}
+          {#if zOchrony}
+            <!-- Dzień przed początkiem ochrony (decyzja z 05.10.2026) — liczy się sam. -->
+            <input id="dp-data" class="pole" type="date" value={zOchrony} readonly aria-describedby="dp-data-skad" data-data-z-ochrony />
+            <p id="dp-data-skad" class="mala">Dzień przed początkiem ochrony.</p>
+          {:else}
+            <input id="dp-data" class="pole" type="date" bind:value={data} max={dzis}
+                   aria-invalid={bledy.data ? 'true' : undefined} aria-describedby={bledy.data ? 'dp-data-blad' : undefined} />
+            {#if bledy.data}<p id="dp-data-blad" class="blad-pola">{bledy.data}</p>{/if}
+          {/if}
         </div>
         {#if admin}
           <div class="pole-wiersz">
@@ -292,7 +300,8 @@
           </div>
         {/each}
       </div>
-      <PolaPolisy bind:numer bind:od={ochronaOd} bind:do={ochronaDo} {bledy} prefiks="dp" poczatek={data} />
+      <PolaPolisy bind:numer bind:od={ochronaOd} bind:do={ochronaDo} {bledy} prefiks="dp" poczatek={przesunDzien(data, 1) ?? ''}
+                  pokazSprzedaz={false} />
     </fieldset>
 
     {#if blad}
