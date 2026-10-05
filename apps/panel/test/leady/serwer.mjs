@@ -20,7 +20,7 @@ import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { uruchomKlaster, wczytaj } from '../../scripts/lib/pg-tymczasowy.mjs';
 import {
   BladApi, adresPliku, dodajPolise, notatka, odczytajPoliseNowa, odczytajWgranaPolise, odpowiedzKolumny, odpowiedzLicznikow,
-  odpowiedzSzczegolow, odpowiedzWariantow, przetworz, statystyki, wczytajTablice, wgrajPolise, zmien, zwin,
+  odpowiedzSzczegolow, odpowiedzWariantow, polisy, przetworz, statystyki, wczytajTablice, wgrajPolise, zmien, zwin,
 } from '../../src/lib/server/leady.js';
 import { liczNiedokonczone } from '../../src/lib/server/niedokonczone.js';
 
@@ -246,6 +246,15 @@ export async function startuj() {
             // Dane strony /panel/statystyki dla harnessu w przeglądarce (odpowiednik load).
             try {
               return odpowiedz(res, 200, { st: await statystyki(sb, uzytkownik, url.searchParams), blad: '', ja: uzytkownik });
+            } catch (e) {
+              if (e instanceof BladApi) return odpowiedz(res, e.status, e.body);
+              throw e;
+            }
+          }
+          if (sciezka === '/__test/polisy-dane') {
+            // Dane strony /panel/polisy (odpowiednik load).
+            try {
+              return odpowiedz(res, 200, { w: await polisy(sb, uzytkownik, url.searchParams), blad: '', ja: uzytkownik });
             } catch (e) {
               if (e instanceof BladApi) return odpowiedz(res, e.status, e.body);
               throw e;

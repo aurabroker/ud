@@ -53,6 +53,12 @@ nie wyniknie.
   formularza (`ud_lead_polisa_reczna`). Kolejność: baza, potem panel v.0.61.
   **Przez SQL Editor**, potem:
   `insert into supabase_migrations.schema_migrations (version, name) values ('20261004200000', 'leady_kanban_5_prowizja_polisy');`
+- `20261005090000_leady_kanban_6_wykaz_polis.sql` — wykaz polis: numer polisy
+  i okres ochrony w danych sprzedaży (`ud_leady.polisa_numer`, `ochrona_od`,
+  `ochrona_do`; widok, karta, `ud_lead_zmien`, `ud_lead_polisa_reczna`)
+  i funkcja `ud_leady_polisy` dla strony `/panel/polisy`. Kolejność: baza,
+  potem panel v.0.62. **Przez SQL Editor**, potem:
+  `insert into supabase_migrations.schema_migrations (version, name) values ('20261005090000', 'leady_kanban_6_wykaz_polis');`
 
 Dlaczego tak: MCP Supabase (`apply_migration` i `execute_sql`) wstrzymuje do
 ręcznego potwierdzenia każde `DROP` i każdą funkcję, która w treści robi

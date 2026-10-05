@@ -1481,6 +1481,38 @@ została, żeby nie przebudowywać widoku i wszystkich funkcji naraz.
   „Zgon · suma ubezpieczenia" — bez „niezdolność do pracy" i „świadczenie
   miesięczne"; miesięczność mówi jednostka „/ mies." przy kwocie.
 
+### Wykaz polis (część 6, decyzja z 05.10.2026)
+
+Zakładka „Polisy" (`/panel/polisy`, `ud_leady_polisy`): każda sprzedaż (lead
+w „Wygrany", także zarchiwizowany) z numerem polisy, okresem ochrony, datą
+sprzedaży, składką miesięczną i roczną, prowizją, agentem i plikiem PDF.
+Widoczność jak w Statystykach (administrator — wszyscy, z wyborem agenta;
+agent — swoje sprzedaże, także z cudzym agentem w adresie). Okres w filtrze to
+**data sprzedaży**; status, szukanie, sortowanie, sumy i CSV liczy przeglądarka
+z całego wczytanego wykazu (`src/lib/polisy/model.js`), więc sumy dotyczą
+dokładnie tego, co widać.
+
+- **Numer polisy i daty ochrony wpisuje agent** — w „Dane sprzedaży" albo
+  „Dodaj polisę" (wspólne pola `PolaPolisy.svelte`). Z PDF-u ich nie
+  zgadujemy: czytnik zna układ OFERTY, nie polisy, a zła data końca ochrony
+  to przegapione wznowienie. Przycisk „Ochrona na rok" jest jawnym skrótem
+  (od + rok − 1 dzień; 29.02 → 28.02), nie domyślną wartością.
+- **Status** liczy się od „dziś" w czasie polskim, które podaje serwer
+  (`dzis` z `ud_leady_polisy`), nie z zegara przeglądarki: bez dat ochrony,
+  przyszła, aktywna, **wygasa (≤ 30 dni)**, wygasła. Polisa bez dat ma swój
+  chip i przypomnienie pod tabelą — bez nich wykaz nie pokaże wznowień.
+- **Składka miesięczna**: zapisana, a bez niej 1/12 rocznej ze znakiem „≈"
+  i przypisem (raty bywają droższe).
+- **CSV dla Excela**: BOM, średnik, przecinek dziesiętny; tylko widoczne
+  wiersze. Nazwa klienta zaczynająca się od `=`, `+`, `-`, `@` dostaje
+  apostrof — inaczej arkusz wykonałby ją jako formułę.
+- Koniec ochrony nie przed początkiem: pilnuje przeglądarka, `ud_lead_zmien`
+  / `ud_lead_polisa_reczna` (`bledne_dane` z polem) i ograniczenie
+  `lead_ochrona_kolejnosc` w bazie. Wyjście z „Wygrany" zeruje numer i daty
+  razem z kwotami (historia je pamięta).
+- Filtry okresu i agenta są wspólne ze Statystykami
+  (`src/lib/statystyki/Filtry.svelte`, `filtr.js`).
+
 ### Model danych (tylko stan procesu — dane osobowe czytamy ze źródła)
 
 | Obiekt | Rola |
@@ -1492,6 +1524,7 @@ została, żeby nie przebudowywać widoku i wszystkich funkcji naraz.
 | `ud_leady_baza` | widok z imieniem/e-mailem/telefonem z kartoteki klienta, `opiekun_admin` i danymi sprzedaży; tylko leady klientów |
 | `ud_leady_pliki` | polisy przy leadzie: kubełek `ud-polisy`, ścieżka `<lead>/<uuid>.pdf`, nazwa, kto dodał; kasowane razem z leadem (obiekt w kubełku zostaje) |
 | `ud_user_profiles.prowizja_procent` | stawka prowizji agenta (% składki rocznej); `ud_leady.prowizja_procent` — jej migawka z chwili sprzedaży |
+| `ud_leady.polisa_numer`, `ochrona_od`, `ochrona_do` | numer polisy i okres ochrony sprzedaży — wykaz polis (`ud_leady_polisy`) |
 
 Dostęp: RLS bez polityk, wszystko tylko dla `service_role` (panel przez
 `createAdminClient`). `ud_leady` **nie ma kolumn z danymi osobowymi** — test SQL
@@ -1595,8 +1628,10 @@ samych funkcji co ich `load`. `$app/stores` i `$app/navigation` podmienia
 sprawdza — tylko to, co pokazuje świeżo wczytana strona. Okno „Dodaj polisę"
 jedzie w przeglądarce na własnym harnessie (`test/leady/statystyki.html`,
 `statystyki-polisa.spec.js`): prawdziwa strona, prawdziwe funkcje serwera i SQL;
-`invalidateAll` z zaślepki pobiera dane strony ponownie. Panelu Admina (pole
-stawki) harness nie ma — parser stawki sprawdza `test:leady-model`.
+`invalidateAll` z zaślepki pobiera dane strony ponownie. Ten sam harness
+podaje wykaz polis (`statystyki.html?strona=polisy`, `polisy.spec.js`, także
+test szerokości 390 px). Panelu Admina (pole stawki) harness nie ma — parser
+stawki sprawdza `test:leady-model`.
 
 **Czego testy NIE pokazują:** Firefoksa i Safari (K24 sprawdzono na Chromium —
 w Firefoksie Shift + prawy klik zwykle nie wysyła `contextmenu` w ogóle, wtedy

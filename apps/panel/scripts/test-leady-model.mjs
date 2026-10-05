@@ -14,6 +14,8 @@ import {
 } from '../src/lib/leady/model.js';
 import { BladSieci, utworzApi } from '../src/lib/leady/api.js';
 import { stawkaZFormularza } from '../src/lib/prowizja.js';
+import { danePolisyZFormularza, dataPL, doCsv, dzienPL, pasujeStatus, pasujeSzukanie, rokOchrony, sortuj, statusPolisy, sumy } from '../src/lib/polisy/model.js';
+import { adresFiltra } from '../src/lib/statystyki/filtr.js';
 
 let pass = 0;
 const bledy = [];
@@ -349,6 +351,69 @@ await t('API klienta: ponowny odczyt polisy leada — POST JSON pod …/polisa/<
   const api = utworzApi({ baza: '/x/api', fetch: async (u, o) => { wolane.push([u, o.method, o.headers['content-type'], o.body]); return odp(200, { status: 'ok' }); }, czekaj: bezOczekiwania });
   await api.odczytPolisy('l 1', 'p1');
   assert.deepEqual(wolane, [['/x/api/polisa/l%201/odczyt', 'POST', 'application/json', JSON.stringify({ plikId: 'p1' })]]);
+});
+
+// ── Wykaz polis (część 6) ────────────────────────────────────────────────────
+await t('polisy: status na dzień — bez dat, wygasła, przyszła, wygasa (≤ 30 dni), aktywna', () => {
+  const dzis = '2026-10-05';
+  assert.equal(statusPolisy({ ochrona_od: '2026-01-01' }, dzis).id, 'bez_dat');
+  assert.equal(statusPolisy({ ochrona_od: '2025-01-01', ochrona_do: '2026-10-04' }, dzis).id, 'wygasla');
+  assert.deepEqual(statusPolisy({ ochrona_od: '2026-11-01', ochrona_do: '2027-10-31' }, dzis), { id: 'przyszla', etykieta: 'Od 01.11.2026' });
+  assert.equal(statusPolisy({ ochrona_do: '2026-10-05' }, dzis).etykieta, 'Wygasa dziś');
+  assert.equal(statusPolisy({ ochrona_do: '2026-10-06' }, dzis).etykieta, 'Wygasa jutro');
+  assert.deepEqual(statusPolisy({ ochrona_do: '2026-11-04' }, dzis), { id: 'wygasa', etykieta: 'Wygasa za 30 dni', dni: 30 });
+  assert.equal(statusPolisy({ ochrona_do: '2026-11-05' }, dzis).id, 'aktywna');
+  // Chipy: „Aktywne" obejmuje też wygasające i przyszłe.
+  assert.ok(pasujeStatus({ id: 'wygasa' }, 'aktywne') && pasujeStatus({ id: 'przyszla' }, 'aktywne') && !pasujeStatus({ id: 'wygasla' }, 'aktywne'));
+  assert.ok(pasujeStatus({ id: 'bez_dat' }, 'wszystkie') && !pasujeStatus({ id: 'aktywna' }, 'bez_dat'));
+});
+
+await t('polisy: rok ochrony (do = od + rok − 1 dzień; 29 lutego → 28 lutego); daty po polsku', () => {
+  assert.equal(rokOchrony('2026-10-05'), '2027-10-04');
+  assert.equal(rokOchrony('2026-01-01'), '2026-12-31');
+  assert.equal(rokOchrony('2028-02-29'), '2029-02-28');
+  assert.equal(rokOchrony('2028-03-01'), '2029-02-28');
+  assert.equal(rokOchrony(''), null);
+  assert.equal(dataPL('2026-10-05'), '05.10.2026');
+  assert.equal(dataPL(null), '—');
+  assert.equal(dzienPL('2026-03-31T23:30:00Z'), '2026-04-01', 'data sprzedaży w czasie polskim');
+});
+
+await t('polisy: pola z formularza — numer przycięty, daty YYYY-MM-DD, koniec nie przed początkiem', () => {
+  assert.deepEqual(danePolisyZFormularza({ numer: '  LHP  1/2026 ', od: '2026-10-01', do: '2027-09-30' }),
+    { polisa: { polisa_numer: 'LHP 1/2026', ochrona_od: '2026-10-01', ochrona_do: '2027-09-30' }, bledy: {} });
+  assert.deepEqual(danePolisyZFormularza({}), { polisa: {}, bledy: {} });
+  assert.ok(danePolisyZFormularza({ od: '2026-10-01', do: '2026-09-30' }).bledy.ochrona_do);
+  assert.ok(danePolisyZFormularza({ od: '2026-02-31' }).bledy.ochrona_od, 'dzień, którego nie ma');
+  assert.ok(danePolisyZFormularza({ numer: 'X'.repeat(61) }).bledy.polisa_numer);
+});
+
+await t('polisy: sumy, szukanie bez ogonków, sortowanie po końcu ochrony (bez dat na końcu)', () => {
+  const lista = [
+    { lead_id: 'a', klient: 'Łucja Żak', numer: 'P-1', ochrona_do: '2027-01-01', skladka_mies: 100, skladka_roczna: 1200, prowizja: 240, sprzedano: '2026-09-01' },
+    { lead_id: 'b', klient: 'Adam Nowak', numer: null, ochrona_do: null, skladka_mies: 50.5, skladka_roczna: 606, prowizja: null, mies_wyliczona: true, sprzedano: '2026-10-01' },
+    { lead_id: 'c', klient: 'Ewa Bąk', numer: 'X-9', ochrona_do: '2026-11-01', skladka_mies: null, skladka_roczna: null, prowizja: null, sprzedano: '2026-08-01' },
+  ];
+  assert.deepEqual(sumy(lista), { liczba: 3, mies: 150.5, roczna: 1806, prowizja: 240, wyliczonych: 1 });
+  assert.ok(pasujeSzukanie(lista[0], 'lucja zak') && pasujeSzukanie(lista[2], 'x-9') && !pasujeSzukanie(lista[1], 'p-1'));
+  assert.deepEqual(sortuj(lista, 'ochrona_do').map((p) => p.lead_id), ['c', 'a', 'b']);
+  assert.deepEqual(sortuj(lista).map((p) => p.lead_id), ['b', 'a', 'c'], 'domyślnie: najnowsza sprzedaż pierwsza');
+  assert.deepEqual(sortuj(lista, 'skladka_mies', 'rosnaco').map((p) => p.lead_id), ['c', 'b', 'a']);
+});
+
+await t('polisy: CSV dla Excela — BOM, średnik, przecinek dziesiętny, formuła w nazwie unieszkodliwiona, agent tylko u administratora', () => {
+  const lista = [{ lead_id: 'a', klient: '=HYPERLINK("x")', numer: 'P;1', ochrona_od: '2026-10-01', ochrona_do: '2027-09-30',
+    sprzedano: '2026-09-30T22:30:00Z', skladka_mies: 230.5, skladka_roczna: 2766, prowizja: 553.2, agent: 'Ula' }];
+  const csv = doCsv(lista, { admin: true, dzis: '2026-10-05' });
+  assert.ok(csv.startsWith('\ufeffKlient;Numer polisy;Ochrona od;Ochrona do;Status;Data sprzedaży;Składka miesięczna;Składka roczna;Prowizja;Agent\r\n'));
+  assert.ok(csv.includes(`"'=HYPERLINK(""x"")";"P;1";2026-10-01;2027-09-30;Aktywna;2026-10-01;230,5;2766;553,2;Ula`), csv);
+  assert.ok(!doCsv(lista, { admin: false, dzis: '2026-10-05' }).includes('Agent'));
+});
+
+await t('filtry: adres zostawia drugi filtr; „Cały czas" bez parametru', () => {
+  assert.equal(adresFiltra({ okres: 'miesiac', agent: 'A' }, { okres: 'rok' }), '?okres=rok&agent=A');
+  assert.equal(adresFiltra({ okres: 'miesiac', agent: 'A' }, { agent: null }), '?okres=miesiac');
+  assert.equal(adresFiltra({ okres: 'rok', agent: null }, { okres: 'wszystko' }), '?');
 });
 
 for (const b of bledy) console.log(b);

@@ -36,6 +36,7 @@
   const tabs = [
     { href: '/panel/leady', label: 'Leady' },
     { href: '/panel/statystyki', label: 'Statystyki' },
+    { href: '/panel/polisy', label: 'Polisy' },
     { href: '/panel/klienci', label: 'Klienci' },
     { href: '/panel/niedokonczone', label: 'Niedokończone', alarm: true },
     { href: '/panel', label: 'Oferty', exact: true },

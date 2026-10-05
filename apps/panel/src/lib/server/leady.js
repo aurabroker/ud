@@ -26,6 +26,7 @@ const TERMINY = ['przeterminowane', 'dzisiaj', 'tydzien', 'brak'];
 const DZIALANIA = ['telefon', 'email', 'spotkanie', 'inne'];
 const OPERACJE = ['przenies', 'dzialanie', 'opiekun', 'archiwizuj', 'sprzedaz'];
 const POLA_SPRZEDAZY = ['skladka_roczna', 'skladka_mies', 'swiadczenie_okresowa', 'swiadczenie_trwala', 'swiadczenie_zgon'];
+const POLA_POLISY = ['polisa_numer', 'ochrona_od', 'ochrona_do'];
 export const OKRESY_STATYSTYK = ['wszystko', 'miesiac', 'poprzedni', 'kwartal', 'rok'];
 
 /** Błąd, który endpoint zamienia na odpowiedź HTTP bez dalszej obróbki. */
@@ -487,6 +488,24 @@ export async function statystyki(sb, userId, parametry) {
   return { ...wynik, okres };
 }
 
+/**
+ * Wykaz polis (/panel/polisy): każda sprzedaż z numerem polisy, okresem
+ * ochrony, datą sprzedaży i składkami. Kto co widzi, decyduje SQL
+ * (ud_leady_polisy — reguła jak w statystykach); okres to data sprzedaży.
+ */
+export async function polisy(sb, userId, parametry) {
+  const pobierz = (k) => {
+    const v = parametry instanceof URLSearchParams ? parametry.get(k) : parametry?.[k];
+    return typeof v === 'string' ? v : '';
+  };
+  const okres = OKRESY_STATYSTYK.includes(pobierz('okres')) ? pobierz('okres') : 'wszystko';
+  const agent = jestUuid(pobierz('agent')) ? pobierz('agent') : null;
+  const { od, do: doo } = graniceOkresu(okres);
+  const wynik = await rpc(sb, 'ud_leady_polisy', { p_user: userId, p_od: od, p_do: doo, p_agent: agent });
+  if (!wynik) throw blad(403, 'Brak dostępu do wykazu polis.');
+  return { ...wynik, okres };
+}
+
 /** Adres wniosku na portalu — link agenta dokłada do niego ?agent=<kod>. */
 export const ADRES_WNIOSKU = 'https://utratadochodu.pl/wniosek/';
 
@@ -615,6 +634,12 @@ function daneSprzedazy(src) {
     const v = src[k];
     if (typeof v === 'number' && Number.isFinite(v)) wynik[k] = v;
     else if (typeof v === 'string' && v.trim()) wynik[k] = v.slice(0, 30);
+  }
+  // Pola polisy (część 6): numer i daty ochrony jako tekst — SQL sprawdza
+  // długość, format i kolejność dat.
+  for (const k of POLA_POLISY) {
+    const v = src[k];
+    if (typeof v === 'string' && v.trim()) wynik[k] = v.slice(0, k === 'polisa_numer' ? 80 : 20);
   }
   if (jestUuid(src.wariant_id)) wynik.wariant_id = src.wariant_id;
   return Object.keys(wynik).length ? wynik : undefined;

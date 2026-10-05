@@ -16,6 +16,8 @@
   import { tick } from 'svelte';
   import Dialog from '$lib/leady/Dialog.svelte';
   import { POLA_SPRZEDAZY, daneSprzedazyZFormularza } from '$lib/leady/model.js';
+  import { danePolisyZFormularza } from '$lib/polisy/model.js';
+  import PolaPolisy from '$lib/leady/PolaPolisy.svelte';
 
   let { admin = false, agenci = [], ja, onzamknij, onzapisano } = $props();
 
@@ -31,6 +33,9 @@
   let data = $state(dzis);
   let agentId = $state(ja ?? '');
   let pola = $state(Object.fromEntries(POLA_SPRZEDAZY.map((p) => [p.id, ''])));
+  let numer = $state('');
+  let ochronaOd = $state('');
+  let ochronaDo = $state('');
 
   let plik = $state(null);
   let inputPliku = $state(null);
@@ -104,13 +109,15 @@
     if (pesel.trim() && cyfryPeselu.length !== 11) b.pesel = 'PESEL ma 11 cyfr.';
     if (email.trim() && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())) b.email = 'Niepoprawny adres e-mail.';
     if (!data || data > dzis) b.data = 'Data sprzedaży nie może być z przyszłości.';
-    const { sprzedaz, bledne } = daneSprzedazyZFormularza(pola);
+    const { sprzedaz: kwoty, bledne } = daneSprzedazyZFormularza(pola);
     for (const id of bledne) b[id] = 'Wpisz kwotę cyframi, np. 2 760 albo 2760,50 — albo 0, jeśli tego ryzyka nie ma.';
-    if (!sprzedaz.skladka_roczna && !b.skladka_roczna) b.skladka_roczna = 'Składka roczna jest wymagana.';
-    return { b, sprzedaz };
+    if (!kwoty.skladka_roczna && !b.skladka_roczna) b.skladka_roczna = 'Składka roczna jest wymagana.';
+    const { polisa, bledy: bledyPolisy } = danePolisyZFormularza({ numer, od: ochronaOd, do: ochronaDo });
+    return { b: { ...b, ...bledyPolisy }, sprzedaz: { ...kwoty, ...polisa } };
   }
 
-  const POLE_Z_SQL = { imie_nazwisko: 'imie', pesel: 'pesel', email: 'email', telefon: 'telefon', data_sprzedazy: 'data', agent_id: 'agent' };
+  const POLE_Z_SQL = { imie_nazwisko: 'imie', pesel: 'pesel', email: 'email', telefon: 'telefon', data_sprzedazy: 'data', agent_id: 'agent',
+                       polisa_numer: 'polisa_numer', ochrona_od: 'ochrona_od', ochrona_do: 'ochrona_do' };
 
   async function zapisz(e) {
     e.preventDefault();
@@ -276,6 +283,7 @@
           </div>
         {/each}
       </div>
+      <PolaPolisy bind:numer bind:od={ochronaOd} bind:do={ochronaDo} {bledy} prefiks="dp" poczatek={data} />
     </fieldset>
 
     {#if blad}

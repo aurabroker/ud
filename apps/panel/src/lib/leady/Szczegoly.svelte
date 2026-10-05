@@ -5,6 +5,7 @@
    * poleceniem co przeciągnięciem i menu — przez ctx.przeniesZUi.
    */
   import { getContext } from 'svelte';
+  import { dataPL } from '$lib/polisy/model.js';
   import { DZIALANIA, POLA_SPRZEDAZY, dataGodzina, dataKrotka, dniWEtapie, etykietaZrodla, formatKwota, kontekstKarty, kwotaZTekstu, terminTekst, wartoscKarty } from './model.js';
 
   let { onzamknij } = $props();
@@ -109,6 +110,10 @@
               <p class="wiersz"><span class="et">{p.nazwa}</span> {formatKwota(lead.sprzedaz[p.id])}{p.jednostka.startsWith('zł /') ? p.jednostka.slice(2) : ''}</p>
             {/if}
           {/each}
+          {#if lead.sprzedaz.polisa_numer}<p class="wiersz" data-polisa-numer><span class="et">Numer polisy</span> {lead.sprzedaz.polisa_numer}</p>{/if}
+          {#if lead.sprzedaz.ochrona_od || lead.sprzedaz.ochrona_do}
+            <p class="wiersz" data-ochrona><span class="et">Ochrona</span> {dataPL(lead.sprzedaz.ochrona_od)} – {dataPL(lead.sprzedaz.ochrona_do)}</p>
+          {/if}
         {:else}
           <p class="uwaga">Brak danych sprzedaży — bez nich ta sprzedaż nie liczy się w statystykach składek.</p>
         {/if}

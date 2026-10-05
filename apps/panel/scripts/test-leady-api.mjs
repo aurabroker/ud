@@ -37,6 +37,7 @@ import {
   odczytajPoliseNowa,
   odczytajWgranaPolise,
   odpowiedzWariantow,
+  polisy,
   wczytajPlan,
   wczytajTablice,
   zmien,
@@ -830,6 +831,35 @@ try {
     assert.ok(Number(s.podsumowanie.prowizja_suma) > 0 && s.podsumowanie.bez_stawki === 0);
     sql(`update public.ud_user_profiles set prowizja_procent = null where id = '${ULA}'`);
   });
+  // ═══ Część 6: wykaz polis ══════════════════════════════════════════════════
+  await t('wykaz polis: numer i okres ochrony przechodzą przez zmianę stanu (biała lista), agent widzi swoje, admin wszystkie', async () => {
+    const leadZenona = sql(`select l.id from public.ud_leady l join public.ud_clients c on c.id = l.klient_id where c.full_name = 'Zenon Polisa'`);
+    const wersja = Number(sql(`select wersja from public.ud_leady where id = '${leadZenona}'`));
+    const r = await zmien(sbSql, ULA, { op: 'sprzedaz', leadId: leadZenona, expectedVersion: wersja, idempotencyKey: klucz(),
+      sprzedaz: { skladka_roczna: 2760, skladka_mies: 230, polisa_numer: 'LHP 9/2026', ochrona_od: '2026-09-15', ochrona_do: '2027-09-14', obce: 'x' } });
+    assert.equal(r.status, 200, JSON.stringify(r.body));
+    assert.equal(sql(`select polisa_numer || '|' || ochrona_od || '|' || ochrona_do from public.ud_leady where id = '${leadZenona}'`),
+      'LHP 9/2026|2026-09-15|2027-09-14');
+    const zle = await zmien(sbSql, ULA, { op: 'sprzedaz', leadId: leadZenona, expectedVersion: wersja + 1, idempotencyKey: klucz(),
+      sprzedaz: { skladka_roczna: 2760, ochrona_od: '2026-09-15', ochrona_do: '2026-09-01' } });
+    assert.deepEqual([zle.status, zle.body.pola], [400, ['ochrona_do']]);
+
+    const w = await polisy(sbSql, ULA, new URLSearchParams('agent=' + OLEK));
+    assert.equal(w.rola, 'user');
+    assert.equal(w.okres, 'wszystko');
+    assert.ok(w.polisy.every((x) => x.agent_id === ULA), 'agent nie podejrzy cudzych także parametrem');
+    const z = w.polisy.find((x) => x.lead_id === leadZenona);
+    assert.deepEqual([z.numer, z.ochrona_od, z.ochrona_do, Number(z.skladka_mies)], ['LHP 9/2026', '2026-09-15', '2027-09-14', 230]);
+    const a = await polisy(sbSql, ADM, new URLSearchParams('okres=cokolwiek'));
+    assert.ok(a.polisy.length > w.polisy.length && Array.isArray(a.agenci) && a.okres === 'wszystko');
+    await assert.rejects(polisy(sbSql, INES, new URLSearchParams()), (e) => e.status === 403);
+  });
+  await t('dodaj polisę: numer i okres ochrony z okna zapisane', async () => {
+    const r = await dodajPolise(sbSql, ULA, { idempotencyKey: klucz(), klient: { imieNazwisko: 'Olga Okresowa' },
+      sprzedaz: { skladka_roczna: 1500, polisa_numer: 'N-77', ochrona_od: '2026-08-01', ochrona_do: '2027-07-31' } });
+    assert.equal(r.status, 200, JSON.stringify(r.body));
+    assert.equal(sql(`select polisa_numer || '|' || ochrona_do from public.ud_leady where id = '${r.body.lead_id}'`), 'N-77|2027-07-31');
+  });
   await t('przetworz: polisa przyjmuje tylko application/pdf (formularz z cudzej strony → 415)', async () => {
     const r = await przetworz({ user: { id: ULA }, oczekiwanyTyp: 'application/pdf', typTresci: 'multipart/form-data; boundary=x',
       czytajCialo: async () => { throw new Error('nie powinno być czytane'); }, wykonaj: async () => ({ status: 200, body: {} }) });
@@ -894,7 +924,7 @@ try {
   await t('kontrakt: wszystkie funkcje SQL z leady.js były wołane (nazwy argumentów zgodne z sygnaturą)', () => {
     const wolane = new Set(sbSql.wywolania.map(([n]) => n));
     for (const f of ['ud_leady_plan', 'ud_leady_synchronizuj', 'ud_leady_liczniki', 'ud_leady_kolumna', 'ud_lead_szczegoly', 'ud_lead_zmien', 'ud_lead_notatka', 'ud_leady_zwin',
-                     'ud_lead_plik', 'ud_lead_plik_dodaj', 'ud_lead_polisa_reczna', 'ud_leady_statystyki']) {
+                     'ud_lead_plik', 'ud_lead_plik_dodaj', 'ud_lead_polisa_reczna', 'ud_leady_statystyki', 'ud_leady_polisy']) {
       assert.ok(wolane.has(f), `nie wołano ${f}`);
     }
   });

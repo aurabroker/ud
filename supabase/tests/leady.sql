@@ -1045,5 +1045,89 @@ begin
                           'ud_leady_statystyki')));
 end $$;
 
+-- ─── 14. Część 6: wykaz polis (numer, okres ochrony) ───────────────────────
+do $$
+declare
+  piotr uuid := (select id from public.ud_leady where klient_id = 'c0000000-0000-0000-0000-0000000000e1');
+  r jsonb; w jsonb; s jsonb; wyjatek boolean; robert uuid;
+  sp jsonb := '{"skladka_roczna": 2760, "skladka_mies": 230, "polisa_numer": " LHP 123/2026 ", "ochrona_od": "2026-10-01", "ochrona_do": "2027-09-30"}';
+begin
+  r := tt.ruch('sprzedaz', piotr, tt.wersja(piotr), 'pol6-0001', tt.id_ula(), sp);
+  perform tt.t('polisa: numer (bez spacji na brzegach) i okres ochrony zapisane, na karcie i w historii poprzednich danych',
+    r->>'status' = 'ok'
+    and (select polisa_numer = 'LHP 123/2026' and ochrona_od = '2026-10-01' and ochrona_do = '2027-09-30' from public.ud_leady where id = piotr)
+    and r->'lead'->'sprzedaz'->>'polisa_numer' = 'LHP 123/2026' and r->'lead'->'sprzedaz'->>'ochrona_do' = '2027-09-30');
+  r := tt.ruch('sprzedaz', piotr, tt.wersja(piotr), 'pol6-0002', tt.id_ula(), sp);
+  perform tt.t('polisa: te same dane → bez_zmiany', r->>'status' = 'bez_zmiany');
+  r := tt.ruch('sprzedaz', piotr, tt.wersja(piotr), 'pol6-0003', tt.id_ula(), sp || '{"ochrona_do": "2027-12-31"}');
+  perform tt.t('polisa: zmiana samej daty końca to zmiana; poprzednia data w historii',
+    r->>'status' = 'ok' and (select (dane->'poprzednia_sprzedaz'->>'ochrona_do') = '2027-09-30' from public.ud_leady_historia
+                              where lead_id = piotr and klucz = 'pol6-0003'));
+  perform tt.t('polisa: koniec przed początkiem → błędne dane z polem',
+    tt.ruch('sprzedaz', piotr, tt.wersja(piotr), 'pol6-0004', tt.id_ula(), sp || '{"ochrona_do": "2026-09-01"}')->'pola' = '["ochrona_do"]');
+  perform tt.t('polisa: data nieistniejąca, z innego stulecia, numer za długi → błędne dane',
+    tt.ruch('sprzedaz', piotr, tt.wersja(piotr), 'pol6-0005', tt.id_ula(), sp || '{"ochrona_od": "2026-02-31"}')->>'status' = 'bledne_dane'
+    and tt.ruch('sprzedaz', piotr, tt.wersja(piotr), 'pol6-0006', tt.id_ula(), sp || '{"ochrona_od": "1990-01-01"}')->>'status' = 'bledne_dane'
+    and tt.ruch('sprzedaz', piotr, tt.wersja(piotr), 'pol6-0007', tt.id_ula(), sp || jsonb_build_object('polisa_numer', repeat('X', 61)))->'pola' = '["polisa_numer"]');
+  perform tt.t('polisa: sam numer bez składki dalej nie wystarcza (brak_danych)',
+    tt.ruch('sprzedaz', piotr, tt.wersja(piotr), 'pol6-0008', tt.id_ula(), '{"polisa_numer": "X1"}')->>'status' = 'brak_danych');
+  wyjatek := false;
+  begin
+    update public.ud_leady set ochrona_od = '2027-01-01', ochrona_do = '2026-01-01' where id = piotr;
+  exception when check_violation then wyjatek := true;
+  end;
+  perform tt.t('polisa: baza sama odrzuca koniec przed początkiem', wyjatek);
+
+  -- Wykaz: Ula widzi swoje sprzedaże, administrator wszystkie, nieaktywny nic.
+  w := public.ud_leady_polisy(tt.id_ula());
+  perform tt.t('wykaz: agent — tylko swoje sprzedaże (także zarchiwizowane), z numerem, datami i dziś czasu polskiego',
+    (w->>'dzis')::date = (now() at time zone 'Europe/Warsaw')::date and w->'agenci' = 'null'::jsonb
+    and not exists (select 1 from jsonb_array_elements(w->'polisy') x where x->>'agent_id' <> tt.id_ula()::text)
+    and exists (select 1 from jsonb_array_elements(w->'polisy') x
+                 where x->>'lead_id' = piotr::text and x->>'numer' = 'LHP 123/2026' and x->>'ochrona_od' = '2026-10-01'
+                   and (x->>'skladka_mies')::numeric = 230 and not (x->>'mies_wyliczona')::boolean)
+    and exists (select 1 from jsonb_array_elements(w->'polisy') x where (x->>'archiwum')::boolean));
+  perform tt.t('wykaz: agent nie poda cudzego agenta w parametrze',
+    public.ud_leady_polisy(tt.id_ula(), null, null, tt.id_olek())->'polisy' = w->'polisy');
+  w := public.ud_leady_polisy(tt.id_adm());
+  perform tt.t('wykaz: administrator — wszystkie sprzedaże z kwotami i bez; lista agentów do filtra',
+    jsonb_array_length(w->'polisy') = (select count(*) from public.ud_leady l join public.ud_leady_etap e on e.id = l.etap_id
+                                         where e.rodzaj = 'wygrany' and l.klient_id is not null)
+    and jsonb_array_length(w->'agenci') >= 3
+    and exists (select 1 from jsonb_array_elements(w->'polisy') x where x->>'skladka_roczna' is null));
+  perform tt.t('wykaz: składka miesięczna bez zapisanej = 1/12 rocznej, z flagą; prowizja ze stawki',
+    exists (select 1 from jsonb_array_elements(w->'polisy') x
+             where (x->>'mies_wyliczona')::boolean and (x->>'skladka_mies')::numeric = round((x->>'skladka_roczna')::numeric / 12, 2))
+    and exists (select 1 from jsonb_array_elements(w->'polisy') x
+                 where x->>'lead_id' = piotr::text and (x->>'prowizja')::numeric = round(2760 * 0.18, 2)));
+  perform tt.t('wykaz: filtr administratora po agencie i po dacie sprzedaży',
+    not exists (select 1 from jsonb_array_elements(public.ud_leady_polisy(tt.id_adm(), null, null, tt.id_olek())->'polisy') x
+                 where x->>'agent_id' is distinct from tt.id_olek()::text)
+    and jsonb_array_length(public.ud_leady_polisy(tt.id_adm(), now() + interval '1 day', null)->'polisy') = 0);
+  perform tt.t('wykaz: nieaktywny i nieznany → brak (null)',
+    public.ud_leady_polisy(tt.id_ines()) is null and public.ud_leady_polisy(gen_random_uuid()) is null);
+
+  -- „Dodaj polisę" z numerem i datami.
+  r := public.ud_lead_polisa_reczna(tt.id_ula(), 'pol6-1001', jsonb_build_object('imie_nazwisko', 'Ewa Okres',
+         'sprzedaz', jsonb_build_object('skladka_roczna', 1200, 'polisa_numer', 'P-1', 'ochrona_od', '2026-05-01', 'ochrona_do', '2027-04-30')));
+  perform tt.t('dodaj polisę: numer i okres ochrony zapisane',
+    r->>'status' = 'ok' and (select polisa_numer = 'P-1' and ochrona_od = '2026-05-01' and ochrona_do = '2027-04-30'
+                               from public.ud_leady where id = (r->>'lead_id')::uuid));
+  perform tt.t('dodaj polisę: koniec przed początkiem → błąd, nic nie zapisane',
+    public.ud_lead_polisa_reczna(tt.id_ula(), 'pol6-1002', jsonb_build_object('imie_nazwisko', 'Ewa Zladata',
+      'sprzedaz', jsonb_build_object('skladka_roczna', 1200, 'ochrona_od', '2026-05-01', 'ochrona_do', '2026-04-30')))->'pola' = '["ochrona_do"]'
+    and not exists (select 1 from public.ud_clients where full_name = 'Ewa Zladata'));
+
+  r := tt.przenies(piotr, 'oferta', 'pol6-0009');
+  perform tt.t('polisa: wyjście z Wygrany zeruje numer i daty (historia je pamięta)',
+    r->>'status' = 'ok' and (select polisa_numer is null and ochrona_od is null and ochrona_do is null from public.ud_leady where id = piotr)
+    and (select dane->'poprzednia_sprzedaz'->>'polisa_numer' = 'LHP 123/2026' from public.ud_leady_historia
+          where lead_id = piotr and klucz = 'pol6-0009'));
+  perform tt.t('uprawnienia: ud_leady_polisy tylko dla service_role',
+    (select not has_function_privilege('anon', p.oid, 'execute') and not has_function_privilege('authenticated', p.oid, 'execute')
+            and has_function_privilege('service_role', p.oid, 'execute')
+       from pg_proc p where p.proname = 'ud_leady_polisy' and p.pronamespace = 'public'::regnamespace));
+end $$;
+
 -- ─── Podsumowanie ───────────────────────────────────────────────────────────
 select format('WYNIK: %s PASS, %s FAIL', count(*) filter (where ok), count(*) filter (where not ok)) from tt.wyniki;

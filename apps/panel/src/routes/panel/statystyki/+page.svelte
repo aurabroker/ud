@@ -1,20 +1,15 @@
 <script>
-  import { goto, invalidateAll } from '$app/navigation';
+  import { invalidateAll } from '$app/navigation';
   import { formatKwota } from '$lib/leady/model.js';
   import DialogPolisy from '$lib/statystyki/DialogPolisy.svelte';
+  import Filtry from '$lib/statystyki/Filtry.svelte';
+  import { adresFiltra } from '$lib/statystyki/filtr.js';
 
   let { data } = $props();
   const st = $derived(data.st);
   const p = $derived(st?.podsumowanie);
   const admin = $derived(st?.rola === 'admin');
 
-  const OKRESY = [
-    { id: 'wszystko', nazwa: 'Cały czas' },
-    { id: 'miesiac', nazwa: 'Ten miesiąc' },
-    { id: 'poprzedni', nazwa: 'Poprzedni miesiąc' },
-    { id: 'kwartal', nazwa: 'Ten kwartał' },
-    { id: 'rok', nazwa: 'Ten rok' },
-  ];
   // Nazwy bez „niezdolność do pracy" i „świadczenie miesięczne" (decyzja z 04.10.2026);
   // to, że okresowa jest miesięczna, mówi jednostka przy kwocie.
   const RYZYKA = [
@@ -30,20 +25,7 @@
   const nazwaAgenta = $derived(st?.agent ? (st.agenci?.find((a) => a.id === st.agent)?.nazwa ?? null) : null);
   const maxRoczna = $derived(Math.max(1, ...(st?.wg_agentow ?? []).map((a) => Number(a.skladka_roczna_suma) || 0)));
 
-  /** Adres z filtrami: zmiana jednego zostawia drugi. */
-  function adres(zmiana) {
-    const q = new URLSearchParams();
-    const okres = zmiana.okres ?? st?.okres ?? 'wszystko';
-    const agent = 'agent' in zmiana ? zmiana.agent : (admin ? st?.agent : null);
-    if (okres && okres !== 'wszystko') q.set('okres', okres);
-    if (agent) q.set('agent', agent);
-    return `?${q}`;
-  }
-
-  /** Bez JS filtr agenta działa jako zwykły GET; z JS zmiana od razu odświeża widok. */
-  function zmienAgenta(e) {
-    goto(adres({ agent: e.currentTarget.value || null }), { keepFocus: true, noScroll: true, replaceState: true });
-  }
+  const adres = (zmiana) => adresFiltra({ okres: st?.okres, agent: admin ? st?.agent : null }, zmiana);
 
   let dodawanie = $state(false);
   let dodano = $state(null);
@@ -72,25 +54,7 @@
 </div>
 
 {#if st}
-  <form method="GET" class="filtry">
-    <input type="hidden" name="okres" value={st.okres ?? 'wszystko'} />
-    <nav class="okresy" aria-label="Okres">
-      {#each OKRESY as o (o.id)}
-        <a href={adres({ okres: o.id })} aria-current={(st.okres ?? 'wszystko') === o.id ? 'page' : undefined}
-           data-sveltekit-noscroll data-sveltekit-replacestate data-sveltekit-keepfocus>{o.nazwa}</a>
-      {/each}
-    </nav>
-    {#if admin}
-      <label class="agent">
-        <span class="label">Agent</span>
-        <select name="agent" class="input" value={st.agent ?? ''} onchange={zmienAgenta}>
-          <option value="">Wszyscy</option>
-          {#each st.agenci ?? [] as a (a.id)}<option value={a.id}>{a.nazwa}</option>{/each}
-        </select>
-      </label>
-      <noscript><button class="btn btn-ghost">Pokaż</button></noscript>
-    {/if}
-  </form>
+  <Filtry okres={st.okres} agent={st.agent} agenci={st.agenci} {admin} />
 {/if}
 
 {#if dodano}
@@ -214,14 +178,6 @@
   h1 { font-size: 1.55rem; letter-spacing: -.01em; }
   .tytul .muted { max-width: 44rem; margin-top: .3rem; }
 
-  .filtry { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: .75rem 1rem; margin-bottom: 1.1rem; }
-  .okresy { display: inline-flex; flex-wrap: wrap; gap: .25rem; padding: .25rem; background: #fff; border: 1px solid var(--slate-300); border-radius: 10px; }
-  .okresy a { padding: .4rem .75rem; border-radius: 7px; font-size: .84rem; font-weight: 600; color: var(--slate-600); text-decoration: none; }
-  .okresy a:hover { background: var(--slate-100); color: var(--slate-900); }
-  .okresy a[aria-current='page'] { background: var(--slate-800); color: #fff; }
-  .okresy a:focus-visible { outline: 2px solid var(--blue-600); outline-offset: 1px; }
-  .agent { display: flex; flex-direction: column; }
-  .agent .input { width: auto; min-width: 13rem; background: #fff; }
 
   .kafle { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: .9rem; margin-bottom: 1.1rem; }
   .kafel { position: relative; background: #fff; border: 1px solid var(--slate-300); border-radius: 12px; padding: 1rem 1.15rem 1rem 1.35rem;
@@ -255,6 +211,5 @@
   a { color: var(--blue-700); }
   @media (max-width: 40rem) {
     .liczba { font-size: 1.45rem; }
-    .okresy { width: 100%; }
   }
 </style>

@@ -17,6 +17,8 @@
   import { getContext, onMount, tick } from 'svelte';
   import Dialog from './Dialog.svelte';
   import { POLA_SPRZEDAZY, daneSprzedazyZFormularza, formatKwota } from './model.js';
+  import { danePolisyZFormularza } from '$lib/polisy/model.js';
+  import PolaPolisy from './PolaPolisy.svelte';
 
   let { dialog, onzamknij } = $props();
   const ctx = getContext('tablica');
@@ -32,6 +34,10 @@
   const poczatkowe = stan.znajdz(dialog.leadId)?.karta?.sprzedaz ?? stan.otwarty?.lead?.sprzedaz ?? null;
   let pola = $state(Object.fromEntries(POLA_SPRZEDAZY.map((p) => [p.id, naTekst(poczatkowe?.[p.id])])));
   let wariantId = $state(poczatkowe?.wariant_id ?? '');
+  // Numer polisy i okres ochrony (część 6, wykaz polis).
+  let numer = $state(poczatkowe?.polisa_numer ?? '');
+  let ochronaOd = $state(poczatkowe?.ochrona_od ?? '');
+  let ochronaDo = $state(poczatkowe?.ochrona_do ?? '');
   let warianty = $state(null);
   // 'wybor' (klient bez ofert: polisa albo ręcznie) | 'warianty' | 'reczne'
   let tryb = $state(poczatkowe?.skladka_roczna != null ? 'reczne' : null);
@@ -126,9 +132,12 @@
   async function zapisz(e) {
     e.preventDefault();
     if (tryb === 'wybor' || tryb === null) tryb = 'reczne';
-    const { sprzedaz, bledne } = daneSprzedazyZFormularza(pola, wariantId || null);
+    const { sprzedaz: kwoty, bledne } = daneSprzedazyZFormularza(pola, wariantId || null);
+    const { polisa, bledy: bledyPolisy } = danePolisyZFormularza({ numer, od: ochronaOd, do: ochronaDo });
+    const sprzedaz = { ...kwoty, ...polisa };
     bledy = Object.fromEntries(bledne.map((id) => [id, 'Wpisz kwotę cyframi, np. 3 036 albo 3036,50 — albo 0, jeśli tego ryzyka nie ma.']));
     if (!sprzedaz.skladka_roczna && !bledy.skladka_roczna) bledy.skladka_roczna = 'Składka roczna jest wymagana.';
+    bledy = { ...bledy, ...bledyPolisy };
     if (Object.keys(bledy).length) {
       blad = 'Popraw zaznaczone pola.';
       await tick();
@@ -235,6 +244,7 @@
           </div>
         {/each}
       </div>
+      <PolaPolisy bind:numer bind:od={ochronaOd} bind:do={ochronaDo} {bledy} prefiks="dlg-sp" />
     {/if}
     {#if blad}<p class="blad" role="alert">{blad}</p>{/if}
   </form>
