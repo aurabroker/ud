@@ -1621,12 +1621,19 @@ dwa źródła dawałyby dwie prawdy. Mapa w `src/lib/klienci/akcja.js`:
 Nowy → „Do kontaktu", Oferta → „Oferta wysłana", Decyzja klienta → „Czeka na
 decyzję klienta", Wygrany → „Klient ubezpieczony" (po końcu ochrony —
 „Polisa wygasła"), Przegrany → „Klient zrezygnował" (powód w podpowiedzi);
-etap spoza mapy — jego nazwa. Odznaka prowadzi do leada na tablicy;
-zarchiwizowany lead ma dopisek „archiwum" i bez odnośnika. Lista
+etap spoza mapy — jego nazwa. Odznaka prowadzi do leada na tablicy. Lista
 (`listaKlientow` w `src/lib/server/klienci.js`) woła przy wejściu tę samą
 synchronizację co tablica, więc nowy klient od razu ma etap. Widoczność bez
 zmian (`klienciWidoczni`). Test: `klienci.spec.js` (SSR na prawdziwym SQL,
 `/__test/ssr-klienci`) i `test:leady-model`.
+
+**Archiwum tablicy = archiwum Klientów (v.0.67, decyzja z 05.10.2026).**
+Klient, którego lead zarchiwizowano na tablicy, znika z listy i stoi
+w widoku „Archiwum" (`/panel/klienci?widok=archiwum`, przełącznik z licznikami
+nad tabelą). Widok idzie przez adres, nie przez stan komponentu — da się go
+zapisać w zakładce i sprawdzić w SSR. W archiwum etap zostaje (np. „Klient
+ubezpieczony"), ale bez odnośnika: zarchiwizowanego leada nie ma na tablicy.
+Klient bez leada zostaje na liście. Karta klienta otwiera się z obu widoków.
 
 ### Nagłówek: „Ustawienia" zamiast trzech zakładek (v.0.66, 05.10.2026)
 

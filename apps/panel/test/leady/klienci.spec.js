@@ -8,8 +8,8 @@ import { adres, reset, sql } from './pomocnicy.js';
 
 test.beforeEach(async ({ request }) => { await reset(request); });
 
-async function wczytaj(page, request, u) {
-  const r = await request.get(`${adres()}/__test/ssr-klienci`, { headers: { 'x-test-user': u } });
+async function wczytaj(page, request, u, zapytanie = '') {
+  const r = await request.get(`${adres()}/__test/ssr-klienci${zapytanie}`, { headers: { 'x-test-user': u } });
   expect(r.status(), await r.text()).toBe(200);
   await page.setContent(await r.text());
 }
@@ -45,13 +45,39 @@ test('kolumna „Akcja" z etapu leada; „Zawód" zniknął; odnośnik prowadzi 
   await expect(page.getByPlaceholder('Szukaj: nazwisko, email, telefon, akcja…')).toBeVisible();
 });
 
-test('zarchiwizowany lead: etap zostaje, dopisek „archiwum", bez odnośnika do tablicy', async ({ page, request }) => {
+test('zarchiwizowany lead: klient znika z listy i stoi w „Archiwum" — z etapem, bez odnośnika do tablicy', async ({ page, request }) => {
   await sql(request, `update public.ud_leady set etap_id = tt.etap('wygrany'), skladka_roczna = 2400,
-           zarchiwizowano_at = now() where id = tt.lead('Grażyna Pawlak');`);
+           zarchiwizowano_at = now() where id = tt.lead('Grażyna Pawlak');
+    update public.ud_leady set etap_id = tt.etap('przegrany'), powod_utraty = 'Za drogo',
+           zarchiwizowano_at = now() where id = tt.lead('Filip Lis');`);
+  const wszyscy = Number(await sql(request, 'select count(*) from public.ud_clients'));
+
   await wczytaj(page, request, 'adm');
-  await expect(akcja(page, 'Grażyna Pawlak')).toContainText('Klient ubezpieczony');
-  await expect(akcja(page, 'Grażyna Pawlak')).toContainText('archiwum');
+  await expect(wiersz(page, 'Grażyna Pawlak')).toHaveCount(0);
+  await expect(wiersz(page, 'Filip Lis')).toHaveCount(0);
+  await expect(page.locator('[data-widok="aktywni"]')).toHaveAttribute('aria-current', 'page');
+  await expect(page.locator('[data-widok="aktywni"] .ile')).toHaveText(String(wszyscy - 2));
+  await expect(page.locator('[data-widok="archiwum"] .ile')).toHaveText('2');
+  await expect(page.locator('[data-widok="archiwum"]')).toHaveAttribute('href', '/panel/klienci?widok=archiwum');
+  await expect(page.locator('tbody tr')).toHaveCount(wszyscy - 2);
+
+  await wczytaj(page, request, 'adm', '?widok=archiwum');
+  await expect(page.locator('[data-widok="archiwum"]')).toHaveAttribute('aria-current', 'page');
+  await expect(page.locator('tbody tr')).toHaveCount(2);
+  await expect(akcja(page, 'Grażyna Pawlak')).toHaveText('Klient ubezpieczony');
   await expect(akcja(page, 'Grażyna Pawlak').locator('a')).toHaveCount(0);
+  await expect(akcja(page, 'Filip Lis')).toHaveText('Klient zrezygnował');
+  await expect(akcja(page, 'Filip Lis').locator('[title]')).toHaveAttribute('title', 'Powód: Za drogo');
+  await expect(page.locator('main, body')).toContainText('2 w archiwum');
+  // Wiersz nadal prowadzi do karty klienta.
+  await expect(wiersz(page, 'Grażyna Pawlak').locator('td:first-child a')).toHaveAttribute('href', /^\/panel\/klienci\/[0-9a-f-]{36}$/);
+});
+
+test('puste archiwum mówi, co tu trafia', async ({ page, request }) => {
+  await wczytaj(page, request, 'adm', '?widok=archiwum');
+  await expect(page.locator('tbody tr')).toHaveCount(0);
+  await expect(page.locator('body')).toContainText('Archiwum jest puste');
+  await expect(page.locator('[data-widok="archiwum"] .ile')).toHaveText('0');
 });
 
 test('agent widzi tylko klientów swoich leadów — z ich akcją', async ({ page, request }) => {

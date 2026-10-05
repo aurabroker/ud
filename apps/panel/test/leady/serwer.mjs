@@ -255,7 +255,7 @@ export async function startuj() {
             const { render } = await serwer.ssrLoadModule('svelte/server');
             const Strona = (await serwer.ssrLoadModule('/src/routes/panel/klienci/+page.svelte')).default;
             const clients = await listaKlientow({ rpc: (n, a) => sb.rpc(n, a), from: (t) => sbOferty.from(t) }, uzytkownik);
-            const { body } = render(Strona, { props: { data: { clients } } });
+            const { body } = render(Strona, { props: { data: { clients, archiwum: url.searchParams.get('widok') === 'archiwum' } } });
             res.setHeader('content-type', 'text/html; charset=utf-8');
             return res.end(`<!doctype html><meta charset="utf-8"><body>${body}</body>`);
           }
