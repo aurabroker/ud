@@ -1342,6 +1342,14 @@ w historii). Druga sprzedaż z tamtego dnia (3 876 zł, odczytana z polisy przed
 zmianą) czeka na „Odczytaj kwoty z polisy" — pliku w prywatnym kubełku stąd
 odczytać się nie da.
 
+**Wersja 5 WDROŻONA 05.10.2026 (sekcja „Wykaz polis")**: część 6,
+`20261005090000_leady_kanban_6_wykaz_polis` — wklejona przez właściciela
+w SQL Editor, wersja odnotowana ręcznie; potem panel v.0.62 (zakładka
+„Polisy"). Sprawdzone na produkcji: treść 5 funkcji = repozytorium,
+uprawnienia tylko `service_role`, ograniczenie `lead_ochrona_kolejnosc`,
+wyzwalaczy bez zmian. Sprzedaże sprzed tej wersji nie mają numeru ani dat —
+wykaz pokazuje je jako „Bez dat ochrony", do uzupełnienia w „Dane sprzedaży".
+
 SQL Editor zapisał treść funkcji z końcami linii CRLF. Porównując `prosrc`
 z repozytorium, licz skrót z `replace(prosrc, chr(13), '')` — inaczej każda
 funkcja z części 2 wygląda na inną niż w repo, choć nie jest.
