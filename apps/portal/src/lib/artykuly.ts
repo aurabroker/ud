@@ -110,6 +110,12 @@ export function normalizuj(html: string): string {
   wynik = wynik.replace(/<a ([^>]*target="_blank"[^>]*)>/g, (całość, atrybuty: string) =>
     atrybuty.includes('rel=') ? całość : `<a ${atrybuty} rel="noopener noreferrer">`);
 
+  // 8. Tabela o pięciu kolumnach nie mieści się na telefonie i rozpychałaby
+  //    całą stronę w poziomie. Przewija się więc sama, w swoim kontenerze.
+  //    tabindex, bo przewijany obszar musi dać się obsłużyć z klawiatury.
+  wynik = wynik.replace(/<table[\s>][\s\S]*?<\/table>/g, (tabela) =>
+    `<div class="tabela" tabindex="0">${tabela}</div>`);
+
   return wynik.trim();
 }
 

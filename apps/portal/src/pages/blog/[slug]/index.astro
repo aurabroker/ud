@@ -209,6 +209,35 @@ const KATEGORIE = kategorie();
     margin: 1.8rem 0;
     border: 1px solid var(--color-linia);
   }
+  /* Kontener z normalizuj() (krok 8): przewija tabelę, nie stronę. Minimalna
+     szerokość tabeli trzyma kolumny czytelne — lepiej przewinąć niż czytać
+     liczby łamane po jednej cyfrze. */
+  .wpis :global(.tabela) {
+    overflow-x: auto;
+    border: 1px solid var(--color-linia);
+    margin: 0 0 1.6rem;
+  }
+  .wpis :global(table) {
+    width: 100%;
+    min-width: 34rem;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: var(--color-tekst-drugi);
+  }
+  .wpis :global(th), .wpis :global(td) {
+    padding: 0.7rem 0.9rem;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid var(--color-linia);
+  }
+  .wpis :global(thead th) {
+    color: var(--color-tekst);
+    font-weight: 600;
+    background: var(--color-tlo-jasne);
+  }
+  .wpis :global(tbody tr:last-child td),
+  .wpis :global(tbody tr:last-child th) { border-bottom: 0; }
   .wpis :global(hr) {
     border: 0;
     border-top: 1px solid var(--color-linia);

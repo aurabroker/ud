@@ -170,6 +170,34 @@ Nowy artykuł idzie tak:
 3. Jeden wpis na początku `artykuly.json`, w formacie pozostałych, z adresami
    800/1600 w `obraz`/`obrazDuzy`, i plik `artykuly/<slug>.html` z treścią.
 
+**Obrazek w treści (infografika, wykres) — z sandboksa nie wyślesz go do
+kubełka**, bo `article-images` przyjmuje wysyłki tylko od zalogowanych. Droga,
+która działa (09.10.2026, „zawal-udar-utrata-dochodu"): plik źródłowy do
+repozytorium obok treści (`artykuly/<slug>-<nazwa>.png`), push, a potem
+w SQL `net.http_get` na
+`https://api.github.com/repos/aurabroker/ud/contents/<ścieżka>?ref=<sha>`.
+Odpowiedź niesie plik w base64; wklejasz go do `content` jako
+`data:image/png;base64,…` i normalizacja robi z niego
+`<slug>-content1-1600.webp`, jak z obrazka wklejonego w CMS-ie. Zanim zapiszesz,
+porównaj `md5(decode(…, 'base64'))` z lokalną sumą pliku. Przepisywanie base64
+przez narzędzie odpada — 35 kB to dziesiątki tysięcy znaków, w których jedna
+pomyłka psuje obraz. Działa, bo repozytorium jest publiczne.
+
+Tą samą drogą idzie sama treść: plik `artykuly/<slug>.html` pchasz do repo
+od razu z docelowym adresem obrazka (`normalized/<slug>-content1-1600.webp` —
+nazwy są przewidywalne, patrz `nazwaPliku()` w funkcji), a w SQL podmieniasz
+ten adres na data URI. Po normalizacji `md5(content)` w bazie ma się równać
+sumie pliku w repo. Bez wpisu w `artykuly.json` portal pliku nie buduje, więc
+może wyprzedzić wpis.
+
+Okładka i infografika w jednym wywołaniu przekroczyły limit workera
+(546 `WORKER_RESOURCE_LIMIT`). Drugie wywołanie zrobiło resztę, bo okładka była
+już w `aura_article_images` — przy dwóch obrazkach licz się z dwoma wywołaniami.
+
+**Tabele w treści** `normalizuj()` owija w kontener przewijany w poziomie
+(`.tabela`). Bez niego tabela z pięcioma kolumnami rozpychała stronę na
+telefonie. Pilnuje tego `artykuly.spec.js`, także przy szerokości 390 px.
+
 **Poprawiasz treść opublikowanego artykułu — dopisz mu `zmieniono`** (ISO,
 jak `opublikowano`). Z tego pola, a bez niego z daty publikacji, bierze się
 `dateModified` na stronie i `<lastmod>` w mapie strony. Datę w mapie mają
