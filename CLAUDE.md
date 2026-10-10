@@ -1823,6 +1823,67 @@ nie słuchał), schematu produkcji (atrapa ma tylko potrzebne kolumny) i PostgRE
 
 ---
 
+## Newsletter — HTML do wklejenia w Resend
+
+Wydanie opisuje `apps/portal/newsletter/<rrrr-mm>.json` (temat, preheader,
+wstęp, artykuł wiodący, dwa „Warto przeczytać", ramka kalkulatora, serwisy
+w stopce). HTML buduje:
+
+```
+cd apps/portal && node scripts/newsletter.mjs 2026-10
+```
+
+Tytuły, adresy i okładki bierze z `artykuly.json`, dane spółki z `firma.ts` —
+w pliku wydania są tylko zajawki i kolejność. Wynik, `newsletter/<wydanie>.html`,
+właściciel wkleja w Resend Broadcasts (decyzja z 10.10.2026: kopiuje cały HTML
+sam, skryptu wysyłki nie ma). Link do wypisu to `{{{RESEND_UNSUBSCRIBE_URL}}}` —
+Resend podstawia go per odbiorca. Nadawca jak przy przypomnieniach:
+`UtrataDochodu <info@utratadochodu.pl>` (domena zweryfikowana w Resend).
+
+**Zajawki piszesz z treści artykułu, nie z pamięci.** Liczba w zajawce, której
+nie ma w artykule, to nowe twierdzenie bez sprawdzenia z OWU i źródłami.
+
+### Obrazki: JPEG w `public/email/`, na zawsze
+
+- **Nie WebP z kubełka** — Outlook na Windowsie WebP-a nie pokazuje. Generator
+  robi z wariantu 1600 px JPEG-i 1200 i 600 px
+  (`public/email/artykuly/<slug>-<szer>.jpg`) i nie nadpisuje istniejących.
+- **Nie `/_astro/`** — tam nazwa zmienia się z każdym buildem, a wysłany mail
+  wskazuje adres latami. To jest ten jeden przypadek, w którym zdjęcie idzie do
+  `public/` (zasada „src/, nigdy public/" dotyczy zdjęć na stronach).
+- **Nie kasuj i nie przemianowuj** niczego w `public/email/` — każdy wysłany
+  mail straciłby obrazek. Pilnuje tego `test/newsletter.spec.js`, który
+  sprawdza KAŻDE wydanie w `newsletter/`, także stare.
+- Logo: `scripts/email-logo.mjs` (znak z `Znak.astro` + napis krojem Public
+  Sans, PNG 3×, białe tło — przezroczyste znikałoby w trybie ciemnym).
+- `/email/*` jest wypisane z `_routes.json` — inaczej każde otwarcie maila to
+  kilka wywołań funkcji brzegowej.
+
+### UTM-y
+
+`utm_source=newsletter`, `utm_medium=email`, `utm_campaign` z pliku wydania
+(`newsletter_2026_10`), `utm_content` = miejsce w mailu (`temat-numeru`,
+`artykul-2`, `kalkulator`, `logo`…). Linki do serwisów siostrzanych mają
+`utm_source=newsletter-utratadochodu`, bo tam „newsletter" znaczyłby ich własny.
+Bez UTM-ów wizyty z poczty lądują w GA4 jako ruch bezpośredni albo jako
+odesłanie z `mail.google.com`, wymieszane z resztą.
+
+GA4 zobaczy tylko tych, którzy zgodzą się na analitykę (Consent Mode w trybie
+basic) — pełną liczbę kliknięć pokazuje Resend. UTM-y nie trafiają do wniosku
+w bazie: lead z newslettera nie jest w panelu oznaczony (do zrobienia osobno,
+gdyby było potrzebne).
+
+### Komu wolno wysłać
+
+**Newsletter to informacja handlowa — tylko do osób, które zgodziły się na nią
+e-mailem (art. 398 Prawa komunikacji elektronicznej).** Na 10.10.2026 serwis
+takiej zgody nie zbiera nigdzie: zgoda w kreatorze dotyczy wyłącznie kontaktu
+w sprawie niedokończonego wniosku, a `ud_clients` i `udochodu_contacts` nie
+mają pola zgody marketingowej. Lista w Resend musi więc pochodzić ze źródła,
+które zgodę ma — nie z kartoteki klientów.
+
+---
+
 ## Serwis jest jasny — bez trybu ciemnego
 
 Decyzja klienta, 2026-08-28. Nie proponuj ponownie i nie dokładaj wariantu

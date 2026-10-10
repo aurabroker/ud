@@ -8,6 +8,7 @@
     "/_astro/*",
     "/fonts/*",
     "/img/*",
+    "/email/*",
     "/blog/rss.xml",
     "/robots.txt",
     "/sitemap-index.xml",

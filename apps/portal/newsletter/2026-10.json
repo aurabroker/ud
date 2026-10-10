@@ -1,0 +1,35 @@
+{
+  "wydanie": "2026-10",
+  "kampania": "newsletter_2026_10",
+  "miesiac": "Październik 2026",
+  "temat": "Zawał albo udar. Ile zapłaci ZUS, a ile zostanie z Twojego dochodu",
+  "preheader": "Do ok. 3 900 zł zasiłku przy minimalnym dużym ZUS. Policzyliśmy lukę dla specjalistki zarabiającej 20 000 zł.",
+  "wstep": "W tym wydaniu sprawdzamy, co zawał albo udar robi z dochodem osoby na B2B, ile płaci ZUS po wypadku przy pracy i co mówią najnowsze dane o zwolnieniach lekarskich.",
+  "wiodacy": {
+    "slug": "zawal-udar-utrata-dochodu",
+    "zajawka": [
+      "Zawał i udar to w Polsce ponad 140 tys. przypadków rocznie, a choroby układu krążenia odpowiadają za ok. 37% zgonów. Zanim jednak zabiją, zwykle na tygodnie lub miesiące wyłączają z pracy.",
+      "Na B2B zasiłek liczy się od zadeklarowanej podstawy, nie od faktur: przy minimalnej podstawie dużego ZUS to do ok. 3 900 zł miesięcznie. Policzyliśmy, ile traci specjalistka zarabiająca 20 000 zł: ok. 48 tys. zł po zawale i ok. 190 tys. zł po udarze, nawet przy opłacanym chorobowym."
+    ],
+    "przycisk": "Przeczytaj artykuł"
+  },
+  "dalej": [
+    {
+      "slug": "wypadek-przy-pracy-a-dlugie-l4-co-mowi-zus-i-co-dzieje-sie-po-182-dniach",
+      "zajawka": "Po wypadku przy pracy pracownik dostaje z ubezpieczenia wypadkowego 100% podstawy od pierwszego dnia, ale najwyżej przez 182 dni. Co dalej, gdy leczenie i rehabilitacja trwają dłużej?"
+    },
+    {
+      "slug": "290000000-dni-na-zwolnieniu-l4",
+      "zajawka": "W 2025 r. do ZUS trafiło 27,5 mln zwolnień lekarskich, razem 290,5 mln dni absencji. Najszybciej rośnie absencja z powodu zaburzeń psychicznych: z 30,3 do 34,1 mln dni w ciągu roku."
+    }
+  ],
+  "kalkulator": {
+    "tytul": "Ile zostanie z Twojego dochodu, gdy zabraknie Cię w pracy na dłużej?",
+    "tekst": "Kalkulator pokaże świadczenie i orientacyjną składkę dla Twojego dochodu.",
+    "przycisk": "Otwórz kalkulator"
+  },
+  "serwisy": [
+    { "nazwa": "NNW dzieciaków", "url": null },
+    { "nazwa": "Koszty leczenia", "url": null }
+  ]
+}
