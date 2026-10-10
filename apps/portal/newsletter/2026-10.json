@@ -27,9 +27,5 @@
     "tytul": "Ile zostanie z Twojego dochodu, gdy zabraknie Cię w pracy na dłużej?",
     "tekst": "Kalkulator pokaże świadczenie i orientacyjną składkę dla Twojego dochodu.",
     "przycisk": "Otwórz kalkulator"
-  },
-  "serwisy": [
-    { "nazwa": "NNW dzieciaków", "url": null },
-    { "nazwa": "Koszty leczenia", "url": null }
-  ]
+  }
 }

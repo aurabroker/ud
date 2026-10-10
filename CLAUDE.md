@@ -1826,8 +1826,8 @@ nie słuchał), schematu produkcji (atrapa ma tylko potrzebne kolumny) i PostgRE
 ## Newsletter — HTML do wklejenia w Resend
 
 Wydanie opisuje `apps/portal/newsletter/<rrrr-mm>.json` (temat, preheader,
-wstęp, artykuł wiodący, dwa „Warto przeczytać", ramka kalkulatora, serwisy
-w stopce). HTML buduje:
+wstęp, artykuł wiodący, dwa „Warto przeczytać", ramka kalkulatora). HTML
+buduje:
 
 ```
 cd apps/portal && node scripts/newsletter.mjs 2026-10
@@ -1839,6 +1839,10 @@ właściciel wkleja w Resend Broadcasts (decyzja z 10.10.2026: kopiuje cały HTM
 sam, skryptu wysyłki nie ma). Link do wypisu to `{{{RESEND_UNSUBSCRIBE_URL}}}` —
 Resend podstawia go per odbiorca. Nadawca jak przy przypomnieniach:
 `UtrataDochodu <info@utratadochodu.pl>` (domena zweryfikowana w Resend).
+
+Stopka to dane spółki z `firma.ts` i zdanie z wypisem („Możesz się wypisać
+z newslettera, ale po co?" — treść właściciela, 10.10.2026). Sekcji „Nasze
+serwisy" nie ma, decyzją właściciela z tego samego dnia.
 
 **Zajawki piszesz z treści artykułu, nie z pamięci.** Liczba w zajawce, której
 nie ma w artykule, to nowe twierdzenie bez sprawdzenia z OWU i źródłami.
@@ -1863,9 +1867,7 @@ nie ma w artykule, to nowe twierdzenie bez sprawdzenia z OWU i źródłami.
 
 `utm_source=newsletter`, `utm_medium=email`, `utm_campaign` z pliku wydania
 (`newsletter_2026_10`), `utm_content` = miejsce w mailu (`temat-numeru`,
-`artykul-2`, `kalkulator`, `logo`…). Linki do serwisów siostrzanych mają
-`utm_source=newsletter-utratadochodu`, bo tam „newsletter" znaczyłby ich własny.
-Bez UTM-ów wizyty z poczty lądują w GA4 jako ruch bezpośredni albo jako
+`artykul-2`, `kalkulator`, `logo`…). Bez UTM-ów wizyty z poczty lądują w GA4 jako ruch bezpośredni albo jako
 odesłanie z `mail.google.com`, wymieszane z resztą.
 
 GA4 zobaczy tylko tych, którzy zgodzą się na analitykę (Consent Mode w trybie

@@ -69,12 +69,11 @@ const tekst = (t) => esc(t).replace(/(^|\s)([aiouwzAIOUWZ])\s/g, '$1$2&nbsp;');
 /**
  * UTM-y: źródło „newsletter", kanał „email", kampania z wydania, a w
  * utm_content miejsce w mailu — wtedy w GA4 widać, czy klikano zdjęcie
- * artykułu wiodącego, czy kalkulator. Do serwisów siostrzanych źródło mówi,
- * skąd przyszedł ruch, bo tam „newsletter" znaczyłby ich własny.
+ * artykułu wiodącego, czy kalkulator.
  */
-function zUtm(adres, miejsce, zrodlo = 'newsletter') {
+function zUtm(adres, miejsce) {
   const u = new URL(adres);
-  u.searchParams.set('utm_source', zrodlo);
+  u.searchParams.set('utm_source', 'newsletter');
   u.searchParams.set('utm_medium', 'email');
   u.searchParams.set('utm_campaign', dane.kampania);
   u.searchParams.set('utm_content', miejsce);
@@ -137,11 +136,6 @@ const kolumna = (d, i) => {
   <a href="${adres}" style="font-family:${BEZSZERYF};font-size:15px;font-weight:bold;color:${K.akcentTekst};text-decoration:none;">Czytaj dalej&nbsp;&rarr;</a>
 </td>`;
 };
-
-const serwisy = dane.serwisy.map((s) => s.url
-  ? `<a href="${zUtm(s.url, `stopka-${s.nazwa.toLowerCase().replace(/\s+/g, '-')}`, 'newsletter-utratadochodu')}" style="color:${K.akcentTekst};text-decoration:underline;">${tekst(s.nazwa)}</a>`
-  : tekst(s.nazwa));
-const bezAdresu = dane.serwisy.filter((s) => !s.url).map((s) => s.nazwa);
 
 const a = FIRMA.adres;
 /** Numer telefonu nie może się łamać w środku. */
@@ -221,9 +215,8 @@ const html = `<!doctype html>
 
 <!-- Stopka -->
 <tr><td class="wnetrze" bgcolor="${K.tlo}" style="padding:24px 24px 28px;background-color:${K.tlo};border-top:1px solid ${K.linia};font-family:${BEZSZERYF};font-size:13px;line-height:20px;color:${K.drugi};">
-  <p style="margin:0 0 14px;"><strong style="color:${K.tekst};">Nasze serwisy:</strong> ${serwisy.join(' &middot; ')}</p>
-  <p style="margin:0 0 14px;">${esc(FIRMA.marka)} prowadzi ${esc(FIRMA.nazwa)}, ${esc(a.ulica)}, ${esc(a.kod)} ${esc(a.miasto)}. KRS ${FIRMA.krs}, NIP ${FIRMA.nip}. Agent ubezpieczeniowy wpisany do Rejestru Pośredników Ubezpieczeniowych KNF pod numerem ${esc(FIRMA.rpu)}.</p>
-  <p style="margin:0;">Otrzymujesz tę wiadomość, ponieważ ten adres jest zapisany na newsletter ${esc(FIRMA.marka)}. Pytania? Odpowiedz na tego maila albo zadzwoń: ${telefon}. <a href="{{{RESEND_UNSUBSCRIBE_URL}}}" style="color:${K.akcentTekst};text-decoration:underline;">Wypisz się z newslettera</a></p>
+  <p style="margin:0 0 14px;">Serwis internetowy ${esc(FIRMA.marka)} prowadzi ${esc(FIRMA.nazwa)}, ${esc(a.ulica)}, ${esc(a.kod)} ${esc(a.miasto)}. KRS ${FIRMA.krs}, NIP ${FIRMA.nip}. Agent ubezpieczeniowy wpisany do Rejestru Pośredników Ubezpieczeniowych KNF pod numerem ${esc(FIRMA.rpu)}.</p>
+  <p style="margin:0;">Pytania? Odpowiedz na tego maila albo zadzwoń: ${telefon}. Możesz <a href="{{{RESEND_UNSUBSCRIBE_URL}}}" style="color:${K.akcentTekst};text-decoration:underline;">się wypisać z&nbsp;newslettera</a>, ale&nbsp;po&nbsp;co?</p>
 </td></tr>
 
 </table>
@@ -237,4 +230,3 @@ const wyjscie = join(PORTAL, `newsletter/${wydanie}.html`);
 writeFileSync(wyjscie, html);
 console.log(`gotowe: newsletter/${wydanie}.html (${Buffer.byteLength(html)} B)`);
 console.log(`temat: ${dane.temat}`);
-if (bezAdresu.length) console.warn(`UWAGA: bez adresu, w stopce stoją bez linku: ${bezAdresu.join(', ')}`);
