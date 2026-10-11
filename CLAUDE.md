@@ -1870,10 +1870,24 @@ nie ma w artykule, to nowe twierdzenie bez sprawdzenia z OWU i źródłami.
 `artykul-2`, `kalkulator`, `logo`…). Bez UTM-ów wizyty z poczty lądują w GA4 jako ruch bezpośredni albo jako
 odesłanie z `mail.google.com`, wymieszane z resztą.
 
-GA4 zobaczy tylko tych, którzy zgodzą się na analitykę (Consent Mode w trybie
-basic) — pełną liczbę kliknięć pokazuje Resend. UTM-y nie trafiają do wniosku
-w bazie: lead z newslettera nie jest w panelu oznaczony (do zrobienia osobno,
-gdyby było potrzebne).
+UTM-y czyta wyłącznie GA4 (`G-MGB0RBTCC9`) i tylko u tych, którzy zgodzą się
+na analitykę (Consent Mode w trybie basic). Zgoda musi paść **na stronie, na
+którą prowadzi link** — tag startuje dopiero po niej i bierze adres bieżącej
+strony; kto przejdzie dalej przed kliknięciem w baner, wpada do ruchu
+bezpośredniego. Wniosek z newslettera widać w GA4 tylko jako odsłonę
+`/podziekowanie/` w takiej sesji: portal nie wysyła do GA4 osobnego zdarzenia,
+a konwersja Ads idzie wyłącznie do Ads.
+
+**Resend nie liczy dziś niczego poza doręczeniem.** Na 11.10.2026 domena
+`utratadochodu.pl` ma w Resend wyłączone i śledzenie kliknięć, i otwarć.
+Włącza się je dla całej domeny, więc obejmie też przypomnienia
+z `wniosek-przypomnienie` (link wycofania zgody pójdzie przez przekierowanie
+Resend — po włączeniu sprawdź, że fragment `#id=…&sig=…` dochodzi). Piksel
+otwarć i linki z identyfikatorem odbiorcy to dostęp do urządzenia odbiorcy
+(art. 399 PKE), więc ich mierzenie powinno stać w treści zgody na newsletter.
+
+UTM-y nie trafiają do wniosku w bazie: lead z newslettera nie jest w panelu
+oznaczony (do zrobienia osobno, gdyby było potrzebne).
 
 ### Komu wolno wysłać
 
