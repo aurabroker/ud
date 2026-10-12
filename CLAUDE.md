@@ -170,6 +170,34 @@ Nowy artykuł idzie tak:
 3. Jeden wpis na początku `artykuly.json`, w formacie pozostałych, z adresami
    800/1600 w `obraz`/`obrazDuzy`, i plik `artykuly/<slug>.html` z treścią.
 
+**Obrazek w treści (infografika, wykres) — z sandboksa nie wyślesz go do
+kubełka**, bo `article-images` przyjmuje wysyłki tylko od zalogowanych. Droga,
+która działa (09.10.2026, „zawal-udar-utrata-dochodu"): plik źródłowy do
+repozytorium obok treści (`artykuly/<slug>-<nazwa>.png`), push, a potem
+w SQL `net.http_get` na
+`https://api.github.com/repos/aurabroker/ud/contents/<ścieżka>?ref=<sha>`.
+Odpowiedź niesie plik w base64; wklejasz go do `content` jako
+`data:image/png;base64,…` i normalizacja robi z niego
+`<slug>-content1-1600.webp`, jak z obrazka wklejonego w CMS-ie. Zanim zapiszesz,
+porównaj `md5(decode(…, 'base64'))` z lokalną sumą pliku. Przepisywanie base64
+przez narzędzie odpada — 35 kB to dziesiątki tysięcy znaków, w których jedna
+pomyłka psuje obraz. Działa, bo repozytorium jest publiczne.
+
+Tą samą drogą idzie sama treść: plik `artykuly/<slug>.html` pchasz do repo
+od razu z docelowym adresem obrazka (`normalized/<slug>-content1-1600.webp` —
+nazwy są przewidywalne, patrz `nazwaPliku()` w funkcji), a w SQL podmieniasz
+ten adres na data URI. Po normalizacji `md5(content)` w bazie ma się równać
+sumie pliku w repo. Bez wpisu w `artykuly.json` portal pliku nie buduje, więc
+może wyprzedzić wpis.
+
+Okładka i infografika w jednym wywołaniu przekroczyły limit workera
+(546 `WORKER_RESOURCE_LIMIT`). Drugie wywołanie zrobiło resztę, bo okładka była
+już w `aura_article_images` — przy dwóch obrazkach licz się z dwoma wywołaniami.
+
+**Tabele w treści** `normalizuj()` owija w kontener przewijany w poziomie
+(`.tabela`). Bez niego tabela z pięcioma kolumnami rozpychała stronę na
+telefonie. Pilnuje tego `artykuly.spec.js`, także przy szerokości 390 px.
+
 **Poprawiasz treść opublikowanego artykułu — dopisz mu `zmieniono`** (ISO,
 jak `opublikowano`). Z tego pola, a bez niego z daty publikacji, bierze się
 `dateModified` na stronie i `<lastmod>` w mapie strony. Datę w mapie mają
@@ -942,6 +970,69 @@ Pilnuje tego `test/wylaczenia.spec.js`.
 
 ---
 
+## Granice wniosku — waga, wzrost, sumy (od 12.10.2026)
+
+11.10.2026 przez kreator przeszedł wniosek z wagą **1000 kg**, świadczeniem
+**500 000 000 zł miesięcznie** i sumą śmierci **99 999 999 zł** (do tego
+telefon `123123123`). Nikt tego nie zatrzymał: `min`/`max` w HTML-u działają
+tylko przy natywnej wysyłce formularza, a kreator wysyła sam i swoją walidacją
+wagi ani wzrostu nie dotykał; `form-submit` zapisywał, co przyszło.
+
+Granice ustalił właściciel:
+
+| Pole | Granica |
+|---|---|
+| wzrost | 100–250 cm (minimum z dawnego atrybutu `min`) |
+| waga | 30–200 kg (j.w.) |
+| świadczenie miesięczne (okresowa niezdolność) | do 50 000 zł |
+| trwała niezdolność | do 10 000 000 zł |
+| śmierć / inwalidztwo (NW) | do 10 000 000 zł |
+
+Granica jest dozwolona, złotówka wyżej — nie. Waga i wzrost zostają
+**nieobowiązkowe**; wpisane muszą się mieścić.
+
+Liczby stoją w **dwóch miejscach**: `packages/wniosek/src/schemat.js`
+(`RYZYKA[].max`, `GRANICE_CIALA`) i `supabase/functions/form-submit/index.ts`
+(`GRANICE_SUM`, `GRANICE_CIALA`). Decyduje funkcja — kreator da się obejść.
+`test/wniosek-granice.spec.js` ładuje prawdziwe źródło funkcji i sprawdza
+**zachowaniem**, że każda granica ze schematu jest po tamtej stronie ta sama
+(na granicy 200, złotówkę wyżej 400). Zmiana granicy = obie strony w jednym
+commicie i wdrożenie funkcji.
+
+Rzeczy, których nie upraszczaj:
+
+- **Funkcja czyta liczby ściśle (`liczbaScisla`), nie przez `parseAmount`.**
+  Ten bierze PIERWSZĄ liczbę z napisu: „5e8" czyta jako 5, „50000abc" jako
+  50 000 — oba przeszłyby granicę i trafiły do bazy w tej postaci. Przyjmuje
+  tylko liczbę albo napis: tablica `[1, 500000000]` po `String()` to
+  „1,500000000", czyli 1,5.
+- **Do kolumny idzie odczytana liczba, nie napis z żądania.** Inaczej
+  przechodzą BOM, odstępy w środku czy „50000.000…0001" (po odczycie równe
+  granicy, w bazie dłuższe). Pole z samymi odstępami idzie jako puste.
+- **Kwota przy niewybranym ryzyku nie idzie do kolumny** (zostaje
+  w `form_data`). Pole w kreatorze zostaje wypełnione, gdy ktoś wpisze sumę
+  i odznaczy ryzyko — bez tego taki wniosek dostawałby 400 za kwotę, której
+  klient nie chce.
+- Odmowa za granice zapisuje wpis w `ud_errors` („Wniosek poza granicami: …",
+  z IP). Kreator nie przepuszcza takich wartości, więc każdy taki wpis to
+  obejście kreatora albo stara wersja strony w czyjejś karcie.
+- Brama obciążeniowa (`obciazenie-formularza.mjs`) wypełnia pola wartościami
+  realistycznymi (80 kg, 180 cm, 10 000 zł/mies.). Wcześniej wpisywała 15 000
+  do wagi i 300 000 zł jako świadczenie miesięczne — i przechodziła.
+
+**Stan na 12.10.2026:** funkcja wdrożona jako `form-submit` **v25** (treść
+z repozytorium; sonda z fałszywym tokenem → 400, brama obciążeniowa 16/16
+przeciw v25). Kreator z granicami wchodzi razem z portalem — do tego czasu
+żywa strona przepuszcza takie wartości do funkcji, a ta odpowiada 400
+z komunikatem. W `liczbaScisla` produkcja ma NBSP i BOM wpisane jako znaki,
+repozytorium — jako `\u00A0\uFEFF`; to ten sam wzorzec, nie różnica w kodzie.
+
+Czego granice NIE obejmują (świadomie, do osobnej decyzji): kwot klauzul NW
+(w kreatorze z listy, funkcja ich nie sprawdza), pól B2B, długości pól
+tekstowych i numerów telefonu typu `123123123`.
+
+---
+
 ## Ankieta rozszerzona — kontrakt z funkcją brzegową to `hs_<klucz>`
 
 Przy sumie „trwałej niezdolności" **powyżej 1 000 000 zł** kreator pokazuje
@@ -1017,7 +1108,8 @@ skasowałoby to wszystko na produkcji. To samo dotyczy dziś `review-admin`
 
 Numer wersji rośnie także wtedy, gdy nikt nie wdraża kodu: wpisanie sekretu
 w Edge Functions → Secrets podbiło 24.09 licznik **wszystkim** funkcjom o jeden,
-przy identycznym `ezbr_sha256`. Stan na 28.09: `form-submit` v23 — od tej wersji
+przy identycznym `ezbr_sha256`. Od 12.10: `form-submit` v25 — granice wniosku
+(sekcja „Granice wniosku"); v24 to v23 podbita sekretem. Stan na 28.09: `form-submit` v23 — od tej wersji
 bez „Okresowej niezdolności" i jej kwoty wniosek dostaje 400 (wcześniej blokowana
 była tylko sama „Trwała", więc przechodził wniosek z samą śmiercią / inwalidztwem).
 Kreator ma tę samą regułę: okresowa jest zaznaczona na stałe (`podstawowe: true`
@@ -1067,6 +1159,17 @@ jest ignorowana. Nie dopisuj tam odczytu `pesel` ani `med_*` (test to łapie).
   nieaktywne od 30 dni, zostawiając sumę tydzień × krok w
   `ud_lejek_wniosku_archiwum`, żeby lejek nie urywał się po miesiącu.
   Po wysłaniu wniosku dane kontaktowe znikają ze szkicu od razu.
+
+### Szkice NIE są leadami (od 02.10.2026)
+
+Przez jeden dzień tablica Kanban pokazywała szkic ze zgodą jako lead. Decyzja
+właściciela z 02.10.2026: porzucone wnioski nie wpadają do kolumn — zostają na
+liście „Niedokończone", a zakładka w menu miga na czerwono, dopóki czeka tam
+kontakt bez „Obsłużony". Wyzwalacz na `ud_wnioski_szkice` został zdjęty
+(migracja `…_leady_kanban_3_sprzedaz.sql`), więc **ani `ud_clients`, ani
+`ud_wnioski_szkice` nie mają wyzwalaczy od tablicy** — test SQL tego pilnuje.
+Nie dokładaj go z powrotem „żeby lead przeszedł na klienta": klient staje się
+leadem przy najbliższej synchronizacji.
 
 ### „Wystrzel i zapomnij" — szkic nigdy nie zatrzymuje wniosku
 
@@ -1186,9 +1289,11 @@ Supabase i Resend; atrapa bazy odtwarza ograniczenia tabeli. Pomocniki:
 
 ## Panel — kod dostępu do oferty to 4 ostatnie cyfry PESEL-u
 
-**SMS-ów nie wysyłamy.** Klient dostaje sam e-mail z linkiem, a hasłem są
+**Kodu SMS-em nie wysyłamy.** Klient dostaje e-mail z linkiem, a hasłem są
 cztery ostatnie cyfry jego PESEL-u — ten sam ciąg, którym Leadenhall szyfruje
 pliki oferty. Klient zna go z dowodu, więc nie ma czego dowozić drugim kanałem.
+(SMS, który od 12.10.2026 idzie po e-mailu, jest samym zawiadomieniem — patrz
+niżej.)
 Sprawdzone na danych: wszystkie 17 ofert z ustawionym kodem miało go równy
 `right(pesel, 4)`, zero wyjątków.
 
@@ -1212,10 +1317,35 @@ Treść mówiąca o haśle stoi w **trzech miejscach i musi być zgodna**:
 | `src/routes/offer/[token]/+page.svelte` | podpowiedź nad polem na stronie oferty |
 | `src/routes/panel/offer/[id]/+page.svelte` | opis kodu dla agenta |
 
-Zostało po SMS-ach, celowo nieruszone: `lib/server/sms.js`, test wysyłki
-w Ustawieniach, sonda w `health.js` i filtr kanału w Wysyłkach. Pierwsze trzy
-to narzędzia diagnostyczne SMSAPI, ostatni pokazuje **historię** wysyłek sprzed
-zmiany. Usunięcie ich to osobna decyzja — nie kasuj przy okazji.
+### SMS „wysłaliśmy do Ciebie ofertę" (od 12.10.2026)
+
+Decyzja właściciela: po **wysłanym** e-mailu z ofertą klient dostaje SMS
+`SMS_OFERTA` z `src/lib/server/smsOferta.js` — „Wlasnie wyslalismy do Ciebie
+oferte. Sprawdz maila (takze folder Spam)" i telefon. Przez SMSAPI
+(`lib/server/sms.js`), numer z oferty, a bez niego z kartoteki klienta.
+
+- **Bez linku i bez kodu.** Kod to PESEL (wyżej), a link w SMS-ie od
+  nieznanego nadawcy uczy klikać w linki z SMS-ów — na tym nawyku żerują
+  oszuści. Dlatego podpis „UtrataDochodu:", nie „UtrataDochodu.pl:" — telefon
+  robi odnośnik także z gołej domeny. Test to sprawdza.
+- **Bez polskich znaków.** Z nimi SMS przechodzi na UCS-2 (70 znaków na część
+  zamiast 160) i ta sama treść kosztuje dwa SMS-y. Test pilnuje jednej części.
+- **Tylko po `email.sent`** — „wysłaliśmy ofertę" przy odrzuconym mailu byłoby
+  nieprawdą. SMS nie decyduje o statusie „Wysłana": porażka SMSAPI nie cofa
+  wysyłki, trafia do `ud_send_log` (kanał `sms`) i na stronę oferty.
+- Numer tylko polski (`numerDoSms`, 9 cyfr z opcjonalnym 48/+48/0048).
+  Zły numer przy ofercie nie zasłania dobrego z kartoteki. Zagraniczny albo
+  ucięty — SMS się nie wysyła i strona oferty mówi dlaczego.
+- **Nadawca to `SMSAPI_SENDER`**, a bez niej domyślne „Info". W `wrangler.toml`
+  panelu tej zmiennej nie ma, a przy sekcji `[vars]` zmienne jawne z panelu
+  Cloudflare są pomijane — sprawdź w Ustawieniach → SMS, kto jest nadawcą
+  i czy jest na liście zatwierdzonych w SMSAPI.
+- W trybie `SMSAPI_TEST=1` SMSAPI odpowiada jak przy wysyłce, więc strona
+  oferty i `ud_send_log` pokazują „wysłany", choć nic nie wyszło.
+
+Test: `pnpm test:sms` w `apps/panel`. Diagnostyka SMSAPI (test wysyłki
+w Ustawieniach, sonda w `health.js`) i filtr kanału w Wysyłkach znów obsługują
+żywą ścieżkę — nie kasuj ich.
 
 ---
 
@@ -1285,6 +1415,579 @@ jako pokryta.
 Test: `pnpm test:owu` w `apps/panel`. `test:parser` z tego samego katalogu to
 narzędzie ręczne — bierze dwa pliki PDF jako argumenty i bez nich się wywala;
 to nie jest regres.
+
+---
+
+## Panel — tablica leadów (Kanban)
+
+Wytyczne i scenariusze odbiorcze K01–K25: `KANBAN-CRM-WYTYCZNE.md` (v1.0,
+01.10.2026). Strona: `/panel/leady`, zakładka „Leady" w panelu.
+
+**Stan na 02.10.2026: WDROŻONE w wersji 2.** Wersja 1 weszła 01.10 (panel
+v.0.58, części 1 i 2 migracji: `20261001151739_leady_kanban_1_tabele` przez MCP,
+`20261001180000_leady_kanban_2_funkcje` przez SQL Editor). Zmiany z 02.10
+(sekcja niżej) to część 3, `20261002120000_leady_kanban_3_sprzedaz` — wklejona
+przez właściciela w SQL Editor (funkcje z UPDATE/DELETE i DROP), wersja
+odnotowana w bazie ręcznie; potem panel v.0.59. Sprawdzone na produkcji: treść
+15 funkcji = repozytorium, uprawnienia tylko `service_role`, wyzwalacz na
+szkicach zdjęty (na `ud_clients` stoi tylko stary `send-confirmation-email-full`,
+niezwiązany z tablicą), Kontakt wyłączony, jego 4 leady w Nowym z wpisem
+w historii, 3 leady ze szkiców usunięte — 52 leady, wszystkie z kartoteki.
+Panel v.0.59 bez części 3 w bazie nie zadziała na `/panel/leady` (woła nowe
+kolumny i funkcje) — kolejność zawsze: baza, potem panel.
+
+**Wersja 3 WDROŻONA 04.10.2026 (zmiany z 02.10, sekcja „Widoczność, polisy
+i link agenta")**: część 4, `20261002160000_leady_kanban_4_widocznosc` —
+wklejona przez właściciela w SQL Editor (DROP starej sygnatury
+`ud_lead_szczegoly`, funkcje z UPDATE), wersja odnotowana ręcznie; potem panel
+v.0.60 i portal (kreator wysyła kod agenta, `Wniosek.*.js` z `affiliateCode`).
+Sprawdzone na produkcji: treść 21 funkcji = repozytorium, uprawnienia tylko
+`service_role`, `ud_leady_pliki` z RLS bez polityk, kubełek `ud-polisy`
+prywatny (PDF, 10 MB), wyzwalaczy bez zmian; agent bez przydziału (Andrzej Cur)
+widzi 0 leadów i 0 klientów, administrator wszystkie. Panel v.0.60 bez części 4
+nie otworzy szczegółów leada (woła `ud_lead_szczegoly(p_lead, p_user)`).
+Wklejając plik w SQL Editor, kopiuj go przyciskiem „Copy raw file" na GitHubie:
+04.10 zaznaczenie strony zabrało ze sobą datę i całość padła na linii 1
+(bez skutków — błąd składni nie wykonuje niczego).
+
+**Wersja 4 WDROŻONA 04.10.2026 (sekcja „Statystyki: prowizja, składka bez
+opłaty, polisa spoza formularza")**: część 5,
+`20261004200000_leady_kanban_5_prowizja_polisy` — wklejona przez właściciela
+w SQL Editor, wersja odnotowana ręcznie; potem panel v.0.61. Sprawdzone na
+produkcji: treść 7 funkcji = repozytorium, uprawnienia tylko `service_role`,
+wyzwalaczy bez zmian, Centrala 20%, pozostali agenci bez stawki; korekta objęła
+jedną sprzedaż skopiowaną z wariantu (7 176 / 598 → 6 528 / 544, wpis
+w historii). Druga sprzedaż z tamtego dnia (3 876 zł, odczytana z polisy przed
+zmianą) czeka na „Odczytaj kwoty z polisy" — pliku w prywatnym kubełku stąd
+odczytać się nie da.
+
+**Wersja 5 WDROŻONA 05.10.2026 (sekcja „Wykaz polis")**: część 6,
+`20261005090000_leady_kanban_6_wykaz_polis` — wklejona przez właściciela
+w SQL Editor, wersja odnotowana ręcznie; potem panel v.0.62 (zakładka
+„Polisy"). Sprawdzone na produkcji: treść 5 funkcji = repozytorium,
+uprawnienia tylko `service_role`, ograniczenie `lead_ochrona_kolejnosc`,
+wyzwalaczy bez zmian. Sprzedaże sprzed tej wersji nie mają numeru ani dat —
+wykaz pokazuje je jako „Bez dat ochrony", do uzupełnienia w „Dane sprzedaży".
+
+**Wersja 6 WDROŻONA 05.10.2026 (sekcje „Odczyt polis z PDF", „Data sprzedaży
+= dzień przed początkiem ochrony", „Status polisy to kolor ramki dat")**:
+panel v.0.63 (odczyt numeru i okresu z PDF, „Uzupełnij z plików PDF" — bez
+migracji; właściciel uruchomił go na pięciu polisach), potem część 7,
+`20261005140000_leady_kanban_7_data_sprzedazy` — wklejona przez właściciela
+w SQL Editor, wersja odnotowana ręcznie — i panel v.0.64. Sprawdzone na
+produkcji: treść 3 funkcji = repozytorium, uprawnienia tylko `service_role`,
+wyzwalaczy bez zmian (na `ud_clients` tylko `send-confirmation-email-full`),
+sześć sprzedaży z datą ochrony ma datę sprzedaży = dzień przed nią, każda
+z wpisem „Korekta…" i poprzednią datą w historii.
+
+SQL Editor zapisał treść funkcji z końcami linii CRLF. Porównując `prosrc`
+z repozytorium, licz skrót z `replace(prosrc, chr(13), '')` — inaczej każda
+funkcja z części 2 wygląda na inną niż w repo, choć nie jest.
+
+### Czym jest lead — decyzje właściciela z 01 i 02.10.2026
+
+Lead to **klient z `ud_clients`** (złożony wniosek albo klient dodany w panelu).
+01.10 leadem był też porzucony wniosek ze zgodą; 02.10 właściciel to cofnął:
+„Niedokończone wnioski nie wpadają do kolumny." Zostają na liście
+„Niedokończone", a ograniczenie `lead_tylko_klient` (`szkic_id is null`) nie
+wpuści leada ze szkicu nawet przy bezpośrednim zapisie. Kolumna `szkic_id`
+została, żeby nie przebudowywać widoku i wszystkich funkcji naraz.
+
+### Zmiany z 02.10.2026 — czego nie „poprawiać" z powrotem
+
+- **Nowy i Kontakt to jeden etap.** Kontakt jest WYŁĄCZONY (`aktywny = false`),
+  nie usunięty — historia na niego wskazuje. Jego leady przeszły do Nowego bez
+  zerowania `etap_od`. Oferta robocza przy synchronizacji też daje Nowy.
+- **Kolor wieku karty** (`wiekKarty` w `model.js`): pierwsza otwarta kolumna od
+  zieleni (dzień 0) przez żółć do pomarańczu (dzień 5), **ponad 5 dni w etapie —
+  czerwień w każdej otwartej kolumnie**. Wygrany i Przegrany nie świecą. Licznik
+  zeruje tylko przeniesienie do innego etapu; notatka ani zaplanowany telefon
+  nie. Obok koloru zawsze stoi napis „N dni w etapie" — sam kolor nic nie znaczy.
+- **Administrator jako opiekun nie jest pokazywany na karcie** (`opiekun_admin`
+  z widoku, `opiekunNaKarcie`). W szczegółach jest — z dopiskiem „(administrator)".
+- **Przegrany**: karty zwinięte do samej nazwy; kliknięcie rozwija kartę
+  w miejscu, „▴" zwija.
+- **Wygrany wymaga składki rocznej** (`wymagane_pola = {skladka_roczna}`).
+  Żadna oferta nie ma zapisanego wyboru klienta, więc to agent wskazuje
+  sprzedany wariant w oknie „Dane sprzedaży" (warianty z JEGO ofert — RLS;
+  administrator widzi wszystkie) albo wpisuje kwoty ręcznie. Kwoty: składka
+  roczna i miesięczna, świadczenie okresowe (zł/mies.), sumy trwałej
+  niezdolności i zgonu. Wyjście z Wygrany zeruje dane sprzedaży (historia je
+  pamięta); operacja `sprzedaz` poprawia je bez zmiany etapu.
+- **Sprzedawca** to opiekun w chwili wygrania, a bez opiekuna — ten, kto
+  przeniósł. Nie zmienia się razem z opiekunem: statystyka pamięta, kto sprzedał.
+- **Nagłówek Wygrany pokazuje Σ składek rocznych**, nie Σ świadczeń (Przegrany
+  nie pokazuje żadnej sumy).
+- **Statystyki** (`/panel/statystyki`, `ud_leady_statystyki`): administrator —
+  wszyscy z podziałem na agentów i wybór agenta; agent — wyłącznie swoje, także
+  gdy poda cudzy identyfikator w adresie. Sprzedaż = lead w Wygrany, także
+  zarchiwizowany. Składka miesięczna bez zapisanej wartości = 1/12 rocznej
+  i strona mówi, ile takich jest (raty bywają droższe niż 1/12).
+- **Zakładka „Niedokończone" miga** (layout panelu, odpytywanie co minutę),
+  dopóki na liście jest kontakt bez „Obsłużony". Przy ograniczonych animacjach
+  w systemie — stała czerwień.
+
+### Widoczność, polisy i link agenta (część 4, decyzje z 02.10.2026)
+
+- **Agent widzi i obsługuje wyłącznie leady, których jest opiekunem.** Starych
+  ani wolnych nie widzi; dopiero przydział przez administratora daje dostęp.
+  Opiekuna zmienia **tylko administrator** (agent nie przejmuje wolnych i nie
+  zwalnia własnych). Jedno źródło reguły: `ud_leady_widzi(p_user, p_opiekun)`
+  — używają jej filtr tablicy, liczniki (także „wszystkich", żeby nie zdradzać
+  liczby cudzych), szczegóły, zmiany, notatki i pliki. Dla agenta cudzy lead
+  „nie istnieje" (`brak_leada` / 404), także pod linkiem `?lead=`. Konto
+  nieaktywne nie widzi nic, nawet leada, którego jest opiekunem.
+- **Ta sama reguła w zakładce „Klienci", na stronie klienta i w wyborze
+  klienta na stronie oferty** (`ud_klienci_widoczni`, `ud_klient_widoczny`,
+  `src/lib/server/widocznosc.js`). Te strony czytają klientów kluczem
+  serwisowym, więc bez filtra nowy agent widziałby wszystkich z pełnymi danymi.
+  Klient już przypięty do oferty zostaje w wyborze — inaczej zapis formularza
+  odpiąłby go po cichu. **Sama strona `/panel/offer/<id>` nadal otwiera każdą
+  ofertę każdemu zalogowanemu** — to osobna, starsza dziura do zamknięcia.
+- **„Niedokończone" widzi każdy agent** (decyzja z 01.10 bez zmian) — porzucone
+  wnioski nie mają opiekuna.
+- **Okno „Dane sprzedaży"**: wariant opisany numerem dokumentu ubezpieczyciela
+  i składkami (bez nazwy produktu). Klient bez ofert w panelu — dwa przyciski:
+  „Wgraj polisę (PDF)" i „Dodaj ręcznie"; pola kwot dopiero po wyborze.
+- **Polisa** idzie jako sam plik (`application/pdf`, nie multipart — typ
+  „prosty" przeszedłby z cudzej strony bez preflightu CORS), do 10 MB, do
+  prywatnego kubełka `ud-polisy` (`<lead>/<uuid>.pdf`), wiersz w
+  `ud_leady_pliki` i wpis „plik" w historii. Kwoty czyta ten sam czytnik co
+  oferty (Leadenhall/CEU); Leadenhall szyfruje PDF 4 ostatnimi cyframi
+  PESEL-u — serwer próbuje ich sam, PESEL nie wychodzi do przeglądarki.
+  Polisa w innym układzie zapisuje się bez kwot, agent wpisuje je ręcznie.
+  Pobranie: `/panel/leady/api/plik/<id>` → adres podpisany na minutę, tylko
+  dla kogoś, kto widzi lead. Nie ma usuwania plików (świadomie).
+- **Kwota 0 w danych sprzedaży = brak tego ryzyka** (np. sprzedana sama
+  okresowa niezdolność), nie błąd — w formularzu i w `ud_leady_liczba`.
+  Składka roczna dalej musi być większa od zera.
+- **Link agenta do wniosku: `https://utratadochodu.pl/wniosek/?agent=<kod>`.**
+  Przycisk „Mój link do wniosku" na tablicy; kod nadaje `ud_agent_kod()`
+  (istniejący `ud_user_profiles.affiliate_code` albo kolejny wolny numer).
+  Kreator czyta kod **wyłącznie z adresu** (`zLinkuAgenta` w `@ud/wniosek`,
+  bez ciasteczek i sessionStorage — art. 399 PKE) i wysyła go jako
+  `affiliateCode`; `form-submit` zapisywał go już wcześniej do
+  `ud_clients.affiliate_code_used` — **funkcja brzegowa się nie zmieniła**.
+  Synchronizacja tablicy ustawia opiekuna: dodany w panelu (`referred_by`) →
+  kod z linku → autor oferty; nieaktywny albo nieznany kod — lead bez opiekuna,
+  czeka na przydział. Link prowadzi wprost na `/wniosek/`: kod nie przechodzi
+  przez inne strony portalu.
+- Konto „Marek Cieśla" (administrator) nazywa się od 02.10.2026 **„Centrala"**.
+  Inicjały w numerach nowych ofert z tego konta to więc `CE`
+  (`UD/2026/CE/00025/…`), nie `MC` — numeracja jest globalna, bez kolizji.
+
+### Statystyki: prowizja, składka bez opłaty, polisa spoza formularza (część 5, decyzje z 04.10.2026)
+
+- **Prowizja = składka roczna × stawka sprzedawcy.** Stawka jest cechą AGENTA
+  (`ud_user_profiles.prowizja_procent`, % składki rocznej), ustawia ją
+  administrator w Panelu Admina — przy dodawaniu konta albo w kolumnie
+  „Prowizja". **Centrala: 20%.** Agent widzi w Statystykach tylko swoją
+  prowizję i stawkę. Stawka zapisuje się przy sprzedaży
+  (`ud_leady.prowizja_procent`: wejście do „Wygrany", „Dodaj polisę",
+  synchronizacja kupionej oferty), więc późniejsza zmiana stawki nie
+  przepisuje historii; sprzedaż sprzed ustawienia stawki liczy się stawką
+  aktualną, a bez żadnej — „bez stawki" (kafel to mówi). Poprawka danych
+  sprzedaży stawki nie zmienia; wyjście z „Wygrany" ją zeruje.
+- **Opłata dystrybucyjna NIE jest prowizją i nie wchodzi do składki.**
+  Leadenhall: „Składka 2 760 zł, Opłata dystrybucyjna 276 zł, razem 3 036 zł
+  w 12 ratach po 253". Czytnik PDF zapisuje w `premium_total` kwotę DO ZAPŁATY
+  i tak zostaje (oferta pokazuje, ile płaci klient); w danych sprzedaży jest
+  2 760 / 230. Ta sama reguła w JS (`kwotyZDokumentu`) i SQL (`ud_skladka_netto`,
+  `ud_skladka_mies_netto`) — rata × netto / razem. Migracja skorygowała
+  sprzedaże skopiowane wprost z wariantu (wpis w historii). Kwot wpisanych
+  ręcznie albo odczytanych z polisy przed tą zmianą baza nie rozpozna — te
+  poprawia się w „Dane sprzedaży" → **„Odczytaj kwoty z polisy"** (ponowny
+  odczyt pliku już wgranego przy leadzie, z hasłem z PESEL-u klienta).
+- **„Dodaj polisę"** (przycisk na Statystykach): klient, który nie składał
+  wniosku, trafia do kartoteki (`source = 'polisa'`) i od razu do „Wygrany"
+  (`ud_lead_polisa_reczna`). Agent dodaje sobie; administrator — sobie albo
+  wybranemu agentowi (ten zostaje opiekunem i sprzedawcą). Data sprzedaży może
+  być z przeszłości (zapis w południe czasu polskiego). Ten sam PESEL drugi raz
+  → `klient_istnieje` z odnośnikiem do leada, jeśli użytkownik go widzi.
+  Odczyt PDF przed zapisem: `/panel/statystyki/api/odczyt`, hasło = 4 ostatnie
+  cyfry z pola PESEL (nagłówek `x-haslo`, do przeglądarki nic nie wraca);
+  wpisanie PESEL-u po pliku czyta go ponownie. Plik idzie do nowego leada tą
+  samą drogą co na tablicy, PO zapisie sprzedaży — gdy się nie uda, sprzedaż
+  już jest, a okno ma „Wgraj plik ponownie".
+- **E-mail klienta z polisą zapisuje się osobnym UPDATE-em, nie w INSERT-cie.**
+  Stary wyzwalacz `send-confirmation-email-full` (tylko INSERT na `ud_clients`)
+  wysłałby mu „Twój kompletny wniosek ubezpieczeniowy dotarł…" i SMS do doradcy
+  „nowy wniosek" — klientowi, który żadnego wniosku nie składał. Nie „upraszczaj"
+  tego do jednego INSERT-a. (Ręczne „Nowy klient" w panelu nadal wstawia z
+  e-mailem i list wychodzi — to stare zachowanie, osobna decyzja.)
+- Ryzyka w Statystykach: „Okresowa", „Trwała · suma ubezpieczenia",
+  „Zgon · suma ubezpieczenia" — bez „niezdolność do pracy" i „świadczenie
+  miesięczne"; miesięczność mówi jednostka „/ mies." przy kwocie.
+
+### Wykaz polis (część 6, decyzja z 05.10.2026)
+
+Zakładka „Polisy" (`/panel/polisy`, `ud_leady_polisy`): każda sprzedaż (lead
+w „Wygrany", także zarchiwizowany) z numerem polisy, okresem ochrony, datą
+sprzedaży, składką miesięczną i roczną, prowizją, agentem i plikiem PDF.
+Widoczność jak w Statystykach (administrator — wszyscy, z wyborem agenta;
+agent — swoje sprzedaże, także z cudzym agentem w adresie). Okres w filtrze to
+**data sprzedaży**; status, szukanie, sortowanie, sumy i CSV liczy przeglądarka
+z całego wczytanego wykazu (`src/lib/polisy/model.js`), więc sumy dotyczą
+dokładnie tego, co widać.
+
+- **Numer polisy i daty ochrony** stoją w „Dane sprzedaży" i „Dodaj polisę"
+  (wspólne pola `PolaPolisy.svelte`). Od v.0.63 **wgrany PDF polisy wpisuje je
+  sam** — patrz „Odczyt polis z PDF" niżej; czego czytnik nie znajdzie, agent
+  przepisuje z polisy. Dat nie zgadujemy: zła data końca ochrony to
+  przegapione wznowienie. Przycisk „Ochrona na rok" jest jawnym skrótem
+  (od + rok − 1 dzień; 29.02 → 28.02), nie domyślną wartością.
+- **Status** liczy się od „dziś" w czasie polskim, które podaje serwer
+  (`dzis` z `ud_leady_polisy`), nie z zegara przeglądarki: bez dat ochrony,
+  przyszła, aktywna, **wygasa (≤ 30 dni)**, wygasła. Polisa bez dat ma swój
+  chip i przypomnienie pod tabelą — bez nich wykaz nie pokaże wznowień.
+- **Składka miesięczna**: zapisana, a bez niej 1/12 rocznej ze znakiem „≈"
+  i przypisem (raty bywają droższe).
+- **CSV dla Excela**: BOM, średnik, przecinek dziesiętny; tylko widoczne
+  wiersze. Nazwa klienta zaczynająca się od `=`, `+`, `-`, `@` dostaje
+  apostrof — inaczej arkusz wykonałby ją jako formułę.
+- Koniec ochrony nie przed początkiem: pilnuje przeglądarka, `ud_lead_zmien`
+  / `ud_lead_polisa_reczna` (`bledne_dane` z polem) i ograniczenie
+  `lead_ochrona_kolejnosc` w bazie. Wyjście z „Wygrany" zeruje numer i daty
+  razem z kwotami (historia je pamięta).
+- Filtry okresu i agenta są wspólne ze Statystykami
+  (`src/lib/statystyki/Filtry.svelte`, `filtr.js`).
+
+### Odczyt polis z PDF (v.0.63, 05.10.2026)
+
+Pytanie właściciela: „nie odczytasz z polis numerów polis???". Zmapowane na
+pięciu prawdziwych polisach Leadenhall z produkcji (kopie na Dysku Google,
+`Nazwisko_LHC…[_PIN].pdf`): LW044/AD_D_TTD_PTD, LW047/MEDICARE i
+LW050/TTD/UNIPRO („Beauty"). Wszystkie mają ten sam zapis:
+
+```
+Polisa nr LHC3100906
+4. Okres ubezpieczenia 5 lutego 2026 - 4 lutego 2027      (Beauty: pozycja 3)
+Składka 3 432 zł / Opłata dystrybucyjna 336 zł / 3 768 zł płatne w 12 ratach
+Świadczenie 7 000 zł miesięcznie                          (tylko Beauty)
+```
+
+- **Kwoty z polisy czyta zwykły czytnik ofert** (`parseLeadenhall`) — działał
+  na polisach od początku. Brakowało numeru, okresu i świadczenia z polisy
+  „Beauty" — to robi `src/lib/pdf/polisa.js` (`daneZPolisy`), wołany
+  z `czytnik-polis.js` na tym samym tekście. Dokument, którego czytnik ofert
+  nie rozpozna, nadal oddaje numer i daty.
+- **Numer awaryjnie z nazwy pliku** — tylko wzorzec `LHC` + 6–8 cyfr
+  (`numerZNazwy`), tylko gdy w treści go nie ma (np. skan bez warstwy tekstu).
+- **Data niepewna = pusta.** Jedna data bez drugiej, koniec przed początkiem
+  albo nieistniejący dzień — obie zostają puste.
+- **Polisy CEU nie widzieliśmy** (na Dysku są tylko oferty `LOIP/…`) — wzorce
+  są ogólne („Polisa nr / Numer polisy", „od … do …", DD-MM-RRRR i DD.MM.RRRR).
+  Przy pierwszej polisie CEU sprawdź, co wyszło, i dopisz jej układ do testu.
+- Odczyt przy wgraniu („Dane sprzedaży", „Dodaj polisę") **wypełnia pola do
+  sprawdzenia** — zapis dopiero przyciskiem agenta, jak przy kwotach.
+- **Wykaz polis → „Uzupełnij z plików PDF (N)"** — dla polis z plikiem, którym
+  brakuje numeru albo dat (bez zarchiwizowanych). Po jednym leadzie na żądanie
+  (`POST /panel/polisy/api/uzupelnij`, `uzupelnijZPolisy`) — PDF polisy ma
+  ~25 stron, a strona pokazuje postęp. Serwer czyta NAJNOWSZY plik przy leadzie
+  (hasło z PESEL-u klienta) i wpisuje **tylko puste pola**: numer, okres,
+  a sprzedaży bez kwot — kwoty. Jedno nadpisanie jest celowe: składka roczna
+  równa kwocie DO ZAPŁATY z polisy to sprzedaż zapisana z opłatą
+  dystrybucyjną (sprzed 04.10.2026) — dostaje składki bez opłaty. Zapis idzie
+  operacją `sprzedaz` (`ud_lead_zmien`: wersja, uprawnienia, historia
+  z poprzednimi wartościami) — **bez migracji**.
+- **Data wystawienia z polisy NIE jest czytana** („Warszawa, 4 lutego 2026").
+  Data sprzedaży bierze się z początku ochrony — patrz niżej.
+
+### Data sprzedaży = dzień przed początkiem ochrony (część 7, decyzja z 05.10.2026)
+
+„Data sprzedaży to zawsze dzień przed początkiem ochrony." Regułę trzyma SQL
+(`ud_data_sprzedazy(ochrona_od)` — południe czasu polskiego dnia przed
+ochroną, jak „Dodaj polisę"), więc działa w każdej ścieżce zapisu:
+
+- wejście do „Wygrany" i „Dane sprzedaży" (`ud_lead_zmien`) z datą początku
+  ochrony ustawiają z niej datę sprzedaży; bez daty ochrony — jak dawniej
+  (chwila wejścia do „Wygrany", poprawka jej nie rusza). Zapis z tymi samymi
+  danymi, ale złą datą sprzedaży, ją naprawia (nie kończy się `bez_zmiany`),
+  a poprzednia data idzie do historii;
+- „Dodaj polisę" (`ud_lead_polisa_reczna`): z datą ochrony pole „Data
+  sprzedaży" jest tylko do odczytu i pokazuje dzień przed ochroną — także
+  w przyszłości, gdy polisa jest wystawiona z wyprzedzeniem (wtedy nie
+  obowiązuje zakaz przyszłej daty). „Ochrona na rok" bez daty ochrony liczy
+  ją od dnia PO dacie sprzedaży;
+- „Uzupełnij z plików PDF" wpisuje datę ochrony, więc przestawia też datę
+  sprzedaży.
+
+Okno „Dane sprzedaży" pokazuje pod datami podpowiedź „Data sprzedaży: … —
+dzień przed początkiem ochrony" (`PolaPolisy.svelte`, `dataSprzedazyZOchrony`
+w `src/lib/polisy/model.js` — tylko do pokazania, zapisuje baza). Prowizji
+i składek reguła nie rusza; zmienia okres, do którego sprzedaż wpada
+w statystykach i w wykazie. Migracja poprawiła sprzedaże już zapisane z datą
+ochrony (wpis „Korekta: data sprzedaży = dzień przed początkiem ochrony").
+
+### Status polisy to kolor ramki dat (05.10.2026)
+
+W wykazie zamiast słowa pod datą cały okres ochrony stoi w ramce: **zielona**
+— aktywna, **pomarańczowa** — wygasa w ciągu 30 dni, **czerwona** — wygasła,
+**niebieska** — ochrona jeszcze się nie zaczęła. Bez dat — szara przerywana
+ramka „Bez dat ochrony". Słowo zostaje w podpowiedzi (`title`) i w tekście dla
+czytnika ekranu (sam kolor nic by mu nie powiedział); nad tabelą stoi legenda.
+Krawędzie mają ≥ 3:1 do bieli, tekst ≥ 7:1 do swojego tła.
+
+Uruchomione przez właściciela 05.10.2026: pięć polis dostało numer i okres
+ochrony, Iwona Buza składkę 3 528 / 294 zamiast 3 876 / 323 (z opłatą 348 zł).
+
+### Klienci → kolumna „Akcja" zamiast „Zawód" (v.0.65, 05.10.2026)
+
+Zakładka „Klienci" pokazuje, gdzie klient jest w procesie — **z etapu jego
+leada na tablicy** (jeden lead na klienta), nie ze statusów ofert. Tablica to
+jedno miejsce prowadzenia sprawy, a synchronizacja i tak ustawia etap z ofert;
+dwa źródła dawałyby dwie prawdy. Mapa w `src/lib/klienci/akcja.js`:
+Nowy → „Do kontaktu", Oferta → „Oferta wysłana", Decyzja klienta → „Czeka na
+decyzję klienta", Wygrany → „Klient ubezpieczony" (po końcu ochrony —
+„Polisa wygasła"), Przegrany → „Klient zrezygnował" (powód w podpowiedzi);
+etap spoza mapy — jego nazwa. Odznaka prowadzi do leada na tablicy. Lista
+(`listaKlientow` w `src/lib/server/klienci.js`) woła przy wejściu tę samą
+synchronizację co tablica, więc nowy klient od razu ma etap. Widoczność bez
+zmian (`klienciWidoczni`). Test: `klienci.spec.js` (SSR na prawdziwym SQL,
+`/__test/ssr-klienci`) i `test:leady-model`.
+
+**Archiwum tablicy = archiwum Klientów (v.0.67, decyzja z 05.10.2026).**
+Klient, którego lead zarchiwizowano na tablicy, znika z listy i stoi
+w widoku „Archiwum" (`/panel/klienci?widok=archiwum`, przełącznik z licznikami
+nad tabelą). Widok idzie przez adres, nie przez stan komponentu — da się go
+zapisać w zakładce i sprawdzić w SSR. W archiwum etap zostaje (np. „Klient
+ubezpieczony"), ale bez odnośnika: zarchiwizowanego leada nie ma na tablicy.
+Klient bez leada zostaje na liście. Karta klienta otwiera się z obu widoków.
+
+### Nagłówek: „Ustawienia" zamiast trzech zakładek (v.0.66, 05.10.2026)
+
+Wysyłki, Panel Admina i dawne Ustawienia są jedną pozycją **„Ustawienia"
+w prawej części nagłówka, tuż przed nazwą konta** (decyzja właściciela).
+Strony zostały pod swoimi adresami (`/panel/logi`, `/panel/admin`,
+`/panel/ustawienia`) — siedzą w zakładkach przeglądarki, w odnośnikach
+i w akcjach formularzy; łączy je pasek sekcji `UstawieniaNav.svelte`
+(Wysyłki · Panel Admina · Ustawienia systemu). Lista sekcji i reguła
+podświetlenia: `src/lib/ustawienia.js`. Agent ma tylko Wysyłki, więc
+przycisk prowadzi go tam, a pasek z jedną pozycją się nie pokazuje.
+Nagłówek zawija się na telefonie (`.header` z `flex-wrap`) — wcześniej nazwa
+konta i „Wyloguj" wychodziły poza ekran. Test: `ustawienia.spec.js`.
+
+### Model danych (tylko stan procesu — dane osobowe czytamy ze źródła)
+
+| Obiekt | Rola |
+|---|---|
+| `ud_leady` | etap, opiekun, następne działanie, **wersja**, `etap_od`, dane sprzedaży (`skladka_roczna`, `skladka_mies`, świadczenia, `sprzedaz_wariant_id`, `sprzedawca_id`, `sprzedano_at`); zawsze `klient_id` |
+| `ud_leady_historia` | wpis przy każdej zmianie + **dziennik idempotencji** (`unique (lead_id, klucz)`) |
+| `ud_leady_notatki`, `ud_leady_widok_uzytkownika` | notatki; osobisty stan zwinięcia etapów (per użytkownik × pipeline) |
+| `ud_leady_pipeline`, `ud_leady_etap` | jeden pipeline „Sprzedaż": Nowy → Oferta → Decyzja klienta → Wygrany (składka roczna wymagana) / Przegrany (powód utraty wymagany); Kontakt wyłączony |
+| `ud_leady_baza` | widok z imieniem/e-mailem/telefonem z kartoteki klienta, `opiekun_admin` i danymi sprzedaży; tylko leady klientów |
+| `ud_leady_pliki` | polisy przy leadzie: kubełek `ud-polisy`, ścieżka `<lead>/<uuid>.pdf`, nazwa, kto dodał; kasowane razem z leadem (obiekt w kubełku zostaje) |
+| `ud_user_profiles.prowizja_procent` | stawka prowizji agenta (% składki rocznej); `ud_leady.prowizja_procent` — jej migawka z chwili sprzedaży |
+| `ud_leady.polisa_numer`, `ochrona_od`, `ochrona_do` | numer polisy i okres ochrony sprzedaży — wykaz polis (`ud_leady_polisy`) |
+
+Dostęp: RLS bez polityk, wszystko tylko dla `service_role` (panel przez
+`createAdminClient`). `ud_leady` **nie ma kolumn z danymi osobowymi** — test SQL
+tego pilnuje.
+
+**Nie ma wyzwalacza na `ud_clients` i nie wolno go dodawać.** Wniosek to jedyna
+ścieżka, którą wpływają pieniądze (ABSOLUTE_RULE). Leady powstają w
+`ud_leady_synchronizuj()`, wołanej przy otwarciu tablicy: dokłada klientów
+(etap startowy z ofert: kupiona → Wygrany, wybrana → Decyzja, wysłana albo
+obejrzana → Oferta, odrzucona → Przegrany, robocza albo brak → Nowy). Kupiona
+z zapisanym wyborem wariantu wnosi od razu dane sprzedaży. Tablica nie ma
+**żadnego** wyzwalacza (od 02.10 także na szkicach).
+
+Zamknięcie sprawy (Wygrany / Przegrany) kasuje zaplanowane działanie (zostaje w
+historii) — inaczej przeterminowane „zadzwoń" krzyczałoby w nieskończoność.
+
+### Jedna ścieżka zmiany stanu
+
+Przeciąganie, menu, lista „Przenieś do…" i pole etapu w szczegółach wołają to
+samo: `POST /panel/leady/api/zmien` → `ud_lead_zmien()` w SQL. Tam, atomowo i pod
+blokadą wiersza: sprawdzenie aktywnego agenta, **wersji** (`expectedVersion`,
+konflikt zamiast cichego nadpisania), **klucza idempotencji** (ponowienie →
+ten sam wynik bez drugiego skutku; ten sam klucz do innej operacji →
+`klucz_uzyty`), etapu (z innego pipeline'u / wyłączony → `niedozwolony`; FK w bazie
+też go nie przepuści), pól wymaganych (`brak_danych`) i reguł opiekuna
+(od 02.10 opiekuna zmienia wyłącznie administrator; agent działa tylko na
+swoich leadach — cudzy i wolny to dla niego `brak_leada`).
+Tożsamość wykonawcy bierze serwer z sesji — pola `userId`/`wykonawca` w ciele
+żądania są ignorowane, do SQL idą tylko pola z białej listy.
+
+Klient (`src/lib/leady/api.js`) po zerwanej odpowiedzi **ponawia tym samym
+kluczem**; po wyczerpaniu prób nie zakłada, że zapis się nie odbył — pyta o stan
+leada, a gdy i to się nie uda, oznacza kartę „Stan nieznany" z przyciskiem
+„Spróbuj ponownie". Rollback optymistycznej zmiany tylko wtedy, gdy nic nowszego
+nie zastąpiło karty; inaczej pobranie stanu serwera.
+
+### Decyzje, które łatwo „poprawić" na gorsze
+
+- **Wartość na karcie to MIESIĘCZNE świadczenie z okresowej niezdolności
+  (zł/mies.)** — jedyna jednoznaczna kwota z wniosku. To nie składka ani
+  przychód; etykiety mówią to wprost, suma kolumny też. Nie podpisuj jej „wartość
+  leada". Wyjątek: w Wygrany karta i nagłówek pokazują **składkę roczną**
+  sprzedanego wariantu.
+- **Liczniki i sumy liczy SQL dla całego zbioru po filtrze** (`ud_leady_liczniki`),
+  nie przeglądarka z załadowanych kart (K23). Filtr jest zdefiniowany w jednym
+  miejscu (`ud_leady_dopasowane`); wyszukiwanie przez `strpos`, nie `ilike` —
+  `_` i `%` są poprawnymi znakami w adresie e-mail.
+- **Karta nie niesie e-maila ani PESEL-u**; szczegóły pokazują e-mail, zawód i
+  kwoty, nigdy PESEL. Oferty w szczegółach czyta klient **z sesją agenta**, nie
+  serwisowy — panel ma własne reguły dostępu do ofert.
+- **Prawy klik**: `preventDefault` tylko gdy otwieramy własne menu. Natywne zostaje
+  na linkach, polach, zaznaczonym tekście i przy Shift. Przycisk „…" i prawy klik
+  czytają jeden model akcji (`akcjeLeada` w `model.js`).
+- **Własny kontroler przeciągania** (`przeciaganie.js`), bez biblioteki: próg 7 px
+  (zwykły klik otwiera szczegóły), Esc / puszczenie poza celem / utrata fokusu
+  anulują, autoprzewijanie przy krawędziach, tymczasowy podgląd zwiniętego etapu
+  po 600 ms (nakładka, bez przesuwania układu), kliknięcie po upuszczeniu połykane
+  tylko na tej karcie. Na telefonie nie ma uchwytu — podstawą jest menu.
+- Uprawnienia w menu to **podpowiedź**; decyduje SQL. Pozycja niedostępna zostaje
+  widoczna z przyczyną (`aria-disabled` + opis), nie znika.
+
+### Czego nie ma (poza MVP z wytycznych, świadomie)
+
+Masowe przenoszenie i zaznaczanie, ręczna kolejność kart (sortowanie: działanie /
+data / wartość), tagi na karcie, duplikowanie, trwałe usuwanie, „Konfiguruj etap…" (administrator
+zmienia etapy w bazie), automatyzacje na zdarzeniach z historii, wysyłka e-maili
+i SMS z tablicy. „Dodaj lead" prowadzi do formularza nowego klienta — lead
+pojawia się w etapie Nowy po jego zapisaniu.
+
+### Testy — `apps/panel`
+
+```
+pnpm test:leady-model     # logika widoku + klient API (Node, bez bazy)
+pnpm test:leady-sql       # funkcje SQL na jednorazowym Postgresie (+ współbieżność)
+pnpm test:leady-api       # warstwa serwerowa na PRAWDZIWYM SQL (kontrakt nazw argumentów)
+npx playwright test       # K01–K25 i reszta, w przeglądarce
+```
+
+Testy SQL i przeglądarkowe stawiają własny klaster Postgresa (`initdb`; jako root
+przez `runuser -u postgres`). **Bez binariów Postgresa kończą się błędem, nie
+zielonym wynikiem.** Przeglądarkowe jadą po prawdziwych komponentach i prawdziwych
+funkcjach serwerowych; zastąpione są tylko sesja (nagłówek `x-test-user`) i
+transport do bazy (psql zamiast PostgREST). Awarie sieci są wstrzykiwane w
+`test/leady/serwer.mjs` (zgubiona odpowiedź, 502 po wykonaniu, zerwane połączenie).
+Wszystkie warstwy przeszły testy mutacyjne — celowo zepsuty kod (brak kontroli
+wersji, brak blokady wiersza, tożsamość z ciała, brak formularza powodu, brak
+zapisu zwinięcia…) daje czerwony wynik.
+
+Testy przeglądarkowe działają domyślnie jako administrator (`otworz()` bez
+`u`), bo on widzi wszystkie leady; reguły agenta mają własne scenariusze
+(`polisy-widocznosc.spec.js`, K19 jako Olek). Czytnik PDF w serwerze testowym
+rozpoznaje znaczniki w treści pliku (`UD-TEST-KWOTY`, `UD-TEST-HASLO`,
+`UD-TEST-OPLATA`, `UD-TEST-POLISA`) — prawdziwej polisy w repozytorium nie ma
+(dane osobowe), więc **odczytu z prawdziwego pliku Leadenhall testy nie
+sprawdzają**. Układ tekstu polis pilnuje `test:leady-model` na fragmentach
+przepisanych z prawdziwych polis (z wymyślonymi danymi); sam odczyt pięciu
+prawdziwych plików sprawdzono ręcznie 05.10.2026 (numer, okres, kwoty — 5/5).
+
+Strona statystyk i menu panelu (migająca zakładka) nie siedzą w harnessie
+tablicy — `statystyki.spec.js` renderuje je po stronie serwera z prawdziwych
+komponentów (`/__test/ssr-statystyki`, `/__test/ssr-uklad`), z danymi z tych
+samych funkcji co ich `load`. `$app/stores` i `$app/navigation` podmienia
+`test/leady/app-zaslepka.js`. Odpytywania co minutę w przeglądarce to nie
+sprawdza — tylko to, co pokazuje świeżo wczytana strona. Okno „Dodaj polisę"
+jedzie w przeglądarce na własnym harnessie (`test/leady/statystyki.html`,
+`statystyki-polisa.spec.js`): prawdziwa strona, prawdziwe funkcje serwera i SQL;
+`invalidateAll` z zaślepki pobiera dane strony ponownie. Ten sam harness
+podaje wykaz polis (`statystyki.html?strona=polisy`, `polisy.spec.js`, także
+test szerokości 390 px). Panelu Admina (pole stawki) harness nie ma — parser
+stawki sprawdza `test:leady-model`.
+
+**Czego testy NIE pokazują:** Firefoksa i Safari (K24 sprawdzono na Chromium —
+w Firefoksie Shift + prawy klik zwykle nie wysyła `contextmenu` w ogóle, wtedy
+aplikacja nie ma czego obsłużyć), dotyku na prawdziwym telefonie, czytnika
+ekranu (są role, nazwy, regiony `status`/`alert` i zarządzanie fokusem, ale nikt
+nie słuchał), schematu produkcji (atrapa ma tylko potrzebne kolumny) i PostgREST.
+
+### Wdrożenie — kolejność (dopiero po wyraźnym słowie właściciela)
+
+1. Migracja na produkcję **przed** panelem. Dodaje FK z `ud_leady` do `ud_clients`
+   i wyzwalacz na `ud_wnioski_szkice` — na ułamek sekundy blokuje te tabele
+   (wstawianie wniosku też). Rób to poza godzinami ruchu. Część 2 ma
+   `lock_timeout` 5 s: przy zajętej tabeli odpada, zamiast trzymać wnioski
+   w kolejce. **MCP nie przyjmie części 2** (funkcje z `UPDATE`/`DELETE` czekają
+   na potwierdzenie, które nie dociera) — idzie przez SQL Editor.
+2. Nazwa pliku migracji = wersja odnotowana przez bazę.
+3. Panel (`REBUILD`, projekt `udappnew`, root `apps/panel`). Panel wdrożony przed
+   migracją pokaże na `/panel/leady` komunikat o błędzie, reszta działa.
+4. Pierwsze otwarcie tablicy utworzy leady dla wszystkich klientów i szkiców ze
+   zgodą (etap startowy z ofert) — sprawdź to oczami.
+5. Po wdrożeniu `cd apps/portal && node test/obciazenie-formularza.mjs` jak po
+   każdej pracy.
+
+---
+
+## Newsletter — HTML do wklejenia w Resend
+
+Wydanie opisuje `apps/portal/newsletter/<rrrr-mm>.json` (temat, preheader,
+wstęp, artykuł wiodący, dwa „Warto przeczytać", ramka kalkulatora). HTML
+buduje:
+
+```
+cd apps/portal && node scripts/newsletter.mjs 2026-10
+```
+
+Tytuły, adresy i okładki bierze z `artykuly.json`, dane spółki z `firma.ts` —
+w pliku wydania są tylko zajawki i kolejność. Wynik, `newsletter/<wydanie>.html`,
+właściciel wkleja w Resend Broadcasts (decyzja z 10.10.2026: kopiuje cały HTML
+sam, skryptu wysyłki nie ma). Link do wypisu to `{{{RESEND_UNSUBSCRIBE_URL}}}` —
+Resend podstawia go per odbiorca. Nadawca jak przy przypomnieniach:
+`UtrataDochodu <info@utratadochodu.pl>` (domena zweryfikowana w Resend).
+
+Stopka to dane spółki z `firma.ts` i zdanie z wypisem („Możesz się wypisać
+z newslettera, ale po co?" — treść właściciela, 10.10.2026). Sekcji „Nasze
+serwisy" nie ma, decyzją właściciela z tego samego dnia.
+
+**Zajawki piszesz z treści artykułu, nie z pamięci.** Liczba w zajawce, której
+nie ma w artykule, to nowe twierdzenie bez sprawdzenia z OWU i źródłami.
+
+### Obrazki: JPEG w `public/email/`, na zawsze
+
+- **Nie WebP z kubełka** — Outlook na Windowsie WebP-a nie pokazuje. Generator
+  robi z wariantu 1600 px JPEG-i 1200 i 600 px
+  (`public/email/artykuly/<slug>-<szer>.jpg`) i nie nadpisuje istniejących.
+- **Nie `/_astro/`** — tam nazwa zmienia się z każdym buildem, a wysłany mail
+  wskazuje adres latami. To jest ten jeden przypadek, w którym zdjęcie idzie do
+  `public/` (zasada „src/, nigdy public/" dotyczy zdjęć na stronach).
+- **Nie kasuj i nie przemianowuj** niczego w `public/email/` — każdy wysłany
+  mail straciłby obrazek. Pilnuje tego `test/newsletter.spec.js`, który
+  sprawdza KAŻDE wydanie w `newsletter/`, także stare.
+- Logo: `scripts/email-logo.mjs` (znak z `Znak.astro` + napis krojem Public
+  Sans, PNG 3×, białe tło — przezroczyste znikałoby w trybie ciemnym).
+- `/email/*` jest wypisane z `_routes.json` — inaczej każde otwarcie maila to
+  kilka wywołań funkcji brzegowej.
+
+### UTM-y
+
+`utm_source=newsletter`, `utm_medium=email`, `utm_campaign` z pliku wydania
+(`newsletter_2026_10`), `utm_content` = miejsce w mailu (`temat-numeru`,
+`artykul-2`, `kalkulator`, `logo`…). Bez UTM-ów wizyty z poczty lądują w GA4 jako ruch bezpośredni albo jako
+odesłanie z `mail.google.com`, wymieszane z resztą.
+
+UTM-y czyta wyłącznie GA4 (`G-MGB0RBTCC9`) i tylko u tych, którzy zgodzą się
+na analitykę (Consent Mode w trybie basic). Zgoda musi paść **na stronie, na
+którą prowadzi link** — tag startuje dopiero po niej i bierze adres bieżącej
+strony; kto przejdzie dalej przed kliknięciem w baner, wpada do ruchu
+bezpośredniego. Wniosek z newslettera widać w GA4 tylko jako odsłonę
+`/podziekowanie/` w takiej sesji: portal nie wysyła do GA4 osobnego zdarzenia,
+a konwersja Ads idzie wyłącznie do Ads.
+
+**Resend nie liczy dziś niczego poza doręczeniem.** Na 11.10.2026 domena
+`utratadochodu.pl` ma w Resend wyłączone i śledzenie kliknięć, i otwarć.
+Włącza się je dla całej domeny, więc obejmie też przypomnienia
+z `wniosek-przypomnienie` (link wycofania zgody pójdzie przez przekierowanie
+Resend — po włączeniu sprawdź, że fragment `#id=…&sig=…` dochodzi). Piksel
+otwarć i linki z identyfikatorem odbiorcy to dostęp do urządzenia odbiorcy
+(art. 399 PKE), więc ich mierzenie powinno stać w treści zgody na newsletter.
+
+UTM-y nie trafiają do wniosku w bazie: lead z newslettera nie jest w panelu
+oznaczony (do zrobienia osobno, gdyby było potrzebne).
+
+### Komu wolno wysłać
+
+**Newsletter to informacja handlowa — tylko do osób, które zgodziły się na nią
+e-mailem (art. 398 Prawa komunikacji elektronicznej).** Na 10.10.2026 serwis
+takiej zgody nie zbiera nigdzie: zgoda w kreatorze dotyczy wyłącznie kontaktu
+w sprawie niedokończonego wniosku, a `ud_clients` i `udochodu_contacts` nie
+mają pola zgody marketingowej. Lista w Resend musi więc pochodzić ze źródła,
+które zgodę ma — nie z kartoteki klientów.
 
 ---
 

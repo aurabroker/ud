@@ -6,6 +6,8 @@ import { createAdminClient } from './supabase.js';
 import { parseOfferPdf } from '$lib/pdf/index.js';
 import { generateShareToken, generatePin, hashPin } from './crypto.js';
 import { sendEmail } from './email.js';
+import { sendSms } from './sms.js';
+import { SMS_OFERTA, numerDoSms } from './smsOferta.js';
 import { offerLinkEmail } from './templates.js';
 import { resolveOwus, pokryteBazy, bezInnychWersji } from './owuMatch.js';
 import { buildSummaryDocDefinition } from './pdf/summaryDoc.js';
@@ -554,8 +556,11 @@ async function regenerateSummary(sb, offerId) {
  * w ud_send_log — bez tego nie da się odtworzyć, którą wersję klient dostał
  * którego dnia, a przy kilku rundach poprawek to jedyne, o co pyta.
  *
+ * Od 12.10.2026 po wysłanym e-mailu idzie też SMS „wysłaliśmy Ci ofertę,
+ * sprawdź maila" (smsOferta.js) — samo zawiadomienie, bez linku i bez kodu.
+ *
  * @param {string} offerId
- * @returns {Promise<{ ok: boolean, email: any, pinDev?: string, wersja: number }>}
+ * @returns {Promise<{ ok: boolean, email: any, sms: any, pinDev?: string, wersja: number }>}
  */
 export async function sendOfferToClient(offerId) {
   const sb = createAdminClient();
@@ -565,7 +570,7 @@ export async function sendOfferToClient(offerId) {
   // Jeden kod: access_code (= hasło PDF = 4 ostatnie cyfry PESEL). Odblokowuje
   // link i otwiera pliki.
   const { data: klient } = offer.client_id
-    ? await sb.from('ud_clients').select('pesel').eq('id', offer.client_id).maybeSingle()
+    ? await sb.from('ud_clients').select('pesel, phone').eq('id', offer.client_id).maybeSingle()
     : { data: null };
   const zPeselu = /^\d{11}$/.test(String(klient?.pesel || '')) ? String(klient.pesel).slice(-4) : null;
 
@@ -651,12 +656,29 @@ export async function sendOfferToClient(offerId) {
       .eq('id', offerId);
   }
 
+  // SMS: tylko zawiadomienie, że oferta czeka w skrzynce (decyzja właściciela
+  // z 12.10.2026). Wyłącznie po WYSŁANYM e-mailu — „wysłaliśmy ofertę" przy
+  // odrzuconym mailu byłoby nieprawdą. Porażka SMS-a nie cofa wysyłki: oferta
+  // już jest u klienta, a próba ląduje w ud_send_log jak każda inna.
+  let sms = { sent: false, pominiety: 'e-mail nie wyszedł' };
+  if (email.sent) {
+    // Najpierw numer z oferty, a gdy go nie ma albo jest błędny — z kartoteki.
+    const numer = numerDoSms(offer.client_phone) ?? numerDoSms(klient?.phone);
+    if (numer) {
+      sms = await sendSms(numer, SMS_OFERTA)
+        .catch((e) => ({ sent: false, error: 'SMS: ' + (e?.message || e) }));
+      await logSend('sms', numer, sms);
+    } else {
+      sms = { sent: false, pominiety: 'brak poprawnego polskiego numeru telefonu' };
+    }
+  }
+
   // Po wysyłce upewnij się, że PDF podsumowania jest wygenerowany (do pobrania).
   await ensureSummaryUrl(offerId).catch(() => {});
 
   // pinDev zwracany tylko w trybie stub (brak realnej wysyłki), do testów
   const pinDev = email.stub ? pin : undefined;
-  return { ok: true, email, pinDev, wersja };
+  return { ok: true, email, sms, pinDev, wersja };
 }
 
 /**

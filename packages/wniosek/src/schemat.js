@@ -92,13 +92,22 @@ export const AKTYWNOSCI_RYZYKOWNE = [
  * trzy startowały puste i wystarczało „dowolne jedno" — 28.09.2026 przeszedł
  * tak wniosek z samą śmiercią / inwalidztwem.
  */
+/** 10000000 → „10 000 000 zł" (spacja zwykła, jak w pozostałych tekstach kreatora). */
+const kwotaZl = (n) => `${String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} zł`;
+
+/** Najwyższe sumy — decyzja właściciela z 12.10.2026 (patrz GRANICE_CIALA niżej). */
+const MAX_NW = 10_000_000;
+const MAX_OKRESOWA = 50_000;
+const MAX_TRWALA = 10_000_000;
+
 export const RYZYKA = [
   {
     klucz: 'riskDeathInvalidity',
     poleSumy: 'nwDeathSum',
     etykieta: 'Śmierć / inwalidztwo w wyniku nieszczęśliwego wypadku',
     rodzaj: 'Jednorazowe świadczenie',
-    podpowiedz: 'Zaokrąglana do pełnych tysięcy złotych.',
+    max: MAX_NW,
+    podpowiedz: `Najwyżej ${kwotaZl(MAX_NW)}. Zaokrąglana do pełnych tysięcy złotych.`,
   },
   {
     klucz: 'riskTempIncapacity',
@@ -106,16 +115,50 @@ export const RYZYKA = [
     etykieta: 'Okresowa niezdolność do pracy',
     rodzaj: 'Miesięczne świadczenie',
     podstawowe: true,
-    podpowiedz: 'Maksymalnie {limit}% średniorocznych przychodów netto.',
+    max: MAX_OKRESOWA,
+    podpowiedz: `Maksymalnie {limit}% średniorocznych przychodów netto, nie więcej niż ${kwotaZl(MAX_OKRESOWA)} miesięcznie.`,
   },
   {
     klucz: 'riskPermIncapacity',
     poleSumy: 'permIncapacitySum',
     etykieta: 'Trwała niezdolność do pracy',
     rodzaj: 'Jednorazowe świadczenie',
-    podpowiedz: 'Maksymalnie 10× roczne przychody. Zaokrąglana do tysięcy.',
+    max: MAX_TRWALA,
+    podpowiedz: `Maksymalnie 10× roczne przychody, nie więcej niż ${kwotaZl(MAX_TRWALA)}. Zaokrąglana do tysięcy.`,
   },
 ];
+
+/**
+ * Waga i wzrost — granice, poza którymi wpis nie jest daną, tylko pomyłką
+ * albo zabawą.
+ *
+ * Pola są nieobowiązkowe (puste przechodzi), ale wpisana wartość musi się
+ * mieścić w granicach. Maksima ustalił właściciel 12.10.2026 (`max`); minima
+ * to wartości, które pola miały w atrybutach `min` od początku.
+ *
+ * Do 12.10.2026 żadna z tych liczb nie była sprawdzana: `min`/`max` w HTML-u
+ * działają tylko przy natywnej wysyłce formularza, a kreator ma własną
+ * walidację, która wagi i wzrostu nie dotykała. 11.10 przeszedł wniosek
+ * z wagą 1000 kg, świadczeniem 500 000 000 zł miesięcznie i sumą śmierci
+ * 99 999 999 zł.
+ *
+ * TE SAME LICZBY stoją w funkcji brzegowej form-submit (`GRANICE_CIALA`,
+ * `GRANICE_SUM`) — kreator da się obejść, funkcji nie.
+ * test/wniosek-granice.spec.js w portalu pilnuje, żeby się zgadzały.
+ */
+const granica = (min, max, jednostka, co) => ({ min, max, jednostka, komunikat: `Wpisz ${co} — od ${min} do ${max}.` });
+export const GRANICE_CIALA = {
+  weight: granica(30, 200, 'kg', 'wagę w kilogramach'),
+  height: granica(100, 250, 'cm', 'wzrost w centymetrach'),
+};
+
+/** Liczba z pola formularza: `type="number"` daje liczbę, wklejony tekst — napis. */
+function liczba(v) {
+  if (typeof v === 'number') return v;
+  const s = String(v ?? '').replace(/[\s\u00A0]/g, '').replace(',', '.');
+  return s === '' ? NaN : Number(s);
+}
+
 
 /**
  * Próg, powyżej którego ubezpieczyciel udostępnia klauzule dodatkowe.
@@ -287,6 +330,13 @@ export function sprawdzKrok(krok, dane) {
         bledy.pesel = `Ochrona obejmuje osoby od 18 do 65 lat, a z PESEL-u wychodzi ${wiek}.`;
       }
     }
+    // Po PESEL-u, bo kolejność kluczy w `bledy` to kolejność, w jakiej kreator
+    // szuka pierwszego pola do pokazania — PESEL stoi na ekranie wyżej.
+    for (const [pole, g] of Object.entries(GRANICE_CIALA)) {
+      if (!String(dane[pole] ?? '').trim()) continue;   // pole nieobowiązkowe
+      const v = liczba(dane[pole]);
+      if (!Number.isFinite(v) || v < g.min || v > g.max) bledy[pole] = g.komunikat;
+    }
   }
 
   if (krok === 'zakres') {
@@ -300,9 +350,13 @@ export function sprawdzKrok(krok, dane) {
         + 'Pozostałe ryzyka możesz do niego dołożyć.';
     }
     for (const r of wybrane) {
-      const suma = Number(dane[r.poleSumy]);
+      const suma = liczba(dane[r.poleSumy]);
       if (!Number.isFinite(suma) || suma <= 0) {
         bledy[r.poleSumy] = 'Wpisz kwotę.';
+      } else if (suma > r.max) {
+        bledy[r.poleSumy] = r.rodzaj === 'Miesięczne świadczenie'
+          ? `Najwyżej ${kwotaZl(r.max)} miesięcznie — wpisz niższą kwotę.`
+          : `Najwyżej ${kwotaZl(r.max)} — wpisz niższą sumę.`;
       }
     }
   }
@@ -385,6 +439,25 @@ export const POLA_LOGICZNE = [
  */
 
 /** Zamienia stan formularza na kształt, którego oczekuje funkcja form-submit. */
+/**
+ * Kod agenta z jego linku do wniosku (/wniosek/?agent=0004). Idzie do
+ * form-submit jako `affiliateCode` — funkcja już zapisuje go w
+ * ud_clients.affiliate_code_used — a tablica leadów w panelu przypisuje po nim
+ * opiekuna. Bierzemy go wyłącznie z adresu strony: bez ciasteczek
+ * i sessionStorage (zapis w urządzeniu wymagałby zgody, art. 399 PKE).
+ * Niepoprawny kod jest pomijany — wniosek idzie zawsze, najwyżej bez agenta.
+ * @param {string} search location.search
+ * @returns {{ affiliateCode?: string }}
+ */
+export function zLinkuAgenta(search) {
+  try {
+    const kod = (new URLSearchParams(search ?? '').get('agent') ?? '').trim();
+    return /^[A-Za-z0-9_-]{1,20}$/.test(kod) ? { affiliateCode: kod } : {};
+  } catch {
+    return {};
+  }
+}
+
 export function doWysylki(dane) {
   const out = { ...dane };
   // Zgoda na kontakt w sprawie niedokończonego wniosku dotyczy szkicu

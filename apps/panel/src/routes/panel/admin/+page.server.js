@@ -1,5 +1,6 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { createAdminClient } from '$lib/server/supabase.js';
+import { stawkaZFormularza } from '$lib/prowizja.js';
 
 async function requireAdmin(locals) {
   const { user } = await locals.safeGetSession();
@@ -15,7 +16,7 @@ export async function load({ locals }) {
 
   const { data: profiles } = await sb
     .from('ud_user_profiles')
-    .select('id, full_name, role, active, leader_id, created_at')
+    .select('id, full_name, role, active, leader_id, created_at, prowizja_procent')
     .order('created_at', { ascending: false });
 
   // e-maile z auth.users
@@ -39,7 +40,9 @@ export const actions = {
     const password = String(form.get('password') || '');
     const fullName = String(form.get('fullName') || '').trim();
     const role = String(form.get('role') || 'user');
+    const stawka = stawkaZFormularza(form.get('prowizja'));
     if (!email || password.length < 6) return fail(400, { error: 'Podaj email i hasło (min. 6 znaków).' });
+    if (stawka === undefined) return fail(400, { error: 'Prowizja: wpisz procent od 0 do 100, np. 20 albo 12,5.' });
 
     const { data: created, error: cErr } = await sb.auth.admin.createUser({
       email,
@@ -52,7 +55,8 @@ export const actions = {
       id: created.user.id,
       full_name: fullName || email,
       role: role === 'admin' ? 'admin' : 'user',
-      active: true
+      active: true,
+      prowizja_procent: stawka
     });
     if (pErr) return fail(400, { error: 'Profil: ' + pErr.message });
     return { ok: true };
@@ -66,7 +70,13 @@ export const actions = {
     if (form.has('role')) patch.role = String(form.get('role')) === 'admin' ? 'admin' : 'user';
     if (form.has('active')) patch.active = String(form.get('active')) === 'true';
     if (form.has('fullName')) patch.full_name = String(form.get('fullName')).trim() || null;
-    await sb.from('ud_user_profiles').update(patch).eq('id', id);
+    if (form.has('prowizja')) {
+      const stawka = stawkaZFormularza(form.get('prowizja'));
+      if (stawka === undefined) return fail(400, { error: 'Prowizja: wpisz procent od 0 do 100, np. 20 albo 12,5.' });
+      patch.prowizja_procent = stawka;
+    }
+    const { error: e } = await sb.from('ud_user_profiles').update(patch).eq('id', id);
+    if (e) return fail(400, { error: 'Zapis: ' + e.message });
     return { ok: true };
   },
 

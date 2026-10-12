@@ -9,6 +9,7 @@ import {
   pesekPoprawny, dataZPesel, wiekZPesel, telefonPoprawny, emailPoprawny,
   sprawdzKrok, ankietaRozszerzona, doWysylki, HEALTH_SURVEY_THRESHOLD,
   AKTYWNOSCI_RYZYKOWNE, POLA_LOGICZNE, KROKI, ZGODA_KONTAKT, krokiSlownie,
+  RYZYKA, GRANICE_CIALA,
 } from '../src/schemat.js';
 
 /** Dokleja poprawną cyfrę kontrolną do dziesięciu cyfr. */
@@ -76,6 +77,56 @@ test('krok „zakres" — wymaga ryzyka i kwoty', () => {
 
   const ok = sprawdzKrok('zakres', { riskTempIncapacity: true, tempIncapacitySum: 12000 });
   assert.deepEqual(ok, {});
+});
+
+/*
+ * Granice z 12.10.2026. 11.10 przeszedł wniosek z wagą 1000 kg, świadczeniem
+ * 500 000 000 zł miesięcznie i sumą śmierci 99 999 999 zł — kreator nie
+ * sprawdzał żadnej z tych liczb od góry. Przypadki niżej to dokładnie tamten
+ * wniosek plus wartości na samej granicy (granica jest dozwolona, grosz
+ * wyżej już nie).
+ */
+test('granice: maksima uzgodnione z właścicielem', () => {
+  const max = Object.fromEntries(RYZYKA.map((r) => [r.poleSumy, r.max]));
+  assert.deepEqual(max, { nwDeathSum: 10_000_000, tempIncapacitySum: 50_000, permIncapacitySum: 10_000_000 });
+  assert.equal(GRANICE_CIALA.weight.max, 200);
+  assert.equal(GRANICE_CIALA.height.max, 250);
+});
+
+test('krok „dane" — waga i wzrost w granicach, puste przechodzi', () => {
+  const pesel = zCyfraKontrolna('9001011234');
+  const baza = { profession: 'Lekarz', pesel };
+  assert.deepEqual(sprawdzKrok('dane', baza), {}, 'pola nieobowiązkowe');
+  assert.deepEqual(sprawdzKrok('dane', { ...baza, weight: 200, height: 250 }), {}, 'granica dozwolona');
+  assert.deepEqual(sprawdzKrok('dane', { ...baza, weight: '72,5', height: '180' }), {}, 'tekst z przecinkiem');
+  assert.deepEqual(sprawdzKrok('dane', { ...baza, weight: 30, height: 100 }), {}, 'minimum dozwolone');
+
+  const janusz = sprawdzKrok('dane', { ...baza, weight: 1000, height: 131 });
+  assert.match(janusz.weight, /od 30 do 200/);
+  assert.equal(janusz.height, undefined);
+
+  for (const [weight, height] of [[200.5, 180], [80, 251], [0, 180], [-80, 180], [80, 99], ['abc', 180], [80, '1e9']]) {
+    const b = sprawdzKrok('dane', { ...baza, weight, height });
+    assert.ok(b.weight || b.height, `${weight} kg / ${height} cm powinno być błędem`);
+  }
+});
+
+test('krok „zakres" — sumy nie wyżej niż maksimum', () => {
+  const wszystkie = { riskTempIncapacity: true, riskPermIncapacity: true, riskDeathInvalidity: true };
+  const naGranicy = { ...wszystkie, tempIncapacitySum: 50_000, permIncapacitySum: 10_000_000, nwDeathSum: 10_000_000 };
+  assert.deepEqual(sprawdzKrok('zakres', naGranicy), {}, 'granica dozwolona');
+
+  const janusz = sprawdzKrok('zakres', { ...wszystkie, tempIncapacitySum: 500_000_000, permIncapacitySum: 123_123, nwDeathSum: 99_999_999 });
+  assert.match(janusz.tempIncapacitySum, /50 000 zł miesięcznie/);
+  assert.match(janusz.nwDeathSum, /10 000 000 zł/);
+  assert.equal(janusz.permIncapacitySum, undefined);
+
+  assert.ok(sprawdzKrok('zakres', { ...naGranicy, tempIncapacitySum: 50_001 }).tempIncapacitySum);
+  assert.ok(sprawdzKrok('zakres', { ...naGranicy, permIncapacitySum: 10_000_001 }).permIncapacitySum);
+  assert.ok(sprawdzKrok('zakres', { ...naGranicy, nwDeathSum: '1e9' }).nwDeathSum, 'zapis wykładniczy');
+
+  // Niezaznaczone ryzyko nie blokuje kroku — jego kwoty kreator nie pokazuje.
+  assert.deepEqual(sprawdzKrok('zakres', { riskTempIncapacity: true, tempIncapacitySum: 10_000, nwDeathSum: 99_999_999 }), {});
 });
 
 test('krok „zdrowie" — TAK wymaga opisu', () => {
@@ -232,4 +283,15 @@ test('liczba kroków słowami idzie z KROKI i ma poprawną odmianę', () => {
   assert.equal(krokiSlownie(4), 'cztery kroki');
   assert.equal(krokiSlownie(5), 'pięć kroków');
   assert.equal(krokiSlownie(12), '12 kroków', 'poza słownikiem — cyfra, ale z dobrą odmianą');
+});
+
+test('zLinkuAgenta: kod z ?agent= idzie jako affiliateCode; brak albo śmieci → nic (wniosek i tak idzie)', async () => {
+  const { zLinkuAgenta } = await import('../src/schemat.js');
+  assert.deepEqual(zLinkuAgenta('?agent=0004'), { affiliateCode: '0004' });
+  assert.deepEqual(zLinkuAgenta('?zawod=lekarz&agent=%200007%20'), { affiliateCode: '0007' });
+  assert.deepEqual(zLinkuAgenta(''), {});
+  assert.deepEqual(zLinkuAgenta('?agent='), {});
+  assert.deepEqual(zLinkuAgenta('?agent=<script>'), {});
+  assert.deepEqual(zLinkuAgenta('?agent=' + 'x'.repeat(21)), {});
+  assert.deepEqual(zLinkuAgenta(undefined), {});
 });

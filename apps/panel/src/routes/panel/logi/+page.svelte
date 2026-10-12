@@ -1,4 +1,5 @@
 <script>
+  import UstawieniaNav from '$lib/components/UstawieniaNav.svelte';
   let { data } = $props();
 
   const statusLabel = { sent: 'Wysłano', error: 'Błąd', stub: 'Tryb testowy' };
@@ -16,6 +17,8 @@
 </script>
 
 <svelte:head><title>Wysyłki — Panel</title></svelte:head>
+
+<UstawieniaNav />
 
 <div style="margin-bottom:1rem;">
   <h1 style="font-size:1.5rem;">Wysyłki do klientów</h1>

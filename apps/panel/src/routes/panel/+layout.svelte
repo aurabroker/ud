@@ -1,20 +1,51 @@
 <script>
+  import { onMount } from 'svelte';
   import { page } from '$app/stores';
   import { APP_VERSION } from '$lib/version.js';
+  import { sekcjeUstawien, wUstawieniach } from '$lib/ustawienia.js';
   let { data, children } = $props();
+
+  /**
+   * Ile kontaktów czeka na liście „Niedokończone" (porzucony wniosek ze zgodą,
+   * nieoznaczony jako „Obsłużony"). Dopóki > 0, zakładka miga na czerwono.
+   * Liczba przychodzi z load (każda nawigacja) i z odpytywania co minutę —
+   * nowy kontakt ma być widać bez przeładowania strony.
+   */
+  let niedokonczoneOdpytane = $state(null);
+  const niedokonczone = $derived(niedokonczoneOdpytane ?? data.niedokonczone ?? 0);
+  $effect(() => { data.niedokonczone; niedokonczoneOdpytane = null; });
+
+  onMount(() => {
+    const odpytaj = async () => {
+      try {
+        const r = await fetch('/panel/api/niedokonczone', { headers: { accept: 'application/json' } });
+        if (r.ok) {
+          const { ile } = await r.json();
+          if (typeof ile === 'number') niedokonczoneOdpytane = ile;
+        }
+      } catch { /* sieć — spróbujemy za minutę */ }
+    };
+    const id = setInterval(odpytaj, 60_000);
+    return () => clearInterval(id);
+  });
+
+  const kontaktow = (n) => `${n} ${n === 1 ? 'kontakt czeka' : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 'kontakty czekają' : 'kontaktów czeka'}`;
   const name = data.profile?.full_name || data.user?.email || 'Agent';
   const role = data.profile?.role || 'user';
   const isAdmin = role === 'admin';
 
   const tabs = [
+    { href: '/panel/leady', label: 'Leady' },
+    { href: '/panel/statystyki', label: 'Statystyki' },
+    { href: '/panel/polisy', label: 'Polisy' },
     { href: '/panel/klienci', label: 'Klienci' },
-    { href: '/panel/niedokonczone', label: 'Niedokończone' },
+    { href: '/panel/niedokonczone', label: 'Niedokończone', alarm: true },
     { href: '/panel', label: 'Oferty', exact: true },
-    { href: '/panel/owu', label: 'Biblioteka OWU' },
-    { href: '/panel/logi', label: 'Wysyłki' },
-    ...(isAdmin ? [{ href: '/panel/admin', label: 'Panel Admina' }] : []),
-    ...(isAdmin ? [{ href: '/panel/ustawienia', label: 'Ustawienia' }] : [])
+    { href: '/panel/owu', label: 'Biblioteka OWU' }
   ];
+  // Wysyłki, Panel Admina i ustawienia systemu — jedna pozycja „Ustawienia"
+  // obok nazwy konta (05.10.2026); prowadzi do pierwszej dostępnej sekcji.
+  const ustawienia = sekcjeUstawien(isAdmin)[0].href;
 
   function active(tab) {
     const p = $page.url.pathname;
@@ -31,14 +62,23 @@
     </a>
     <nav style="display:flex;gap:.25rem;flex-wrap:wrap;">
       {#each tabs as tab}
+        {@const alarm = tab.alarm && niedokonczone > 0}
         <a href={tab.href}
-          style="color:{active(tab) ? '#fff' : '#94a3b8'};text-decoration:none;font-size:.9rem;font-weight:{active(tab) ? '700' : '500'};padding:.4rem .7rem;border-radius:7px;background:{active(tab) ? 'rgba(255,255,255,.12)' : 'transparent'};">
-          {tab.label}
+          class:alarm
+          data-zakladka={tab.href}
+          aria-label={alarm ? `${tab.label} — ${kontaktow(niedokonczone)}` : undefined}
+          style="color:{active(tab) || alarm ? '#fff' : '#94a3b8'};text-decoration:none;font-size:.9rem;font-weight:{active(tab) || alarm ? '700' : '500'};padding:.4rem .7rem;border-radius:7px;background:{active(tab) ? 'rgba(255,255,255,.12)' : 'transparent'};">
+          {tab.label}{#if alarm}<span class="licznik-alarmu" aria-hidden="true">{niedokonczone}</span>{/if}
         </a>
       {/each}
     </nav>
   </div>
-  <div style="display:flex;align-items:center;gap:1rem;">
+  <div style="display:flex;align-items:center;gap:.75rem 1rem;flex-wrap:wrap;margin-left:auto;">
+    <a href={ustawienia} class="ustawienia" class:aktywne={wUstawieniach($page.url.pathname)}
+       aria-current={wUstawieniach($page.url.pathname) ? 'page' : undefined} data-ustawienia>
+      <svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Ustawienia
+    </a>
     <div style="text-align:right;line-height:1.2;">
       <div style="font-size:.85rem;font-weight:600;">{name}</div>
       <div style="font-size:.72rem;color:var(--slate-400);">{role} · <span title="Wersja aplikacji">{APP_VERSION}</span></div>
@@ -50,3 +90,27 @@
 <main class="container">
   {@render children()}
 </main>
+
+<style>
+  /*
+   * Zakładka „Niedokończone" miga, dopóki na liście czeka kontakt. Biały tekst na
+   * #dc2626 ma 4,8:1. Kto ma w systemie ograniczone animacje, widzi stałą czerwień.
+   */
+  a.alarm { animation: alarm-niedokonczone 1.2s ease-in-out infinite; }
+  @keyframes alarm-niedokonczone {
+    0%, 100% { background: #dc2626; }
+    50% { background: #7f1d1d; }
+  }
+  .ustawienia { display: inline-flex; align-items: center; gap: .4rem; color: #94a3b8; text-decoration: none; font-size: .9rem;
+                font-weight: 500; padding: .4rem .7rem; border-radius: 7px; white-space: nowrap; }
+  .ustawienia:hover { color: #fff; }
+  .ustawienia.aktywne { color: #fff; font-weight: 700; background: rgba(255, 255, 255, .12); }
+  .ustawienia:focus-visible { outline: 2px solid #38bdf8; outline-offset: 2px; }
+  .licznik-alarmu {
+    display: inline-block; margin-left: .35rem; min-width: 1.25rem; padding: 0 .35rem; border-radius: 999px;
+    background: #fff; color: #991b1b; font-size: .72rem; font-weight: 800; text-align: center; line-height: 1.25rem;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    a.alarm { animation: none; background: #dc2626 !important; }
+  }
+</style>

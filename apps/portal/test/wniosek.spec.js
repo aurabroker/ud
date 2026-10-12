@@ -80,6 +80,31 @@ test('błędny PESEL nie przepuszcza, poprawny przepuszcza', async ({ page }) =>
   await expect(page.locator('input[name="riskTempIncapacity"]')).toBeVisible();
 });
 
+test('granice z 12.10: waga 1000 kg i świadczenie 500 mln zł zatrzymują kreator', async ({ page }) => {
+  // Wniosek z 11.10.2026 przeszedł z wagą 1000 kg i świadczeniem 500 000 000 zł
+  // miesięcznie: min/max w HTML-u niczego nie blokują, a kreator wysyła sam.
+  await kontakt(page);
+  await page.fill('input[name="profession"]', 'Lekarz');
+  await page.fill('input[name="pesel"]', PESEL);
+  await page.fill('input[name="weight"]', '1000');
+  await page.fill('input[name="height"]', '131');
+  await page.getByRole('button', { name: 'Dalej' }).click();
+  await expect(page.getByText('Wpisz wagę w kilogramach — od 30 do 200.')).toBeVisible();
+  await expect(page.locator('input[name="weight"]')).toHaveAttribute('aria-invalid', 'true');
+  await expect(page.locator('input[name="riskTempIncapacity"]')).toHaveCount(0);
+
+  await page.fill('input[name="weight"]', '200');
+  await page.getByRole('button', { name: 'Dalej' }).click();
+  await page.fill('input[name="tempIncapacitySum"]', '500000000');
+  await page.getByRole('button', { name: 'Dalej' }).click();
+  await expect(page.getByText('Najwyżej 50 000 zł miesięcznie — wpisz niższą kwotę.')).toBeVisible();
+
+  await page.fill('input[name="tempIncapacitySum"]', '50000');
+  await page.getByRole('button', { name: 'Dalej' }).click();
+  await expect(page.getByText('Najwyżej 50 000 zł miesięcznie — wpisz niższą kwotę.')).toHaveCount(0);
+  await expect(page.locator('input[name="tempIncapacitySum"]')).toHaveCount(0);
+});
+
 test('forma zatrudnienia zmienia limit świadczenia', async ({ page }) => {
   await kontakt(page);
   await expect(page.getByText('Świadczenie obejmie do 80% udokumentowanego dochodu.')).toBeVisible();
@@ -334,6 +359,40 @@ test.describe('szkic wniosku', () => {
     // Nic z wniosku poza krokiem nie wychodzi do szkicu.
     const wszystko = JSON.stringify(zapytania);
     expect(wszystko).not.toMatch(/pesel|med_|hs_|hsd_|Nadciśnienie|90010112349/i);
+  });
+
+  /** Przechodzi cały kreator z adresu `adres` i zwraca to, co poszło do form-submit. */
+  async function zlozWniosek(page, adres) {
+    await atrapaTurnstile(page);
+    const szkice = await przechwycSzkic(page);
+    const wnioski = [];
+    await page.route('**/functions/v1/form-submit', async (route) => {
+      wnioski.push(route.request().postDataJSON());
+      await route.fulfill({ status: 200, contentType: 'application/json', body: '{"status":"success"}' });
+    });
+    await page.goto(adres);
+    await expect(page.locator('input[name="fullName"]')).toBeVisible();
+    await kontakt(page, 'Jan Kowalski');
+    await przejdzDoZgod(page);
+    await page.check('input[name="exclusions_accepted"]');
+    await page.check('input[name="informedAccepted"]');
+    await page.getByRole('button', { name: 'Wyślij wniosek' }).click();
+    await page.waitForURL('**/podziekowanie/');
+    expect(wnioski).toHaveLength(1);
+    return { wniosek: wnioski[0], szkice };
+  }
+
+  test('link agenta: kod z ?agent= idzie do form-submit jako affiliateCode (lead trafi do tego agenta), do szkicu nie', async ({ page }) => {
+    const { wniosek, szkice } = await zlozWniosek(page, '/wniosek/?agent=0004');
+    expect(wniosek.affiliateCode).toBe('0004');
+    expect(wniosek.pesel).toBe(PESEL);                                  // reszta wniosku bez zmian
+    expect(JSON.stringify(szkice)).not.toContain('0004');
+  });
+
+  test('bez linku agenta i z niepoprawnym kodem wniosek idzie bez affiliateCode', async ({ page }) => {
+    const { wniosek } = await zlozWniosek(page, '/wniosek/?agent=%3Cscript%3E');
+    expect(wniosek).not.toHaveProperty('affiliateCode');
+    expect(wniosek.pesel).toBe(PESEL);
   });
 
   test('Wstecz i zmiana zgody na kroku „kontakt" aktualizuje szkic, brak zmiany — nie', async ({ page }) => {

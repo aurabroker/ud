@@ -70,6 +70,63 @@ const HEALTH_SURVEY_COLUMNS: Record<string, string> = {
 };
 const HEALTH_SURVEY_THRESHOLD = 1_000_000;
 
+/* Granice wniosku — decyzja właściciela z 12.10.2026.
+   11.10 przeszedł wniosek z wagą 1000 kg, świadczeniem 500 000 000 zł
+   miesięcznie i sumą śmierci 99 999 999 zł. Kreator od tego dnia pilnuje tych
+   samych liczb (packages/wniosek/src/schemat.js: RYZYKA[].max, GRANICE_CIALA),
+   ale kreator da się obejść — o tym, co trafia do bazy, decyduje ta funkcja.
+   test/wniosek-granice.spec.js w portalu pilnuje, żeby liczby się zgadzały.
+   Granica jest dozwolona, wszystko powyżej — 400. */
+const GRANICE_SUM: Record<string, { ryzyko: string; max: number; komunikat: string }> = {
+  temp_incapacity_sum: { ryzyko: 'risk_temp_incapacity',  max: 50_000,
+    komunikat: 'Świadczenie miesięczne z okresowej niezdolności może wynosić najwyżej 50 000 zł.' },
+  perm_incapacity_sum: { ryzyko: 'risk_perm_incapacity',  max: 10_000_000,
+    komunikat: 'Suma trwałej niezdolności do pracy może wynosić najwyżej 10 000 000 zł.' },
+  nw_death_sum:        { ryzyko: 'risk_death_invalidity', max: 10_000_000,
+    komunikat: 'Suma na wypadek śmierci / inwalidztwa (NW) może wynosić najwyżej 10 000 000 zł.' },
+};
+const GRANICE_CIALA: Record<string, { min: number; max: number; komunikat: string }> = {
+  weight: { min: 30,  max: 200, komunikat: 'Waga musi mieścić się między 30 a 200 kg.' },
+  height: { min: 100, max: 250, komunikat: 'Wzrost musi mieścić się między 100 a 250 cm.' },
+};
+
+/* Ścisły odczyt liczby do sprawdzenia granic. parseAmount bierze PIERWSZĄ
+   liczbę z napisu, więc „5e8" czyta jako 5, a „50000abc" jako 50 000 —
+   oba przeszłyby granicę i trafiły do bazy w tej postaci. Tu napis, poza
+   spacjami, „zł"/„PLN" i przecinkiem dziesiętnym, musi być samą liczbą.
+   Tylko liczba albo napis: tablica [1,500000000] po String() to „1,500000000",
+   czyli 1,5 — przeszłaby granicę i poszła do kolumny jako cała tablica. */
+function liczbaScisla(raw: unknown): number {
+  if (typeof raw === 'number') return Number.isFinite(raw) ? raw : NaN;
+  if (typeof raw !== 'string') return NaN;
+  const s = raw
+    .replace(/[\s\u00A0\uFEFF]/g, '')
+    .replace(/z[łl]$/i, '')
+    .replace(/pln$/i, '')
+    .replace(',', '.');
+  return /^\d+(?:\.\d+)?$/.test(s) ? parseFloat(s) : NaN;
+}
+
+const pusta = (v: unknown) => v == null || (typeof v === 'string' && v.trim() === '');
+
+/** Sprawdza granice i NORMALIZUJE pola: do kolumny idzie odczytana liczba,
+    nie napis, który przyszedł (BOM, odstępy, ogon „.0000…" po granicy).
+    Puste pole nie jest błędem — obecność kwoty przy ryzyku podstawowym
+    sprawdza osobna bramka. Zwraca pierwsze pole poza granicami albo null. */
+function pozaGranicami(record: Record<string, unknown>): { pole: string; komunikat: string } | null {
+  const granice: [string, number, number, string][] = [
+    ...Object.entries(GRANICE_CIALA).map(([p, g]) => [p, g.min, g.max, g.komunikat] as [string, number, number, string]),
+    ...Object.entries(GRANICE_SUM).map(([p, g]) => [p, 0, g.max, g.komunikat] as [string, number, number, string]),
+  ];
+  for (const [pole, min, max, komunikat] of granice) {
+    if (pusta(record[pole])) { record[pole] = null; continue; }
+    const n = liczbaScisla(record[pole]);
+    if (!Number.isFinite(n) || n < min || n > max) return { pole, komunikat };
+    record[pole] = n;
+  }
+  return null;
+}
+
 /* Gdy w projekcie brakuje TURNSTILE_SECRET_KEY, formularz odmawia zamiast
    wpuszczać bez sprawdzenia. Klient dostaje drogę kontaktu, a brak sekretu
    trafia do ud_errors — głośna awaria zamiast cichej dziury. */
@@ -231,6 +288,25 @@ serve(async (req) => {
           status: 'error',
           message: 'Polisy nie da się zawrzeć bez „Okresowej niezdolności do pracy" — to ryzyko podstawowe. Zaznacz je i wpisz kwotę miesięczną.',
         }),
+        { status: 400, headers: { ...CORS, 'Content-Type': 'application/json' } },
+      );
+    }
+
+    /* Kwota przy ryzyku, którego klient nie wybrał, nie jest daną — zostaje
+       w polu, gdy ktoś wpisze sumę i odznaczy ryzyko. Do kolumny nie idzie
+       (zostaje w form_data), więc nie trzeba jej też sprawdzać granicami. */
+    for (const [pole, g] of Object.entries(GRANICE_SUM)) {
+      if (record[g.ryzyko] !== true) record[pole] = null;
+    }
+
+    /* Granice z 12.10.2026 — przed zapisem, po bramce ryzyka podstawowego. */
+    const poza = pozaGranicami(record);
+    if (poza) {
+      const ip = req.headers.get('CF-Connecting-IP') ?? undefined;
+      await logError('form-submit', `Wniosek poza granicami: ${poza.pole}`,
+        { wartosc: String(record[poza.pole]).slice(0, 40) }, ip);
+      return new Response(
+        JSON.stringify({ status: 'error', message: poza.komunikat }),
         { status: 400, headers: { ...CORS, 'Content-Type': 'application/json' } },
       );
     }

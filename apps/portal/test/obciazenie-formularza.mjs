@@ -143,7 +143,17 @@ async function wypelnijWidoczne(page) {
       }
 
       if (e.value) continue;
-      if (e.type === 'number') { ustaw(e, /sum/i.test(e.name) ? '300000' : '15000'); continue; }
+      if (e.type === 'number') {
+        // Wartości realistyczne, nie „cokolwiek”: od 12.10.2026 kreator ma granice
+        // (waga ≤ 200 kg, wzrost ≤ 250 cm, świadczenie ≤ 50 000 zł/mies., sumy
+        // ≤ 10 mln zł). Wcześniej szło tu 15 000 do wagi i 300 000 zł jako
+        // świadczenie miesięczne — i kreator to przepuszczał, czego dowodem
+        // wniosek z 11.10 z wagą 1000 kg.
+        const wartosc = { weight: '80', height: '180', tempIncapacitySum: '10000' }[e.name]
+          ?? (/sum/i.test(e.name) ? '300000' : '15000');
+        ustaw(e, wartosc);
+        continue;
+      }
       if (e.type === 'email') { ustaw(e, 'jan.kowalski@example.com'); continue; }
       if (e.type === 'tel') { ustaw(e, '500100200'); continue; }
       if (e.type === 'text' || e.tagName === 'TEXTAREA') {

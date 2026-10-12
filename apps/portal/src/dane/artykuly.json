@@ -3,6 +3,20 @@
   "zrodlo": "aura_articles (status=published, platforms zawiera UtrataDochodu.pl); zdjęcia z preview_image_800/1600",
   "artykuly": [
     {
+      "slug": "zawal-udar-utrata-dochodu",
+      "tytul": "Zawał albo udar. Co roku dotyka to ponad 140 tysięcy Polaków — i ile kosztuje to Twój dochód",
+      "zajawka": "Ponad 140 tys. zawałów i udarów rocznie. Sprawdź, ile zapłaci ZUS na B2B po zawale lub udarze i jaka luka zostaje w Twoim budżecie.",
+      "tagi": [
+        "ZUS",
+        "L4",
+        "zawał i udar"
+      ],
+      "opublikowano": "2026-10-09T14:23:11Z",
+      "utworzono": "2026-10-09T14:23:11Z",
+      "obraz": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/zawal-udar-utrata-dochodu-cover-800.webp",
+      "obrazDuzy": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/zawal-udar-utrata-dochodu-cover-1600.webp"
+    },
+    {
       "slug": "7-rzeczy-ktore-wykluczaja-wyplate-owu",
       "tytul": "7 rzeczy, które wykluczą wypłatę — najczęstsze pułapki w OWU ubezpieczeń od utraty dochodu",
       "zajawka": "Siedem sytuacji, w których ubezpieczyciel odmówi wypłaty: choroby sprzed polisy, zwyrodnienia kręgosłupa, alkohol, samookaleczenie, sporty ekstremalne, wojna i sankcje oraz przemilczenia w ankiecie medycznej.",
