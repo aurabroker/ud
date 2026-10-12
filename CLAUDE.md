@@ -1348,6 +1348,111 @@ Test: `pnpm test:sms` w `apps/panel`. Diagnostyka SMSAPI (test wysyłki
 w Ustawieniach, sonda w `health.js`) i filtr kanału w Wysyłkach znów obsługują
 żywą ścieżkę — nie kasuj ich.
 
+### Przypomnienie SMS o ofercie bez odpowiedzi (panel v.0.69, 12.10.2026)
+
+Decyzja właściciela: „ludzie, co dostali ofertę i cisza — musimy się
+przypomnieć". Jeden SMS `SMS_PRZYPOMNIENIE` („Kilka dni temu wyslalismy Ci
+oferte ubezpieczenia na e-mail. Masz pytania? Chetnie pomozemy: 504 400 901"),
+te same zasady co przy SMS-ie o ofercie: bez linku, kodu i polskich znaków.
+
+Podział pracy:
+
+| Kto | Co |
+|---|---|
+| `ud_oferty_do_przypomnienia(3, 30)` (SQL, tylko odczyt) | kogo: oferta `sent`/`viewed` przypięta do klienta, 3–30 dni po wysyłce, bez wyboru wariantu i bez pytania klienta po wysyłce (przy którejkolwiek jego ofercie), nie w archiwum, najnowsza oferta klienta, klient nic nie kupił ani nie wybrał w **innej** ofercie, lead nie w Wygrany/Przegrany i niezarchiwizowany, o tej **wersji** jeszcze nie przypominaliśmy |
+| `POST /api/cron/przypomnienia-ofert` (panel) | wysyłka przez SMSAPI — token SMSAPI jest tylko w panelu |
+| `ud_oferty_przypomnienia()` + pg_cron `oferty-przypomnienia-sms` (`25 * * * *`) | woła panel z nagłówkiem `x-cron-token` z Vaulta (wzorzec `edge_cron_token`) |
+
+Listę „na sucho" — kto dostałby SMS teraz — daje
+`select * from public.ud_oferty_do_przypomnienia();` (nic nie wysyła).
+
+**Zasada nadrzędna: dwa SMS-y są gorsze niż żaden.** Gdy nie wiadomo, czy SMS
+wyszedł, oferta zostaje zajęta i nikt nie próbuje drugi raz. Rzeczy, których
+nie upraszczaj (`przypomnieniaOfert.js`):
+
+- **Token z Vaulta sprawdzany przed czymkolwiek** (`edge_cron_token_matches`).
+  Endpoint nie ma sesji agenta — bez tokenu każdy znający adres rozsyłałby
+  SMS-y naszym nadawcą.
+- **Oferta jest zajmowana warunkowym UPDATE-em przed wysłaniem**
+  (`przypomnienie_wersja`), więc dwa nakładające się wywołania nie wyślą
+  dwóch SMS-ów. Nowa wersja oferty (ponowna wysyłka) może dostać własne
+  przypomnienie, ta sama — nigdy drugie. Zajęcie **sprawdza jeszcze raz**
+  wersję, status, wybór, decyzję i archiwum: lista kandydatów jest sprzed
+  kilku sekund, a „Kilka dni temu wysłaliśmy" minutę po ponownej wysyłce
+  oferty byłoby nieprawdą.
+- **Przed SMS-em w `ud_send_log` staje wpis `pending`; bez niego SMS nie
+  wychodzi.** Wywołanie, które padnie po wysłaniu, zostawia `pending` — ten
+  blokuje ponowienie i liczy się do limitu na numer. Zajęcie bez wpisu
+  z TEGO zajęcia (padło przed wpisem) baza po godzinie oddaje do puli —
+  wpisy z wcześniejszych, już zwolnionych prób się nie liczą (migracje
+  `…162649_…_2.sql` i `…172729_…_3.sql`). W „Wysyłkach" taki wpis ma etykietę
+  „Bez wyniku".
+- **Jeden numer — jeden SMS na 7 dni** (liczą się `sent` i `pending`), także
+  przy dwóch klientach z tym samym telefonem. Odczyt idzie z `.retry(false)` —
+  automatyczne ponowienia postgrest-js (do trzech, 1–4 s odstępu) zjadłyby
+  budżet zapytań i czasu.
+- **Odmowa SMSAPI z kodem błędu zwalnia ofertę i kończy wywołanie** (brak
+  punktów, zły token, filtr IP — każda następna próba skończyłaby się tak
+  samo; nieudane zwolnienie trafia do `ud_errors`). Tak samo **brak tokenu
+  (stub)** — inaczej „zużyłby" przypomnienia wszystkich klientów bez jednego
+  SMS-a. Wyjątki: **odrzucony numer (SMSAPI 13)** — oferta zostaje zajęta,
+  idziemy dalej; **wynik nieznany** — oferta zostaje zajęta, wpis zostaje
+  `pending`, wywołanie się kończy. Nieznany to brak odpowiedzi (limit 8 s
+  w `sms.js`, zerwane połączenie), błąd bramy 5xx/408 bez kodu SMSAPI (strona
+  HTML zamiast JSON-a) i błąd wewnętrzny SMSAPI 201 — w każdym z nich SMS mógł
+  już wyjść (`sms.js` ustawia wtedy `nieznany`). **SMSAPI 105 to filtr adresów
+  IP konta, nie zły numer** — do 12.10 opis w `sms.js` mówił odwrotnie.
+- **`SMSAPI_TEST=1` wstrzymuje przypomnienia.** SMSAPI odpowiada wtedy jak przy
+  wysyłce, więc każde wywołanie zużyłoby przypomnienia bez SMS-a.
+- **Godziny: dni robocze 9:00–18:59 czasu polskiego** (`wOknieWysylki`, przez
+  Intl, nie przesunięcie UTC) — bez sobót, niedziel i świąt ustawowych
+  (`swietoWPolsce`: stałe, poniedziałek wielkanocny, Boże Ciało, Wigilia od
+  2025). Poza nimi wywołanie kończy się bez odczytu.
+- **Limity jednego wywołania:** 6 prób (`PRZYPOMNIENIA_NA_RAZ`), 40 zapytań
+  (`BUDZET_ZAPYTAN` — darmowy plan Workers przerywa wywołanie po 50
+  podżądaniach, a przerwanie w środku wysyłki to wynik nieznany) i 15 s
+  (`CZAS_MS` — pg_net czeka 30 s). Reszta czeka na następną godzinę: do 60
+  SMS-ów w dniu roboczym.
+- **Każde przerwanie, wyjątek i brak bazy przy sprawdzaniu tokenu trafia do
+  `ud_errors`** (źródło `przypomnienia-ofert`). Odpowiedź crona czyta tylko
+  pg_net, więc bez tego przypomnienia mogłyby nie działać tygodniami. **Zły
+  token — nie:** cron bierze token z tego samego Vaulta, z którym go
+  porównujemy, więc zły token to zawsze ktoś z zewnątrz, a wpis za każde jego
+  żądanie pozwoliłby mu zapchać dziennik.
+- Ślad w `ud_send_log` (kanał `sms_przypomnienie`) — widać go w „Wysyłkach"
+  pod filtrem SMS i na stronie oferty.
+
+Czego reguła świadomie nie robi: nie przypomina o ofercie wysłanej ponownie
+po decyzji klienta (oferta z `decided_at` nie jest kandydatem, także w nowej
+wersji) — taką sprawę prowadzi agent. Gdy SMSAPI odrzuci numer z oferty
+(kod 13, np. stacjonarny), numer z kartoteki nie jest próbowany — ta wersja
+zostaje bez przypomnienia.
+
+**Zadanie crona powstało WYŁĄCZONE** (migracja
+`20261012123157_oferty_przypomnienia_sms.sql`, zastosowana 12.10.2026;
+`…162649_…_2.sql` go nie rusza). Włączenie to decyzja właściciela po obejrzeniu
+listy i treści:
+`select cron.alter_job((select jobid from cron.job where jobname =
+'oferty-przypomnienia-sms'), active := true);` — wyłączenie tak samo,
+z `active := false`.
+
+Podstawa prawna: kontakt w sprawie oferty, o którą klient sam prosił
+(klauzula informacyjna: „Przygotowanie oferty i obsługa wniosku", art. 6 ust.
+1 lit. b RODO). SMS ma pomagać w tej sprawie, nie sprzedawać — rabaty,
+„ostatnia szansa" i podobne zwroty zrobiłyby z niego marketing bezpośredni
+(art. 398 PKE), na który zgody nie zbieramy.
+
+Testy w `apps/panel`: `pnpm test:przypomnienia` — wysyłka na atrapie bazy
+i SMSAPI (bez sieci: zajęcie, `pending`, błędy SMSAPI, limity, awarie
+dziennika) **i reguły wyboru w SQL** na jednorazowym Postgresie
+(`test:przypomnienia-sql`, `supabase/tests/przypomnienia.sql`, 40 przypadków;
+każda migracja bez kolejnych poprawek wywala się na przypadkach, które te
+poprawiają; atrapa ma domyślne uprawnienia Supabase, więc brak `revoke` od
+`anon`/`authenticated` też wychodzi na czerwono). `sms.js` sprawdzany jest
+zachowaniem — prawdziwy plik z podstawionym `fetch` (502 z HTML-em, limit
+czasu, kody 103/105/201). Bez binariów Postgresa część SQL kończy się
+błędem, nie zielonym wynikiem.
+
 ---
 
 ## Panel — cykl życia oferty

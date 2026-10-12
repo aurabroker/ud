@@ -2,8 +2,8 @@
   import UstawieniaNav from '$lib/components/UstawieniaNav.svelte';
   let { data } = $props();
 
-  const statusLabel = { sent: 'Wysłano', error: 'Błąd', stub: 'Tryb testowy' };
-  const channelLabel = { email: '✉ Email', sms: '✆ SMS' };
+  const statusLabel = { sent: 'Wysłano', error: 'Błąd', stub: 'Tryb testowy', pending: 'Bez wyniku' };
+  const channelLabel = { email: '✉ Email', sms: '✆ SMS', sms_przypomnienie: '✆ SMS — przypomnienie' };
 
   function dt(s) {
     return s ? new Date(s).toLocaleString('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
@@ -70,6 +70,7 @@
             <td style="font-size:.8rem;max-width:380px;">
               {#if l.error}<span style="color:var(--red-700);">{l.error}</span>
               {:else if l.status === 'stub'}<span class="muted">Brak konfiguracji dostawcy — nic nie wysłano</span>
+              {:else if l.status === 'pending'}<span class="muted">Wysyłka przerwana w trakcie — nie wiadomo, czy SMS wyszedł; nie będzie ponawiana</span>
               {:else if l.provider_id}<span class="muted">ID: {l.provider_id}</span>
               {:else}—{/if}
             </td>
@@ -87,4 +88,5 @@
   .st-sent { background: #dcfce7; color: #15803d; }
   .st-error { background: #fee2e2; color: #b91c1c; }
   .st-stub { background: #fef3c7; color: #92400e; }
+  .st-pending { background: #e2e8f0; color: #334155; }
 </style>

@@ -83,6 +83,7 @@ npx wrangler pages secret put SMSAPI_TOKEN
 
 - **Resend:** zweryfikuj domenę nadawcy (DNS: SPF/DKIM), inaczej maile nie wyjdą.
 - **SMSAPI:** wygeneruj token OAuth w panelu SMSAPI, dodaj i zatwierdź **nazwę nadawcy** (pole „from"); numery klientów w formacie `48XXXXXXXXX`.
+  **Filtr adresów IP w ustawieniach API musi być wyłączony** — Workers wychodzą adresami z puli Cloudflare, których nie da się wpisać na listę; z włączonym filtrem każda wysyłka kończy się błędem 105. Ten sam token wysyła przypomnienia o ofertach bez odpowiedzi (cron `oferty-przypomnienia-sms`, `POST /api/cron/przypomnienia-ofert`, patrz CLAUDE.md); przy `SMSAPI_TEST=1` przypomnienia stoją.
 - **Supabase Auth:** konta agentów (już są w `ud_user_profiles`). Nowych agentów dodaje się
   w Supabase → Authentication → Users (email+hasło), a profil w `ud_user_profiles` (rola `user`/`admin`).
 - **Supabase Storage:** buckety `ud-offers` i `ud-owu` już utworzone (prywatne).

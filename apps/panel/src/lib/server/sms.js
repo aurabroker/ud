@@ -17,6 +17,9 @@ const UA = 'UtrataDochodu/1.0 (+https://app.utratadochodu.pl)';
 
 const trim = (v) => String(v || '').trim();
 
+/** Limit czasu jednego wywołania SMSAPI. */
+const TIMEOUT_MS = 8000;
+
 /** Adres API: konta polskie — api.smsapi.pl, międzynarodowe — api.smsapi.com. */
 function baseUrl() {
   return (trim(env.SMSAPI_BASE) || 'https://api.smsapi.pl').replace(/\/+$/, '');
@@ -57,6 +60,10 @@ async function call(path, { method = 'GET', params = null } = {}) {
   try {
     res = await fetch(`${baseUrl()}${path}`, {
       method,
+      // Bez limitu zawieszone połączenie trzyma wysyłkę (i crona przypomnień,
+      // na którego pg_net czeka 30 s) bez końca. Przerwanie trafia do catch
+      // niżej jako „SMSAPI: …" — wynik nieznany, nie „nie wysłano".
+      signal: AbortSignal.timeout(TIMEOUT_MS),
       headers: {
         Authorization: `Bearer ${t}`,
         Accept: 'application/json',
@@ -79,7 +86,8 @@ async function call(path, { method = 'GET', params = null } = {}) {
 
 /**
  * SMSAPI sygnalizuje błąd polem `error` w JSON-ie, nawet przy HTTP 200.
- * Kod 101 = zła autoryzacja, 103 = brak punktów, 104 = nieistniejąca nazwa nadawcy.
+ * Kod 13 = brak prawidłowego numeru, 101 = zła autoryzacja, 103 = brak punktów,
+ * 105 = adres IP spoza filtra konta.
  */
 function failure(r) {
   if (r.error) return r.error;
@@ -89,10 +97,14 @@ function failure(r) {
   const msg = r.data?.message
     || String(r.raw || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 300);
   const hints = {
+    13: 'brak prawidłowego numeru odbiorcy (błędny, stacjonarny albo na czarnej liście)',
+    14: 'nazwa nadawcy nie istnieje lub nie jest zatwierdzona',
     101: 'zły lub wygasły token OAuth',
     103: 'brak punktów na koncie',
     104: 'nazwa nadawcy nie istnieje lub nie jest zatwierdzona',
-    105: 'błędny numer odbiorcy',
+    // 105 to NIE zły numer: konto ma włączony filtr adresów IP, a Workers
+    // wychodzą adresami z puli Cloudflare, których nie da się wpisać na listę.
+    105: 'adres IP spoza listy dozwolonych — wyłącz filtr IP w ustawieniach API SMSAPI',
     203: 'zbyt wiele żądań w krótkim czasie',
     // 401 „Access forbidden" przy poprawnym tokenie oznacza brak zakresu
     // uprawnień dla tej metody — token wystawiono bez dostępu do niej.
@@ -103,9 +115,23 @@ function failure(r) {
 }
 
 /**
+ * Czy po tej porażce NIE wiadomo, czy SMS wyszedł. Pewne „nie wysłano" to
+ * tylko odmowa SMSAPI z kodem błędu (brak punktów, zły token, zły numer…).
+ * Brak odpowiedzi (limit czasu, zerwane połączenie), błąd bramy bez kodu
+ * SMSAPI (502/504 z HTML-em) i błąd wewnętrzny SMSAPI (201) mogły zdarzyć się
+ * już po przyjęciu wiadomości — ponowienie mogłoby wysłać drugi SMS.
+ */
+function wynikNieznany(r) {
+  if (r.status === 0) return true;
+  const code = r.data?.error;
+  if (code == null) return r.status >= 500 || r.status === 408;
+  return Number(code) === 201;
+}
+
+/**
  * @param {string} phone - numer (dowolny format; nie-cyfry są usuwane)
  * @param {string} message
- * @returns {Promise<{ sent: boolean, stub?: boolean, id?: string, error?: string }>}
+ * @returns {Promise<{ sent: boolean, stub?: boolean, nieznany?: boolean, id?: string, error?: string }>}
  */
 export async function sendSms(phone, message) {
   const to = String(phone).replace(/[^\d]/g, '');
@@ -126,7 +152,7 @@ export async function sendSms(phone, message) {
 
   const r = await call('/sms.do', { method: 'POST', params });
   const err = failure(r);
-  if (err) return { sent: false, error: err };
+  if (err) return { sent: false, error: err, ...(wynikNieznany(r) ? { nieznany: true } : {}) };
 
   const first = Array.isArray(r.data?.list) ? r.data.list[0] : null;
   return { sent: true, id: first?.id != null ? String(first.id) : undefined };

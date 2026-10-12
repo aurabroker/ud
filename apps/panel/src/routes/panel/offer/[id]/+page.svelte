@@ -231,12 +231,13 @@
         {#each data.wysylki as w}
           <tr>
             <td style="font-weight:600;">v{w.wersja || 1}</td>
-            <td>{w.channel === 'email' ? '✉ Email' : w.channel === 'sms' ? '✆ SMS' : w.channel}</td>
+            <td>{w.channel === 'email' ? '✉ Email' : w.channel === 'sms' ? '✆ SMS' : w.channel === 'sms_przypomnienie' ? '✆ SMS — przypomnienie' : w.channel}</td>
             <td class="muted">{w.recipient || '—'}</td>
             <td class="muted">{dateP(w.created_at)}</td>
             <td>
               {#if w.status === 'sent'}wysłana ✓
               {:else if w.status === 'stub'}tryb testowy
+              {:else if w.status === 'pending'}<span class="muted">bez wyniku — wysyłka przerwana, nie wiadomo, czy SMS wyszedł</span>
               {:else}<span style="color:var(--red-700);">błąd{#if w.error} — {w.error}{/if}</span>{/if}
             </td>
           </tr>

@@ -17,7 +17,9 @@
     "test:leady-model": "node scripts/test-leady-model.mjs",
     "test:leady-ui": "playwright test",
     "test:leady": "node scripts/test-leady-model.mjs && node scripts/test-leady-sql.mjs && node scripts/test-leady-api.mjs && playwright test",
-    "test:sms": "node scripts/test-sms-oferta.mjs"
+    "test:sms": "node scripts/test-sms-oferta.mjs",
+    "test:przypomnienia": "node scripts/test-przypomnienia-ofert.mjs && node scripts/test-przypomnienia-sql.mjs",
+    "test:przypomnienia-sql": "node scripts/test-przypomnienia-sql.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",
