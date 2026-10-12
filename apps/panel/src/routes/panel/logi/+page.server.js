@@ -15,7 +15,9 @@ export async function load({ locals, url }) {
     .order('created_at', { ascending: false })
     .limit(300);
 
-  if (channel) q = q.eq('channel', channel);
+  // Filtr „SMS" obejmuje też przypomnienia o ofercie (kanał sms_przypomnienie).
+  if (channel === 'sms') q = q.in('channel', ['sms', 'sms_przypomnienie']);
+  else if (channel) q = q.eq('channel', channel);
   if (status) q = q.eq('status', status);
 
   const { data: logs, error } = await q;

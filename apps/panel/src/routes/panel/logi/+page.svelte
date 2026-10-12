@@ -3,7 +3,7 @@
   let { data } = $props();
 
   const statusLabel = { sent: 'Wysłano', error: 'Błąd', stub: 'Tryb testowy' };
-  const channelLabel = { email: '✉ Email', sms: '✆ SMS' };
+  const channelLabel = { email: '✉ Email', sms: '✆ SMS', sms_przypomnienie: '✆ SMS — przypomnienie' };
 
   function dt(s) {
     return s ? new Date(s).toLocaleString('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';

@@ -1348,6 +1348,62 @@ Test: `pnpm test:sms` w `apps/panel`. Diagnostyka SMSAPI (test wysyłki
 w Ustawieniach, sonda w `health.js`) i filtr kanału w Wysyłkach znów obsługują
 żywą ścieżkę — nie kasuj ich.
 
+### Przypomnienie SMS o ofercie bez odpowiedzi (panel v.0.69, 12.10.2026)
+
+Decyzja właściciela: „ludzie, co dostali ofertę i cisza — musimy się
+przypomnieć". Jeden SMS `SMS_PRZYPOMNIENIE` („Kilka dni temu wyslalismy Ci
+oferte ubezpieczenia na e-mail. Masz pytania? Chetnie pomozemy: 504 400 901"),
+te same zasady co przy SMS-ie o ofercie: bez linku, kodu i polskich znaków.
+
+Podział pracy:
+
+| Kto | Co |
+|---|---|
+| `ud_oferty_do_przypomnienia(3, 30)` (SQL, tylko odczyt) | kogo: oferta `sent`/`viewed`, 3–30 dni po wysyłce, bez wyboru wariantu i bez pytania klienta po wysyłce, nie w archiwum, najnowsza oferta klienta, lead nie w Wygrany/Przegrany, o tej **wersji** jeszcze nie przypominaliśmy |
+| `POST /api/cron/przypomnienia-ofert` (panel) | wysyłka przez SMSAPI — token SMSAPI jest tylko w panelu |
+| `ud_oferty_przypomnienia()` + pg_cron `oferty-przypomnienia-sms` (`25 * * * *`) | woła panel z nagłówkiem `x-cron-token` z Vaulta (wzorzec `edge_cron_token`) |
+
+Listę „na sucho" — kto dostałby SMS teraz — daje
+`select * from public.ud_oferty_do_przypomnienia();` (nic nie wysyła).
+
+Rzeczy, których nie upraszczaj (`przypomnieniaOfert.js`):
+
+- **Token z Vaulta sprawdzany przed czymkolwiek** (`edge_cron_token_matches`).
+  Endpoint nie ma sesji agenta — bez tokenu każdy znający adres rozsyłałby
+  SMS-y naszym nadawcą.
+- **Oferta jest zajmowana warunkowym UPDATE-em przed wysłaniem**
+  (`przypomnienie_wersja`), więc dwa nakładające się wywołania nie wyślą
+  dwóch SMS-ów. Nowa wersja oferty (ponowna wysyłka) może dostać własne
+  przypomnienie, ta sama — nigdy drugie.
+- **Jeden numer — jeden SMS na 7 dni**, także przy dwóch klientach z tym samym
+  telefonem.
+- **Porażka SMSAPI zwalnia ofertę i kończy wywołanie** (brak punktów albo zły
+  token skończyłyby się tak samo przy każdej następnej). Tak samo **brak
+  tokenu (stub)** — inaczej „zużyłby" przypomnienia wszystkich klientów bez
+  jednego SMS-a. Wyjątek: błędny numer (SMSAPI 13/105) — oferta zostaje
+  zajęta, bo ponowienie nic nie da.
+- **Godziny: dni robocze 9:00–18:59 czasu polskiego** (`wOknieWysylki`, przez
+  Intl, nie przesunięcie UTC). Poza nimi wywołanie kończy się bez odczytu.
+- Najwyżej 20 SMS-ów na wywołanie; ślad w `ud_send_log` (kanał
+  `sms_przypomnienie`) — widać go w „Wysyłkach" pod filtrem SMS i na stronie
+  oferty.
+
+**Zadanie crona powstało WYŁĄCZONE** (migracja
+`20261012123157_oferty_przypomnienia_sms.sql`, zastosowana 12.10.2026).
+Włączenie to decyzja właściciela po obejrzeniu listy i treści:
+`select cron.alter_job((select jobid from cron.job where jobname =
+'oferty-przypomnienia-sms'), active := true);` — wyłączenie tak samo,
+z `active := false`.
+
+Podstawa prawna: kontakt w sprawie oferty, o którą klient sam prosił
+(klauzula informacyjna: „Przygotowanie oferty i obsługa wniosku", art. 6 ust.
+1 lit. b RODO). SMS ma pomagać w tej sprawie, nie sprzedawać — rabaty,
+„ostatnia szansa" i podobne zwroty zrobiłyby z niego marketing bezpośredni
+(art. 398 PKE), na który zgody nie zbieramy.
+
+Test: `pnpm test:przypomnienia` w `apps/panel` (atrapa bazy i SMSAPI, bez
+sieci). Reguł wyboru w SQL test nie sprawdza — od tego jest lista „na sucho".
+
 ---
 
 ## Panel — cykl życia oferty

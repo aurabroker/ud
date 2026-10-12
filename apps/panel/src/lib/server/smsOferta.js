@@ -45,3 +45,36 @@ export function numerDoSms(raw) {
   if (!/^[1-9]\d{8}$/.test(d)) return null;
   return `48${d}`;
 }
+
+/*
+ * Przypomnienie o ofercie bez odpowiedzi (decyzja właściciela z 12.10.2026).
+ * Te same zasady co wyżej: bez linku, bez kodu, bez polskich znaków, jedna
+ * część SMS-a. Bez „przypominamy o płatności" i podobnych zwrotów — to ma
+ * brzmieć jak pomoc w sprawie, o którą klient sam prosił, nie jak ponaglenie.
+ */
+export const SMS_PRZYPOMNIENIE =
+  'UtrataDochodu: Kilka dni temu wyslalismy Ci oferte ubezpieczenia na e-mail. Masz pytania? Chetnie pomozemy: 504 400 901';
+
+/** Po ilu dniach od wysyłki oferty przypominamy i do ilu dni najdłużej. */
+export const PRZYPOMNIENIE_PO_DNIACH = 3;
+export const PRZYPOMNIENIE_NAJWYZEJ_DNI = 30;
+
+/** Najwięcej SMS-ów w jednym wywołaniu (cron co godzinę). */
+export const PRZYPOMNIENIA_NA_RAZ = 20;
+
+/**
+ * Czy teraz wolno wysłać przypomnienie: dni robocze, 9:00–18:59 czasu
+ * polskiego. SMS o ofercie w sobotę o 7 rano albo w nocy to prosty sposób,
+ * żeby klient zapamiętał nas źle. Czas polski liczymy przez Intl, nie z
+ * przesunięcia UTC — zmiana czasu nie przesuwa wtedy okna.
+ * @param {Date} [teraz]
+ */
+export function wOknieWysylki(teraz = new Date()) {
+  const czesci = Object.fromEntries(
+    new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Europe/Warsaw', weekday: 'short', hour: '2-digit', hourCycle: 'h23'
+    }).formatToParts(teraz).map((p) => [p.type, p.value])
+  );
+  const godzina = Number(czesci.hour);
+  return !['Sat', 'Sun'].includes(czesci.weekday) && godzina >= 9 && godzina < 19;
+}
