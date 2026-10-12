@@ -237,6 +237,7 @@
             <td>
               {#if w.status === 'sent'}wysłana ✓
               {:else if w.status === 'stub'}tryb testowy
+              {:else if w.status === 'pending'}<span class="muted">bez wyniku — wysyłka przerwana, nie wiadomo, czy SMS wyszedł</span>
               {:else}<span style="color:var(--red-700);">błąd{#if w.error} — {w.error}{/if}</span>{/if}
             </td>
           </tr>

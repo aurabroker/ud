@@ -59,8 +59,12 @@ export const SMS_PRZYPOMNIENIE =
 export const PRZYPOMNIENIE_PO_DNIACH = 3;
 export const PRZYPOMNIENIE_NAJWYZEJ_DNI = 30;
 
-/** Najwięcej SMS-ów w jednym wywołaniu (cron co godzinę). */
-export const PRZYPOMNIENIA_NA_RAZ = 20;
+/**
+ * Najwięcej prób wysyłki w jednym wywołaniu (cron co godzinę, 10 godzin w dniu
+ * roboczym — do 60 SMS-ów dziennie). Więcej nie zmieściłoby się w limicie 50
+ * zapytań na wywołanie darmowego planu Workers (patrz przypomnieniaOfert.js).
+ */
+export const PRZYPOMNIENIA_NA_RAZ = 6;
 
 /**
  * Czy teraz wolno wysłać przypomnienie: dni robocze, 9:00–18:59 czasu

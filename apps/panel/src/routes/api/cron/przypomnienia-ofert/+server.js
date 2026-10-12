@@ -10,35 +10,75 @@
  *
  * Godziny: dni robocze 9–18 czasu polskiego (wOknieWysylki). Poza nimi
  * wywołanie kończy się bez odczytu kandydatów.
+ *
+ * SMSAPI_TEST=1: SMSAPI odpowiada wtedy jak przy prawdziwej wysyłce, więc
+ * każde wywołanie „zużyłoby" przypomnienia klientów bez jednego SMS-a.
+ * Przypomnienia w tym trybie stoją.
+ *
+ * Odpowiedź crona czyta tylko pg_net (net._http_response, kilka godzin), więc
+ * każda awaria i każde przerwanie wysyłki zostawia wpis w ud_errors — inaczej
+ * przypomnienia mogłyby nie działać tygodniami i nikt by tego nie zauważył.
  */
 import { json } from '@sveltejs/kit';
+import { env } from '$env/dynamic/private';
 import { createAdminClient } from '$lib/server/supabase.js';
 import { sendSms } from '$lib/server/sms.js';
 import { wOknieWysylki } from '$lib/server/smsOferta.js';
 import { wyslijPrzypomnienia } from '$lib/server/przypomnieniaOfert.js';
 
-export async function POST({ request }) {
+const ZRODLO = 'przypomnienia-ofert';
+
+/** Wpis w ud_errors; sam nigdy nie rzuca. */
+async function zapiszBlad(sb, message, context, ip) {
+  await sb
+    .from('ud_errors')
+    .insert({ source: ZRODLO, level: 'error', message: String(message).slice(0, 500), context: context ?? null, ip: ip || null })
+    .then(() => {}, () => {});
+}
+
+export async function POST({ request, getClientAddress }) {
   const token = request.headers.get('x-cron-token') || '';
   if (!token) return json({ ok: false, error: 'brak tokenu' }, { status: 401 });
+
+  let ip = '';
+  try { ip = request.headers.get('cf-connecting-ip') || getClientAddress(); } catch { /* bez adresu */ }
 
   let sb;
   try {
     sb = createAdminClient();
   } catch (e) {
+    // Bez klienta bazy nie ma gdzie zapisać błędu — zostaje dziennik workera.
+    console.error(`[${ZRODLO}] brak konfiguracji Supabase`, e);
     return json({ ok: false, error: 'brak konfiguracji' }, { status: 503 });
   }
 
   const { data: zgodny, error: bladTokenu } = await sb.rpc('edge_cron_token_matches', { token });
-  if (bladTokenu) return json({ ok: false, error: 'nie da się sprawdzić tokenu' }, { status: 503 });
-  if (zgodny !== true) return json({ ok: false, error: 'zły token' }, { status: 401 });
+  if (bladTokenu) {
+    await zapiszBlad(sb, 'Przypomnienia ofert: nie da się sprawdzić tokenu crona', { blad: bladTokenu.message }, ip);
+    return json({ ok: false, error: 'nie da się sprawdzić tokenu' }, { status: 503 });
+  }
+  if (zgodny !== true) {
+    // Zły token z nagłówkiem to albo próba z zewnątrz, albo rozjechany sekret
+    // w Vaulcie — w obu przypadkach ktoś powinien to zobaczyć.
+    await zapiszBlad(sb, 'Przypomnienia ofert: zły token crona', null, ip);
+    return json({ ok: false, error: 'zły token' }, { status: 401 });
+  }
+
+  if (env.SMSAPI_TEST === '1') {
+    return json({ ok: true, pominieto: 'SMSAPI_TEST=1 — tryb testowy SMSAPI, przypomnienia wstrzymane' });
+  }
 
   if (!wOknieWysylki()) return json({ ok: true, pominieto: 'poza godzinami wysyłki' });
 
   try {
     const wynik = await wyslijPrzypomnienia({ sb, sendSms });
+    if (wynik.przerwano) {
+      await zapiszBlad(sb, 'Przypomnienia ofert przerwane: ' + wynik.przerwano, wynik, null);
+    }
     return json({ ok: true, ...wynik });
   } catch (e) {
-    console.error('[przypomnienia-ofert]', e);
+    console.error(`[${ZRODLO}]`, e);
+    await zapiszBlad(sb, 'Przypomnienia ofert: ' + String(e?.message || e), null, null);
     return json({ ok: false, error: String(e?.message || e) }, { status: 500 });
   }
 }
