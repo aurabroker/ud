@@ -1317,9 +1317,10 @@ Treść mówiąca o haśle stoi w **trzech miejscach i musi być zgodna**:
 | `src/routes/offer/[token]/+page.svelte` | podpowiedź nad polem na stronie oferty |
 | `src/routes/panel/offer/[id]/+page.svelte` | opis kodu dla agenta |
 
-### SMS „wysłaliśmy do Ciebie ofertę" (od 12.10.2026)
+### SMS „wysłaliśmy do Ciebie ofertę" (panel v.0.68, 12.10.2026)
 
-Decyzja właściciela: po **wysłanym** e-mailu z ofertą klient dostaje SMS
+Panel v.0.67 tego SMS-a nie ma — numer wersji mówi, czy wdrożenie już go
+niesie (widać go pod nazwą konta w nagłówku, na stronie logowania i w `/health`). Decyzja właściciela: po **wysłanym** e-mailu z ofertą klient dostaje SMS
 `SMS_OFERTA` z `src/lib/server/smsOferta.js` — „Wlasnie wyslalismy do Ciebie
 oferte. Sprawdz maila (takze folder Spam)" i telefon. Przez SMSAPI
 (`lib/server/sms.js`), numer z oferty, a bez niego z kartoteki klienta.
