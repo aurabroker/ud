@@ -25,3 +25,8 @@ create table if not exists public.ud_send_log (
   created_at  timestamptz not null default now(),
   wersja      integer
 );
+
+-- Supabase nadaje anon i authenticated EXECUTE na każdą nową funkcję w public
+-- (domyślne uprawnienia). Bez tego test uprawnień nie złapałby migracji, która
+-- odbiera EXECUTE tylko PUBLIC-owi, a zapomina o tych dwóch rolach.
+alter default privileges in schema public grant execute on functions to anon, authenticated, service_role;

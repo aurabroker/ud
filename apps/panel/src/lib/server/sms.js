@@ -115,9 +115,23 @@ function failure(r) {
 }
 
 /**
+ * Czy po tej porażce NIE wiadomo, czy SMS wyszedł. Pewne „nie wysłano" to
+ * tylko odmowa SMSAPI z kodem błędu (brak punktów, zły token, zły numer…).
+ * Brak odpowiedzi (limit czasu, zerwane połączenie), błąd bramy bez kodu
+ * SMSAPI (502/504 z HTML-em) i błąd wewnętrzny SMSAPI (201) mogły zdarzyć się
+ * już po przyjęciu wiadomości — ponowienie mogłoby wysłać drugi SMS.
+ */
+function wynikNieznany(r) {
+  if (r.status === 0) return true;
+  const code = r.data?.error;
+  if (code == null) return r.status >= 500 || r.status === 408;
+  return Number(code) === 201;
+}
+
+/**
  * @param {string} phone - numer (dowolny format; nie-cyfry są usuwane)
  * @param {string} message
- * @returns {Promise<{ sent: boolean, stub?: boolean, id?: string, error?: string }>}
+ * @returns {Promise<{ sent: boolean, stub?: boolean, nieznany?: boolean, id?: string, error?: string }>}
  */
 export async function sendSms(phone, message) {
   const to = String(phone).replace(/[^\d]/g, '');
@@ -138,7 +152,7 @@ export async function sendSms(phone, message) {
 
   const r = await call('/sms.do', { method: 'POST', params });
   const err = failure(r);
-  if (err) return { sent: false, error: err };
+  if (err) return { sent: false, error: err, ...(wynikNieznany(r) ? { nieznany: true } : {}) };
 
   const first = Array.isArray(r.data?.list) ? r.data.list[0] : null;
   return { sent: true, id: first?.id != null ? String(first.id) : undefined };

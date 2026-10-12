@@ -1,5 +1,5 @@
 -- Reguły wyboru kandydatów do przypomnienia SMS o ofercie
--- (ud_oferty_do_przypomnienia, migracje 20261012123157 i 20261012162649).
+-- (ud_oferty_do_przypomnienia, migracje 20261012123157, …162649 i …172729).
 -- Uruchamia apps/panel/scripts/test-przypomnienia-sql.mjs na jednorazowym
 -- klastrze: stub.sql + migracje leadów + przypomnienia-stub.sql + obie
 -- migracje przypomnień, potem ten plik. Każda asercja to NOTICE PASS/FAIL.
@@ -93,6 +93,12 @@ begin
   insert into public.ud_offer_questions (offer_id, asked_at) values (o, now() - interval '10 days');
   perform tp.sprawdz('pytanie sprzed wysyłki nie zamyka sprawy — kandydat', tp.jest(o));
 
+  k := tp.klient('Pyta przy starej');
+  o := tp.oferta('stara', k, 12);
+  o2 := tp.oferta('nowa', k, 5);
+  insert into public.ud_offer_questions (offer_id, asked_at) values (o, now() - interval '1 day');
+  perform tp.sprawdz('pytanie przy STARSZEJ ofercie po wysyłce nowej — nie (poprawka …172729)', not tp.jest(o2));
+
   -- ── Inne oferty tego samego klienta ──────────────────────────────────────
   k := tp.klient('Dwie oferty');
   o := tp.oferta('starsza', k, 10);
@@ -168,6 +174,18 @@ begin
   insert into public.ud_send_log (offer_id, channel, recipient, status, wersja, error)
   values (o, 'sms_przypomnienie', '48504400901', 'error', 1, 'SMSAPI błąd 103');
   perform tp.sprawdz('zwolniona po błędzie SMSAPI (zajęcie puste) — znów kandydat', tp.jest(o));
+
+  o := tp.oferta('po zwolnieniu', tp.klient('Po zwolnieniu'), 6);
+  insert into public.ud_send_log (offer_id, channel, recipient, status, wersja, error, created_at)
+  values (o, 'sms_przypomnienie', '48504400901', 'error', 1, 'SMSAPI błąd 103', now() - interval '3 hours');
+  update public.ud_offers set przypomnienie_wersja = 1, przypomnienie_sms_at = now() - interval '2 hours' where id = o;
+  perform tp.sprawdz('osierocone zajęcie po wcześniejszej, zwolnionej próbie — wraca (poprawka …172729)', tp.jest(o));
+
+  o := tp.oferta('pending tuż przed zajęciem', tp.klient('Zegar'), 6);
+  update public.ud_offers set przypomnienie_wersja = 1, przypomnienie_sms_at = now() - interval '2 hours' where id = o;
+  insert into public.ud_send_log (offer_id, channel, recipient, status, wersja, created_at)
+  values (o, 'sms_przypomnienie', '48504400901', 'pending', 1, now() - interval '2 hours 2 minutes');
+  perform tp.sprawdz('„pending" 2 min przed zajęciem (rozjazd zegarów) — nadal blokuje', not tp.jest(o));
 
   o := tp.oferta('inny kanał', tp.klient('SMS o ofercie'), 6);
   update public.ud_offers set przypomnienie_wersja = 1, przypomnienie_sms_at = now() - interval '2 hours' where id = o;

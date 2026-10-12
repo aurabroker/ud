@@ -66,19 +66,57 @@ export const PRZYPOMNIENIE_NAJWYZEJ_DNI = 30;
  */
 export const PRZYPOMNIENIA_NA_RAZ = 6;
 
+/** Wielkanoc (niedziela) w kalendarzu gregoriańskim — algorytm Meeusa/Jonesa/Butchera. */
+function wielkanoc(rok) {
+  const a = rok % 19;
+  const b = Math.floor(rok / 100);
+  const c = rok % 100;
+  const d = Math.floor(b / 4);
+  const e = b % 4;
+  const f = Math.floor((b + 8) / 25);
+  const g = Math.floor((b - f + 1) / 3);
+  const h = (19 * a + b - d - g + 15) % 30;
+  const i = Math.floor(c / 4);
+  const k = c % 4;
+  const l = (32 + 2 * e + 2 * i - h - k) % 7;
+  const m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const miesiac = Math.floor((h + l - 7 * m + 114) / 31);
+  const dzien = ((h + l - 7 * m + 114) % 31) + 1;
+  return Date.UTC(rok, miesiac - 1, dzien);
+}
+
 /**
- * Czy teraz wolno wysłać przypomnienie: dni robocze, 9:00–18:59 czasu
- * polskiego. SMS o ofercie w sobotę o 7 rano albo w nocy to prosty sposób,
- * żeby klient zapamiętał nas źle. Czas polski liczymy przez Intl, nie z
- * przesunięcia UTC — zmiana czasu nie przesuwa wtedy okna.
+ * Czy dzień (rok, miesiąc 1–12, dzień) jest w Polsce ustawowo wolny od pracy
+ * (ustawa o dniach wolnych od pracy; Wigilia od 2025). Niedziele wielkanocna
+ * i Zielonych Świątek wypadają w niedzielę, więc odpadają i bez tej listy.
+ */
+export function swietoWPolsce(rok, miesiac, dzien) {
+  const md = `${String(miesiac).padStart(2, '0')}-${String(dzien).padStart(2, '0')}`;
+  const stale = ['01-01', '01-06', '05-01', '05-03', '08-15', '11-01', '11-11', '12-25', '12-26'];
+  if (stale.includes(md) || (md === '12-24' && rok >= 2025)) return true;
+  const dzienMs = 24 * 3600 * 1000;
+  const t = Date.UTC(rok, miesiac - 1, dzien);
+  const w = wielkanoc(rok);
+  return t === w + dzienMs || t === w + 60 * dzienMs;   // poniedziałek wielkanocny, Boże Ciało
+}
+
+/**
+ * Czy teraz wolno wysłać przypomnienie: dni robocze (bez sobót, niedziel
+ * i świąt), 9:00–18:59 czasu polskiego. SMS o ofercie w sobotę o 7 rano, w
+ * nocy albo 11 listopada to prosty sposób, żeby klient zapamiętał nas źle.
+ * Czas polski liczymy przez Intl, nie z przesunięcia UTC — zmiana czasu nie
+ * przesuwa wtedy okna.
  * @param {Date} [teraz]
  */
 export function wOknieWysylki(teraz = new Date()) {
   const czesci = Object.fromEntries(
     new Intl.DateTimeFormat('en-GB', {
-      timeZone: 'Europe/Warsaw', weekday: 'short', hour: '2-digit', hourCycle: 'h23'
+      timeZone: 'Europe/Warsaw', weekday: 'short', hour: '2-digit', hourCycle: 'h23',
+      year: 'numeric', month: '2-digit', day: '2-digit'
     }).formatToParts(teraz).map((p) => [p.type, p.value])
   );
   const godzina = Number(czesci.hour);
-  return !['Sat', 'Sun'].includes(czesci.weekday) && godzina >= 9 && godzina < 19;
+  if (['Sat', 'Sun'].includes(czesci.weekday)) return false;
+  if (swietoWPolsce(Number(czesci.year), Number(czesci.month), Number(czesci.day))) return false;
+  return godzina >= 9 && godzina < 19;
 }

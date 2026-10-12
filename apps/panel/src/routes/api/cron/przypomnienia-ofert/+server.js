@@ -18,6 +18,7 @@
  * Odpowiedź crona czyta tylko pg_net (net._http_response, kilka godzin), więc
  * każda awaria i każde przerwanie wysyłki zostawia wpis w ud_errors — inaczej
  * przypomnienia mogłyby nie działać tygodniami i nikt by tego nie zauważył.
+ * Wyjątek: zły token (patrz niżej).
  */
 import { json } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
@@ -58,9 +59,10 @@ export async function POST({ request, getClientAddress }) {
     return json({ ok: false, error: 'nie da się sprawdzić tokenu' }, { status: 503 });
   }
   if (zgodny !== true) {
-    // Zły token z nagłówkiem to albo próba z zewnątrz, albo rozjechany sekret
-    // w Vaulcie — w obu przypadkach ktoś powinien to zobaczyć.
-    await zapiszBlad(sb, 'Przypomnienia ofert: zły token crona', null, ip);
+    // Bez wpisu w ud_errors: cron bierze token z tego samego Vaulta, z którym
+    // go porównujemy, więc zły token to zawsze ktoś z zewnątrz — a wpis za
+    // każde jego żądanie pozwoliłby mu zapchać dziennik błędów.
+    console.warn(`[${ZRODLO}] zły token crona`, ip);
     return json({ ok: false, error: 'zły token' }, { status: 401 });
   }
 

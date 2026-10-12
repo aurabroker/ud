@@ -8,9 +8,12 @@
  * (ud_oferty_do_przypomnienia) — tu atrapa oddaje gotową listę, a reguły
  * wyboru sprawdza scripts/test-przypomnienia-sql.mjs na prawdziwym Postgresie.
  */
-import { readFileSync, readdirSync } from 'node:fs';
+import { readFileSync, readdirSync, writeFileSync, mkdtempSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { wyslijPrzypomnienia, KANAL_PRZYPOMNIENIA, BUDZET_ZAPYTAN, CZAS_MS } from '../src/lib/server/przypomnieniaOfert.js';
-import { SMS_PRZYPOMNIENIE, jednaCzesc, wOknieWysylki, PRZYPOMNIENIA_NA_RAZ } from '../src/lib/server/smsOferta.js';
+import { SMS_PRZYPOMNIENIE, jednaCzesc, wOknieWysylki, swietoWPolsce, PRZYPOMNIENIA_NA_RAZ } from '../src/lib/server/smsOferta.js';
 
 let failures = 0;
 function check(label, actual, expected) {
@@ -67,9 +70,13 @@ function warunekOr(wyr) {
  */
 function atrapa({ oferty, kandydaci, dziennik = [], awarie = {} }) {
   const stan = {
-    oferty: oferty.map((o) => ({ przypomnienie_wersja: null, przypomnienie_sms_at: null, user_id: 'agent-1', ...o })),
+    oferty: oferty.map((o) => ({
+      przypomnienie_wersja: null, przypomnienie_sms_at: null, user_id: 'agent-1',
+      status: 'sent', client_choice: null, decided_at: null, archived_at: null, ...o,
+    })),
     dziennik,
     zapytan: 0,
+    retry: [],
   };
   let nastepneId = 1;
   const sb = {
@@ -90,6 +97,8 @@ function atrapa({ oferty, kandydaci, dziennik = [], awarie = {} }) {
         insert(r) { op = 'insert'; wiersz = r; return b; },
         eq(k, v) { f.push((r) => r[k] === v); return b; },
         in(k, v) { f.push((r) => v.includes(r[k])); return b; },
+        is(k, v) { if (v !== null) throw new Error('is() tylko z null'); f.push((r) => r[k] == null); return b; },
+        retry(v) { stan.retry.push(`${tabela}:${v}`); return b; },
         gte(k, v) { f.push((r) => r[k] >= v); return b; },
         limit() { return b; },
         or(wyr) { const w = warunekOr(wyr); f.push(w.ktorykolwiek); return b; },
@@ -97,7 +106,7 @@ function atrapa({ oferty, kandydaci, dziennik = [], awarie = {} }) {
           return Promise.resolve().then(() => {
             stan.zapytan++;
             const awaria = awarie[`${tabela}.${op}`];
-            if (awaria) return { data: null, error: { message: `awaria ${tabela}.${op}` } };
+            if (typeof awaria === 'function' ? awaria(patch ?? wiersz) : awaria) return { data: null, error: { message: `awaria ${tabela}.${op}` } };
             const zbior = tabela === 'ud_offers' ? stan.oferty : stan.dziennik;
             if (op === 'insert') {
               const nowy = { id: 'log-' + nextId(), created_at: TERAZ.toISOString(), ...wiersz };
@@ -152,6 +161,14 @@ check('wtorek 19:00 — nie', wOknieWysylki(new Date('2026-10-13T17:00:00Z')), f
 check('sobota 12:00 — nie', wOknieWysylki(new Date('2026-10-17T10:00:00Z')), false);
 check('niedziela 12:00 — nie', wOknieWysylki(new Date('2026-10-18T10:00:00Z')), false);
 check('zimą 9:00 czasu polskiego = 8:00 UTC — można', wOknieWysylki(new Date('2026-12-01T08:00:00Z')), true);
+check('11 listopada (środa) — nie', wOknieWysylki(new Date('2026-11-11T10:00:00Z')), false);
+check('24 grudnia 2026 (czwartek, wolny od 2025) — nie', wOknieWysylki(new Date('2026-12-24T09:00:00Z')), false);
+check('poniedziałek wielkanocny 2027 (29.03) — nie', wOknieWysylki(new Date('2027-03-29T08:00:00Z')), false);
+check('Boże Ciało 2026 (4.06) — nie', wOknieWysylki(new Date('2026-06-04T08:00:00Z')), false);
+check('dzień po Bożym Ciele (5.06) — można', wOknieWysylki(new Date('2026-06-05T08:00:00Z')), true);
+check('święta ruchome: Wielkanoc 2026/2027/2030 → poniedziałki 6.04 / 29.03 / 22.04',
+  [swietoWPolsce(2026, 4, 6), swietoWPolsce(2027, 3, 29), swietoWPolsce(2030, 4, 22), swietoWPolsce(2026, 4, 7)], [true, true, true, false]);
+check('Wigilia przed 2025 nie była wolna', swietoWPolsce(2024, 12, 24), false);
 check('latem 7:30 UTC = 9:30 czasu polskiego — można', wOknieWysylki(new Date('2026-07-01T07:30:00Z')), true);
 
 console.log('Wysyłka');
@@ -210,6 +227,24 @@ for (const status of ['sent', 'pending']) {
   const { sendSms, wyslane } = smsapi();
   await uruchom(sb, sendSms);
   check('numer zagraniczny — bez SMS-a (nie zgadujemy kierunkowego)', wyslane.length, 0);
+}
+
+{
+  // Lista kandydatów jest sprzed kilku sekund. W tym czasie agent wysłał
+  // ofertę ponownie (wersja 2), klient wybrał wariant, a trzecią zarchiwizowano.
+  const { sb, stan } = atrapa({
+    oferty: [{ id: 'A', wersja: 2 }, { id: 'B', wersja: 1, status: 'chosen', decided_at: '2026-10-13T07:59:00Z' }, { id: 'C', wersja: 1, archived_at: '2026-10-13T07:59:00Z' }],
+    kandydaci: [kand('A', '504400901', 1), kand('B', '600100200'), kand('C', '700100200')],
+  });
+  const { sendSms, wyslane } = smsapi();
+  const w = await uruchom(sb, sendSms);
+  check('stan oferty zmienił się po odczycie listy (nowa wersja, decyzja, archiwum) — bez SMS-a',
+    [wyslane.length, w.pominieto, stan.oferty.map((o) => o.przypomnienie_wersja)], [0, 3, [null, null, null]]);
+}
+{
+  const { sb, stan } = atrapa({ oferty: [{ id: 'A', wersja: 1 }], kandydaci: [kand('A', '504400901')] });
+  await uruchom(sb, smsapi().sendSms);
+  check('limit 7 dni czytany bez automatycznych ponowień postgrest-js', stan.retry, ['ud_send_log:false']);
 }
 
 console.log('Osierocone zajęcie');
@@ -279,7 +314,31 @@ console.log('Błędy SMSAPI');
   const { sendSms, wyslane } = smsapi({ '48504400901': { sent: false, error: 'SMSAPI: The operation was aborted due to timeout' } });
   const w = await uruchom(sb, sendSms);
   check('brak odpowiedzi SMSAPI — oferta ZOSTAJE zajęta, wywołanie przerwane', [stan.oferty[0].przypomnienie_wersja, wyslane.length, Boolean(w.przerwano)], [1, 1, true]);
-  check('w dzienniku: błąd z dopiskiem „nie wiadomo, czy SMS wyszedł"', /nie wiadomo/.test(stan.dziennik[0].error) && stan.dziennik[0].status === 'error', true);
+  check('w dzienniku: „pending" z dopiskiem „nie wiadomo, czy SMS wyszedł"', /nie wiadomo/.test(stan.dziennik[0].error) && stan.dziennik[0].status === 'pending', true);
+  // Ten sam telefon przy innej ofercie (małżonek, druga kartoteka) godzinę później — SMS mógł już wyjść.
+  const { sb: sb2 } = atrapa({ oferty: [{ id: 'C', wersja: 1 }], kandydaci: [kand('C', '504400901')], dziennik: stan.dziennik });
+  const drugi = smsapi();
+  await uruchom(sb2, drugi.sendSms);
+  check('… a ten numer przy innej ofercie nie dostaje drugiego SMS-a', drugi.wyslane.length, 0);
+}
+{
+  // Brama SMSAPI odpowiada 502/504 stroną HTML — bez kodu SMSAPI nie wiadomo,
+  // czy wiadomość przyjęto. sms.js ustawia wtedy `nieznany`.
+  const { sb, stan } = atrapa({ oferty: [{ id: 'A', wersja: 1 }, { id: 'B', wersja: 1 }], kandydaci: [kand('A', '504400901'), kand('B', '600100200')] });
+  const { sendSms, wyslane } = smsapi({ '48504400901': { sent: false, nieznany: true, error: 'SMSAPI HTTP 502: 502 Bad Gateway nginx' } });
+  const w = await uruchom(sb, sendSms);
+  check('błąd bramy 5xx (nieznany) — oferta zostaje zajęta, „pending", przerwane',
+    [stan.oferty[0].przypomnienie_wersja, stan.dziennik[0].status, wyslane.length, Boolean(w.przerwano)], [1, 'pending', 1, true]);
+}
+{
+  // Zwolnienie po odmowie SMSAPI się nie udało — ma to być widać w ud_errors.
+  const { sb, stan } = atrapa({
+    oferty: [{ id: 'A', wersja: 1 }], kandydaci: [kand('A', '504400901')],
+    awarie: { 'ud_offers.update': (patch) => patch.przypomnienie_wersja === null },
+  });
+  const { sendSms } = smsapi({ '48504400901': { sent: false, error: 'SMSAPI błąd 103: brak punktów' } });
+  const w = await uruchom(sb, sendSms);
+  check('nieudane zwolnienie po odmowie — przerwano mówi „nie da się zwolnić"', /nie da się zwolnić/.test(w.przerwano) && stan.oferty[0].przypomnienie_wersja === 1, true);
 }
 
 console.log('Dziennik wysyłek');
@@ -364,7 +423,8 @@ console.log('Punkt wejścia crona');
   check('token przed oknem godzin i przed wysyłką', iToken < zrodlo.indexOf('wOknieWysylki()') && iToken < iWysylka, true);
   check('SMSAPI_TEST=1 wstrzymuje przypomnienia (przed wysyłką)', iTest > iToken && iTest < iWysylka, true);
   check('przerwanie wysyłki i wyjątek trafiają do ud_errors', /if \(wynik\.przerwano\)[\s\S]*zapiszBlad\(/.test(zrodlo) && /catch \(e\)[\s\S]*zapiszBlad\(/.test(zrodlo.slice(iWysylka)), true);
-  check('zły token z nagłówkiem trafia do ud_errors', /zgodny !== true[\s\S]{0,400}zapiszBlad\(/.test(zrodlo), true);
+  const galazZlegoTokenu = zrodlo.slice(zrodlo.indexOf('zgodny !== true'), zrodlo.indexOf("status: 401 });", zrodlo.indexOf('zgodny !== true')));
+  check('zły token NIE trafia do ud_errors (każdy mógłby zapchać dziennik)', galazZlegoTokenu.length > 0 && !/zapiszBlad\(/.test(galazZlegoTokenu), true);
   check('tylko POST (GET → 405)', /export function GET[\s\S]*status: 405/.test(zrodlo), true);
 }
 
@@ -375,18 +435,46 @@ console.log('SMSAPI (sms.js)');
   check('limit krótszy niż cierpliwość crona (30 s)', Number(/const TIMEOUT_MS = (\d+)/.exec(sms)?.[1]) <= 10000, true);
   check('105 opisany jako filtr IP, nie zły numer', /105: '[^']*IP/.test(sms) && !/105: '[^']*numer/.test(sms), true);
   check('13 opisany jako zły numer', /13: '[^']*numer/.test(sms), true);
+
+  // Zachowanie, nie zapis: prawdziwy sms.js z podstawionym `$env` i `fetch`.
+  const linia = "import { env } from '$env/dynamic/private';";
+  check('sms.js bierze env z $env/dynamic/private (inaczej podmiana niżej nic nie sprawdza)', sms.includes(linia), true);
+  const katalogTmp = mkdtempSync(join(tmpdir(), 'ud-sms-'));
+  const plik = join(katalogTmp, 'sms.mjs');
+  writeFileSync(plik, sms.replace(linia, 'const env = globalThis.__udSmsEnv;'));
+  globalThis.__udSmsEnv = { SMSAPI_TOKEN: 'token-testowy' };
+  const { sendSms: prawdziwySendSms } = await import(pathToFileURL(plik).href);
+  const zFetch = async (atrapaFetch) => {
+    const poprzedni = globalThis.fetch;
+    globalThis.fetch = atrapaFetch;
+    try { return await prawdziwySendSms('48504400901', 'test'); } finally { globalThis.fetch = poprzedni; }
+  };
+  let sygnal = null;
+  const wyslany = await zFetch(async (_u, init) => { sygnal = init?.signal; return new Response(JSON.stringify({ list: [{ id: 'abc' }] }), { status: 200 }); });
+  check('wysłany: sent + id, bez „nieznany"', [wyslany.sent, wyslany.id, wyslany.nieznany], [true, 'abc', undefined]);
+  check('fetch dostaje sygnał przerwania (limit czasu)', sygnal instanceof AbortSignal, true);
+  const brama = await zFetch(async () => new Response('<html><body>502 Bad Gateway nginx</body></html>', { status: 502 }));
+  check('502 z HTML-em (brama, bez kodu SMSAPI) — nieznany', [brama.sent, brama.nieznany], [false, true]);
+  const wyjatek = await zFetch(async () => { throw new DOMException('The operation was aborted due to timeout', 'TimeoutError'); });
+  check('limit czasu / zerwane połączenie — nieznany, błąd „SMSAPI: …"', [wyjatek.nieznany, /^SMSAPI: /.test(wyjatek.error)], [true, true]);
+  const punkty = await zFetch(async () => new Response(JSON.stringify({ error: 103, message: 'Insufficient credits' }), { status: 200 }));
+  check('odmowa z kodem (103) — pewne „nie wysłano", bez „nieznany"', [punkty.sent, punkty.nieznany, /błąd 103/.test(punkty.error)], [false, undefined, true]);
+  const wewnetrzny = await zFetch(async () => new Response(JSON.stringify({ error: 201, message: 'System internal error' }), { status: 200 }));
+  check('błąd wewnętrzny SMSAPI (201) — nieznany', wewnetrzny.nieznany, true);
+  const filtrIp = await zFetch(async () => new Response(JSON.stringify({ error: 105, message: 'Invalid IP' }), { status: 200 }));
+  check('105 — pewne „nie wysłano", podpowiedź o filtrze IP', [filtrIp.nieznany, /filtr IP/.test(filtrIp.error)], [undefined, true]);
 }
 
 console.log('Migracje');
 {
   const katalog = new URL('../../../supabase/migrations/', import.meta.url);
   const pliki = readdirSync(katalog).filter((p) => /_oferty_przypomnienia_sms(_\d+)?\.sql$/.test(p)).sort();
-  check('dwie migracje przypomnień (nazwy = wersje w bazie)', pliki, ['20261012123157_oferty_przypomnienia_sms.sql', '20261012162649_oferty_przypomnienia_sms_2.sql']);
+  check('trzy migracje przypomnień (nazwy = wersje w bazie)', pliki, ['20261012123157_oferty_przypomnienia_sms.sql', '20261012162649_oferty_przypomnienia_sms_2.sql', '20261012172729_oferty_przypomnienia_sms_3.sql']);
   const pierwsza = readFileSync(new URL(pliki[0], katalog), 'utf8');
   check('cron woła ten adres z tokenem z Vaulta', pierwsza.includes('/api/cron/przypomnienia-ofert') && /x-cron-token[\s\S]*vault\.decrypted_secrets/.test(pierwsza), true);
   check('zadanie powstaje wyłączone', /cron\.alter_job\(v_id, active := false\)/.test(pierwsza), true);
-  const druga = readFileSync(new URL(pliki[1], katalog), 'utf8');
-  check('druga migracja nie włącza zadania crona', /cron\./.test(druga.replace(/--.*$/gm, '')), false);
+  check('kolejne migracje nie ruszają zadania crona',
+    pliki.slice(1).some((p) => /cron\./.test(readFileSync(new URL(p, katalog), 'utf8').replace(/--.*$/gm, ''))), false);
 }
 
 if (failures) {
