@@ -71,7 +71,7 @@ export const actions = {
     if (!user) throw redirect(303, '/login');
     try {
       const res = await sendOfferToClient(params.id);
-      return { sent: true, email: res.email, pinDev: res.pinDev, wersja: res.wersja };
+      return { sent: true, email: res.email, sms: res.sms, pinDev: res.pinDev, wersja: res.wersja };
     } catch (e) {
       return fail(400, { error: e?.message || 'Błąd wysyłki' });
     }

@@ -942,6 +942,69 @@ Pilnuje tego `test/wylaczenia.spec.js`.
 
 ---
 
+## Granice wniosku — waga, wzrost, sumy (od 12.10.2026)
+
+11.10.2026 przez kreator przeszedł wniosek z wagą **1000 kg**, świadczeniem
+**500 000 000 zł miesięcznie** i sumą śmierci **99 999 999 zł** (do tego
+telefon `123123123`). Nikt tego nie zatrzymał: `min`/`max` w HTML-u działają
+tylko przy natywnej wysyłce formularza, a kreator wysyła sam i swoją walidacją
+wagi ani wzrostu nie dotykał; `form-submit` zapisywał, co przyszło.
+
+Granice ustalił właściciel:
+
+| Pole | Granica |
+|---|---|
+| wzrost | 100–250 cm (minimum z dawnego atrybutu `min`) |
+| waga | 30–200 kg (j.w.) |
+| świadczenie miesięczne (okresowa niezdolność) | do 50 000 zł |
+| trwała niezdolność | do 10 000 000 zł |
+| śmierć / inwalidztwo (NW) | do 10 000 000 zł |
+
+Granica jest dozwolona, złotówka wyżej — nie. Waga i wzrost zostają
+**nieobowiązkowe**; wpisane muszą się mieścić.
+
+Liczby stoją w **dwóch miejscach**: `packages/wniosek/src/schemat.js`
+(`RYZYKA[].max`, `GRANICE_CIALA`) i `supabase/functions/form-submit/index.ts`
+(`GRANICE_SUM`, `GRANICE_CIALA`). Decyduje funkcja — kreator da się obejść.
+`test/wniosek-granice.spec.js` ładuje prawdziwe źródło funkcji i sprawdza
+**zachowaniem**, że każda granica ze schematu jest po tamtej stronie ta sama
+(na granicy 200, złotówkę wyżej 400). Zmiana granicy = obie strony w jednym
+commicie i wdrożenie funkcji.
+
+Rzeczy, których nie upraszczaj:
+
+- **Funkcja czyta liczby ściśle (`liczbaScisla`), nie przez `parseAmount`.**
+  Ten bierze PIERWSZĄ liczbę z napisu: „5e8" czyta jako 5, „50000abc" jako
+  50 000 — oba przeszłyby granicę i trafiły do bazy w tej postaci. Przyjmuje
+  tylko liczbę albo napis: tablica `[1, 500000000]` po `String()` to
+  „1,500000000", czyli 1,5.
+- **Do kolumny idzie odczytana liczba, nie napis z żądania.** Inaczej
+  przechodzą BOM, odstępy w środku czy „50000.000…0001" (po odczycie równe
+  granicy, w bazie dłuższe). Pole z samymi odstępami idzie jako puste.
+- **Kwota przy niewybranym ryzyku nie idzie do kolumny** (zostaje
+  w `form_data`). Pole w kreatorze zostaje wypełnione, gdy ktoś wpisze sumę
+  i odznaczy ryzyko — bez tego taki wniosek dostawałby 400 za kwotę, której
+  klient nie chce.
+- Odmowa za granice zapisuje wpis w `ud_errors` („Wniosek poza granicami: …",
+  z IP). Kreator nie przepuszcza takich wartości, więc każdy taki wpis to
+  obejście kreatora albo stara wersja strony w czyjejś karcie.
+- Brama obciążeniowa (`obciazenie-formularza.mjs`) wypełnia pola wartościami
+  realistycznymi (80 kg, 180 cm, 10 000 zł/mies.). Wcześniej wpisywała 15 000
+  do wagi i 300 000 zł jako świadczenie miesięczne — i przechodziła.
+
+**Stan na 12.10.2026:** funkcja wdrożona jako `form-submit` **v25** (treść
+z repozytorium; sonda z fałszywym tokenem → 400, brama obciążeniowa 16/16
+przeciw v25). Kreator z granicami wchodzi razem z portalem — do tego czasu
+żywa strona przepuszcza takie wartości do funkcji, a ta odpowiada 400
+z komunikatem. W `liczbaScisla` produkcja ma NBSP i BOM wpisane jako znaki,
+repozytorium — jako `\u00A0\uFEFF`; to ten sam wzorzec, nie różnica w kodzie.
+
+Czego granice NIE obejmują (świadomie, do osobnej decyzji): kwot klauzul NW
+(w kreatorze z listy, funkcja ich nie sprawdza), pól B2B, długości pól
+tekstowych i numerów telefonu typu `123123123`.
+
+---
+
 ## Ankieta rozszerzona — kontrakt z funkcją brzegową to `hs_<klucz>`
 
 Przy sumie „trwałej niezdolności" **powyżej 1 000 000 zł** kreator pokazuje
@@ -1017,7 +1080,8 @@ skasowałoby to wszystko na produkcji. To samo dotyczy dziś `review-admin`
 
 Numer wersji rośnie także wtedy, gdy nikt nie wdraża kodu: wpisanie sekretu
 w Edge Functions → Secrets podbiło 24.09 licznik **wszystkim** funkcjom o jeden,
-przy identycznym `ezbr_sha256`. Stan na 28.09: `form-submit` v23 — od tej wersji
+przy identycznym `ezbr_sha256`. Od 12.10: `form-submit` v25 — granice wniosku
+(sekcja „Granice wniosku"); v24 to v23 podbita sekretem. Stan na 28.09: `form-submit` v23 — od tej wersji
 bez „Okresowej niezdolności" i jej kwoty wniosek dostaje 400 (wcześniej blokowana
 była tylko sama „Trwała", więc przechodził wniosek z samą śmiercią / inwalidztwem).
 Kreator ma tę samą regułę: okresowa jest zaznaczona na stałe (`podstawowe: true`
@@ -1197,9 +1261,11 @@ Supabase i Resend; atrapa bazy odtwarza ograniczenia tabeli. Pomocniki:
 
 ## Panel — kod dostępu do oferty to 4 ostatnie cyfry PESEL-u
 
-**SMS-ów nie wysyłamy.** Klient dostaje sam e-mail z linkiem, a hasłem są
+**Kodu SMS-em nie wysyłamy.** Klient dostaje e-mail z linkiem, a hasłem są
 cztery ostatnie cyfry jego PESEL-u — ten sam ciąg, którym Leadenhall szyfruje
 pliki oferty. Klient zna go z dowodu, więc nie ma czego dowozić drugim kanałem.
+(SMS, który od 12.10.2026 idzie po e-mailu, jest samym zawiadomieniem — patrz
+niżej.)
 Sprawdzone na danych: wszystkie 17 ofert z ustawionym kodem miało go równy
 `right(pesel, 4)`, zero wyjątków.
 
@@ -1223,10 +1289,35 @@ Treść mówiąca o haśle stoi w **trzech miejscach i musi być zgodna**:
 | `src/routes/offer/[token]/+page.svelte` | podpowiedź nad polem na stronie oferty |
 | `src/routes/panel/offer/[id]/+page.svelte` | opis kodu dla agenta |
 
-Zostało po SMS-ach, celowo nieruszone: `lib/server/sms.js`, test wysyłki
-w Ustawieniach, sonda w `health.js` i filtr kanału w Wysyłkach. Pierwsze trzy
-to narzędzia diagnostyczne SMSAPI, ostatni pokazuje **historię** wysyłek sprzed
-zmiany. Usunięcie ich to osobna decyzja — nie kasuj przy okazji.
+### SMS „wysłaliśmy do Ciebie ofertę" (od 12.10.2026)
+
+Decyzja właściciela: po **wysłanym** e-mailu z ofertą klient dostaje SMS
+`SMS_OFERTA` z `src/lib/server/smsOferta.js` — „Wlasnie wyslalismy do Ciebie
+oferte. Sprawdz maila (takze folder Spam)" i telefon. Przez SMSAPI
+(`lib/server/sms.js`), numer z oferty, a bez niego z kartoteki klienta.
+
+- **Bez linku i bez kodu.** Kod to PESEL (wyżej), a link w SMS-ie od
+  nieznanego nadawcy uczy klikać w linki z SMS-ów — na tym nawyku żerują
+  oszuści. Dlatego podpis „UtrataDochodu:", nie „UtrataDochodu.pl:" — telefon
+  robi odnośnik także z gołej domeny. Test to sprawdza.
+- **Bez polskich znaków.** Z nimi SMS przechodzi na UCS-2 (70 znaków na część
+  zamiast 160) i ta sama treść kosztuje dwa SMS-y. Test pilnuje jednej części.
+- **Tylko po `email.sent`** — „wysłaliśmy ofertę" przy odrzuconym mailu byłoby
+  nieprawdą. SMS nie decyduje o statusie „Wysłana": porażka SMSAPI nie cofa
+  wysyłki, trafia do `ud_send_log` (kanał `sms`) i na stronę oferty.
+- Numer tylko polski (`numerDoSms`, 9 cyfr z opcjonalnym 48/+48/0048).
+  Zły numer przy ofercie nie zasłania dobrego z kartoteki. Zagraniczny albo
+  ucięty — SMS się nie wysyła i strona oferty mówi dlaczego.
+- **Nadawca to `SMSAPI_SENDER`**, a bez niej domyślne „Info". W `wrangler.toml`
+  panelu tej zmiennej nie ma, a przy sekcji `[vars]` zmienne jawne z panelu
+  Cloudflare są pomijane — sprawdź w Ustawieniach → SMS, kto jest nadawcą
+  i czy jest na liście zatwierdzonych w SMSAPI.
+- W trybie `SMSAPI_TEST=1` SMSAPI odpowiada jak przy wysyłce, więc strona
+  oferty i `ud_send_log` pokazują „wysłany", choć nic nie wyszło.
+
+Test: `pnpm test:sms` w `apps/panel`. Diagnostyka SMSAPI (test wysyłki
+w Ustawieniach, sonda w `health.js`) i filtr kanału w Wysyłkach znów obsługują
+żywą ścieżkę — nie kasuj ich.
 
 ---
 

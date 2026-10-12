@@ -16,7 +16,7 @@
     FORMY_ZATRUDNIENIA, FORMY_OPODATKOWANIA, LIMIT_DOCHODU,
     HEALTH_SURVEY_GROUPS, HEALTH_SURVEY_ITEMS, HEALTH_SURVEY_THRESHOLD,
     sprawdzKrok, ankietaRozszerzona, doWysylki, zLinkuAgenta, klauzuleDostepne, PROG_KLAUZUL_NW,
-    ZGODA_KONTAKT,
+    ZGODA_KONTAKT, GRANICE_CIALA,
   } from '@ud/wniosek';
 
   let { zawody = [], zawodPoczatkowy = '', urlFunkcji, urlSzkicu = '', kluczTurnstile } = $props();
@@ -448,16 +448,25 @@
             {#if bledy.profession}<span id="e-profession" class="block text-[13px] text-alarm mt-1.5">{bledy.profession}</span>{/if}
           </label>
 
+          <!-- Granice z GRANICE_CIALA (@ud/wniosek) — te same sprawdza form-submit.
+               Atrybuty min/max podpowiadają klawiaturze i przeglądarce, ale niczego
+               nie blokują: kreator wysyła sam, więc decyduje sprawdzKrok(). -->
           <label class="block">
             <span class="block text-sm font-semibold mb-1.5">Waga (kg)</span>
-            <input name="weight" type="number" min="30" max="300" bind:value={dane.weight}
+            <input name="weight" type="number" min={GRANICE_CIALA.weight.min} max={GRANICE_CIALA.weight.max}
+                   bind:value={dane.weight} inputmode="decimal"
+                   aria-invalid={!!bledy.weight} aria-describedby={bledy.weight ? 'e-weight' : undefined}
                    class="w-full border border-linia-pole p-3 bg-tlo focus:border-akcent">
+            {#if bledy.weight}<span id="e-weight" class="block text-[13px] text-alarm mt-1.5">{bledy.weight}</span>{/if}
           </label>
 
           <label class="block">
             <span class="block text-sm font-semibold mb-1.5">Wzrost (cm)</span>
-            <input name="height" type="number" min="100" max="250" bind:value={dane.height}
+            <input name="height" type="number" min={GRANICE_CIALA.height.min} max={GRANICE_CIALA.height.max}
+                   bind:value={dane.height} inputmode="numeric"
+                   aria-invalid={!!bledy.height} aria-describedby={bledy.height ? 'e-height' : undefined}
                    class="w-full border border-linia-pole p-3 bg-tlo focus:border-akcent">
+            {#if bledy.height}<span id="e-height" class="block text-[13px] text-alarm mt-1.5">{bledy.height}</span>{/if}
           </label>
 
           <label class="block sm:col-span-2">
@@ -566,10 +575,12 @@
                   <span class="block text-sm font-semibold mb-1.5">
                     {r.rodzaj === 'Miesięczne świadczenie' ? 'Kwota miesięczna (zł)' : 'Suma ubezpieczenia (zł)'}
                   </span>
-                  <input name={r.poleSumy} type="number" min="0" step="1000" bind:value={dane[r.poleSumy]}
+                  <input name={r.poleSumy} type="number" min="0" max={r.max} step="1000" bind:value={dane[r.poleSumy]}
                          aria-invalid={!!bledy[r.poleSumy]}
                          class="w-full max-w-xs border border-linia p-3 bg-tlo font-mono focus:border-akcent">
-                  <span class="block text-[13px] text-tekst-trzeci mt-1.5">
+                  <!-- tekst-drugi, nie trzeci: podpowiedź niesie górną granicę kwoty,
+                       a --color-tekst-trzeci (2,65:1) nie nadaje się do czytania. -->
+                  <span class="block text-[13px] text-tekst-drugi mt-1.5">
                     {r.podpowiedz.replace('{limit}', String(Math.round(limit * 100)))}
                   </span>
                   {#if bledy[r.poleSumy]}<span class="block text-[13px] text-alarm mt-1.5">{bledy[r.poleSumy]}</span>{/if}

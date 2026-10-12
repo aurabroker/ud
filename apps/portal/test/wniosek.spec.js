@@ -80,6 +80,31 @@ test('błędny PESEL nie przepuszcza, poprawny przepuszcza', async ({ page }) =>
   await expect(page.locator('input[name="riskTempIncapacity"]')).toBeVisible();
 });
 
+test('granice z 12.10: waga 1000 kg i świadczenie 500 mln zł zatrzymują kreator', async ({ page }) => {
+  // Wniosek z 11.10.2026 przeszedł z wagą 1000 kg i świadczeniem 500 000 000 zł
+  // miesięcznie: min/max w HTML-u niczego nie blokują, a kreator wysyła sam.
+  await kontakt(page);
+  await page.fill('input[name="profession"]', 'Lekarz');
+  await page.fill('input[name="pesel"]', PESEL);
+  await page.fill('input[name="weight"]', '1000');
+  await page.fill('input[name="height"]', '131');
+  await page.getByRole('button', { name: 'Dalej' }).click();
+  await expect(page.getByText('Wpisz wagę w kilogramach — od 30 do 200.')).toBeVisible();
+  await expect(page.locator('input[name="weight"]')).toHaveAttribute('aria-invalid', 'true');
+  await expect(page.locator('input[name="riskTempIncapacity"]')).toHaveCount(0);
+
+  await page.fill('input[name="weight"]', '200');
+  await page.getByRole('button', { name: 'Dalej' }).click();
+  await page.fill('input[name="tempIncapacitySum"]', '500000000');
+  await page.getByRole('button', { name: 'Dalej' }).click();
+  await expect(page.getByText('Najwyżej 50 000 zł miesięcznie — wpisz niższą kwotę.')).toBeVisible();
+
+  await page.fill('input[name="tempIncapacitySum"]', '50000');
+  await page.getByRole('button', { name: 'Dalej' }).click();
+  await expect(page.getByText('Najwyżej 50 000 zł miesięcznie — wpisz niższą kwotę.')).toHaveCount(0);
+  await expect(page.locator('input[name="tempIncapacitySum"]')).toHaveCount(0);
+});
+
 test('forma zatrudnienia zmienia limit świadczenia', async ({ page }) => {
   await kontakt(page);
   await expect(page.getByText('Świadczenie obejmie do 80% udokumentowanego dochodu.')).toBeVisible();

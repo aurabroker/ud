@@ -152,6 +152,14 @@
         {:else if form.email?.error}<span style="color:var(--red-700);">błąd — {form.email.error}</span>
         {:else}brak adresu email klienta{/if}
       </li>
+      <li>
+        SMS „wysłaliśmy ofertę":
+        {#if form.sms?.sent}wysłany ✓
+        {:else if form.sms?.stub}tryb testowy (brak SMSAPI_TOKEN)
+        {:else if form.sms?.error}<span style="color:var(--red-700);">błąd — {form.sms.error}</span> <span class="muted">(oferta i tak poszła mailem)</span>
+        {:else if form.sms?.pominiety}<span class="muted">nie wysłano — {form.sms.pominiety}</span>
+        {:else}<span class="muted">nie wysłano</span>{/if}
+      </li>
     </ul>
     {#if form.pinDev}<strong>PIN testowy: {form.pinDev}</strong> (widoczny tylko bez realnej wysyłki).<br />{/if}
     <a href="/panel/logi">Historia wysyłek →</a>
@@ -223,7 +231,7 @@
         {#each data.wysylki as w}
           <tr>
             <td style="font-weight:600;">v{w.wersja || 1}</td>
-            <td>{w.channel === 'email' ? '✉ Email' : w.channel}</td>
+            <td>{w.channel === 'email' ? '✉ Email' : w.channel === 'sms' ? '✆ SMS' : w.channel}</td>
             <td class="muted">{w.recipient || '—'}</td>
             <td class="muted">{dateP(w.created_at)}</td>
             <td>

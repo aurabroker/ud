@@ -14,7 +14,11 @@ export interface Ryzyko {
   podpowiedz: string;
   /** Ryzyko, bez którego polisy nie ma — kreator trzyma je zaznaczone. */
   podstawowe?: boolean;
+  /** Najwyższa suma (zł; przy okresowej — miesięcznie). Ta sama liczba stoi w form-submit. */
+  max: number;
 }
+
+export interface Granica { min: number; max: number; jednostka: string; komunikat: string }
 
 export interface Klauzula {
   klucz: string;
@@ -36,6 +40,8 @@ export const FORMY_OPODATKOWANIA: Opcja[];
 export const PYTANIA_MEDYCZNE: Pytanie[];
 export const AKTYWNOSCI_RYZYKOWNE: Pytanie[];
 export const RYZYKA: Ryzyko[];
+/** Waga i wzrost: pole nieobowiązkowe, ale wpisane musi się mieścić w granicach. */
+export const GRANICE_CIALA: { weight: Granica; height: Granica };
 export const KLAUZULE_NW: Klauzula[];
 export const KROKI: { id: IdKroku; tytul: string; opis: string }[];
 /** Zgoda na kontakt w sprawie niedokończonego wniosku (wersja + dokładna treść). */

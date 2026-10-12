@@ -53,8 +53,7 @@ Dla środowiska **Production** (i **Preview**, jeśli chcesz testować):
 | Nazwa | Skąd |
 |---|---|
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase → Project Settings → API → `service_role` |
-| `SMSAPI_TOKEN` | Panel SMSAPI → Tokeny OAuth. **Opcjonalne** — oferty idą samym
-e-mailem, token obsługuje już tylko diagnostykę w Ustawieniach i sondę w `health.js`. |
+| `SMSAPI_TOKEN` | Panel SMSAPI → Tokeny OAuth. Od 12.10.2026 po wysłanym e-mailu z ofertą idzie SMS „wysłaliśmy do Ciebie ofertę, sprawdź maila" (bez linku i kodu). Bez tokenu oferta wychodzi samym e-mailem, a strona oferty pokazuje „tryb testowy". |
 | `RESEND_API_KEY` | resend.com → API Keys |
 | `PIN_COOKIE_SECRET` | dowolny losowy ciąg (mamy wygenerowany w `.env`) |
 
@@ -66,7 +65,7 @@ e-mailem, token obsługuje już tylko diagnostykę w Ustawieniach i sondę w `he
 | `PUBLIC_APP_URL` | adres produkcyjny; `appUrl.js` odrzuca `*.pages.dev` |
 | `RESEND_FROM` | domyślnie `UtrataDochodu <info@utratadochodu.pl>` |
 | `PIN_TTL_HOURS` | `48` |
-| `SMSAPI_SENDER` | opcjonalna, tylko do diagnostyki |
+| `SMSAPI_SENDER` | zatwierdzona w SMSAPI nazwa nadawcy SMS-a o ofercie; bez niej idzie domyślne „Info”. Sprawdź w Ustawieniach → SMS, czy nazwa jest na liście zatwierdzonych. Uwaga: przy `[vars]` w `wrangler.toml` zmienne jawne z panelu Cloudflare są pomijane — dopisz ją tam. |
 
 > Po dodaniu/zmianie zmiennych zrób **Retry deployment** — Cloudflare zaciąga env przy buildzie.
 
@@ -102,8 +101,10 @@ npx wrangler pages secret put SMSAPI_TOKEN
    (właściwe OWU podepnie się automatycznie po symbolu).
 3. Uzupełnij email + telefon klienta → „Wyślij klientowi".
 4. Otwórz link z maila (lub skopiowany) w trybie incognito → wpisz **4 ostatnie cyfry
-   PESEL-u klienta** → oferta się odblokuje. SMS-ów nie wysyłamy; ten sam kod otwiera
-   pobrane pliki PDF. Wysyłka nie odbędzie się, jeśli klient nie ma PESEL-u w kartotece.
+   PESEL-u klienta** → oferta się odblokuje. Ten sam kod otwiera pobrane pliki PDF.
+   Wysyłka nie odbędzie się, jeśli klient nie ma PESEL-u w kartotece. Przy polskim numerze
+   telefonu klient dostaje też SMS „wysłaliśmy do Ciebie ofertę" — samo zawiadomienie,
+   bez linku i bez kodu; wynik widać na stronie oferty i w „Co i kiedy poszło do klienta".
 5. Pobierz PDF/OWU, zadaj pytanie, wybierz wariant — sprawdź, czy agent dostał maile.
 
 ---
