@@ -77,6 +77,33 @@ test('kanał RSS wymienia wszystkie wpisy i jest poprawnym XML-em', () => {
   expect(rss.replace(/&(amp|lt|gt|quot|apos|#\d+);/g, '')).not.toContain('&');
 });
 
+test('tabela w treści przewija się sama, a nie cała strona na telefonie', async ({ page }) => {
+  /**
+   * Tabela z pięcioma kolumnami jest szersza niż telefon. Bez kontenera
+   * z normalizuj() przewijałaby się cała strona w poziomie — z nawigacją,
+   * nagłówkiem i paskiem bocznym. Sprawdzamy oba końce: że kontener jest
+   * w HTML-u i że przy 390 px strona naprawdę się nie rozjeżdża.
+   */
+  const wpisZ = (html) => html.match(/<article[^>]*class="wpis[^>]*>(.*?)<\/article>/s)?.[1] ?? '';
+  const zTabela = strony.filter((s) => /<table[\s>]/.test(wpisZ(s.html)));
+  expect(zTabela.length, 'żaden artykuł nie ma tabeli — test niczego nie sprawdza').toBeGreaterThan(0);
+
+  for (const { slug, html } of zTabela) {
+    const wpis = wpisZ(html);
+    const tabel = (wpis.match(/<table[\s>]/g) ?? []).length;
+    const wKontenerze = (wpis.match(/<div class="tabela" tabindex="0"><table[\s>]/g) ?? []).length;
+    expect(wKontenerze, `„${slug}" — tabela poza kontenerem przewijania`).toBe(tabel);
+  }
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (const { slug } of zTabela) {
+    await page.goto(`/blog/${slug}/`);
+    const nadmiar = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(nadmiar, `„${slug}" rozpycha stronę na 390 px o ${nadmiar} px`).toBeLessThanOrEqual(0);
+  }
+});
+
 test('obrazki w treści nie są wklejone jako data URI', () => {
   // Jeden taki wpis potrafi ważyć 1,3 MB i wjeżdża w kod strony.
   for (const { slug, html } of strony) {

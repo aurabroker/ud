@@ -170,6 +170,34 @@ Nowy artykuł idzie tak:
 3. Jeden wpis na początku `artykuly.json`, w formacie pozostałych, z adresami
    800/1600 w `obraz`/`obrazDuzy`, i plik `artykuly/<slug>.html` z treścią.
 
+**Obrazek w treści (infografika, wykres) — z sandboksa nie wyślesz go do
+kubełka**, bo `article-images` przyjmuje wysyłki tylko od zalogowanych. Droga,
+która działa (09.10.2026, „zawal-udar-utrata-dochodu"): plik źródłowy do
+repozytorium obok treści (`artykuly/<slug>-<nazwa>.png`), push, a potem
+w SQL `net.http_get` na
+`https://api.github.com/repos/aurabroker/ud/contents/<ścieżka>?ref=<sha>`.
+Odpowiedź niesie plik w base64; wklejasz go do `content` jako
+`data:image/png;base64,…` i normalizacja robi z niego
+`<slug>-content1-1600.webp`, jak z obrazka wklejonego w CMS-ie. Zanim zapiszesz,
+porównaj `md5(decode(…, 'base64'))` z lokalną sumą pliku. Przepisywanie base64
+przez narzędzie odpada — 35 kB to dziesiątki tysięcy znaków, w których jedna
+pomyłka psuje obraz. Działa, bo repozytorium jest publiczne.
+
+Tą samą drogą idzie sama treść: plik `artykuly/<slug>.html` pchasz do repo
+od razu z docelowym adresem obrazka (`normalized/<slug>-content1-1600.webp` —
+nazwy są przewidywalne, patrz `nazwaPliku()` w funkcji), a w SQL podmieniasz
+ten adres na data URI. Po normalizacji `md5(content)` w bazie ma się równać
+sumie pliku w repo. Bez wpisu w `artykuly.json` portal pliku nie buduje, więc
+może wyprzedzić wpis.
+
+Okładka i infografika w jednym wywołaniu przekroczyły limit workera
+(546 `WORKER_RESOURCE_LIMIT`). Drugie wywołanie zrobiło resztę, bo okładka była
+już w `aura_article_images` — przy dwóch obrazkach licz się z dwoma wywołaniami.
+
+**Tabele w treści** `normalizuj()` owija w kontener przewijany w poziomie
+(`.tabela`). Bez niego tabela z pięcioma kolumnami rozpychała stronę na
+telefonie. Pilnuje tego `artykuly.spec.js`, także przy szerokości 390 px.
+
 **Poprawiasz treść opublikowanego artykułu — dopisz mu `zmieniono`** (ISO,
 jak `opublikowano`). Z tego pola, a bez niego z daty publikacji, bierze się
 `dateModified` na stronie i `<lastmod>` w mapie strony. Datę w mapie mają
@@ -1883,6 +1911,83 @@ nie słuchał), schematu produkcji (atrapa ma tylko potrzebne kolumny) i PostgRE
    zgodą (etap startowy z ofert) — sprawdź to oczami.
 5. Po wdrożeniu `cd apps/portal && node test/obciazenie-formularza.mjs` jak po
    każdej pracy.
+
+---
+
+## Newsletter — HTML do wklejenia w Resend
+
+Wydanie opisuje `apps/portal/newsletter/<rrrr-mm>.json` (temat, preheader,
+wstęp, artykuł wiodący, dwa „Warto przeczytać", ramka kalkulatora). HTML
+buduje:
+
+```
+cd apps/portal && node scripts/newsletter.mjs 2026-10
+```
+
+Tytuły, adresy i okładki bierze z `artykuly.json`, dane spółki z `firma.ts` —
+w pliku wydania są tylko zajawki i kolejność. Wynik, `newsletter/<wydanie>.html`,
+właściciel wkleja w Resend Broadcasts (decyzja z 10.10.2026: kopiuje cały HTML
+sam, skryptu wysyłki nie ma). Link do wypisu to `{{{RESEND_UNSUBSCRIBE_URL}}}` —
+Resend podstawia go per odbiorca. Nadawca jak przy przypomnieniach:
+`UtrataDochodu <info@utratadochodu.pl>` (domena zweryfikowana w Resend).
+
+Stopka to dane spółki z `firma.ts` i zdanie z wypisem („Możesz się wypisać
+z newslettera, ale po co?" — treść właściciela, 10.10.2026). Sekcji „Nasze
+serwisy" nie ma, decyzją właściciela z tego samego dnia.
+
+**Zajawki piszesz z treści artykułu, nie z pamięci.** Liczba w zajawce, której
+nie ma w artykule, to nowe twierdzenie bez sprawdzenia z OWU i źródłami.
+
+### Obrazki: JPEG w `public/email/`, na zawsze
+
+- **Nie WebP z kubełka** — Outlook na Windowsie WebP-a nie pokazuje. Generator
+  robi z wariantu 1600 px JPEG-i 1200 i 600 px
+  (`public/email/artykuly/<slug>-<szer>.jpg`) i nie nadpisuje istniejących.
+- **Nie `/_astro/`** — tam nazwa zmienia się z każdym buildem, a wysłany mail
+  wskazuje adres latami. To jest ten jeden przypadek, w którym zdjęcie idzie do
+  `public/` (zasada „src/, nigdy public/" dotyczy zdjęć na stronach).
+- **Nie kasuj i nie przemianowuj** niczego w `public/email/` — każdy wysłany
+  mail straciłby obrazek. Pilnuje tego `test/newsletter.spec.js`, który
+  sprawdza KAŻDE wydanie w `newsletter/`, także stare.
+- Logo: `scripts/email-logo.mjs` (znak z `Znak.astro` + napis krojem Public
+  Sans, PNG 3×, białe tło — przezroczyste znikałoby w trybie ciemnym).
+- `/email/*` jest wypisane z `_routes.json` — inaczej każde otwarcie maila to
+  kilka wywołań funkcji brzegowej.
+
+### UTM-y
+
+`utm_source=newsletter`, `utm_medium=email`, `utm_campaign` z pliku wydania
+(`newsletter_2026_10`), `utm_content` = miejsce w mailu (`temat-numeru`,
+`artykul-2`, `kalkulator`, `logo`…). Bez UTM-ów wizyty z poczty lądują w GA4 jako ruch bezpośredni albo jako
+odesłanie z `mail.google.com`, wymieszane z resztą.
+
+UTM-y czyta wyłącznie GA4 (`G-MGB0RBTCC9`) i tylko u tych, którzy zgodzą się
+na analitykę (Consent Mode w trybie basic). Zgoda musi paść **na stronie, na
+którą prowadzi link** — tag startuje dopiero po niej i bierze adres bieżącej
+strony; kto przejdzie dalej przed kliknięciem w baner, wpada do ruchu
+bezpośredniego. Wniosek z newslettera widać w GA4 tylko jako odsłonę
+`/podziekowanie/` w takiej sesji: portal nie wysyła do GA4 osobnego zdarzenia,
+a konwersja Ads idzie wyłącznie do Ads.
+
+**Resend nie liczy dziś niczego poza doręczeniem.** Na 11.10.2026 domena
+`utratadochodu.pl` ma w Resend wyłączone i śledzenie kliknięć, i otwarć.
+Włącza się je dla całej domeny, więc obejmie też przypomnienia
+z `wniosek-przypomnienie` (link wycofania zgody pójdzie przez przekierowanie
+Resend — po włączeniu sprawdź, że fragment `#id=…&sig=…` dochodzi). Piksel
+otwarć i linki z identyfikatorem odbiorcy to dostęp do urządzenia odbiorcy
+(art. 399 PKE), więc ich mierzenie powinno stać w treści zgody na newsletter.
+
+UTM-y nie trafiają do wniosku w bazie: lead z newslettera nie jest w panelu
+oznaczony (do zrobienia osobno, gdyby było potrzebne).
+
+### Komu wolno wysłać
+
+**Newsletter to informacja handlowa — tylko do osób, które zgodziły się na nią
+e-mailem (art. 398 Prawa komunikacji elektronicznej).** Na 10.10.2026 serwis
+takiej zgody nie zbiera nigdzie: zgoda w kreatorze dotyczy wyłącznie kontaktu
+w sprawie niedokończonego wniosku, a `ud_clients` i `udochodu_contacts` nie
+mają pola zgody marketingowej. Lista w Resend musi więc pochodzić ze źródła,
+które zgodę ma — nie z kartoteki klientów.
 
 ---
 
