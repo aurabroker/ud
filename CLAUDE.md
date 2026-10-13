@@ -1428,13 +1428,18 @@ wersji) — taką sprawę prowadzi agent. Gdy SMSAPI odrzuci numer z oferty
 (kod 13, np. stacjonarny), numer z kartoteki nie jest próbowany — ta wersja
 zostaje bez przypomnienia.
 
-**Zadanie crona powstało WYŁĄCZONE** (migracja
-`20261012123157_oferty_przypomnienia_sms.sql`, zastosowana 12.10.2026;
-`…162649_…_2.sql` go nie rusza). Włączenie to decyzja właściciela po obejrzeniu
-listy i treści:
+**Zadanie crona WŁĄCZONE 13.10.2026 ok. 14:35** decyzją właściciela
+(powstało wyłączone w migracji `20261012123157_oferty_przypomnienia_sms.sql`).
+Pierwsze uruchomienie 13.10 o 15:25: 15 kandydatów, 6 SMS-ów przyjętych przez
+SMSAPI, 0 błędów. Wyłączenie:
 `select cron.alter_job((select jobid from cron.job where jobname =
-'oferty-przypomnienia-sms'), active := true);` — wyłączenie tak samo,
-z `active := false`.
+'oferty-przypomnienia-sms'), active := false);` (włączenie — `true`).
+
+Do 13.10.2026 projekt `udappnew` (panel) **nie miał `SMSAPI_TOKEN`
+ani `SMSAPI_SENDER`** — ostatni prawdziwy SMS wyszedł 20.09 jeszcze ze starego
+projektu `udapp`, a SMS „wysłaliśmy ofertę" z v.0.68 szedł w trybie bez tokenu
+(`stub`). Gdy `/health` pokaże `SMSAPI_TOKEN: MISSING`, żaden SMS nie wychodzi
+— ani o ofercie, ani przypomnienie (to drugie zapisze wtedy `ud_errors`).
 
 Podstawa prawna: kontakt w sprawie oferty, o którą klient sam prosił
 (klauzula informacyjna: „Przygotowanie oferty i obsługa wniosku", art. 6 ust.
@@ -1521,6 +1526,55 @@ jako pokryta.
 Test: `pnpm test:owu` w `apps/panel`. `test:parser` z tego samego katalogu to
 narzędzie ręczne — bierze dwa pliki PDF jako argumenty i bez nich się wywala;
 to nie jest regres.
+
+
+### Kosz ofert — 30 dni na przywrócenie (panel v.0.70, 13.10.2026)
+
+Decyzja właściciela po przypadkowym usunięciu oferty UD/2026/CE/00034:
+„Usuń" kasowało ofertę na stałe razem z wariantami, PDF-ami w kubełku,
+PIN-ami, pytaniami klienta i historią wysyłek. Odtworzenie szło z maila
+w Resend (link z tokenem) i PDF-ów z Dysku — bez kosza nie ma innej drogi,
+bo kopia bazy przywraca całą bazę naraz.
+
+Od v.0.70 oba przyciski „Usuń" (lista ofert i strona oferty) wołają
+`ud_oferta_do_kosza()` (migracja `…_oferty_kosz.sql`):
+
+- **W `ud_offers_kosz` zostaje komplet**: wiersz oferty i wszystkie wiersze
+  zależne jako JSON (warianty, pliki, PIN-y, pytania, wysyłki) oraz leady, przy
+  których ten wariant był sprzedany. **Potem oferta jest usuwana jak dotąd.**
+  To jest sedno: żadne miejsce czytające `ud_offers` — lista, strona klienta
+  pod linkiem, tablica leadów, statystyki, przypomnienia SMS — nie musi wiedzieć
+  o koszu. Oferty w koszu po prostu nie ma, klient traci dostęp od razu.
+  Nie zamieniaj tego na kolumnę „usunięto" w `ud_offers` — trzeba by dopisać
+  filtr w kilkudziesięciu zapytaniach, a jedno przeoczone zostawia klientowi
+  otwarty link do „usuniętej" oferty.
+- **Pliki PDF zostają w kubełku** przez 30 dni (adresy podpisuje panel tylko
+  dla istniejących ofert, więc nikt ich nie widzi).
+- **Przywrócenie** (`/panel/kosz` → „Przywróć", `ud_oferta_z_kosza()`) wstawia
+  wszystko z powrotem z **tym samym id i `share_token`** — link z maila do
+  klienta znowu działa, numer, status, wersja, stan przypomnienia i historia
+  wysyłek też wracają. Sprzedany wariant wraca do leada tylko wtedy, gdy lead
+  dalej jest w „Wygrany" i nikt nie wpisał innego; wersja leada rośnie.
+- **Widzi i przywraca**: właściciel oferty, administrator
+  (`ud_leady_widzi`) i osoba, która ofertę usunęła. Konto nieaktywne — nic.
+- **Po 30 dniach** cron `kosz-ofert-czyszczenie` (03:17 UTC, włączony) woła
+  `POST /api/cron/kosz-ofert` (token z Vaulta): panel usuwa pliki z kubełka
+  — tylko ścieżki `<offer_id>/…` — a potem wpis. Najpierw pliki, potem wpis:
+  wpis bez plików da się powtórzyć jutro, pliki bez wpisu zostałyby w kubełku
+  na zawsze. To jest usunięcie danych osobowych na dobre.
+- Twarde `deleteOffer()` zostało wyłącznie do sprzątania po nieudanym
+  utworzeniu oferty (PDF nie dał się odczytać). „Usuń wariant" na stronie
+  oferty nadal kasuje wariant na stałe — kosz go nie obejmuje.
+
+Dodając do tabel ofert kolumnę NOT NULL, pamiętaj o koszu: przywrócenie
+wstawia wiersze przez `jsonb_populate_record(set)`, więc kopia sprzed zmiany
+dostanie w nowej kolumnie NULL i przywrócenie się nie uda.
+
+Testy: `pnpm test:kosz` w `apps/panel` — warstwa panelu na atrapie (komunikaty,
+kolejność czyszczenia, tylko pliki z katalogu oferty, źródła: oba „Usuń" idą
+do kosza, użytkownik z sesji, token crona przed czymkolwiek) i funkcje SQL na
+jednorazowym Postgresie (`supabase/tests/kosz.sql`: przeniesienie, przywrócenie
+„bit w bit", widoczność, konflikt linku, czyszczenie po 30 dniach, uprawnienia).
 
 ---
 

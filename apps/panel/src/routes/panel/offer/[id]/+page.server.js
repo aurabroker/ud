@@ -1,8 +1,9 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { createAdminClient } from '$lib/server/supabase.js';
 import { klienciWidoczni } from '$lib/server/widocznosc.js';
-import { sendOfferToClient, deleteOffer, deleteOfferDocument, addDocumentsToOffer, refreshOfferDocuments, addAttachmentsToOffer, oznaczKupiona, ustawArchiwum, historiaWysylek } from '$lib/server/offers.js';
+import { sendOfferToClient, deleteOfferDocument, addDocumentsToOffer, refreshOfferDocuments, addAttachmentsToOffer, oznaczKupiona, ustawArchiwum, historiaWysylek } from '$lib/server/offers.js';
 import { clientBaseUrl } from '$lib/server/appUrl.js';
+import { przeniesDoKosza } from '$lib/server/kosz.js';
 
 export async function load({ params, locals }) {
   const { user } = await locals.safeGetSession();
@@ -169,14 +170,16 @@ export const actions = {
     }
   },
 
+  // „Usuń" przenosi do kosza na 30 dni (od 13.10.2026). Twarde deleteOffer
+  // zostało tylko do sprzątania po nieudanym utworzeniu oferty.
   delete: async ({ params, locals }) => {
     const { user } = await locals.safeGetSession();
     if (!user) throw redirect(303, '/login');
     try {
-      await deleteOffer(params.id);
+      await przeniesDoKosza(createAdminClient(), params.id, user.id);
     } catch (e) {
       return fail(400, { error: e?.message || 'Błąd usuwania' });
     }
-    throw redirect(303, '/panel');
+    throw redirect(303, '/panel?usunieto=1');
   }
 };

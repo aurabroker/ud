@@ -19,7 +19,9 @@
     "test:leady": "node scripts/test-leady-model.mjs && node scripts/test-leady-sql.mjs && node scripts/test-leady-api.mjs && playwright test",
     "test:sms": "node scripts/test-sms-oferta.mjs",
     "test:przypomnienia": "node scripts/test-przypomnienia-ofert.mjs && node scripts/test-przypomnienia-sql.mjs",
-    "test:przypomnienia-sql": "node scripts/test-przypomnienia-sql.mjs"
+    "test:przypomnienia-sql": "node scripts/test-przypomnienia-sql.mjs",
+    "test:kosz": "node scripts/test-kosz.mjs && node scripts/test-kosz-sql.mjs",
+    "test:kosz-sql": "node scripts/test-kosz-sql.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",

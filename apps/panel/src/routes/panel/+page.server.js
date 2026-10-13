@@ -1,5 +1,7 @@
 import { fail, redirect } from '@sveltejs/kit';
-import { deleteOffer, refreshOfferDocuments } from '$lib/server/offers.js';
+import { refreshOfferDocuments } from '$lib/server/offers.js';
+import { createAdminClient } from '$lib/server/supabase.js';
+import { przeniesDoKosza, listaKosza } from '$lib/server/kosz.js';
 
 export async function load({ locals, url }) {
   // Archiwum jest osobnym widokiem, nie filtrem domyślnym: sprawy zamknięte
@@ -25,7 +27,17 @@ export async function load({ locals, url }) {
     .eq('source', 'pdf_import')
     .not('archived_at', 'is', null);
 
-  return { offers: offers || [], archiwum, wArchiwum: wArchiwum || 0 };
+  // Licznik kosza przy przełączniku. Awaria (np. brak migracji) nie może
+  // zablokować listy ofert — wtedy po prostu bez licznika.
+  const { user } = await locals.safeGetSession();
+  const wKoszu = user
+    ? await listaKosza(createAdminClient(), user.id).then((l) => l.length, () => null)
+    : null;
+
+  return {
+    offers: offers || [], archiwum, wArchiwum: wArchiwum || 0, wKoszu,
+    usunieto: url.searchParams.get('usunieto') === '1'
+  };
 }
 
 export const actions = {
@@ -62,13 +74,14 @@ export const actions = {
     return { refreshedAll: { ok, total: (offers || []).length, reparsed, docs, addedOwu, errors: errors.slice(0, 20) } };
   },
 
+  // „Usuń" przenosi do kosza na 30 dni (od 13.10.2026).
   delete: async ({ request, locals }) => {
     const { user } = await locals.safeGetSession();
     if (!user) throw redirect(303, '/login');
     const form = await request.formData();
     const id = String(form.get('id') || '');
     try {
-      await deleteOffer(id);
+      await przeniesDoKosza(createAdminClient(), id, user.id);
       return { deleted: true };
     } catch (e) {
       return fail(400, { error: e?.message || 'Błąd usuwania' });
