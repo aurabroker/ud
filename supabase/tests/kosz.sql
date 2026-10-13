@@ -56,7 +56,8 @@ declare
   bart  constant uuid := 'a0000000-0000-0000-0000-0000000000b2';
   adm   constant uuid := 'a0000000-0000-0000-0000-00000000000a';
   niea  constant uuid := 'a0000000-0000-0000-0000-0000000000c3';
-  o uuid; o2 uuid; r jsonb; k public.ud_offers_kosz%rowtype; przed jsonb; po jsonb;
+  usun  constant uuid := 'a0000000-0000-0000-0000-0000000000d4';   -- konto do usunięcia z auth.users
+  o uuid; o2 uuid; o5 uuid; r jsonb; k public.ud_offers_kosz%rowtype; przed jsonb; po jsonb;
   v_lead uuid; v_wersja int;
 begin
   -- ── Przeniesienie do kosza ───────────────────────────────────────────────
@@ -161,6 +162,16 @@ begin
     public.ud_oferta_z_kosza((select id from public.ud_offers_kosz where offer_id = o), ala)->>'status' = 'konflikt_linku'
     and exists (select 1 from public.ud_offers_kosz where offer_id = o));
 
+  -- Konto właściciela usunięte w Supabase, gdy oferta leżała w koszu.
+  o5 := tk.oferta('00005');
+  update public.ud_offers set user_id = usun where id = o5;
+  r := public.ud_oferta_do_kosza(o5, adm);
+  delete from auth.users where id = usun;
+  r := public.ud_oferta_z_kosza((select id from public.ud_offers_kosz where offer_id = o5), adm);
+  perform tk.sprawdz('właściciel usunięty z auth.users — przywrócenie ok, oferta bez właściciela (jak ON DELETE SET NULL)',
+    r->>'status' = 'ok' and (select user_id is null from public.ud_offers where id = o5)
+    and exists (select 1 from public.ud_offer_documents where offer_id = o5));
+
   -- ── Termin 30 dni ────────────────────────────────────────────────────────
   update public.ud_offers_kosz set usunieto_at = now() - interval '29 days 23 hours' where offer_id = o2;
   perform tk.sprawdz('29 dni i 23 godziny — jeszcze na liście', exists (select 1 from public.ud_kosz_ofert_lista(ala) x where x.offer_id = o2));
@@ -189,6 +200,18 @@ begin
   perform tk.sprawdz('istniejąca oferta o tym id — wpis NIE do czyszczenia', not exists (select 1 from public.ud_kosz_ofert_do_wyczyszczenia() x where x.offer_id = o));
   perform tk.sprawdz('… i nie da się jej przywrócić drugi raz (po terminie i zajęty)',
     public.ud_oferta_z_kosza((select id from public.ud_offers_kosz where offer_id = o), adm)->>'status' = 'po_terminie');
+  -- Ta odtworzona oferta trafia do kosza drugi raz: nowa kopia zastępuje
+  -- starą, a pliki starej zostają do wyczyszczenia.
+  r := public.ud_oferta_do_kosza(o, adm);
+  perform tk.sprawdz('oferta z wpisem w koszu usuwa się drugi raz (nie blokuje jej unique offer_id)',
+    r->>'status' = 'ok' and not exists (select 1 from public.ud_offers where id = o));
+  select * into k from public.ud_offers_kosz where offer_id = o;
+  perform tk.sprawdz('… jeden wpis, świeży, niezajęty, z nową kopią',
+    (select count(*) from public.ud_offers_kosz where offer_id = o) = 1
+    and k.czyszczenie_od is null and k.usunieto_at > now() - interval '1 minute'
+    and k.oferta->>'name' = 'odtworzona' and jsonb_array_length(k.dokumenty) = 0);
+  perform tk.sprawdz('… a pliki starego wpisu zostają na liście do czyszczenia',
+    array_length(k.pliki_storage, 1) = 3);
 
   -- ── Uprawnienia ──────────────────────────────────────────────────────────
   perform tk.sprawdz('anon/authenticated nie wywołają żadnej funkcji kosza',
@@ -206,8 +229,8 @@ begin
   perform tk.sprawdz('tabela kosza: RLS włączone, bez polityk, bez dostępu dla anon/authenticated',
     (select relrowsecurity from pg_class where oid = 'public.ud_offers_kosz'::regclass)
     and not exists (select 1 from pg_policies where tablename = 'ud_offers_kosz')
-    and not has_table_privilege('authenticated', 'public.ud_offers_kosz', 'select')
-    and not has_table_privilege('anon', 'public.ud_offers_kosz', 'select'));
+    and not has_table_privilege('authenticated', 'public.ud_offers_kosz', 'select, insert, update, delete, truncate')
+    and not has_table_privilege('anon', 'public.ud_offers_kosz', 'select, insert, update, delete, truncate'));
   perform tk.sprawdz('zadanie crona: co godzinę o :17, włączone',
     exists (select 1 from cron.job where jobname = 'kosz-ofert-czyszczenie' and schedule = '17 * * * *' and active));
 end $$;

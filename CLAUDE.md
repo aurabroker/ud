@@ -1588,14 +1588,38 @@ Dodając do tabel ofert kolumnę NOT NULL, pamiętaj o koszu: przywrócenie
 wstawia wiersze przez `jsonb_populate_record(set)`, więc kopia sprzed zmiany
 dostanie w nowej kolumnie NULL i przywrócenie się nie uda.
 
+Dwa przypadki brzegowe, które migracja obsługuje (przegląd z 13.10.2026 na
+schemacie produkcji):
+
+- **Konto właściciela usunięte w panelu Supabase**, gdy oferta leży w koszu:
+  `ud_offers.user_id` ma na produkcji klucz do `auth.users` z `ON DELETE SET
+  NULL`, więc przywrócenie zeruje `user_id`, jak baza zrobiłaby to żywej
+  ofercie — zamiast padać na kluczu obcym. Ofertę bez właściciela widzi
+  administrator.
+- **Oferta wstawiona ręcznie z powrotem z tym samym id** (SQL Editor), gdy jej
+  wpis wciąż jest w koszu: ponowne „Usuń" zastępuje stary wpis nowym i dopisuje
+  jego pliki do listy czyszczenia. Wcześniej `unique(offer_id)` blokował
+  usunięcie, a stary wpis z danymi klienta nie znikał nigdy.
+
+**Panel v.0.70 poszedł na produkcję przed migracją** (13.10.2026): push na
+gałąź roboczą wdrożył `udappnew` od razu, a migracja czekała na wklejenie.
+Bez funkcji w bazie „Usuń" kończy się błędem i nic nie znika — od v.0.71 po
+polsku („Kosz ofert nie jest jeszcze włączony w bazie — nic nie zostało
+usunięte…"), wcześniej surowym `PGRST202`. Kolejność „baza, potem panel"
+trzeba pilnować **przed pushem**, nie przed scaleniem.
+
 Testy: `pnpm test:kosz` w `apps/panel` — warstwa panelu na atrapie (komunikaty,
-kolejność czyszczenia, tylko pliki z katalogu oferty, źródła: oba „Usuń" idą
-do kosza, użytkownik z sesji, token crona przed czymkolwiek) i funkcje SQL na
-jednorazowym Postgresie (`supabase/tests/kosz.sql`, 47 przypadków:
-przeniesienie, przywrócenie „bit w bit", kto usuwa i kto widzi, termin 30 dni,
-zajęcie przez czyszczenie, konflikt linku, uprawnienia). Bramka tokenu crona
-jest wspólna (`src/lib/server/cronBramka.js`, przypomnienia i kosz) i sprawdzana
-zachowaniem: przepuszcza tylko `true` z bazy.
+także brak funkcji w bazie, kolejność czyszczenia, tylko pliki z katalogu
+oferty, źródła: oba „Usuń" idą do kosza, użytkownik z sesji, token crona przed
+czymkolwiek) i funkcje SQL na jednorazowym Postgresie (`supabase/tests/kosz.sql`,
+51 przypadków: przeniesienie, przywrócenie „bit w bit", kto usuwa i kto widzi,
+termin 30 dni, zajęcie przez czyszczenie, konflikt linku, usunięty właściciel,
+ponowne usunięcie odtworzonej oferty, uprawnienia). Atrapa
+(`supabase/tests/kosz-stub.sql`) ma klucz `user_id → auth.users` i domyślne
+uprawnienia do nowych tabel jak produkcja — bez nich brak `revoke` w migracji
+przechodził na zielono. Bramka tokenu crona jest wspólna
+(`src/lib/server/cronBramka.js`, przypomnienia i kosz) i sprawdzana zachowaniem:
+przepuszcza tylko `true` z bazy.
 
 ---
 

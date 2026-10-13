@@ -73,8 +73,17 @@ for (const [status, fragment] of [['brak_oferty', 'nie możesz'], ['brak_uprawni
   check(`do kosza: status ${status} → zdanie dla agenta`, (await rzuca(() => przeniesDoKosza(sb, 'O1', 'U1')))?.includes(fragment), true);
 }
 {
-  const { sb } = atrapa({ rpc: { ud_oferta_do_kosza: { data: null, error: { message: 'function does not exist' } } } });
-  check('do kosza: błąd bazy (np. brak migracji) → wyjątek, nic po cichu', /function does not exist/.test(await rzuca(() => przeniesDoKosza(sb, 'O1', 'U1'))), true);
+  const { sb } = atrapa({ rpc: { ud_oferta_do_kosza: { data: null, error: { message: 'permission denied for table ud_offers' } } } });
+  check('do kosza: błąd bazy → wyjątek z treścią błędu, nic po cichu', /Kosz: permission denied/.test(await rzuca(() => przeniesDoKosza(sb, 'O1', 'U1'))), true);
+}
+// Panel wdrożony przed migracją (13.10.2026): PostgREST odpowiada PGRST202
+// po angielsku. Agent ma przeczytać, że oferta NIE zniknęła.
+for (const [nazwa, fn] of [['do kosza', (sb) => przeniesDoKosza(sb, 'O1', 'U1')], ['przywrócenie', (sb) => przywrocZKosza(sb, 'K1', 'U1')], ['lista', (sb) => listaKosza(sb, 'U1')]]) {
+  const brak = { data: null, error: { code: 'PGRST202', message: 'Could not find the function public.x(p_user) in the schema cache' } };
+  const { sb } = atrapa({ rpc: { ud_oferta_do_kosza: brak, ud_oferta_z_kosza: brak, ud_kosz_ofert_lista: brak } });
+  const tekst = await rzuca(() => fn(sb));
+  check(`${nazwa}: brak funkcji w bazie (PGRST202) → po polsku, „nic nie zostało usunięte"`,
+    [/nie jest jeszcze włączony/.test(tekst), /nic nie zostało usunięte/.test(tekst), /schema cache/.test(tekst)], [true, true, false]);
 }
 {
   const { sb, log } = atrapa({ rpc: { ud_oferta_z_kosza: { data: { status: 'ok', offer_id: 'O1' }, error: null } } });
@@ -193,6 +202,8 @@ console.log('Źródła');
   const kosz = zrodlo('routes/panel/kosz/+page.server.js');
   check('kosz: przywrócenie z użytkownikiem z sesji', /przywrocZKosza\(createAdminClient\(\), [\w.]+, user\.id\)/.test(kosz), true);
   check('kosz: bez sesji — logowanie', (kosz.match(/redirect\(303, '\/login'\)/g) || []).length, 2);
+  const koszWidok = zrodlo('routes/panel/kosz/+page.svelte');
+  check('kosz: przy błędzie wczytania NIE pisze „Kosz jest pusty"', /\{#if !data\.blad\}[^{]*Kosz jest pusty/.test(koszWidok), true);
   const cron = zrodlo('routes/api/cron/kosz-ofert/+server.js');
   const iToken = cron.indexOf('await sprawdzTokenCrona(sb, token)');
   check('cron: bramka przed czyszczeniem, odmowa kończy wywołanie', iToken > 0 && iToken < cron.indexOf('wyczyscKosz(')

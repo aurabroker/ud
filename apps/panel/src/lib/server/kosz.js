@@ -30,12 +30,23 @@ function blad(status) {
 }
 
 /**
+ * Błąd wywołania funkcji SQL. Brak funkcji (PGRST202 — panel wdrożony przed
+ * migracją kosza) mówi wprost, że oferta NIE zniknęła; reszta idzie dosłownie.
+ */
+function bladBazy(error) {
+  if (error?.code === 'PGRST202' || /Could not find the function/i.test(error?.message || '')) {
+    return new Error('Kosz ofert nie jest jeszcze włączony w bazie — nic nie zostało usunięte ani przywrócone. Zgłoś to administratorowi.');
+  }
+  return new Error('Kosz: ' + (error?.message || error));
+}
+
+/**
  * Przenosi ofertę do kosza. Klient od razu traci dostęp do linku.
  * @returns {Promise<{ koszId: string, offerId: string }>}
  */
 export async function przeniesDoKosza(sb, offerId, userId) {
   const { data, error } = await sb.rpc('ud_oferta_do_kosza', { p_offer: offerId, p_user: userId });
-  if (error) throw new Error('Kosz: ' + error.message);
+  if (error) throw bladBazy(error);
   if (data?.status !== 'ok') throw blad(data?.status);
   return { koszId: data.kosz_id, offerId: data.offer_id };
 }
@@ -46,7 +57,7 @@ export async function przeniesDoKosza(sb, offerId, userId) {
  */
 export async function przywrocZKosza(sb, koszId, userId) {
   const { data, error } = await sb.rpc('ud_oferta_z_kosza', { p_kosz: koszId, p_user: userId, p_dni: KOSZ_DNI });
-  if (error) throw new Error('Kosz: ' + error.message);
+  if (error) throw bladBazy(error);
   if (data?.status !== 'ok') throw blad(data?.status);
   return { offerId: data.offer_id };
 }
@@ -54,7 +65,7 @@ export async function przywrocZKosza(sb, koszId, userId) {
 /** Wpisy w koszu widoczne dla użytkownika (właściciel, administrator, usuwający). */
 export async function listaKosza(sb, userId) {
   const { data, error } = await sb.rpc('ud_kosz_ofert_lista', { p_user: userId, p_dni: KOSZ_DNI });
-  if (error) throw new Error('Kosz: ' + error.message);
+  if (error) throw bladBazy(error);
   return data || [];
 }
 

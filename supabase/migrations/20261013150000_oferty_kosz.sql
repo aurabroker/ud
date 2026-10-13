@@ -74,6 +74,7 @@ as $fn$
 declare
   o public.ud_offers%rowtype;
   v_kosz uuid;
+  v_stare text[];
 begin
   if not exists (select 1 from public.ud_user_profiles p
                   where p.id = p_user and coalesce(p.active, true)) then
@@ -86,6 +87,14 @@ begin
   if not found or not public.ud_leady_widzi(p_user, o.user_id) then
     return jsonb_build_object('status', 'brak_oferty');
   end if;
+
+  -- Wpis z poprzedniego usunięcia tej samej oferty (wstawionej potem ręcznie
+  -- z tym samym id): nowa kopia go zastępuje, a jego pliki zostają na liście
+  -- do czyszczenia. Bez tego unique(offer_id) blokowałby usunięcie na zawsze,
+  -- a stary wpis z danymi klienta nigdy by nie zniknął (czyszczenie pomija
+  -- wpisy, których oferta istnieje).
+  delete from public.ud_offers_kosz where offer_id = o.id
+    returning pliki_storage into v_stare;
 
   insert into public.ud_offers_kosz (
     offer_id, offer_number, client_name, wlasciciel_id, usunieto_przez,
@@ -108,9 +117,10 @@ begin
                 from public.ud_leady l
                where l.sprzedaz_wariant_id in (select d.id from public.ud_offer_documents d
                                                 where d.offer_id = o.id)), '[]'::jsonb),
-    coalesce((select array_agg(f.storage_path order by f.storage_path)
-                from public.ud_offer_files f
-               where f.offer_id = o.id and f.storage_bucket = 'ud-offers'), '{}')
+    coalesce((select array_agg(distinct p order by p)
+                from unnest(coalesce(v_stare, '{}'::text[])
+                            || array(select f.storage_path from public.ud_offer_files f
+                                      where f.offer_id = o.id and f.storage_bucket = 'ud-offers')) p), '{}')
   returning id into v_kosz;
 
   -- Reszta jak przy dawnym usuwaniu: FK ON DELETE CASCADE / SET NULL.
@@ -155,6 +165,14 @@ begin
   if k.oferta->>'share_token' is not null
      and exists (select 1 from public.ud_offers where share_token = k.oferta->>'share_token') then
     return jsonb_build_object('status', 'konflikt_linku');
+  end if;
+
+  -- Konto właściciela usunięte w Supabase, gdy oferta leżała w koszu: żywej
+  -- ofercie klucz ud_offers_user_id_fkey (ON DELETE SET NULL) wyzerowałby
+  -- user_id — przywrócenie robi to samo, zamiast padać na kluczu obcym.
+  if k.oferta->>'user_id' is not null
+     and not exists (select 1 from auth.users u where u.id = (k.oferta->>'user_id')::uuid) then
+    k.oferta := jsonb_set(k.oferta, '{user_id}', 'null'::jsonb);
   end if;
 
   insert into public.ud_offers

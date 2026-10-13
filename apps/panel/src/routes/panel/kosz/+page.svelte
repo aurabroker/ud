@@ -36,7 +36,7 @@
 
 <div class="card">
   {#if data.wpisy.length === 0}
-    <div class="card-pad muted" style="text-align:center;padding:3rem 1rem;">Kosz jest pusty.</div>
+    {#if !data.blad}<div class="card-pad muted" style="text-align:center;padding:3rem 1rem;">Kosz jest pusty.</div>{/if}
   {:else}
     <table>
       <thead>

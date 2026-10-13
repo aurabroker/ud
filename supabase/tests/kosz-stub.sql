@@ -38,3 +38,24 @@ create table if not exists public.ud_offer_pins (
   verified_at  timestamptz,
   created_at   timestamptz not null default now()
 );
+
+-- Konta Supabase: na produkcji ud_offers.user_id → auth.users ON DELETE SET
+-- NULL. Bez tego klucza test nie widzi przywrócenia oferty, której właściciela
+-- usunięto w panelu Supabase w czasie leżenia w koszu.
+create schema if not exists auth;
+create table if not exists auth.users (id uuid primary key);
+insert into auth.users (id) values
+  ('a0000000-0000-0000-0000-00000000000a'),
+  ('a0000000-0000-0000-0000-0000000000a1'),
+  ('a0000000-0000-0000-0000-0000000000b2'),
+  ('a0000000-0000-0000-0000-0000000000c3'),
+  ('a0000000-0000-0000-0000-0000000000d4')
+on conflict do nothing;
+alter table public.ud_offers
+  add constraint ud_offers_user_id_fkey foreign key (user_id) references auth.users(id) on delete set null;
+
+-- Domyślne uprawnienia do NOWYCH tabel jak na produkcji (pg_default_acl dla
+-- schematu public, sprawdzone 13.10.2026): anon i authenticated dostają
+-- wszystko. Bez tego asercja „bez dostępu dla anon/authenticated" przechodzi
+-- także wtedy, gdy migracja zapomni o revoke.
+alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
