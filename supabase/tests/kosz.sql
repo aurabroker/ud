@@ -72,7 +72,10 @@ begin
   select l.id, l.wersja into v_lead, v_wersja from public.ud_leady l
     join public.ud_offer_documents d on d.id = l.sprzedaz_wariant_id where d.offer_id = o;
 
-  r := public.ud_oferta_do_kosza(o, bart);   -- usuwa agent, który NIE jest właścicielem
+  r := public.ud_oferta_do_kosza(o, bart);   -- agent, który NIE jest właścicielem
+  perform tk.sprawdz('cudzej oferty agent nie usunie (brak_oferty), oferta zostaje',
+    r->>'status' = 'brak_oferty' and exists (select 1 from public.ud_offers where id = o));
+  r := public.ud_oferta_do_kosza(o, adm);    -- administrator usuwa ofertę Ali
   perform tk.sprawdz('do kosza: status ok', r->>'status' = 'ok');
   perform tk.sprawdz('oferty nie ma w ud_offers (link klienta przestaje działać)', not exists (select 1 from public.ud_offers where id = o));
   perform tk.sprawdz('warianty, pliki, PIN-y, pytania i wysyłki zniknęły jak przy usunięciu',
@@ -86,7 +89,7 @@ begin
   select * into k from public.ud_offers_kosz where offer_id = o;
   perform tk.sprawdz('wpis w koszu: numer, klient, właściciel, kto usunął',
     k.offer_number = 'UD/2026/AL/00001/Klient' and k.client_name = 'Klient 00001'
-    and k.wlasciciel_id = ala and k.usunieto_przez = bart);
+    and k.wlasciciel_id = ala and k.usunieto_przez = adm and k.czyszczenie_od is null);
   perform tk.sprawdz('kopia: 2 warianty, 4 pliki, PIN, pytanie, 2 wysyłki, lead',
     jsonb_array_length(k.dokumenty) = 2 and jsonb_array_length(k.pliki) = 4 and jsonb_array_length(k.piny) = 1
     and jsonb_array_length(k.pytania) = 1 and jsonb_array_length(k.wysylki) = 2 and jsonb_array_length(k.leady) = 1);
@@ -103,16 +106,17 @@ begin
 
   -- ── Widoczność ───────────────────────────────────────────────────────────
   perform tk.sprawdz('właścicielka widzi wpis', exists (select 1 from public.ud_kosz_ofert_lista(ala) x where x.offer_id = o));
-  perform tk.sprawdz('usuwający widzi wpis (cofnie własną pomyłkę)', exists (select 1 from public.ud_kosz_ofert_lista(bart) x where x.offer_id = o));
-  perform tk.sprawdz('administrator widzi wpis', exists (select 1 from public.ud_kosz_ofert_lista(adm) x where x.offer_id = o));
+  perform tk.sprawdz('administrator (usuwający) widzi wpis', exists (select 1 from public.ud_kosz_ofert_lista(adm) x where x.offer_id = o));
+  perform tk.sprawdz('inny agent nie widzi cudzego wpisu', not exists (select 1 from public.ud_kosz_ofert_lista(bart) x where x.offer_id = o));
   perform tk.sprawdz('konto nieaktywne nie widzi nic', not exists (select 1 from public.ud_kosz_ofert_lista(niea)));
   perform tk.sprawdz('lista: nazwy, liczba wariantów, data usunięcia na dobre (+30 dni)',
-    (select x.wlasciciel = 'Agent Ala' and x.usunieto_przez = 'Agent Bartek' and x.wariantow = 2
+    (select x.wlasciciel = 'Agent Ala' and x.usunieto_przez = 'Admin Testowy' and x.wariantow = 2
             and x.usuniecie_na_dobre = k.usunieto_at + interval '30 days' and x.status = 'viewed'
        from public.ud_kosz_ofert_lista(ala) x where x.offer_id = o));
 
-  -- Oferta Ali usunięta przez Alę: Bartek jej nie widzi i nie przywróci.
+  -- Oferta Ali usunięta przez Alę: Ala widzi, Bartek jej nie widzi i nie przywróci.
   r := public.ud_oferta_do_kosza(o2, ala);
+  perform tk.sprawdz('właścicielka usuwa własną ofertę', r->>'status' = 'ok');
   perform tk.sprawdz('cudzy wpis: inny agent go nie widzi', not exists (select 1 from public.ud_kosz_ofert_lista(bart) x where x.offer_id = o2));
   perform tk.sprawdz('cudzy wpis: inny agent nie przywróci (brak_wpisu)',
     public.ud_oferta_z_kosza((select id from public.ud_offers_kosz where offer_id = o2), bart)->>'status' = 'brak_wpisu');
@@ -157,31 +161,46 @@ begin
     public.ud_oferta_z_kosza((select id from public.ud_offers_kosz where offer_id = o), ala)->>'status' = 'konflikt_linku'
     and exists (select 1 from public.ud_offers_kosz where offer_id = o));
 
-  -- ── Czyszczenie po 30 dniach ─────────────────────────────────────────────
+  -- ── Termin 30 dni ────────────────────────────────────────────────────────
+  update public.ud_offers_kosz set usunieto_at = now() - interval '29 days 23 hours' where offer_id = o2;
+  perform tk.sprawdz('29 dni i 23 godziny — jeszcze na liście', exists (select 1 from public.ud_kosz_ofert_lista(ala) x where x.offer_id = o2));
+  perform tk.sprawdz('… i jeszcze nie do czyszczenia', not exists (select 1 from public.ud_kosz_ofert_do_wyczyszczenia() x where x.offer_id = o2));
+  update public.ud_offers_kosz set usunieto_at = now() - interval '30 days 1 minute' where offer_id = o2;
+  perform tk.sprawdz('po terminie — znika z listy', not exists (select 1 from public.ud_kosz_ofert_lista(ala) x where x.offer_id = o2));
+  perform tk.sprawdz('po terminie — przywrócenie odmawia (po_terminie)',
+    public.ud_oferta_z_kosza((select id from public.ud_offers_kosz where offer_id = o2), ala)->>'status' = 'po_terminie');
+
+  -- ── Czyszczenie: zajmuje wpis, zanim panel ruszy pliki ───────────────────
   update public.ud_offers_kosz set usunieto_at = now() - interval '31 days' where offer_id = o;
   perform tk.sprawdz('wpis sprzed 31 dni — do wyczyszczenia, z plikami',
     exists (select 1 from public.ud_kosz_ofert_do_wyczyszczenia() x where x.offer_id = o and array_length(x.pliki_storage, 1) = 3));
-  perform tk.sprawdz('wpis sprzed chwili (oferta 00002) — jeszcze nie',
-    not exists (select 1 from public.ud_kosz_ofert_do_wyczyszczenia() x where x.offer_id = o2));
-  update public.ud_offers_kosz set usunieto_at = now() - interval '29 days 23 hours' where offer_id = o2;
-  perform tk.sprawdz('29 dni i 23 godziny — jeszcze nie', not exists (select 1 from public.ud_kosz_ofert_do_wyczyszczenia() x where x.offer_id = o2));
+  perform tk.sprawdz('zwrócony wpis jest zajęty (czyszczenie_od)',
+    (select czyszczenie_od is not null from public.ud_offers_kosz where offer_id = o));
+  -- Zajęty wpis z terminem cofniętym ręcznie: dalej nie do przywrócenia i niewidoczny.
+  update public.ud_offers_kosz set usunieto_at = now() where offer_id = o;
+  perform tk.sprawdz('zajęty przez czyszczenie — przywrócenie odmawia, nawet przed terminem',
+    public.ud_oferta_z_kosza((select id from public.ud_offers_kosz where offer_id = o), ala)->>'status' = 'po_terminie');
+  perform tk.sprawdz('zajęty przez czyszczenie — znika z listy', not exists (select 1 from public.ud_kosz_ofert_lista(ala) x where x.offer_id = o));
+  update public.ud_offers_kosz set usunieto_at = now() - interval '31 days' where offer_id = o;
+  perform tk.sprawdz('nieudane czyszczenie (wpis został) — następne wywołanie bierze go znowu',
+    exists (select 1 from public.ud_kosz_ofert_do_wyczyszczenia() x where x.offer_id = o));
   -- Oferta o tym samym id istnieje (przywrócona inną drogą) — plików nie wolno ruszać.
   insert into public.ud_offers (id, user_id, name, status) values (o, ala, 'odtworzona', 'draft');
   perform tk.sprawdz('istniejąca oferta o tym id — wpis NIE do czyszczenia', not exists (select 1 from public.ud_kosz_ofert_do_wyczyszczenia() x where x.offer_id = o));
-  perform tk.sprawdz('… i nie da się jej przywrócić drugi raz (oferta_istnieje)',
-    public.ud_oferta_z_kosza((select id from public.ud_offers_kosz where offer_id = o), adm)->>'status' = 'oferta_istnieje');
+  perform tk.sprawdz('… i nie da się jej przywrócić drugi raz (po terminie i zajęty)',
+    public.ud_oferta_z_kosza((select id from public.ud_offers_kosz where offer_id = o), adm)->>'status' = 'po_terminie');
 
   -- ── Uprawnienia ──────────────────────────────────────────────────────────
   perform tk.sprawdz('anon/authenticated nie wywołają żadnej funkcji kosza',
     not has_function_privilege('anon', 'public.ud_oferta_do_kosza(uuid, uuid)', 'execute')
     and not has_function_privilege('authenticated', 'public.ud_oferta_do_kosza(uuid, uuid)', 'execute')
-    and not has_function_privilege('authenticated', 'public.ud_oferta_z_kosza(uuid, uuid)', 'execute')
+    and not has_function_privilege('authenticated', 'public.ud_oferta_z_kosza(uuid, uuid, integer)', 'execute')
     and not has_function_privilege('authenticated', 'public.ud_kosz_ofert_lista(uuid, integer)', 'execute')
     and not has_function_privilege('authenticated', 'public.ud_kosz_ofert_do_wyczyszczenia(integer, integer)', 'execute')
     and not has_function_privilege('authenticated', 'public.ud_kosz_ofert_czyszczenie()', 'execute'));
   perform tk.sprawdz('service_role wywoła przeniesienie, przywrócenie, listę i czyszczenie',
     has_function_privilege('service_role', 'public.ud_oferta_do_kosza(uuid, uuid)', 'execute')
-    and has_function_privilege('service_role', 'public.ud_oferta_z_kosza(uuid, uuid)', 'execute')
+    and has_function_privilege('service_role', 'public.ud_oferta_z_kosza(uuid, uuid, integer)', 'execute')
     and has_function_privilege('service_role', 'public.ud_kosz_ofert_lista(uuid, integer)', 'execute')
     and has_function_privilege('service_role', 'public.ud_kosz_ofert_do_wyczyszczenia(integer, integer)', 'execute'));
   perform tk.sprawdz('tabela kosza: RLS włączone, bez polityk, bez dostępu dla anon/authenticated',
@@ -189,6 +208,6 @@ begin
     and not exists (select 1 from pg_policies where tablename = 'ud_offers_kosz')
     and not has_table_privilege('authenticated', 'public.ud_offers_kosz', 'select')
     and not has_table_privilege('anon', 'public.ud_offers_kosz', 'select'));
-  perform tk.sprawdz('zadanie crona: raz dziennie 03:17 UTC, włączone',
-    exists (select 1 from cron.job where jobname = 'kosz-ofert-czyszczenie' and schedule = '17 3 * * *' and active));
+  perform tk.sprawdz('zadanie crona: co godzinę o :17, włączone',
+    exists (select 1 from cron.job where jobname = 'kosz-ofert-czyszczenie' and schedule = '17 * * * *' and active));
 end $$;

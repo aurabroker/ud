@@ -1,14 +1,15 @@
 /**
  * POST /api/cron/kosz-ofert — usuwa na dobre oferty, które leżą w koszu
- * dłużej niż 30 dni (pliki z kubełka + wpis). Woła pg_cron raz dziennie przez
+ * dłużej niż 30 dni (pliki z kubełka + wpis). Woła pg_cron co godzinę przez
  * ud_kosz_ofert_czyszczenie() (migracja …_oferty_kosz.sql).
  *
- * Bramka jak w /api/cron/przypomnienia-ofert: nagłówek x-cron-token sprawdzany
- * przez edge_cron_token_matches() PRZED pierwszym odczytem. Awaria i
- * przerwanie zostawiają wpis w ud_errors — odpowiedź crona czyta tylko pg_net.
+ * Bramka: sprawdzTokenCrona (x-cron-token z Vaulta) PRZED pierwszym
+ * odczytem. Awaria i przerwanie zostawiają wpis w ud_errors — odpowiedź crona
+ * czyta tylko pg_net.
  */
 import { json } from '@sveltejs/kit';
 import { createAdminClient } from '$lib/server/supabase.js';
+import { sprawdzTokenCrona } from '$lib/server/cronBramka.js';
 import { wyczyscKosz } from '$lib/server/kosz.js';
 
 const ZRODLO = 'kosz-ofert';
@@ -32,13 +33,11 @@ export async function POST({ request }) {
     return json({ ok: false, error: 'brak konfiguracji' }, { status: 503 });
   }
 
-  const { data: zgodny, error: bladTokenu } = await sb.rpc('edge_cron_token_matches', { token });
-  if (bladTokenu) {
-    await zapiszBlad(sb, 'Kosz ofert: nie da się sprawdzić tokenu crona', { blad: bladTokenu.message });
-    return json({ ok: false, error: 'nie da się sprawdzić tokenu' }, { status: 503 });
+  const bramka = await sprawdzTokenCrona(sb, token);
+  if (!bramka.ok) {
+    if (bramka.doDziennika) await zapiszBlad(sb, 'Kosz ofert: nie da się sprawdzić tokenu crona', { blad: bramka.doDziennika });
+    return json({ ok: false, error: bramka.error }, { status: bramka.status });
   }
-  // Zły token bez wpisu w ud_errors — patrz przypomnienia-ofert.
-  if (zgodny !== true) return json({ ok: false, error: 'zły token' }, { status: 401 });
 
   try {
     const wynik = await wyczyscKosz({ sb });

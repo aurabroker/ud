@@ -9,6 +9,8 @@
  */
 import { readFileSync, readdirSync } from 'node:fs';
 import { przeniesDoKosza, przywrocZKosza, listaKosza, wyczyscKosz, KOSZ_DNI, KUBELEK_OFERT } from '../src/lib/server/kosz.js';
+import { sprawdzTokenCrona } from '../src/lib/server/cronBramka.js';
+import { potwierdz } from '../src/lib/potwierdz.js';
 
 let failures = 0;
 function check(label, actual, expected) {
@@ -21,7 +23,7 @@ async function rzuca(fn) {
 }
 
 /** Atrapa: odpowiedzi RPC po nazwie, awarie Storage/delete, dziennik wywołań. */
-function atrapa({ rpc = {}, awariaPlikow = null, awariaWpisu = null } = {}) {
+function atrapa({ rpc = {}, awariaPlikow = null, awariaWpisu = null, juzUsuniete = [] } = {}) {
   const log = [];
   const sb = {
     async rpc(nazwa, arg) {
@@ -43,9 +45,14 @@ function atrapa({ rpc = {}, awariaPlikow = null, awariaWpisu = null } = {}) {
       return {
         delete() {
           return {
-            async eq(k, v) {
-              log.push(['delete', tabela, k, v]);
-              return { error: awariaWpisu === v ? { message: 'baza padła' } : null };
+            eq(k, v) {
+              return {
+                async select() {
+                  log.push(['delete', tabela, k, v]);
+                  if (awariaWpisu === v) return { data: null, error: { message: 'baza padła' } };
+                  return { data: juzUsuniete.includes(v) ? [] : [{ id: v }], error: null };
+                },
+              };
             },
           };
         },
@@ -61,7 +68,7 @@ console.log('Przeniesienie i przywrócenie');
   check('do kosza: zwraca id wpisu i oferty', await przeniesDoKosza(sb, 'O1', 'U1'), { koszId: 'K1', offerId: 'O1' });
   check('… z użytkownikiem i ofertą w argumentach SQL', log[0], ['rpc', 'ud_oferta_do_kosza', { p_offer: 'O1', p_user: 'U1' }]);
 }
-for (const [status, fragment] of [['brak_oferty', 'już nie ma'], ['brak_uprawnien', 'nie może'], ['xyz', 'Nieoczekiwany']]) {
+for (const [status, fragment] of [['brak_oferty', 'nie możesz'], ['brak_uprawnien', 'nie może'], ['xyz', 'Nieoczekiwany']]) {
   const { sb } = atrapa({ rpc: { ud_oferta_do_kosza: { data: { status }, error: null } } });
   check(`do kosza: status ${status} → zdanie dla agenta`, (await rzuca(() => przeniesDoKosza(sb, 'O1', 'U1')))?.includes(fragment), true);
 }
@@ -72,9 +79,9 @@ for (const [status, fragment] of [['brak_oferty', 'już nie ma'], ['brak_uprawni
 {
   const { sb, log } = atrapa({ rpc: { ud_oferta_z_kosza: { data: { status: 'ok', offer_id: 'O1' }, error: null } } });
   check('przywrócenie: zwraca id oferty (to samo co przed usunięciem)', await przywrocZKosza(sb, 'K1', 'U1'), { offerId: 'O1' });
-  check('… argumenty SQL', log[0], ['rpc', 'ud_oferta_z_kosza', { p_kosz: 'K1', p_user: 'U1' }]);
+  check('… argumenty SQL (z terminem 30 dni)', log[0], ['rpc', 'ud_oferta_z_kosza', { p_kosz: 'K1', p_user: 'U1', p_dni: 30 }]);
 }
-for (const [status, fragment] of [['brak_wpisu', 'nie ma w koszu'], ['oferta_istnieje', 'już jest'], ['konflikt_linku', 'ten sam link']]) {
+for (const [status, fragment] of [['brak_wpisu', 'nie ma w koszu'], ['oferta_istnieje', 'już jest'], ['konflikt_linku', 'ten sam link'], ['po_terminie', '30 dni']]) {
   const { sb } = atrapa({ rpc: { ud_oferta_z_kosza: { data: { status }, error: null } } });
   check(`przywrócenie: status ${status} → zdanie dla agenta`, (await rzuca(() => przywrocZKosza(sb, 'K1', 'U1')))?.includes(fragment), true);
 }
@@ -93,7 +100,8 @@ const wpis = (id, offer, pliki) => ({ id, offer_id: offer, pliki_storage: pliki 
   ], error: null } } });
   const w = await wyczyscKosz({ sb });
   check('dwa wpisy: pliki pierwszego, oba wpisy usunięte', [w.kandydatow, w.usunieto, w.plikow, w.przerwano], [2, 2, 2, undefined]);
-  check('kolejność: najpierw pliki, potem wpis', log.slice(1).map((l) => l[0] + ':' + (l[3] ?? l[2].join?.(',') ?? '')), ['remove:O1/a.pdf,O1/podsumowanie.pdf', 'delete:K1', 'delete:K2']);
+  check('kolejność: najpierw pliki, potem wpis — z tabeli ud_offers_kosz', log.slice(1),
+    [['remove', 'ud-offers', ['O1/a.pdf', 'O1/podsumowanie.pdf']], ['delete', 'ud_offers_kosz', 'id', 'K1'], ['delete', 'ud_offers_kosz', 'id', 'K2']]);
   check('pliki z kubełka ud-offers, okres 30 dni w zapytaniu', [log[1][1], log[0][2].p_dni], ['ud-offers', 30]);
 }
 {
@@ -118,8 +126,59 @@ const wpis = (id, offer, pliki) => ({ id, offer_id: offer, pliki_storage: pliki 
   check('awaria usunięcia wpisu — przerwane, licznik bez niego', [w.usunieto, /K1/.test(w.przerwano)], [0, true]);
 }
 {
+  const { sb } = atrapa({ juzUsuniete: ['K1'], rpc: { ud_kosz_ofert_do_wyczyszczenia: { data: [wpis('K1', 'O1', [])], error: null } } });
+  const w = await wyczyscKosz({ sb });
+  check('wpis usunięty w międzyczasie (0 wierszy) — nie liczony jako usunięty', [w.usunieto, w.przerwano], [0, undefined]);
+}
+{
   const { sb } = atrapa({ rpc: { ud_kosz_ofert_do_wyczyszczenia: { data: null, error: { message: 'x' } } } });
   check('błąd odczytu kandydatów — wyjątek', Boolean(await rzuca(() => wyczyscKosz({ sb }))), true);
+}
+
+console.log('Bramka crona (cronBramka.js)');
+{
+  const bramka = (odp) => sprawdzTokenCrona({ rpc: async () => { if (odp === 'wyjatek') throw new Error('sieć'); return odp; } }, 'tok');
+  check('true z bazy — przepuszcza', await bramka({ data: true, error: null }), { ok: true });
+  for (const [opis, odp] of [['false', { data: false, error: null }], ['null', { data: null, error: null }], ['brak danych', {}], ['napis "true"', { data: 'true', error: null }], ['1', { data: 1, error: null }]]) {
+    const r = await bramka(odp);
+    check(`${opis} — 401, bez wpisu do dziennika`, [r.ok, r.status, r.doDziennika], [false, 401, undefined]);
+  }
+  const blad = await bramka({ data: null, error: { message: 'baza nie odpowiada' } });
+  check('błąd bazy — 503 i treść do ud_errors', [blad.ok, blad.status, blad.doDziennika], [false, 503, 'baza nie odpowiada']);
+  const wyjatek = await bramka('wyjatek');
+  check('wyjątek klienta — 503', [wyjatek.ok, wyjatek.status], [false, 503]);
+  check('pusty token — 401 bez pytania bazy', await sprawdzTokenCrona({ rpc: async () => { throw new Error('nie wolno pytać'); } }, ''), { ok: false, status: 401, error: 'brak tokenu' });
+}
+
+console.log('Potwierdzenie przed wysłaniem (potwierdz.js)');
+{
+  const proba = (odpowiedz, dalej) => {
+    let anulowano = false;
+    const poprzedni = globalThis.confirm;
+    globalThis.confirm = () => odpowiedz;
+    try {
+      const zwrot = potwierdz('Na pewno?', dalej)({ cancel: () => { anulowano = true; }, formData: null });
+      return { anulowano, zwrot };
+    } finally { globalThis.confirm = poprzedni; }
+  };
+  let wolano = false;
+  const anuluj = proba(false, () => { wolano = true; return 'cb'; });
+  check('„Anuluj" — cancel() i NIC dalej (formularz nie idzie)', [anuluj.anulowano, wolano, anuluj.zwrot], [true, false, undefined]);
+  const ok = proba(true, () => 'cb');
+  check('„OK" — bez cancel, zwraca callback z argumentu', [ok.anulowano, ok.zwrot], [false, 'cb']);
+  check('„OK" bez drugiego argumentu — domyślne zachowanie enhance', proba(true).zwrot, undefined);
+
+  // Wzorzec, który przepuszczał „Anuluj": onsubmit z confirm przy use:enhance.
+  const svelte = [];
+  const zbierz = (kat) => { for (const e of readdirSync(new URL(kat, import.meta.url), { withFileTypes: true })) {
+    const sc = kat + e.name + (e.isDirectory() ? '/' : '');
+    if (e.isDirectory()) zbierz(sc); else if (e.name.endsWith('.svelte')) svelte.push(sc);
+  } };
+  zbierz('../src/');
+  const zle = svelte.filter((p) => /onsubmit=\{[^}]*confirm\(/.test(readFileSync(new URL(p, import.meta.url), 'utf8')));
+  check('żaden formularz nie pyta przez onsubmit + confirm (przy use:enhance nie działa)', zle, []);
+  const ilePotw = svelte.reduce((n, p) => n + (readFileSync(new URL(p, import.meta.url), 'utf8').match(/use:enhance=\{potwierdz\(/g) || []).length, 0);
+  check('sześć formularzy pyta przez potwierdz()', ilePotw, 6);
 }
 
 console.log('Źródła');
@@ -135,8 +194,9 @@ console.log('Źródła');
   check('kosz: przywrócenie z użytkownikiem z sesji', /przywrocZKosza\(createAdminClient\(\), [\w.]+, user\.id\)/.test(kosz), true);
   check('kosz: bez sesji — logowanie', (kosz.match(/redirect\(303, '\/login'\)/g) || []).length, 2);
   const cron = zrodlo('routes/api/cron/kosz-ofert/+server.js');
-  const iToken = cron.indexOf("rpc('edge_cron_token_matches'");
-  check('cron: token sprawdzany przed czyszczeniem', iToken > 0 && iToken < cron.indexOf('wyczyscKosz('), true);
+  const iToken = cron.indexOf('await sprawdzTokenCrona(sb, token)');
+  check('cron: bramka przed czyszczeniem, odmowa kończy wywołanie', iToken > 0 && iToken < cron.indexOf('wyczyscKosz(')
+    && /if \(!bramka\.ok\) \{[\s\S]*?return json\([^;]*bramka\.status/.test(cron), true);
   check('cron: przerwanie i wyjątek do ud_errors', /if \(wynik\.przerwano\)[\s\S]*zapiszBlad\(/.test(cron) && /catch \(e\)[\s\S]*zapiszBlad\(/.test(cron.slice(cron.indexOf('wyczyscKosz('))), true);
   check('cron: tylko POST (GET → 405)', /export function GET[\s\S]*status: 405/.test(cron), true);
   const katalog = new URL('../../../supabase/migrations/', import.meta.url);

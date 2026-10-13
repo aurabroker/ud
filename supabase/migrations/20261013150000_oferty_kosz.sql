@@ -14,13 +14,19 @@
 --     podpisuje panel tylko dla istniejących ofert).
 --   * ud_oferta_z_kosza() wstawia ofertę z powrotem z TYM SAMYM id
 --     i share_token — link z maila do klienta znowu działa.
---   * Po 30 dniach panel (cron, /api/cron/kosz-ofert) usuwa pliki z kubełka
---     i wpis z kosza (ud_kosz_ofert_do_wyczyszczenia). To jest usunięcie
---     danych osobowych na dobre — dlatego cron, nie „kiedyś".
+--   * Po 30 dniach panel (cron co godzinę, /api/cron/kosz-ofert) usuwa pliki
+--     z kubełka i wpis z kosza. To jest usunięcie danych osobowych na dobre —
+--     dlatego cron, nie „kiedyś".
+--   * Wpis po terminie NIE da się przywrócić i znika z listy. Inaczej
+--     przywrócenie mogłoby się wcisnąć między usunięcie plików a usunięcie
+--     wpisu i oddać ofertę z martwymi odnośnikami do PDF-ów. Czyszczenie
+--     dodatkowo „zajmuje" wpis (czyszczenie_od, FOR UPDATE SKIP LOCKED), więc
+--     przywrócenie trwające akurat na granicy 30 dni nie zostanie rozjechane.
 --
--- Kto widzi wpis w koszu: właściciel oferty i administrator (ta sama reguła
--- co na tablicy leadów, ud_leady_widzi) oraz osoba, która ofertę usunęła —
--- żeby mogła cofnąć własną pomyłkę. Konto nieaktywne nie widzi nic.
+-- Kto usuwa: właściciel oferty i administrator (jak RLS na ud_offers; panel
+-- woła kluczem serwisowym, więc reguła musi siedzieć tutaj). Kto widzi wpis
+-- i przywraca: ci sami oraz osoba, która ofertę usunęła. Konto nieaktywne —
+-- nic.
 --
 -- Uwaga przy zmianach schematu: przywrócenie wstawia wiersze przez
 -- jsonb_populate_record(set), więc kolumna NOT NULL dodana do tabel ofert
@@ -42,7 +48,8 @@ create table if not exists public.ud_offers_kosz (
   pytania         jsonb not null default '[]'::jsonb,
   wysylki         jsonb not null default '[]'::jsonb,
   leady           jsonb not null default '[]'::jsonb,
-  pliki_storage   text[] not null default '{}'
+  pliki_storage   text[] not null default '{}',
+  czyszczenie_od  timestamptz
 );
 
 comment on table public.ud_offers_kosz is
@@ -74,7 +81,9 @@ begin
   end if;
 
   select * into o from public.ud_offers where id = p_offer for update;
-  if not found then
+  -- Cudza oferta „nie istnieje" — agent usuwa tylko swoje (administrator
+  -- wszystkie), jak w RLS na ud_offers.
+  if not found or not public.ud_leady_widzi(p_user, o.user_id) then
     return jsonb_build_object('status', 'brak_oferty');
   end if;
 
@@ -114,7 +123,7 @@ $fn$;
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Przywrócenie z kosza
 
-create or replace function public.ud_oferta_z_kosza(p_kosz uuid, p_user uuid)
+create or replace function public.ud_oferta_z_kosza(p_kosz uuid, p_user uuid, p_dni integer default 30)
 returns jsonb
 language plpgsql
 security definer
@@ -133,6 +142,11 @@ begin
   if not found or not (public.ud_leady_widzi(p_user, k.wlasciciel_id)
                        or k.usunieto_przez = p_user) then
     return jsonb_build_object('status', 'brak_wpisu');
+  end if;
+
+  -- Po terminie albo w trakcie czyszczenia pliki mogą już nie istnieć.
+  if k.czyszczenie_od is not null or k.usunieto_at < now() - make_interval(days => p_dni) then
+    return jsonb_build_object('status', 'po_terminie');
   end if;
 
   if exists (select 1 from public.ud_offers where id = k.offer_id) then
@@ -210,40 +224,58 @@ as $fn$
    where exists (select 1 from public.ud_user_profiles p
                   where p.id = p_user and coalesce(p.active, true))
      and (public.ud_leady_widzi(p_user, k.wlasciciel_id) or k.usunieto_przez = p_user)
+     and k.czyszczenie_od is null
+     and k.usunieto_at >= now() - make_interval(days => p_dni)
    order by k.usunieto_at desc;
 $fn$;
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- Do wyczyszczenia po p_dni dniach. Tylko odczyt — pliki z kubełka usuwa
--- panel (API Storage), potem kasuje wpis. Wpis, którego oferta jakimś cudem
--- istnieje (przywrócona inną drogą), nie jest zwracany: jej pliki są w użyciu.
+-- Do wyczyszczenia po p_dni dniach. ZAJMUJE wpisy (czyszczenie_od) pod blokadą
+-- z SKIP LOCKED: wpis, który ktoś właśnie przywraca, zostaje na następną
+-- godzinę, a wpisu zajętego przez czyszczenie nie da się już przywrócić.
+-- Pliki z kubełka usuwa panel (API Storage), potem kasuje wpis; nieudane
+-- usunięcie zostawia wpis zajęty i po terminie — następne wywołanie go ponowi.
+-- Wpis, którego oferta jakimś cudem istnieje (przywrócona inną drogą), nie
+-- jest zwracany: jej pliki są w użyciu.
 
 create or replace function public.ud_kosz_ofert_do_wyczyszczenia(p_dni integer default 30, p_limit integer default 20)
 returns table (id uuid, offer_id uuid, pliki_storage text[])
 language sql
-stable
+volatile
 security definer
 set search_path = ''
 as $fn$
-  select k.id, k.offer_id, k.pliki_storage
-    from public.ud_offers_kosz k
-   where k.usunieto_at < now() - make_interval(days => p_dni)
-     and not exists (select 1 from public.ud_offers o where o.id = k.offer_id)
-   order by k.usunieto_at
-   limit p_limit;
+  with kandydaci as (
+    select k.id
+      from public.ud_offers_kosz k
+     where k.usunieto_at < now() - make_interval(days => p_dni)
+       and not exists (select 1 from public.ud_offers o where o.id = k.offer_id)
+     order by k.usunieto_at
+     limit p_limit
+       for update of k skip locked
+  )
+  update public.ud_offers_kosz k
+     set czyszczenie_od = coalesce(k.czyszczenie_od, now())
+    from kandydaci c
+   where k.id = c.id
+  returning k.id, k.offer_id, k.pliki_storage;
 $fn$;
 
 revoke all on function public.ud_oferta_do_kosza(uuid, uuid) from public, anon, authenticated;
-revoke all on function public.ud_oferta_z_kosza(uuid, uuid) from public, anon, authenticated;
+revoke all on function public.ud_oferta_z_kosza(uuid, uuid, integer) from public, anon, authenticated;
 revoke all on function public.ud_kosz_ofert_lista(uuid, integer) from public, anon, authenticated;
 revoke all on function public.ud_kosz_ofert_do_wyczyszczenia(integer, integer) from public, anon, authenticated;
 grant execute on function public.ud_oferta_do_kosza(uuid, uuid) to service_role;
-grant execute on function public.ud_oferta_z_kosza(uuid, uuid) to service_role;
+grant execute on function public.ud_oferta_z_kosza(uuid, uuid, integer) to service_role;
 grant execute on function public.ud_kosz_ofert_lista(uuid, integer) to service_role;
 grant execute on function public.ud_kosz_ofert_do_wyczyszczenia(integer, integer) to service_role;
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- Cron: raz dziennie panel czyści wpisy starsze niż 30 dni (pliki + wpis).
+-- Cron: co godzinę (o :17) panel czyści wpisy starsze niż 30 dni (pliki +
+-- wpis), najwyżej 20 naraz. Co godzinę, nie raz na dobę: po usunięciu
+-- kilkudziesięciu ofert jednego dnia zaległość schodzi w godziny, a nie dni —
+-- dane osobowe nie mogą leżeć dłużej, niż obiecuje strona kosza. Bez
+-- kandydatów wywołanie kończy się na jednym zapytaniu.
 -- Token z Vaulta dokłada funkcja SQL (wzorzec edge_cron_token).
 
 create or replace function public.ud_kosz_ofert_czyszczenie()
@@ -269,7 +301,7 @@ revoke all on function public.ud_kosz_ofert_czyszczenie() from public, anon, aut
 do $$
 begin
   if not exists (select 1 from cron.job where jobname = 'kosz-ofert-czyszczenie') then
-    perform cron.schedule('kosz-ofert-czyszczenie', '17 3 * * *',
+    perform cron.schedule('kosz-ofert-czyszczenie', '17 * * * *',
                           'select public.ud_kosz_ofert_czyszczenie()');
   end if;
 end $$;

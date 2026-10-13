@@ -1555,16 +1555,34 @@ Od v.0.70 oba przyciski „Usuń" (lista ofert i strona oferty) wołają
   klienta znowu działa, numer, status, wersja, stan przypomnienia i historia
   wysyłek też wracają. Sprzedany wariant wraca do leada tylko wtedy, gdy lead
   dalej jest w „Wygrany" i nikt nie wpisał innego; wersja leada rośnie.
-- **Widzi i przywraca**: właściciel oferty, administrator
-  (`ud_leady_widzi`) i osoba, która ofertę usunęła. Konto nieaktywne — nic.
-- **Po 30 dniach** cron `kosz-ofert-czyszczenie` (03:17 UTC, włączony) woła
-  `POST /api/cron/kosz-ofert` (token z Vaulta): panel usuwa pliki z kubełka
-  — tylko ścieżki `<offer_id>/…` — a potem wpis. Najpierw pliki, potem wpis:
-  wpis bez plików da się powtórzyć jutro, pliki bez wpisu zostałyby w kubełku
-  na zawsze. To jest usunięcie danych osobowych na dobre.
+- **Usuwa** właściciel oferty albo administrator (`ud_leady_widzi`, jak RLS
+  na `ud_offers`). Do v.0.69 panel kasował kluczem serwisowym, więc każdy
+  zalogowany agent mógł usunąć cudzą ofertę po id — kosz to zamknął.
+  **Widzi i przywraca**: ci sami oraz osoba, która ofertę usunęła. Konto
+  nieaktywne — nic.
+- **Po 30 dniach wpis jest nie do przywrócenia i znika z listy**, a cron
+  `kosz-ofert-czyszczenie` (co godzinę o :17, włączony; najwyżej 20 wpisów
+  naraz) woła `POST /api/cron/kosz-ofert` (token z Vaulta). SQL **zajmuje**
+  wpisy (`czyszczenie_od`, `FOR UPDATE SKIP LOCKED`), dopiero potem panel usuwa
+  pliki z kubełka — tylko ścieżki `<offer_id>/…` — i wpis. Zajęty albo po
+  terminie wpis `ud_oferta_z_kosza` odrzuca (`po_terminie`): przywrócenie nie
+  może się wcisnąć między usunięcie plików a usunięcie wpisu i oddać oferty
+  z martwymi odnośnikami do PDF-ów. Najpierw pliki, potem wpis: wpis bez
+  plików da się powtórzyć za godzinę, pliki bez wpisu zostałyby w kubełku na
+  zawsze. To jest usunięcie danych osobowych na dobre.
 - Twarde `deleteOffer()` zostało wyłącznie do sprzątania po nieudanym
   utworzeniu oferty (PDF nie dał się odczytać). „Usuń wariant" na stronie
   oferty nadal kasuje wariant na stałe — kosz go nie obejmuje.
+
+**„Anuluj" w okienku potwierdzenia nie działał** (do v.0.69): przy
+`use:enhance` SvelteKit ignoruje `preventDefault()` z `onsubmit`, więc
+`onsubmit={(e) => { if (!confirm(…)) e.preventDefault(); }}` wysyłało formularz
+mimo „Anuluj". Tak najpewniej poszła do usunięcia oferta 00034; tak samo
+działały „Usuń OWU" (kasuje plik z kubełka na stałe), „Usuń logo", „Usuń plik"
+dystrybutora i „Odśwież wszystkie". Od v.0.70 jedyny wzorzec to
+`use:enhance={potwierdz('…', dalej)}` z `src/lib/potwierdz.js` — `cancel()`
+wewnątrz funkcji enhance. `test:kosz` pilnuje, żeby `onsubmit` z `confirm(`
+nie wrócił w żadnym pliku `.svelte`.
 
 Dodając do tabel ofert kolumnę NOT NULL, pamiętaj o koszu: przywrócenie
 wstawia wiersze przez `jsonb_populate_record(set)`, więc kopia sprzed zmiany
@@ -1573,8 +1591,11 @@ dostanie w nowej kolumnie NULL i przywrócenie się nie uda.
 Testy: `pnpm test:kosz` w `apps/panel` — warstwa panelu na atrapie (komunikaty,
 kolejność czyszczenia, tylko pliki z katalogu oferty, źródła: oba „Usuń" idą
 do kosza, użytkownik z sesji, token crona przed czymkolwiek) i funkcje SQL na
-jednorazowym Postgresie (`supabase/tests/kosz.sql`: przeniesienie, przywrócenie
-„bit w bit", widoczność, konflikt linku, czyszczenie po 30 dniach, uprawnienia).
+jednorazowym Postgresie (`supabase/tests/kosz.sql`, 47 przypadków:
+przeniesienie, przywrócenie „bit w bit", kto usuwa i kto widzi, termin 30 dni,
+zajęcie przez czyszczenie, konflikt linku, uprawnienia). Bramka tokenu crona
+jest wspólna (`src/lib/server/cronBramka.js`, przypomnienia i kosz) i sprawdzana
+zachowaniem: przepuszcza tylko `true` z bazy.
 
 ---
 

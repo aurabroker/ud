@@ -18,9 +18,10 @@ export const KUBELEK_OFERT = 'ud-offers';
 
 const KOMUNIKATY = {
   brak_uprawnien: 'Twoje konto nie może usuwać ani przywracać ofert (nieaktywne?).',
-  brak_oferty: 'Tej oferty już nie ma — może ktoś usunął ją przed chwilą.',
+  brak_oferty: 'Tej oferty nie ma albo nie możesz jej usunąć (usuwa właściciel oferty lub administrator).',
   brak_wpisu: 'Tej oferty nie ma w koszu.',
   oferta_istnieje: 'Ta oferta już jest na liście ofert.',
+  po_terminie: 'Minęło 30 dni — ta oferta jest usuwana na dobre i nie da się jej już przywrócić.',
   konflikt_linku: 'Nie da się przywrócić: inna oferta ma ten sam link dla klienta. Zgłoś to administratorowi.'
 };
 
@@ -44,7 +45,7 @@ export async function przeniesDoKosza(sb, offerId, userId) {
  * @returns {Promise<{ offerId: string }>}
  */
 export async function przywrocZKosza(sb, koszId, userId) {
-  const { data, error } = await sb.rpc('ud_oferta_z_kosza', { p_kosz: koszId, p_user: userId });
+  const { data, error } = await sb.rpc('ud_oferta_z_kosza', { p_kosz: koszId, p_user: userId, p_dni: KOSZ_DNI });
   if (error) throw new Error('Kosz: ' + error.message);
   if (data?.status !== 'ok') throw blad(data?.status);
   return { offerId: data.offer_id };
@@ -59,8 +60,10 @@ export async function listaKosza(sb, userId) {
 
 /**
  * Usuwa na dobre wpisy starsze niż KOSZ_DNI: najpierw pliki z kubełka, potem
- * wpis. Kolejność ma znaczenie — wpis bez plików da się powtórzyć jutro,
- * pliki bez wpisu zostałyby w kubełku na zawsze, nikomu nieznane.
+ * wpis. Kolejność ma znaczenie — wpis bez plików da się powtórzyć za godzinę,
+ * pliki bez wpisu zostałyby w kubełku na zawsze, nikomu nieznane. SQL zajmuje
+ * zwrócone wpisy (czyszczenie_od), więc żadnego z nich nie da się już
+ * przywrócić — nawet gdy coś tu padnie między plikami a wpisem.
  *
  * Usuwa tylko ścieżki z katalogu tej oferty (`<offer_id>/…`). Wszystkie pliki
  * ofert tak leżą (sprawdzone 13.10.2026: 157 z 157); ścieżka spoza katalogu
@@ -86,12 +89,13 @@ export async function wyczyscKosz({ sb, limit = 20 }) {
       }
       wynik.plikow += sciezki.length;
     }
-    const { error: bladWpisu } = await sb.from('ud_offers_kosz').delete().eq('id', w.id);
+    const { data: usuniete, error: bladWpisu } = await sb.from('ud_offers_kosz').delete().eq('id', w.id).select('id');
     if (bladWpisu) {
       wynik.przerwano = `wpis kosza ${w.id}: ${bladWpisu.message || bladWpisu}`;
       break;
     }
-    wynik.usunieto += 1;
+    // Zero wierszy bez błędu = ktoś usunął wpis w międzyczasie; nie liczymy.
+    if (usuniete?.length) wynik.usunieto += 1;
   }
   return wynik;
 }

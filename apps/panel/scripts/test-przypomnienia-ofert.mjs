@@ -416,15 +416,17 @@ console.log('Limity jednego wywołania');
 console.log('Punkt wejścia crona');
 {
   const zrodlo = readFileSync(new URL('../src/routes/api/cron/przypomnienia-ofert/+server.js', import.meta.url), 'utf8');
-  const iToken = zrodlo.indexOf("rpc('edge_cron_token_matches'");
+  const iToken = zrodlo.indexOf('await sprawdzTokenCrona(sb, token)');
   const iTest = zrodlo.indexOf("env.SMSAPI_TEST === '1'");
   const iWysylka = zrodlo.indexOf('wyslijPrzypomnienia(');
   check('token sprawdzany', iToken > 0, true);
   check('token przed oknem godzin i przed wysyłką', iToken < zrodlo.indexOf('wOknieWysylki()') && iToken < iWysylka, true);
   check('SMSAPI_TEST=1 wstrzymuje przypomnienia (przed wysyłką)', iTest > iToken && iTest < iWysylka, true);
   check('przerwanie wysyłki i wyjątek trafiają do ud_errors', /if \(wynik\.przerwano\)[\s\S]*zapiszBlad\(/.test(zrodlo) && /catch \(e\)[\s\S]*zapiszBlad\(/.test(zrodlo.slice(iWysylka)), true);
-  const galazZlegoTokenu = zrodlo.slice(zrodlo.indexOf('zgodny !== true'), zrodlo.indexOf("status: 401 });", zrodlo.indexOf('zgodny !== true')));
-  check('zły token NIE trafia do ud_errors (każdy mógłby zapchać dziennik)', galazZlegoTokenu.length > 0 && !/zapiszBlad\(/.test(galazZlegoTokenu), true);
+  // Zły token → bramka zwraca bez doDziennika (zachowanie: scripts/test-kosz.mjs),
+  // a punkt wejścia zapisuje ud_errors tylko przy doDziennika.
+  check('odmowa bramki kończy wywołanie, ud_errors tylko przy błędzie bazy',
+    /if \(!bramka\.ok\) \{\s*if \(bramka\.doDziennika\) await zapiszBlad\([\s\S]*?return json\(\{ ok: false, error: bramka\.error \}, \{ status: bramka\.status \}\);/.test(zrodlo), true);
   check('tylko POST (GET → 405)', /export function GET[\s\S]*status: 405/.test(zrodlo), true);
 }
 

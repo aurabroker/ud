@@ -1,4 +1,5 @@
 <script>
+  import { potwierdz } from '$lib/potwierdz.js';
   import { enhance } from '$app/forms';
   import OfferComparison from '$lib/components/OfferComparison.svelte';
   import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
@@ -53,8 +54,8 @@
   </div>
   <div style="display:flex;gap:.5rem;">
     <button class="btn btn-ghost" onclick={() => (editing = !editing)}>{editing ? 'Zamknij edycję' : '✎ Edytuj'}</button>
-    <form method="POST" action="?/delete" use:enhance={() => ({ update }) => update()}
-      onsubmit={(e) => { if (!confirm('Przenieść ofertę do kosza? Klient straci dostęp do linku. Przez 30 dni ofertę można przywrócić z „Kosza" na liście ofert.')) e.preventDefault(); }}>
+    <form method="POST" action="?/delete"
+      use:enhance={potwierdz('Przenieść ofertę do kosza? Klient straci dostęp do linku. Przez 30 dni ofertę można przywrócić z „Kosza" na liście ofert.', () => ({ update }) => update())}>
       <button class="btn btn-ghost" style="color:var(--red-600);">🗑 Usuń ofertę</button>
     </form>
   </div>
