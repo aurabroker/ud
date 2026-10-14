@@ -328,6 +328,28 @@ begin
     (r->'raport'->'surowe'->>'mediana')::numeric = 0.02175 and (r->'stawka'->>'srodek')::numeric = 0.022);
 end $$;
 
+do $$
+declare r jsonb; o uuid;
+begin
+  begin
+    -- Mediana tuż pod maksimum: 0,0321 w górę do 0,1 p.p. to 0,033 — więcej niż
+    -- góra 0,0322. Środek nie może przekroczyć góry (walidator portalu
+    -- odrzuciłby plik, a kalibrator stałby na odmowie).
+    o := tk.oferta('S1', '95050500001', '2030-05-10T10:00:00Z'); perform tk.wariant(o, 10000, 2400);
+    for i in 2..7 loop
+      o := tk.oferta('S' || i, '9505050000' || i, '2030-05-10T10:00:00Z'); perform tk.wariant(o, 10000, 3852);
+    end loop;
+    o := tk.oferta('S8', '95050500008', '2030-05-10T10:00:00Z'); perform tk.wariant(o, 10000, 3864);
+    r := tk.k();
+    perform tk.sprawdz('środek: mediana 0,0321 tuż pod górą 0,0322 → środek = góra (nie 0,033)',
+      r->>'status' = 'ok' and (r->'raport'->'surowe'->>'mediana')::numeric = 0.0321
+      and (r->'stawka'->>'srodek')::numeric = 0.0322 and (r->'stawka'->>'gora')::numeric = 0.0322
+      and (r->'stawka'->>'dol')::numeric = 0.02);
+    raise exception using errcode = 'ZZ001';
+  exception when sqlstate 'ZZ001' then null;
+  end;
+end $$;
+
 -- ═══ 9. Mnożniki okresów: ≥ 3 osoby, rozrzut ≤ 1,05, para w jednej ofercie ══
 do $$
 declare r jsonb; o uuid;

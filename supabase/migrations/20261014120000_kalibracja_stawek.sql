@@ -333,7 +333,10 @@ select jsonb_build_object(
   'na_dzien', to_char(par.na_dzien at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
   'stawka',   case when r.status = 'ok' then jsonb_build_object(
                 'dol',    round(ceil(r.mn * 10000) / 10000, 4),
-                'srodek', round(ceil(r.mediana * 1000) / 1000, 3),
+                -- Środek w górę do 0,1 p.p., ale nie ponad górę: przy medianie
+                -- tuż pod maksimum (0,0321 / 0,0322) dałby 0,033 > góra.
+                'srodek', least(round(ceil(r.mediana * 1000) / 1000, 3),
+                                round(ceil(r.mx * 10000) / 10000, 4)),
                 'gora',   round(ceil(r.mx * 10000) / 10000, 4)) end,
   'okresy',   case when r.status = 'ok' then
                 jsonb_build_object('24', 1)

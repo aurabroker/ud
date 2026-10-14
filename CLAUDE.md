@@ -896,7 +896,7 @@ oferta z sześcioma wariantami ważyłaby inaczej sześć razy więcej niż drug
 | Pole | Skąd |
 |---|---|
 | `stawka.dol` / `stawka.gora` | najtańsza i najdroższa **osoba** z ofert z 12 miesięcy, w górę do 0,01 p.p. (14.10: 2,02% / 3,22%) |
-| `stawka.srodek` | mediana osób, w górę do 0,1 p.p. (2,2%) — żadna strona go dziś nie pokazuje |
+| `stawka.srodek` | mediana osób, w górę do 0,1 p.p., nie wyżej niż `gora` (2,2%) — żadna strona go dziś nie pokazuje |
 | `okresy` | mnożniki z par w jednej ofercie, ≥ 3 osoby, rozrzut ≤ 1,05: 24 → 1,00, 36 → 1,25 |
 | `zrodlo` | metoda, okno dat, liczba osób, ofert, wariantów i par — metryczka kalibracji, nie treść strony |
 
@@ -977,12 +977,19 @@ tygodni na sucho przed przełączeniem na `propozycja`.
 
 Rzeczy, których nie upraszczaj:
 
-- **Twarda lista zapisów do GitHuba (`zapisDozwolony()`).** Gałąź bota, jeden
-  plik (`kalibracja.json`) na gałęzi bota, PR z niej do produkcyjnej, tytuł
-  i opis PR. Ani scalenia, ani zamknięcia, ani zapisu na gałąź produkcyjną.
-  Test to sprawdza dla każdej z tych dróg.
-- **Gałąź bota ustawiana na bieżący HEAD produkcyjnej przy każdej propozycji**
-  (`force`), z jednym commitem. Scalenie nie może cofnąć niczego innego.
+- **Twarda lista zapisów do GitHuba (`zapisDozwolony()`).** Drzewo z jednym
+  wpisem (`kalibracja.json`), commit z jednym rodzicem, gałąź bota, PR z niej
+  do produkcyjnej, tytuł i opis PR. Ani scalenia, ani zamknięcia, ani zapisu
+  na gałąź produkcyjną, ani Contents API. Test to sprawdza dla każdej drogi.
+- **Commit najpierw, gałąź raz.** Propozycja to commit z rodzicem = HEAD
+  produkcyjnej i drzewem HEAD z podmienionym plikiem; gałąź bota przestawiana
+  jednym ruchem wprost na niego. **Nigdy „reset gałęzi bota na HEAD, potem
+  zapis pliku"** — w tej chwili GitHub mógł uznać otwarty PR za scalony, choć
+  nic nie weszło (przegląd z 14.10.2026). Scalenie nie cofa niczego innego.
+- **Nieaktualny PR jest oznaczany.** Gdy dane przestają dawać liczby z
+  otwartego PR (bez zmian albo odmowa), tytuł dostaje `[NIEAKTUALNE]`, opis —
+  „nie scalaj", a mail — alarm. Nie scalaj PR kalibratora z tym przedrostkiem.
+  Ręczne poprawki na gałęzi bota przepadają przy następnej propozycji.
 - **Odrzucona propozycja nie wraca.** Skrót stawek i okresów stoi w opisie PR;
   PR zamknięty bez scalenia wycisza te same liczby. Nowe dane — nowy skrót.
 - **Nowych okresów (48, 60) kalibrator nie dopisuje** — zgłasza je mailem
@@ -1025,17 +1032,17 @@ tylko `aurabroker/ud`, Contents i Pull requests: write) jako sekret
 Testy:
 
 ```
-cd apps/panel && pnpm test:kalibracja-sql      # metoda SQL, 57 przypadków
+cd apps/panel && pnpm test:kalibracja-sql      # metoda SQL, 58 przypadków
 cd apps/portal && pnpm build && NODE_NO_WARNINGS=1 npx playwright test \
   test/kalibrator.spec.js test/kalkulator.spec.js test/funkcje-brzegowe.spec.js
 ```
 
 `kalibracja.sql` sprawdza metodę na zamrożonym, zanonimizowanym zestawie
 z produkcji (127 wariantów, `kalibracja-fixture.sql`) — oczekiwane liczby
-policzyła niezależna implementacja, nie sama funkcja. Każda z 43 mutacji
+policzyła niezależna implementacja, nie sama funkcja. Każda z 44 mutacji
 migracji (każdy filtr z osobna, osoba po kliencie zamiast PESEL-u, składka
-netto, zaokrąglenie do najbliższej, progi, `SECURITY DEFINER`, brak
-`revoke`, stan crona) daje czerwony wynik. Bez binariów Postgresa test
+netto, zaokrąglenie do najbliższej, środek ponad górę, progi, `SECURITY
+DEFINER`, brak `revoke`, stan crona) daje czerwony wynik. Bez binariów Postgresa test
 kończy się błędem, nie zielonym wynikiem.
 
 ---

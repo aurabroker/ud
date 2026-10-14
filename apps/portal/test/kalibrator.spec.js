@@ -146,20 +146,49 @@ function atrapaSupabase({ ustawienia, historia, wynik, bladSql, bladTokenu }) {
 }
 
 /** Atrapa API GitHuba: gałęzie, commity, plik kalibracji, pull requesty. */
-function atrapaGitHuba({ plik, botIstnieje, prs, wygasa, limitBezTokenu, awaria }) {
+function atrapaGitHuba({ plik, botIstnieje, prs, wygasa, limitBezTokenu, awaria, awariaPr = null }) {
   let n = 0;
   const commity = new Map();
+  const drzewa = new Map();
+  const drzewoCommitu = new Map();
+  const rodzic = new Map();
   const galezie = new Map();
-  const commit = (tresc) => {
+  /** Każde ustawienie gałęzi bota (sha) — test sprawdza, że nigdy nie był to HEAD produkcyjnej. */
+  const ustawieniaBota = [];
+  const noweDrzewo = (tresc) => {
+    n += 1;
+    const sha = createHash('sha1').update(`tree-${n}`).digest('hex');
+    drzewa.set(sha, tresc);
+    return sha;
+  };
+  const commit = (tresc, drzewo = noweDrzewo(tresc), przodek = null) => {
     n += 1;
     const sha = createHash('sha1').update(`commit-${n}`).digest('hex');
     commity.set(sha, tresc);
+    drzewoCommitu.set(sha, drzewo);
+    rodzic.set(sha, przodek);
     return sha;
+  };
+  const REPO_PR = { full_name: 'aurabroker/ud' };
+  /**
+   * Zachowanie GitHuba: gdy gałąź otwartego PR wskaże commit, który już jest
+   * w gałęzi bazowej, PR zostaje uznany za scalony — choć niczego nie scalono.
+   */
+  const ustawGalaz = (nazwa, sha) => {
+    galezie.set(nazwa, sha);
+    if (nazwa !== BOT) return;
+    ustawieniaBota.push(sha);
+    for (const pr of pulls) {
+      if (pr.state === 'open' && pr.head.ref === BOT && galezie.get(pr.base.ref) === sha) {
+        pr.state = 'closed';
+        pr.merged_at = new Date().toISOString();
+      }
+    }
   };
   const blob = (tresc) => createHash('sha1').update(`blob ${tresc}`).digest('hex');
   galezie.set(GALAZ, commit(plik));
   if (botIstnieje) galezie.set(BOT, commit('{"stara": "propozycja"}\n'));
-  const pulls = prs.map((p) => ({ head: { ref: BOT }, base: { ref: GALAZ }, merged_at: null, ...p }));
+  const pulls = prs.map((p) => ({ title: 'Kalibracja stawek', head: { ref: BOT, repo: REPO_PR }, base: { ref: GALAZ }, merged_at: null, ...p }));
   const zadania = [];
 
   const odp = (status, dane, naglowki = {}) =>
@@ -196,27 +225,37 @@ function atrapaGitHuba({ plik, botIstnieje, prs, wygasa, limitBezTokenu, awaria 
         ? odp(200, { ref: `refs/heads/${nazwa}`, object: { type: 'commit', sha: galezie.get(nazwa) } }, extra)
         : odp(404, { message: 'Not Found' }, extra);
     }
+    const mc = p.match(/^\/git\/commits\/([0-9a-f]{40})$/);
+    if (mc && metoda === 'GET') {
+      return commity.has(mc[1])
+        ? odp(200, { sha: mc[1], tree: { sha: drzewoCommitu.get(mc[1]) }, parents: rodzic.get(mc[1]) ? [{ sha: rodzic.get(mc[1]) }] : [] }, extra)
+        : odp(404, { message: 'Not Found' }, extra);
+    }
+    if (p === '/git/trees' && metoda === 'POST') {
+      if (!drzewa.has(cialo.base_tree)) return odp(422, { message: 'base_tree does not exist' }, extra);
+      // Atrapa trzyma w drzewie tylko plik kalibracji — każdy inny wpis to błąd testu.
+      if (cialo.tree.length !== 1 || cialo.tree[0].path !== PLIK) return odp(422, { message: 'atrapa: inne pliki w drzewie' }, extra);
+      return odp(201, { sha: noweDrzewo(cialo.tree[0].content) }, extra);
+    }
+    if (p === '/git/commits' && metoda === 'POST') {
+      if (!drzewa.has(cialo.tree)) return odp(422, { message: 'tree does not exist' }, extra);
+      if (!commity.has(cialo.parents[0])) return odp(422, { message: 'parent does not exist' }, extra);
+      const nowy = commit(drzewa.get(cialo.tree), cialo.tree, cialo.parents[0]);
+      return odp(201, { sha: nowy, tree: { sha: cialo.tree }, message: cialo.message }, extra);
+    }
     if (p === '/git/refs' && metoda === 'POST') {
       const nazwa = cialo.ref.replace('refs/heads/', '');
       if (galezie.has(nazwa)) return odp(422, { message: 'Reference already exists' }, extra);
       if (!commity.has(cialo.sha)) return odp(422, { message: 'Object does not exist' }, extra);
-      galezie.set(nazwa, cialo.sha);
+      ustawGalaz(nazwa, cialo.sha);
       return odp(201, { ref: cialo.ref, object: { sha: cialo.sha } }, extra);
     }
     if (p.startsWith('/git/refs/heads/') && metoda === 'PATCH') {
       const nazwa = decodeURIComponent(p.slice('/git/refs/heads/'.length));
       if (!galezie.has(nazwa)) return odp(422, { message: 'Reference does not exist' }, extra);
-      galezie.set(nazwa, cialo.sha);
+      if (!commity.has(cialo.sha)) return odp(422, { message: 'Object does not exist' }, extra);
+      ustawGalaz(nazwa, cialo.sha);
       return odp(200, { ref: `refs/heads/${nazwa}`, object: { sha: cialo.sha } }, extra);
-    }
-    if (p === `/contents/${PLIK}` && metoda === 'PUT') {
-      const sha = galezie.get(cialo.branch);
-      if (!sha) return odp(404, { message: 'Branch not found' }, extra);
-      if (blob(commity.get(sha)) !== cialo.sha) return odp(409, { message: 'sha does not match' }, extra);
-      const tresc = Buffer.from(cialo.content, 'base64').toString('utf8');
-      const nowy = commit(tresc);
-      galezie.set(cialo.branch, nowy);
-      return odp(200, { content: { sha: blob(tresc) }, commit: { sha: nowy } }, extra);
     }
     if (p === '/pulls' && metoda === 'GET') {
       const stan = u.searchParams.get('state') ?? 'open';
@@ -224,19 +263,21 @@ function atrapaGitHuba({ plik, botIstnieje, prs, wygasa, limitBezTokenu, awaria 
       return odp(200, pulls.filter((pr) => (stan === 'all' || pr.state === stan) && (!head || head === `aurabroker:${pr.head.ref}`)), extra);
     }
     if (p === '/pulls' && metoda === 'POST') {
-      if (pulls.some((pr) => pr.state === 'open' && pr.head.ref === cialo.head)) {
+      if (pulls.some((pr) => pr.state === 'open' && pr.head.ref === cialo.head && pr.head.repo?.full_name === REPO_PR.full_name &&
+        pr.base.ref === cialo.base)) {
         return odp(422, { message: 'A pull request already exists' }, extra);
       }
       const numer = 41 + pulls.length;
       const pr = {
         number: numer, state: 'open', merged_at: null, title: cialo.title, body: cialo.body,
-        head: { ref: cialo.head }, base: { ref: cialo.base }, html_url: `https://github.com/aurabroker/ud/pull/${numer}`,
+        head: { ref: cialo.head, repo: REPO_PR }, base: { ref: cialo.base }, html_url: `https://github.com/aurabroker/ud/pull/${numer}`,
       };
       pulls.push(pr);
       return odp(201, pr, extra);
     }
     const m = p.match(/^\/pulls\/(\d+)$/);
     if (m && metoda === 'PATCH') {
+      if (awariaPr) return odp(awariaPr, { message: 'Server Error' }, extra);
       const pr = pulls.find((x) => x.number === Number(m[1]));
       if (!pr) return odp(404, { message: 'Not Found' }, extra);
       Object.assign(pr, cialo);
@@ -250,6 +291,8 @@ function atrapaGitHuba({ plik, botIstnieje, prs, wygasa, limitBezTokenu, awaria 
     zadania,
     pulls,
     galezie,
+    rodzic,
+    ustawieniaBota,
     trescNa: (galaz) => commity.get(galezie.get(galaz)),
     zapisy: () => zadania.filter((z) => z.metoda !== 'GET'),
   };
@@ -277,6 +320,7 @@ async function zaladuj({
   wygasa = null,
   limitBezTokenu = false,
   awaria = null,
+  awariaPr = null,
   strona = null,
   resend = () => ({ ok: true, status: 200 }),
 } = {}) {
@@ -284,7 +328,7 @@ async function zaladuj({
     ustawienia: ustawienia === null ? null : { tryb, galaz: GALAZ, odbiorca: 'biuro@utratadochodu.com', dane_od: null, ...ustawienia },
     historia, wynik, bladSql, bladTokenu,
   });
-  const gh = atrapaGitHuba({ plik, botIstnieje, prs, wygasa, limitBezTokenu, awaria });
+  const gh = atrapaGitHuba({ plik, botIstnieje, prs, wygasa, limitBezTokenu, awaria, awariaPr });
   const logi = [];
   const maile = [];
   const strony = [];
@@ -537,20 +581,25 @@ test.describe('kalibrator: propozycja', () => {
     expect(f.gh.zapisy()).toEqual([]);
   });
 
-  test('zmiana: jedna gałąź bota, jeden PUT na niej i pull request; gałąź produkcyjna nietknięta', async () => {
+  test('zmiana: commit z jednym plikiem na HEAD produkcyjnej, gałąź bota ustawiona raz, pull request; produkcyjna nietknięta', async () => {
     const f = await zaladuj({ tryb: 'propozycja', env });
+    const head = f.gh.galezie.get(GALAZ);
     const r = await f.wywolaj();
     expect(r.status).toBe(200);
 
     const zapisy = f.gh.zapisy();
     expect(zapisy.map((z) => `${z.metoda} ${z.sciezka}`)).toEqual([
+      'POST /repos/aurabroker/ud/git/trees',
+      'POST /repos/aurabroker/ud/git/commits',
       'POST /repos/aurabroker/ud/git/refs',
-      `PUT /repos/aurabroker/ud/contents/${PLIK}`,
       'POST /repos/aurabroker/ud/pulls',
     ]);
-    const [ref, put, pr] = zapisy;
-    expect(ref.cialo).toEqual({ ref: `refs/heads/${BOT}`, sha: f.gh.galezie.get(GALAZ) });
-    expect(put.cialo.branch).toBe(BOT);
+    const [drzewo, commit, ref, pr] = zapisy;
+    expect(drzewo.cialo.tree).toEqual([{ path: PLIK, mode: '100644', type: 'blob', content: oczekiwanyPlik(dzisWarszawa()) }]);
+    expect(commit.cialo.parents).toEqual([head]);
+    expect(ref.cialo).toEqual({ ref: `refs/heads/${BOT}`, sha: f.gh.galezie.get(BOT) });
+    expect(ref.cialo.sha).not.toBe(head);
+    expect(f.gh.rodzic.get(f.gh.galezie.get(BOT))).toBe(head);
     expect(pr.cialo).toMatchObject({ head: BOT, base: GALAZ });
     for (const z of zapisy) expect(z.auth).toBe(`Bearer ${TOKEN_GH}`);
 
@@ -588,12 +637,15 @@ test.describe('kalibrator: propozycja', () => {
     await f.wywolaj();
     const zapisy = f.gh.zapisy();
     expect(zapisy.map((z) => `${z.metoda} ${z.sciezka}`)).toEqual([
+      'POST /repos/aurabroker/ud/git/trees',
+      'POST /repos/aurabroker/ud/git/commits',
       `PATCH /repos/aurabroker/ud/git/refs/heads/${BOT}`,
-      `PUT /repos/aurabroker/ud/contents/${PLIK}`,
       'PATCH /repos/aurabroker/ud/pulls/7',
     ]);
-    expect(zapisy[0].cialo).toEqual({ sha: f.gh.galezie.get(GALAZ), force: true });
-    expect(Object.keys(zapisy[2].cialo).sort()).toEqual(['body', 'title']);
+    expect(zapisy[2].cialo).toEqual({ sha: f.gh.galezie.get(BOT), force: true });
+    expect(f.gh.rodzic.get(f.gh.galezie.get(BOT))).toBe(f.gh.galezie.get(GALAZ));
+    expect(Object.keys(zapisy[3].cialo).sort()).toEqual(['body', 'title']);
+    expect(f.gh.pulls[0]).toMatchObject({ state: 'open', merged_at: null });
     expect(f.gh.trescNa(BOT)).toBe(oczekiwanyPlik(dzisWarszawa()));
     expect(f.gh.trescNa(GALAZ)).toBe(PLIK_OBECNY);
     expect(f.gh.pulls).toHaveLength(1);
@@ -688,7 +740,10 @@ test.describe('kalibrator: propozycja', () => {
   });
 
   test('spadek dolnej granicy: wyraźna flaga w mailu i w pull requeście', async () => {
-    const f = await zaladuj({ tryb: 'propozycja', env, wynik: wynikOk({ stawka: { dol: 0.0195 } }) });
+    const f = await zaladuj({
+      tryb: 'propozycja', env,
+      wynik: wynikOk({ stawka: { dol: 0.0195 }, raport: { surowe: { ...RAPORT.surowe, min: 0.01948 } } }),
+    });
     await f.wywolaj();
     expect(f.maile[0].cialo.text).toContain('SPADEK dolnej granicy');
     expect(f.maile[0].cialo.html).toContain('SPADEK dolnej granicy');
@@ -701,6 +756,170 @@ test.describe('kalibrator: propozycja', () => {
     const plik = JSON.parse(f.gh.trescNa(BOT));
     expect(plik.okresy['36']).toBe(1.26);
     expect(plik.policzono).toBe(dzisWarszawa());
+  });
+});
+
+test.describe('kalibrator: otwarty PR, którego dane już nie dają', () => {
+  const env = { GITHUB_KALIBRATOR_TOKEN: TOKEN_GH };
+  const STARY = 'a'.repeat(64);
+  const prStary = (zmien = {}) => ({
+    number: 7, state: 'open', title: 'Kalibracja stawek: 2,02%–2,50% (było 2,02%–2,44%)',
+    body: `| tabela |\n\nSkrót propozycji: \`${STARY}\`\n<!-- kalibrator:${STARY} -->`,
+    html_url: 'https://github.com/aurabroker/ud/pull/7', ...zmien,
+  });
+
+  test('bez zmian: PR oznaczony [NIEAKTUALNE], skrót usunięty, jeden alarm; nazajutrz cisza', async () => {
+    const f = await zaladuj({ tryb: 'propozycja', env, plik: PLIK_ZGODNY, historia: [NIEDAWNY_MAIL], botIstnieje: true, prs: [prStary()] });
+    expect((await f.wywolaj()).status).toBe(200);
+    const zapisy = f.gh.zapisy();
+    expect(zapisy.map((z) => `${z.metoda} ${z.sciezka}`)).toEqual(['PATCH /repos/aurabroker/ud/pulls/7']);
+    expect(Object.keys(zapisy[0].cialo).sort()).toEqual(['body', 'title']);
+    const pr = f.gh.pulls[0];
+    expect(pr.state).toBe('open');
+    expect(pr.title.startsWith('[NIEAKTUALNE] Kalibracja stawek')).toBe(true);
+    expect(pr.body.startsWith('**[NIEAKTUALNE] Nie scalaj.**')).toBe(true);
+    expect(pr.body).not.toContain(STARY);
+    expect(pr.body).toContain('| tabela |');
+    expect(f.maile).toHaveLength(1);
+    expect(f.maile[0].cialo.subject).toBe('Kalibracja: uwagi');
+    expect(f.maile[0].cialo.text).toContain('Pull request #7 oznaczony jako nieaktualny');
+    expect(ostatni(f)).toMatchObject({ wynik: 'bez_zmian', mail_wyslany: true });
+    expect(ostatni(f).powod).toContain('nieaktualny PR #7');
+    expect(f.gh.trescNa(GALAZ)).toBe(PLIK_ZGODNY);
+
+    await f.wywolaj();
+    expect(f.gh.zapisy(), 'już oznaczony — drugi raz go nie ruszamy').toHaveLength(1);
+    expect(f.maile).toHaveLength(1);
+  });
+
+  test('odmowa (za mało osób): PR oznaczony, uwaga stoi w mailu odmowy', async () => {
+    const f = await zaladuj({
+      tryb: 'propozycja', env, botIstnieje: true, prs: [prStary()],
+      wynik: { status: 'za_malo_osob', stawka: null, okresy: null, zrodlo: { ...ZRODLO_SQL, osob: 7 }, raport: RAPORT },
+    });
+    await f.wywolaj();
+    expect(f.gh.zapisy().map((z) => `${z.metoda} ${z.sciezka}`)).toEqual(['PATCH /repos/aurabroker/ud/pulls/7']);
+    expect(f.gh.pulls[0].body).toContain('za_malo_osob');
+    expect(f.maile).toHaveLength(1);
+    expect(f.maile[0].cialo.subject).toContain('odmowa');
+    expect(f.maile[0].cialo.text).toContain('Pull request #7 oznaczony jako nieaktualny');
+    expect(ostatni(f)).toMatchObject({ wynik: 'odmowa', mail_wyslany: true, pr_numer: null });
+  });
+
+  test('oznaczony PR wraca, gdy dane znowu dają zmianę — przepisany na nowo, bez przedrostka', async () => {
+    let w = wynikOk();
+    const f = await zaladuj({
+      tryb: 'propozycja', env, plik: PLIK_ZGODNY, historia: [NIEDAWNY_MAIL], botIstnieje: true, prs: [prStary()],
+      wynik: () => structuredClone(w),
+    });
+    await f.wywolaj();
+    expect(f.gh.pulls[0].title.startsWith('[NIEAKTUALNE]')).toBe(true);
+
+    w = wynikOk({ stawka: { gora: 0.033 }, raport: { surowe: { ...RAPORT.surowe, max: 0.03295 } } });
+    await f.wywolaj();
+    expect(f.gh.pulls).toHaveLength(1);
+    const pr = f.gh.pulls[0];
+    expect(pr).toMatchObject({ number: 7, state: 'open', merged_at: null });
+    expect(pr.title.startsWith('[NIEAKTUALNE]')).toBe(false);
+    expect(pr.body).toContain(skrotPropozycji({ dol: 0.0202, srodek: 0.022, gora: 0.033 }, { 24: 1, 36: 1.25 }));
+    expect(JSON.parse(f.gh.trescNa(BOT)).stawka.gora).toBe(0.033);
+    expect(ostatni(f)).toMatchObject({ wynik: 'propozycja', pr_numer: 7 });
+  });
+
+  test('na sucho: otwartego PR nie rusza (zero zapisów do GitHuba)', async () => {
+    const f = await zaladuj({ tryb: 'na_sucho', env, plik: PLIK_ZGODNY, botIstnieje: true, prs: [prStary()] });
+    await f.wywolaj();
+    expect(f.gh.zapisy()).toEqual([]);
+  });
+
+  test('błąd GitHuba przy oznaczaniu: przebieg kończy się normalnie, ud_errors i alarm', async () => {
+    const f = await zaladuj({
+      tryb: 'propozycja', env, plik: PLIK_ZGODNY, historia: [NIEDAWNY_MAIL], botIstnieje: true, prs: [prStary()], awariaPr: 502,
+    });
+    const r = await f.wywolaj();
+    expect(r.status).toBe(200);
+    expect(ostatni(f).wynik).toBe('bez_zmian');
+    expect(f.logi.map((l) => l.wiadomosc).join()).toContain('nie mogę sprawdzić albo oznaczyć otwartego PR');
+    expect(f.maile).toHaveLength(1);
+    expect(f.maile[0].cialo.text).toContain('Nie udało się sprawdzić');
+    await f.wywolaj();
+    expect(f.maile, 'alarm o błędzie nie częściej niż raz na 7 dni').toHaveLength(1);
+  });
+
+  test('PR z cudzego repozytorium albo do innej bazy jest pomijany — nowy PR, cudzych nie rusza', async () => {
+    const f = await zaladuj({
+      tryb: 'propozycja', env, botIstnieje: true,
+      prs: [
+        prStary({ number: 7, head: { ref: BOT, repo: { full_name: 'obcy/ud' } } }),
+        prStary({ number: 8, base: { ref: 'main' } }),
+        prStary({ number: 9, head: { ref: BOT, repo: null } }),
+      ],
+    });
+    await f.wywolaj();
+    const zapisy = f.gh.zapisy().map((z) => `${z.metoda} ${z.sciezka}`);
+    expect(zapisy).toContain('POST /repos/aurabroker/ud/pulls');
+    expect(zapisy.some((z) => /\/pulls\/\d+$/.test(z))).toBe(false);
+    const nowy = f.gh.pulls[f.gh.pulls.length - 1];
+    expect(nowy).toMatchObject({ state: 'open', head: { ref: BOT, repo: { full_name: 'aurabroker/ud' } }, base: { ref: GALAZ } });
+    expect(ostatni(f)).toMatchObject({ wynik: 'propozycja', pr_numer: nowy.number });
+    expect(f.gh.pulls.slice(0, 3).map((p) => p.title)).toEqual(Array(3).fill(prStary().title));
+  });
+
+  test('gałąź bota nigdy nie stoi na HEAD produkcyjnej — otwarty PR nie „scala się" sam', async () => {
+    const f = await zaladuj({ tryb: 'propozycja', env, botIstnieje: true, prs: [prStary()] });
+    await f.wywolaj();
+    expect(f.gh.ustawieniaBota).toHaveLength(1);
+    for (const sha of f.gh.ustawieniaBota) expect(sha).not.toBe(f.gh.galezie.get(GALAZ));
+    expect(f.gh.pulls[0]).toMatchObject({ number: 7, state: 'open', merged_at: null });
+    expect(f.maile[0].cialo.html).toContain('Zaktualizowany pull request #7');
+  });
+});
+
+test.describe('kalibrator: nieudany mail jest ponawiany', () => {
+  const env = { GITHUB_KALIBRATOR_TOKEN: TOKEN_GH };
+  const padaPierwszy = (_c, n) => (n === 1 ? { ok: false, status: 500 } : { ok: true, status: 200 });
+
+  test('odmowa: mail nie wyszedł — następny przebieg z tym samym powodem wysyła go jeszcze raz', async () => {
+    const f = await zaladuj({
+      tryb: 'propozycja', env, resend: padaPierwszy,
+      wynik: { status: 'za_malo_osob', stawka: null, okresy: null, zrodlo: { ...ZRODLO_SQL, osob: 7 }, raport: RAPORT },
+    });
+    await f.wywolaj();
+    expect(ostatni(f)).toMatchObject({ wynik: 'odmowa', mail_wyslany: false });
+    await f.wywolaj();
+    expect(f.maile).toHaveLength(2);
+    expect(ostatni(f)).toMatchObject({ wynik: 'odmowa', mail_wyslany: true });
+    await f.wywolaj();
+    expect(f.maile, 'po udanym mailu — cisza').toHaveLength(2);
+  });
+
+  test('błąd przebiegu: mail nie wyszedł — ten sam błąd nazajutrz wysyła go jeszcze raz', async () => {
+    const f = await zaladuj({ tryb: 'propozycja', resend: padaPierwszy, bladSql: { message: 'statement timeout' } });
+    await f.wywolaj();
+    expect(ostatni(f)).toMatchObject({ wynik: 'blad', mail_wyslany: false });
+    await f.wywolaj();
+    expect(f.maile).toHaveLength(2);
+    expect(ostatni(f)).toMatchObject({ wynik: 'blad', mail_wyslany: true });
+    await f.wywolaj();
+    expect(f.maile).toHaveLength(2);
+  });
+
+  test('alert o stronie: mail nie wyszedł — kolejny przebieg ponawia alert', async () => {
+    const f = await zaladuj({
+      tryb: 'propozycja', env, plik: PLIK_ZGODNY, historia: [NIEDAWNY_MAIL], strona: '291–351 zł',
+      resend: padaPierwszy,
+    });
+    await f.wywolaj();
+    expect(f.maile).toHaveLength(0);
+    await f.wywolaj();
+    expect(f.maile, 'alert poszedł, ale Resend odmówił').toHaveLength(1);
+    expect(ostatni(f).mail_wyslany).toBe(false);
+    await f.wywolaj();
+    expect(f.maile).toHaveLength(2);
+    expect(f.maile[1].cialo.text).toContain('nie pokazuje przedziału');
+    expect(ostatni(f).powod).toContain('alert: strona nie pokazuje stawek z pliku');
+    await f.wywolaj();
+    expect(f.maile).toHaveLength(2);
   });
 });
 
@@ -722,6 +941,9 @@ test.describe('kalibrator: bramki — odmowa, jeden mail, drugi identyczny przeb
     ['klucz 72', wynikOk({ okresy: { 24: 1, 36: 1.25, 72: 1.6 } }), 'niedozwolony klucz'],
     ['mnożniki malejące', wynikOk({ okresy: { 24: 1, 36: 1.25, 48: 1.2 } }), 'rosnąć'],
     ['mnożnik ponad 2', wynikOk({ okresy: { 24: 1, 36: 2.5 } }), '[1; 2]'],
+    ['dół pod surowym minimum', wynikOk({ stawka: { dol: 0.0201 } }), 'poniżej surowej stawki'],
+    ['góra pod surowym maksimum', wynikOk({ stawka: { gora: 0.0321 } }), 'poniżej surowej stawki'],
+    ['brak surowych stawek', wynikOk({ raport: { surowe: null } }), 'raport.surowe'],
   ];
 
   for (const [opis, wynik, fraza] of przypadki) {
@@ -761,6 +983,18 @@ test.describe('kalibrator: bramki — odmowa, jeden mail, drugi identyczny przeb
     expect(t).not.toContain('Kowalski');
     expect(t).toContain('rata × 12 ≠ składka');
     expect(JSON.stringify(ostatni(f).wyliczone)).not.toContain('Kowalski');
+  });
+
+  test('anomalie: numer oferty z polskimi inicjałami agenta też się pokazuje (bez nazwiska)', async () => {
+    const f = await zaladuj({
+      tryb: 'propozycja', env,
+      wynik: { status: 'anomalie', stawka: null, okresy: null, zrodlo: ZRODLO_SQL,
+        raport: { ...RAPORT, anomalie: [{ oferta: 'UD/2026/ŁŚ/00034/Młot', powod: 'rata × 12 ≠ składka' }] } },
+    });
+    await f.wywolaj();
+    const t = trescMaila(f.maile[0]);
+    expect(t).toContain('UD/2026/ŁŚ/00034');
+    expect(t).not.toContain('Młot');
   });
 
   test('obecny plik na gałęzi produkcyjnej nie przechodzi walidatora: odmowa', async () => {
@@ -1117,12 +1351,37 @@ test.describe('kalibrator: źródło', () => {
   test('twarda lista zapisów: tylko plik kalibracji na gałęzi bota i PR z niej', async () => {
     const { zapisDozwolony } = await wnetrze();
     const ok = (m, s, c, g = GALAZ) => zapisDozwolony(m, s, c, g);
+    const S = 'a'.repeat(40);
+    const wpis = (zmien = {}) => ({ path: PLIK, mode: '100644', type: 'blob', content: '{}', ...zmien });
     expect(ok('GET', `/contents/${PLIK}?ref=${GALAZ}`)).toBe(true);
-    expect(ok('POST', '/git/refs', { ref: `refs/heads/${BOT}`, sha: 'a' })).toBe(true);
-    expect(ok('PATCH', `/git/refs/heads/${BOT}`, { sha: 'a', force: true })).toBe(true);
-    expect(ok('PUT', `/contents/${PLIK}`, { branch: BOT, content: 'x', sha: 'a', message: 'm' })).toBe(true);
+    expect(ok('POST', '/git/trees', { base_tree: S, tree: [wpis()] })).toBe(true);
+    expect(ok('POST', '/git/commits', { message: 'm', tree: S, parents: [S] })).toBe(true);
+    expect(ok('POST', '/git/refs', { ref: `refs/heads/${BOT}`, sha: S })).toBe(true);
+    expect(ok('PATCH', `/git/refs/heads/${BOT}`, { sha: S, force: true })).toBe(true);
     expect(ok('POST', '/pulls', { head: BOT, base: GALAZ, title: 't', body: 'b' })).toBe(true);
     expect(ok('PATCH', '/pulls/7', { title: 't', body: 'b' })).toBe(true);
+
+    // Drzewo: dokładnie jeden wpis — plik kalibracji, zwykły plik, treść wprost.
+    expect(ok('POST', '/git/trees', { base_tree: S, tree: [wpis(), wpis({ path: 'apps/portal/src/lib/symulacja.ts' })] })).toBe(false);
+    expect(ok('POST', '/git/trees', { base_tree: S, tree: [wpis({ path: 'apps/portal/src/lib/symulacja.ts' })] })).toBe(false);
+    expect(ok('POST', '/git/trees', { base_tree: S, tree: [wpis({ path: `./${PLIK}` })] })).toBe(false);
+    expect(ok('POST', '/git/trees', { base_tree: S, tree: [wpis({ mode: '100755' })] })).toBe(false);
+    expect(ok('POST', '/git/trees', { base_tree: S, tree: [wpis({ mode: '120000' })] })).toBe(false);
+    expect(ok('POST', '/git/trees', { base_tree: S, tree: [{ path: PLIK, mode: '100644', type: 'blob', sha: S }] })).toBe(false);
+    expect(ok('POST', '/git/trees', { tree: [wpis()] })).toBe(false);
+    expect(ok('POST', '/git/trees', { base_tree: S, tree: [] })).toBe(false);
+    // Commit: jeden rodzic, bez autora i innych pól.
+    expect(ok('POST', '/git/commits', { message: 'm', tree: S, parents: [S, S] })).toBe(false);
+    expect(ok('POST', '/git/commits', { message: 'm', tree: S, parents: [] })).toBe(false);
+    expect(ok('POST', '/git/commits', { message: 'm', tree: S, parents: [S], author: { name: 'x' } })).toBe(false);
+    expect(ok('POST', '/git/commits', { message: 'm', tree: 't' })).toBe(false);
+    // Referencja gałęzi bota: pełne sha, force tylko jawnie.
+    expect(ok('PATCH', `/git/refs/heads/${BOT}`, { sha: 'a', force: true })).toBe(false);
+    expect(ok('PATCH', `/git/refs/heads/${BOT}`, { sha: S })).toBe(false);
+    expect(ok('POST', '/git/refs', { ref: `refs/heads/${BOT}`, sha: S, force: true })).toBe(false);
+    // Stara droga przez Contents API jest zamknięta — zapis idzie wyłącznie przez commit.
+    expect(ok('PUT', `/contents/${PLIK}`, { branch: BOT, content: 'x', sha: 'a', message: 'm' })).toBe(false);
+    expect(ok('PATCH', '/pulls/7', {})).toBe(false);
 
     // Gałąź produkcyjna — żadnej drogi.
     expect(ok('PUT', `/contents/${PLIK}`, { branch: GALAZ, content: 'x', sha: 'a', message: 'm' })).toBe(false);
@@ -1136,9 +1395,9 @@ test.describe('kalibrator: źródło', () => {
     expect(ok('PATCH', '/pulls/7', { state: 'closed' })).toBe(false);
     expect(ok('PATCH', '/pulls/7', { base: 'main' })).toBe(false);
     expect(ok('DELETE', `/git/refs/heads/${GALAZ}`, {})).toBe(false);
-    expect(ok('POST', '/git/commits', { message: 'm', tree: 't' })).toBe(false);
     // Gałąź produkcyjna ustawiona na gałąź bota — zero zapisów.
-    expect(ok('PUT', `/contents/${PLIK}`, { branch: BOT, content: 'x', sha: 'a', message: 'm' }, BOT)).toBe(false);
+    expect(ok('PATCH', `/git/refs/heads/${BOT}`, { sha: S, force: true }, BOT)).toBe(false);
+    expect(ok('POST', '/git/trees', { base_tree: S, tree: [wpis()] }, BOT)).toBe(false);
   });
 
   test('decyzje właściciela: gałąź bota, plik, nadawca, odbiorca domyślny, podgląd', () => {

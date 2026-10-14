@@ -325,7 +325,8 @@ błędu:
 - `dol` = najtańsza osoba, w górę do 0,01 p.p. (0,0001),
 - `gora` = najdroższa osoba, jw. — decyzja właściciela z 14.10: górą jest
   realny klient, nie percentyl,
-- `srodek` = mediana osób, w górę do 0,1 p.p. (0,001).
+- `srodek` = mediana osób, w górę do 0,1 p.p. (0,001), ale nie wyżej niż
+  `gora` — przy medianie tuż pod maksimum (0,0321 / 0,0322) dałby 0,033.
 
 **Mnożnik okresu** tylko z par w jednej ofercie (to samo świadczenie,
 wyczekiwanie, dodatki i baza OWU), iloraz osoby = mediana jej par. Klucz
@@ -358,6 +359,9 @@ Propozycja zmiany powstaje tylko wtedy, gdy:
 - obecny plik z gałęzi produkcyjnej przechodzi walidator, a kandydat — ten sam
   walidator co portal (`bledyKalibracji` w funkcji = `sprawdzKalibracje`
   w `symulacja.ts`; test porównuje oba na wspólnej liście przypadków);
+- żadna granica nie leży pod surową stawką z raportu (`dol` ≥ surowe
+  minimum, `gora` ≥ surowe maksimum) — druga linia obrony, gdyby ktoś zmienił
+  zaokrąglenia w SQL;
 - zmieniło się `stawka` albo `okresy` — sama zmiana liczności próby
   (`zrodlo`) PR-a nie otwiera;
 - tej samej propozycji (skrót SHA-256 ze stawek i okresów, zapisany w opisie
@@ -378,15 +382,28 @@ Decyzja właściciela z 14.10.2026 — **każda zmiana stawek przez jego
 kliknięcie.** Push na gałąź produkcyjną wdraża portal od razu (i trzy inne
 projekty Pages), a kalibrator zmienia ceny pokazywane konsumentom.
 
-- Gałąź bota `kalibrator/propozycja` jest przy każdej propozycji ustawiana
-  na **bieżący HEAD gałęzi produkcyjnej** (z `force`), a potem dostaje jeden
-  commit z jednym plikiem. Scalenie nigdy nie cofnie niczego innego.
+- Propozycja to **jeden commit, którego rodzicem jest bieżący HEAD gałęzi
+  produkcyjnej**, a drzewem — drzewo tego HEAD z podmienionym jednym plikiem
+  (Git Data API). Gałąź bota `kalibrator/propozycja` jest przestawiana raz,
+  wprost na ten commit (`force`). Scalenie nigdy nie cofnie niczego innego.
+- **Gałąź bota nigdy nie stoi na samym HEAD produkcyjnej.** Pierwsza wersja
+  najpierw cofała ją na HEAD, a potem dopisywała plik — przez tę chwilę GitHub
+  mógł uznać otwarty PR za scalony, choć na stronę nic nie weszło (przegląd
+  z 14.10.2026). Nie wracaj do „reset, potem PUT /contents".
 - Zanim zapisze, sprawdza, że plik w tym HEAD jest dokładnie tym, który
   właśnie ocenił — inaczej przerywa.
 - Twarda lista zapisów (`zapisDozwolony()`), sprawdzana przed każdym
-  żądaniem innym niż GET: gałąź bota, jeden plik na gałęzi bota, PR z gałęzi
-  bota do produkcyjnej, tytuł i opis istniejącego PR. Nic więcej — ani
-  scalenia, ani zamknięcia, ani zmiany bazy PR.
+  żądaniem innym niż GET: drzewo z jednym wpisem (plik kalibracji), commit
+  z jednym rodzicem, gałąź bota, PR z gałęzi bota do produkcyjnej, tytuł
+  i opis istniejącego PR. Nic więcej — ani scalenia, ani zamknięcia, ani
+  zmiany bazy PR, ani zapisu przez Contents API.
+- **Otwarty PR, którego liczb dane już nie dają** (przebieg „bez zmian" albo
+  odmowa), dostaje tytuł z przedrostkiem `[NIEAKTUALNE]` i ostrzeżenie „nie
+  scalaj" na początku opisu; skrót propozycji znika z opisu. Gdy dane znowu
+  pokażą zmianę, kalibrator przepisze ten sam PR na nowo. Bez tego właściciel
+  mógł scalić stawki sprzed zmiany danych — także niższy dół.
+- Ręczne poprawki na gałęzi bota przepadają przy następnej propozycji —
+  poprawia się dane albo zamyka PR, nie gałąź.
 - Podgląd: `https://kalibrator-propozycja.utratadochodu.pages.dev/kalkulator/`.
 
 Token: fine-grained, tylko `aurabroker/ud`, Contents i Pull requests: write.
@@ -404,10 +421,11 @@ Odbiorca z ustawień (domyślnie `biuro@utratadochodu.com`). Nadawca
 - **propozycja** — link do PR i do podglądu, tabelka kwot, poprzednia treść
   pliku (do cofnięcia), ostrzeżenie, gdy spada dolna granica;
 - **odmowa** — powody; ta sama odmowa co w poprzednim przebiegu drugiego
-  maila nie wysyła;
+  maila nie wysyła, chyba że poprzedni mail nie wyszedł (wtedy ponawia);
 - **bez zmian** — raz na 30 dni, żeby cisza nie znaczyła awarii;
 - **alarmy** — strona dwa przebiegi z rzędu nie pokazuje przedziału z pliku
-  (portal nie przebudował się po scaleniu), token wygasa.
+  (portal nie przebudował się po scaleniu; przypomnienie co tydzień, dopóki
+  tak jest), token wygasa, otwarty PR stał się nieaktualny.
 
 ## Czego kalibratorowi nie wolno
 
@@ -423,7 +441,7 @@ Odbiorca z ustawień (domyślnie `biuro@utratadochodu.com`). Nadawca
 
 | Co | Gdzie |
 |---|---|
-| metoda SQL na zamrożonym zestawie z produkcji (127 wariantów, zanonimizowane) i na przypadkach brzegowych; uprawnienia, cron | `pnpm test:kalibracja-sql` w `apps/panel` (`supabase/tests/kalibracja.sql`, 57 przypadków) |
+| metoda SQL na zamrożonym zestawie z produkcji (127 wariantów, zanonimizowane) i na przypadkach brzegowych; uprawnienia, cron | `pnpm test:kalibracja-sql` w `apps/panel` (`supabase/tests/kalibracja.sql`, 58 przypadków) |
 | funkcja brzegowa na atrapach Supabase, GitHuba i Resend; zgodność walidatorów; rozpoznanie przedziału na zbudowanej stronie | `apps/portal/test/kalibrator.spec.js` |
 | walidator pliku w portalu, kwoty liczone z `kalibracja.json` | `apps/portal/test/kalkulator.spec.js` |
 
@@ -432,9 +450,10 @@ z 5 osób) policzyła niezależna implementacja w Pythonie na tych samych
 wierszach, nie sama funkcja SQL. Jeśli kiedyś funkcja zwróci co innego na tym
 zestawie, to znaczy, że ktoś zmienił metodę, a nie że zmienił się rynek.
 
-Testy przeszły mutacje (43 pogorszone wersje migracji, każda daje czerwony
+Testy przeszły mutacje (44 pogorszone wersje migracji, każda daje czerwony
 wynik): każdy filtr z osobna, osoba po kliencie zamiast PESEL-u, najstarsza
 oferta zamiast najnowszej, minimum zamiast mediany, składka netto,
-zaokrąglenia do najbliższej zamiast w górę, progi 3 osób / 1,05 / 8 osób,
+zaokrąglenia do najbliższej zamiast w górę, środek ponad górę, progi
+3 osób / 1,05 / 8 osób,
 anomalie, pełny numer oferty z nazwiskiem, `SECURITY DEFINER`, brak `revoke`,
 stan crona po ponownej migracji.

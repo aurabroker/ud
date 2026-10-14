@@ -88,6 +88,9 @@ const DNI_DO_DECYZJI_PRZERWA = 30;
 /** Znaczniki w `powod` — po nich dziennik pamięta, o czym już pisaliśmy. */
 const ZNACZNIK_TOKENU = "ostrzeżenie: token GitHuba wygasa";
 const ZNACZNIK_STRONY = "alert: strona nie pokazuje stawek z pliku";
+const ZNACZNIK_NIEAKTUALNY = "nieaktualny PR";
+/** Przedrostek tytułu PR, którego liczb dane już nie dają. Po nim drugi raz go nie oznaczamy. */
+const NIEAKTUALNY = "[NIEAKTUALNE]";
 const SEPARATOR_ZNACZNIKOW = " | ";
 
 type Json = Record<string, unknown>;
@@ -110,7 +113,16 @@ type Sekcja = {
   pre?: string;
 };
 type Mail = { temat: string; html: string; tekst: string };
-type Pr = { number: number; state: string; merged_at: string | null; body: string | null; html_url: string };
+type Pr = {
+  number: number;
+  state: string;
+  merged_at: string | null;
+  title?: string | null;
+  body: string | null;
+  html_url: string;
+  head?: { ref?: string; repo?: { full_name?: string } | null } | null;
+  base?: { ref?: string } | null;
+};
 type Klient = ReturnType<typeof createClient>;
 
 const json = (data: unknown, status = 200) =>
@@ -256,6 +268,15 @@ function ocen(wynik: unknown, obecny: unknown, dzis: string) {
     bledy.push(...bledyStawek(wynik.stawka).map((b) => `wynik SQL: ${b}`));
     const s = wynik.stawka as Stawka;
     if (!bledy.length && !(s.dol < s.gora)) bledy.push("wynik SQL: dolna granica musi być niższa od górnej");
+    // Druga linia obrony przed zmianą zaokrągleń w SQL: granica pod surową
+    // stawką to cena niższa niż u realnego klienta z próby.
+    const surowe = pole(wynik.raport, "surowe");
+    const min = pole(surowe, "min");
+    const max = pole(surowe, "max");
+    if (!liczba(min) || !liczba(max)) bledy.push("wynik SQL: brak raport.surowe (min, max)");
+    else if (!bledy.length && (s.dol < min || s.gora < max)) {
+      bledy.push(`wynik SQL: granica poniżej surowej stawki (dół ${s.dol} < ${min} albo góra ${s.gora} < ${max})`);
+    }
     bledy.push(...bledyOkresow(wynik.okresy).map((b) => `wynik SQL: ${b}`));
   }
   const zr = oczyscZrodlo(wynik.zrodlo);
@@ -363,7 +384,8 @@ function bezDanych(tekst: string): string {
 
 /** Numer oferty bez członu z nazwiskiem: UD/2026/CE/00034/Młot → UD/2026/CE/00034. */
 function numerOferty(v: unknown): string {
-  const m = String(v ?? "").match(/^[A-Z]{2}\/\d{4}\/[A-Z0-9]{1,6}\/\d{1,8}/);
+  // Inicjały agenta bywają polskie (initialsFrom() w panelu: „ŁŚ") — stąd \p{Lu}.
+  const m = String(v ?? "").match(/^[A-Z]{2}\/\d{4}\/[\p{Lu}0-9]{1,6}\/\d{1,8}/u);
   return m ? m[0] : "—";
 }
 
@@ -402,8 +424,9 @@ const dataPl = (iso: string) => iso.split("-").reverse().join(".");
 /** Część `powod` przed znacznikami — po niej rozpoznajemy „ten sam" przebieg. */
 const rdzen = (powod: string | null | undefined) => String(powod ?? "").split(SEPARATOR_ZNACZNIKOW)[0];
 
+/** Ten sam wynik i powód co ostatnio — i ostatni mail o nim naprawdę wyszedł (inaczej ponawiamy). */
 const powtorzenie = (historia: Wpis[], wynik: string, powod: string) =>
-  historia[0]?.wynik === wynik && rdzen(historia[0]?.powod) === rdzen(powod);
+  historia[0]?.wynik === wynik && rdzen(historia[0]?.powod) === rdzen(powod) && historia[0]?.mail_wyslany === true;
 
 function dniOd(iso: string, teraz: Date): number {
   return (teraz.getTime() - new Date(iso).getTime()) / DZIEN_MS;
@@ -421,21 +444,42 @@ function dniOdOstatniegoMaila(historia: Wpis[], teraz: Date): number {
 
 const sciezkaGalezi = (galaz: string) => galaz.split("/").map(encodeURIComponent).join("/");
 
+const SHA = /^[0-9a-f]{40}$/;
+const tylkoKlucze = (o: Json, klucze: string[]) =>
+  Object.keys(o).length === klucze.length && klucze.every((k) => k in o);
+
 /**
  * Twarda lista zapisów. Każde żądanie inne niż GET przechodzi tędy, zanim
- * wyjdzie: wolno ustawić gałąź bota, zapisać JEDEN plik na gałęzi bota
- * i otworzyć albo opisać pull request z gałęzi bota do produkcyjnej.
- * Gałąź produkcyjna nie ma tu żadnej drogi zapisu.
+ * wyjdzie. Wolno: zbudować drzewo, które różni się od bazowego JEDNYM plikiem
+ * (kalibracji), i commit z jednym rodzicem — to same obiekty, bez referencji
+ * nic nie zmieniają — potem ustawić na nim gałąź bota i otworzyć albo opisać
+ * pull request z gałęzi bota do produkcyjnej. Gałąź produkcyjna nie ma tu
+ * żadnej drogi zapisu.
  */
 function zapisDozwolony(metoda: string, sciezka: string, cialo: Json | undefined, galaz: string): boolean {
   if (metoda === "GET") return true;
   if (galaz === GALAZ_BOTA || !cialo) return false;
-  if (metoda === "POST" && sciezka === "/git/refs") return cialo.ref === `refs/heads/${GALAZ_BOTA}`;
-  if (metoda === "PATCH" && sciezka === `/git/refs/heads/${GALAZ_BOTA}`) return true;
-  if (metoda === "PUT" && sciezka === `/contents/${PLIK}`) return cialo.branch === GALAZ_BOTA;
+  if (metoda === "POST" && sciezka === "/git/trees") {
+    if (!tylkoKlucze(cialo, ["base_tree", "tree"]) || typeof cialo.base_tree !== "string" || !SHA.test(cialo.base_tree)) return false;
+    if (!Array.isArray(cialo.tree) || cialo.tree.length !== 1 || !obiekt(cialo.tree[0])) return false;
+    const w = cialo.tree[0];
+    return tylkoKlucze(w, ["path", "mode", "type", "content"]) && w.path === PLIK && w.mode === "100644" &&
+      w.type === "blob" && typeof w.content === "string";
+  }
+  if (metoda === "POST" && sciezka === "/git/commits") {
+    return tylkoKlucze(cialo, ["message", "tree", "parents"]) && typeof cialo.message === "string" &&
+      typeof cialo.tree === "string" && SHA.test(cialo.tree) &&
+      Array.isArray(cialo.parents) && cialo.parents.length === 1 && typeof cialo.parents[0] === "string" && SHA.test(cialo.parents[0]);
+  }
+  if (metoda === "POST" && sciezka === "/git/refs") {
+    return tylkoKlucze(cialo, ["ref", "sha"]) && cialo.ref === `refs/heads/${GALAZ_BOTA}` && typeof cialo.sha === "string" && SHA.test(cialo.sha);
+  }
+  if (metoda === "PATCH" && sciezka === `/git/refs/heads/${GALAZ_BOTA}`) {
+    return tylkoKlucze(cialo, ["sha", "force"]) && typeof cialo.sha === "string" && SHA.test(cialo.sha) && cialo.force === true;
+  }
   if (metoda === "POST" && sciezka === "/pulls") return cialo.head === GALAZ_BOTA && cialo.base === galaz;
   if (metoda === "PATCH" && /^\/pulls\/\d+$/.test(sciezka)) {
-    return Object.keys(cialo).every((k) => k === "title" || k === "body");
+    return Object.keys(cialo).length > 0 && Object.keys(cialo).every((k) => k === "title" || k === "body");
   }
   return false;
 }
@@ -487,12 +531,6 @@ function zBase64(b64: string): string {
   return new TextDecoder("utf-8", { fatal: true }).decode(Uint8Array.from(s, (c) => c.charCodeAt(0)));
 }
 
-function doBase64(tekst: string): string {
-  let s = "";
-  for (const b of new TextEncoder().encode(tekst)) s += String.fromCharCode(b);
-  return btoa(s);
-}
-
 /**
  * Obecny plik z gałęzi produkcyjnej. Bez tokenu API GitHuba liczy limit na
  * adres IP — wspólny dla wielu funkcji brzegowych — więc przy odmowie 403/429
@@ -515,14 +553,69 @@ async function pobierzPlik(gh: GitHub, galaz: string): Promise<{ tekst: string }
   }
 }
 
-async function listaPr(gh: GitHub): Promise<Pr[]> {
+/**
+ * Pull requesty kalibratora: z gałęzi bota w tym repozytorium do gałęzi
+ * produkcyjnej. Filtr `head=` po stronie GitHuba to za mało, żeby na ich
+ * podstawie cokolwiek pisać — sprawdzamy jeszcze raz każde pole.
+ */
+async function listaPr(gh: GitHub, galaz: string): Promise<Pr[]> {
   const wlasciciel = REPO.split("/")[0];
   const { dane } = await gh.zapytaj(
     "GET",
     `/pulls?head=${encodeURIComponent(`${wlasciciel}:${GALAZ_BOTA}`)}&state=all&per_page=100`,
   );
   if (!Array.isArray(dane)) throw new Error("GitHub: lista pull requestów nie jest tablicą");
-  return (dane as Pr[]).filter((p) => Number.isInteger(p?.number));
+  return (dane as Pr[]).filter((p) =>
+    Number.isInteger(p?.number) && p.head?.ref === GALAZ_BOTA && p.head?.repo?.full_name === REPO && p.base?.ref === galaz
+  );
+}
+
+/**
+ * Otwarte PR kalibratora, których liczb dane już nie dają: tytuł z przedrostkiem
+ * [NIEAKTUALNE], na początku opisu ostrzeżenie, skrót propozycji usunięty —
+ * dzięki temu te same liczby, gdy wrócą, nie trafią na „już czeka", tylko
+ * przepiszą ten PR na nowo. Błąd GitHuba nie przerywa przebiegu: wpis
+ * w ud_errors i alarm (nie częściej niż raz na 7 dni).
+ */
+async function oznaczNieaktualne(gh: GitHub, galaz: string, powod: string, historia: Wpis[], teraz: Date): Promise<Uwaga[]> {
+  const uwagi: Uwaga[] = [];
+  try {
+    const otwarte = (await listaPr(gh, galaz)).filter((p) => p.state === "open" && !String(p.title ?? "").startsWith(NIEAKTUALNY));
+    for (const p of otwarte) {
+      const tytul = `${NIEAKTUALNY} ${String(p.title ?? "Kalibracja stawek")}`.slice(0, 200);
+      const reszta = String(p.body ?? "")
+        .replace(/^Skrót propozycji: `[0-9a-f]+`$/gm, "")
+        .replace(/<!-- kalibrator:[0-9a-f]+ -->/g, "");
+      const opis = [
+        `**${NIEAKTUALNY} Nie scalaj.** Dane z ofert już nie dają tej propozycji (${bezDanych(powod).slice(0, 200)}).`,
+        "Kalibrator przepisze ten pull request sam, gdy dane znowu pokażą zmianę stawek.",
+        "",
+        "---",
+        "",
+        reszta.trim(),
+      ].join("\n");
+      await gh.zapytaj("PATCH", `/pulls/${p.number}`, { title: tytul, body: opis });
+      uwagi.push({
+        alarm: true,
+        znacznik: `${ZNACZNIK_NIEAKTUALNY} #${p.number}`,
+        tekst: `Pull request #${p.number} oznaczony jako nieaktualny — dane już nie dają tych stawek. Nie scalaj go; ` +
+          "kalibrator przepisze go sam przy następnej zmianie.",
+      });
+    }
+  } catch (e) {
+    const komunikat = bezDanych(String((e as { message?: string })?.message ?? e));
+    await logError(ZRODLO_BLEDU, `Kalibrator: nie mogę sprawdzić albo oznaczyć otwartego PR (${komunikat})`);
+    const znacznik = `${ZNACZNIK_NIEAKTUALNY}: błąd`;
+    if (!byloWDniach(historia, znacznik, DNI_TOKEN_PRZERWA, teraz)) {
+      uwagi.push({
+        alarm: true,
+        znacznik,
+        tekst: `Nie udało się sprawdzić, czy otwarty pull request kalibratora jest aktualny (${komunikat}). ` +
+          "Zanim scalisz otwarty PR kalibratora, porównaj jego liczby z tym mailem.",
+      });
+    }
+  }
+  return uwagi;
 }
 
 /**
@@ -548,17 +641,28 @@ async function zlozPropozycje(
     throw new Error("plik kalibracji na gałęzi produkcyjnej zmienił się w trakcie przebiegu");
   }
 
-  const bot = await gh.zapytaj("GET", `/git/ref/heads/${GALAZ_BOTA}`, undefined, [404]);
-  if (bot.status === 404) await gh.zapytaj("POST", "/git/refs", { ref: `refs/heads/${GALAZ_BOTA}`, sha });
-  // force: true wolno — to gałąź bota, nikt na niej nie pracuje.
-  else await gh.zapytaj("PATCH", `/git/refs/heads/${GALAZ_BOTA}`, { sha, force: true });
-
-  await gh.zapytaj("PUT", `/contents/${PLIK}`, {
-    message: o.wiadomosc,
-    content: doBase64(o.kandydatTekst),
-    sha: wHead.dane.sha,
-    branch: GALAZ_BOTA,
+  // Najpierw commit (drzewo HEAD z podmienionym jednym plikiem), dopiero potem
+  // JEDNO przestawienie gałęzi bota. Gałąź nigdy nie stoi na samym HEAD
+  // produkcyjnej — GitHub uznałby wtedy otwarty PR za scalony, choć na stronę
+  // nic nie weszło.
+  const commitHead = await gh.zapytaj("GET", `/git/commits/${sha}`);
+  const drzewoHead = obiekt(commitHead.dane) && obiekt(commitHead.dane.tree) ? String(commitHead.dane.tree.sha ?? "") : "";
+  if (!SHA.test(drzewoHead)) throw new Error("GitHub: brak drzewa HEAD gałęzi produkcyjnej");
+  const drzewo = await gh.zapytaj("POST", "/git/trees", {
+    base_tree: drzewoHead,
+    tree: [{ path: PLIK, mode: "100644", type: "blob", content: o.kandydatTekst }],
   });
+  const drzewoSha = obiekt(drzewo.dane) ? String(drzewo.dane.sha ?? "") : "";
+  if (!SHA.test(drzewoSha)) throw new Error("GitHub: drzewo bez sha");
+  const commit = await gh.zapytaj("POST", "/git/commits", { message: o.wiadomosc, tree: drzewoSha, parents: [sha] });
+  const commitSha = obiekt(commit.dane) ? String(commit.dane.sha ?? "") : "";
+  if (!SHA.test(commitSha)) throw new Error("GitHub: commit bez sha");
+
+  const bot = await gh.zapytaj("GET", `/git/ref/heads/${GALAZ_BOTA}`, undefined, [404]);
+  if (bot.status === 404) await gh.zapytaj("POST", "/git/refs", { ref: `refs/heads/${GALAZ_BOTA}`, sha: commitSha });
+  // force: true wolno — to gałąź bota, nikt na niej nie pracuje (ręczne
+  // poprawki w PR kalibratora przepadają przy następnej propozycji).
+  else await gh.zapytaj("PATCH", `/git/refs/heads/${GALAZ_BOTA}`, { sha: commitSha, force: true });
 
   const pr = o.otwarty
     ? await gh.zapytaj("PATCH", `/pulls/${o.otwarty.number}`, { title: o.tytul, body: o.opis })
@@ -1112,14 +1216,26 @@ async function przebieg(supabase: Klient, stan: { ustawienia?: Ustawienia }): Pr
         " Nowy: fine-grained, tylko aurabroker/ud, Contents i Pull requests: write; podmiana w Edge Functions → Secrets.",
     });
   }
+  // Drugi przebieg z rzędu bez przedziału z pliku. Znacznik trafia do dziennika
+  // tylko z wysłanym mailem — nieudany mail ponawiamy w kolejnym przebiegu,
+  // a przy trwałej awarii przypominamy co tydzień.
   const sprawdzone = historia.filter((h) => typeof h.na_stronie === "boolean");
-  if (naStronie === false && sprawdzone[0]?.na_stronie === false && sprawdzone[1]?.na_stronie !== false) {
+  if (naStronie === false && sprawdzone[0]?.na_stronie === false &&
+    !byloWDniach(historia, ZNACZNIK_STRONY, DNI_TOKEN_PRZERWA, teraz)) {
     uwagi.push({
       alarm: true,
       znacznik: ZNACZNIK_STRONY,
       tekst: `Strona ${STRONA_MD} drugi przebieg z rzędu nie pokazuje przedziału ${zakres(SWIADCZENIE_STRONY, pole(obecny, "stawka"))} ` +
         `dla ${zl(SWIADCZENIE_STRONY)}, policzonego z pliku na gałęzi ${ustawienia.galaz}. Sprawdź wdrożenie w Cloudflare Pages.`,
     });
+  }
+
+  // Otwarty PR kalibratora, którego liczb dane już nie dają (odmowa albo stawki
+  // równe plikowi): oznaczamy go, żeby nikt nie scalił stawek sprzed zmiany
+  // danych. Przed budową maili — uwaga ma w nich stać.
+  if (ustawienia.tryb === "propozycja" && tokenGh && (bledy.length || !ocena.zmiana)) {
+    const dlaczego = bledy.length ? bledy.join("; ") : "stawki z danych są takie same jak w pliku na gałęzi produkcyjnej";
+    uwagi.push(...await oznaczNieaktualne(gh, ustawienia.galaz, dlaczego, historia, teraz));
   }
 
   const k: Kontekst = {
@@ -1156,7 +1272,7 @@ async function przebieg(supabase: Klient, stan: { ustawienia?: Ustawienia }): Pr
   } else {
     const kandydat = ocena.kandydat as Json;
     skrot = await sha256(kanoniczny({ stawka: kandydat.stawka, okresy: kandydat.okresy }));
-    const prs = await listaPr(gh);
+    const prs = await listaPr(gh, ustawienia.galaz);
     const zTymSkrotem = prs.filter((p) => String(p.body ?? "").includes(skrot as string));
     const czeka = zTymSkrotem.find((p) => p.state === "open");
     const odrzucony = zTymSkrotem.find((p) => p.state === "closed" && !p.merged_at);
@@ -1220,18 +1336,19 @@ async function zapiszPrzebieg(supabase: Klient, wpis: Json) {
 async function obsluzBlad(supabase: Klient, stan: { ustawienia?: Ustawienia }, e: unknown): Promise<Response> {
   const komunikat = bezDanych(String((e as { message?: string })?.message ?? e));
   await logError(ZRODLO_BLEDU, `Kalibrator: ${komunikat}`);
-  let ostatni: { wynik?: string; powod?: string | null } | undefined;
+  let ostatni: { wynik?: string; powod?: string | null; mail_wyslany?: boolean } | undefined;
   try {
     const { data } = await supabase
       .from("ud_kalibracja_przebiegi")
-      .select("wynik, powod")
+      .select("wynik, powod, mail_wyslany")
       .order("uruchomiono", { ascending: false })
       .limit(1);
     ostatni = (data ?? [])[0] as typeof ostatni;
   } catch {
     ostatni = undefined;
   }
-  const powtorka = ostatni?.wynik === "blad" && rdzen(ostatni?.powod) === komunikat;
+  // Ten sam błąd co ostatnio i mail o nim wyszedł — bez drugiego maila.
+  const powtorka = ostatni?.wynik === "blad" && rdzen(ostatni?.powod) === komunikat && ostatni?.mail_wyslany === true;
   let wyslany = false;
   if (!powtorka) {
     try {
