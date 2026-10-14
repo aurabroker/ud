@@ -1,12 +1,49 @@
 # Model szacowania składki — kalibracja na ofertach z bazy
 
-Stan na 2026-09-17. Źródło: `ud_offer_documents` w projekcie Supabase
-`kukvgsjrmrqtzhkszzum` — 48 wariantów z 15 ofert, jeden ubezpieczyciel
-(Leadenhall), produkty LW044 i LW047/MEDICARE.
+Dokument opisuje, skąd biorą się liczby w `src/lib/kalibracja.json`
+i `src/lib/symulacja.ts`. Bez niego każda z nich jest umowna, a to jest
+dokładnie ten zarzut, który postawił klient stawce 1,5%.
 
-Dokument opisuje, skąd biorą się liczby w `src/lib/symulacja.ts`. Bez niego
-każda z nich jest umowna, a to jest dokładnie ten zarzut, który postawił klient
-stawce 1,5%.
+Dwie warstwy: analiza z 17.09.2026 (pierwsza kalibracja, ręczna, na 48
+wariantach z 15 ofert — sekcje od „Co w danych jest") i metoda **osoby-v1**
+z 14.10.2026, którą liczy funkcja SQL `ud_kalibracja_stawek()` i pilnuje
+funkcja brzegowa `kalibrator` (druga część dokumentu). Liczby w pliku
+pochodzą z tej drugiej.
+
+## Stan na 14.10.2026 — metoda osoby-v1
+
+| | 17.09 (ręcznie) | 14.10 (osoby-v1) |
+|---|---|---|
+| jednostka | wariant | **osoba** (PESEL) |
+| próba | 10 wariantów | 10 osób, 11 ofert, 22 warianty |
+| stawka dół / góra | 2,02% / 2,44% | 2,02% / **3,22%** (surowe 3,217%) |
+| środek | 2,2% | 2,2% (mediana osób 2,144%) |
+| mnożnik 36 mies. | 1,25 z 6 par | 1,25 z 5 osób (1,2376–1,2549) |
+| przedział przy 14 400 zł | 291–351 zł | **291–464 zł** |
+
+Pominięte warianty z okna (14.10): trwała niezdolność albo śmierć 64,
+płatność jednorazowa 13, klauzula HIV/WZW 3, okres wyczekiwania ponad 21 dni 2,
+spoza okna 21. Anomalii zero.
+
+Co z analizy z 17.09 okazało się nieprawdą — przeczytaj, zanim zaczniesz
+porównywać liczby z tabel niżej:
+
+- **Górne 2,44% to wariant z klauzulą HIV/WZW** (LW049, pielęgniarka, 366 zł).
+  Klauzula kosztuje osobno (×1,07 w kalkulatorze), więc wariant z nią nie mówi
+  nic o stawce bazowej. Osoba-v1 go wyklucza; ta sama osoba bez klauzuli ma
+  2,373%.
+- **Obie pary pielęgniarki w tabeli mnożnika 36 mają klauzulę po stronie
+  36 miesięcy** (ta sama oferta): 1,2432 porównuje klauzulę z klauzulą,
+  1,2781 — wariant bez klauzuli z wariantem z nią, stąd zawyżenie. Osoba-v1
+  nie bierze żadnej; z pięciu osób wychodzi mediana 1,2453 — mnożnik dalej
+  1,25, ale z czystej próby.
+- **Wiek przestał być „26–43”.** Czysta próba 24-miesięczna (przed oknem
+  48 h) to trzy osoby przed trzydziestką, sześć po trzydziestce, trzy po
+  czterdziestce i jedna po pięćdziesiątce. Najdroższa osoba (3,217%) to
+  właśnie ta po pięćdziesiątce. To pierwszy ślad gradientu wieku w danych
+  i **jedna obserwacja** — współczynnika wieku z tego nie ma (patrz „Wiek”),
+  ale górna granica przedziału nie jest błędem pomiaru, tylko realnym
+  klientem.
 
 ## Co w danych jest, a czego nie ma
 
@@ -53,9 +90,12 @@ Dziesięć wariantów bez trwałej niezdolności i bez śmierci, płatnych w 12 
 | Kierowca | 6 000 | 14/21 | 140 zł | 2,333% |
 | Kierowca | 8 000 | 14/21 | 187 zł | 2,338% |
 | Pielęgniarka | 15 000 | 14/21 | 356 zł | 2,373% |
-| Pielęgniarka | 15 000 | 14/21 | 366 zł | 2,440% |
+| Pielęgniarka | 15 000 | 14/21 | 366 zł | 2,440% ¹ |
 
 Mediana 2,147%, średnia 2,206%, rozrzut 2,02–2,44%.
+
+¹ Wariant z klauzulą HIV/WZW (LW049) — wyszło na jaw 14.10.2026. Bez niego
+rozrzut z tej tabeli to 2,02–2,37%.
 
 **Stawka 1,5% z `symulacja.ts` leży poniżej najniższej zaobserwowanej oferty.**
 Przy świadczeniu 14 400 zł serwis pokazuje 216 zł; najtańsza obserwacja daje
@@ -69,13 +109,17 @@ Sześć par z tej samej oferty, identycznych we wszystkim poza okresem wypłaty
 | Zawód | Świadczenie | 24 mies. | 36 mies. | Mnożnik |
 |---|---|---|---|---|
 | Kosmetolog | 5 000 | 1 212 zł | 1 500 zł | 1,2376 |
-| Pielęgniarka | 15 000 | 4 392 zł | 5 460 zł | 1,2432 |
+| Pielęgniarka | 15 000 | 4 392 zł | 5 460 zł | 1,2432 ¹ |
 | Elektryk | 10 000 | 2 544 zł | 3 168 zł | 1,2453 |
 | Ratownik medyczny | 12 000 | 3 036 zł | 3 792 zł | 1,2490 |
 | Kosmetyczka | 5 000 | 1 224 zł | 1 536 zł | 1,2549 |
-| Pielęgniarka | 15 000 | 4 272 zł | 5 460 zł | 1,2781 |
+| Pielęgniarka | 15 000 | 4 272 zł | 5 460 zł | 1,2781 ¹ |
 
 Mediana 1,2471, rozrzut 1,2376–1,2781. **Mnożnik 1,25.**
+
+¹ Pary z klauzulą HIV/WZW (14.10.2026): 1,2432 ma ją po obu stronach,
+1,2781 tylko po stronie 36 miesięcy — porównuje dwie rzeczy naraz. Osoba-v1
+nie bierze żadnej z nich; z pięciu osób wychodzi 1,2453 → 1,25.
 
 Warianty z dorzuconą trwałą niezdolnością dają mnożnik niższy (1,13–1,21),
 bo część składki za trwałą niezdolność nie zależy od okresu wypłaty. To
@@ -117,7 +161,10 @@ Klasy I i IV występują wyłącznie w wariantach z trwałą niezdolnością alb
 
 Wiek daje się odtworzyć z PESEL-u klienta dla wszystkich 48 wierszy, ale:
 
-- zakres to 26–43 lata, a serwis kieruje ofertę także do osób po pięćdziesiątce,
+- zakres to 26–43 lata, a serwis kieruje ofertę także do osób po pięćdziesiątce
+  (14.10.2026: w próbie jest już jedna taka osoba i to ona wyznacza górną
+  granicę — 3,217% wobec 2,37% następnej; jedna obserwacja to wciąż nie
+  współczynnik),
 - **każdy wiek występuje z innym zawodem** — 14 osób, 14 zawodów. Wiek i zawód
   są w tych danych nierozróżnialne; to, co przypiszemy wiekowi, mogło być
   zawodem, i odwrotnie.
@@ -137,21 +184,26 @@ dałaby 1,50 i 1,75, ale to byłoby zgadywanie udające rachunek.
 
 ```
 świadczenie = dochód × limit                 (0,80 B2B, 0,65 etat)
-składka     = świadczenie × stawka × mnożnik_okresu
+składka     = świadczenie × stawka × mnożnik_okresu   — jako przedział
 
-stawka          = 0,022          ± 10% (rozrzut w danych: 0,0202–0,0244)
+stawka          = dol … gora     (14.10.2026: 0,0202 … 0,0322)
+                  dol = najtańsza osoba, gora = najdroższa osoba
+                  srodek = mediana osób (0,022) — tylko tam, gdzie musi
+                  paść jedna liczba; żadna strona go dziś nie pokazuje
 mnożnik_okresu  = 1,00  dla 24 miesięcy
                 = 1,25  dla 36 miesięcy
                 = brak danych dla 48 i 60
 ```
 
 Zakres ważności: niezdolność okresowa bez trwałej niezdolności i bez śmierci,
-B2B, wiek 26–43, karencja 14–21 dni, składka w 12 ratach, Leadenhall.
+bez klauzuli HIV/WZW i bez płatnych dodatków, okres wyczekiwania do 21 dni,
+składka w 12 ratach (brutto, z opłatą dystrybucyjną — tyle płaci klient),
+Leadenhall, oferty z ostatnich 12 miesięcy.
 
-Sprawdzenie na wszystkich 16 czystych obserwacjach (10 × 24 mies., 6 × 36):
-największy błąd **+10,0%**, najmniejszy **+0,4%**, wszystkie w przedziale
-od −9,8% do +10,0%. Stąd `± 10%` przy stawce — to nie jest ostrożnościowy
-margines dopisany na oko, tylko zmierzony rozrzut modelu.
+Z 17.09 zostało sprawdzenie modelu na 16 obserwacjach: wzór ze stawką 0,022
+mylił się od −9,8% do +10,0%. Dlatego strona pokazuje przedział, a nie
+„0,022 ± 10%” — przedział od najtańszej do najdroższej osoby obejmuje każdego
+klienta z próby z definicji.
 
 ### Klauzula HIV/WZW
 
@@ -169,137 +221,220 @@ warto policzyć to jeszcze raz, ręcznie.
 
 ## Jak tę kalibrację powtórzyć
 
-Zapytania, którymi policzone są tabele wyżej, są w historii sesji; każde
-sprowadza się do tego samego filtru:
+Od 14.10.2026 nie ręcznie: `select public.ud_kalibracja_stawek();` (tylko
+odczyt, wyłącznie `service_role` — w SQL Editorze działa) zwraca stawki,
+mnożniki, liczność próby i raport z powodami pominięć. Metoda jest opisana
+niżej, w części o kalibratorze.
 
-```sql
-where coalesce(perm_incapacity_covered,false)=false
-  and coalesce(perm_sum_insured,0)=0
-  and coalesce(death_covered,false)=false
-  and installments = 12
-```
+Filtr z 17.09 (bez trwałej, bez śmierci, 12 rat) był za luźny — przepuszczał
+klauzulę HIV/WZW. Mnożnik okresu liczy się na parach z jednej oferty, złączonych
+po świadczeniu, okresie wyczekiwania, dodatkach i bazie OWU — inaczej do
+porównania wchodzą warianty różniące się czymś jeszcze i mnożnik rozjeżdża się
+do 1,13–1,40.
 
-Mnożnik okresu liczy się na parach złączonych po `offer_id`, świadczeniu,
-karencji, dodatkach i sposobie płatności — inaczej do porównania wchodzą
-warianty różniące się czymś jeszcze i mnożnik rozjeżdża się do 1,13–1,40.
-
-Kalibrację warto powtórzyć, gdy w `ud_offer_documents` przybędzie ofert —
-w szczególności takich z okresem 48 lub 60 miesięcy, z drugim ubezpieczycielem
-albo z klientem po pięćdziesiątce. Każde z tych trzech domyka jedną z dziur
-opisanych wyżej.
+Dziury, które domkną nowe oferty: okres 48 lub 60 miesięcy (kalibrator zgłosi
+mnożnik mailem „do decyzji”), drugi ubezpieczyciel (CEU — dziś świadomie poza
+próbą), klienci po pięćdziesiątce (dziś jedna osoba).
 
 ---
 
-# Plan: worker `ud-kalibrator` — przeliczanie stawek raz dziennie
+# Kalibrator — stawki przeliczane z ofert (metoda osoby-v1)
 
-Status: **plan, nie kod.** Nic z tego nie jest jeszcze wdrożone.
+Status na 14.10.2026: **kod w repozytorium, na produkcji jeszcze nic.**
+Kolejność wdrożenia i kroki właściciela — CLAUDE.md, „Kalibrator stawek".
 
 ## Rzecz, która przesądza o kształcie: serwis jest statyczny
 
-Kwoty składek nie są czytane w przeglądarce. Są wpieczone w build — w 228
-plików HTML, 227 plików `.md` i 189 plików `llms.txt`. Kalkulator jest wyspą
-Svelte, ale i on renderuje się po stronie serwera, żeby robot i model językowy
-zobaczyły liczby, a nie pustą ramkę.
+Kwoty składek nie są czytane w przeglądarce. Są wpieczone w build: przedział
+składki stoi w 191 plikach HTML, 191 plikach `.md` i 188 plikach `llms.txt`.
+Kalkulator jest wyspą Svelte, ale renderuje się po stronie serwera, żeby robot
+i model językowy zobaczyły liczby, a nie pustą ramkę.
 
-Z tego wynika, że worker **nie może „zaktualizować danych w serwisie"** przez
-zapis do bazy, z której strona by je czytała. Gdyby czytała, zniknęłyby ze
-źródła strony i cała warstwa dla agentów zostałaby z pustymi miejscami.
-
-Worker może za to zrobić coś lepszego: przeliczyć stawki i **podmienić
-`kalibracja.json` w repozytorium**. Cloudflare Pages zbuduje serwis sam, bo
-commit na gałęzi produkcyjnej jest dla niego wyzwalaczem. Historia gita staje
-się przy okazji dziennikiem: widać, kiedy stawka się zmieniła, o ile i na
-jakiej próbce. Na produkcie regulowanym to nie jest dodatek — to odpowiedź na
-pytanie „co serwis pokazywał w marcu i skąd ta liczba".
-
-Build **nie** pyta bazy o nic. Czyta zatwierdzony plik. Dzięki temu awaria
-Supabase nie może zepsuć wdrożenia portalu.
+Dlatego kalibrator **nie zapisuje stawek do bazy, z której czytałaby strona**,
+tylko proponuje nowy `kalibracja.json` w repozytorium. Build niczego nie pyta
+bazy — awaria Supabase nie zepsuje wdrożenia portalu. Historia gita jest przy
+okazji dziennikiem: widać, kiedy stawka się zmieniła, o ile i na jakiej próbie
+(`zrodlo`). Na produkcie regulowanym to odpowiedź na pytanie „co serwis
+pokazywał w marcu i skąd ta liczba".
 
 ## Przepływ
 
 ```
-cron 05:00 UTC
-  └─ worker ud-kalibrator
-       ├─ RPC do Postgresa: ud_kalibracja_stawek()   → {stawka, okresy, zrodlo}
-       ├─ pobiera obecny kalibracja.json z GitHuba
-       ├─ bramki bezpieczeństwa (niżej)
-       ├─ identyczny → koniec, cisza
-       └─ inny → commit do aurabroker/ud + alert na webhook
-                    └─ Pages buduje i wdraża sam
+pg_cron „kalibracja-stawek" (pn–pt 05:40 UTC, powstaje WYŁĄCZONE)
+  └─ public.ud_kalibracja_uruchom()          — dokłada x-cron-token z Vaulta
+       └─ funkcja brzegowa kalibrator
+            ├─ edge_cron_token_matches        — przed czymkolwiek innym
+            ├─ ud_kalibracja_ustawienia        — tryb, gałąź, odbiorca, dane_od
+            ├─ rpc ud_kalibracja_stawek()      — agregaty, nic osobowego
+            ├─ kalibracja.json z gałęzi produkcyjnej (GitHub)
+            ├─ /kalkulator/index.md            — czy strona pokazuje plik
+            ├─ bramki (niżej)
+            └─ tryb:
+                 wylaczony  → wpis w dzienniku
+                 na_sucho   → mail z porównaniem, codziennie; zero zapisów
+                 propozycja → gałąź kalibrator/propozycja + pull request
+                              → właściciel scala → Pages buduje portal
 ```
 
-## Zapytanie mieszka w Postgresie, nie w workerze
+Każdy przebieg zostawia wiersz w `ud_kalibracja_przebiegi` (wynik, powód,
+numer PR, wynik SQL przepuszczony przez białą listę pól).
 
-Filtr, który odsiewa warianty z trwałą niezdolnością i śmiercią, i złączenie
-par po `offer_id` — to jest cała metoda z tego dokumentu. Przepisanie jej do
-JavaScriptu oznacza dwie wersje prawdy, które rozjadą się przy pierwszej
-poprawce.
+## Metoda — w SQL, nie w funkcji brzegowej
 
-Dlatego: funkcja `public.ud_kalibracja_stawek()` w bazie, `SECURITY DEFINER`,
-zwracająca **wyłącznie agregaty** — stawki, mnożniki, liczność próby. Żadnego
-wiersza oferty, żadnego nazwiska, żadnego PESEL-u.
+Cała metoda siedzi w `ud_kalibracja_stawek(p_na_dzien, p_dane_od)`. Funkcja
+brzegowa jej nie powtarza: bierze wynik, pilnuje bramek i decyduje, co z nim
+zrobić. Dwie wersje metody rozjechałyby się przy pierwszej poprawce.
 
-Konsekwencja jest taka, że worker chodzi na **kluczu anonimowym**, nie na
-`service_role`. Na wszystkich trzech tabelach (`ud_offer_documents`,
-`ud_offers`, `ud_clients`) jest włączone RLS, więc bez tej funkcji worker
-musiałby dostać klucz serwisowy — czyli pełny dostęp do bazy jedenastu
-serwisów po to, żeby policzyć jedną średnią. Wyciek takiego klucza z crona
-jest znacznie gorszy niż wyciek klucza, którym da się policzyć medianę.
+**Baza:** oferty wysłane (`sent_at`, bez szkiców), także zarchiwizowane,
+z okna 365 dni do chwili 48 h przed przebiegiem (oferta wystawiona wczoraj
+może jeszcze być poprawiana). Oferta w koszu wypada sama — jej warianty
+wychodzą z `ud_offer_documents`. `dane_od` w ustawieniach przycina okno od
+dołu (gdyby kiedyś trzeba było odciąć dane sprzed zmiany taryfy).
 
-## Bramki — worker zmienia ceny pokazywane konsumentom
+**Wariant porównywalny z kalkulatorem** — każdy inny dostaje jeden powód
+pominięcia (pierwszy pasujący, liczony w `raport.pominiete`):
 
-To nie jest zadanie, które wolno puścić bez ograniczeń. Cztery warunki,
-wszystkie muszą być spełnione, inaczej worker **nie zmienia niczego** i wysyła
-alert:
+| Powód | Warunek wykluczenia |
+|---|---|
+| `poza_oknem` | poza oknem wyżej |
+| `inny_ubezpieczyciel` | nie Leadenhall (CEU świadomie poza próbą) |
+| `trwala_lub_smierc` | trwała niezdolność, suma trwałej albo śmierć — także `null` (nie wiemy, że ich nie ma) |
+| `jednorazowe` | inna liczba rat niż 12 (raty kosztują ~10% więcej, kalkulator mówi o ratach) |
+| `hiv` | którykolwiek z trzech sygnałów: `covers_hiv_wzw` różne od `false` (także brak odpowiedzi parsera), `hiv_owu_symbol`, objęta pozycja `hiv_wzw` w `extras` |
+| `dodatki` | objęta pozycja w `extras` z symbolem innym niż LW144 |
+| `wyczekiwanie` | okres wyczekiwania powyżej 21 dni (NW albo choroba) |
+| `brak_kwot` | świadczenie albo składka puste lub zerowe |
 
-| Bramka | Próg | Po co |
-|---|---|---|
-| liczność próby | ≥ 8 czystych obserwacji | dziś jest 10; przy mniejszej próbce mediana skacze po jednej ofercie |
-| pas zdrowego rozsądku | stawka 1,0–5,0% | literówka w kwocie oferty albo zmiana schematu nie może wjechać na stronę |
-| dzienny ruch | ≤ 15% względnie | prawdziwa zmiana taryfy jest stopniowa; skok o jedną trzecią w dobę to błąd danych, nie rynek |
-| faktyczna różnica | cokolwiek się zmieniło | bez tego historia wdrożeń zapełnia się codziennym commitem bez zmian |
+LW144 występuje pod kluczami `degenerative_limit` i `lw_lw144` — to ta sama
+pozycja, porównujemy po symbolu.
 
-Alert idzie na ten sam webhook, którego używa `ud-monitor`, i przy zmianie
-**też** — nie tylko przy odmowie. Zmiana ceny na serwisie musi być widoczna dla
-człowieka tego samego dnia.
+**Składka brutto** (`premium_total`, z opłatą dystrybucyjną). Kalkulator mówi,
+ile klient zapłaci. Netto (`ud_skladka_netto`) to podstawa prowizji w panelu —
+inna wielkość, a stawka netto byłaby o ~9% niższa od ceny, czyli zaniżona.
 
-## Czego workerowi nie wolno
+**Osoba, nie wariant.** Jedna oferta potrafi mieć sześć wariantów tej samej
+osoby; licząc warianty, jeden klient ważyłby sześć razy więcej niż drugi.
+Osoba to `md5(PESEL)`, bez PESEL-u — klient, bez klienta — oferta. Stawka
+osoby to mediana jej czystych wariantów 24-miesięcznych z jej **najnowszej**
+oferty (ponowna oferta zastępuje starą). Ten sam wiersz wczytany dwa razy do
+jednej oferty liczy się raz.
 
-- **Dopisywać mnożników dla 48 i 60 miesięcy.** Zero obserwacji to nie jest
-  problem do rozwiązania ekstrapolacją. Jeśli w bazie pojawią się oferty
-  z takim okresem, funkcja SQL policzy je tym samym sposobem co 36 — i dopiero
-  wtedy mnożnik ma prawo trafić do pliku.
-- **Ruszać `MNOZNIK_HIV_WZW`.** Stoi za nim jedna czysta para ofert — za mało
-  na przeliczanie maszynowe; tę liczbę ustawia się ręcznie, w `symulacja.ts`.
-- **Dopisywać współczynnika klasy ryzyka ani wieku.** Powody są w tym
-  dokumencie wyżej i nie znikną przez dołożenie kilku ofert — dopóki wiek jest
-  zmylony zawodem, rozdzielić ich się nie da.
+**Stawki** — zaokrąglane **w górę**, bo zaniżona cena to najgorszy kierunek
+błędu:
 
-Praktycznie: funkcja SQL zwraca tylko te pola, które umie policzyć. Worker
-wkleja to, co dostał, i nie umie dopisać niczego od siebie.
+- `dol` = najtańsza osoba, w górę do 0,01 p.p. (0,0001),
+- `gora` = najdroższa osoba, jw. — decyzja właściciela z 14.10: górą jest
+  realny klient, nie percentyl,
+- `srodek` = mediana osób, w górę do 0,1 p.p. (0,001).
 
-## Dlaczego osobny worker, a nie drugi cron w `ud-monitor`
+**Mnożnik okresu** tylko z par w jednej ofercie (to samo świadczenie,
+wyczekiwanie, dodatki i baza OWU), iloraz osoby = mediana jej par. Klucz
+powstaje przy **≥ 3 osobach** z parą i rozrzucie ilorazów **≤ 1,05**,
+zaokrąglony w górę do 0,01. Mniej osób albo większy rozrzut — klucza nie ma,
+a kandydat stoi w raporcie (`okresy_kandydaci`).
 
-Monitor jest celowo odcięty od portalu — ma działać wtedy, gdy portal się nie
-zbudował. Zadanie, które **wyzwala** wdrożenia portalu, w monitorze psuje
-dokładnie tę własność. Osobny worker, osobne sekrety, osobny budżet awarii.
+**Bramki w SQL:** poniżej **8 osób** status `za_malo_osob` (bez stawek);
+anomalia w danych — status `anomalie` (bez stawek, z listą). Anomalia to rata
+× 12 różna od składki o ponad złotówkę, „do zapłaty" różne od składki albo
+stawka wariantu poza 1–5%. Lista niesie numer oferty **bez członu
+z nazwiskiem** (`UD/2026/CE/00038`) i powód — nic się po cichu nie pomija.
 
-Koszt: jedno wywołanie na dobę, 30 na miesiąc. Poziom darmowy.
+**Kontrakt wyniku:** `status`, `metoda`, `na_dzien`, `stawka`, `okresy`,
+`zrodlo` (metoda, ubezpieczyciel, okno, osob, ofert, wariantow, par),
+`raport` (surowe min/mediana/średnia/max/p10/p90, kandydaci okresów,
+pominięte, anomalie). Żadnego PESEL-u, uuid ani skrótu — test to sprawdza.
 
-## Czego potrzeba od klienta
+Funkcja jest `STABLE`, `SECURITY INVOKER`, z pustym `search_path`, wykonać ją
+może wyłącznie `service_role`. Plan z 17.09 zakładał `SECURITY DEFINER`
+i klucz anonimowy; odpadło, bo funkcja brzegowa i tak ma klucz serwisowy
+(zapisuje dziennik), a funkcja wołalna kluczem z każdego źródła strony to
+otwarte drzwi do bazy ofert — nawet jeśli zwraca same agregaty.
 
-1. **Token GitHuba** — fine-grained, wyłącznie `aurabroker/ud`, wyłącznie
-   `contents: write`. Nie klasyczny PAT z dostępem do wszystkiego.
-2. **Decyzja: commit prosto na gałąź produkcyjną czy pull request.**
-   Rekomendacja: prosto, bo bramki już ograniczają ruch, a PR czekający na
-   scalenie oznacza, że stawki stoją, gdy nikt nie patrzy — czyli wracamy do
-   stanu, który naprawiamy. Cofnięcie to jeden plik.
-3. **Adres webhooka alertów**, jeśli ma być inny niż monitorowy.
+## Bramki funkcji brzegowej
 
-## Test, bez którego to nie ma prawa wejść
+Propozycja zmiany powstaje tylko wtedy, gdy:
 
-Funkcja `ud_kalibracja_stawek()` uruchomiona na dzisiejszych 48 wierszach musi
-zwrócić 2,02% / 2,20% / 2,44% i mnożnik 1,25 — czyli liczby z tego dokumentu.
-Jeśli kiedyś zwróci co innego przy tych samych danych, to znaczy, że ktoś
-zmienił metodę, a nie że zmienił się rynek. To jest jedyny test, który odróżnia
-te dwie sytuacje.
+- SQL zwrócił `status = 'ok'`, stawki w 1–5%, `dol < gora`, mnożniki w 1–2;
+- obecny plik z gałęzi produkcyjnej przechodzi walidator, a kandydat — ten sam
+  walidator co portal (`bledyKalibracji` w funkcji = `sprawdzKalibracje`
+  w `symulacja.ts`; test porównuje oba na wspólnej liście przypadków);
+- zmieniło się `stawka` albo `okresy` — sama zmiana liczności próby
+  (`zrodlo`) PR-a nie otwiera;
+- tej samej propozycji (skrót SHA-256 ze stawek i okresów, zapisany w opisie
+  PR) nie ma już w otwartym PR ani w PR zamkniętym bez scalenia — odrzuconej
+  liczby kalibrator nie ponawia.
+
+**Nowych okresów (48, 60) nie dopisuje** — dane, które je pozwalają policzyć,
+idą do maila jako „do decyzji", raz na 30 dni. Okres z pliku, którego SQL nie
+policzył (za mało par), zostaje stary, z uwagą w mailu.
+
+Plan z 17.09 miał jeszcze bramkę „≤ 15% ruchu na dobę". Odpadła razem
+z commitem prosto na produkcję: każda zmiana idzie przez kliknięcie
+właściciela, a mail i opis PR pokazują tabelkę „było / będzie" z kwotami.
+
+## Pull request, nie commit na produkcję
+
+Decyzja właściciela z 14.10.2026 — **każda zmiana stawek przez jego
+kliknięcie.** Push na gałąź produkcyjną wdraża portal od razu (i trzy inne
+projekty Pages), a kalibrator zmienia ceny pokazywane konsumentom.
+
+- Gałąź bota `kalibrator/propozycja` jest przy każdej propozycji ustawiana
+  na **bieżący HEAD gałęzi produkcyjnej** (z `force`), a potem dostaje jeden
+  commit z jednym plikiem. Scalenie nigdy nie cofnie niczego innego.
+- Zanim zapisze, sprawdza, że plik w tym HEAD jest dokładnie tym, który
+  właśnie ocenił — inaczej przerywa.
+- Twarda lista zapisów (`zapisDozwolony()`), sprawdzana przed każdym
+  żądaniem innym niż GET: gałąź bota, jeden plik na gałęzi bota, PR z gałęzi
+  bota do produkcyjnej, tytuł i opis istniejącego PR. Nic więcej — ani
+  scalenia, ani zamknięcia, ani zmiany bazy PR.
+- Podgląd: `https://kalibrator-propozycja.utratadochodu.pages.dev/kalkulator/`.
+
+Token: fine-grained, tylko `aurabroker/ud`, Contents i Pull requests: write.
+Kalibrator czyta nagłówek wygaśnięcia i ostrzega mailem 30 dni wcześniej.
+
+## Maile
+
+Odbiorca z ustawień (domyślnie `biuro@utratadochodu.com`). Nadawca
+`noreply@utratadochodu.com` kluczem `RESEND2_API_KEY`, a gdy ten odmówi —
+`info@utratadochodu.pl` kluczem `RESEND_API_KEY`.
+
+- **na sucho** — codziennie, bez względu na wynik: stawki teraz i według
+  danych, kwoty dla dwóch przykładów (14 400 i 11 700 zł), próba, pominięcia,
+  anomalie;
+- **propozycja** — link do PR i do podglądu, tabelka kwot, poprzednia treść
+  pliku (do cofnięcia), ostrzeżenie, gdy spada dolna granica;
+- **odmowa** — powody; ta sama odmowa co w poprzednim przebiegu drugiego
+  maila nie wysyła;
+- **bez zmian** — raz na 30 dni, żeby cisza nie znaczyła awarii;
+- **alarmy** — strona dwa przebiegi z rzędu nie pokazuje przedziału z pliku
+  (portal nie przebudował się po scaleniu), token wygasa.
+
+## Czego kalibratorowi nie wolno
+
+- **Dopisywać mnożników dla 48 i 60 miesięcy** — patrz wyżej.
+- **Ruszać `MNOZNIK_HIV_WZW`** — jedna czysta para to za mało na przeliczanie
+  maszynowe; ustawia się go ręcznie w `symulacja.ts`.
+- **Dopisywać współczynnika klasy ryzyka ani wieku** — powody w pierwszej
+  części dokumentu.
+- **Wpisywać do repozytorium czegokolwiek z danych klientów.** `zrodlo`
+  przechodzi przez białą listę pól; numery ofert stoją wyłącznie w mailu.
+
+## Testy
+
+| Co | Gdzie |
+|---|---|
+| metoda SQL na zamrożonym zestawie z produkcji (127 wariantów, zanonimizowane) i na przypadkach brzegowych; uprawnienia, cron | `pnpm test:kalibracja-sql` w `apps/panel` (`supabase/tests/kalibracja.sql`, 57 przypadków) |
+| funkcja brzegowa na atrapach Supabase, GitHuba i Resend; zgodność walidatorów; rozpoznanie przedziału na zbudowanej stronie | `apps/portal/test/kalibrator.spec.js` |
+| walidator pliku w portalu, kwoty liczone z `kalibracja.json` | `apps/portal/test/kalkulator.spec.js` |
+
+Oczekiwane liczby z produkcji (10 osób, 0,0202 / 0,022 / 0,0322, 36 → 1,25
+z 5 osób) policzyła niezależna implementacja w Pythonie na tych samych
+wierszach, nie sama funkcja SQL. Jeśli kiedyś funkcja zwróci co innego na tym
+zestawie, to znaczy, że ktoś zmienił metodę, a nie że zmienił się rynek.
+
+Testy przeszły mutacje (43 pogorszone wersje migracji, każda daje czerwony
+wynik): każdy filtr z osobna, osoba po kliencie zamiast PESEL-u, najstarsza
+oferta zamiast najnowszej, minimum zamiast mediany, składka netto,
+zaokrąglenia do najbliższej zamiast w górę, progi 3 osób / 1,05 / 8 osób,
+anomalie, pełny numer oferty z nazwiskiem, `SECURITY DEFINER`, brak `revoke`,
+stan crona po ponownej migracji.

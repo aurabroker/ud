@@ -392,6 +392,7 @@ Stan po audycie z 24.09.2026:
 | `send-digest-email`, `sync-beauty-companies` | pg_cron | nagłówek `x-cron-token` z Vaulta |
 | `normalize-article-images` | pg_cron | nagłówek `x-blog-token` z Vaulta |
 | `review-admin` | panel opinii | JWT + `profiles.rola = 'admin'` |
+| `kalibrator` | pg_cron (zadanie `kalibracja-stawek`) — **w repo, niewdrożona** (14.10.2026) | nagłówek `x-cron-token` z Vaulta, sprawdzany przed pierwszym odczytem; `verify_jwt = false` |
 | `send-offer-email` | stary `js/client.js` w udapp — w praktyce nikt | treść wyłącznie z bazy, wysyłka tylko do 30 min po wyborze |
 | `div-send-email` | formularz kancelarii (rozwod.waw.pl) | **żadna** — patrz niżej |
 | pozostałe trzy | — | `verify_jwt = true` |
@@ -770,6 +771,11 @@ rozumie każdy robot i nie ma powodu mówić tego samego dwa razy.
 
 ## Przepięcie domeny — co musi być, zanim pójdzie
 
+**Stan na 14.10.2026: przepięcie już się odbyło.** `utratadochodu.pl` podaje
+portal z projektu Pages `utratadochodu` (te same pliki co
+`utratadochodu.pages.dev`, bez `noindex`, `/wniosek/` odpowiada 200). Sekcja
+zostaje jako lista kontrolna — każdy punkt dalej obowiązuje.
+
 ### Stare adresy mają dokąd prowadzić
 
 240 adresów starego serwisu, 227 podstron nowego, 53 reguły przekierowań,
@@ -882,24 +888,47 @@ importuje, reszta serwisu bierze je z `symulacja.ts`. Ten plik jest pomyślany
 tak, żeby dało się go przeliczyć maszynowo — nie wpisuj wartości bezpośrednio
 w kodzie.
 
+Od 14.10.2026 liczy je funkcja SQL `ud_kalibracja_stawek()` metodą
+**osoby-v1** (sekcja „Kalibrator stawek" niżej, pełny opis
+w MODEL-SKLADKI.md). Jednostką jest **osoba** (PESEL), nie wariant — jedna
+oferta z sześcioma wariantami ważyłaby inaczej sześć razy więcej niż druga.
+
 | Pole | Skąd |
 |---|---|
-| `stawka.dol` / `stawka.gora` | najtańsza i najdroższa zaobserwowana oferta (2,02% / 2,44%) |
-| `stawka.srodek` | mediana zaokrąglona do 2,2% — tam, gdzie musi paść jedna liczba |
-| `okresy` | mnożniki policzone z par ofert: 24 → 1,00, 36 → 1,25 |
-| `zrodlo` | ile ofert i wariantów stoi za tymi liczbami — metryczka kalibracji, nie treść strony |
+| `stawka.dol` / `stawka.gora` | najtańsza i najdroższa **osoba** z ofert z 12 miesięcy, w górę do 0,01 p.p. (14.10: 2,02% / 3,22%) |
+| `stawka.srodek` | mediana osób, w górę do 0,1 p.p. (2,2%) — żadna strona go dziś nie pokazuje |
+| `okresy` | mnożniki z par w jednej ofercie, ≥ 3 osoby, rozrzut ≤ 1,05: 24 → 1,00, 36 → 1,25 |
+| `zrodlo` | metoda, okno dat, liczba osób, ofert, wariantów i par — metryczka kalibracji, nie treść strony |
 
-**Składka jest przedziałem, nie liczbą.** Rozrzut 2,02–2,44% jest prawdziwy
+Do bazy stawek wchodzi tylko wariant porównywalny z kalkulatorem: Leadenhall,
+samo świadczenie okresowe (bez trwałej i śmierci), 12 rat, okres wyczekiwania
+do 21 dni, bez płatnych dodatków (LW144 dozwolony) i **bez klauzuli HIV/WZW** —
+ta ma własny mnożnik 1,07, więc wariant z nią zawyżałby górę (stare „2,44%"
+było właśnie takim wariantem). Składka **brutto** (`premium_total`, z opłatą
+dystrybucyjną) — tyle płaci klient; `ud_skladka_netto` z panelu to podstawa
+prowizji, nie cena.
+
+**Składka jest przedziałem, nie liczbą.** Rozrzut 2,02–3,22% jest prawdziwy
 i bierze się z wieku, klasy ryzyka i okresu wyczekiwania, o które kalkulator
-nie pyta. Jedna liczba udawałaby precyzję, której w tym produkcie nie ma.
+nie pyta (góra to dziś jedyna osoba po pięćdziesiątce w próbie). Jedna liczba
+udawałaby precyzję, której w tym produkcie nie ma.
 
-**W treści na stronie nie ma liczby ofert ani wariantów.** Stoi tam „przedział
-z ostatnio wystawionych ofert" i „ze wszystkich wariantów we wszystkich
-ofertach". To nie jest ogólnikowość dla samej ogólnikowości: konkretna liczba
-zestarzeje się przy pierwszej nowej ofercie, a wtedy albo ktoś ją poprawia
-ręcznie w trzech miejscach, albo worker `ud-kalibrator` musi przepisywać
-treść zamiast samych stawek. Pola `zrodlo` używaj w dokumentacji i w bramkach
-workera, nie w zdaniu na stronie.
+`kalibracja.json` jest sprawdzany przy imporcie (`sprawdzKalibracje()`
+w `symulacja.ts`): brak pola, napis zamiast liczby albo stawka spoza 1–5%
+**wywala build**, a Pages zostawia poprzednie wdrożenie. Bez tego zła wartość
+budowała się do „NaN zł" na blisko dwustu podstronach. Testy liczą kwoty
+z pliku (`kalkulator.spec.js`) — nie wpisuj kwot do testów, bo pierwsza
+zmiana stawek zrobi je czerwonymi, a następna sesja „naprawi" je cofnięciem
+pliku.
+
+**W treści na stronie nie ma liczby ofert ani wariantów.** Opis metody stoi
+w jednej stałej, `OPIS_KALIBRACJI` w `symulacja.ts` („z ofert wystawionych
+w ostatnich 12 miesiącach, w wariancie porównywalnym z kalkulatorem: …"),
+i stamtąd idzie do kalkulatora, podstron zawodów i ich `llms.txt` (decyzja
+właściciela z 14.10.2026: tekst ma opisywać metodę). Konkretna liczba
+zestarzałaby się przy pierwszej nowej ofercie, a wtedy kalibrator musiałby
+przepisywać treść zamiast samych stawek. Pola `zrodlo` używaj w dokumentacji
+i w bramkach kalibratora, nie w zdaniu na stronie.
 
 Na stronie mówimy **„okres wyczekiwania"**, nie „karencja" — w kolumnach bazy
 (`wait_accident`, `wait_illness`) i w MODEL-SKLADKI.md termin techniczny
@@ -917,7 +946,97 @@ składka bazowa 1500 zł wobec 1404 zł. Druga oferta z klauzulą nie rozstrzyga
 bo jej dwa warianty bez klauzuli różnią się ceną przy identycznych widocznych
 parametrach (+3% albo +13%). Mnożnik siedzi w `symulacja.ts`, nie
 w `kalibracja.json` — jedna para to za mało na przeliczanie maszynowe
-i planowany worker ma go nie ruszać.
+i kalibrator go nie rusza.
+
+## Kalibrator stawek — funkcja brzegowa `kalibrator` (od 14.10.2026)
+
+Opis metody i bramek: `apps/portal/MODEL-SKLADKI.md`, część „Kalibrator".
+Tu tylko to, co trzeba wiedzieć, zanim się go dotknie.
+
+**Stan na 14.10.2026: kod w repozytorium, na produkcji nic.** Migracja
+`20261014120000_kalibracja_stawek.sql` niezastosowana, funkcja niewdrożona,
+`kalibracja.json` z nowymi stawkami (góra 3,22%) czeka na „wypychaj"
+właściciela — commit na gałęzi produkcyjnej zmienia ceny na żywej stronie
+od razu.
+
+Przepływ: pg_cron `kalibracja-stawek` (pn–pt 05:40 UTC, **powstaje
+wyłączone**) → `ud_kalibracja_uruchom()` (token z Vaulta) → funkcja
+`kalibrator` → RPC `ud_kalibracja_stawek()` → porównanie z `kalibracja.json`
+z gałęzi produkcyjnej. Tryb w `ud_kalibracja_ustawienia.tryb`:
+
+| Tryb | Co robi |
+|---|---|
+| `wylaczony` | wpis w `ud_kalibracja_przebiegi` i koniec |
+| `na_sucho` (domyślny) | codzienny mail z porównaniem na `biuro@utratadochodu.com`; **zero zapisów do GitHuba** |
+| `propozycja` | zmiana stawek jako PR z gałęzi `kalibrator/propozycja` do produkcyjnej; **scala właściciel** |
+
+Decyzje właściciela z 14.10.2026: **każda zmiana stawek przez jego
+kliknięcie** (nigdy commit prosto na produkcję), góra = najdroższa osoba,
+klauzula HIV/WZW poza bazą, tekst na stronie opisuje metodę. Około dwóch
+tygodni na sucho przed przełączeniem na `propozycja`.
+
+Rzeczy, których nie upraszczaj:
+
+- **Twarda lista zapisów do GitHuba (`zapisDozwolony()`).** Gałąź bota, jeden
+  plik (`kalibracja.json`) na gałęzi bota, PR z niej do produkcyjnej, tytuł
+  i opis PR. Ani scalenia, ani zamknięcia, ani zapisu na gałąź produkcyjną.
+  Test to sprawdza dla każdej z tych dróg.
+- **Gałąź bota ustawiana na bieżący HEAD produkcyjnej przy każdej propozycji**
+  (`force`), z jednym commitem. Scalenie nie może cofnąć niczego innego.
+- **Odrzucona propozycja nie wraca.** Skrót stawek i okresów stoi w opisie PR;
+  PR zamknięty bez scalenia wycisza te same liczby. Nowe dane — nowy skrót.
+- **Nowych okresów (48, 60) kalibrator nie dopisuje** — zgłasza je mailem
+  „do decyzji". `MNOZNIK_HIV_WZW` nie jest w pliku i tak ma zostać.
+- **Ręczna zmiana stawek w `kalibracja.json` wróci jako PR** do wartości
+  z danych przy najbliższym przebiegu w trybie `propozycja`. Zamknięcie tego
+  PR bez scalenia ją wycisza.
+- **Funkcja SQL wykonywalna tylko przez `service_role`** (`SECURITY INVOKER`,
+  `revoke` od anon/authenticated). Plan z 17.09 zakładał `SECURITY DEFINER`
+  i klucz anonimowy — to byłby odczyt bazy ofert kluczem z każdego źródła
+  strony.
+
+**Push z sesji po scalonym PR kalibratora:** scalenie to commit na gałęzi
+produkcyjnej, którego lokalna kopia nie ma — przed pushem dociągnij gałąź
+(`git pull --rebase origin claude/portal-rebuild-seo-llm-yz2x4t`), inaczej
+push zostanie odrzucony. Nigdy `--force` na tej gałęzi.
+
+### Wdrożenie — kolejność (dopiero po „wypychaj")
+
+1. Push (portal z nowymi stawkami, migracja i funkcja w repo).
+2. Migracja przez MCP (funkcje bez UPDATE/DELETE w ciele, więc przejdzie);
+   sprawdzenie md5 treści funkcji, uprawnień i crona (wyłączony).
+3. Wdrożenie `kalibrator` przez MCP: `verify_jwt: false`, pliki
+   `source/index.ts` + `_shared/logger.ts`, treść generowana skryptem z repo.
+4. Sondy: GET → 405, POST bez tokenu → 401; potem
+   `select public.ud_kalibracja_uruchom();` i mail na sucho.
+5. Cron włączany za zgodą właściciela:
+   `select cron.alter_job((select jobid from cron.job where jobname =
+   'kalibracja-stawek'), active := true);`.
+
+Po stronie właściciela: potwierdzić w Cloudflare „Production branch"
+projektów `utratadochodu` i `udappnew` (ślady z GitHuba wskazują
+`claude/portal-rebuild-seo-llm-yz2x4t`, API Pages jest stąd niedostępne);
+opcjonalnie Build watch paths, żeby scalenie samego `kalibracja.json` nie
+przebudowywało panelu; po okresie na sucho — token GitHuba (fine-grained,
+tylko `aurabroker/ud`, Contents i Pull requests: write) jako sekret
+`GITHUB_KALIBRATOR_TOKEN` w Edge Functions → Secrets i przełączenie trybu:
+`update public.ud_kalibracja_ustawienia set tryb = 'propozycja';`.
+
+Testy:
+
+```
+cd apps/panel && pnpm test:kalibracja-sql      # metoda SQL, 57 przypadków
+cd apps/portal && pnpm build && NODE_NO_WARNINGS=1 npx playwright test \
+  test/kalibrator.spec.js test/kalkulator.spec.js test/funkcje-brzegowe.spec.js
+```
+
+`kalibracja.sql` sprawdza metodę na zamrożonym, zanonimizowanym zestawie
+z produkcji (127 wariantów, `kalibracja-fixture.sql`) — oczekiwane liczby
+policzyła niezależna implementacja, nie sama funkcja. Każda z 43 mutacji
+migracji (każdy filtr z osobna, osoba po kliencie zamiast PESEL-u, składka
+netto, zaokrąglenie do najbliższej, progi, `SECURITY DEFINER`, brak
+`revoke`, stan crona) daje czerwony wynik. Bez binariów Postgresa test
+kończy się błędem, nie zielonym wynikiem.
 
 ---
 

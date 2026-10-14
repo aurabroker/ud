@@ -5,15 +5,15 @@
    * Kwoty: suma = dochód × limit, składka = suma × stawka. Stawka jest
    * policzona na ofertach, które naprawdę wystawiliśmy — patrz MODEL-SKLADKI.md.
    * Dlatego składka jest przedziałem, a nie jedną liczbą: rozrzut między
-   * najtańszą a najdroższą ofertą bierze się z wieku, klasy ryzyka i karencji,
-   * o które kalkulator nie pyta.
+   * najniższą a najwyższą stawką bierze się z wieku, klasy ryzyka i okresu
+   * wyczekiwania, o które kalkulator nie pyta.
    *
    * To jest SYMULACJA, nie oferta i nie stawka z tabeli ubezpieczyciela. Realną
    * składkę wylicza system ubezpieczyciela po ocenie ryzyka. Zastrzeżenie stoi
    * przy każdej kwocie i nie jest ozdobą — przedstawianie szacunku jak oferty
    * to spór z ustawą o dystrybucji ubezpieczeń.
    */
-  import { symuluj, zl, zlZakres, ZUS_MIESIECZNIE, LIMIT, MIESIECY_WYPLATY, OKRESY }
+  import { symuluj, zl, zlZakres, ZUS_MIESIECZNIE, LIMIT, MIESIECY_WYPLATY, OKRESY, OPIS_KALIBRACJI }
     from '../lib/symulacja';
 
   let { dochodPoczatkowy = 18000, zawod = '', kompaktowy = false } = $props();
@@ -112,10 +112,9 @@
     ryzyka — może różnić się od tej kwoty. Zasiłek ZUS policzony od podstawy {zl(ZUS_MIESIECZNIE)}.
   </p>
   <p class="text-[12.5px] leading-relaxed text-tekst-drugi mt-2.5 mb-0">
-    Przedział składki policzyliśmy ze wszystkich wariantów we wszystkich ofertach, które
-    naprawdę wystawiliśmy — od najtańszej do najdroższej stawki, jaka w nich wystąpiła.
-    Na Twoją składkę wpłyną wiek, klasa ryzyka Twojego zawodu, długość okresu wyczekiwania,
-    o które ten kalkulator nie pyta.
+    Przedział składki policzyliśmy {OPIS_KALIBRACJI} — od najtańszej do najdroższej stawki,
+    jaka w nich wystąpiła. Na Twoją składkę wpłyną wiek, klasa ryzyka Twojego zawodu,
+    długość okresu wyczekiwania, o które ten kalkulator nie pyta.
   </p>
   <p class="text-[12.5px] leading-relaxed text-tekst-drugi mt-2.5 mb-0">
     Świadczenie wypłacane jest przez {okresy} miesięcy — okres wybierasz przy zawarciu
