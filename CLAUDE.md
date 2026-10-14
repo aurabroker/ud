@@ -1601,6 +1601,14 @@ schemacie produkcji):
   jego pliki do listy czyszczenia. Wcześniej `unique(offer_id)` blokował
   usunięcie, a stary wpis z danymi klienta nie znikał nigdy.
 
+**Stan na 14.10.2026: WDROŻONE.** Migracja wklejona przez właściciela w SQL
+Editor (wersja `20261013150000` odnotowana ręcznie), panel v.0.71. Sprawdzone
+na produkcji: treść 5 funkcji = repozytorium (md5), uprawnienia tylko
+`service_role`, tabela z RLS bez polityk i bez dostępu dla anon/authenticated,
+cron `kosz-ofert-czyszczenie` włączony (`17 * * * *`). Przebieg „do kosza →
+lista → przywrócenie" na prawdziwym schemacie w wycofanej transakcji: `ok`,
+oferta na liście, `ok`, wiersze „bit w bit", wpis z kosza znika.
+
 **Panel v.0.70 poszedł na produkcję przed migracją** (13.10.2026): push na
 gałąź roboczą wdrożył `udappnew` od razu, a migracja czekała na wklejenie.
 Bez funkcji w bazie „Usuń" kończy się błędem i nic nie znika — od v.0.71 po
