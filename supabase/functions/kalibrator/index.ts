@@ -127,6 +127,8 @@ type Pr = {
   base?: { ref?: string } | null;
 };
 type Klient = ReturnType<typeof createClient>;
+/** Stan przebiegu widoczny dla obsługi błędu: ustawienia i PR, który właśnie zapisywaliśmy. */
+type Stan = { ustawienia?: Ustawienia; prZapisywany?: number };
 
 const json = (data: unknown, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json" } });
@@ -460,12 +462,13 @@ const zapisPr = (h: Wpis, numer: number) =>
   h.wynik === "propozycja" && h.pr_numer === numer && new RegExp(`^PR #${numer} (utworzony|zaktualizowany)$`).test(rdzen(h.powod));
 
 /**
- * Wpisy nowsze niż ostatni zapis PR o tym numerze. Kolejne propozycje
+ * Wpisy nowsze niż ostatni wpis propozycji o tym PR (zapis, „już czeka",
+ * ponowiony mail) — wtedy PR był nieoznaczony i aktualny. Kolejne propozycje
  * przepisują ten sam PR (z gałęzi bota może być otwarty tylko jeden), więc
- * mail czy znacznik z poprzedniej wersji nie mówi nic o bieżącej.
+ * znacznik z poprzedniej wersji nie mówi nic o bieżącej.
  */
 function odZapisuPr(historia: Wpis[], numer: number): Wpis[] {
-  const i = historia.findIndex((h) => zapisPr(h, numer));
+  const i = historia.findIndex((h) => h.wynik === "propozycja" && h.pr_numer === numer);
   return i === -1 ? historia : historia.slice(0, i);
 }
 
@@ -477,11 +480,18 @@ function odZapisuPr(historia: Wpis[], numer: number): Wpis[] {
  * zostawia wpisu, więc ostatni wpis zapisu może dotyczyć poprzedniej wersji.
  */
 function mailOPrWyszedl(historia: Wpis[], numer: number, skrot: string): boolean | null {
+  const oznaczony = `PR #${numer} ${ZNACZNIK_NIEAKTUALNY}`;
   for (const h of historia) {
+    // Granice wersji, za którymi stary mail o propozycji już nic nie znaczy:
+    // właściciel dostał potem „nie scalaj" o tym PR; zapis tego PR padł
+    // (GitHub mógł go przyjąć); wpis o tym PR z innym skrótem.
+    if ((h.powod ?? "").includes(oznaczony)) return false;
+    if (h.wynik === "blad" && h.pr_numer === numer) return false;
     if (h.wynik !== "propozycja" || h.pr_numer !== numer) continue;
+    if (h.propozycja_hash !== skrot) return false;
     const zapis = zapisPr(h, numer);
     const oPropozycji = zapis || rdzen(h.powod).endsWith(MAIL_PONOWIONY);
-    if (oPropozycji && h.mail_wyslany === true && h.propozycja_hash === skrot) return true;
+    if (oPropozycji && h.mail_wyslany === true) return true;
     if (zapis) return false;
   }
   return null;
@@ -1224,7 +1234,7 @@ Deno.serve(async (req: Request) => {
   // więc zły to zawsze ktoś z zewnątrz, a wpis za każde żądanie zapychałby dziennik.
   if (zgoda !== true) return new Response("zły nagłówek x-cron-token", { status: 401 });
 
-  const stan: { ustawienia?: Ustawienia } = {};
+  const stan: Stan = {};
   try {
     return await przebieg(supabase, stan);
   } catch (e) {
@@ -1232,7 +1242,7 @@ Deno.serve(async (req: Request) => {
   }
 });
 
-async function przebieg(supabase: Klient, stan: { ustawienia?: Ustawienia }): Promise<Response> {
+async function przebieg(supabase: Klient, stan: Stan): Promise<Response> {
   const teraz = new Date();
 
   const { data: wiersz, error: bladUstawien } = await supabase
@@ -1383,14 +1393,17 @@ async function przebieg(supabase: Klient, stan: { ustawienia?: Ustawienia }): Pr
       uwagi.push(...await oznaczNieaktualne(gh, ustawienia.galaz, powod, historia, teraz));
     } else {
       const { tytul, opis, wiadomosc } = opisPr(obecny, kandydat, skrot, ustawienia.galaz);
+      const otwarty = prs.find((p) => p.state === "open");
+      if (otwarty) stan.prZapisywany = otwarty.number;
       const pr = await zlozPropozycje(gh, ustawienia.galaz, {
         obecnyTekst,
         kandydatTekst: formatPliku(kandydat),
         tytul,
         opis,
         wiadomosc,
-        otwarty: prs.find((p) => p.state === "open"),
+        otwarty,
       });
+      stan.prZapisywany = undefined;
       wynik = "propozycja";
       prNumer = pr.numer;
       powod = pr.zaktualizowany ? `PR #${pr.numer} zaktualizowany` : `PR #${pr.numer} utworzony`;
@@ -1429,7 +1442,7 @@ async function zapiszPrzebieg(supabase: Klient, wpis: Json) {
  * Każdy wyjątek: wpis „blad" w dzienniku, ud_errors i mail — ale ten sam błąd
  * dzień po dniu nie wysyła maila drugi raz (porównanie z ostatnim wpisem).
  */
-async function obsluzBlad(supabase: Klient, stan: { ustawienia?: Ustawienia }, e: unknown): Promise<Response> {
+async function obsluzBlad(supabase: Klient, stan: Stan, e: unknown): Promise<Response> {
   const komunikat = bezDanych(String((e as { message?: string })?.message ?? e));
   await logError(ZRODLO_BLEDU, `Kalibrator: ${komunikat}`);
   let ostatnie: Pick<Wpis, "wynik" | "powod" | "mail_wyslany">[] = [];
@@ -1457,6 +1470,9 @@ async function obsluzBlad(supabase: Klient, stan: { ustawienia?: Ustawienia }, e
     const { error } = await supabase.from("ud_kalibracja_przebiegi").insert({
       tryb: stan.ustawienia?.tryb ?? "nieznany",
       wynik: "blad",
+      // Błąd w trakcie zapisu otwartego PR: GitHub mógł zapis przyjąć mimo
+      // błędu po naszej stronie. Ten wpis zamyka wersję PR w mailOPrWyszedl().
+      pr_numer: stan.prZapisywany ?? null,
       powod: komunikat,
       mail_wyslany: wyslany,
     });

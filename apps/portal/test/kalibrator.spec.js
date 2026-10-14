@@ -1098,6 +1098,75 @@ test.describe('kalibrator: nieudany mail jest ponawiany', () => {
     expect(f.maile).toHaveLength(przed + 1);
   });
 
+  test('A → „nie scalaj" → A z zagubioną odpowiedzią: nazajutrz mail o A, nie miesiąc ciszy', async () => {
+    let w = wynikOk();
+    const ZGODNE = () => wynikOk({ stawka: { gora: 0.0244 }, raport: { surowe: { ...RAPORT.surowe, max: 0.0244 } } });
+    const f = await zaladuj({ tryb: 'propozycja', env, historia: [NIEDAWNY_MAIL], wynik: () => structuredClone(w) });
+    await f.wywolaj();                                    // A → PR #41, mail
+    w = ZGODNE();
+    await f.wywolaj();                                    // #41 oznaczony, mail „nie scalaj"
+    w = wynikOk();
+    Object.assign(f.gh.awarie, { pr: 502, prOd: f.gh.patchPr() + 2, prZastosuj: true });
+    expect((await f.wywolaj()).status).toBe(500);         // #41 przepisany na A, odpowiedź zginęła
+    expect(ostatni(f)).toMatchObject({ wynik: 'blad', pr_numer: 41 });
+    Object.assign(f.gh.awarie, { pr: null, prZastosuj: false });
+    const przed = f.maile.length;
+    await f.wywolaj();
+    expect(f.maile).toHaveLength(przed + 1);
+    expect(ostatniMail(f).cialo.subject).toBe('Kalibracja: propozycja zmiany stawek');
+    await f.wywolaj();
+    expect(f.maile).toHaveLength(przed + 1);
+  });
+
+  test('V1 → V2 i V1 z zagubionymi odpowiedziami: ostatni mail mówi o tym, co jest w PR', async () => {
+    let w = wynikOk();
+    const V2 = () => wynikOk({ stawka: { gora: 0.033 }, raport: { surowe: { ...RAPORT.surowe, max: 0.03295 } } });
+    const f = await zaladuj({ tryb: 'propozycja', env, historia: [NIEDAWNY_MAIL], wynik: () => structuredClone(w) });
+    const zgubOpis = () => Object.assign(f.gh.awarie, { pr: 502, prOd: f.gh.patchPr() + 2, prZastosuj: true });
+    const napraw = () => Object.assign(f.gh.awarie, { pr: null, prZastosuj: false });
+    await f.wywolaj();                                    // V1 → #41, mail
+    w = V2(); zgubOpis();
+    await f.wywolaj();                                    // #41 = V2, odpowiedź zginęła
+    napraw();
+    await f.wywolaj();                                    // czeka na V2 → mail o V2
+    expect(ostatniMail(f).cialo.text).toContain('3,30%');
+    w = wynikOk(); zgubOpis();
+    await f.wywolaj();                                    // #41 = V1, odpowiedź zginęła
+    napraw();
+    const przed = f.maile.length;
+    await f.wywolaj();                                    // czeka na V1 → mail o V1
+    expect(f.maile).toHaveLength(przed + 1);
+    expect(ostatniMail(f).cialo.subject).toBe('Kalibracja: propozycja zmiany stawek');
+    expect(ostatniMail(f).cialo.text).not.toContain('2,02%–3,30%');
+    expect(JSON.parse(f.gh.trescNa(BOT)).stawka.gora).toBe(0.0322);
+  });
+
+  test('przypomnienie o oznaczonym PR: znacznik sprzed niezalogowanego przepisania nie ucisza', async () => {
+    let w = wynikOk();
+    let padaMail = false;
+    const ZGODNE = () => wynikOk({ stawka: { gora: 0.0244 }, raport: { surowe: { ...RAPORT.surowe, max: 0.0244 } } });
+    const f = await zaladuj({
+      tryb: 'propozycja', env, historia: [NIEDAWNY_MAIL], wynik: () => structuredClone(w),
+      resend: () => (padaMail ? { ok: false, status: 500 } : { ok: true, status: 200 }),
+    });
+    await f.wywolaj();                                    // A → #41
+    w = ZGODNE();
+    await f.wywolaj();                                    // oznaczony, znacznik w dzienniku
+    w = wynikOk();
+    Object.assign(f.gh.awarie, { pr: 502, prOd: f.gh.patchPr() + 2, prZastosuj: true });
+    await f.wywolaj();                                    // przepisany na A bez wpisu zapisu
+    Object.assign(f.gh.awarie, { pr: null, prZastosuj: false });
+    await f.wywolaj();                                    // czeka (mail ponowiony)
+    w = ZGODNE(); padaMail = true;
+    await f.wywolaj();                                    // oznaczony znowu — mail pada
+    expect(f.gh.pulls[0].title.startsWith('[NIEAKTUALNE]')).toBe(true);
+    padaMail = false;
+    const przed = f.maile.length;
+    await f.wywolaj();
+    expect(f.maile).toHaveLength(przed + 1);
+    expect(ostatniMail(f).cialo.text).toContain('Pull request #41 jest oznaczony jako nieaktualny i dalej otwarty');
+  });
+
   test('ponowiony mail o propozycji niesie też bieżące uwagi (ostrzeżenie o tokenie)', async () => {
     const zaDni = (d) => new Date(Date.now() + d * DZIEN).toISOString().replace('T', ' ').replace(/\.\d+Z$/, ' UTC');
     let padaMail = true;
