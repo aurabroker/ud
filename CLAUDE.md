@@ -986,12 +986,20 @@ Rzeczy, których nie upraszczaj:
   jednym ruchem wprost na niego. **Nigdy „reset gałęzi bota na HEAD, potem
   zapis pliku"** — w tej chwili GitHub mógł uznać otwarty PR za scalony, choć
   nic nie weszło (przegląd z 14.10.2026). Scalenie nie cofa niczego innego.
+  Otwarty PR na czas aktualizacji dostaje `[NIEAKTUALNE]` i opis bez skrótu;
+  końcowy opis dopiero po przestawieniu gałęzi.
 - **Nieaktualny PR jest oznaczany.** Gdy dane przestają dawać liczby z
   otwartego PR (bez zmian albo odmowa), tytuł dostaje `[NIEAKTUALNE]`, opis —
   „nie scalaj", a mail — alarm. Nie scalaj PR kalibratora z tym przedrostkiem.
   Ręczne poprawki na gałęzi bota przepadają przy następnej propozycji.
 - **Odrzucona propozycja nie wraca.** Skrót stawek i okresów stoi w opisie PR;
   PR zamknięty bez scalenia wycisza te same liczby. Nowe dane — nowy skrót.
+  Zamknięcie PR z `[NIEAKTUALNE]` niczego nie wycisza (skrótu w nim nie ma).
+- **Dziennik `ud_kalibracja_przebiegi` steruje mailami.** Powtórka odmowy
+  i błędu to cały ciąg identycznych wpisów, nie ostatni wpis; mail o
+  propozycji liczy się od ostatniego zapisu PR (ten sam numer bywa
+  przepisywany); znaczniki uwag lądują w `powod` tylko z wysłanym mailem.
+  Nie czyść dziennika ręcznie — kalibrator wyśle wtedy maile od nowa.
 - **Nowych okresów (48, 60) kalibrator nie dopisuje** — zgłasza je mailem
   „do decyzji". `MNOZNIK_HIV_WZW` nie jest w pliku i tak ma zostać.
 - **Ręczna zmiana stawek w `kalibracja.json` wróci jako PR** do wartości

@@ -390,6 +390,11 @@ projekty Pages), a kalibrator zmienia ceny pokazywane konsumentom.
   najpierw cofała ją na HEAD, a potem dopisywała plik — przez tę chwilę GitHub
   mógł uznać otwarty PR za scalony, choć na stronę nic nie weszło (przegląd
   z 14.10.2026). Nie wracaj do „reset, potem PUT /contents".
+- **Aktualizacja otwartego PR idzie w trzech krokach:** najpierw PR dostaje
+  `[NIEAKTUALNE]` i opis bez skrótu, potem przestawienie gałęzi, potem
+  końcowy tytuł i opis. Awaria w środku nie zostawia PR ze starymi liczbami
+  w opisie i nową treścią na gałęzi — a bez skrótu następny przebieg go
+  przepisze albo przypomni o nim (trzecia runda przeglądu, 14.10.2026).
 - Zanim zapisze, sprawdza, że plik w tym HEAD jest dokładnie tym, który
   właśnie ocenił — inaczej przerywa.
 - Twarda lista zapisów (`zapisDozwolony()`), sprawdzana przed każdym
@@ -401,7 +406,10 @@ projekty Pages), a kalibrator zmienia ceny pokazywane konsumentom.
   odmowa), dostaje tytuł z przedrostkiem `[NIEAKTUALNE]` i ostrzeżenie „nie
   scalaj" na początku opisu; skrót propozycji znika z opisu. Gdy dane znowu
   pokażą zmianę, kalibrator przepisze ten sam PR na nowo. Bez tego właściciel
-  mógł scalić stawki sprzed zmiany danych — także niższy dół.
+  mógł scalić stawki sprzed zmiany danych — także niższy dół. Dotyczy też
+  przebiegu, w którym dane wracają do propozycji odrzuconej wcześniej.
+  Zamknięcie oznaczonego PR niczego nie blokuje (nie ma w nim skrótu);
+  dopóki wisi otwarty, raz na 30 dni wraca przypomnienie.
 - Ręczne poprawki na gałęzi bota przepadają przy następnej propozycji —
   poprawia się dane albo zamyka PR, nie gałąź.
 - Podgląd: `https://kalibrator-propozycja.utratadochodu.pages.dev/kalkulator/`.
@@ -419,13 +427,22 @@ Odbiorca z ustawień (domyślnie `biuro@utratadochodu.com`). Nadawca
   danych, kwoty dla dwóch przykładów (14 400 i 11 700 zł), próba, pominięcia,
   anomalie;
 - **propozycja** — link do PR i do podglądu, tabelka kwot, poprzednia treść
-  pliku (do cofnięcia), ostrzeżenie, gdy spada dolna granica;
-- **odmowa** — powody; ta sama odmowa co w poprzednim przebiegu drugiego
-  maila nie wysyła, chyba że poprzedni mail nie wyszedł (wtedy ponawia);
+  pliku (do cofnięcia), ostrzeżenie, gdy spada dolna granica. Gdy mail
+  o bieżącej wersji PR nie wyszedł, następny przebieg go ponawia (liczy się
+  wersja, nie numer — kolejne propozycje przepisują ten sam PR); PR czekający
+  dłużej niż historia dziennika (31 dni) — przypomnienie raz na miesiąc;
+- **odmowa** — powody; ta sama odmowa w nieprzerwanym ciągu przebiegów to
+  jeden mail (ponawiany, gdy nie wyszedł; po 31 dniach przypomnienie).
+  Pierwsza wersja patrzyła tylko na ostatni wpis i wysyłała ten sam mail co
+  drugi przebieg — uciszony przebieg zapisuje przecież `mail_wyslany = false`;
 - **bez zmian** — raz na 30 dni, żeby cisza nie znaczyła awarii;
 - **alarmy** — strona dwa przebiegi z rzędu nie pokazuje przedziału z pliku
-  (portal nie przebudował się po scaleniu; przypomnienie co tydzień, dopóki
-  tak jest), token wygasa, otwarty PR stał się nieaktualny.
+  (portal nie przebudował się po scaleniu; przypomnienie co tydzień w obrębie
+  jednej awarii, nowa awaria — nowy alert), token wygasa, otwarty PR stał się
+  nieaktualny.
+
+Znaczniki uwag trafiają do dziennika (`powod`) tylko z mailem, który
+naprawdę wyszedł — dlatego nieudany mail z uwagą wraca w kolejnym przebiegu.
 
 ## Czego kalibratorowi nie wolno
 
