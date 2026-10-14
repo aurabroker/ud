@@ -5,8 +5,8 @@ import { logError } from "../_shared/logger.ts";
 /**
  * kalibrator — przeliczenie stawek kalkulatora z ofert wystawionych w panelu.
  *
- * Specyfikacja i decyzje właściciela z 14.10.2026: MODEL-SKLADKI.md („Plan:
- * worker ud-kalibrator") i CLAUDE.md („Kalkulator — stawka pochodzi z ofert").
+ * Specyfikacja i decyzje właściciela z 14.10.2026: apps/portal/MODEL-SKLADKI.md
+ * (część „Kalibrator") i CLAUDE.md („Kalibrator stawek").
  * Metodę liczy funkcja SQL `ud_kalibracja_stawek()` — ten plik jej NIE
  * powtarza: bierze agregaty, pilnuje bramek, porównuje z plikiem
  * `apps/portal/src/lib/kalibracja.json` i decyduje, co z tym zrobić.
@@ -37,7 +37,8 @@ import { logError } from "../_shared/logger.ts";
  *
  * Sekrety: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, RESEND2_API_KEY
  * (zapasowo RESEND_API_KEY), GITHUB_KALIBRATOR_TOKEN — fine-grained, tylko
- * aurabroker/ud, uprawnienia Contents: write i Pull requests: write.
+ * aurabroker/ud, uprawnienia Contents: write (obejmuje Git Data API: drzewa,
+ * commity, referencje) i Pull requests: write.
  * Bez tokenu odczyt pliku idzie anonimowo (repozytorium jest publiczne),
  * a tryb propozycji kończy się odmową.
  */
@@ -103,6 +104,7 @@ type Wpis = {
   mail_wyslany: boolean;
   na_stronie: boolean | null;
   pr_numer?: number | null;
+  propozycja_hash?: string | null;
 };
 type Uwaga = { tekst: string; alarm: boolean; znacznik?: string };
 type Sekcja = {
@@ -468,15 +470,18 @@ function odZapisuPr(historia: Wpis[], numer: number): Wpis[] {
 }
 
 /**
- * Czy mail o BIEŻĄCEJ wersji PR wyszedł: true / false, a null, gdy jej zapisu
- * nie ma już w historii (31 dni). Liczy się tylko mail o propozycji — przy
- * zapisie albo ponowiony — nie mail z samymi uwagami tego samego dnia.
+ * Czy mail o BIEŻĄCEJ wersji PR (skrót `skrot`) wyszedł: true / false, a null,
+ * gdy jej zapisu nie ma już w historii (31 dni). Liczy się tylko mail
+ * o propozycji — przy zapisie albo ponowiony — i tylko z tym samym skrótem:
+ * zapis, który GitHub przyjął, a odpowiedź zginęła (502, limit czasu), nie
+ * zostawia wpisu, więc ostatni wpis zapisu może dotyczyć poprzedniej wersji.
  */
-function mailOPrWyszedl(historia: Wpis[], numer: number): boolean | null {
+function mailOPrWyszedl(historia: Wpis[], numer: number, skrot: string): boolean | null {
   for (const h of historia) {
     if (h.wynik !== "propozycja" || h.pr_numer !== numer) continue;
     const zapis = zapisPr(h, numer);
-    if ((zapis || rdzen(h.powod).endsWith(MAIL_PONOWIONY)) && h.mail_wyslany === true) return true;
+    const oPropozycji = zapis || rdzen(h.powod).endsWith(MAIL_PONOWIONY);
+    if (oPropozycji && h.mail_wyslany === true && h.propozycja_hash === skrot) return true;
     if (zapis) return false;
   }
   return null;
@@ -690,6 +695,19 @@ async function zlozPropozycje(
   galaz: string,
   o: { obecnyTekst: string; kandydatTekst: string; tytul: string; opis: string; wiadomosc: string; otwarty?: Pr },
 ) {
+  // Otwarty PR ma liczby, których dane już nie dają — najpierw dostaje
+  // [NIEAKTUALNE] i opis bez skrótu, dopiero potem cokolwiek innego. Awaria
+  // na dowolnym dalszym kroku (HEAD, drzewo, commit, gałąź, końcowy opis) nie
+  // zostawia PR ze starymi liczbami bez ostrzeżenia, a bez skrótu następny
+  // przebieg go przepisze (zmiana) albo przypomni o nim (bez zmian, odmowa).
+  if (o.otwarty) {
+    await gh.zapytaj("PATCH", `/pulls/${o.otwarty.number}`, {
+      title: `${NIEAKTUALNY} ${o.tytul}`.slice(0, 200),
+      body: `**${NIEAKTUALNY} Nie scalaj.** Kalibrator właśnie aktualizuje ten pull request. ` +
+        "Jeśli ten napis zostaje do następnego przebiegu, aktualizacja się nie udała — kalibrator spróbuje ponownie.",
+    });
+  }
+
   const head = await gh.zapytaj("GET", `/git/ref/heads/${sciezkaGalezi(galaz)}`);
   const sha = obiekt(head.dane) && obiekt(head.dane.object) ? String(head.dane.object.sha ?? "") : "";
   if (!/^[0-9a-f]{40}$/.test(sha)) throw new Error("GitHub: brak HEAD gałęzi produkcyjnej");
@@ -720,18 +738,6 @@ async function zlozPropozycje(
   const commit = await gh.zapytaj("POST", "/git/commits", { message: o.wiadomosc, tree: drzewoSha, parents: [sha] });
   const commitSha = obiekt(commit.dane) ? String(commit.dane.sha ?? "") : "";
   if (!SHA.test(commitSha)) throw new Error("GitHub: commit bez sha");
-
-  // Otwarty PR na czas zmiany dostaje [NIEAKTUALNE] i opis bez skrótu. Gdy
-  // przestawienie gałęzi albo końcowy opis się nie uda, PR nie zostaje ze
-  // starymi liczbami w opisie i nową treścią — a bez skrótu następny przebieg
-  // go przepisze (zmiana) albo przypomni o nim (bez zmian, odmowa).
-  if (o.otwarty) {
-    await gh.zapytaj("PATCH", `/pulls/${o.otwarty.number}`, {
-      title: `${NIEAKTUALNY} ${o.tytul}`.slice(0, 200),
-      body: `**${NIEAKTUALNY} Nie scalaj.** Kalibrator właśnie aktualizuje ten pull request. ` +
-        "Jeśli ten napis zostaje do następnego przebiegu, aktualizacja się nie udała — kalibrator spróbuje ponownie.",
-    });
-  }
 
   const bot = await gh.zapytaj("GET", `/git/ref/heads/${GALAZ_BOTA}`, undefined, [404]);
   if (bot.status === 404) await gh.zapytaj("POST", "/git/refs", { ref: `refs/heads/${GALAZ_BOTA}`, sha: commitSha });
@@ -1245,7 +1251,7 @@ async function przebieg(supabase: Klient, stan: { ustawienia?: Ustawienia }): Pr
 
   const { data: wpisy, error: bladHistorii } = await supabase
     .from("ud_kalibracja_przebiegi")
-    .select("uruchomiono, wynik, powod, mail_wyslany, na_stronie, pr_numer")
+    .select("uruchomiono, wynik, powod, mail_wyslany, na_stronie, pr_numer, propozycja_hash")
     .gte("uruchomiono", new Date(teraz.getTime() - 31 * DZIEN_MS).toISOString())
     .order("uruchomiono", { ascending: false })
     .limit(500);
@@ -1362,7 +1368,7 @@ async function przebieg(supabase: Klient, stan: { ustawienia?: Ustawienia }): Pr
       // Mail o bieżącej wersji tego PR nie wyszedł (Resend leżał w dniu zapisu)
       // — wysyłamy go teraz. Zapis starszy niż historia (31 dni), a PR dalej
       // czeka: jedno przypomnienie na miesiąc. Bez żadnych wpisów — cisza.
-      const wyszedl = mailOPrWyszedl(historia, czeka.number);
+      const wyszedl = mailOPrWyszedl(historia, czeka.number, skrot);
       const wpisy = historia.some((h) => h.wynik === "propozycja" && h.pr_numer === czeka.number);
       if (wyszedl === false || (wyszedl === null && wpisy)) {
         mail = mailPropozycja(k, { numer: czeka.number, url: adresPr(czeka), zaktualizowany: false });

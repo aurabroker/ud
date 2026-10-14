@@ -190,8 +190,12 @@ function atrapaGitHuba({ plik, botIstnieje, prs, wygasa, limitBezTokenu, awaria,
   if (botIstnieje) galezie.set(BOT, commit('{"stara": "propozycja"}\n'));
   const pulls = prs.map((p) => ({ title: 'Kalibracja stawek', head: { ref: BOT, repo: REPO_PR }, base: { ref: GALAZ }, merged_at: null, ...p }));
   const zadania = [];
-  /** Awarie sterowane z testu: PATCH /pulls od n-tego wywołania, przestawienie gałęzi. */
-  const awarie = { pr: awariaPr, prOd: 1, ref: null };
+  /**
+   * Awarie sterowane z testu: PATCH /pulls od n-tego wywołania (z prZastosuj —
+   * GitHub zapisuje zmianę, a odpowiedź i tak jest błędem), przestawienie
+   * gałęzi, budowa drzewa.
+   */
+  const awarie = { pr: awariaPr, prOd: 1, prZastosuj: false, ref: null, drzewo: null };
   let patchPr = 0;
 
   const odp = (status, dane, naglowki = {}) =>
@@ -235,6 +239,7 @@ function atrapaGitHuba({ plik, botIstnieje, prs, wygasa, limitBezTokenu, awaria,
         : odp(404, { message: 'Not Found' }, extra);
     }
     if (p === '/git/trees' && metoda === 'POST') {
+      if (awarie.drzewo) return odp(awarie.drzewo, { message: 'Server Error' }, extra);
       if (!drzewa.has(cialo.base_tree)) return odp(422, { message: 'base_tree does not exist' }, extra);
       // Atrapa trzyma w drzewie tylko plik kalibracji — każdy inny wpis to błąd testu.
       if (cialo.tree.length !== 1 || cialo.tree[0].path !== PLIK) return odp(422, { message: 'atrapa: inne pliki w drzewie' }, extra);
@@ -282,8 +287,11 @@ function atrapaGitHuba({ plik, botIstnieje, prs, wygasa, limitBezTokenu, awaria,
     const m = p.match(/^\/pulls\/(\d+)$/);
     if (m && metoda === 'PATCH') {
       patchPr += 1;
-      if (awarie.pr && patchPr >= awarie.prOd) return odp(awarie.pr, { message: 'Server Error' }, extra);
       const pr = pulls.find((x) => x.number === Number(m[1]));
+      if (awarie.pr && patchPr >= awarie.prOd) {
+        if (awarie.prZastosuj && pr) Object.assign(pr, cialo);
+        return odp(awarie.pr, { message: 'Server Error' }, extra);
+      }
       if (!pr) return odp(404, { message: 'Not Found' }, extra);
       Object.assign(pr, cialo);
       return odp(200, pr, extra);
@@ -644,15 +652,15 @@ test.describe('kalibrator: propozycja', () => {
     await f.wywolaj();
     const zapisy = f.gh.zapisy();
     expect(zapisy.map((z) => `${z.metoda} ${z.sciezka}`)).toEqual([
+      'PATCH /repos/aurabroker/ud/pulls/7',
       'POST /repos/aurabroker/ud/git/trees',
       'POST /repos/aurabroker/ud/git/commits',
-      'PATCH /repos/aurabroker/ud/pulls/7',
       `PATCH /repos/aurabroker/ud/git/refs/heads/${BOT}`,
       'PATCH /repos/aurabroker/ud/pulls/7',
     ]);
-    // Na czas przestawiania gałęzi PR jest oznaczony i nie ma skrótu w opisie.
-    expect(zapisy[2].cialo.title.startsWith('[NIEAKTUALNE]')).toBe(true);
-    expect(zapisy[2].cialo.body).not.toMatch(/Skrót propozycji|kalibrator:[0-9a-f]/);
+    // Zanim cokolwiek innego, PR dostaje [NIEAKTUALNE] i traci skrót z opisu.
+    expect(zapisy[0].cialo.title.startsWith('[NIEAKTUALNE]')).toBe(true);
+    expect(zapisy[0].cialo.body).not.toMatch(/Skrót propozycji|kalibrator:[0-9a-f]/);
     expect(zapisy[3].cialo).toEqual({ sha: f.gh.galezie.get(BOT), force: true });
     expect(f.gh.rodzic.get(f.gh.galezie.get(BOT))).toBe(f.gh.galezie.get(GALAZ));
     expect(Object.keys(zapisy[4].cialo).sort()).toEqual(['body', 'title']);
@@ -914,6 +922,18 @@ test.describe('kalibrator: otwarty PR, którego dane już nie dają', () => {
     expect(f.gh.pulls[0].body).toContain(skrotPropozycji({ dol: 0.0202, srodek: 0.022, gora: 0.0322 }, { 24: 1, 36: 1.25 }));
   });
 
+  test('awaria przy budowie commitu: otwarty PR ze starymi liczbami i tak dostaje [NIEAKTUALNE]', async () => {
+    let w = wynikOk();
+    const f = await zaladuj({ tryb: 'propozycja', env, historia: [NIEDAWNY_MAIL], wynik: () => structuredClone(w) });
+    await f.wywolaj();                                    // P1 → PR #41
+    w = wynikOk({ stawka: { gora: 0.033 }, raport: { surowe: { ...RAPORT.surowe, max: 0.03295 } } });
+    f.gh.awarie.drzewo = 502;
+    expect((await f.wywolaj()).status).toBe(500);
+    expect(JSON.parse(f.gh.trescNa(BOT)).stawka.gora, 'gałąź nietknięta').toBe(0.0322);
+    expect(f.gh.pulls[0].title.startsWith('[NIEAKTUALNE]')).toBe(true);
+    expect(f.gh.pulls[0].body).not.toMatch(/Skrót propozycji/);
+  });
+
   test('przypomnienie o oznaczonym PR liczy znacznik tylko z bieżącej wersji PR', async () => {
     let w = wynikOk();
     let padaMail = false;
@@ -1056,6 +1076,24 @@ test.describe('kalibrator: nieudany mail jest ponawiany', () => {
     expect(ostatniMail(f).cialo.subject).toBe('Kalibracja: propozycja zmiany stawek');
     expect(ostatniMail(f).cialo.text).toContain('3,30%');
     expect(ostatni(f).powod).toContain('mail ponowiony');
+    await f.wywolaj();
+    expect(f.maile).toHaveLength(przed + 1);
+  });
+
+  test('końcowy opis PR zapisany, a odpowiedź zginęła (502): mail o nowej wersji wychodzi nazajutrz', async () => {
+    let w = wynikOk();
+    const f = await zaladuj({ tryb: 'propozycja', env, historia: [NIEDAWNY_MAIL], wynik: () => structuredClone(w) });
+    await f.wywolaj();                                    // P1 → PR #41, mail OK
+    w = wynikOk({ stawka: { gora: 0.033 }, raport: { surowe: { ...RAPORT.surowe, max: 0.03295 } } });
+    Object.assign(f.gh.awarie, { pr: 502, prOd: f.gh.patchPr() + 2, prZastosuj: true });
+    expect((await f.wywolaj()).status).toBe(500);         // GitHub przyjął opis z P2, my widzimy 502
+    expect(f.gh.pulls[0].title.startsWith('[NIEAKTUALNE]')).toBe(false);
+    Object.assign(f.gh.awarie, { pr: null, prZastosuj: false });
+    const przed = f.maile.length;
+    await f.wywolaj();                                    // „już czeka" na P2 — mail o P2 jeszcze nie wyszedł
+    expect(f.maile).toHaveLength(przed + 1);
+    expect(ostatniMail(f).cialo.subject).toBe('Kalibracja: propozycja zmiany stawek');
+    expect(ostatniMail(f).cialo.text).toContain('3,30%');
     await f.wywolaj();
     expect(f.maile).toHaveLength(przed + 1);
   });
