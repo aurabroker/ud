@@ -452,6 +452,36 @@ function dniOdOstatniegoMaila(historia: Wpis[], teraz: Date): number {
   return ostatni ? dniOd(ostatni.uruchomiono, teraz) : Infinity;
 }
 
+const MAIL_PONOWIONY = "mail ponowiony";
+/** Wpis przebiegu, który zapisał PR (utworzył albo przepisał) — początek jego bieżącej wersji. */
+const zapisPr = (h: Wpis, numer: number) =>
+  h.wynik === "propozycja" && h.pr_numer === numer && new RegExp(`^PR #${numer} (utworzony|zaktualizowany)$`).test(rdzen(h.powod));
+
+/**
+ * Wpisy nowsze niż ostatni zapis PR o tym numerze. Kolejne propozycje
+ * przepisują ten sam PR (z gałęzi bota może być otwarty tylko jeden), więc
+ * mail czy znacznik z poprzedniej wersji nie mówi nic o bieżącej.
+ */
+function odZapisuPr(historia: Wpis[], numer: number): Wpis[] {
+  const i = historia.findIndex((h) => zapisPr(h, numer));
+  return i === -1 ? historia : historia.slice(0, i);
+}
+
+/**
+ * Czy mail o BIEŻĄCEJ wersji PR wyszedł: true / false, a null, gdy jej zapisu
+ * nie ma już w historii (31 dni). Liczy się tylko mail o propozycji — przy
+ * zapisie albo ponowiony — nie mail z samymi uwagami tego samego dnia.
+ */
+function mailOPrWyszedl(historia: Wpis[], numer: number): boolean | null {
+  for (const h of historia) {
+    if (h.wynik !== "propozycja" || h.pr_numer !== numer) continue;
+    const zapis = zapisPr(h, numer);
+    if ((zapis || rdzen(h.powod).endsWith(MAIL_PONOWIONY)) && h.mail_wyslany === true) return true;
+    if (zapis) return false;
+  }
+  return null;
+}
+
 // ─── GitHub ─────────────────────────────────────────────────────────────────
 
 const sciezkaGalezi = (galaz: string) => galaz.split("/").map(encodeURIComponent).join("/");
@@ -604,7 +634,7 @@ async function oznaczNieaktualne(gh: GitHub, galaz: string, powod: string, histo
       if (oznaczony) {
         // Oznaczony wcześniej. Alarm wraca, gdy mail o nim nie wyszedł (znacznik
         // trafia do dziennika tylko z wysłanym mailem) — i raz na 30 dni, dopóki PR wisi.
-        if (byloWDniach(historia, znacznik, DNI_POTWIERDZENIA, teraz)) continue;
+        if (byloWDniach(odZapisuPr(historia, p.number), znacznik, DNI_POTWIERDZENIA, teraz)) continue;
         uwagi.push({
           alarm: true,
           znacznik,
@@ -690,6 +720,18 @@ async function zlozPropozycje(
   const commit = await gh.zapytaj("POST", "/git/commits", { message: o.wiadomosc, tree: drzewoSha, parents: [sha] });
   const commitSha = obiekt(commit.dane) ? String(commit.dane.sha ?? "") : "";
   if (!SHA.test(commitSha)) throw new Error("GitHub: commit bez sha");
+
+  // Otwarty PR na czas zmiany dostaje [NIEAKTUALNE] i opis bez skrótu. Gdy
+  // przestawienie gałęzi albo końcowy opis się nie uda, PR nie zostaje ze
+  // starymi liczbami w opisie i nową treścią — a bez skrótu następny przebieg
+  // go przepisze (zmiana) albo przypomni o nim (bez zmian, odmowa).
+  if (o.otwarty) {
+    await gh.zapytaj("PATCH", `/pulls/${o.otwarty.number}`, {
+      title: `${NIEAKTUALNY} ${o.tytul}`.slice(0, 200),
+      body: `**${NIEAKTUALNY} Nie scalaj.** Kalibrator właśnie aktualizuje ten pull request. ` +
+        "Jeśli ten napis zostaje do następnego przebiegu, aktualizacja się nie udała — kalibrator spróbuje ponownie.",
+    });
+  }
 
   const bot = await gh.zapytaj("GET", `/git/ref/heads/${GALAZ_BOTA}`, undefined, [404]);
   if (bot.status === 404) await gh.zapytaj("POST", "/git/refs", { ref: `refs/heads/${GALAZ_BOTA}`, sha: commitSha });
@@ -1317,13 +1359,14 @@ async function przebieg(supabase: Klient, stan: { ustawienia?: Ustawienia }): Pr
       wynik = "propozycja";
       prNumer = czeka.number;
       powod = `PR #${czeka.number} z tą propozycją już czeka na decyzję`;
-      // Mail o tym PR nie wyszedł w żadnym przebiegu z historii (Resend leżał
-      // w dniu propozycji) — wysyłamy go teraz. Bez wpisów o tym PR (historia
-      // ginie po 31 dniach) też: to jedno przypomnienie na miesiąc.
-      const wpisy = historia.filter((h) => h.wynik === "propozycja" && h.pr_numer === czeka.number);
-      if (wpisy.length && !wpisy.some((h) => h.mail_wyslany === true)) {
+      // Mail o bieżącej wersji tego PR nie wyszedł (Resend leżał w dniu zapisu)
+      // — wysyłamy go teraz. Zapis starszy niż historia (31 dni), a PR dalej
+      // czeka: jedno przypomnienie na miesiąc. Bez żadnych wpisów — cisza.
+      const wyszedl = mailOPrWyszedl(historia, czeka.number);
+      const wpisy = historia.some((h) => h.wynik === "propozycja" && h.pr_numer === czeka.number);
+      if (wyszedl === false || (wyszedl === null && wpisy)) {
         mail = mailPropozycja(k, { numer: czeka.number, url: adresPr(czeka), zaktualizowany: false });
-        powod += " — mail ponowiony";
+        powod += ` — ${MAIL_PONOWIONY}`;
       }
     } else if (odrzucony) {
       // Właściciel zamknął ten PR bez scalenia — te same liczby nie wracają.

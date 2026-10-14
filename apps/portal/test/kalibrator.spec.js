@@ -190,6 +190,9 @@ function atrapaGitHuba({ plik, botIstnieje, prs, wygasa, limitBezTokenu, awaria,
   if (botIstnieje) galezie.set(BOT, commit('{"stara": "propozycja"}\n'));
   const pulls = prs.map((p) => ({ title: 'Kalibracja stawek', head: { ref: BOT, repo: REPO_PR }, base: { ref: GALAZ }, merged_at: null, ...p }));
   const zadania = [];
+  /** Awarie sterowane z testu: PATCH /pulls od n-tego wywołania, przestawienie gałęzi. */
+  const awarie = { pr: awariaPr, prOd: 1, ref: null };
+  let patchPr = 0;
 
   const odp = (status, dane, naglowki = {}) =>
     new Response(JSON.stringify(dane), { status, headers: { 'content-type': 'application/json', ...naglowki } });
@@ -251,6 +254,7 @@ function atrapaGitHuba({ plik, botIstnieje, prs, wygasa, limitBezTokenu, awaria,
       return odp(201, { ref: cialo.ref, object: { sha: cialo.sha } }, extra);
     }
     if (p.startsWith('/git/refs/heads/') && metoda === 'PATCH') {
+      if (awarie.ref) return odp(awarie.ref, { message: 'Server Error' }, extra);
       const nazwa = decodeURIComponent(p.slice('/git/refs/heads/'.length));
       if (!galezie.has(nazwa)) return odp(422, { message: 'Reference does not exist' }, extra);
       if (!commity.has(cialo.sha)) return odp(422, { message: 'Object does not exist' }, extra);
@@ -277,7 +281,8 @@ function atrapaGitHuba({ plik, botIstnieje, prs, wygasa, limitBezTokenu, awaria,
     }
     const m = p.match(/^\/pulls\/(\d+)$/);
     if (m && metoda === 'PATCH') {
-      if (awariaPr) return odp(awariaPr, { message: 'Server Error' }, extra);
+      patchPr += 1;
+      if (awarie.pr && patchPr >= awarie.prOd) return odp(awarie.pr, { message: 'Server Error' }, extra);
       const pr = pulls.find((x) => x.number === Number(m[1]));
       if (!pr) return odp(404, { message: 'Not Found' }, extra);
       Object.assign(pr, cialo);
@@ -293,6 +298,8 @@ function atrapaGitHuba({ plik, botIstnieje, prs, wygasa, limitBezTokenu, awaria,
     galezie,
     rodzic,
     ustawieniaBota,
+    awarie,
+    patchPr: () => patchPr,
     trescNa: (galaz) => commity.get(galezie.get(galaz)),
     zapisy: () => zadania.filter((z) => z.metoda !== 'GET'),
   };
@@ -639,12 +646,17 @@ test.describe('kalibrator: propozycja', () => {
     expect(zapisy.map((z) => `${z.metoda} ${z.sciezka}`)).toEqual([
       'POST /repos/aurabroker/ud/git/trees',
       'POST /repos/aurabroker/ud/git/commits',
+      'PATCH /repos/aurabroker/ud/pulls/7',
       `PATCH /repos/aurabroker/ud/git/refs/heads/${BOT}`,
       'PATCH /repos/aurabroker/ud/pulls/7',
     ]);
-    expect(zapisy[2].cialo).toEqual({ sha: f.gh.galezie.get(BOT), force: true });
+    // Na czas przestawiania gałęzi PR jest oznaczony i nie ma skrótu w opisie.
+    expect(zapisy[2].cialo.title.startsWith('[NIEAKTUALNE]')).toBe(true);
+    expect(zapisy[2].cialo.body).not.toMatch(/Skrót propozycji|kalibrator:[0-9a-f]/);
+    expect(zapisy[3].cialo).toEqual({ sha: f.gh.galezie.get(BOT), force: true });
     expect(f.gh.rodzic.get(f.gh.galezie.get(BOT))).toBe(f.gh.galezie.get(GALAZ));
-    expect(Object.keys(zapisy[3].cialo).sort()).toEqual(['body', 'title']);
+    expect(Object.keys(zapisy[4].cialo).sort()).toEqual(['body', 'title']);
+    expect(zapisy[4].cialo.title.startsWith('[NIEAKTUALNE]')).toBe(false);
     expect(f.gh.pulls[0]).toMatchObject({ state: 'open', merged_at: null });
     expect(f.gh.trescNa(BOT)).toBe(oczekiwanyPlik(dzisWarszawa()));
     expect(f.gh.trescNa(GALAZ)).toBe(PLIK_OBECNY);
@@ -863,6 +875,72 @@ test.describe('kalibrator: otwarty PR, którego dane już nie dają', () => {
     expect(f.maile).toHaveLength(2);
   });
 
+  test('przestawiona gałąź, a końcowy opis PR się nie zapisał: PR zostaje [NIEAKTUALNE]; dawne liczby go przepisują', async () => {
+    let w = wynikOk();
+    const P2 = () => wynikOk({ stawka: { gora: 0.033 }, raport: { surowe: { ...RAPORT.surowe, max: 0.03295 } } });
+    const f = await zaladuj({ tryb: 'propozycja', env, historia: [NIEDAWNY_MAIL], wynik: () => structuredClone(w) });
+    await f.wywolaj();                                    // P1 → PR #41
+    w = P2();
+    f.gh.awarie.pr = 502;
+    f.gh.awarie.prOd = f.gh.patchPr() + 2;                // przejdzie tylko PATCH oznaczający
+    expect((await f.wywolaj()).status).toBe(500);         // P2: gałąź przestawiona, opis padł
+    expect(JSON.parse(f.gh.trescNa(BOT)).stawka.gora).toBe(0.033);
+    const pr = f.gh.pulls[0];
+    expect(pr.title.startsWith('[NIEAKTUALNE]')).toBe(true);
+    expect(pr.body).not.toMatch(/Skrót propozycji/);
+
+    f.gh.awarie.pr = null;
+    w = wynikOk();                                        // dane wracają do P1
+    await f.wywolaj();
+    expect(JSON.parse(f.gh.trescNa(BOT)).stawka.gora, 'gałąź znowu z P1, nie „już czeka" na P2').toBe(0.0322);
+    expect(f.gh.pulls).toHaveLength(1);
+    expect(f.gh.pulls[0].title.startsWith('[NIEAKTUALNE]')).toBe(false);
+    expect(f.gh.pulls[0].body).toContain(skrotPropozycji({ dol: 0.0202, srodek: 0.022, gora: 0.0322 }, { 24: 1, 36: 1.25 }));
+  });
+
+  test('przestawienie gałęzi padło: PR oznaczony; te same liczby nazajutrz go przepisują, nie „już czeka"', async () => {
+    let w = wynikOk();
+    const f = await zaladuj({ tryb: 'propozycja', env, historia: [NIEDAWNY_MAIL], wynik: () => structuredClone(w) });
+    await f.wywolaj();                                    // P1 → PR #41
+    w = wynikOk({ stawka: { gora: 0.033 }, raport: { surowe: { ...RAPORT.surowe, max: 0.03295 } } });
+    f.gh.awarie.ref = 502;
+    expect((await f.wywolaj()).status).toBe(500);
+    expect(JSON.parse(f.gh.trescNa(BOT)).stawka.gora, 'gałąź bez zmian — dalej P1').toBe(0.0322);
+    expect(f.gh.pulls[0].title.startsWith('[NIEAKTUALNE]')).toBe(true);
+    f.gh.awarie.ref = null;
+    w = wynikOk();                                        // P1 jak na gałęzi — ale opis PR już bez skrótu
+    await f.wywolaj();
+    expect(f.gh.pulls[0].title.startsWith('[NIEAKTUALNE]')).toBe(false);
+    expect(f.gh.pulls[0].body).toContain(skrotPropozycji({ dol: 0.0202, srodek: 0.022, gora: 0.0322 }, { 24: 1, 36: 1.25 }));
+  });
+
+  test('przypomnienie o oznaczonym PR liczy znacznik tylko z bieżącej wersji PR', async () => {
+    let w = wynikOk();
+    let padaMail = false;
+    const ZGODNE = () => wynikOk({ stawka: { gora: 0.0244 }, raport: { surowe: { ...RAPORT.surowe, max: 0.0244 } } });
+    const f = await zaladuj({
+      tryb: 'propozycja', env, historia: [NIEDAWNY_MAIL], wynik: () => structuredClone(w),
+      resend: () => (padaMail ? { ok: false, status: 500 } : { ok: true, status: 200 }),
+    });
+    await f.wywolaj();                                    // P1 → PR #41, mail
+    w = ZGODNE();
+    await f.wywolaj();                                    // bez zmian → #41 oznaczony, mail ze znacznikiem
+    expect(ostatni(f).powod).toContain('PR #41 nieaktualny');
+    w = wynikOk({ stawka: { gora: 0.033 }, raport: { surowe: { ...RAPORT.surowe, max: 0.03295 } } });
+    await f.wywolaj();                                    // P2 → #41 przepisany
+    w = ZGODNE();
+    padaMail = true;
+    await f.wywolaj();                                    // bez zmian → #41 oznaczony znowu, mail pada
+    expect(f.gh.pulls[0].title.startsWith('[NIEAKTUALNE]')).toBe(true);
+    padaMail = false;
+    const przed = f.maile.length;
+    await f.wywolaj();                                    // przypomnienie mimo znacznika sprzed przepisania
+    expect(f.maile).toHaveLength(przed + 1);
+    expect(ostatniMail(f).cialo.text).toContain('Pull request #41 jest oznaczony jako nieaktualny i dalej otwarty');
+    await f.wywolaj();
+    expect(f.maile).toHaveLength(przed + 1);
+  });
+
   test('na sucho: otwartego PR nie rusza (zero zapisów do GitHuba)', async () => {
     const f = await zaladuj({ tryb: 'na_sucho', env, plik: PLIK_ZGODNY, botIstnieje: true, prs: [prStary()] });
     await f.wywolaj();
@@ -957,6 +1035,46 @@ test.describe('kalibrator: nieudany mail jest ponawiany', () => {
     expect(f.gh.pulls).toHaveLength(1);
     await f.wywolaj();
     expect(f.maile).toHaveLength(2);
+  });
+
+  test('mail o przepisanym PR nie wyszedł: ponowiony nazajutrz, mimo udanego maila o poprzedniej wersji', async () => {
+    let w = wynikOk();
+    let padaMail = false;
+    const f = await zaladuj({
+      tryb: 'propozycja', env, historia: [NIEDAWNY_MAIL], wynik: () => structuredClone(w),
+      resend: () => (padaMail ? { ok: false, status: 500 } : { ok: true, status: 200 }),
+    });
+    await f.wywolaj();                                    // P1 → PR #41, mail OK
+    w = wynikOk({ stawka: { gora: 0.033 }, raport: { surowe: { ...RAPORT.surowe, max: 0.03295 } } });
+    padaMail = true;
+    await f.wywolaj();                                    // P2 → #41 zaktualizowany, mail pada
+    expect(ostatni(f)).toMatchObject({ wynik: 'propozycja', pr_numer: 41, mail_wyslany: false });
+    padaMail = false;
+    const przed = f.maile.length;
+    await f.wywolaj();                                    // „już czeka" — ale mail o P2 nie wyszedł
+    expect(f.maile).toHaveLength(przed + 1);
+    expect(ostatniMail(f).cialo.subject).toBe('Kalibracja: propozycja zmiany stawek');
+    expect(ostatniMail(f).cialo.text).toContain('3,30%');
+    expect(ostatni(f).powod).toContain('mail ponowiony');
+    await f.wywolaj();
+    expect(f.maile).toHaveLength(przed + 1);
+  });
+
+  test('ponowiony mail o propozycji niesie też bieżące uwagi (ostrzeżenie o tokenie)', async () => {
+    const zaDni = (d) => new Date(Date.now() + d * DZIEN).toISOString().replace('T', ' ').replace(/\.\d+Z$/, ' UTC');
+    let padaMail = true;
+    const f = await zaladuj({
+      tryb: 'propozycja', env, historia: [NIEDAWNY_MAIL], wygasa: zaDni(10),
+      resend: () => (padaMail ? { ok: false, status: 500 } : { ok: true, status: 200 }),
+    });
+    await f.wywolaj();                                    // PR #41, mail (z ostrzeżeniem o tokenie) pada
+    padaMail = false;
+    await f.wywolaj();                                    // ponowiony mail o propozycji
+    expect(f.maile).toHaveLength(2);
+    expect(ostatniMail(f).cialo.subject).toBe('Kalibracja: propozycja zmiany stawek');
+    expect(ostatniMail(f).cialo.text).toContain('GITHUB_KALIBRATOR_TOKEN');
+    expect(ostatni(f).powod).toContain('mail ponowiony');
+    expect(ostatni(f).powod).toContain('ostrzeżenie: token GitHuba wygasa');
   });
 
   test('alert o stronie: nowa awaria tuż po naprawionej dostaje własny alert', async () => {
