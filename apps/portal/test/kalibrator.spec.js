@@ -764,7 +764,7 @@ test.describe('kalibrator: otwarty PR, którego dane już nie dają', () => {
   const STARY = 'a'.repeat(64);
   const prStary = (zmien = {}) => ({
     number: 7, state: 'open', title: 'Kalibracja stawek: 2,02%–2,50% (było 2,02%–2,44%)',
-    body: `| tabela |\n\nSkrót propozycji: \`${STARY}\`\n<!-- kalibrator:${STARY} -->`,
+    body: `| tabela |\n\nScalenie do \`${GALAZ}\` = nowe stawki na stronie po zbudowaniu. Zamknięcie bez scalenia = kalibrator nie zaproponuje tych samych liczb ponownie.\n\nSkrót propozycji: \`${STARY}\`\n<!-- kalibrator:${STARY} -->`,
     html_url: 'https://github.com/aurabroker/ud/pull/7', ...zmien,
   });
 
@@ -780,11 +780,14 @@ test.describe('kalibrator: otwarty PR, którego dane już nie dają', () => {
     expect(pr.body.startsWith('**[NIEAKTUALNE] Nie scalaj.**')).toBe(true);
     expect(pr.body).not.toContain(STARY);
     expect(pr.body).toContain('| tabela |');
+    // Zamknięcie oznaczonego PR niczego już nie blokuje — opis nie może twierdzić inaczej.
+    expect(pr.body).not.toContain('nie zaproponuje tych samych liczb');
+    expect(pr.body).toContain('nie blokuje przyszłych propozycji');
     expect(f.maile).toHaveLength(1);
     expect(f.maile[0].cialo.subject).toBe('Kalibracja: uwagi');
     expect(f.maile[0].cialo.text).toContain('Pull request #7 oznaczony jako nieaktualny');
     expect(ostatni(f)).toMatchObject({ wynik: 'bez_zmian', mail_wyslany: true });
-    expect(ostatni(f).powod).toContain('nieaktualny PR #7');
+    expect(ostatni(f).powod).toContain('PR #7 nieaktualny');
     expect(f.gh.trescNa(GALAZ)).toBe(PLIK_ZGODNY);
 
     await f.wywolaj();
@@ -824,6 +827,40 @@ test.describe('kalibrator: otwarty PR, którego dane już nie dają', () => {
     expect(pr.body).toContain(skrotPropozycji({ dol: 0.0202, srodek: 0.022, gora: 0.033 }, { 24: 1, 36: 1.25 }));
     expect(JSON.parse(f.gh.trescNa(BOT)).stawka.gora).toBe(0.033);
     expect(ostatni(f)).toMatchObject({ wynik: 'propozycja', pr_numer: 7 });
+  });
+
+  test('odrzucona propozycja wraca, a otwarty jest inny PR: oznaczony i alarm (trzy dni)', async () => {
+    let w = wynikOk();
+    const f = await zaladuj({ tryb: 'propozycja', env, historia: [NIEDAWNY_MAIL], wynik: () => structuredClone(w) });
+    await f.wywolaj();                                   // dzień 1: P1 → PR #41
+    f.gh.pulls[0].state = 'closed';                      // właściciel zamyka bez scalenia
+    w = wynikOk({ stawka: { gora: 0.033 }, raport: { surowe: { ...RAPORT.surowe, max: 0.03295 } } });
+    await f.wywolaj();                                   // dzień 2: P2 → PR #42
+    expect(f.gh.pulls.map((p) => [p.number, p.state])).toEqual([[41, 'closed'], [42, 'open']]);
+    const maili = f.maile.length;
+    w = wynikOk();
+    await f.wywolaj();                                   // dzień 3: dane wracają do odrzuconego P1
+    expect(ostatni(f)).toMatchObject({ wynik: 'odmowa', pr_numer: 41 });
+    expect(f.gh.pulls[1].title.startsWith('[NIEAKTUALNE]')).toBe(true);
+    expect(f.maile).toHaveLength(maili + 1);
+    expect(ostatniMail(f).cialo.text).toContain('Pull request #42 oznaczony jako nieaktualny');
+  });
+
+  test('mail o oznaczeniu nie wyszedł: następny przebieg przypomina o oznaczonym PR, potem cisza', async () => {
+    const f = await zaladuj({
+      tryb: 'propozycja', env, plik: PLIK_ZGODNY, historia: [NIEDAWNY_MAIL], botIstnieje: true, prs: [prStary()],
+      resend: (_c, n) => (n === 1 ? { ok: false, status: 500 } : { ok: true, status: 200 }),
+    });
+    await f.wywolaj();
+    expect(f.gh.pulls[0].title.startsWith('[NIEAKTUALNE]')).toBe(true);
+    expect(ostatni(f)).toMatchObject({ mail_wyslany: false });
+    expect(ostatni(f).powod).not.toContain('PR #7 nieaktualny');
+    await f.wywolaj();
+    expect(f.maile).toHaveLength(2);
+    expect(f.maile[1].cialo.text).toContain('Pull request #7 jest oznaczony jako nieaktualny i dalej otwarty');
+    expect(f.gh.zapisy(), 'oznaczony — bez drugiego PATCH').toHaveLength(1);
+    await f.wywolaj();
+    expect(f.maile).toHaveLength(2);
   });
 
   test('na sucho: otwartego PR nie rusza (zero zapisów do GitHuba)', async () => {
@@ -890,7 +927,51 @@ test.describe('kalibrator: nieudany mail jest ponawiany', () => {
     expect(f.maile).toHaveLength(2);
     expect(ostatni(f)).toMatchObject({ wynik: 'odmowa', mail_wyslany: true });
     await f.wywolaj();
-    expect(f.maile, 'po udanym mailu — cisza').toHaveLength(2);
+    await f.wywolaj();
+    await f.wywolaj();
+    expect(f.maile, 'po udanym mailu — cisza, także po kilku przebiegach').toHaveLength(2);
+  });
+
+  test('ta sama odmowa i ten sam błąd przez pięć przebiegów: jeden mail, nie co drugi', async () => {
+    const odmowa = await zaladuj({
+      tryb: 'propozycja', env,
+      wynik: { status: 'za_malo_osob', stawka: null, okresy: null, zrodlo: { ...ZRODLO_SQL, osob: 7 }, raport: RAPORT },
+    });
+    const blad = await zaladuj({ tryb: 'propozycja', bladSql: { message: 'statement timeout' } });
+    for (let i = 0; i < 5; i += 1) { await odmowa.wywolaj(); await blad.wywolaj(); }
+    expect(odmowa.maile).toHaveLength(1);
+    expect(blad.maile).toHaveLength(1);
+    expect(odmowa.przebiegi.map((p) => p.mail_wyslany)).toEqual([true, false, false, false, false]);
+    expect(blad.przebiegi.map((p) => p.mail_wyslany)).toEqual([true, false, false, false, false]);
+  });
+
+  test('mail o propozycji nie wyszedł: następny przebieg („PR już czeka") wysyła go jeszcze raz', async () => {
+    const f = await zaladuj({ tryb: 'propozycja', env, historia: [NIEDAWNY_MAIL], resend: padaPierwszy });
+    await f.wywolaj();
+    expect(ostatni(f)).toMatchObject({ wynik: 'propozycja', pr_numer: 41, mail_wyslany: false });
+    await f.wywolaj();
+    expect(f.maile).toHaveLength(2);
+    expect(f.maile[1].cialo.subject).toBe('Kalibracja: propozycja zmiany stawek');
+    expect(f.maile[1].cialo.text).toContain('https://github.com/aurabroker/ud/pull/41');
+    expect(ostatni(f)).toMatchObject({ wynik: 'propozycja', pr_numer: 41, mail_wyslany: true });
+    expect(f.gh.pulls).toHaveLength(1);
+    await f.wywolaj();
+    expect(f.maile).toHaveLength(2);
+  });
+
+  test('alert o stronie: nowa awaria tuż po naprawionej dostaje własny alert', async () => {
+    const f = await zaladuj({
+      tryb: 'propozycja', env, plik: PLIK_ZGODNY, strona: '291–351 zł',
+      historia: [
+        NIEDAWNY_MAIL,
+        { uruchomiono: dniTemu(1), wynik: 'bez_zmian', powod: 'bez zmian', mail_wyslany: false, na_stronie: false },
+        { uruchomiono: dniTemu(2), wynik: 'bez_zmian', powod: 'bez zmian', mail_wyslany: false, na_stronie: true },
+        { uruchomiono: dniTemu(4), wynik: 'bez_zmian', powod: 'bez zmian | alert: strona nie pokazuje stawek z pliku', mail_wyslany: true, na_stronie: false },
+      ],
+    });
+    await f.wywolaj();
+    expect(f.maile).toHaveLength(1);
+    expect(f.maile[0].cialo.text).toContain('nie pokazuje przedziału');
   });
 
   test('błąd przebiegu: mail nie wyszedł — ten sam błąd nazajutrz wysyła go jeszcze raz', async () => {

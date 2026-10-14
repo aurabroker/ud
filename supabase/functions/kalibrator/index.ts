@@ -88,7 +88,7 @@ const DNI_DO_DECYZJI_PRZERWA = 30;
 /** Znaczniki w `powod` — po nich dziennik pamięta, o czym już pisaliśmy. */
 const ZNACZNIK_TOKENU = "ostrzeżenie: token GitHuba wygasa";
 const ZNACZNIK_STRONY = "alert: strona nie pokazuje stawek z pliku";
-const ZNACZNIK_NIEAKTUALNY = "nieaktualny PR";
+const ZNACZNIK_NIEAKTUALNY = "nieaktualny";
 /** Przedrostek tytułu PR, którego liczb dane już nie dają. Po nim drugi raz go nie oznaczamy. */
 const NIEAKTUALNY = "[NIEAKTUALNE]";
 const SEPARATOR_ZNACZNIKOW = " | ";
@@ -102,6 +102,7 @@ type Wpis = {
   powod: string | null;
   mail_wyslany: boolean;
   na_stronie: boolean | null;
+  pr_numer?: number | null;
 };
 type Uwaga = { tekst: string; alarm: boolean; znacznik?: string };
 type Sekcja = {
@@ -424,9 +425,20 @@ const dataPl = (iso: string) => iso.split("-").reverse().join(".");
 /** Część `powod` przed znacznikami — po niej rozpoznajemy „ten sam" przebieg. */
 const rdzen = (powod: string | null | undefined) => String(powod ?? "").split(SEPARATOR_ZNACZNIKOW)[0];
 
-/** Ten sam wynik i powód co ostatnio — i ostatni mail o nim naprawdę wyszedł (inaczej ponawiamy). */
-const powtorzenie = (historia: Wpis[], wynik: string, powod: string) =>
-  historia[0]?.wynik === wynik && rdzen(historia[0]?.powod) === rdzen(powod) && historia[0]?.mail_wyslany === true;
+/**
+ * Ten sam wynik i powód co w nieprzerwanym ciągu ostatnich przebiegów — i w tym
+ * ciągu mail o nim naprawdę wyszedł. Szukamy w całym ciągu, nie w ostatnim
+ * wpisie: przebieg uciszony jako powtórka zapisuje mail_wyslany = false, więc
+ * patrząc tylko na niego mail szedłby co drugi przebieg. Ciąg dłuższy niż
+ * historia (31 dni) daje jedno przypomnienie na miesiąc.
+ */
+function powtorzenie(historia: Pick<Wpis, "wynik" | "powod" | "mail_wyslany">[], wynik: string, powod: string): boolean {
+  for (const h of historia) {
+    if (h.wynik !== wynik || rdzen(h.powod) !== rdzen(powod)) return false;
+    if (h.mail_wyslany === true) return true;
+  }
+  return false;
+}
 
 function dniOd(iso: string, teraz: Date): number {
   return (teraz.getTime() - new Date(iso).getTime()) / DZIEN_MS;
@@ -553,6 +565,10 @@ async function pobierzPlik(gh: GitHub, galaz: string): Promise<{ tekst: string }
   }
 }
 
+/** Adres PR do maila — tylko z github.com, inaczej składany z numeru. */
+const adresPr = (p: Pr) =>
+  String(p.html_url ?? "").startsWith("https://github.com/") ? p.html_url : `https://github.com/${REPO}/pull/${p.number}`;
+
 /**
  * Pull requesty kalibratora: z gałęzi bota w tym repozytorium do gałęzi
  * produkcyjnej. Filtr `head=` po stronie GitHuba to za mało, żeby na ich
@@ -580,15 +596,32 @@ async function listaPr(gh: GitHub, galaz: string): Promise<Pr[]> {
 async function oznaczNieaktualne(gh: GitHub, galaz: string, powod: string, historia: Wpis[], teraz: Date): Promise<Uwaga[]> {
   const uwagi: Uwaga[] = [];
   try {
-    const otwarte = (await listaPr(gh, galaz)).filter((p) => p.state === "open" && !String(p.title ?? "").startsWith(NIEAKTUALNY));
+    const otwarte = (await listaPr(gh, galaz)).filter((p) => p.state === "open");
     for (const p of otwarte) {
+      // „PR #4 nieaktualny" nie jest podciągiem „PR #41 nieaktualny" — znacznik szukany przez includes().
+      const znacznik = `PR #${p.number} ${ZNACZNIK_NIEAKTUALNY}`;
+      const oznaczony = String(p.title ?? "").startsWith(NIEAKTUALNY);
+      if (oznaczony) {
+        // Oznaczony wcześniej. Alarm wraca, gdy mail o nim nie wyszedł (znacznik
+        // trafia do dziennika tylko z wysłanym mailem) — i raz na 30 dni, dopóki PR wisi.
+        if (byloWDniach(historia, znacznik, DNI_POTWIERDZENIA, teraz)) continue;
+        uwagi.push({
+          alarm: true,
+          znacznik,
+          tekst: `Pull request #${p.number} jest oznaczony jako nieaktualny i dalej otwarty. Nie scalaj go — ` +
+            "możesz go zamknąć; zamknięcie oznaczonego PR nie blokuje przyszłych propozycji.",
+        });
+        continue;
+      }
       const tytul = `${NIEAKTUALNY} ${String(p.title ?? "Kalibracja stawek")}`.slice(0, 200);
       const reszta = String(p.body ?? "")
         .replace(/^Skrót propozycji: `[0-9a-f]+`$/gm, "")
-        .replace(/<!-- kalibrator:[0-9a-f]+ -->/g, "");
+        .replace(/<!-- kalibrator:[0-9a-f]+ -->/g, "")
+        .replace(/^Scalenie do `[^`\n]*` = nowe stawki.*$/gm, "");
       const opis = [
         `**${NIEAKTUALNY} Nie scalaj.** Dane z ofert już nie dają tej propozycji (${bezDanych(powod).slice(0, 200)}).`,
-        "Kalibrator przepisze ten pull request sam, gdy dane znowu pokażą zmianę stawek.",
+        "Kalibrator przepisze ten pull request sam, gdy dane znowu pokażą zmianę stawek. " +
+          "Możesz go też zamknąć — zamknięcie oznaczonego PR nie blokuje przyszłych propozycji.",
         "",
         "---",
         "",
@@ -597,7 +630,7 @@ async function oznaczNieaktualne(gh: GitHub, galaz: string, powod: string, histo
       await gh.zapytaj("PATCH", `/pulls/${p.number}`, { title: tytul, body: opis });
       uwagi.push({
         alarm: true,
-        znacznik: `${ZNACZNIK_NIEAKTUALNY} #${p.number}`,
+        znacznik,
         tekst: `Pull request #${p.number} oznaczony jako nieaktualny — dane już nie dają tych stawek. Nie scalaj go; ` +
           "kalibrator przepisze go sam przy następnej zmianie.",
       });
@@ -605,7 +638,7 @@ async function oznaczNieaktualne(gh: GitHub, galaz: string, powod: string, histo
   } catch (e) {
     const komunikat = bezDanych(String((e as { message?: string })?.message ?? e));
     await logError(ZRODLO_BLEDU, `Kalibrator: nie mogę sprawdzić albo oznaczyć otwartego PR (${komunikat})`);
-    const znacznik = `${ZNACZNIK_NIEAKTUALNY}: błąd`;
+    const znacznik = `PR ${ZNACZNIK_NIEAKTUALNY}: błąd sprawdzenia`;
     if (!byloWDniach(historia, znacznik, DNI_TOKEN_PRZERWA, teraz)) {
       uwagi.push({
         alarm: true,
@@ -1170,7 +1203,7 @@ async function przebieg(supabase: Klient, stan: { ustawienia?: Ustawienia }): Pr
 
   const { data: wpisy, error: bladHistorii } = await supabase
     .from("ud_kalibracja_przebiegi")
-    .select("uruchomiono, wynik, powod, mail_wyslany, na_stronie")
+    .select("uruchomiono, wynik, powod, mail_wyslany, na_stronie, pr_numer")
     .gte("uruchomiono", new Date(teraz.getTime() - 31 * DZIEN_MS).toISOString())
     .order("uruchomiono", { ascending: false })
     .limit(500);
@@ -1219,9 +1252,13 @@ async function przebieg(supabase: Klient, stan: { ustawienia?: Ustawienia }): Pr
   // Drugi przebieg z rzędu bez przedziału z pliku. Znacznik trafia do dziennika
   // tylko z wysłanym mailem — nieudany mail ponawiamy w kolejnym przebiegu,
   // a przy trwałej awarii przypominamy co tydzień.
+  // Znacznik liczy się tylko z bieżącej przerwy (od ostatniej zgodnej strony) —
+  // nowa awaria tuż po naprawionej dostaje własny alert.
   const sprawdzone = historia.filter((h) => typeof h.na_stronie === "boolean");
+  const zgodna = sprawdzone.findIndex((h) => h.na_stronie === true);
+  const przerwa = zgodna === -1 ? sprawdzone : sprawdzone.slice(0, zgodna);
   if (naStronie === false && sprawdzone[0]?.na_stronie === false &&
-    !byloWDniach(historia, ZNACZNIK_STRONY, DNI_TOKEN_PRZERWA, teraz)) {
+    !byloWDniach(przerwa, ZNACZNIK_STRONY, DNI_TOKEN_PRZERWA, teraz)) {
     uwagi.push({
       alarm: true,
       znacznik: ZNACZNIK_STRONY,
@@ -1280,11 +1317,21 @@ async function przebieg(supabase: Klient, stan: { ustawienia?: Ustawienia }): Pr
       wynik = "propozycja";
       prNumer = czeka.number;
       powod = `PR #${czeka.number} z tą propozycją już czeka na decyzję`;
+      // Mail o tym PR nie wyszedł w żadnym przebiegu z historii (Resend leżał
+      // w dniu propozycji) — wysyłamy go teraz. Bez wpisów o tym PR (historia
+      // ginie po 31 dniach) też: to jedno przypomnienie na miesiąc.
+      const wpisy = historia.filter((h) => h.wynik === "propozycja" && h.pr_numer === czeka.number);
+      if (wpisy.length && !wpisy.some((h) => h.mail_wyslany === true)) {
+        mail = mailPropozycja(k, { numer: czeka.number, url: adresPr(czeka), zaktualizowany: false });
+        powod += " — mail ponowiony";
+      }
     } else if (odrzucony) {
       // Właściciel zamknął ten PR bez scalenia — te same liczby nie wracają.
       wynik = "odmowa";
       prNumer = odrzucony.number;
       powod = `propozycja odrzucona przez właściciela (PR #${odrzucony.number} zamknięty bez scalenia) — bez ponawiania`;
+      // Inny otwarty PR (z liczbami, których dane już nie dają) — nie scalać.
+      uwagi.push(...await oznaczNieaktualne(gh, ustawienia.galaz, powod, historia, teraz));
     } else {
       const { tytul, opis, wiadomosc } = opisPr(obecny, kandydat, skrot, ustawienia.galaz);
       const pr = await zlozPropozycje(gh, ustawienia.galaz, {
@@ -1336,19 +1383,19 @@ async function zapiszPrzebieg(supabase: Klient, wpis: Json) {
 async function obsluzBlad(supabase: Klient, stan: { ustawienia?: Ustawienia }, e: unknown): Promise<Response> {
   const komunikat = bezDanych(String((e as { message?: string })?.message ?? e));
   await logError(ZRODLO_BLEDU, `Kalibrator: ${komunikat}`);
-  let ostatni: { wynik?: string; powod?: string | null; mail_wyslany?: boolean } | undefined;
+  let ostatnie: Pick<Wpis, "wynik" | "powod" | "mail_wyslany">[] = [];
   try {
     const { data } = await supabase
       .from("ud_kalibracja_przebiegi")
       .select("wynik, powod, mail_wyslany")
       .order("uruchomiono", { ascending: false })
-      .limit(1);
-    ostatni = (data ?? [])[0] as typeof ostatni;
+      .limit(50);
+    ostatnie = (data ?? []) as typeof ostatnie;
   } catch {
-    ostatni = undefined;
+    ostatnie = [];
   }
-  // Ten sam błąd co ostatnio i mail o nim wyszedł — bez drugiego maila.
-  const powtorka = ostatni?.wynik === "blad" && rdzen(ostatni?.powod) === komunikat && ostatni?.mail_wyslany === true;
+  // Ten sam błąd w nieprzerwanym ciągu i mail o nim wyszedł — bez drugiego maila.
+  const powtorka = powtorzenie(ostatnie, "blad", komunikat);
   let wyslany = false;
   if (!powtorka) {
     try {
