@@ -378,8 +378,10 @@ w panelu Supabase.
 
 ## Funkcje brzegowe — kto może je wołać
 
-Jedenaście z czternastu funkcji ma `verify_jwt = false` (do 01.10.2026 dziewięć
-z dwunastu — dołożyły `wniosek-szkic` i `wniosek-przypomnienie`), więc platforma wpuszcza
+Trzynaście z szesnastu funkcji ma `verify_jwt = false` (stan na 20.10.2026; do
+01.10.2026 dziewięć z dwunastu — dołożyły `wniosek-szkic`, `wniosek-przypomnienie`,
+20.10 `kalibrator`, a 08.10 `send-payment-reminders`, której kodu w tym
+repozytorium nie ma i której bramki nikt stąd nie sprawdzał), więc platforma wpuszcza
 do nich każdego, kto zna adres — a roboty te adresy znajdują (17.09 SemrushBot
 zapukał GET-em do `div-send-email`). Bramka musi siedzieć w kodzie funkcji.
 Stan po audycie z 24.09.2026:
@@ -392,7 +394,7 @@ Stan po audycie z 24.09.2026:
 | `send-digest-email`, `sync-beauty-companies` | pg_cron | nagłówek `x-cron-token` z Vaulta |
 | `normalize-article-images` | pg_cron | nagłówek `x-blog-token` z Vaulta |
 | `review-admin` | panel opinii | JWT + `profiles.rola = 'admin'` |
-| `kalibrator` | pg_cron (zadanie `kalibracja-stawek`) — **w repo, niewdrożona** (14.10.2026) | nagłówek `x-cron-token` z Vaulta, sprawdzany przed pierwszym odczytem; `verify_jwt = false` |
+| `kalibrator` | pg_cron (zadanie `kalibracja-stawek`) — wdrożona 20.10.2026 (v1), **zadanie wyłączone** | nagłówek `x-cron-token` z Vaulta, sprawdzany przed pierwszym odczytem; `verify_jwt = false` |
 | `send-offer-email` | stary `js/client.js` w udapp — w praktyce nikt | treść wyłącznie z bazy, wysyłka tylko do 30 min po wyborze |
 | `div-send-email` | formularz kancelarii (rozwod.waw.pl) | **żadna** — patrz niżej |
 | pozostałe trzy | — | `verify_jwt = true` |
@@ -453,6 +455,20 @@ Funkcja z `import … from '../_shared/logger.ts'` idzie jako dwa pliki:
 Treść do wdrożenia generuj skryptem (`json.dumps`) z pliku w repo, zamiast
 przepisywać — w `form-submit` stoi twarda spacja (U+00A0) w `parseAmount()`,
 która przy przepisywaniu znika bez śladu.
+
+**Nie zamieniaj takich znaków na `\u00a0` „dla bezpieczeństwa".** 20.10.2026
+(`kalibrator`) zapis `\u00a0` / `\u202f` / `\u2009` jako tekst w treści
+wdrożenia doszedł na produkcję jako prawdziwe znaki — droga przez MCP dekoduje
+o jeden poziom więcej. Znaki wpisane wprost przeszły bez zmian, więc wdrożona
+treść zgadza się z repozytorium tylko wtedy, gdy repozytorium ma je wprost.
+
+**Po wdrożeniu porównaj treść z repozytorium (md5), i to cudzymi rękami.**
+Osobny agent, który pliku w repo nie czytał, pobiera funkcję przez
+`get_edge_function`, zapisuje treść przez `json.loads` i liczy md5 — kopia
+robiona przez kogoś, kto zna oryginał, potrafi po cichu „poprawić" właśnie
+ten błąd, którego szukamy. Tak sprawdzony `kalibrator` v1: `index.ts`
+md5 `3a0a236aaac70add811cb0247983c62b`, `logger.ts`
+`41dc46f97766499da5d4b07588bbf1b3` — oba równe repozytorium.
 
 Pilnuje tego `test/funkcje-brzegowe.spec.js` — czyta źródła i sprawdza, że
 bramki stoją przed pierwszym odczytem. Na wersjach sprzed 24.09 wywala się
@@ -953,11 +969,29 @@ i kalibrator go nie rusza.
 Opis metody i bramek: `apps/portal/MODEL-SKLADKI.md`, część „Kalibrator".
 Tu tylko to, co trzeba wiedzieć, zanim się go dotknie.
 
-**Stan na 14.10.2026: kod w repozytorium, na produkcji nic.** Migracja
-`20261014120000_kalibracja_stawek.sql` niezastosowana, funkcja niewdrożona,
-`kalibracja.json` z nowymi stawkami (góra 3,22%) czeka na „wypychaj"
-właściciela — commit na gałęzi produkcyjnej zmienia ceny na żywej stronie
-od razu.
+**Stan na 20.10.2026: WDROŻONE, zadanie cron wyłączone.** Po „wypychaj"
+właściciela (20.10):
+
+- push `14547bd` — portal z nowymi stawkami na żywej stronie (14 400 zł:
+  291–464 zł zamiast 291–351 zł);
+- migracja przez MCP jako wersja `20261020104145` (plik w repo przemianowany
+  na tę nazwę); md5 treści `ud_kalibracja_stawek` i `ud_kalibracja_uruchom`
+  = repozytorium, wykonanie tylko `service_role`, obie tabele z RLS, zadanie
+  `kalibracja-stawek` **wyłączone**, tryb `na_sucho`;
+- funkcja `kalibrator` v1, `verify_jwt = false`, treść = repozytorium (md5,
+  patrz „Wdrażanie przez MCP"); sondy: GET → 405, POST bez tokenu → 401,
+  zły token → 401;
+- `select public.ud_kalibracja_uruchom();` → HTTP 200, „na sucho: bez zmian",
+  strona pokazuje przedział z pliku, mail na `biuro@utratadochodu.com` wyszedł,
+  `ud_errors` pusty.
+
+Stawki z żywych danych 20.10 = plik (2,02% / 2,2% / 3,22%, 36 mies. × 1,25),
+tylko metryczka urosła: 13 osób, 14 ofert, 29 wariantów, 7 par (w pliku 10 /
+11 / 22 / 5 z 14.10). Sama metryczka nie jest zmianą — `zrodlo` w pliku
+odświeży się przy pierwszej propozycji ze zmienionymi stawkami.
+
+**Zostaje po stronie właściciela:** włączenie crona (krok 5 niżej), około
+dwóch tygodni na sucho, potem token GitHuba i tryb `propozycja`.
 
 Przepływ: pg_cron `kalibracja-stawek` (pn–pt 05:40 UTC, **powstaje
 wyłączone**) → `ud_kalibracja_uruchom()` (token z Vaulta) → funkcja
@@ -1016,6 +1050,8 @@ produkcyjnej, którego lokalna kopia nie ma — przed pushem dociągnij gałąź
 push zostanie odrzucony. Nigdy `--force` na tej gałęzi.
 
 ### Wdrożenie — kolejność (dopiero po „wypychaj")
+
+Kroki 1–4 wykonane 20.10.2026 (stan wyżej); krok 5 czeka na zgodę właściciela.
 
 1. Push (portal z nowymi stawkami, migracja i funkcja w repo).
 2. Migracja przez MCP (funkcje bez UPDATE/DELETE w ciele, więc przejdzie);
