@@ -10,6 +10,7 @@
     "check": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
     "test:parser": "node --experimental-vm-modules scripts/test-parser.mjs",
     "test:extras": "node scripts/test-extras.mjs",
+    "test:wybor": "node scripts/test-wybor.mjs",
     "test:owu": "node scripts/test-owu.mjs",
     "test:lejek": "node scripts/test-lejek.mjs",
     "test:leady-sql": "node scripts/test-leady-sql.mjs",

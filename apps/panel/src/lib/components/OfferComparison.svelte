@@ -1,7 +1,8 @@
 <script>
   import { insurerLabel } from '$lib/format.js';
   import { comparisonRows, extraNotes } from '$lib/comparisonRows.js';
-  let { documents = [], selectable = false, onchoose = null, chosenId = null } = $props();
+  // etykietaWyboru: panel mówi „Wybór klienta", strona klienta — „Twój wybór".
+  let { documents = [], selectable = false, onchoose = null, chosenId = null, etykietaWyboru = 'Wybór klienta' } = $props();
 
   // Gdy wszystkie porównywane oferty są od tego samego ubezpieczyciela,
   // nagłówek jest jeden, wspólny dla wszystkich kolumn.
@@ -32,6 +33,19 @@
       </tr>
     </thead>
     <tbody>
+      <!-- Po decyzji klienta wybrany wariant ma znaczek nad kolumną i zielone tło.
+           Wcześniej znaczek stał tylko w wierszu przycisków „Wybieram ten", który
+           po wyborze znika — i w panelu, i u klienta nie było widać, co wybrano. -->
+      {#if chosenId && !selectable}
+        <tr class="wybor-wiersz">
+          <td class="lbl">{etykietaWyboru}</td>
+          {#each documents as d}
+            <td class:col-wybrana={d.id === chosenId}>
+              {#if d.id === chosenId}<span class="badge badge-chosen">✓ Wybrany</span>{/if}
+            </td>
+          {/each}
+        </tr>
+      {/if}
       {#each rows as row (row.key)}
         {#if row.kind === 'section'}
           <tr class="sec">
@@ -40,8 +54,8 @@
         {:else}
           <tr class={row.premium ? 'premium' : ''}>
             <td class="lbl">{row.label}</td>
-            {#each row.cells as c}
-              <td>
+            {#each row.cells as c, i}
+              <td class:col-wybrana={chosenId != null && documents[i]?.id === chosenId}>
                 {#if c.green}<span class="yes">{c.text}</span>
                 {:else if c.underline}<span class="mth">{c.text}</span>
                 {:else if c.bold}<strong>{c.text}</strong>
@@ -89,6 +103,8 @@
   tbody tr:nth-child(even) td:not(.lbl) { background: #fbfcfe; }
   tr.premium td { font-size: 0.95rem; border-top: 2px solid var(--slate-200); }
   .yes { color: #15803d; font-weight: 700; }
+  /* Kolumna wariantu wybranego przez klienta — wygrywa z pasami co drugiego wiersza. */
+  table.cmp td.col-wybrana { background: #ecfdf3 !important; }
   /* Nagłówek sekcji „Postanowienia dodatkowe" — renderowany tylko, gdy sekcja ma wiersze. */
   tr.sec td.sec-lbl { background: var(--slate-100); color: var(--slate-700); font-size: .78rem;
     text-transform: uppercase; letter-spacing: .04em; padding: 6px 14px; }

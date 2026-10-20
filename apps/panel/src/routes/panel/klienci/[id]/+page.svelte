@@ -1,8 +1,9 @@
 <script>
-  import { dateP } from '$lib/format.js';
+  import { dateP, dateTimeP, offerNoDisplay } from '$lib/format.js';
+  import { wybranyWariant, krotkiOpis } from '$lib/wybranyWariant.js';
   let { data } = $props();
   const c = data.client;
-  const statusLabel = { draft: 'Szkic', sent: 'Wysłana', viewed: 'Otwarta', chosen: 'Wybrana', rejected: 'Rezygnacja' };
+  const statusLabel = { draft: 'Szkic', sent: 'Wysłana', viewed: 'Otwarta', chosen: 'Wybrana', bought: 'Kupiona', rejected: 'Rezygnacja' };
 
   const val = (v) => (v === true ? 'Tak' : v === false ? 'Nie' : v == null || v === '' ? '—' : String(v));
   const has = (v) => v !== null && v !== undefined && v !== '';
@@ -76,6 +77,46 @@
     </p>
   </div>
   <a class="btn btn-primary" href="/panel/new?client={c.id}">+ Utwórz ofertę dla klienta</a>
+</div>
+
+<!-- Oferty klienta — na górze karty: link do oferty i to, co klient wybrał -->
+<div class="card card-pad" style="margin-bottom:1.25rem;">
+  <h3 style="font-size:1rem;margin-bottom:.75rem;">Oferty klienta ({data.offers.length})</h3>
+  {#if data.offers.length}
+    <div style="overflow-x:auto;">
+    <table>
+      <thead><tr><th>Oferta</th><th>Status</th><th>Wybór klienta</th><th>Utworzona</th><th></th></tr></thead>
+      <tbody>
+        {#each data.offers as o}
+          {@const w = wybranyWariant(o.client_choice, data.wybrane)}
+          <tr>
+            <td style="font-weight:600;">
+              <a href="/panel/offer/{o.id}">{o.offer_number || o.name}</a>
+              {#if o.offer_number && o.name}<div class="muted" style="font-weight:400;font-size:.8rem;">{o.name}</div>{/if}
+            </td>
+            <td><span class="badge badge-{o.status}">{statusLabel[o.status] || o.status}</span></td>
+            <td style="font-size:.85rem;">
+              {#if o.client_choice?.rejected}
+                <span style="color:var(--red-700);">rezygnacja{o.client_choice.rejected_at ? ` — ${dateTimeP(o.client_choice.rejected_at)}` : ''}</span>
+              {:else if w}
+                <strong>✓ {krotkiOpis(w)}</strong>
+                {#if o.client_choice.chosen_at}<div class="muted">{dateTimeP(o.client_choice.chosen_at)}</div>{/if}
+              {:else if o.client_choice?.document_id}
+                ✓ nr {offerNoDisplay(o.client_choice.offer_number)} <span class="muted">(wariant usunięty z oferty)</span>
+              {:else}
+                <span class="muted">—</span>
+              {/if}
+            </td>
+            <td class="muted">{dateP(o.created_at)}</td>
+            <td style="text-align:right;white-space:nowrap;"><a href="/panel/offer/{o.id}">Otwórz →</a></td>
+          </tr>
+        {/each}
+      </tbody>
+    </table>
+    </div>
+  {:else}
+    <p class="muted">Brak ofert dla tego klienta.</p>
+  {/if}
 </div>
 
 <div class="kk-sections">
@@ -172,28 +213,6 @@
         </tbody>
       </table>
     </div>
-  {/if}
-</div>
-
-<!-- Oferty klienta -->
-<div class="card card-pad" style="margin-top:1.25rem;">
-  <h3 style="font-size:1rem;margin-bottom:.75rem;">Oferty klienta ({data.offers.length})</h3>
-  {#if data.offers.length}
-    <table>
-      <thead><tr><th>Oferta</th><th>Status</th><th>Utworzona</th><th></th></tr></thead>
-      <tbody>
-        {#each data.offers as o}
-          <tr>
-            <td style="font-weight:600;">{o.name}</td>
-            <td><span class="badge badge-{o.status}">{statusLabel[o.status] || o.status}</span></td>
-            <td class="muted">{dateP(o.created_at)}</td>
-            <td style="text-align:right;"><a href="/panel/offer/{o.id}">Otwórz →</a></td>
-          </tr>
-        {/each}
-      </tbody>
-    </table>
-  {:else}
-    <p class="muted">Brak ofert dla tego klienta.</p>
   {/if}
 </div>
 

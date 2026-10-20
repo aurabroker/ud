@@ -22,9 +22,18 @@ export async function load({ params, locals }) {
 
   const { data: offers } = await sb
     .from('ud_offers')
-    .select('id, name, status, created_at, source')
+    .select('id, name, offer_number, status, created_at, sent_at, client_choice, source')
     .eq('client_id', client.id)
     .order('created_at', { ascending: false });
 
-  return { client, owner_name, offers: offers || [] };
+  // Warianty wybrane przez klienta — żeby karta mówiła, CO wybrał, nie tylko że wybrał.
+  const ids = (offers || []).map((o) => o.client_choice?.document_id).filter(Boolean);
+  const { data: wybrane } = ids.length
+    ? await sb
+        .from('ud_offer_documents')
+        .select('id, offer_number, temp_monthly_benefit, indemnity_period, wait_accident, wait_illness, premium_total')
+        .in('id', ids)
+    : { data: [] };
+
+  return { client, owner_name, offers: offers || [], wybrane: wybrane || [] };
 }

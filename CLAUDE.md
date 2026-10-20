@@ -1486,6 +1486,32 @@ dopiero po `email.sent`, a w logu zostaje ślad próby z tym numerem.
 
 Migracja: `supabase/migrations/20260917200000_oferty_archiwum_wersje.sql`.
 
+### Wybór klienta widać na górze oferty i karty klienta (panel v.0.72, 20.10.2026)
+
+Klientka wybrała w portalu jeden z czterech wariantów, a panel pokazywał
+„Wybrano: Utrata dochodu (Leadenhall)" — nazwę produktu, wspólną dla
+wszystkich wariantów oferty. Wybór był zapisany poprawnie
+(`ud_offers.client_choice.document_id`), tylko nikt go nie pokazywał.
+
+- **Opis wariantu** stoi w jednym miejscu, `src/lib/wybranyWariant.js`
+  (numer, świadczenie, okres odszkodowawczy, wyczekiwanie, trwała, śmierć,
+  składki — etykiety jak w tabeli porównania). Korzystają z niego strona
+  oferty, karta klienta i mail do agenta. Nie wracaj do samej nazwy produktu.
+- **Strona oferty, od góry:** kontakt z klientem (telefon, e-mail, karta
+  klienta) → „Klient wybrał wariant nr …" ze wszystkimi parametrami →
+  „Link dla klienta" i „Wersja N" **obok siebie** (`.of-para`, na wąskim
+  ekranie jedna pod drugą) → porównanie wariantów.
+- **Karta klienta:** „Oferty klienta" na samej górze, z kolumną „Wybór
+  klienta" i linkiem do oferty.
+- **Tabela porównania** (`OfferComparison.svelte`, wspólna dla panelu
+  i strony klienta) po decyzji ma wiersz ze znaczkiem „✓ Wybrany" i zieloną
+  kolumnę. Wcześniej znaczek stał tylko w wierszu przycisków „Wybieram ten",
+  który po wyborze znika — klient też nie widział, co wybrał.
+- **Mail „Decyzja klienta" do agenta** niesie numer wariantu, kwoty i link do
+  oferty w panelu; wartości są escape'owane.
+
+Test: `pnpm test:wybor` w `apps/panel` (na kodzie sprzed zmiany 16 czerwonych).
+
 ### Podmiana wersji OWU — co wolno, a co urywa dostęp
 
 Na stronie pokazujemy **tylko aktualne OWU**. Wgląd w wersje historyczne idzie

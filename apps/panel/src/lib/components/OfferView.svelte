@@ -146,7 +146,7 @@
   <!-- PORÓWNANIE OFERT -->
   <section class="ov-card">
     <h2 class="ov-h2">Porównanie ofert{documents.length > 1 ? ` (${documents.length})` : ''}</h2>
-    <OfferComparison {documents} selectable={!choice} onchoose={openChoose} chosenId={chosenDocId} />
+    <OfferComparison {documents} selectable={!choice} onchoose={openChoose} chosenId={chosenDocId} etykietaWyboru="Twój wybór" />
   </section>
 
   {#if offer.broker_message}
