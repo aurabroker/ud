@@ -10,6 +10,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { wybranyWariant, opisWariantu, krotkiOpis } from '../src/lib/wybranyWariant.js';
+import { zawodKlienta } from '../src/lib/zawodKlienta.js';
 
 let failures = 0;
 function check(label, ok, info = '') {
@@ -73,6 +74,26 @@ const para = oferta.slice(poz('<div class="of-para">'), poz('<!-- Porównanie wa
 check('„Link dla klienta" i „Wersja" w jednym rzędzie (.of-para)', para.includes('Link dla klienta') && para.includes('Wersja {data.offer.wersja'));
 check('rząd ma dwie kolumny i składa się na wąskim ekranie',
   /\.of-para\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\) minmax\(0, 1fr\)/.test(oferta) && /@media[^{]*\{\s*\.of-para\s*\{\s*grid-template-columns:\s*minmax\(0, 1fr\);/.test(oferta));
+
+console.log('\nZawód na karcie kontaktu (v.0.73)');
+const z1 = zawodKlienta('Stylistka paznokci', [{ profession: 'Kosmetyczka' }, { profession: 'kosmetyczka ' }]);
+check('zawód podany przez klienta + inny z oferty (bez powtórzeń)', z1.zawod === 'Stylistka paznokci' && z1.wOfercie === 'Kosmetyczka' && !z1.zOferty, JSON.stringify(z1));
+const z2 = zawodKlienta('  Pielęgniarka ', [{ profession: 'pielęgniarka' }]);
+check('ten sam zawód w ofercie (inna wielkość liter, odstępy) → bez dopisku', z2.zawod === 'Pielęgniarka' && z2.wOfercie === null, JSON.stringify(z2));
+const z3 = zawodKlienta(null, [{ profession: 'Kosmetyczka' }]);
+check('klient bez zawodu → zawód z oferty, oznaczony', z3.zawod === 'Kosmetyczka' && z3.zOferty === true && z3.wOfercie === null, JSON.stringify(z3));
+const z4 = zawodKlienta('', [{ profession: null }, {}]);
+check('nic nigdzie → brak (strona pokazuje „—")', z4.zawod === null && z4.zOferty === false && z4.wOfercie === null, JSON.stringify(z4));
+const z5 = zawodKlienta('Kierownik', null);
+check('oferta bez wariantów', z5.zawod === 'Kierownik' && z5.wOfercie === null, JSON.stringify(z5));
+const kontakt = oferta.slice(poz('of-kontakt'), poz('Klient wybrał wariant'));
+check('zawód stoi w karcie kontaktu na górze strony',
+  kontakt.includes('Zawód:') && kontakt.includes('{zawod.zawod}') && kontakt.includes('zawod.wOfercie') && kontakt.includes('zawod.zOferty'));
+check('strona liczy zawód z danych loadera (zawodKlienta + warianty)', oferta.includes('zawodKlienta(data.zawodKlienta, data.documents)'));
+const ofertaSerwer = czytaj('src/routes/panel/offer/[id]/+page.server.js');
+check('loader czyta zawód tylko przypiętego klienta',
+  /from\('ud_clients'\)\.select\('profession'\)\.eq\('id', offer\.client_id\)\.maybeSingle\(\)/.test(ofertaSerwer) && ofertaSerwer.includes('zawodKlienta: przypiety?.profession'));
+check('lista wyboru klienta nadal bez zawodu (500 wierszy)', ofertaSerwer.includes("select('id, full_name, email, phone')"));
 
 console.log('\nTabela porównania (wspólna dla panelu i strony klienta)');
 const tabela = czytaj('src/lib/components/OfferComparison.svelte');

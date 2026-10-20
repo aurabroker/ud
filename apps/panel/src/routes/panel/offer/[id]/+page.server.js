@@ -19,13 +19,17 @@ export async function load({ params, locals }) {
   const swoi = await klienciWidoczni(sb, user.id);
   const widoczni = swoi && offer.client_id && !swoi.includes(offer.client_id) ? [...swoi, offer.client_id] : swoi;
   const klienci = sb.from('ud_clients').select('id, full_name, email, phone').order('created_at', { ascending: false }).limit(500);
-  const [{ data: documents }, { data: files }, { data: questions }, { data: pin }, { data: clients }] =
+  const [{ data: documents }, { data: files }, { data: questions }, { data: pin }, { data: clients }, { data: przypiety }] =
     await Promise.all([
       sb.from('ud_offer_documents').select('*').eq('offer_id', offer.id).order('sort_order'),
       sb.from('ud_offer_files').select('*').eq('offer_id', offer.id),
       sb.from('ud_offer_questions').select('*').eq('offer_id', offer.id).order('asked_at', { ascending: false }),
       sb.from('ud_offer_pins').select('expires_at, verified_at, attempts').eq('offer_id', offer.id).maybeSingle(),
-      widoczni === null ? klienci : widoczni.length ? klienci.in('id', widoczni) : Promise.resolve({ data: [] })
+      widoczni === null ? klienci : widoczni.length ? klienci.in('id', widoczni) : Promise.resolve({ data: [] }),
+      // Zawód wskazany przez klienta — tylko przypiętego, nie całej listy wyboru.
+      offer.client_id
+        ? sb.from('ud_clients').select('profession').eq('id', offer.client_id).maybeSingle()
+        : Promise.resolve({ data: null })
     ]);
 
   const wysylki = await historiaWysylek(offer.id);
@@ -37,6 +41,7 @@ export async function load({ params, locals }) {
     questions: questions || [],
     pin,
     clients: clients || [],
+    zawodKlienta: przypiety?.profession ?? null,
     wysylki,
     link: `${clientBaseUrl()}/offer/${offer.share_token}`
   };

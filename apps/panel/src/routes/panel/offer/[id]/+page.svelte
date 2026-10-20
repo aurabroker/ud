@@ -5,6 +5,7 @@
   import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
   import { dateP, dateTimeP, offerNoDisplay } from '$lib/format.js';
   import { wybranyWariant, opisWariantu } from '$lib/wybranyWariant.js';
+  import { zawodKlienta } from '$lib/zawodKlienta.js';
   let { data, form } = $props();
   let sending = $state(false);
   let copied = $state(false);
@@ -27,6 +28,8 @@
   const klient = $derived(data.clients.find((x) => x.id === data.offer.client_id) || null);
   const telefon = $derived(data.offer.client_phone || klient?.phone || '');
   const email = $derived(data.offer.client_email || klient?.email || '');
+  // Zawód podany przez klienta, a obok — gdy inny — ten, pod którym wycenił go ubezpieczyciel.
+  const zawod = $derived(zawodKlienta(data.zawodKlienta, data.documents));
 
   // pola edycji
   let eClientId = $state(data.offer.client_id || '');
@@ -74,6 +77,10 @@
     <span><span class="muted">Klient:</span> <strong>{data.offer.client_name || klient?.full_name || 'Bez nazwiska'}</strong></span>
     <span><span class="muted">Telefon:</span> {#if telefon}<a href="tel:{telefon.replace(/\s+/g, '')}"><strong>{telefon}</strong></a>{:else}—{/if}</span>
     <span><span class="muted">E-mail:</span> {#if email}<a href="mailto:{email}">{email}</a>{:else}—{/if}</span>
+    <span class="of-zawod"><span class="muted">Zawód:</span>
+      {#if zawod.zawod}<strong>{zawod.zawod}</strong>{#if zawod.zOferty}<span class="muted">{' (z oferty ubezpieczyciela)'}</span>{/if}{:else}—{/if}
+      {#if zawod.wOfercie}<span class="muted">{` · w ofercie ubezpieczyciela: ${zawod.wOfercie}`}</span>{/if}
+    </span>
   </div>
   {#if data.offer.client_id}
     <a class="btn btn-ghost" href="/panel/klienci/{data.offer.client_id}">Karta klienta →</a>
