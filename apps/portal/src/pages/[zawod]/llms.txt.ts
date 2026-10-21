@@ -12,9 +12,9 @@
 import type { APIRoute, GetStaticPaths } from 'astro';
 import { ZAWODY, zawod, tresc, pokrewne, slugKategorii, malymi } from '@ud/zawody';
 import { FIRMA, SERWIS } from '../../lib/firma';
-import { symuluj, zl, zlZakres, MIESIECY_WYPLATY, OKRESY, OPIS_KALIBRACJI }
+import { symuluj, zl, zlZakres, MIESIECY_WYPLATY, MIESIECY_MAX, OKRESY, OPIS_KALIBRACJI }
   from '../../lib/symulacja';
-import { ZUS_TEKST } from '../../lib/zus';
+import { ZUS_TEKST, ZASILEK_JDG } from '../../lib/zus';
 
 export const getStaticPaths: GetStaticPaths = () =>
   ZAWODY.map((z) => ({ params: { zawod: z.slug } }));
@@ -69,9 +69,10 @@ ubezpieczyciela po ocenie ryzyka.
 - Dochód przyjęty do wyliczenia: ${zl(dochod)} miesięcznie
 - Limit świadczenia przy kontrakcie B2B: 80%
 - Miesięczne świadczenie z polisy: ${zl(w.swiadczenie)}
-- Okres wypłaty: najdłużej ${OKRESY.slice(0, -1).join(', ')} albo ${OKRESY.at(-1)} miesięcy;
-  składka poniżej dotyczy wariantu najkrótszego, ${MIESIECY_WYPLATY}-miesięcznego
-- Zasiłek chorobowy z ZUS: ${zl(w.zus)} miesięcznie przed podatkiem — ${ZUS_TEKST.wzor},
+- Okres wypłaty: najdłużej ${MIESIECY_MAX} miesięcy (warianty ${OKRESY.slice(0, -1).join(', ')}
+  i ${OKRESY.at(-1)} miesięcy); składka poniżej dotyczy wariantu najkrótszego,
+  ${MIESIECY_WYPLATY}-miesięcznego
+- Zasiłek chorobowy z ZUS: ${zl(ZASILEK_JDG.duzy)} miesięcznie przed podatkiem — ${ZUS_TEKST.wzor},
   ${ZUS_TEKST.scenariusz}; ${ZUS_TEKST.dopiski}
 - Szacowana składka miesięczna: ${zlZakres(w.skladkaOd, w.skladkaDo)}, razem z opłatą
   dystrybucyjną — przedział od najtańszej do najdroższej stawki ${OPIS_KALIBRACJI}

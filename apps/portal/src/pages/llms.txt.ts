@@ -17,7 +17,8 @@ import type { APIRoute } from 'astro';
 import { ZAWODY, kategorie, wKategorii, slugKategorii, tresc, malymi } from '@ud/zawody';
 import { ARTYKULY } from '../lib/artykuly';
 import { FIRMA, SERWIS, UBEZPIECZYCIELE } from '../lib/firma';
-import { LIMIT, OKRESY, SWIADCZENIE_MAX, zl } from '../lib/symulacja';
+import { LIMIT, OKRESY, MIESIECY_MAX, zl } from '../lib/symulacja';
+import { SWIADCZENIE_MAX } from '../lib/granice';
 import { ZASILEK_JDG, ZUS_TEKST } from '../lib/zus';
 import { krokiSlownie } from '@ud/wniosek/schemat';
 
@@ -66,9 +67,9 @@ niezdolnością do wykonywania zawodu z powodu choroby lub nieszczęśliwego wyp
   ${ZUS_TEKST.scenariusz} dostaje ${zl(ZASILEK_JDG.duzy)} miesięcznie przed podatkiem,
   niezależnie od faktycznych zarobków; ${ZUS_TEKST.dopiski}. To jest luka, którą polisa zamyka.
   ${ZUS_TEKST.etat}
-- **Okres wypłaty:** świadczenie miesięczne wypłacane najdłużej przez ${OKRESY.slice(0, -1).join(', ')}
-  albo ${OKRESY.at(-1)} miesięcy — okres wybiera się przy zawarciu umowy, najkrótszy
-  wariant to ${OKRESY[0]} miesiące. Pierwsza wypłata przysługuje po okresie wyczekiwania
+- **Okres wypłaty:** świadczenie miesięczne wypłacane najdłużej przez ${MIESIECY_MAX} miesięcy.
+  Okres wybiera się przy zawarciu umowy: ${OKRESY.slice(0, -1).join(', ')} albo ${OKRESY.at(-1)}
+  miesięcy; najkrótszy wariant to ${OKRESY[0]} miesiące. Pierwsza wypłata przysługuje po okresie wyczekiwania
   ustalonym w umowie.
 - **Ryzyka:** okresowa niezdolność do pracy (świadczenie miesięczne), trwała
   niezdolność do pracy oraz śmierć i inwalidztwo wskutek nieszczęśliwego wypadku

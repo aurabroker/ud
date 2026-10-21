@@ -137,7 +137,7 @@ const jsonld = graf([
     <h2 class="text-[clamp(1.6rem,4vw,2.4rem)] leading-tight mb-3">Skąd bierze się luka</h2>
     <p class="text-[1.08rem] leading-relaxed text-tekst-drugi max-w-[42em] mt-0 mb-8">
       Zasiłek chorobowy z ZUS to {ZUS_TEKST.wzor}. Na dużym ZUS-ie z najniższą podstawą
-      i z dobrowolnym chorobowym daje to {zl(przyklad.zus)} miesięcznie przed podatkiem —
+      i z dobrowolnym chorobowym daje to {zl(ZASILEK_JDG.duzy)} miesięcznie przed podatkiem —
       niezależnie od tego, czy zarabiasz 8 000 zł, czy 80 000 zł. Na preferencyjnym ZUS-ie
       to około {zl(ZASILEK_JDG.preferencyjny)}, a bez chorobowego nic.
     </p>
@@ -152,7 +152,7 @@ const jsonld = graf([
           </tr>
           <tr class="border-b border-linia">
             <th scope="row" class="px-6 py-4 font-semibold text-[15.5px]">Zasiłek z ZUS (duży ZUS z chorobowym)</th>
-            <td class="px-6 py-4 font-mono text-lg text-alarm font-semibold">{zl(przyklad.zus)}</td>
+            <td class="px-6 py-4 font-mono text-lg text-alarm font-semibold">{zl(ZASILEK_JDG.duzy)}</td>
           </tr>
           <tr class="border-b border-linia">
             <th scope="row" class="px-6 py-4 font-semibold text-[15.5px]">Świadczenie z polisy ({Math.round(LIMIT.b2b * 100)}%)</th>

@@ -2,7 +2,8 @@
 import Baza from '../../layouts/Baza.astro';
 import Kalkulator from '../../components/Kalkulator.svelte';
 import { graf, organizacja, serwis, strona, okruszki, faq } from '../../lib/seo';
-import { symuluj, zl, zlZakres, LIMIT, MIESIECY_WYPLATY, OKRESY, ZAKRES_DOCHODU, SWIADCZENIE_MAX } from '../../lib/symulacja';
+import { symuluj, zl, zlZakres, LIMIT, MIESIECY_WYPLATY, MIESIECY_MAX, OKRESY, ZAKRES_DOCHODU } from '../../lib/symulacja';
+import { SWIADCZENIE_MAX } from '../../lib/granice';
 import { ZASILEK_JDG, ZUS_TEKST, WYCZEKIWANIE_DOBROWOLNE_DNI, OKRES_ZASILKOWY_DNI } from '../../lib/zus';
 
 const sciezka = '/kalkulator/';
@@ -119,7 +120,7 @@ const jsonld = graf([
           {PRZYKLADY.map((p) => (
             <tr class="border-b border-linia last:border-0">
               <th scope="row" class="px-5 py-4 font-semibold text-[15.5px] whitespace-nowrap">{zl(p.dochod)}</th>
-              <td class="px-5 py-4 font-mono text-[15.5px] text-alarm whitespace-nowrap">{zl(p.zus)}</td>
+              <td class="px-5 py-4 font-mono text-[15.5px] text-alarm whitespace-nowrap">{zl(ZASILEK_JDG.duzy)}</td>
               <td class="px-5 py-4 font-mono text-[15.5px] font-semibold text-akcent-ciemny whitespace-nowrap">{zl(p.swiadczenie)}</td>
               <td class="px-5 py-4 font-mono text-[15.5px] whitespace-nowrap">{zlZakres(p.skladkaOd, p.skladkaDo)}</td>
             </tr>
@@ -130,8 +131,9 @@ const jsonld = graf([
     <p class="text-[13px] leading-relaxed text-tekst-drugi mt-4 mb-0 max-w-[46em]">
       Założenia: zasiłek to {ZUS_TEKST.wzor}, {ZUS_TEKST.scenariusz}; {ZUS_TEKST.dopiski}.{' '}
       {ZUS_TEKST.brutto} Świadczenie z polisy to {Math.round(LIMIT.b2b * 100)}% dochodu,
-      wypłacane najdłużej przez {MIESIECY_WYPLATY} miesiące. Składka razem z opłatą
-      dystrybucyjną, jako przedział z ostatnio wystawionych ofert. Symulacja, nie oferta.
+      wypłacane co miesiąc najdłużej przez {MIESIECY_MAX} miesięcy, zależnie od wariantu. Składka
+      dotyczy wariantu z wypłatą do {MIESIECY_WYPLATY} miesięcy, razem z opłatą dystrybucyjną, jako
+      przedział z ostatnio wystawionych ofert. Symulacja, nie oferta.
     </p>
   </section>
 

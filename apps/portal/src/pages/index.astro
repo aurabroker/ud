@@ -2,7 +2,8 @@
 import Baza from '../layouts/Baza.astro';
 import Kalkulator from '../components/Kalkulator.svelte';
 import { kategorie, ZAWODY, liczebnik } from '@ud/zawody';
-import { symuluj, zl, zlZakres, SWIADCZENIE_MAX } from '../lib/symulacja';
+import { symuluj, zl, zlZakres, MIESIECY_MAX } from '../lib/symulacja';
+import { SWIADCZENIE_MAX } from '../lib/granice';
 import { ZASILEK_JDG, ZUS_TEKST } from '../lib/zus';
 import { graf, organizacja, serwis, strona, faq } from '../lib/seo';
 import { FIRMA } from '../lib/firma';
@@ -37,7 +38,7 @@ const PYTANIA = [
     pytanie: 'Od kiedy wypłacane jest świadczenie?',
     odpowiedz: 'Po upływie okresu wyczekiwania ustalonego w umowie, liczonego od początku '
       + 'niezdolności do pracy. Później co miesiąc, dopóki trwa niezdolność, najdłużej przez '
-      + 'okres wybrany w umowie.',
+      + `${MIESIECY_MAX} miesięcy — zależnie od okresu wybranego w umowie.`,
   },
   {
     pytanie: 'Czego polisa nie obejmuje?',
@@ -130,7 +131,7 @@ const hero = obrazHero();
         <tbody>
           <tr>
             <th scope="row" class="px-6 py-5 font-semibold text-[16px]">Dochód {zl(18000)} na B2B, duży ZUS z chorobowym</th>
-            <td class="px-6 py-5 font-mono text-xl font-semibold text-alarm">{zl(przyklad.zus)}</td>
+            <td class="px-6 py-5 font-mono text-xl font-semibold text-alarm">{zl(ZASILEK_JDG.duzy)}</td>
             <td class="px-6 py-5 font-mono text-xl font-semibold text-akcent-ciemny">{zl(przyklad.swiadczenie)}</td>
           </tr>
         </tbody>

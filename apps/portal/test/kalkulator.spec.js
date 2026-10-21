@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
-import { sprawdzKalibracje, bledyKalibracji, MNOZNIK_HIV_WZW } from '../src/lib/symulacja.ts';
+import { sprawdzKalibracje, bledyKalibracji, MNOZNIK_HIV_WZW, ZAKRES_DOCHODU, LIMIT } from '../src/lib/symulacja.ts';
+import { SWIADCZENIE_MAX } from '../src/lib/granice.ts';
+import { ZAWODY } from '@ud/zawody';
 
 /**
  * Kwoty liczone są w teście ze stawek z kalibracja.json, tym samym wzorem co
@@ -120,8 +122,10 @@ test('przy składce stoi, że przedział pochodzi z wystawionych ofert', async (
 test('kalkulator wymienia cztery okresy i mówi, którego dotyczy składka', async ({ page }) => {
   const kwoty = page.locator('dl').filter({ hasText: 'Świadczenie z polisy' }).first();
   // Okres odszkodowawczy to NAJDŁUŻSZY czas wypłaty (LW044 § 15 pkt 9), nie
-  // najkrótszy. Do 21.10.2026 stało tu „minimum przez 24 miesiące".
-  await expect(kwoty).toContainText('najdłużej przez 24 miesiące');
+  // najkrótszy. Do 21.10.2026 stało tu „minimum przez 24 miesiące"; właściciel:
+  // „najdłużej przez 60 miesięcy". Przy składce — którego wariantu dotyczy.
+  await expect(kwoty).toContainText('najdłużej przez 60 miesięcy');
+  await expect(kwoty).toContainText('wariant z wypłatą do 24 miesięcy');
   await expect(page.getByText(/minimum przez/)).toHaveCount(0);
   await expect(page.getByText(/wypłacane jest najdłużej przez 24, 36, 48 albo 60 miesięcy/)).toBeVisible();
   await expect(page.getByText(/składka dotyczy wariantu najkrótszego, 24-miesięcznego/)).toBeVisible();
@@ -154,6 +158,20 @@ test('strona zawodu ma kalkulator z dochodem dobranym do zawodu', async ({ page 
   await expect(naglowek).toBeVisible();
   // Lekarz: świadczenie 500 zł/dzień → dochód przykładowy 19 000 zł, suma 15 200 zł.
   await expect(wynik(page, 'Świadczenie z polisy')).toHaveText('15 200 zł');
+});
+
+/**
+ * symuluj() nie przycina świadczenia do granicy wniosku (50 000 zł/mies.) —
+ * symulacja.ts nie może importować @ud/wniosek. Zamiast tego: żadne miejsce,
+ * z którego bierze się dochód do symulacji, nie może dać świadczenia ponad
+ * granicę, którą przepuszcza formularz.
+ */
+test('suwak i przykłady nie dają świadczenia ponad granicę wniosku', { tag: '@plik' }, () => {
+  expect(SWIADCZENIE_MAX).toBe(50000);
+  expect(ZAKRES_DOCHODU.max * LIMIT.b2b).toBeLessThanOrEqual(SWIADCZENIE_MAX);
+  for (const z of ZAWODY) {
+    expect(z.dochodPrzykladowy * LIMIT.b2b, z.slug).toBeLessThanOrEqual(SWIADCZENIE_MAX);
+  }
 });
 
 /**

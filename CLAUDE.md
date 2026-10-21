@@ -893,8 +893,10 @@ w komplecie, przy składce musi stać, którego wariantu dotyczy, a ciąg
 
 **Okres to czas NAJDŁUŻSZY, nie najkrótszy** (LW044 § 15 pkt 9: okres
 odszkodowawczy). Do 21.10.2026 kalkulator pisał „minimum przez 24 miesiące".
-Piszemy „najdłużej przez", a o starcie wypłaty — „po okresie wyczekiwania
-ustalonym w umowie". **„Od pierwszego dnia niezdolności" nie wraca** (stało
+Przy świadczeniu piszemy **„najdłużej przez 60 miesięcy"** (najdłuższy wariant,
+stała `MIESIECY_MAX`; decyzja właściciela z 21.10.2026), a przy składce —
+że dotyczy wariantu z wypłatą do 24 miesięcy. O starcie wypłaty: „po okresie
+wyczekiwania ustalonym w umowie". **„Od pierwszego dnia niezdolności" nie wraca** (stało
 w stopce 231 stron, w opisie i FAQ strony głównej): LW044 za sam okres
 wyczekiwania świadczenia nie daje. Słowo „karencja" też nie — patrz
 „okres wyczekiwania" niżej.

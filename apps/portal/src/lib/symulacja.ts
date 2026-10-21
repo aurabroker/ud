@@ -20,8 +20,9 @@
  * patrz `sprawdzKalibracje()` niżej.
  */
 import kalibracja from './kalibracja.json' with { type: 'json' };
-import { ZASILEK_JDG } from './zus';
-import { RYZYKA } from '@ud/wniosek/schemat';
+// Nic więcej nie importuj: test/kalibrator.spec.js ładuje ten plik jako
+// samodzielny moduł (data: URL), w którym działa tylko import kalibracja.json.
+// Zasiłek ZUS jest w zus.ts, granice wniosku — w granice.ts.
 
 /**
  * Okresy wypłaty świadczenia dostępne w ofercie, w miesiącach.
@@ -42,6 +43,14 @@ export const OKRESY = [24, 36, 48, 60] as const;
 
 /** Najkrótszy okres z oferty — dla niego liczona jest symulacja. */
 export const MIESIECY_WYPLATY = OKRESY[0];
+
+/**
+ * Najdłuższy okres wypłaty w ofercie. Przy świadczeniu piszemy „najdłużej przez
+ * 60 miesięcy" (decyzja właściciela z 21.10.2026) — do tego dnia kalkulator
+ * pisał „minimum przez 24 miesiące", a okres odszkodowawczy to czas najdłuższy.
+ * Składka i tak dotyczy wariantu `MIESIECY_WYPLATY` i strona mówi to przy niej.
+ */
+export const MIESIECY_MAX = OKRESY[OKRESY.length - 1];
 
 /** Granice stawki miesięcznej (udział świadczenia), poza którymi plik jest błędny. */
 const STAWKA_MIN = 0.01;
@@ -163,15 +172,6 @@ export const LIMIT = {
 export const ZAKRES_DOCHODU = { min: 3000, max: 60000, krok: 500 } as const;
 
 /**
- * Najwyższe świadczenie miesięczne, jakie przyjmuje wniosek — granica z kreatora
- * i funkcji `form-submit` (decyzja właściciela z 12.10.2026; podawana publicznie
- * od 21.10.2026). Bierzemy ją z `@ud/wniosek`, żeby strona nie obiecywała innej
- * liczby niż ta, którą formularz przepuści.
- */
-export const SWIADCZENIE_MAX: number =
-  RYZYKA.find((r) => r.klucz === 'riskTempIncapacity')!.max;
-
-/**
  * Stawka miesięczna jako udział świadczenia, wariant 24-miesięczny.
  *
  * `dol` i `gora` to najniższa i najwyższa stawka osoby z ofert wystawionych
@@ -238,14 +238,12 @@ export interface Wynik {
   skladkaOd: number;
   /** Składka przy najwyższej stawce osoby z kalibracji (`STAWKA.gora`). */
   skladkaDo: number;
-  /** Zasiłek ZUS brutto na dużym ZUS-ie z chorobowym — `ZASILEK_JDG.duzy` w zus.ts. */
-  zus: number;
   limit: number;
 }
 
 export function symuluj({ dochod, hivWzw = false }: Zalozenia): Wynik {
   const limit = LIMIT.b2b;
-  const swiadczenie = Math.min(Math.round(dochod * limit), SWIADCZENIE_MAX);
+  const swiadczenie = Math.round(dochod * limit);
   const klauzula = hivWzw ? MNOZNIK_HIV_WZW : 1;
   const skladka = (stawka: number) => Math.round(swiadczenie * stawka * klauzula);
 
@@ -254,7 +252,6 @@ export function symuluj({ dochod, hivWzw = false }: Zalozenia): Wynik {
     skladka: skladka(STAWKA.srodek),
     skladkaOd: skladka(STAWKA.dol),
     skladkaDo: skladka(STAWKA.gora),
-    zus: ZASILEK_JDG.duzy,
     limit,
   };
 }

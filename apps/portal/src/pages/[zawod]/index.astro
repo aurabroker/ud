@@ -14,8 +14,8 @@
 import { ZAWODY, zawod, pokrewne, slugKategorii, tresc, malymi } from '@ud/zawody';
 import Baza from '../../layouts/Baza.astro';
 import Kalkulator from '../../components/Kalkulator.svelte';
-import { symuluj, zl, zlZakres, OPIS_KALIBRACJI, MIESIECY_WYPLATY } from '../../lib/symulacja';
-import { ZUS_TEKST } from '../../lib/zus';
+import { symuluj, zl, zlZakres, OPIS_KALIBRACJI, MIESIECY_WYPLATY, MIESIECY_MAX } from '../../lib/symulacja';
+import { ZUS_TEKST, ZASILEK_JDG } from '../../lib/zus';
 import { graf, organizacja, serwis, strona, okruszki, usluga, faq } from '../../lib/seo';
 import { FIRMA } from '../../lib/firma';
 import { Image, getImage } from 'astro:assets';
@@ -197,7 +197,7 @@ const ogObraz = zdjecie
         </h2>
         <p data-odpowiedz class="text-lg leading-relaxed font-medium text-tekst m-0 mb-6">
           Zasiłek chorobowy to {ZUS_TEKST.wzor}, a nie 80% dochodu. Na dużym ZUS-ie z najniższą
-          podstawą i z dobrowolnym chorobowym daje to {zl(wynik.zus)} miesięcznie przed podatkiem,
+          podstawą i z dobrowolnym chorobowym daje to {zl(ZASILEK_JDG.duzy)} miesięcznie przed podatkiem,
           niezależnie od tego, ile się zarabia; {ZUS_TEKST.dopiski}.
         </p>
 
@@ -213,7 +213,7 @@ const ogObraz = zdjecie
               </tr>
               <tr class="border-b border-linia">
                 <th scope="row" class="px-6 py-4 font-semibold text-[15.5px]">Zasiłek z ZUS (duży ZUS z chorobowym)</th>
-                <td class="px-6 py-4 font-mono text-lg text-alarm font-semibold">{zl(wynik.zus)}</td>
+                <td class="px-6 py-4 font-mono text-lg text-alarm font-semibold">{zl(ZASILEK_JDG.duzy)}</td>
               </tr>
               <tr class="border-b border-linia">
                 <th scope="row" class="px-6 py-4 font-semibold text-[15.5px]">Świadczenie z polisy (80% dochodu)</th>
@@ -229,7 +229,8 @@ const ogObraz = zdjecie
 
         <p class="text-[13px] leading-relaxed text-tekst-drugi mt-4 mb-0">
           Symulacja, nie oferta. Świadczenie wypłacane co miesiąc, najdłużej
-          przez {MIESIECY_WYPLATY} miesiące w najkrótszym wariancie. Zasiłek {ZUS_TEKST.scenariusz}.{' '}
+          przez {MIESIECY_MAX} miesięcy, zależnie od wariantu; składka dotyczy wariantu z wypłatą
+          do {MIESIECY_WYPLATY} miesięcy. Zasiłek {ZUS_TEKST.scenariusz}.{' '}
           {ZUS_TEKST.brutto} Składka razem z opłatą dystrybucyjną — przedział od najtańszej
           do najdroższej stawki {OPIS_KALIBRACJI}. Realną składkę wylicza system ubezpieczyciela po ocenie ryzyka.
         </p>
