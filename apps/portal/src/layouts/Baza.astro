@@ -24,7 +24,11 @@ interface Props {
   sciezka: string;
   /** Gotowy JSON-LD (string) — patrz lib/seo.ts. */
   jsonld?: string;
-  /** Obrazek Open Graph; domyślnie logo. */
+  /**
+   * Obrazek Open Graph — ścieżka na naszej domenie albo pełny adres;
+   * domyślnie karta marki `/og-domyslny.jpg`. Plik musi istnieć: 404 pod
+   * og:image to podgląd linku bez obrazka (pilnuje test/og.spec.js).
+   */
   obraz?: string;
   /** Wyłącza indeksowanie — dla podziękowania i stron technicznych. */
   bezIndeksu?: boolean;
@@ -36,11 +40,38 @@ interface Props {
    * nagłówkiem `<link rel="alternate">` prowadziłoby agenta w pustkę.
    */
   wariantMarkdown?: boolean;
+  /**
+   * Czy strona ma adres kanoniczny. Wyłącza go strona 404: Pages podaje ją
+   * pod KAŻDYM nieznanym adresem, a odnośnik na „/404/" wskazywałby adres,
+   * który sam przekierowuje — sprzeczny sygnał dla robota.
+   */
+  kanoniczny?: boolean;
+  /**
+   * Wpis z bazy wiedzy: og:type „article" z datami publikacji i zmiany
+   * (te same, co datePublished/dateModified w JSON-LD i <lastmod> w mapie).
+   */
+  artykul?: { opublikowano: string; zmieniono: string };
 }
 
-const { tytul, opis, sciezka, jsonld, obraz, bezIndeksu = false, wariantMarkdown = true } = Astro.props;
+const {
+  tytul, opis, sciezka, jsonld, obraz, bezIndeksu = false, wariantMarkdown = true,
+  kanoniczny: zKanonicznym = true, artykul,
+} = Astro.props;
 const kanoniczny = new URL(sciezka, SERWIS.url).href;
-const ogObraz = new URL(obraz ?? '/og-domyslny.jpg', SERWIS.url).href;
+
+/**
+ * Domyślny obrazek Open Graph: karta marki 1200 × 630 z `public/` (źródło:
+ * scripts/og-domyslny.html, odtwarzane skryptem og-domyslny.mjs). Wymiary
+ * i opis podajemy tylko dla niej — wymiarów obrazka przekazanego przez stronę
+ * tu nie znamy, a zgadnięte byłyby gorsze niż żadne.
+ */
+const OG_DOMYSLNY = {
+  sciezka: '/og-domyslny.jpg',
+  szerokosc: 1200,
+  wysokosc: 630,
+  opis: `${SERWIS.nazwa} — ubezpieczenie utraty dochodu dla specjalistów i przedsiębiorców`,
+};
+const ogObraz = new URL(obraz ?? OG_DOMYSLNY.sciezka, SERWIS.url).href;
 ---
 <!doctype html>
 <html lang="pl">
@@ -69,7 +100,7 @@ const ogObraz = new URL(obraz ?? '/og-domyslny.jpg', SERWIS.url).href;
 
   <title>{tytul}</title>
   <meta name="description" content={opis}>
-  <link rel="canonical" href={kanoniczny}>
+  {zKanonicznym && <link rel="canonical" href={kanoniczny}>}
 
   {wariantMarkdown && (
     <>
@@ -87,18 +118,33 @@ const ogObraz = new URL(obraz ?? '/og-domyslny.jpg', SERWIS.url).href;
   <Font cssVariable="--font-tekst" preload />
   <Font cssVariable="--font-mono" />
 
-  <meta property="og:type" content="website">
+  <meta property="og:type" content={artykul ? 'article' : 'website'}>
+  {artykul && (
+    <>
+      <meta property="article:published_time" content={artykul.opublikowano}>
+      <meta property="article:modified_time" content={artykul.zmieniono}>
+    </>
+  )}
   <meta property="og:locale" content="pl_PL">
   <meta property="og:site_name" content={SERWIS.nazwa}>
   <meta property="og:title" content={tytul}>
   <meta property="og:description" content={opis}>
-  <meta property="og:url" content={kanoniczny}>
+  {zKanonicznym && <meta property="og:url" content={kanoniczny}>}
   <meta property="og:image" content={ogObraz}>
+  {!obraz && (
+    <>
+      <meta property="og:image:type" content="image/jpeg">
+      <meta property="og:image:width" content={String(OG_DOMYSLNY.szerokosc)}>
+      <meta property="og:image:height" content={String(OG_DOMYSLNY.wysokosc)}>
+      <meta property="og:image:alt" content={OG_DOMYSLNY.opis}>
+    </>
+  )}
 
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content={tytul}>
   <meta name="twitter:description" content={opis}>
   <meta name="twitter:image" content={ogObraz}>
+  {!obraz && <meta name="twitter:image:alt" content={OG_DOMYSLNY.opis}>}
 
   {jsonld && <script type="application/ld+json" set:html={jsonld} />}
 

@@ -13,6 +13,7 @@
  * usterka, dla wyszukiwarki — brak struktury nagłówkowej w połowie tekstu.
  */
 import dane from '../dane/artykuly.json';
+import { ZRODLO, NAZWA_PLIKU } from '../../functions/media/[plik].js';
 
 const TRESCI = import.meta.glob<string>('../dane/artykuly/*.html', {
   query: '?raw',
@@ -39,6 +40,31 @@ export interface Artykul {
   minuty: number;
   naglowki: { poziom: 2 | 3; tekst: string; id: string }[];
 }
+
+/**
+ * Adres zdjęcia z kubełka → adres na naszej domenie (`/media/<plik>`).
+ *
+ * Storage Supabase wysyła przy każdym pliku `x-robots-tag: none`, więc
+ * zdjęcia podawane prosto z kubełka nie mogły trafić do indeksu grafiki.
+ * Podaje je teraz `functions/media/[plik].js`, a adres przepisujemy tutaj,
+ * w buildzie: artykuly.json i pliki treści zostają identyczne z bazą
+ * (pełna synchronizacja i porównania md5 opierają się na tym).
+ *
+ * Przepisujemy tylko to, co funkcja potem poda — to samo wyrażenie
+ * `NAZWA_PLIKU`. Adres spoza wzorca zostaje bez zmian i wychodzi w teście
+ * `media.spec.js`, zamiast zamienić się na stronie w pusty obrazek.
+ */
+export function przezMedia(adres: string): string;
+export function przezMedia(adres: string | null): string | null;
+export function przezMedia(adres: string | null): string | null {
+  if (!adres?.startsWith(ZRODLO)) return adres;
+  const plik = adres.slice(ZRODLO.length);
+  return NAZWA_PLIKU.test(plik) ? `/media/${plik}` : adres;
+}
+
+/** Wszystkie adresy kubełka w atrybucie (`src` albo lista `srcset`). */
+const przepiszAdresy = (wartosc: string) =>
+  wartosc.replace(/https:\/\/[^\s"',]+/g, (adres) => przezMedia(adres));
 
 /** Slug z polskiego tytułu — do kotwic przy nagłówkach. */
 function doSlug(tekst: string): string {
@@ -116,6 +142,13 @@ export function normalizuj(html: string): string {
   wynik = wynik.replace(/<table[\s>][\s\S]*?<\/table>/g, (tabela) =>
     `<div class="tabela" tabindex="0">${tabela}</div>`);
 
+  // 9. Zdjęcia w treści — z kubełka na /media/ (patrz przezMedia). Tylko
+  //    atrybuty src i srcset znaczników <img>: adres w tekście albo w <a href>
+  //    to treść redakcji, nie zdjęcie do wyświetlenia.
+  wynik = wynik.replace(/<img\b[^>]*>/g, (img) =>
+    img.replace(/\b(src|srcset)="([^"]*)"/g, (_, atrybut: string, wartosc: string) =>
+      `${atrybut}="${przepiszAdresy(wartosc)}"`));
+
   return wynik.trim();
 }
 
@@ -146,7 +179,8 @@ function zbuduj(meta: (typeof dane.artykuly)[number]): Artykul {
   return {
     ...meta,
     tagi: meta.tagi ?? [],
-    obrazDuzy: ('obrazDuzy' in meta ? meta.obrazDuzy : null) as string | null,
+    obraz: przezMedia(meta.obraz),
+    obrazDuzy: przezMedia(('obrazDuzy' in meta ? meta.obrazDuzy : null) as string | null),
     zmieniono: ('zmieniono' in meta ? meta.zmieniono : meta.opublikowano) as string,
     tresc: zKotwicami(tresc),
     // 200 słów na minutę to tempo czytania tekstu użytkowego po polsku.
