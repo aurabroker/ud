@@ -14,7 +14,7 @@
  * który już go czyta, i kosztuje tyle, co nic.
  */
 import type { APIRoute } from 'astro';
-import { ZAWODY, kategorie, wKategorii, slugKategorii, tresc } from '@ud/zawody';
+import { ZAWODY, kategorie, wKategorii, slugKategorii, tresc, malymi } from '@ud/zawody';
 import { ARTYKULY } from '../lib/artykuly';
 import { FIRMA, SERWIS, UBEZPIECZYCIELE } from '../lib/firma';
 import { LIMIT, OKRESY, SWIADCZENIE_MAX, zl } from '../lib/symulacja';
@@ -31,7 +31,7 @@ export const GET: APIRoute = () => {
         // Opis bierzemy z pierwszego zdania treści redakcyjnej, jeśli istnieje —
         // wtedy każdy wiersz niesie coś, czego nie ma w samej nazwie zawodu.
         const opis = t?.wstep?.split(/(?<=[.!?])\s/)[0]
-          ?? `Ubezpieczenie utraty dochodu dla ${z.odmiana.dopelniacz.toLowerCase()}.`;
+          ?? `Ubezpieczenie utraty dochodu dla ${malymi(z.odmiana.dopelniacz)}.`;
         return `- [${z.nazwa}](${SERWIS.url}/${z.slug}/): ${opis}`;
       })
       .join('\n');

@@ -1,5 +1,5 @@
 ---
-import { kategorie, wKategorii } from '@ud/zawody';
+import { kategorie, wKategorii, tresc, liczebnik } from '@ud/zawody';
 import Baza from '../../layouts/Baza.astro';
 import { graf, organizacja, serwis, strona, okruszki } from '../../lib/seo';
 import { Image } from 'astro:assets';
@@ -13,9 +13,24 @@ const { kategoria } = Astro.props;
 const zawodyKategorii = wKategorii(kategoria.nazwa);
 
 const sciezka = `/zawody/${kategoria.slug}/`;
+const ileZawodow = liczebnik(kategoria.liczba, ['zawód', 'zawody', 'zawodów']);
 const tytul = `Ubezpieczenie utraty dochodu — ${kategoria.nazwa} | UtrataDochodu.pl`;
-const opis = `${kategoria.liczba} zawodów z branży ${kategoria.nazwa.toLowerCase()}. `
-  + 'Sprawdź, ile wynosi zasiłek ZUS w Twojej grupie i o ile podnosi go polisa.';
+/**
+ * Nazwa grupy zostaje w oryginalnej pisowni: „IT / Tech" po toLowerCase()
+ * dawało „z branży it / tech". Do 21.10.2026 opis twierdził też, że polisa
+ * „podnosi" zasiłek ZUS — nie podnosi, wypłaca osobne świadczenie.
+ */
+const opis = `${kategoria.nazwa}: ${ileZawodow}, każdy z osobną stroną — ryzyka zawodowe, `
+  + 'zasiłek ZUS na zwolnieniu i symulacja składki. Polisa wypłaca co miesiąc do 80% '
+  + 'udokumentowanego dochodu na B2B.';
+
+/**
+ * Na kafelku — pierwsze ryzyko z opisu zawodu. Stało tu „świadczenie do 500 zł
+ * / dzień" ze starego serwisu: limitu dziennego w ofercie nie ma, liczba nie
+ * miała pokrycia. Ryzyko jest prawdziwe i różni kafelki między sobą.
+ */
+const ryzykoNaKafelku = (z: (typeof zawodyKategorii)[number]) =>
+  (tresc(z.slug)?.ryzyka ?? z.ryzyka)[0]?.tytul ?? null;
 
 const sciezkaOkruszkow = [
   { nazwa: 'Strona główna', url: '/' },
@@ -69,7 +84,12 @@ const jsonld = graf([
     <div class={`max-w-[1200px] mx-auto px-5 flex flex-col justify-end ${obrazKategorii(kategoria.slug)
       ? 'pt-[17rem] pb-16 lg:pt-24 lg:pb-24 min-h-[clamp(22rem,26vw,30rem)]'
       : 'py-16 lg:py-20'}`}>
-      <h1 class="text-[clamp(2rem,5vw,3rem)] leading-[1.06] mb-5">{kategoria.nazwa}</h1>
+      <p class="font-mono text-xs tracking-[0.16em] uppercase text-akcent-tekst font-semibold m-0">
+        {ileZawodow} w tej grupie
+      </p>
+      <h1 class="mt-4 text-[clamp(2rem,5vw,3rem)] leading-[1.06] mb-5 max-w-[18em]">
+        Ubezpieczenie utraty dochodu — {kategoria.nazwa}
+      </h1>
       <p data-odpowiedz class="text-[1.12rem] leading-relaxed text-tekst-drugi max-w-[38em] m-0">{opis}</p>
     </div>
   </div>
@@ -82,9 +102,11 @@ const jsonld = graf([
           <a href={`/${z.slug}/`}
              class="block border border-linia bg-tlo p-5 h-full hover:border-akcent hover:bg-tlo-jasne">
             <span class="block font-semibold text-[16.5px] mb-1">{z.nazwa}</span>
-            <span class="block text-[13.5px] text-tekst-trzeci">
-              świadczenie do {new Intl.NumberFormat('pl-PL').format(z.swiadczenieDzienne ?? 0)} zł / dzień
-            </span>
+            {ryzykoNaKafelku(z) && (
+              <span class="block text-[13.5px] text-tekst-drugi">
+                <span class="sr-only">{' — '}</span>{ryzykoNaKafelku(z)}
+              </span>
+            )}
           </a>
         </li>
       ))}

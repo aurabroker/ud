@@ -6,12 +6,13 @@
  * kategorii jest celowo stabilna: zestaw linków zmieniający się między buildami
  * wygląda dla wyszukiwarki na manipulację.
  */
-import { kategorie, wKategorii, ZAWODY } from '@ud/zawody';
+import { kategorie, wKategorii, ZAWODY, liczebnik } from '@ud/zawody';
 import Baza from '../../layouts/Baza.astro';
 import { graf, organizacja, serwis, strona, okruszki } from '../../lib/seo';
 
 const sciezka = '/zawody/';
-const tytul = `Ubezpieczenie utraty dochodu według zawodu — ${ZAWODY.length} grup zawodowych | UtrataDochodu.pl`;
+const ileGrup = liczebnik(ZAWODY.length, ['grupa zawodowa', 'grupy zawodowe', 'grup zawodowych']);
+const tytul = `Ubezpieczenie utraty dochodu według zawodu — ${ileGrup} | UtrataDochodu.pl`;
 const opis = 'Wybierz swój zawód i sprawdź, ile realnie dostaniesz na zwolnieniu oraz ile kosztuje '
   + 'polisa zamykająca lukę między zasiłkiem ZUS a dochodem.';
 
@@ -38,7 +39,7 @@ const jsonld = graf([
   <div class="bg-linear-102 from-tlo via-tlo-cyjan to-tlo-hero border-b border-linia">
     <div class="max-w-[1200px] mx-auto px-5 py-16">
       <p class="font-mono text-xs tracking-[0.16em] uppercase text-akcent-ciemny font-semibold m-0">
-        {ZAWODY.length} grup zawodowych
+        {ileGrup}
       </p>
       <h1 class="mt-4 mb-5 text-[clamp(2rem,5vw,3rem)] leading-[1.06] max-w-[18em]">
         Ubezpieczenie utraty dochodu według zawodu
@@ -58,7 +59,7 @@ const jsonld = graf([
           <h2 id={`kat-${k.slug}`} class="text-[clamp(1.4rem,3vw,1.9rem)] m-0 flex-1">
             <a href={`/zawody/${k.slug}/`} class="hover:text-akcent-ciemny">{k.nazwa}</a>
           </h2>
-          <span class="text-sm text-tekst-trzeci">{k.liczba} zawodów</span>
+          <span class="text-sm text-tekst-drugi">{liczebnik(k.liczba, ['zawód', 'zawody', 'zawodów'])}</span>
         </div>
         <ul class="grid gap-x-8 gap-y-2.5 list-none m-0 p-0
                    grid-cols-[repeat(auto-fill,minmax(15rem,1fr))]">

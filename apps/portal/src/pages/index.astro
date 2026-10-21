@@ -1,7 +1,7 @@
 ---
 import Baza from '../layouts/Baza.astro';
 import Kalkulator from '../components/Kalkulator.svelte';
-import { kategorie, ZAWODY } from '@ud/zawody';
+import { kategorie, ZAWODY, liczebnik } from '@ud/zawody';
 import { symuluj, zl, zlZakres, SWIADCZENIE_MAX } from '../lib/symulacja';
 import { ZASILEK_JDG, ZUS_TEKST } from '../lib/zus';
 import { graf, organizacja, serwis, strona, faq } from '../lib/seo';
@@ -148,7 +148,7 @@ const hero = obrazHero();
     <div class="max-w-[1200px] mx-auto px-5 py-16">
       <h2 class="text-[clamp(1.6rem,4vw,2.5rem)] leading-tight mb-3">Dla kogo jest ta polisa</h2>
       <p class="text-[1.05rem] leading-relaxed text-tekst-drugi max-w-[42em] mt-0 mb-8">
-        {ZAWODY.length} grup zawodowych, dla każdej osobne wyliczenie i osobny opis ryzyka.
+        {liczebnik(ZAWODY.length, ['grupa zawodowa', 'grupy zawodowe', 'grup zawodowych'])}, dla każdej osobne wyliczenie i osobny opis ryzyka.
       </p>
       <ul class="grid gap-3 list-none m-0 p-0 grid-cols-[repeat(auto-fill,minmax(14rem,1fr))]">
         {KATEGORIE.map((k) => (

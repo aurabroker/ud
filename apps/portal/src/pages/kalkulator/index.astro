@@ -2,7 +2,7 @@
 import Baza from '../../layouts/Baza.astro';
 import Kalkulator from '../../components/Kalkulator.svelte';
 import { graf, organizacja, serwis, strona, okruszki, faq } from '../../lib/seo';
-import { symuluj, zl, zlZakres, LIMIT, MIESIECY_WYPLATY, OKRESY, ZAKRES_DOCHODU } from '../../lib/symulacja';
+import { symuluj, zl, zlZakres, LIMIT, MIESIECY_WYPLATY, OKRESY, ZAKRES_DOCHODU, SWIADCZENIE_MAX } from '../../lib/symulacja';
 import { ZASILEK_JDG, ZUS_TEKST, WYCZEKIWANIE_DOBROWOLNE_DNI, OKRES_ZASILKOWY_DNI } from '../../lib/zus';
 
 const sciezka = '/kalkulator/';
@@ -51,7 +51,8 @@ const PYTANIA = [
   {
     pytanie: 'Dlaczego świadczenie nie może pokryć 100% dochodu?',
     odpowiedz: `Limit wynosi ${Math.round(LIMIT.b2b * 100)}% przy samozatrudnieniu i kontrakcie B2B `
-      + `oraz ${Math.round(LIMIT.etat * 100)}% przy umowie o pracę. Zasada jest taka, że `
+      + `oraz ${Math.round(LIMIT.etat * 100)}% przy umowie o pracę, a świadczenie miesięczne `
+      + `wynosi najwyżej ${zl(SWIADCZENIE_MAX)}. Zasada jest taka, że `
       + 'ubezpieczenie nie może być korzystniejsze finansowo niż praca.',
   },
 ];

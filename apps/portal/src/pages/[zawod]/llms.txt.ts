@@ -10,7 +10,7 @@
  * gdy trafi na tę stronę.
  */
 import type { APIRoute, GetStaticPaths } from 'astro';
-import { ZAWODY, zawod, tresc, pokrewne, slugKategorii } from '@ud/zawody';
+import { ZAWODY, zawod, tresc, pokrewne, slugKategorii, malymi } from '@ud/zawody';
 import { FIRMA, SERWIS } from '../../lib/firma';
 import { symuluj, zl, zlZakres, MIESIECY_WYPLATY, OKRESY, OPIS_KALIBRACJI }
   from '../../lib/symulacja';
@@ -24,7 +24,7 @@ export const GET: APIRoute = ({ params }) => {
   const o = z.odmiana;
   const t = tresc(z.slug);
 
-  const dochod = Math.max(8000, Math.round((z.swiadczenieDzienne ?? 400) * 30 / 0.8 / 1000) * 1000);
+  const dochod = z.dochodPrzykladowy;
   const w = symuluj({ dochod });
 
   const ryzyka = (t?.ryzyka ?? z.ryzyka)
@@ -41,9 +41,9 @@ export const GET: APIRoute = ({ params }) => {
     .map((p) => `- [${p.nazwa}](${SERWIS.url}/${p.slug}/)`)
     .join('\n');
 
-  const tekst = `# Ubezpieczenie utraty dochodu dla ${o.dopelniacz.toLowerCase()}
+  const tekst = `# Ubezpieczenie utraty dochodu dla ${malymi(o.dopelniacz)}
 
-> ${t?.wstep ?? `Ochrona dochodu ${o.dopelniacz.toLowerCase()} na wypadek całkowitej niezdolności do wykonywania zawodu wskutek choroby lub nieszczęśliwego wypadku.`}
+> ${t?.wstep ?? `Ochrona dochodu ${malymi(o.dopelniacz)} na wypadek całkowitej niezdolności do wykonywania zawodu wskutek choroby lub nieszczęśliwego wypadku.`}
 
 Strona: ${SERWIS.url}/${z.slug}/
 Kategoria zawodowa: ${z.kategoria}
@@ -51,7 +51,7 @@ Odmiana nazwy: ${o.mianownik} / ${o.dopelniacz} / ${o.narzednik} / liczba mnoga:
 
 ## Jak wygląda dochód w tym zawodzie
 
-${t?.dochod ?? `Zarobki ${o.dopelniacz.toLowerCase()} na kontrakcie zależą od wykonanej pracy, a nie od gotowości do niej.`}
+${t?.dochod ?? `Zarobki ${malymi(o.dopelniacz)} na kontrakcie zależą od wykonanej pracy, a nie od gotowości do niej.`}
 
 ## Co się dzieje przy niezdolności do pracy
 

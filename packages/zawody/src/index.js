@@ -54,13 +54,46 @@ export function wKategorii(nazwa) {
 
 /**
  * Zawody pokrewne — z tej samej kategorii, bez bieżącego.
- * Kolejność alfabetyczna, żeby linkowanie wewnętrzne było stabilne między
- * buildami: zmienny zestaw linków wygląda dla robota na manipulację.
+ *
+ * Kolejne zawody po bieżącym w kolejności alfabetycznej, z zawinięciem na
+ * początek listy. Do 21.10.2026 brane były zawsze pierwsze z alfabetu:
+ * w Medycynie każda strona linkowała do tych samych dziesięciu, a 61 ze 188
+ * podstron nie dostawało ani jednego odnośnika od zawodu pokrewnego. Przy
+ * przesunięciu każda strona kategorii większej niż `ile` dostaje dokładnie
+ * `ile` odnośników — a zestaw dalej jest stały między buildami (zmienny
+ * zestaw linków wygląda dla robota na manipulację).
  */
 export function pokrewne(slug, ile = 8) {
   const z = zawod(slug);
   if (!z) return [];
-  return wKategorii(z.kategoria).filter((i) => i.slug !== slug).slice(0, ile);
+  const lista = wKategorii(z.kategoria);
+  const i = lista.findIndex((x) => x.slug === slug);
+  const reszta = [...lista.slice(i + 1), ...lista.slice(0, i)];
+  return reszta.slice(0, ile);
+}
+
+/**
+ * Forma odmieniona małymi literami w środku zdania — z zachowaniem skrótów.
+ * „Specjalisty HR" → „specjalisty HR", „DevOps Engineera" → „DevOps engineera".
+ * Gołe toLowerCase() dawało „specjalisty hr" i „ai engineera".
+ * Słowo zostaje bez zmian, gdy ma wielką literę dalej niż na początku.
+ */
+export function malymi(tekst) {
+  return tekst.replace(/[\p{L}\p{N}]+/gu, (slowo) =>
+    /\p{Lu}/u.test(slowo.slice(1)) ? slowo : slowo.toLowerCase());
+}
+
+/**
+ * Liczebnik z rzeczownikiem w poprawnej formie: 1 zawód, 2 zawody, 5 zawodów,
+ * 12 zawodów, 22 zawody. „43 zawodów" stało na stronie kategorii.
+ * @param {number} n
+ * @param {[string, string, string]} formy  [1, 2–4, 5+]
+ */
+export function liczebnik(n, [jeden, kilka, wiele]) {
+  const forma = n === 1 ? jeden
+    : (n % 10 >= 2 && n % 10 <= 4 && !(n % 100 >= 12 && n % 100 <= 14)) ? kilka
+    : wiele;
+  return `${n} ${forma}`;
 }
 
 /** Slug kategorii do adresu — bez polskich znaków i spacji. */
@@ -80,7 +113,7 @@ export function slugKategorii(nazwa) {
  * wypracowana pozycja podstrony.
  */
 export function przekierowania() {
-  return [
+  const reguly = [
     // Zmiana samego adresu — treść dalej istnieje.
     ...ZAWODY
       .filter((z) => z.staryAdres)
@@ -88,4 +121,8 @@ export function przekierowania() {
     // Zawód wycofany — kierujemy na kategorię, czyli najbliższą sensowną stronę.
     ...WYCOFANE.map((z) => ({ z: `/${z.slug}/`, na: z.przekierowanieNa })),
   ];
+  // Każda reguła także bez ukośnika na końcu. Pages dopasowuje _redirects
+  // dosłownie: „/stary-adres" (tak linkują niektóre katalogi i stary serwis)
+  // omijał regułę „/stary-adres/" i kończył się 404.
+  return reguly.flatMap((r) => [r, { z: r.z.replace(/\/$/, ''), na: r.na }]);
 }

@@ -60,6 +60,9 @@ const ZAKAZANE = [
   ['„karencja" zamiast okresu wyczekiwania', /karencj/i],
   ['„minimum przez N miesięcy"', /minimum przez \d+ miesi/i],
   ['kolumna etatu w tabeli kalkulatora', /Z polisą — etat/],
+  // Limitu dziennego w ofercie nie ma — liczby 250–600 zł / dzień przyszły ze
+  // starego serwisu bez pokrycia i stały na każdym kafelku stron kategorii.
+  ['limit „zł / dzień"', /zł\s*\/\s*dzie[nń]/],
 ];
 
 test('żadna strona nie podaje starych kwot ZUS ani zdań niezgodnych z OWU', () => {
