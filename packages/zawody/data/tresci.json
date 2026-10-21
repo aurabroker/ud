@@ -53,7 +53,7 @@
       },
       {
         "pytanie": "Jak udokumentować dochód, jeśli rozliczam się ryczałtem?",
-        "odpowiedz": "Ryczałt nie wyklucza z ubezpieczenia, ale zmienia sposób liczenia podstawy. Ubezpieczyciel bierze wtedy przychód z ewidencji, a nie dochód po kosztach — w praktyce trzeba przygotować ewidencję przychodów za ostatnie dwanaście miesięcy."
+        "odpowiedz": "Ryczałt nie wyklucza z ubezpieczenia i nie zmienia sposobu liczenia podstawy. Ubezpieczyciel i tak bierze przychód, a nie dochód po kosztach — przy ryczałcie po prostu z ewidencji przychodów za ostatnie dwanaście miesięcy."
       }
     ]
   },
@@ -111,7 +111,7 @@
       },
       {
         "pytanie": "Pracuję zdalnie z zagranicy — czy ochrona działa?",
-        "odpowiedz": "To zależy od wariantu i od tego, jak długo trwa pobyt. Przy dłuższych wyjazdach ubezpieczyciel wymaga zgłoszenia zmiany miejsca wykonywania pracy; niezgłoszony pobyt poza Polską może być podstawą do odmowy wypłaty."
+        "odpowiedz": "Działa — warunki obu ubezpieczycieli obejmują ochroną cały świat, całą dobę. Trzeba tylko pamiętać, że przy roszczeniu dokumentacja medyczna ma być po polsku (Leadenhall przyjmuje też angielską), a ubezpieczyciel może wezwać na badanie u swojego lekarza."
       }
     ]
   },
@@ -136,7 +136,7 @@
     "pytania": [
       {
         "pytanie": "Jestem na ryczałcie i wynajmuję stanowisko — czy mogę się ubezpieczyć?",
-        "odpowiedz": "Tak. Forma opodatkowania nie wyklucza z ochrony, wpływa tylko na sposób dokumentowania dochodu. Przy ryczałcie podstawą jest ewidencja przychodów, a nie zeznanie o dochodzie."
+        "odpowiedz": "Tak. Ryczałt nie wyklucza z ochrony, wpływa tylko na sposób dokumentowania dochodu. Przy ryczałcie podstawą jest ewidencja przychodów, a nie zeznanie o dochodzie."
       },
       {
         "pytanie": "Czy uczulenie na farby będzie potraktowane jako choroba zawodowa?",
@@ -223,7 +223,7 @@
     "pytania": [
       {
         "pytanie": "Czy oparzenie w pracy to nieszczęśliwy wypadek w rozumieniu polisy?",
-        "odpowiedz": "Tak, o ile jest zdarzeniem nagłym i zewnętrznym — a oparzenie takie jest. Inaczej wygląda sytuacja przy dolegliwościach narastających latami, jak zwyrodnienie stawów: to nie jest wypadek, tylko choroba, i obejmuje ją ryzyko niezdolności do pracy, nie ryzyko NW."
+        "odpowiedz": "Tak, o ile jest zdarzeniem nagłym i zewnętrznym — a oparzenie takie jest. Inaczej wygląda sytuacja przy dolegliwościach narastających latami, jak zwyrodnienie stawów: to nie jest wypadek, tylko choroba, i obejmuje ją ryzyko niezdolności do pracy, nie ryzyko NW — w Leadenhall ze świadczeniem okresowym najwyżej przez 24 miesiące i bez świadczenia z tytułu trwałej niezdolności."
       },
       {
         "pytanie": "Pracuję na umowę zlecenie w restauracji — jaki mam limit?",
@@ -252,7 +252,7 @@
     "pytania": [
       {
         "pytanie": "Czy praca na wysokości podnosi składkę?",
-        "odpowiedz": "Wpływa na ocenę ryzyka, ale nie wyklucza z ochrony. Ubezpieczyciel pyta o charakter pracy we wniosku właśnie po to, żeby wycenić ją realnie zamiast stosować jedną stawkę dla wszystkich zawodów budowlanych."
+        "odpowiedz": "Wpływa na ocenę ryzyka: w Leadenhall praca grożąca upadkiem z wysokości powyżej dwóch metrów to najwyższa klasa ryzyka zawodowego, a CEU szkód z pracy na takiej wysokości na zewnątrz budynku w ogóle nie obejmuje. Ubezpieczyciel pyta o charakter pracy we wniosku właśnie po to, żeby wycenić ją realnie zamiast stosować jedną stawkę dla wszystkich zawodów budowlanych."
       },
       {
         "pytanie": "Mam uprawnienia SEP — czy ich utrata jest zdarzeniem objętym polisą?",
@@ -488,7 +488,7 @@
       },
       {
         "pytanie": "Czy uczulenie na antybiotyk oznacza koniec pracy w aptece?",
-        "odpowiedz": "Niekoniecznie w aptece, ale zwykle przy recepturze. Dla ubezpieczyciela liczy się orzeczenie o niezdolności do wykonywania zawodu — jeśli praca w ekspedycji jest nadal możliwa, świadczenie może nie przysługiwać w pełnej wysokości."
+        "odpowiedz": "Niekoniecznie w aptece, ale zwykle przy recepturze. Dla ubezpieczyciela liczy się orzeczenie o niezdolności do wykonywania zawodu — jeśli praca w ekspedycji jest nadal możliwa, świadczenie może nie przysługiwać wcale, bo warunkiem jest całkowita niezdolność do wykonywania zawodu."
       }
     ]
   },
@@ -553,7 +553,7 @@
   "barista": {
     "wstep": "Barista pracuje przy ekspresie ciśnieniowym, młynku i spieniaczu przez całą zmianę, w tempie kilkudziesięciu kaw na godzinę. To zawód, w którym jakość zależy od powtarzalności ruchu — a powtarzalność jest dokładnie tym, co niszczy nadgarstek.",
     "dochod": "Wynagrodzenie to stawka godzinowa powiększona o napiwki, które w dobrej kawiarni bywają jedną czwartą realnego dochodu i nie figurują w żadnej umowie. Przy wniosku liczy się tylko to, co udokumentowane, więc realna strata bywa wyższa niż wykazana podstawa.",
-    "przerwa": "Kawiarnia obsadza zmianę w ciągu dnia, więc miejsce pracy nie znika, ale godziny — tak. Przy umowie zlecenia albo B2B nie ma płatnego zwolnienia, a przy dłuższej nieobecności umowa zwykle nie jest przedłużana. Barista z własnym lokalem traci dodatkowo czynsz i raty za ekspres, który przy sprzęcie profesjonalnym kosztuje jak używany samochód.",
+    "przerwa": "Kawiarnia obsadza zmianę w ciągu dnia, więc miejsce pracy nie znika, ale godziny — tak. Przy umowie zlecenia albo B2B kawiarnia nie płaci za dni choroby, zasiłek z ZUS przysługuje tylko przy dobrowolnym ubezpieczeniu chorobowym, a przy dłuższej nieobecności umowa zwykle nie jest przedłużana. Barista z własnym lokalem traci dodatkowo czynsz i raty za ekspres, który przy sprzęcie profesjonalnym kosztuje jak używany samochód.",
     "ryzyka": [
       {
         "tytul": "Zapalenie pochewek ścięgnistych nadgarstka",
@@ -706,7 +706,7 @@
       },
       {
         "tytul": "Zaburzenia lękowe i stres pourazowy",
-        "opis": "To ryzyko realne i jednocześnie wyłączone z ochrony. Choroby psychiczne nie są objęte żadnym z wariantów polisy — trzeba to wiedzieć przed podpisaniem, a nie po zdarzeniu."
+        "opis": "To ryzyko realne i jednocześnie wyłączone z ochrony. Żaden wariant polisy nie wypłaci świadczenia, gdy niezdolność wynika wyłącznie z choroby psychicznej, a CEU nie ma nawet zastrzeżenia o jedynej przyczynie — trzeba to wiedzieć przed podpisaniem, a nie po zdarzeniu."
       },
       {
         "tytul": "Choroby układu krążenia",
@@ -774,7 +774,7 @@
     "pytania": [
       {
         "pytanie": "Prowadzę mediacje online — czy to zmienia ocenę ryzyka?",
-        "odpowiedz": "Nie w istotnym stopniu. Ubezpieczyciel ocenia zawód i formę zatrudnienia, a nie kanał kontaktu. Zgłosić trzeba natomiast dłuższy pobyt poza Polską, jeśli praca zdalna oznacza wyjazd."
+        "odpowiedz": "Nie w istotnym stopniu. Ubezpieczyciel ocenia zawód i formę zatrudnienia, a nie kanał kontaktu. Wyjazd za granicę też nie zmienia zakresu, bo ochrona obejmuje cały świat."
       },
       {
         "pytanie": "Mediacje to część moich dochodów, reszta to doradztwo — jak to ująć?",
@@ -832,7 +832,7 @@
     "pytania": [
       {
         "pytanie": "Wynagrodzenie dostaję nieregularnie — jak wyliczyć podstawę?",
-        "odpowiedz": "Bierze się średnią z pełnego roku, a nie z miesiąca wypłaty. Przy dochodzie odroczonym warto przygotować rozliczenie za dwa lata, bo pojedynczy rok może wypaść nietypowo."
+        "odpowiedz": "Bierze się średnią z pełnego roku, a nie z miesiąca wypłaty. Przy dochodzie odroczonym trzeba jednak wiedzieć, że ubezpieczyciel weźmie dokładnie dwanaście miesięcy bezpośrednio przed zawarciem umowy — jeśli wypłaty wypadły w nich nietypowo nisko, niższa będzie też górna granica świadczenia."
       },
       {
         "pytanie": "Czy prowadzę działalność, czy jestem funkcjonariuszem?",
@@ -861,7 +861,7 @@
     "pytania": [
       {
         "pytanie": "Czy pobicie podczas obserwacji jest objęte polisą?",
-        "odpowiedz": "Tak, jako nieszczęśliwy wypadek — zdarzenie nagłe i zewnętrzne. Objęte są następstwa urazu fizycznego; ewentualne skutki psychiczne pozostają poza zakresem, tak jak we wszystkich wariantach."
+        "odpowiedz": "Tak, jako nieszczęśliwy wypadek — zdarzenie nagłe i zewnętrzne. Objęte są następstwa urazu fizycznego; ewentualne skutki psychiczne pozostają poza zakresem, gdy to one same nie pozwalają wrócić do pracy."
       },
       {
         "pytanie": "Utrata licencji po badaniach — czy to podstawa wypłaty?",
@@ -890,7 +890,7 @@
     "pytania": [
       {
         "pytanie": "Wynagrodzenie za opinie dostaję po roku — co przyjąć za dochód?",
-        "odpowiedz": "Rozliczenie roczne, a nie bieżące wpływy. Przy dochodzie tak mocno odroczonym warto pokazać dwa lata, żeby ubezpieczyciel widział średnią, a nie przypadkową lukę."
+        "odpowiedz": "Rozliczenie roczne, a nie bieżące wpływy. Przy dochodzie tak mocno odroczonym liczy się to, co wpłynęło w dwunastu miesiącach przed zawarciem umowy — dłuższego okresu ubezpieczyciel nie uśrednia, więc przypadkowa luka w tym oknie obniża limit świadczenia."
       },
       {
         "pytanie": "Łączę pracę na uczelni z opiniowaniem — jaki mam limit?",
@@ -981,7 +981,7 @@
       },
       {
         "pytanie": "Zmiany zwyrodnieniowe narastają latami — czy będą objęte?",
-        "odpowiedz": "Decyduje moment rozpoznania i leczenia. Schorzenia leczone w ciągu 24 miesięcy przed zawarciem polisy są wyłączone, więc przy dolegliwościach rozwijających się latami warto ubezpieczyć się zanim pierwsze wizyty trafią do dokumentacji."
+        "odpowiedz": "Decyduje moment rozpoznania i leczenia. Schorzenia leczone w ciągu 24 miesięcy przed zawarciem polisy są wyłączone, więc przy dolegliwościach rozwijających się latami warto ubezpieczyć się zanim pierwsze wizyty trafią do dokumentacji. Choroba zwyrodnieniowa ma przy tym w Leadenhall własne granice: świadczenie okresowe wypłaca się z jej powodu najwyżej przez 24 miesiące, a z tytułu trwałej niezdolności — wcale."
       }
     ]
   },
@@ -1068,7 +1068,7 @@
       },
       {
         "pytanie": "Czy praca za granicą przy kampaniach jest objęta?",
-        "odpowiedz": "Krótkie wyjazdy służbowe tak. Dłuższy pobyt poza Polską wymaga zgłoszenia ubezpieczycielowi — niezgłoszony może być podstawą odmowy wypłaty."
+        "odpowiedz": "Tak — ochrona działa na całym świecie, także podczas kampanii zagranicznych."
       }
     ]
   },
@@ -1112,7 +1112,7 @@
       },
       {
         "tytul": "Obciążenie wtórne materiałem klientów",
-        "opis": "Kontakt z cudzą traumą przez wiele godzin dziennie ma udokumentowane następstwa. Trzeba powiedzieć wprost: mieszczą się one w kategorii chorób psychicznych, a te są wyłączone z ochrony we wszystkich wariantach."
+        "opis": "Kontakt z cudzą traumą przez wiele godzin dziennie ma udokumentowane następstwa. Trzeba powiedzieć wprost: mieszczą się one w kategorii chorób psychicznych, a niezdolność wywołana wyłącznie nimi nie daje świadczenia w żadnym z wariantów."
       },
       {
         "tytul": "Skutki pracy siedzącej",
@@ -1122,11 +1122,11 @@
     "pytania": [
       {
         "pytanie": "Czy wypalenie zawodowe jest objęte polisą?",
-        "odpowiedz": "Nie. Wypalenie jako samodzielna diagnoza jest wyłączone we wszystkich wariantach, podobnie jak choroby psychiczne. Objęte są natomiast następstwa somatyczne, jeśli mają odrębne rozpoznanie."
+        "odpowiedz": "Nie. Wypalenie jako samodzielna diagnoza nie daje świadczenia w żadnym wariancie. W Leadenhall to samo dotyczy chorób psychicznych, gdy są jedyną przyczyną niezdolności — jeśli pracować nie pozwala też choroba somatyczna z odrębnym rozpoznaniem, liczy się ona. CEU wyłącza niezdolność, której przyczyną było rozpoznanie psychiatryczne, bez tego zastrzeżenia."
       },
       {
         "pytanie": "Prowadzę sesje online — czy to zmienia ochronę?",
-        "odpowiedz": "Nie, o ile pracujesz z Polski. Forma kontaktu z klientem nie wpływa na ocenę ryzyka; wpływa na nią dłuższy pobyt za granicą, który trzeba zgłosić."
+        "odpowiedz": "Nie. Forma kontaktu z klientem nie wpływa na ocenę ryzyka, a ochrona obejmuje cały świat, więc sesje prowadzone spoza Polski też są objęte."
       }
     ]
   },
@@ -1184,7 +1184,7 @@
       },
       {
         "pytanie": "Czy prowizja aplikacji obniża moją podstawę?",
-        "odpowiedz": "Ubezpieczyciel liczy dochód, a nie obrót — więc po odjęciu prowizji i kosztów. Warto przygotować rozliczenie roczne, a nie zestawienie kursów, bo to ono pokazuje faktyczną podstawę."
+        "odpowiedz": "Ubezpieczyciel liczy przychód w rozumieniu przepisów podatkowych, a nie dochód po kosztach — prowizja obniża podstawę tylko wtedy, gdy nie wchodzi do Twojego przychodu. CEU przy usługach transportowych odejmuje od przychodu jedynie zakup materiałów i części oraz wynagrodzenie podwykonawców. Warto przygotować rozliczenie roczne, a nie zestawienie kursów, bo to ono pokazuje faktyczną podstawę."
       }
     ]
   },
@@ -1209,11 +1209,11 @@
     "pytania": [
       {
         "pytanie": "Rozliczam się za paczkę — jak wykazać dochód?",
-        "odpowiedz": "Przez rozliczenie roczne z działalności, po odjęciu kosztów paliwa i pojazdu. Zestawienie doręczeń pokazuje obrót, a podstawą sumy ubezpieczenia jest dochód."
+        "odpowiedz": "Przez rozliczenie roczne z działalności. Leadenhall bierze przychód w rozumieniu przepisów podatkowych, bez odejmowania kosztów paliwa i pojazdu; CEU przy usługach transportowych pomniejsza przychód tylko o zakup materiałów i części oraz pracę podwykonawców. Samo zestawienie doręczeń nie wystarczy — liczy się przychód wykazany w ewidencji."
       },
       {
         "pytanie": "Czy uraz kręgosłupa przy dźwiganiu to wypadek?",
-        "odpowiedz": "Nagłe wypadnięcie krążka przy podnoszeniu ciężaru zwykle tak. Zmiany zwyrodnieniowe narastające latami — nie; te obejmuje ryzyko niezdolności do pracy, a nie ryzyko następstw nieszczęśliwych wypadków."
+        "odpowiedz": "Nie zawsze. Wypadek wymaga przyczyny zewnętrznej, a wypadnięcie krążka przy samym podnoszeniu ciężaru ubezpieczyciel może uznać za skutek zmian zwyrodnieniowych, czyli chorobę. Taką niezdolność obejmuje ryzyko niezdolności do pracy, a nie ryzyko następstw nieszczęśliwych wypadków — w Leadenhall z limitem 24 miesięcy świadczenia okresowego i bez świadczenia z tytułu trwałej niezdolności."
       }
     ]
   },
@@ -1238,11 +1238,11 @@
     "pytania": [
       {
         "pytanie": "Prowizja jest zmienna — co przyjąć za podstawę?",
-        "odpowiedz": "Średnią z pełnych dwunastu miesięcy. Przy silnych wahaniach sezonowych warto pokazać dwa lata, żeby suma nie została wyliczona z przypadkowo słabego okresu."
+        "odpowiedz": "Średnią z pełnych dwunastu miesięcy bezpośrednio przed zawarciem umowy. Dłuższego okresu warunki nie przewidują, więc przy silnych wahaniach sezonowych to właśnie te miesiące wyznaczą górną granicę świadczenia."
       },
       {
         "pytanie": "Pracuję na etacie w spedycji — czy polisa ma sens?",
-        "odpowiedz": "Ma, choć limit wynosi wtedy 65%. Zasiłek chorobowy z etatu liczy się od podstawy składek, która przy dochodzie z prowizji bywa znacznie niższa niż realne zarobki."
+        "odpowiedz": "Ma, choć limit wynosi wtedy 65%. Zasiłek chorobowy z etatu liczy się od przeciętnego wynagrodzenia razem z prowizją, ale wynosi 80% tej kwoty po odjęciu składek i przysługuje najwyżej przez 182 dni."
       }
     ]
   },
@@ -1470,7 +1470,7 @@
     "pytania": [
       {
         "pytanie": "Prowadzę zajęcia online dla klientów z zagranicy — czy to zmienia ochronę?",
-        "odpowiedz": "Nie, o ile pracujesz z Polski. Miejsce zamieszkania klienta nie ma znaczenia; znaczenie ma dłuższy pobyt ubezpieczonego poza krajem, który wymaga zgłoszenia."
+        "odpowiedz": "Nie. Miejsce zamieszkania klienta nie ma znaczenia, a Twoje własne wyjazdy też nie — ochrona działa na całym świecie."
       },
       {
         "pytanie": "Rozliczam się z kilkoma szkołami językowymi — jaki mam limit?",
@@ -1522,7 +1522,7 @@
       },
       {
         "tytul": "Wyczerpanie i jego następstwa somatyczne",
-        "opis": "Praca w cudzych problemach, przez wiele godzin, przy obowiązku pełnej uwagi. Same rozpoznania z kręgu chorób psychicznych są wyłączone z ochrony — objęte są wyłącznie następstwa somatyczne z odrębną diagnozą."
+        "opis": "Praca w cudzych problemach, przez wiele godzin, przy obowiązku pełnej uwagi. Same rozpoznania z kręgu chorób psychicznych są wyłączone z ochrony — następstwo somatyczne z odrębną diagnozą ocenia się natomiast jak każdą inną chorobę."
       }
     ],
     "pytania": [
@@ -1532,7 +1532,7 @@
       },
       {
         "pytanie": "Czy praca wyłącznie online zmienia ocenę ryzyka?",
-        "odpowiedz": "Nie w istotnym stopniu — ryzyko zawodowe coacha jest w obu formach zbliżone. Zgłosić trzeba natomiast dłuższy pobyt za granicą, jeśli praca zdalna oznacza wyjazd na miesiące."
+        "odpowiedz": "Nie w istotnym stopniu — ryzyko zawodowe coacha jest w obu formach zbliżone. Wyjazd na kilka miesięcy też nie wyłącza ochrony, bo obejmuje ona cały świat."
       }
     ]
   },
@@ -1648,7 +1648,7 @@
       },
       {
         "pytanie": "Czy praca na wysokości wyklucza mnie z ubezpieczenia?",
-        "odpowiedz": "Nie wyklucza, ale podnosi ocenę ryzyka. Trzeba ją zgłosić we wniosku — zatajenie charakteru pracy jest podstawą do odmowy wypłaty przy szkodzie związanej właśnie z tym ryzykiem."
+        "odpowiedz": "W Leadenhall nie wyklucza, ale oznacza klasę V ryzyka zawodowego i wyższą składkę; w CEU szkody z czynności zawodowych na wysokości powyżej 2 metrów na zewnątrz budynku są wyłączone. Trzeba ją zgłosić we wniosku — zatajenie charakteru pracy jest podstawą do odmowy wypłaty przy szkodzie związanej właśnie z tym ryzykiem."
       }
     ]
   },
@@ -1702,7 +1702,7 @@
     "pytania": [
       {
         "pytanie": "Opinie sądowe płacą po latach — co przyjąć za dochód?",
-        "odpowiedz": "Rozliczenie roczne, nie bieżące wpływy. Przy dochodzie tak mocno odroczonym warto przedstawić dwa lata, żeby suma nie została wyliczona z przypadkowo pustego okresu."
+        "odpowiedz": "Rozliczenie roczne, nie bieżące wpływy. Granicę świadczenia wyznacza jednak przychód z dwunastu miesięcy przed zawarciem umowy, nie średnia z kilku lat — przy opiniach płatnych po latach warto sprawdzić, ile wpłynęło właśnie w tym okresie."
       },
       {
         "pytanie": "Czy oględziny obiektów po pożarze zmieniają wycenę?",
@@ -1789,7 +1789,7 @@
     "pytania": [
       {
         "pytanie": "Czy praca na dachu wyklucza mnie z ubezpieczenia?",
-        "odpowiedz": "Nie wyklucza, ale jest jednym z zawodów o wyższej ocenie ryzyka. Trzeba to zgłosić wprost we wniosku — zatajenie charakteru pracy jest podstawą do odmowy wypłaty przy szkodzie z tym związanej."
+        "odpowiedz": "W Leadenhall nie wyklucza — to praca w najwyższej, piątej klasie ryzyka zawodowego; CEU roszczeń z pracy na dachu powyżej dwóch metrów nie obejmuje w ogóle. Trzeba to zgłosić wprost we wniosku — zatajenie charakteru pracy jest podstawą do odmowy wypłaty przy szkodzie z tym związanej."
       },
       {
         "pytanie": "Pracuję sezonowo, zimą mam przestój — jak liczyć dochód?",
@@ -1938,7 +1938,7 @@
       },
       {
         "pytanie": "Zdjęcia bywają za granicą — czy ochrona działa?",
-        "odpowiedz": "Krótkie wyjazdy produkcyjne tak. Dłuższy pobyt poza Polską trzeba zgłosić ubezpieczycielowi — niezgłoszony bywa podstawą odmowy wypłaty."
+        "odpowiedz": "Tak — ochrona obejmuje cały świat, więc długość wyjazdu produkcyjnego nie ma znaczenia. Uraz na planie za granicą trzeba udokumentować tak samo jak w kraju, a dokumenty złożyć po polsku (w Leadenhall także po angielsku)."
       }
     ]
   },
@@ -2021,7 +2021,7 @@
     "pytania": [
       {
         "pytanie": "Mam tantiemy z licencji — czy wliczają się do dochodu?",
-        "odpowiedz": "Tak, jeśli są udokumentowane. Warto je wykazać, bo podnoszą podstawę, choć akurat one płyną dalej mimo przerwy w pracy — a to oznacza, że realna strata jest niższa niż całość dochodu."
+        "odpowiedz": "To zależy od ubezpieczyciela. CEU wprost wyłącza z przychodu tantiemy i wynagrodzenia za prawa autorskie, a w Leadenhall decyduje, czy są przychodem z wykonywania zawodu wpisanego w polisę. Tantiemy płyną zresztą dalej mimo przerwy w pracy — a to oznacza, że realna strata jest niższa niż całość dochodu."
       },
       {
         "pytanie": "Pracuję na umowach o dzieło z wydawcami — jaki mam limit?",
@@ -2054,7 +2054,7 @@
       },
       {
         "pytanie": "Dochód mam nierówny, raz na dwa lata duży projekt — jak to ująć?",
-        "odpowiedz": "Warto pokazać trzy lata zamiast jednego. Ubezpieczyciel bierze średnią, a przy tak nierównym rozkładzie pojedynczy rok bez produkcji zaniżyłby sumę poniżej realnych możliwości zarobkowych."
+        "odpowiedz": "Trzech lat ubezpieczyciel nie uśrednia: limit świadczenia liczy się od przychodu z dwunastu miesięcy bezpośrednio przed zawarciem umowy. Przy tak nierównym rozkładzie rok bez produkcji w tym okresie obniży tę granicę, a suma wybrana ponad nią zostanie przy wypłacie obniżona do kwoty wynikającej z przychodu."
       }
     ]
   },
@@ -2170,7 +2170,7 @@
       },
       {
         "pytanie": "Wyjeżdżam na relacje za granicę — czy ochrona działa?",
-        "odpowiedz": "Krótkie wyjazdy tak, ale wyjazdy do stref konfliktu wymagają zgłoszenia i mogą być wyłączone. To warto ustalić przed wyjazdem, a nie po zdarzeniu."
+        "odpowiedz": "Ochrona obejmuje cały świat, ale oba towarzystwa wyłączają szkody spowodowane wojną i działaniami wojennymi, więc uraz odniesiony w strefie konfliktu zbrojnego może zostać bez wypłaty. To warto ustalić przed wyjazdem, a nie po zdarzeniu."
       }
     ]
   },
@@ -2199,7 +2199,7 @@
       },
       {
         "pytanie": "Robię symultankę i tłumaczenia pisemne — czy stracę oba naraz?",
-        "odpowiedz": "Niedosłuch wyklucza z kabiny, ale niekoniecznie z tłumaczeń pisemnych — i to jest właśnie przypadek, w którym ubezpieczyciel ocenia niezdolność częściową. Warto opisać obie formy pracy we wniosku."
+        "odpowiedz": "Niedosłuch wyklucza z kabiny, ale niekoniecznie z tłumaczeń pisemnych — a polisa płaci tylko za całkowitą niezdolność do wykonywania zawodu wpisanego w umowie, więc przy zachowanej zdolności do tłumaczeń pisemnych świadczenia może nie być. Warto opisać obie formy pracy we wniosku."
       }
     ]
   },
@@ -2253,7 +2253,7 @@
     "pytania": [
       {
         "pytanie": "Dochód mam nierówny i z kilku platform — jak go wykazać?",
-        "odpowiedz": "Przez rozliczenie roczne z działalności, obejmujące wszystkie źródła. Przy silnych wahaniach warto pokazać dwa lata, żeby suma nie została wyliczona z przypadkowo słabego okresu."
+        "odpowiedz": "Przez rozliczenie roczne z działalności, obejmujące wszystkie źródła. Przy silnych wahaniach pamiętaj, że liczy się wyłącznie dwanaście miesięcy przed zawarciem umowy — słabszy okres w tym oknie obniża górną granicę świadczenia."
       },
       {
         "pytanie": "Kręcę materiały ekstremalne — czy to wyklucza mnie z ochrony?",
@@ -2262,7 +2262,7 @@
     ]
   },
   "pielegniarka": {
-    "wstep": "Pielęgniarka na kontrakcie nie ma płatnego zwolnienia — ma dyżury, które ktoś obsadzi zamiast niej. Praca łączy odpowiedzialność kliniczną z wysiłkiem fizycznym, którego skala rzadko trafia do opisu tego zawodu.",
+    "wstep": "Pielęgniarka na kontrakcie nie dostaje od szpitala wynagrodzenia za dni choroby — ma dyżury, które ktoś obsadzi zamiast niej. Praca łączy odpowiedzialność kliniczną z wysiłkiem fizycznym, którego skala rzadko trafia do opisu tego zawodu.",
     "dochod": "Kontrakt z podmiotem leczniczym rozlicza się za przepracowane dyżury, często w kilku placówkach naraz. Dodatki za noce i święta bywają jedną trzecią dochodu i znikają w całości, bo nieobecność wycina cały dyżur, a nie jego część.",
     "przerwa": "Grafik dyżurów układa się na miesiąc do przodu, a placówka obsadza wolne miejsca natychmiast. Przy pracy w trzech miejscach jedna choroba wycina wszystkie trzy źródła równocześnie, a ZUS liczy zasiłek od jednej zadeklarowanej podstawy. Powrót do pełnej liczby dyżurów po dłuższej przerwie zależy od tego, czy grafik zdążył się zapełnić na stałe.",
     "ryzyka": [
@@ -2315,7 +2315,7 @@
       },
       {
         "pytanie": "Uczulenie na lateks — czy to niezdolność do pracy?",
-        "odpowiedz": "Jeśli uniemożliwia pracę przy stole operacyjnym i zostało rozpoznane po zawarciu polisy — tak, przynajmniej w zakresie tej specjalizacji. Schorzenia leczone w ciągu dwóch lat przed umową są wyłączone."
+        "odpowiedz": "Jeśli uniemożliwia pracę przy stole operacyjnym i zostało rozpoznane po zawarciu polisy — tak, o ile w polisie wpisano zawód pielęgniarki operacyjnej, bo ocenia się niezdolność do zawodu wskazanego w umowie. Schorzenia leczone w ciągu dwóch lat przed umową są wyłączone."
       }
     ]
   },
@@ -2340,7 +2340,7 @@
     "pytania": [
       {
         "pytanie": "Prowadzę prywatną praktykę i pracuję na kontrakcie — jak to ująć?",
-        "odpowiedz": "Wykazujesz oba źródła w rozliczeniu rocznym. Prywatna praktyka nie ma żadnego zabezpieczenia z ZUS, więc to właśnie ona jest głównym powodem, żeby liczyć sumę od całości dochodu."
+        "odpowiedz": "Wykazujesz oba źródła w rozliczeniu rocznym. Zasiłek z ZUS przy działalności przysługuje tylko z dobrowolnej składki chorobowej i od zadeklarowanej podstawy, a nie od przychodu praktyki, więc to właśnie praktyka jest głównym powodem, żeby liczyć sumę od całości dochodu."
       },
       {
         "pytanie": "Czy wizyty patronażowe wliczają się do dochodu?",
@@ -2363,7 +2363,7 @@
       },
       {
         "tytul": "Agresja ze strony pacjenta lub świadków",
-        "opis": "Interwencje u osób pod wpływem substancji i w sytuacjach kryzysowych. Napaść na ratownika jest zjawiskiem udokumentowanym, a jej następstwa fizyczne są objęte jako nieszczęśliwy wypadek."
+        "opis": "Interwencje u osób pod wpływem substancji i w sytuacjach kryzysowych. Napaść na ratownika jest zjawiskiem udokumentowanym, a jej następstwa fizyczne Leadenhall obejmuje jako nieszczęśliwy wypadek — CEU szkód z pracy w służbach ratowniczych nie obejmuje."
       }
     ],
     "pytania": [
@@ -2373,7 +2373,7 @@
       },
       {
         "pytanie": "Czy napaść podczas interwencji jest objęta?",
-        "odpowiedz": "Tak, jako nieszczęśliwy wypadek — zdarzenie nagłe, zewnętrzne i niezależne od Twojej woli. Objęte są następstwa fizyczne; skutki psychiczne pozostają poza zakresem we wszystkich wariantach."
+        "odpowiedz": "W Leadenhall tak, jako nieszczęśliwy wypadek — zdarzenie nagłe, zewnętrzne i niezależne od Twojej woli; ratownictwo to tam klasa V ryzyka zawodowego, którą trzeba wskazać we wniosku. CEU wyłącza szkody z czynności zawodowych w służbach ratowniczych. Objęte są następstwa fizyczne; skutki psychiczne, które same uniemożliwiają pracę, pozostają poza zakresem w każdym wariancie."
       }
     ]
   },
@@ -2460,7 +2460,7 @@
       },
       {
         "pytanie": "Prowadzę konsultacje wyłącznie online — czy to zmienia ochronę?",
-        "odpowiedz": "Nie, o ile pracujesz z Polski. Forma kontaktu z pacjentem nie zmienia oceny ryzyka; zmienia ją dłuższy pobyt za granicą, który wymaga zgłoszenia."
+        "odpowiedz": "Nie. Forma kontaktu z pacjentem nie zmienia oceny ryzyka, a zasięg ochrony to cały świat, więc nie zmienia jej też praca z zagranicy."
       }
     ]
   },
@@ -2475,7 +2475,7 @@
       },
       {
         "tytul": "Obciążenie wtórne materiałem pacjentów",
-        "opis": "Prowadzenie kilkuset godzin terapii rocznie oznacza stałe zanurzenie w cudzym cierpieniu. Trzeba powiedzieć wprost: następstwa tego obciążenia mieszczą się w kategorii chorób psychicznych, wyłączonej z ochrony we wszystkich wariantach."
+        "opis": "Prowadzenie kilkuset godzin terapii rocznie oznacza stałe zanurzenie w cudzym cierpieniu. Trzeba powiedzieć wprost: następstwa tego obciążenia mieszczą się w kategorii chorób psychicznych, a gdy to one same nie pozwalają pracować, żaden wariant nie wypłaci świadczenia."
       },
       {
         "tytul": "Skutki wielogodzinnej pracy w fotelu",
@@ -2485,7 +2485,7 @@
     "pytania": [
       {
         "pytanie": "Czy skutki obciążenia psychicznego są objęte?",
-        "odpowiedz": "Nie. Choroby psychiczne i wypalenie zawodowe jako samodzielna diagnoza są wyłączone we wszystkich wariantach. Objęte są wyłącznie następstwa somatyczne, jeśli mają odrębne rozpoznanie."
+        "odpowiedz": "Nie, jeśli to one nie pozwalają pracować. Leadenhall nie wypłaca świadczenia, gdy zaburzenie psychiczne albo wypalenie jest jedyną przyczyną niezdolności; choroba somatyczna z odrębnym rozpoznaniem, która też uniemożliwia pracę, daje je normalnie. CEU wyłącza niezdolność, której przyczyną była depresja, nerwica albo stres, bez zastrzeżenia o jedynej przyczynie."
       },
       {
         "pytanie": "Wydaję opinie sądowe — czy to część dochodu z działalności?",
@@ -2659,7 +2659,7 @@
     "pytania": [
       {
         "pytanie": "Czy zakłucie na sali operacyjnej jest objęte bez klauzuli HIV/WZW?",
-        "odpowiedz": "Osobnego świadczenia za samo zakażenie bez klauzuli nie ma — dają je wyłącznie warunki szczególne LW048 (Medica) albo LW049 (Medicare); wariant LW044 ich nie przewiduje. Zakażenie nie jest jednak wyłączone: niezdolność do pracy, do której doprowadzi, ocenia się na zasadach ogólnych."
+        "odpowiedz": "Osobnego świadczenia za samo zakażenie bez klauzuli nie ma — dają je wyłącznie warunki szczególne LW048 (Medica) albo LW049 (Medicare); wariant LW044 ich nie przewiduje. Zakażenie nie jest jednak wyłączone, a niezdolność do pracy, którą wywoła, ocenia się jak przy każdej innej chorobie."
       },
       {
         "pytanie": "Operuję w kilku szpitalach na kontraktach — jak wykazać dochód?",
@@ -2721,7 +2721,7 @@
       },
       {
         "pytanie": "Wykonuję zabiegi prywatne obok kontraktu szpitalnego — co wykazać?",
-        "odpowiedz": "Oba źródła. Zabiegi prywatne nie mają żadnego zabezpieczenia z ZUS, a stanowią zwykle większą część dochodu — pominięcie ich zaniża sumę ubezpieczenia poniżej realnej straty."
+        "odpowiedz": "Oba źródła. Zabiegi prywatne nie podnoszą zasiłku z ZUS, liczonego od zadeklarowanej podstawy, a stanowią zwykle większą część dochodu — pominięcie ich zaniża sumę ubezpieczenia poniżej realnej straty."
       }
     ]
   },
@@ -2785,7 +2785,7 @@
   },
   "ortopeda": {
     "wstep": "Ortopeda pracuje przy stole operacyjnym z narzędziami, które w innych zawodach nazwano by warsztatowymi: wiertarką, piłą, młotkiem. To chirurgia wymagająca siły fizycznej, nie tylko precyzji.",
-    "dochod": "Kontrakt szpitalny, zabiegi endoprotezoplastyki rozliczane za procedurę i praktyka prywatna z konsultacjami oraz zabiegami artroskopowymi. Praktyka prywatna daje zwykle większą część dochodu i nie ma żadnego zabezpieczenia.",
+    "dochod": "Kontrakt szpitalny, zabiegi endoprotezoplastyki rozliczane za procedurę i praktyka prywatna z konsultacjami oraz zabiegami artroskopowymi. Praktyka prywatna daje zwykle większą część dochodu, a zasiłku z ZUS nie podnosi ani o złotówkę — ten liczy się od pensji albo od zadeklarowanej podstawy.",
     "przerwa": "Pacjent po urazie ma okno czasowe na rekonstrukcję, po którym wynik zabiegu jest gorszy. Ortopeda nieobecny przez dwa miesiące traci nie tylko te zabiegi, ale i kierowania od lekarzy rodzinnych i fizjoterapeutów, którzy w tym czasie znaleźli innego specjalistę. Odbudowa sieci kierowań zajmuje w tej dziedzinie kwartały.",
     "ryzyka": [
       {
@@ -2862,7 +2862,7 @@
     "pytania": [
       {
         "pytanie": "Pracuję zdalnie w teleradiologii — czy ochrona działa?",
-        "odpowiedz": "Działa, o ile pracujesz z Polski. Praca zdalna nie zmienia oceny ryzyka; zmienia ją dłuższy pobyt za granicą, który trzeba zgłosić ubezpieczycielowi."
+        "odpowiedz": "Działa, także gdy opisujesz badania spoza Polski — ochrona obejmuje cały świat. Praca zdalna nie zmienia oceny ryzyka."
       },
       {
         "pytanie": "Czy pogorszenie wzroku będzie uznane za niezdolność?",
@@ -2891,7 +2891,7 @@
     "pytania": [
       {
         "pytanie": "Utrata widzenia w jednym oku — czy to niezdolność częściowa?",
-        "odpowiedz": "Wyklucza z chirurgii okulistycznej, ale nie z pracy ambulatoryjnej — i to jest sytuacja, w której ubezpieczyciel ocenia niezdolność częściową. Warto we wniosku opisać, jaka część dochodu pochodzi z zabiegów, a jaka z konsultacji."
+        "odpowiedz": "Wyklucza z chirurgii okulistycznej, ale nie z pracy ambulatoryjnej — a za niezdolność częściową polisa nie płaci, bo wymaga całkowitej niezdolności do zawodu wskazanego w umowie. Warto we wniosku opisać, jaka część dochodu pochodzi z zabiegów, a jaka z konsultacji."
       },
       {
         "pytanie": "Mam gabinet z drogim sprzętem w leasingu — czy to podnosi sumę?",
@@ -2901,7 +2901,7 @@
   },
   "ginekolog": {
     "wstep": "Ginekolog-położnik pracuje w trybie, w którym poród nie czeka na dyżur zaplanowany, tylko dzieje się wtedy, kiedy się dzieje. Do tego dochodzi chirurgia operacyjna i praktyka ambulatoryjna — trzy różne obciążenia w jednym zawodzie.",
-    "dochod": "Kontrakt szpitalny z dyżurami, porody prowadzone prywatnie, zabiegi operacyjne i gabinet ambulatoryjny. Porody prywatne i gabinet dają zwykle większą część dochodu i są pozbawione jakiegokolwiek zabezpieczenia.",
+    "dochod": "Kontrakt szpitalny z dyżurami, porody prowadzone prywatnie, zabiegi operacyjne i gabinet ambulatoryjny. Porody prywatne i gabinet dają zwykle większą część dochodu, a zasiłek z ZUS od nich nie zależy — liczy się od pensji albo od podstawy zadeklarowanej w działalności.",
     "przerwa": "Pacjentka, która wybrała lekarza do prowadzenia ciąży i porodu, zapłaciła za obecność konkretnej osoby przy porodzie. Nieobecność oznacza zwrot i utratę pacjentki, a w tej dziedzinie polecenia krążą w zamkniętych grupach i jedna nieodebrana ciąża odbija się na dopływie nowych. Zabiegi operacyjne przechodzą na kolegów z oddziału i wracają wolno.",
     "ryzyka": [
       {
@@ -2920,7 +2920,7 @@
     "pytania": [
       {
         "pytanie": "Prowadzę ciąże prywatnie — czy to wykazuję osobno?",
-        "odpowiedz": "Wykazujesz w łącznym dochodzie z działalności. Prowadzenie ciąż i porody prywatne nie mają żadnego zabezpieczenia z ZUS, więc to one są zwykle głównym powodem, żeby liczyć sumę od całości."
+        "odpowiedz": "Wykazujesz w łącznym dochodzie z działalności. Zasiłek z dobrowolnej składki chorobowej nie zależy od tego, ile zarabiasz na prowadzeniu ciąż i porodach prywatnych, więc to one są zwykle głównym powodem, żeby liczyć sumę od całości."
       },
       {
         "pytanie": "Czy ekspozycja przy porodzie jest objęta bez klauzuli?",
@@ -2949,7 +2949,7 @@
     "pytania": [
       {
         "pytanie": "Czy uszkodzenie kciuka wyklucza mnie z pracy endoskopowej?",
-        "odpowiedz": "Sterowanie endoskopem opiera się na kciuku lewej dłoni, więc jego niesprawność wyklucza z zabiegów, choć nie z konsultacji. To sytuacja niezdolności częściowej — warto we wniosku opisać, jaka część dochodu pochodzi z pracowni."
+        "odpowiedz": "Sterowanie endoskopem opiera się na kciuku lewej dłoni, więc jego niesprawność wyklucza z zabiegów, choć nie z konsultacji. To niezdolność częściowa, a świadczenie należy się dopiero przy całkowitej niezdolności do wykonywania zawodu wpisanego w polisie — dlatego warto we wniosku opisać, jaka część pracy i dochodu pochodzi z pracowni."
       },
       {
         "pytanie": "Mam własną pracownię endoskopową — jak liczyć sumę?",
@@ -3055,7 +3055,7 @@
       },
       {
         "tytul": "Obciążenie prowadzeniem chorych terminalnych",
-        "opis": "Trzeba to powiedzieć wprost: skutki tego obciążenia mieszczą się w kategorii chorób psychicznych, wyłączonej z ochrony we wszystkich wariantach. Objęte są wyłącznie następstwa somatyczne z odrębnym rozpoznaniem."
+        "opis": "Trzeba to powiedzieć wprost: skutki tego obciążenia mieszczą się w kategorii chorób psychicznych. W Leadenhall nie dają świadczenia, gdy są jedyną przyczyną niezdolności, a choroba somatyczna z odrębnym rozpoznaniem liczy się normalnie; CEU wyłącza każdą niezdolność spowodowaną takim rozpoznaniem."
       },
       {
         "tytul": "Ekspozycja na infekcje u chorych w immunosupresji",
@@ -3065,7 +3065,7 @@
     "pytania": [
       {
         "pytanie": "Czy skutki ekspozycji na cytostatyki będą objęte?",
-        "odpowiedz": "Objęta jest niezdolność do pracy wynikająca ze schorzenia, niezależnie od jego przyczyny — o ile nie było leczone w ciągu 24 miesięcy przed zawarciem umowy. Przy chorobach o długim okresie utajenia liczy się moment rozpoznania."
+        "odpowiedz": "Objęta jest niezdolność do pracy wynikająca ze schorzenia, także wtedy, gdy wywołała je praca z cytostatykami — o ile nie było leczone w ciągu 24 miesięcy przed zawarciem umowy. Przy chorobach o długim okresie utajenia liczy się moment rozpoznania."
       },
       {
         "pytanie": "Prowadzę pacjentów w programach lekowych — czy to część dochodu?",
@@ -3094,7 +3094,7 @@
     "pytania": [
       {
         "pytanie": "Czy pobicie na dyżurze jest objęte polisą?",
-        "odpowiedz": "Tak. Uderzenie zadane przez pacjenta jest zdarzeniem nagłym i pochodzącym z zewnątrz, więc spełnia definicję wypadku. Wypłata dotyczy urazu ciała; rozstrój psychiczny po takim zajściu nie jest objęty w żadnym z wariantów."
+        "odpowiedz": "Tak. Uderzenie zadane przez pacjenta jest zdarzeniem nagłym i pochodzącym z zewnątrz, więc spełnia definicję wypadku. Wypłata dotyczy urazu ciała; rozstrój psychiczny po takim zajściu, jeśli to on jako jedyny nie pozwala pracować, nie jest objęty w żadnym z wariantów."
       },
       {
         "pytanie": "Dyżuruję w trzech szpitalach — jak wykazać dochód?",
@@ -3142,7 +3142,7 @@
       },
       {
         "tytul": "Ekspozycja zawodowa przy pobraniu i przeszczepieniu",
-        "opis": "Wielogodzinne operacje z rozległym polem i dużą ilością krwi, często u dawców o nieustalonym pełnym statusie serologicznym. Osobne świadczenie za zakażenie HIV albo WZW dają warunki szczególne."
+        "opis": "Wielogodzinne operacje z rozległym polem i dużą ilością krwi, często u dawców o nieustalonym pełnym statusie serologicznym. Jednorazową wypłatę za samo zakażenie HIV albo WZW przewidują tylko warunki szczególne HIV/WZW."
       },
       {
         "tytul": "Przeciążenie kręgosłupa przy długich zabiegach",
@@ -3156,7 +3156,7 @@
       },
       {
         "pytanie": "Wyjeżdżam na pobrania do innych ośrodków — czy to objęte?",
-        "odpowiedz": "Wyjazdy służbowe na terenie Polski są objęte bez dodatkowych warunków. Zgłoszenia wymaga dopiero dłuższy pobyt poza krajem."
+        "odpowiedz": "Tak, bez dodatkowych warunków — ochrona obejmuje cały świat, więc także pobrania w ośrodkach zagranicznych."
       }
     ]
   },
@@ -3175,7 +3175,7 @@
       },
       {
         "tytul": "Przewlekłe obciążenie prowadzeniem chorych nieuleczalnie",
-        "opis": "Trzeba to powiedzieć wprost: następstwa tego obciążenia mieszczą się w kategorii chorób psychicznych, wyłączonej z ochrony. Objęte są wyłącznie skutki somatyczne z odrębnym rozpoznaniem."
+        "opis": "Trzeba to powiedzieć wprost: następstwa tego obciążenia mieszczą się w kategorii chorób psychicznych, wyłączonej z ochrony, gdy to one same są przyczyną niezdolności. Skutek somatyczny z odrębnym rozpoznaniem — nadciśnienie czy choroba serca — ocenia się tak jak każdą inną chorobę."
       }
     ],
     "pytania": [
@@ -3185,7 +3185,7 @@
       },
       {
         "pytanie": "Pracuję w stacji dializ na kontrakcie — jaki mam limit?",
-        "odpowiedz": "Kontrakt B2B oznacza limit 80% udokumentowanego dochodu. To najczęstsza forma współpracy nefrologów z operatorami stacji i jednocześnie ta bez zabezpieczenia z ZUS."
+        "odpowiedz": "Kontrakt B2B oznacza limit 80% udokumentowanego dochodu. To najczęstsza forma współpracy nefrologów z operatorami stacji i jednocześnie ta, w której zasiłek z ZUS zależy od dobrowolnej składki chorobowej i zadeklarowanej podstawy, a nie od kontraktu."
       }
     ]
   },
@@ -3210,7 +3210,7 @@
     "pytania": [
       {
         "pytanie": "Czy zwyrodnienie moich stawów będzie uznane za niezdolność?",
-        "odpowiedz": "Jeśli uniemożliwia wykonywanie iniekcji dostawowych, jest niezdolnością do części zawodu — to sytuacja niezdolności częściowej. Warunkiem pozostaje, żeby schorzenie nie było leczone w ciągu 24 miesięcy przed zawarciem umowy."
+        "odpowiedz": "Jeśli uniemożliwia tylko iniekcje dostawowe, to niezdolność do części zawodu, a za taką polisa nie płaci — wymaga niezdolności całkowitej. W Leadenhall choroba zwyrodnieniowa daje ponadto świadczenie okresowe najwyżej przez 24 miesiące i nie daje świadczenia z tytułu trwałej niezdolności; warunkiem pozostaje też, żeby schorzenie nie było leczone w ciągu 24 miesięcy przed zawarciem umowy."
       },
       {
         "pytanie": "Prowadzę pacjentów w programach lekowych — czy to wykazać?",
@@ -3220,7 +3220,7 @@
   },
   "dermatolog": {
     "wstep": "Dermatolog rozpoznaje chorobę patrząc — dermatoskopia jest oceną wzrokową struktur o wielkości dziesiątych części milimetra, w kolorze. Utrata rozróżniania barw kończy tę specjalizację skuteczniej niż jakikolwiek uraz.",
-    "dochod": "Konsultacje ambulatoryjne, zabiegi chirurgii dermatologicznej rozliczane za procedurę, dermatologia estetyczna i praktyka prywatna. Ta ostatnia daje zwykle większość dochodu i jest wolna od jakiegokolwiek zabezpieczenia.",
+    "dochod": "Konsultacje ambulatoryjne, zabiegi chirurgii dermatologicznej rozliczane za procedurę, dermatologia estetyczna i praktyka prywatna. Ta ostatnia daje zwykle większość dochodu, a zasiłku z ZUS nie zwiększa, bo ten zależy od pensji albo od zadeklarowanej podstawy, nie od przychodu gabinetu.",
     "przerwa": "Pacjent z podejrzeniem czerniaka nie czeka na powrót konkretnego lekarza — trafi do pierwszego dostępnego dermatologa i tam zostanie na kontrole. Zabiegi estetyczne, rezerwowane z wyprzedzeniem i płatne z góry, wymagają zwrotu przy odwołaniu. Przy własnym gabinecie z dermatoskopem cyfrowym i laserem biegną raty za sprzęt.",
     "ryzyka": [
       {
@@ -3272,7 +3272,7 @@
       },
       {
         "pytanie": "Czy nawracające infekcje mogą być podstawą wypłaty?",
-        "odpowiedz": "Pojedyncza infekcja to zwykle za krótka niezdolność, żeby uruchomić świadczenie po karencji. Podstawą są ich następstwa albo schorzenie przewlekłe, o ile powoduje orzeczoną niezdolność do pracy."
+        "odpowiedz": "Pojedyncza infekcja to zwykle za krótka niezdolność, żeby uruchomić świadczenie po okresie wyczekiwania. Podstawą są ich następstwa albo schorzenie przewlekłe, o ile powoduje orzeczoną niezdolność do pracy."
       }
     ]
   },
@@ -3359,7 +3359,7 @@
       },
       {
         "pytanie": "Prowadzę pacjentów prywatnie — jak to wykazać?",
-        "odpowiedz": "Przez rozliczenie roczne z działalności, łącznie z kontraktem. Praktyka prywatna nie ma zabezpieczenia z ZUS i to zwykle ona jest głównym powodem, żeby liczyć sumę od całości dochodu."
+        "odpowiedz": "Przez rozliczenie roczne z działalności, łącznie z kontraktem. Praktyka prywatna nie zmienia wysokości zasiłku z ZUS, który przy działalności zależy od dobrowolnej składki i zadeklarowanej podstawy, i to zwykle ona jest głównym powodem, żeby liczyć sumę od całości dochodu."
       }
     ]
   },
@@ -3384,7 +3384,7 @@
     "pytania": [
       {
         "pytanie": "Czy wtórna ekspozycja na substancję toksyczną jest objęta?",
-        "odpowiedz": "Objęta jest niezdolność do pracy wynikająca ze schorzenia, niezależnie od jego przyczyny. Nagłe zatrucie o charakterze zdarzenia zewnętrznego może dodatkowo spełniać definicję nieszczęśliwego wypadku."
+        "odpowiedz": "Objęta jest niezdolność do pracy wynikająca ze schorzenia, także gdy jego źródłem była ekspozycja w pracy. W Leadenhall nagłe zatrucie o charakterze zdarzenia zewnętrznego może dodatkowo spełniać definicję nieszczęśliwego wypadku; CEU zatrucia za wypadek wprost nie uznaje."
       },
       {
         "pytanie": "Moja specjalizacja jest bardzo nieliczna — czy to argument za wyższą sumą?",
@@ -3432,7 +3432,7 @@
       },
       {
         "tytul": "Skutki obciążenia psychicznego — wyłączone z ochrony",
-        "opis": "To jest ryzyko definiujące tę specjalizację i jednocześnie nieobjęte polisą w żadnym wariancie. Piszemy o tym wprost, bo psychiatra ma prawo wiedzieć, że akurat jego główne zagrożenie zawodowe zostaje poza zakresem umowy."
+        "opis": "To jest ryzyko definiujące tę specjalizację i jednocześnie wyłączone w każdym wariancie, gdy jego skutki są jedyną przyczyną niezdolności; w CEU wyłączenie nie ma nawet tego zastrzeżenia. Piszemy o tym wprost, bo psychiatra ma prawo wiedzieć, że akurat jego główne zagrożenie zawodowe zostaje poza zakresem umowy."
       },
       {
         "tytul": "Choroby narządu głosu",
@@ -3442,11 +3442,11 @@
     "pytania": [
       {
         "pytanie": "Skoro choroby psychiczne są wyłączone, czy polisa ma dla mnie sens?",
-        "odpowiedz": "Ma, ale trzeba wiedzieć, na co. Chroni przed skutkami urazu, choroby somatycznej i wypadku — czyli przed wszystkim poza tym jednym obszarem. Zatajanie tego byłoby wobec psychiatry szczególnie nie w porządku."
+        "odpowiedz": "Ma, ale trzeba wiedzieć, na co. Chroni przed skutkami urazu, choroby somatycznej i wypadku — w granicach pozostałych wyłączeń z OWU, wśród których to jedno jest dla psychiatry najważniejsze. Zatajanie tego byłoby wobec psychiatry szczególnie nie w porządku."
       },
       {
         "pytanie": "Wydaję opinie sądowo-psychiatryczne — czy to osobne źródło?",
-        "odpowiedz": "Wchodzi do łącznego dochodu z działalności. Wypłata następuje po zakończeniu sprawy, więc przy dokumentowaniu warto pokazać dwa pełne lata, a nie bieżące wpływy."
+        "odpowiedz": "Wchodzi do łącznego dochodu z działalności. Wypłata następuje po zakończeniu sprawy, więc liczy się to, co faktycznie wpłynęło w dwunastu miesiącach przed zawarciem umowy, a nie opinie dopiero oczekujące na zapłatę."
       }
     ]
   },
@@ -3519,7 +3519,7 @@
       },
       {
         "tytul": "Ekspozycja na materiał zakaźny przy biopsji szpiku",
-        "opis": "Nakłucie talerza biodrowego u pacjenta z małopłytkowością oznacza obfite krwawienie w polu zabiegu. Osobne świadczenie za zakażenie HIV albo WZW dają warunki szczególne."
+        "opis": "Nakłucie talerza biodrowego u pacjenta z małopłytkowością oznacza obfite krwawienie w polu zabiegu. Za samo zakażenie HIV albo WZW osobną wypłatę daje klauzula szczególna dokładana do wariantów medycznych."
       },
       {
         "tytul": "Kontakt z chorymi w głębokiej immunosupresji",
@@ -3529,7 +3529,7 @@
     "pytania": [
       {
         "pytanie": "Czy utrata precyzji widzenia zamknie mi całą specjalizację?",
-        "odpowiedz": "Zamknie diagnostykę mikroskopową, ale nie pracę kliniczną z pacjentem. To przypadek niezdolności częściowej — warto we wniosku rozpisać, jaka część dochodu pochodzi z każdej z tych czynności."
+        "odpowiedz": "Zamknie diagnostykę mikroskopową, ale nie pracę kliniczną z pacjentem. Taka częściowa niezdolność nie daje świadczenia, bo polisa płaci za całkowitą niezdolność do zawodu z umowy — warto więc we wniosku rozpisać, jaka część pracy i dochodu przypada na każdą z tych czynności."
       },
       {
         "pytanie": "Wykonuję biopsje szpiku — czy to zwiększa ryzyko ekspozycji?",
@@ -3610,7 +3610,7 @@
       },
       {
         "tytul": "Ekspozycja na preparaty krwiopochodne",
-        "opis": "Nadzór nad wlewami immunoglobulin i praca z materiałem osoczopochodnym. Osobne świadczenie za zakażenie HIV albo WZW dają warunki szczególne."
+        "opis": "Nadzór nad wlewami immunoglobulin i praca z materiałem osoczopochodnym. Świadczenie za zakażenie HIV lub WZW jako takie wymaga warunków szczególnych HIV/WZW."
       }
     ],
     "pytania": [
@@ -3732,7 +3732,7 @@
     "pytania": [
       {
         "pytanie": "Wyjeżdżam z drużyną za granicę — czy ochrona działa?",
-        "odpowiedz": "Wyjazdy służbowe na zawody są objęte bez dodatkowych warunków. Zgłoszenia wymaga dopiero dłuższy pobyt poza Polską, na przykład przy pracy w klubie zagranicznym przez cały sezon."
+        "odpowiedz": "Tak, bez dodatkowych warunków — ochrona działa na całym świecie, także przy wyjazdach z drużyną na cały sezon."
       },
       {
         "pytanie": "Kontrakt klubowy jest sezonowy — czy to problem?",
@@ -3761,7 +3761,7 @@
     "pytania": [
       {
         "pytanie": "Wyjeżdżam na misje medyczne — czy polisa działa za granicą?",
-        "odpowiedz": "Dłuższe pobyty poza Polską wymagają zgłoszenia ubezpieczycielowi, a wyjazdy do rejonów o podwyższonym ryzyku mogą być wyłączone albo objęte na innych warunkach. To trzeba ustalić przed wyjazdem, nie po zdarzeniu."
+        "odpowiedz": "Działa — ochrona obejmuje cały świat. Wyłączone są jednak szkody spowodowane wojną albo działaniami wojennymi, więc misja w rejonie konfliktu zbrojnego to ryzyko bez ochrony. To trzeba ustalić przed wyjazdem, nie po zdarzeniu."
       },
       {
         "pytanie": "Poradnia szczepień pracuje sezonowo — jak wykazać dochód?",
@@ -3784,7 +3784,7 @@
       },
       {
         "tytul": "Ekspozycja na materiał biologiczny",
-        "opis": "Praca z nasieniem i krwią przy zabiegach, w warunkach laboratoryjnych i zabiegowych naraz. Osobne świadczenie za zakażenie HIV albo WZW dają warunki szczególne."
+        "opis": "Praca z nasieniem i krwią przy zabiegach, w warunkach laboratoryjnych i zabiegowych naraz. Osobną wypłatę za zakażenie wirusem HIV albo WZW zapewniają warunki szczególne HIV/WZW."
       }
     ],
     "pytania": [
@@ -3829,7 +3829,7 @@
   },
   "seksuolog": {
     "wstep": "Seksuolog prowadzi terapię opartą wyłącznie na rozmowie, w warunkach wymagających pełnej poufności i ciągłości. Zmiana terapeuty w trakcie procesu jest dla pacjenta na tyle trudna, że część po prostu przerywa leczenie.",
-    "dochod": "Gabinet prywatny stanowi w tej dziedzinie zdecydowaną większość przychodu, uzupełniony o opinie sądowo-seksuologiczne i szkolenia. Poradnie finansowane publicznie są nieliczne, więc niemal cały dochód jest pozbawiony jakiegokolwiek zabezpieczenia.",
+    "dochod": "Gabinet prywatny stanowi w tej dziedzinie zdecydowaną większość przychodu, uzupełniony o opinie sądowo-seksuologiczne i szkolenia. Poradnie finansowane publicznie są nieliczne, więc niemal cały dochód pochodzi z działalności, przy której zasiłek z ZUS zależy od dobrowolnej składki i liczy się od zadeklarowanej podstawy, a nie od przychodu.",
     "przerwa": "Proces terapeutyczny przerwany na dwa miesiące zwykle się kończy — pacjent, który z trudem zdecydował się na pierwszą wizytę, rzadko powtarza tę decyzję u kogoś nowego. Opinie sądowe mają terminy wyznaczone przez sąd i przechodzą do innego biegłego. Odbudowa grafiku po dłuższej nieobecności trwa kwartały, bo nowi pacjenci trafiają z polecenia, a polecenia biorą się z bieżącej pracy.",
     "ryzyka": [
       {
@@ -3838,7 +3838,7 @@
       },
       {
         "tytul": "Następstwa somatyczne obciążenia pracą",
-        "opis": "Praca z traumą seksualną i przemocą przez wiele godzin dziennie. Rozpoznania z kręgu chorób psychicznych są z ochrony wyłączone — objęte są wyłącznie skutki somatyczne z odrębną diagnozą."
+        "opis": "Praca z traumą seksualną i przemocą przez wiele godzin dziennie. Rozpoznanie z kręgu chorób psychicznych, które jako jedyne nie pozwala pracować, jest z ochrony wyłączone — skutek somatyczny z odrębną diagnozą liczy się tak samo jak każda inna choroba."
       },
       {
         "tytul": "Skutki wielogodzinnej pracy w pozycji siedzącej",
@@ -3848,11 +3848,11 @@
     "pytania": [
       {
         "pytanie": "Prawie cały mój dochód to gabinet prywatny — czy to zmienia wycenę?",
-        "odpowiedz": "Nie zmienia zasad, ale zmienia stawkę, o którą toczy się gra. Przy dochodzie niemal wyłącznie prywatnym nie ma żadnego zabezpieczenia z ZUS, więc suma powinna odpowiadać całości rocznego przychodu."
+        "odpowiedz": "Nie zmienia zasad, ale zmienia stawkę, o którą toczy się gra. Przy dochodzie niemal wyłącznie prywatnym zasiłek z ZUS, jeśli w ogóle opłacasz składkę chorobową, liczy się od zadeklarowanej podstawy, więc suma powinna odpowiadać całości rocznego przychodu."
       },
       {
         "pytanie": "Czy praca online zmienia coś w ochronie?",
-        "odpowiedz": "Nie, dopóki pracujesz z terytorium Polski. Znaczenie ma dopiero dłuższy pobyt za granicą, o którym trzeba poinformować ubezpieczyciela przed wyjazdem."
+        "odpowiedz": "Nie. Ochrona obejmuje cały świat, więc nie zmienia jej ani praca online, ani miejsce, z którego prowadzisz sesje."
       }
     ]
   },
@@ -3881,7 +3881,7 @@
       },
       {
         "pytanie": "Pracuję zdalnie dla firmy zagranicznej — czy ochrona działa?",
-        "odpowiedz": "Działa, o ile mieszkasz i pracujesz z Polski. Siedziba zamawiającego nie ma znaczenia; znaczenie ma Twoje miejsce pobytu, a dłuższy wyjazd trzeba zgłosić."
+        "odpowiedz": "Działa. Siedziba zamawiającego nie ma znaczenia, a Twoje miejsce pobytu też nie, bo ochrona obejmuje cały świat."
       }
     ]
   },
@@ -3939,7 +3939,7 @@
       },
       {
         "pytanie": "Mam kontrakt i projekty audytowe — jak wykazać dochód?",
-        "odpowiedz": "Łącznie, na podstawie rozliczenia rocznego. Projekty audytowe bywają nierówne w czasie, więc przy wahaniach warto przedstawić dwa lata, żeby średnia nie wypadła przypadkowo nisko."
+        "odpowiedz": "Łącznie, na podstawie rozliczenia rocznego. Projekty audytowe bywają nierówne w czasie, a limit świadczenia wyznacza tylko przychód z roku poprzedzającego zawarcie umowy, więc słaby okres audytowy tuż przed nią obniża ochronę."
       }
     ]
   },
@@ -3993,7 +3993,7 @@
     "pytania": [
       {
         "pytanie": "Mam udział w zyskach z gry — czy to wchodzi do dochodu?",
-        "odpowiedz": "Wchodzi dopiero po wypłacie i rozliczeniu, bo suma liczy się od dochodu udokumentowanego, a nie od oczekiwanego. Przy nierównych latach warto pokazać dwa albo trzy lata, żeby średnia była miarodajna."
+        "odpowiedz": "Wchodzi dopiero po wypłacie i rozliczeniu, bo suma liczy się od dochodu udokumentowanego, a nie od oczekiwanego. Udział wypłacony wcześniej niż dwanaście miesięcy przed zawarciem umowy nie podniesie już limitu świadczenia, bo tylko ten okres się liczy."
       },
       {
         "pytanie": "Kontrakty kończą się razem z projektem — czy to problem?",
@@ -4016,17 +4016,17 @@
       },
       {
         "tytul": "Presja publicznych ocen — skutki poza zakresem polisy",
-        "opis": "Oceny użytkowników są w tej roli publiczne, natychmiastowe i osobiste. Trzeba powiedzieć wprost: następstwa tego obciążenia mieszczą się w kategorii wyłączonej z ochrony we wszystkich wariantach polisy."
+        "opis": "Oceny użytkowników są w tej roli publiczne, natychmiastowe i osobiste. Trzeba powiedzieć wprost: następstwa tego obciążenia mieszczą się w kategorii, która nie daje świadczenia w żadnym wariancie polisy, gdy jest jedyną przyczyną niezdolności."
       }
     ],
     "pytania": [
       {
         "pytanie": "Mam własne aplikacje z przychodem pasywnym — jak to ująć?",
-        "odpowiedz": "Wykazujesz je w łącznym dochodzie, ale warto wiedzieć, że akurat ta część płynie dalej mimo choroby. Realna strata jest więc niższa niż całość dochodu i suma może to uwzględniać."
+        "odpowiedz": "CEU nie wlicza do podstawy przychodu, który nie wymaga Twojego osobistego, stałego zaangażowania, więc aplikacje pasywne tam odpadają; w Leadenhall liczy się przychód z wykonywania zawodu wpisanego w polisę. Warto też wiedzieć, że akurat ta część płynie dalej mimo choroby. Realna strata jest więc niższa niż całość dochodu i suma może to uwzględniać."
       },
       {
         "pytanie": "Pracuję dla klienta z innej strefy czasowej — czy to ma znaczenie?",
-        "odpowiedz": "Dla zakresu ochrony nie, o ile pracujesz z Polski. Warto natomiast pamiętać, że praca w cudzych godzinach ma udokumentowany wpływ na sen, a to już przekłada się na zdrowie."
+        "odpowiedz": "Dla zakresu ochrony nie — obejmuje ona cały świat, niezależnie od strefy czasowej. Warto natomiast pamiętać, że praca w cudzych godzinach ma udokumentowany wpływ na sen, a to już przekłada się na zdrowie."
       }
     ]
   },
@@ -4051,11 +4051,11 @@
     "pytania": [
       {
         "pytanie": "Czy zaburzenia widzenia barw wykluczą mnie z zawodu?",
-        "odpowiedz": "Ocena dotyczy zdolności do wykonywania konkretnego zawodu. Przy frontendzie kontrola kontrastu i barwy jest częścią pracy, więc jej utrata może stanowić niezdolność częściową — warto opisać we wniosku, jaka część obowiązków tego dotyczy."
+        "odpowiedz": "Ocena dotyczy zdolności do wykonywania konkretnego zawodu. Przy frontendzie kontrola kontrastu i barwy jest częścią pracy, ale jeśli reszta obowiązków pozostaje możliwa, jest to niezdolność częściowa, za którą świadczenie nie przysługuje — warto opisać we wniosku, jaka część obowiązków tego dotyczy."
       },
       {
         "pytanie": "Prowadzę też kursy — czy ten przychód się liczy?",
-        "odpowiedz": "Liczy się w łącznym dochodzie. Przychód z kursów płynie zwykle dalej mimo przerwy w pracy, więc realna strata bywa niższa niż całość — i o tym warto pamiętać przy wyborze sumy."
+        "odpowiedz": "Zależy od formy. CEU wyłącza z podstawy przychód, który nie wymaga Twojego osobistego, stałego zaangażowania — a takie są kursy sprzedające się same. Ich przychód płynie zwykle dalej mimo przerwy w pracy, więc realna strata bywa niższa niż całość — i o tym warto pamiętać przy wyborze sumy."
       }
     ]
   },
@@ -4167,7 +4167,7 @@
     "pytania": [
       {
         "pytanie": "Czy utrata rozróżniania barw to niezdolność w moim zawodzie?",
-        "odpowiedz": "Przy projektowaniu i audytach dostępności ocena kontrastu jest czynnością zawodową, więc jej utrata może stanowić niezdolność częściową. Warto rozpisać we wniosku, jaka część dochodu pochodzi z audytów, a jaka z innych zadań."
+        "odpowiedz": "Przy projektowaniu i audytach dostępności ocena kontrastu jest czynnością zawodową, ale gdy pozostałe zadania da się dalej wykonywać, jej utrata jest niezdolnością częściową — a świadczenie wymaga całkowitej. Warto rozpisać we wniosku, jaka część dochodu pochodzi z audytów, a jaka z innych zadań."
       },
       {
         "pytanie": "Prowadzę warsztaty dla klientów — czy to osobne źródło?",
@@ -4200,7 +4200,7 @@
       },
       {
         "pytanie": "Mam przerwy między kontraktami — jak liczyć dochód?",
-        "odpowiedz": "Na podstawie rozliczenia rocznego, które te przerwy już uwzględnia. Przy nierównych latach warto pokazać dwa, żeby średnia nie wypadła z przypadkowo słabego okresu."
+        "odpowiedz": "Na podstawie przychodu z dwunastu miesięcy przed zawarciem umowy, który te przerwy już uwzględnia. Wcześniejsze, lepsze lata nie podniosą limitu świadczenia."
       }
     ]
   },
@@ -4258,7 +4258,7 @@
       },
       {
         "pytanie": "Pracuję zdalnie dla klienta zagranicznego — czy to problem?",
-        "odpowiedz": "Nie, dopóki mieszkasz i pracujesz w Polsce. Zgłoszenia wymaga dopiero dłuższy pobyt za granicą, niezależnie od tego, gdzie ma siedzibę zamawiający."
+        "odpowiedz": "Nie. Liczy się Twoja niezdolność do pracy, a nie kraj zamawiającego, a ochrona działa na całym świecie — także wtedy, gdy sam pracujesz spoza Polski."
       }
     ]
   },
@@ -4312,7 +4312,7 @@
     "pytania": [
       {
         "pytanie": "Moja stawka wynika z aktualności wiedzy — czy polisa to uwzględnia?",
-        "odpowiedz": "Suma liczy się od dochodu udokumentowanego w ostatnim okresie, więc odzwierciedla stawkę sprzed choroby. To dobra wiadomość: świadczenie nie spada dlatego, że w trakcie przerwy rynek się zmienił."
+        "odpowiedz": "Limit świadczenia liczy się od przychodu udokumentowanego za dwanaście miesięcy przed zawarciem umowy, więc odzwierciedla stawkę z tamtego okresu. To dobra wiadomość: świadczenie nie spada dlatego, że w trakcie przerwy rynek się zmienił."
       },
       {
         "pytanie": "Prowadzę szkolenia i wystąpienia obok kontraktu — jak to ująć?",
@@ -4341,7 +4341,7 @@
     "pytania": [
       {
         "pytanie": "Nagrody za podatności są nieregularne — czy wchodzą do dochodu?",
-        "odpowiedz": "Wchodzą, o ile są rozliczone i opodatkowane w ramach działalności. Przy nieregularnych przychodach warto pokazać dwa lata, żeby średnia nie wypadła z przypadkowo słabego okresu."
+        "odpowiedz": "Wchodzą, o ile są rozliczone i opodatkowane w ramach działalności. Do limitu świadczenia wejdą jednak tylko te nagrody, które wpłynęły w dwunastu miesiącach przed zawarciem umowy."
       },
       {
         "pytanie": "Czy odpowiedzialność za błąd w kontrakcie jest objęta polisą?",
@@ -4374,7 +4374,7 @@
       },
       {
         "pytanie": "Rozliczam się z udziału w oszczędnościach — czy to dochód?",
-        "odpowiedz": "Tak, o ile jest udokumentowany fakturą i rozliczony. Przy takim modelu przychody bywają nierówne, więc warto przedstawić dwa pełne lata."
+        "odpowiedz": "Tak, o ile jest udokumentowany fakturą i rozliczony. Przy takim modelu przychody bywają nierówne, a limit świadczenia wyznacza tylko rok bezpośrednio przed zawarciem umowy."
       }
     ]
   },
@@ -4399,7 +4399,7 @@
     "pytania": [
       {
         "pytanie": "Część wynagrodzenia zależy od pozyskanych projektów — czy się liczy?",
-        "odpowiedz": "Liczy się to, co udokumentowane w rozliczeniu rocznym. Przy zmiennej części warto pokazać pełne dwa lata, bo pojedynczy rok bez dużego przetargu zaniżyłby średnią."
+        "odpowiedz": "Liczy się to, co udokumentowane w rozliczeniu rocznym. Przy zmiennej części liczy się jednak wyłącznie okres dwunastu miesięcy przed podpisaniem umowy, więc brak dużego przetargu w tym czasie obniży limit świadczenia."
       },
       {
         "pytanie": "Dużo podróżuję — czy wypadek w podróży służbowej jest objęty?",
@@ -4486,11 +4486,11 @@
     "pytania": [
       {
         "pytanie": "Część wynagrodzenia zależy od wyników produktu — czy się liczy?",
-        "odpowiedz": "Liczy się to, co zostało wypłacone i udokumentowane. Przy silnie zmiennej części warto przedstawić dwa pełne lata, żeby suma nie została wyliczona ze słabszego okresu."
+        "odpowiedz": "Liczy się to, co zostało wypłacone i udokumentowane. Przy silnie zmiennej części limit świadczenia wyliczy się z tego, co dostałeś w dwunastu miesiącach przed zawarciem umowy — wcześniejsze premie się nie liczą."
       },
       {
         "pytanie": "Pracuję na etacie — czy polisa ma sens przy zasiłku z ZUS?",
-        "odpowiedz": "Ma, jeśli Twoje realne wynagrodzenie jest wyższe niż podstawa wymiaru składek albo jeśli premie stanowią istotną część dochodu. Zasiłek liczy się od podstawy, nie od faktycznych zarobków."
+        "odpowiedz": "Ma, choć z innego powodu, niż się często sądzi. Zasiłek z etatu liczy się od faktycznych zarobków z ostatniego roku, ale wynosi 80% podstawy po odjęciu składek społecznych — około 69% pensji brutto — i kończy się po 182 dniach. Polisa wypłaca świadczenie niezależnie od zasiłku, także wtedy, gdy ten już się skończył."
       }
     ]
   },
@@ -4519,7 +4519,7 @@
       },
       {
         "pytanie": "Moja praca to głównie rozmowy — czy głos jest chroniony?",
-        "odpowiedz": "Chroniona jest niezdolność do wykonywania zawodu, niezależnie od tego, co ją powoduje. Jeśli schorzenie krtani uniemożliwia prowadzenie spotkań, jest to niezdolność do pracy w tym zawodzie."
+        "odpowiedz": "Chroniona jest niezdolność do wykonywania zawodu spowodowana chorobą albo wypadkiem, w granicach wyłączeń z OWU — choroby krtani nie są tam wymienione. Jeśli schorzenie krtani uniemożliwia prowadzenie spotkań, jest to niezdolność do pracy w tym zawodzie."
       }
     ]
   },
@@ -4548,7 +4548,7 @@
       },
       {
         "pytanie": "Mam stałą obsługę i sprawy sporne — jak wykazać dochód?",
-        "odpowiedz": "Sumujesz obsługę stałą i sprawy sporne na podstawie zeznania rocznego. Reprezentacja w postępowaniach bywa nierówno rozłożona w czasie, więc przy silnych wahaniach warto przedstawić dwa pełne lata zamiast jednego."
+        "odpowiedz": "Sumujesz obsługę stałą i sprawy sporne na podstawie zeznania rocznego. Reprezentacja w postępowaniach bywa nierówno rozłożona w czasie, a granicę świadczenia wyznacza przychód z dwunastu miesięcy przed zawarciem umowy — nie średnia z dłuższego okresu."
       }
     ]
   },
@@ -4577,7 +4577,7 @@
       },
       {
         "pytanie": "Dochód mam nierówny miesiąc do miesiąca — co przyjąć?",
-        "odpowiedz": "Średnią z pełnego roku, a przy silnych wahaniach z dwóch lat. Pojedynczy słaby miesiąc nie ma znaczenia, ale rok bez dużej transakcji mógłby zaniżyć sumę poniżej realnych możliwości."
+        "odpowiedz": "Średnią z dwunastu miesięcy bezpośrednio przed zawarciem umowy — dłuższego okresu ubezpieczyciel nie bierze. Pojedynczy słaby miesiąc nie ma znaczenia, ale rok bez dużej transakcji obniży granicę świadczenia."
       }
     ]
   },
@@ -4602,11 +4602,11 @@
     "pytania": [
       {
         "pytanie": "Prowizja od wyniku jest zmienna — jak liczyć podstawę?",
-        "odpowiedz": "Na podstawie średniej z dwóch pełnych lat. Przy dochodzie tak silnie zależnym od koniunktury pojedynczy rok bywa niereprezentatywny w obie strony."
+        "odpowiedz": "Na podstawie przychodu z dwunastu miesięcy bezpośrednio przed zawarciem umowy — tak stanowią warunki, nawet jeśli przy dochodzie tak silnie zależnym od koniunktury pojedynczy rok bywa niereprezentatywny w obie strony."
       },
       {
         "pytanie": "Pracuję na etacie w domu maklerskim — czy polisa ma sens?",
-        "odpowiedz": "Ma, jeśli premie i prowizje stanowią większość Twojego dochodu. Zasiłek chorobowy liczy się od podstawy wymiaru składek, a ta rzadko odzwierciedla zarobki oparte na części zmiennej."
+        "odpowiedz": "Ma, choć nie dlatego, że zasiłek pomija prowizje — wchodzą one do podstawy razem z pensją, jeśli pracodawca nie płaci ich za czas choroby. Zasiłek to jednak 80% podstawy po odjęciu składek społecznych i przysługuje najwyżej przez 182 dni, a świadczenie z polisy wypłaca się niezależnie od niego."
       }
     ]
   },
@@ -4631,7 +4631,7 @@
     "pytania": [
       {
         "pytanie": "Premia roczna to duża część wynagrodzenia — czy się liczy?",
-        "odpowiedz": "Liczy się to, co wypłacone i udokumentowane. Przy dużym udziale premii warto przedstawić dwa lata, żeby suma nie została wyliczona z roku bez wypłaty bonusu."
+        "odpowiedz": "Liczy się to, co wypłacone i udokumentowane. Przy dużym udziale premii zwróć uwagę, czy bonus wpłynął w dwunastu miesiącach przed zawarciem umowy — tylko ten okres wyznacza limit świadczenia."
       },
       {
         "pytanie": "Robię wyceny dla podmiotów zewnętrznych — czy je wykazywać?",
@@ -4660,7 +4660,7 @@
     "pytania": [
       {
         "pytanie": "Premia zależy od portfela sprzed dwóch lat — czy to komplikuje wniosek?",
-        "odpowiedz": "Nie, bo liczy się to, co wypłacono w danym roku, niezależnie od tego, czego dotyczyło. Warto natomiast przedstawić dwa lata, żeby średnia obejmowała pełny cykl premiowy."
+        "odpowiedz": "Nie, bo liczy się to, co wypłacono w dwunastu miesiącach przed zawarciem umowy, niezależnie od tego, czego dotyczyło. Pełnego cyklu premiowego z kilku lat ubezpieczyciel nie uśrednia."
       },
       {
         "pytanie": "Doradzam też klientom obok etatu — czy oba źródła się sumują?",
@@ -4834,11 +4834,11 @@
     "pytania": [
       {
         "pytanie": "Premia zależy od wyniku zarządzania ryzykiem — czy się liczy?",
-        "odpowiedz": "Podstawę stanowi kwota faktycznie wypłacona i wykazana w rozliczeniu. Przy premiach zależnych od koniunktury warto pokazać dwa lata, żeby suma nie wyszła z roku o nietypowym wyniku."
+        "odpowiedz": "Podstawę stanowi kwota faktycznie wypłacona i wykazana w rozliczeniu. Przy premiach zależnych od koniunktury trzeba pamiętać, że limit świadczenia liczy się tylko z roku przed zawarciem umowy, nawet jeśli wynik był w nim nietypowy."
       },
       {
         "pytanie": "Pracuję na etacie — czy zasiłek z ZUS nie wystarczy?",
-        "odpowiedz": "Zasiłek liczy się od podstawy wymiaru składek, która jest ograniczona i nie obejmuje pełnej wysokości premii. Przy dochodzie opartym na części zmiennej różnica bywa wielokrotna."
+        "odpowiedz": "Zasiłek z etatu liczy się od przeciętnego wynagrodzenia z ostatnich dwunastu miesięcy, z premiami włącznie, o ile pracodawca nie wypłaca ich za czas choroby — ale wynosi 80% podstawy pomniejszonej o składki, czyli mniej więcej dwie trzecie pensji brutto. Po 182 dniach się kończy, a dłuższa przerwa zależy już od decyzji ZUS o świadczeniu rehabilitacyjnym."
       }
     ]
   },
@@ -4867,7 +4867,7 @@
       },
       {
         "pytanie": "Dochód mam zależny od koniunktury — co przyjąć za podstawę?",
-        "odpowiedz": "Średnią z dwóch pełnych lat. Rok hossy i rok bessy dają w tej roli skrajnie różne wyniki i pojedynczy z nich nie odzwierciedla realnych możliwości zarobkowych."
+        "odpowiedz": "Przychód z dwunastu miesięcy bezpośrednio przed zawarciem umowy — dwóch lat warunki nie uśredniają. Rok hossy i rok bessy dają w tej roli skrajnie różne wyniki, więc moment zawarcia umowy ma znaczenie dla górnej granicy świadczenia."
       }
     ]
   },
@@ -4921,11 +4921,11 @@
     "pytania": [
       {
         "pytanie": "Zarabiam tylko od sfinalizowanych transakcji — jak wykazać dochód?",
-        "odpowiedz": "Na podstawie rozliczenia rocznego, a przy silnych wahaniach z dwóch lat. Przy dochodzie w całości prowizyjnym pojedynczy rok bywa niereprezentatywny w obie strony."
+        "odpowiedz": "Na podstawie przychodu z dwunastu miesięcy przed zawarciem umowy, także przy silnych wahaniach. Przy dochodzie w całości prowizyjnym ten jeden rok bywa niereprezentatywny w obie strony, a i tak to on wyznacza limit świadczenia."
       },
       {
         "pytanie": "Czy przerwana transakcja to szkoda objęta polisą?",
-        "odpowiedz": "Nie w tym sensie — polisa nie pokrywa utraconej prowizji z konkretnej sprawy. Wypłaca świadczenie miesięczne za niezdolność do pracy, liczone od Twojego średniego dochodu."
+        "odpowiedz": "Nie w tym sensie — polisa nie pokrywa utraconej prowizji z konkretnej sprawy. Wypłaca świadczenie miesięczne za niezdolność do pracy w kwocie z polisy, której górną granicę wyznacza Twój średni miesięczny przychód."
       }
     ]
   },
@@ -5066,17 +5066,17 @@
     "pytania": [
       {
         "pytanie": "Premia roczna to połowa mojego dochodu — czy się liczy?",
-        "odpowiedz": "Liczy się to, co wypłacone i wykazane w zeznaniu. Przy dużym udziale części zmiennej warto przedstawić dwa pełne lata, żeby suma nie została wyliczona z roku bez wypłaty premii."
+        "odpowiedz": "Liczy się to, co wypłacone i wykazane w zeznaniu. Przy dużym udziale części zmiennej liczy się, czy premia wpłynęła w dwunastu miesiącach przed zawarciem umowy — rok bez jej wypłaty w tym okresie obniży limit świadczenia."
       },
       {
         "pytanie": "Jestem na etacie — czy zasiłek z ZUS nie wystarczy?",
-        "odpowiedz": "Zasiłek liczy się od podstawy wymiaru składek, która jest ograniczona ustawowo. Przy wynagrodzeniu kierowniczym różnica między zasiłkiem a realnym dochodem bywa wielokrotna."
+        "odpowiedz": "Na etacie zasiłek to 80% podstawy, czyli przeciętnego wynagrodzenia z dwunastu miesięcy po odjęciu składek społecznych — bez górnego limitu, więc mniej więcej 69% pensji brutto. Wypłaca się go najwyżej przez 182 dni; potem zostaje świadczenie rehabilitacyjne (90%, a później 75% podstawy, łącznie do 12 miesięcy), jeśli ZUS uzna, że leczenie rokuje powrót do pracy."
       }
     ]
   },
   "manager": {
     "wstep": "Manager zarządza ludźmi, budżetem i wynikiem zespołu, mając do dyspozycji głównie rozmowę. Jego dzień składa się ze spotkań, w których trzeba mówić, słuchać i pamiętać ustalenia z poprzedniego tygodnia.",
-    "dochod": "Wynagrodzenie zasadnicze z premią kwartalną albo roczną powiązaną z realizacją celów zespołu. Część menedżerów pracuje na kontrakcie B2B, co daje wyższy próg świadczenia, ale zero zabezpieczenia z ZUS.",
+    "dochod": "Wynagrodzenie zasadnicze z premią kwartalną albo roczną powiązaną z realizacją celów zespołu. Część menedżerów pracuje na kontrakcie B2B: to wyższy próg świadczenia, ale zasiłek z ZUS przysługuje im tylko przy dobrowolnym ubezpieczeniu chorobowym i liczy się od zadeklarowanej podstawy, a nie od faktury.",
     "przerwa": "Zespół bez menedżera pracuje dalej, ale traci to, co menedżer wnosił: rozstrzyganie priorytetów, osłonę przed innymi działami i decyzje kadrowe. Po dwóch miesiącach organizacja mianuje kogoś tymczasowo, a taka tymczasowość ma tendencję do utrwalania się razem z kolejnym cyklem planowania. Cele kwartalne rozlicza się z wyniku, a nie z obecności.",
     "ryzyka": [
       {
@@ -5095,11 +5095,11 @@
     "pytania": [
       {
         "pytanie": "Pracuję na kontrakcie B2B jako menedżer — jaki mam limit?",
-        "odpowiedz": "Osiemdziesiąt procent udokumentowanego dochodu, bo decyduje forma rozliczenia, a nie charakter stanowiska. Jednocześnie na B2B nie ma zasiłku chorobowego, więc polisa jest tu jedynym zabezpieczeniem."
+        "odpowiedz": "Osiemdziesiąt procent udokumentowanego dochodu, bo decyduje forma rozliczenia, a nie charakter stanowiska. Zasiłek chorobowy na B2B przysługuje tylko przy dobrowolnym ubezpieczeniu chorobowym, po 90 dniach jego opłacania i od zadeklarowanej podstawy, więc polisa jest tu głównym zabezpieczeniem."
       },
       {
         "pytanie": "Premia zależy od wyniku zespołu — jak ją wykazać?",
-        "odpowiedz": "Na podstawie zeznania rocznego, obejmującego wszystkie wypłacone składniki. Przy premiach kwartalnych rok jest wystarczająco reprezentatywny, przy rocznych warto pokazać dwa."
+        "odpowiedz": "Na podstawie zeznania rocznego, obejmującego wszystkie wypłacone składniki. Przy premiach kwartalnych rok jest wystarczająco reprezentatywny; przy rocznych sprawdź, czy wypłata przypadła w dwunastu miesiącach przed zawarciem umowy, bo tylko one się liczą."
       }
     ]
   },
@@ -5128,7 +5128,7 @@
       },
       {
         "pytanie": "Pracuję u klientów za granicą — czy ochrona działa?",
-        "odpowiedz": "Krótkie wyjazdy projektowe są objęte. Dłuższy pobyt poza Polską wymaga zgłoszenia ubezpieczycielowi, a niezgłoszony bywa podstawą odmowy wypłaty."
+        "odpowiedz": "Działa — warunki obejmują cały świat, niezależnie od tego, jak długo trwa projekt u klienta. Przy roszczeniu z zagranicy dokumenty składa się po polsku, a w Leadenhall także po angielsku."
       }
     ]
   },
@@ -5211,7 +5211,7 @@
     "pytania": [
       {
         "pytanie": "Prowizja to większość mojego dochodu — jak ją wykazać?",
-        "odpowiedz": "Wykazujesz pełne wynagrodzenie z zeznania rocznego, razem z częścią zmienną. Przy silnych wahaniach warto pokazać dwa lata, bo pojedynczy słaby rok zaniżyłby sumę poniżej realnych możliwości zarobkowych."
+        "odpowiedz": "Wykazujesz pełne wynagrodzenie z zeznania rocznego, razem z częścią zmienną. Przy silnych wahaniach pamiętaj, że słaby rok przed zawarciem umowy obniża limit świadczenia, bo to on jest podstawą, a nie średnia z dłuższego okresu."
       },
       {
         "pytanie": "Klienci są przypisani do mnie osobiście — co tracę przy przerwie?",
@@ -5327,11 +5327,11 @@
     "pytania": [
       {
         "pytanie": "Prowizja zależy od zamknięcia procesu — co przy przerwie?",
-        "odpowiedz": "Procesy prowadzone miesiącami przepadają, bo wynagrodzenie należy się za skutek. Polisa wypłaca świadczenie miesięczne liczone od Twojego średniego dochodu i to ono ma zastąpić ten strumień."
+        "odpowiedz": "Procesy prowadzone miesiącami przepadają, bo wynagrodzenie należy się za skutek. Polisa wypłaca świadczenie miesięczne w wysokości ustalonej w umowie, ograniczonej procentem Twojego średniego przychodu, i to ono ma zastąpić ten strumień."
       },
       {
         "pytanie": "Prowadzę rekrutacje na własny rachunek — jaki mam limit?",
-        "odpowiedz": "Działalność gospodarcza daje limit osiemdziesięciu procent. Przy dochodzie w całości prowizyjnym warto wykazać dwa lata, żeby średnia nie wypadła z przypadkowo słabego okresu."
+        "odpowiedz": "Działalność gospodarcza daje limit osiemdziesięciu procent. Przy dochodzie w całości prowizyjnym liczą się prowizje wypłacone w dwunastu miesiącach przed zawarciem umowy — wcześniejszy lepszy okres nie podniesie limitu."
       }
     ]
   },
@@ -5418,7 +5418,7 @@
       },
       {
         "pytanie": "Mam stałe obsługi i projekty kryzysowe — jak to ująć?",
-        "odpowiedz": "Wykazujesz łączny przychód z działalności. Obsługa kryzysowa jest nieregularna z natury, więc przy wahaniach warto przedstawić dwa pełne lata."
+        "odpowiedz": "Wykazujesz łączny przychód z działalności. Obsługa kryzysowa jest nieregularna z natury, a limit świadczenia wyznacza przychód z ostatnich dwunastu miesięcy przed zawarciem umowy, bez uśredniania z wcześniejszymi latami."
       }
     ]
   },
@@ -5447,7 +5447,7 @@
       },
       {
         "pytanie": "Jak wykazać dochód, skoro wypłacam sobie z zysku?",
-        "odpowiedz": "Na podstawie zeznania rocznego i rozliczenia spółki, jeśli działasz w tej formie. Ubezpieczyciel patrzy na to, ile faktycznie z firmy wyjmujesz, a nie na jej obrót."
+        "odpowiedz": "Na podstawie zeznania rocznego i rozliczenia spółki, jeśli działasz w tej formie. Wypłata z zysku spółki to jednak przychód z kapitału, a nie z wykonywania zawodu: CEU wyłącza go z podstawy wprost, a Leadenhall liczy tylko przychód z zawodu wpisanego w polisę. Podstawą jest więc wynagrodzenie za pełnioną funkcję albo przychód z własnej działalności."
       }
     ]
   }
