@@ -120,6 +120,17 @@ test.describe('Leadenhall i CEU to coverholderzy, nie ubezpieczyciele', () => {
     expect(tekst).not.toMatch(/Agencja ubezpieczeniowa i coverholder/);
   });
 
+  test('stopka: status pośrednika czytelny na każdej stronie, bez sklejonych słów', () => {
+    // Astro gubi spację z przełamaniem linii obok znacznika: było
+    // „agent ubezpieczeniowy,RPU 11229690/A· KRS".
+    for (const plik of ['dist/index.html', 'dist/lekarz/index.html', 'dist/zawody/medycyna/index.html']) {
+      const html = readFileSync(plik, 'utf8');
+      const stopka = html.slice(html.lastIndexOf('<footer'), html.lastIndexOf('</footer>'));
+      const tekst = stopka.replace(/<[^>]+>/g, '').replace(/&nbsp;|\u00a0/g, ' ').replace(/\s+/g, ' ');
+      expect(tekst, plik).toContain(`agent ubezpieczeniowy, RPU ${FIRMA.rpu} · KRS ${FIRMA.krs}`);
+    }
+  });
+
   test('firma.ts: bez starej, błędnej nazwy, a opis ról mówi, kto jest kim', () => {
     expect(COVERHOLDERZY).toEqual(['Leadenhall Insurance S.A.', 'CEU sp. z o.o.']);
     expect(COVERHOLDERZY).not.toContain(FIRMA.ubezpieczyciel);

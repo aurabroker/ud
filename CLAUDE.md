@@ -934,7 +934,7 @@ Decyzje właściciela z 21.10.2026:
 |---|---|
 | Kwota główna | duży ZUS z najniższą podstawą (60% prognozy) **i** dobrowolnym chorobowym: 3 902 zł (2026) |
 | Dopiski przy kwocie | preferencyjny ZUS około 995 zł, bez chorobowego 0 zł |
-| Wzór | 80% podstawy po odliczeniu 13,71%; przedsiębiorca dopiero po 90 dniach chorobowego, najdłużej 182 dni |
+| Wzór | 80% podstawy po odliczeniu 13,71%; najdłużej 182 dni; przedsiębiorca po 90 dniach nieprzerwanego ubezpieczenia chorobowego — wcześniejsze, np. z etatu, się wlicza przy przerwie do 30 dni |
 | Etat | **kalkulator go nie liczy** — jedno zdanie opisu bez kwot (`ZUS_TEKST.etat`); na etacie zasiłek zależy od pensji, a przełącznik pokazywał przy nim zasiłek przedsiębiorcy |
 | Limit 80% B2B / 65% etat | zostaje („jest dobrze") |
 | Najwyższe świadczenie | 50 000 zł/mies. — podawane publicznie; liczba z `RYZYKA` w `@ud/wniosek` (`SWIADCZENIE_MAX`), nie wpisana drugi raz |

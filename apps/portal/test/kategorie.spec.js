@@ -58,6 +58,20 @@ test('kafelek zawodu: nazwa oddzielona od opisu, bez limitu dziennego', () => {
   }
 });
 
+test('kafelki kategorii na stronie głównej: nazwa nie sklejona z liczbą', () => {
+  // Było „Medycyna43", „IT / Tech24" — nazwa odnośnika dla czytnika ekranu i w .md.
+  const md = readFileSync(join(DIST, 'index.md'), 'utf8');
+  for (const k of kategorie()) {
+    const linia = md.split('\n').find((l) => l.includes(`](https://utratadochodu.pl/zawody/${k.slug}/)`));
+    expect(linia, k.slug).toBeTruthy();
+    // Tekst odnośnika po obrazku kafelka: „…webp)Medycyna — 43 zawody](…/zawody/medycyna/)".
+    const tekst = linia.match(/(?:\)|\[)([^[\]()]*)\]\(https:\/\/utratadochodu\.pl\/zawody\//)?.[1];
+    expect(tekst, `${k.slug}: brak tekstu odnośnika`).toBeTruthy();
+    expect(tekst, k.slug).not.toMatch(/\p{L}\d/u);
+    expect(tekst, k.slug).toContain(`${k.nazwa} — ${k.liczba}`);
+  }
+});
+
 test('reguły przekierowań zawodów działają też bez ukośnika na końcu', () => {
   const zrodla = new Set(readFileSync(join(DIST, '_redirects'), 'utf8').split('\n')
     .filter((l) => l.trim() && !l.trimStart().startsWith('#'))

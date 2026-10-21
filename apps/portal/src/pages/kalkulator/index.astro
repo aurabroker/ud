@@ -30,9 +30,10 @@ const PYTANIA = [
     pytanie: 'Skąd bierze się kwota zasiłku z ZUS w kalkulatorze?',
     odpowiedz: `Zasiłek chorobowy to ${ZUS_TEKST.wzor}. Kalkulator pokazuje go ${ZUS_TEKST.scenariusz}: `
       + `${zl(ZASILEK_JDG.duzy)} miesięcznie, przed podatkiem. Dla porównania: ${ZUS_TEKST.dopiski}. `
-      + `Zasiłek przysługuje najdłużej przez ${OKRES_ZASILKOWY_DNI} dni, a przedsiębiorcy dopiero po `
-      + `${WYCZEKIWANIE_DOBROWOLNE_DNI} dniach nieprzerwanego opłacania chorobowego. Jeśli opłacasz `
-      + 'składki od wyższej podstawy, Twój zasiłek będzie wyższy.',
+      + `Zasiłek przysługuje najdłużej przez ${OKRES_ZASILKOWY_DNI} dni, a przedsiębiorcy po `
+      + `${WYCZEKIWANIE_DOBROWOLNE_DNI} dniach nieprzerwanego ubezpieczenia chorobowego; wlicza się `
+      + 'wcześniejsze ubezpieczenie chorobowe, np. z etatu, jeśli przerwa nie przekroczyła 30 dni. '
+      + 'Jeśli opłacasz składki od wyższej podstawy, Twój zasiłek będzie wyższy.',
   },
   {
     pytanie: 'Czy kalkulator liczy też umowę o pracę?',

@@ -4,6 +4,7 @@ import { join, sep } from 'node:path';
 import {
   ROK, PLACA_MINIMALNA, PRZECIETNE_PROGNOZA, PODSTAWA, ZASILEK_JDG, zasilek,
 } from '../src/lib/zus.ts';
+import { MIESIECY_MAX } from '../src/lib/symulacja.ts';
 
 /**
  * Zasiłek ZUS, z którym porównujemy polisę — kwoty i zdania w buildzie.
@@ -58,11 +59,17 @@ const ZAKAZANE = [
   ['stara podstawa 2 800 zł', new RegExp(`\\b2${SPACJA}800${SPACJA}zł`)],
   ['„od pierwszego dnia niezdolności"', /od pierwszego dnia niezdolności/i],
   ['„karencja" zamiast okresu wyczekiwania', /karencj/i],
-  ['„minimum przez N miesięcy"', /minimum przez \d+ miesi/i],
+  ['„minimum / co najmniej przez N miesięcy"',
+    /(?:minimum|min\.|co najmniej|przynajmniej)[\s\u00a0]+(?:przez[\s\u00a0]+)?\d+[\s\u00a0]*miesi/i],
+  // Okres wypłaty to czas najdłuższy — „wypłata przez 24 miesiące" czyta się jak gwarancja.
+  ['„wypłata przez N miesięcy" bez „najdłużej"', /wypłata przez \d+[\s\u00a0]+miesi/i],
   ['kolumna etatu w tabeli kalkulatora', /Z polisą — etat/],
+  // Zasiłek jest brutto, dochód i świadczenie netto — suma przekraczała dochód
+  // i przeczyła zdaniu, że ubezpieczenie nie może być korzystniejsze niż praca.
+  ['suma „ZUS + polisa"', /ZUS \+ polisa|Razem na zwolnieniu|Tylko ZUS/i],
   // Limitu dziennego w ofercie nie ma — liczby 250–600 zł / dzień przyszły ze
   // starego serwisu bez pokrycia i stały na każdym kafelku stron kategorii.
-  ['limit „zł / dzień"', /zł\s*\/\s*dzie[nń]/],
+  ['limit „zł / dzień"', /zł[\s\u00a0]*(?:\/[\s\u00a0]*dzie[nń]|dziennie)/],
 ];
 
 test('żadna strona nie podaje starych kwot ZUS ani zdań niezgodnych z OWU', () => {
@@ -81,6 +88,12 @@ test('żadna strona nie podaje starych kwot ZUS ani zdań niezgodnych z OWU', ()
     }
   }
   expect(naruszenia).toEqual([]);
+});
+
+test('okres wypłaty: „najdłużej przez 60 miesięcy" (decyzja właściciela z 21.10.2026)', () => {
+  for (const plik of ['index.md', 'kalkulator/index.md', 'lekarz/index.md', 'llms.txt', 'lekarz/llms.txt']) {
+    expect(readFileSync(join(DIST, plik), 'utf8'), plik).toContain(`najdłużej przez ${MIESIECY_MAX} miesięcy`);
+  }
 });
 
 test('kalkulator, strona zawodu i llms.txt podają zasiłek 3 902 zł z dopiskami', () => {

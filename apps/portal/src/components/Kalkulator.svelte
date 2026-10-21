@@ -75,21 +75,21 @@
   <dl class="border-t border-linia m-0">
     <div class="flex items-baseline justify-between gap-4 py-4 border-b border-linia-lekka">
       <dt class="text-[15px] text-tekst-drugi">
-        Świadczenie z polisy
+        Świadczenie z polisy<span class="sr-only">:</span>
         <span class="block text-[13px]">wypłacane co miesiąc, najdłużej przez {MIESIECY_MAX} miesięcy</span>
       </dt>
       <dd class="font-mono text-2xl font-semibold text-akcent-ciemny m-0">{zl(wynik.swiadczenie)}</dd>
     </div>
     <div class="flex items-baseline justify-between gap-4 py-4 border-b border-linia-lekka">
       <dt class="text-[15px] text-tekst-drugi">
-        Zasiłek chorobowy z ZUS
-        <span class="block text-[13px]">duży ZUS z chorobowym; {ZUS_TEKST.dopiski}</span>
+        Zasiłek chorobowy z ZUS<span class="sr-only">:</span>
+        <span class="block text-[13px]">duży ZUS z chorobowym ({ZUS_TEKST.dopiski})</span>
       </dt>
       <dd class="font-mono text-lg font-semibold text-alarm m-0 whitespace-nowrap">{zl(ZASILEK_JDG.duzy)}</dd>
     </div>
     <div class="flex items-baseline justify-between gap-4 py-4">
       <dt class="text-[15px] font-semibold">
-        Szacowana składka miesięczna
+        Szacowana składka miesięczna<span class="sr-only">:</span>
         <span class="block text-[13px] font-normal text-tekst-drugi">
           wariant z wypłatą do {MIESIECY_WYPLATY} miesięcy, razem z opłatą dystrybucyjną;
           przedział z ostatnio wystawionych ofert

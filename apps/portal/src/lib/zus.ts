@@ -45,7 +45,12 @@ export const ODLICZENIE_SKLADEK = 0.1371;
 /** Zasiłek chorobowy: 80% podstawy wymiaru zasiłku. */
 export const STOPA_ZASILKU = 0.8;
 
-/** Dobrowolne chorobowe przedsiębiorcy daje zasiłek po 90 dniach nieprzerwanego opłacania. */
+/**
+ * Dobrowolne chorobowe daje zasiłek po 90 dniach nieprzerwanego ubezpieczenia
+ * (art. 4 ust. 1 pkt 2 ustawy zasiłkowej); wlicza się wcześniejsze okresy
+ * ubezpieczenia chorobowego, np. z etatu, jeśli przerwa nie przekroczyła 30 dni
+ * (art. 4 ust. 2).
+ */
 export const WYCZEKIWANIE_DOBROWOLNE_DNI = 90;
 
 /** Najdłuższy okres zasiłkowy (poza gruźlicą i ciążą). */

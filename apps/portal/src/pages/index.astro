@@ -165,7 +165,8 @@ const hero = obrazHero();
               )}
               <span class="flex items-baseline justify-between gap-3 px-5 py-4">
                 <span class="font-semibold text-[15.5px] group-hover:text-akcent-ciemny">{k.nazwa}</span>
-                <span class="font-mono text-[13px] text-tekst-trzeci">{k.liczba}</span>
+                {/* Na ekranie sama liczba; w nazwie odnośnika i w .md „Medycyna — 43 zawody". */}
+                <span class="font-mono text-[13px] text-tekst-drugi"><span class="sr-only">{' — '}</span>{k.liczba}<span class="sr-only">{' '}{liczebnik(k.liczba, ['zawód', 'zawody', 'zawodów']).replace(/^\d+ /, '')}</span></span>
               </span>
             </a>
           </li>

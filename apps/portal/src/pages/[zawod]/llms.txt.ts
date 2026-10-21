@@ -69,7 +69,7 @@ ubezpieczyciela po ocenie ryzyka.
 - Dochód przyjęty do wyliczenia: ${zl(dochod)} miesięcznie
 - Limit świadczenia przy kontrakcie B2B: 80%
 - Miesięczne świadczenie z polisy: ${zl(w.swiadczenie)}
-- Okres wypłaty: najdłużej ${MIESIECY_MAX} miesięcy (warianty ${OKRESY.slice(0, -1).join(', ')}
+- Okres wypłaty: najdłużej przez ${MIESIECY_MAX} miesięcy (warianty ${OKRESY.slice(0, -1).join(', ')}
   i ${OKRESY.at(-1)} miesięcy); składka poniżej dotyczy wariantu najkrótszego,
   ${MIESIECY_WYPLATY}-miesięcznego
 - Zasiłek chorobowy z ZUS: ${zl(ZASILEK_JDG.duzy)} miesięcznie przed podatkiem — ${ZUS_TEKST.wzor},

@@ -176,7 +176,7 @@ export const ZAKRES_DOCHODU = { min: 3000, max: 60000, krok: 500 } as const;
  *
  * `dol` i `gora` to najniższa i najwyższa stawka osoby z ofert wystawionych
  * w ostatnich 12 miesiącach, w wariancie porównywalnym z kalkulatorem: samo
- * świadczenie okresowe, wypłata przez 24 miesiące, okres wyczekiwania do
+ * świadczenie okresowe, wypłata najdłużej przez 24 miesiące, okres wyczekiwania do
  * 21 dni, składka w ratach, bez klauzuli HIV/WZW i bez płatnych dodatków.
  * Stawka osoby to mediana jej wariantów z jej najnowszej oferty — klient,
  * któremu wystawiliśmy pięć wariantów, nie waży pięć razy więcej niż ten
@@ -197,7 +197,7 @@ export const STAWKA = KALIBRACJA.stawka;
  */
 export const OPIS_KALIBRACJI =
   'z ofert wystawionych w ostatnich 12 miesiącach, w wariancie porównywalnym z kalkulatorem: '
-  + `samo świadczenie miesięczne, wypłata przez ${MIESIECY_WYPLATY} miesiące, `
+  + `samo świadczenie miesięczne, wypłata najdłużej przez ${MIESIECY_WYPLATY} miesiące, `
   + 'okres wyczekiwania do 21 dni, składka w ratach';
 
 /**

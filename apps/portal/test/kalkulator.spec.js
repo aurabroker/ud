@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { sprawdzKalibracje, bledyKalibracji, MNOZNIK_HIV_WZW, ZAKRES_DOCHODU, LIMIT } from '../src/lib/symulacja.ts';
 import { SWIADCZENIE_MAX } from '../src/lib/granice.ts';
 import { ZAWODY } from '@ud/zawody';
+import { ZASILEK_JDG, ZUS_TEKST } from '../src/lib/zus.ts';
 
 /**
  * Kwoty liczone są w teście ze stawek z kalibracja.json, tym samym wzorem co
@@ -51,10 +52,11 @@ test('wartości domyślne: 18 000 zł na B2B', async ({ page }) => {
   // Duży ZUS 2026: 5 652 × (1 − 0,1371) × 0,8 = 3 901,69 → 3 902. Zasiłek nie
   // zależy od dochodu, tylko od podstawy. Do 21.10.2026 stało tu 2 240 zł —
   // płaca minimalna z 2021 r. pomnożona przez 0,8 (patrz src/lib/zus.ts).
-  await expect(wynik(page, 'Zasiłek chorobowy z ZUS')).toHaveText('3 902 zł');
+  // Kwota ze stałej, nie wpisana: zmienia się co rok, a sam rachunek sprawdza zus.spec.js.
+  await expect(wynik(page, 'Zasiłek chorobowy z ZUS')).toHaveText(`${grupuj(ZASILEK_JDG.duzy)} zł`);
   const zus = page.locator('dt', { hasText: 'Zasiłek chorobowy z ZUS' });
   await expect(zus).toContainText('duży ZUS z chorobowym');
-  await expect(zus).toContainText('na preferencyjnym ZUS-ie około 995 zł, bez chorobowego 0 zł');
+  await expect(zus).toContainText(ZUS_TEKST.dopiski);
 });
 
 /**
@@ -100,7 +102,7 @@ test('przy składce stoi, że przedział pochodzi z wystawionych ofert', async (
   // porównywalny z kalkulatorem), bez liczby ofert i wariantów — ta
   // zestarzałaby się przy pierwszej nowej ofercie.
   await expect(page.getByText(
-    /policzyliśmy z ofert wystawionych w ostatnich 12 miesiącach, w wariancie porównywalnym z kalkulatorem: samo świadczenie miesięczne, wypłata przez 24 miesiące, okres wyczekiwania do 21 dni, składka w ratach — od najtańszej do najdroższej stawki/,
+    /policzyliśmy z ofert wystawionych w ostatnich 12 miesiącach, w wariancie porównywalnym z kalkulatorem: samo świadczenie miesięczne, wypłata najdłużej przez 24 miesiące, okres wyczekiwania do 21 dni, składka w ratach — od najtańszej do najdroższej stawki/,
   )).toBeVisible();
   await expect(page.getByText(/ze wszystkich wariantów we wszystkich ofertach/)).toHaveCount(0);
   await expect(page.getByText(/o które ten kalkulator nie pyta/)).toBeVisible();

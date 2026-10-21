@@ -74,8 +74,9 @@ const KATEGORIE = kategorie();
 
     <div class="flex flex-wrap gap-4 justify-between pt-7 mt-10 border-t border-linia text-[13px] text-tekst-drugi">
       <span>
-        © {new Date().getFullYear()} {FIRMA.nazwa} · agent ubezpieczeniowy,
-        <a href={FIRMA.rejestrUrl} class="hover:text-akcent-ciemny" rel="noopener">RPU {FIRMA.rpu}</a>
+        {/* Odstępy wprost: Astro gubi spację z przełamaniem linii obok znacznika. */}
+        © {new Date().getFullYear()} {FIRMA.nazwa} · agent ubezpieczeniowy,{' '}
+        <a href={FIRMA.rejestrUrl} class="hover:text-akcent-ciemny" rel="noopener">RPU {FIRMA.rpu}</a>{' '}
         · KRS {FIRMA.krs} · REGON {FIRMA.regon}
       </span>
       <span>
