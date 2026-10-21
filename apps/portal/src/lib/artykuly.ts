@@ -51,7 +51,7 @@ export interface Artykul {
  * (pełna synchronizacja i porównania md5 opierają się na tym).
  *
  * Przepisujemy tylko to, co funkcja potem poda — ten sam warunek
- * `dozwolony()` (kształt nazwy i slug wpisu z artykuly.json). Adres spoza wzorca zostaje bez zmian i wychodzi w teście
+ * `dozwolony()` (kształt nazwy wariantu z normalizacji). Adres spoza wzorca zostaje bez zmian i wychodzi w teście
  * `media.spec.js`, zamiast zamienić się na stronie w pusty obrazek.
  */
 export function przezMedia(adres: string): string;

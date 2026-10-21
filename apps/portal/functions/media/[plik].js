@@ -18,14 +18,20 @@
  * artykuly.json i pliki treści zostają takie jak w bazie.
  *
  * Funkcja nie jest otwartym proxy do kubełka: przepuszcza wyłącznie warianty
- * z normalizacji (`<slug>-cover-800.webp`, `<slug>-content1-1600.webp`…)
- * i tylko dla slugów wpisów portalu z `artykuly.json`. Katalog `normalized/`
- * trzyma warianty wszystkich jedenastu serwisów z `aura_articles`, więc sam
- * kształt nazwy wpuściłby zdjęcia cudzych marek pod naszą domenę. Oryginały
- * z aparatu — do 15,9 MB — i każda inna ścieżka dostają 404 bez zapytania
- * do Supabase.
+ * z normalizacji (`<slug>-cover-800.webp`, `<slug>-content1-1600.webp`…).
+ * Oryginały z aparatu — do 15,9 MB — i każda inna ścieżka dostają 404 bez
+ * zapytania do Supabase.
+ *
+ * ZNANA SŁABOŚĆ: katalog `normalized/` trzyma warianty wszystkich jedenastu
+ * serwisów z `aura_articles`, a funkcja sprawdza tylko kształt nazwy — wariant
+ * cudzego wpisu, jeśli ktoś zna jego nazwę, wyjdzie spod naszej domeny. Listy
+ * slugów nie da się tu zaimportować: wrangler 3 w obrazie budowania Pages
+ * (esbuild 0.17) nie zna `import … with { type: 'json' }`, a Node 22 w testach
+ * nie wczyta JSON-a bez tego atrybutu. 21.10.2026 build Pages padł na takim
+ * imporcie (test/funkcje-skladnia.spec.js pilnuje, żeby nie wrócił). Droga na
+ * później: lista nazw generowana w buildzie jako plik statyczny, czytany przez
+ * funkcję jak `owu-adresy.json` w functions/owu.
  */
-import dane from '../../src/dane/artykuly.json' with { type: 'json' };
 
 /** Publiczny katalog wariantów. Ten sam prefiks przepisuje `artykuly.ts`. */
 export const ZRODLO =
@@ -38,15 +44,11 @@ export const ZRODLO =
  */
 export const NAZWA_PLIKU = /^[a-z0-9-]+-(cover|content\d+)-(800|1600)\.webp$/;
 
-/** Slugi wpisów portalu — tylko ich warianty funkcja podaje. */
-const SLUGI = new Set(dane.artykuly.map((a) => a.slug));
-
 /**
- * Jedyny warunek dostępu, wspólny dla funkcji i `przezMedia()` w artykuly.ts:
- * build nie przepisze na /media/ adresu, którego funkcja potem nie poda.
+ * Warunek dostępu, wspólny dla funkcji i `przezMedia()` w artykuly.ts: build
+ * nie przepisze na /media/ adresu, którego funkcja potem nie poda.
  */
-export const dozwolony = (plik) =>
-  NAZWA_PLIKU.test(plik) && SLUGI.has(plik.replace(/-(cover|content\d+)-(800|1600)\.webp$/, ''));
+export const dozwolony = (plik) => NAZWA_PLIKU.test(plik);
 
 /**
  * Doba w przeglądarce, tydzień na krawędzi. Bez `immutable`: nazwa pliku nie

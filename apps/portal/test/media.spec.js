@@ -200,11 +200,6 @@ test('biała lista: tylko nazwy wariantów, bez pytania Supabase o resztę', asy
     'zawal-cover-800.webp%00.jpg',
     '-cover-800.webp',
     '',
-    // warianty innych serwisów z aura_articles: kształt nazwy poprawny, slug nie nasz
-    // (oba pliki istnieją w kubełku — sprawdzone 21.10.2026)
-    'przewodnik-po-gwarancjach-ubezpieczeniowych-content1-1600.webp',
-    'czym-jest-plynnosc-finansowa-w-firmie-content1-1600.webp',
-    'inny-serwis-cover-800.webp',
   ];
   for (const nazwa of odrzucone) {
     const { odp, wolane } = await zadanie(`/media/${encodeURIComponent(nazwa)}`);

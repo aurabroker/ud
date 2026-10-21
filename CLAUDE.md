@@ -79,13 +79,28 @@ serwisów. Portal podaje warianty spod `/media/<plik>`
 (`functions/media/[plik].js` strumieniuje plik, jak `/owu/`); adres przepisuje
 build (`przezMedia()` w `src/lib/artykuly.ts`), a `artykuly.json` i pliki
 treści zostają z adresami z bazy. Funkcja przepuszcza tylko nazwy z
-normalizacji (`<slug>-cover|contentN-800|1600.webp`) **i tylko dla slugów
-z `artykuly.json`** — katalog `normalized/` trzyma warianty wszystkich jedenastu
-serwisów, więc sam kształt nazwy wpuściłby zdjęcia cudzych marek pod naszą
-domenę. Ten sam warunek (`dozwolony()`) stosuje `przezMedia()`. Funkcja
-odpowiada 304 na `If-None-Match` (bufor dostaje nagłówki warunkowe żądania).
-Importuje `artykuly.json` — wrangler 4 bundluje to bez problemu (sprawdzone
-`wrangler pages functions build`, 21.10.2026). Pilnuje tego `test/media.spec.js`.
+normalizacji (`<slug>-cover|contentN-800|1600.webp`); ten sam warunek
+(`dozwolony()`) stosuje `przezMedia()`. Funkcja odpowiada 304 na
+`If-None-Match` (bufor dostaje nagłówki warunkowe żądania). Pilnuje tego
+`test/media.spec.js`.
+
+**Znana słabość:** `normalized/` trzyma warianty wszystkich jedenastu serwisów,
+a funkcja sprawdza tylko kształt nazwy — wariant cudzego wpisu wyjdzie spod
+naszej domeny, jeśli ktoś zna jego nazwę. Listy slugów nie da się w funkcji
+zaimportować (akapit niżej); droga na później to lista generowana w buildzie
+jako plik statyczny, czytany jak `owu-adresy.json`.
+
+**W `functions/` nie ma atrybutów importu (`with`/`assert { type: 'json' }`).**
+Funkcje kompiluje wrangler z obrazu budowania Pages — 21.10.2026 wrangler 3
+z esbuildem 0.17, który atrybutów nie zna. Import `artykuly.json` przeszedł
+lokalnie (Astro, Node 22, nawet wrangler 4), a build Pages padł na
+„Expected ";" but found "with"" i produkcja została na poprzedniej wersji.
+Node 22 z kolei nie wczyta JSON-a bez atrybutu, więc funkcja nie importuje
+JSON-a wcale. Sprawdzaj bundel `npx wrangler@3 pages functions build`
+(wranglera nie ma w repozytorium); skan składni: `test/funkcje-skladnia.spec.js`.
+Wynik budowania Pages widać w statusach commita na GitHubie
+(`/repos/aurabroker/ud/commits/<sha>/check-runs`, „Cloudflare Pages: utratadochodu")
+— API Pages jest stąd niedostępne.
 
 Domyślny `og:image` to `public/og-domyslny.jpg` (1200×630, odtwarzany
 `node scripts/og-domyslny.mjs`), wpisy mają `og:type article` i największy
