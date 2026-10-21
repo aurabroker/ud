@@ -1,6 +1,6 @@
 ---
 import Baza from '../../layouts/Baza.astro';
-import { graf, organizacja, serwis, strona, okruszki } from '../../lib/seo';
+import { graf, organizacja, serwis, strona, okruszki, ekspert } from '../../lib/seo';
 import { FIRMA, COVERHOLDERZY } from '../../lib/firma';
 import { EKSPERT } from '../../lib/ekspert';
 import { ZAWODY } from '@ud/zawody';
@@ -72,6 +72,9 @@ const jsonld = graf([
     '@id': `https://utratadochodu.pl${sciezka}#o-nas`,
     mainEntity: { '@id': 'https://utratadochodu.pl/#organizacja' },
   },
+  // Ten sam węzeł, na który wskazuje BlogPosting.author we wpisach — opisany
+  // na stronie, do której prowadzi jego @id (#ekspert).
+  ekspert(),
 ]);
 
 /** Numery, które da się zweryfikować w rejestrach — to jest treść E-E-A-T, nie ozdoba. */

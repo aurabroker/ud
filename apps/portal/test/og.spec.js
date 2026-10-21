@@ -163,7 +163,8 @@ test.describe('wpisy bazy wiedzy', () => {
       expect(ramka, `${a.slug}: brak ramki autora`).toBeTruthy();
       const tekst = ramka.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ');
       expect(tekst, a.slug).toContain(`Autor: ${EKSPERT.opis}`);
-      expect(ramka, `${a.slug}: ramka autora bez odnośnika do /o-nas/`).toMatch(/<a href="\/o-nas\/"/);
+      // Do sekcji eksperta: tam stoi węzeł Person, na który wskazuje BlogPosting.author.
+      expect(ramka, `${a.slug}: ramka autora bez odnośnika do /o-nas/#ekspert`).toMatch(/<a href="\/o-nas\/#ekspert"/);
       // Ramka stoi po treści wpisu, nie przed nią.
       expect(html.indexOf('aria-label="Autor wpisu"')).toBeGreaterThan(html.indexOf('</article>'));
     }

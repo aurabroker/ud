@@ -70,6 +70,23 @@ naprawdę nie ma zdjęcia" — wtedy renderuj kafelek zastępczy, a nie czekaj.
       + 'preview_image_url, thumbnail_url')
 ```
 
+### W portalu zdjęcia bloga idą przez `/media/`, nie z kubełka
+
+Supabase Storage dokleja do **każdej** odpowiedzi `x-robots-tag: none`, więc
+zdjęcia podane wprost z `supabase.co` nie trafiały do Grafiki Google
+(sprawdzone 21.10.2026). Nagłówka nie wyłączymy — kubełek obsługuje jedenaście
+serwisów. Portal podaje warianty spod `/media/<plik>`
+(`functions/media/[plik].js` strumieniuje plik, jak `/owu/`); adres przepisuje
+build (`przezMedia()` w `src/lib/artykuly.ts`), a `artykuly.json` i pliki
+treści zostają z adresami z bazy. Funkcja przepuszcza tylko nazwy z
+normalizacji (`<slug>-cover|contentN-800|1600.webp`) — nie jest otwartym proxy
+do kubełka. Pilnuje tego `test/media.spec.js`.
+
+Domyślny `og:image` to `public/og-domyslny.jpg` (1200×630, odtwarzany
+`node scripts/og-domyslny.mjs`), wpisy mają `og:type article` i okładkę
+1600 px. Do 21.10.2026 karta OG wskazywała plik, którego nie było, na 34
+stronach. Pilnuje tego `test/og.spec.js`.
+
 ### Renderowanie zdjęcia — wzorzec obowiązkowy
 
 Nie używaj statycznych emoji ani placeholderów, gdy dostępne są URL-e zdjęć.
@@ -1164,6 +1181,47 @@ DEFINER`, brak `revoke`, stan crona) daje czerwony wynik. Bez binariów Postgres
 kończy się błędem, nie zielonym wynikiem.
 
 ---
+
+## Kto jest kim: ubezpieczyciel, coverholderzy, agent (od 21.10.2026)
+
+**Ubezpieczycielem jest Lloyd’s Insurance Company S.A.** (Bruksela).
+**Leadenhall Insurance S.A. i CEU sp. z o.o. to coverholderzy Lloyd’s** —
+przedstawiciele ubezpieczyciela w sprawach zawarcia i wykonania umowy
+(OWU LW044 § 1 ust. 3, OWU CEU § 1, karty produktu). Aura Expert sp. z o.o. to
+agent ubezpieczeniowy (RPU 11229690/A). Do 21.10.2026 serwis nazywał
+Leadenhall i CEU ubezpieczycielami — na stronie głównej, w `/jak-to-dziala/`,
+w `llms.txt` i w klauzuli RODO. Poprawki w klauzuli i polityce prywatności
+zatwierdził prawnik (21.10.2026).
+
+- Nazwy bierz z `firma.ts`: `FIRMA.ubezpieczyciel`, `COVERHOLDERZY`,
+  `OPIS_PODMIOTOW`. Stary eksport `UBEZPIECZYCIELE` (lista coverholderów pod
+  błędną nazwą) został usunięty i test pilnuje, żeby nie wrócił.
+- Szkody w CEU likwiduje WAGAS S.A. w imieniu ubezpieczyciela, nie CEU.
+- Nazwa kończąca się na „S.A." albo „sp. z o.o." nie dostaje drugiej kropki.
+
+Pilnuje tego `test/podmioty.spec.js` (także na `/` i `/jak-to-dziala/`).
+
+### Opinie — tylko od potwierdzonych klientów
+
+21.10.2026 zdjęte obie opinie ze strony (właściciel: „nie klienci"); w bazie
+mają `ud_review.approved = false`, wiersze zostały. `/opinie/` pokazuje
+**wyłącznie** wpisy z polem `potwierdzonoKlienta` (data ISO) w
+`src/dane/opinie.json`, dopisywanym ręcznie po sprawdzeniu, że autor zawarł
+polisę za naszym pośrednictwem. Strona tak to opisuje — przy formularzu, który
+zbiera tylko imię, miasto i zawód, potwierdzenie wymaga dopasowania
+w kartotece. `scripts/synchronizuj.mjs` przepisuje opinie z `approved = true`
+bez pola `potwierdzonoKlienta` — przed jego użyciem trzeba to obsłużyć
+(i tak nie uruchamiaj go w całości, patrz „Nowy artykuł w portalu").
+
+### Ekspert serwisu
+
+`src/lib/ekspert.ts`: „Marek Cieśla — broker ubezpieczeniowy od 2009 roku,
+ekspert w zakresie ubezpieczeń utraty dochodu" — słowo w słowo od właściciela
+(21.10.2026). Nie dopisuj tytułów, uprawnień ani zdjęcia, których właściciel
+nie podał. Ten sam węzeł `Person` (`ekspert()` w `seo.ts`) jest autorem
+`BlogPosting` każdego wpisu i stoi w JSON-LD `/o-nas/` pod `#ekspert`; ramka
+pod wpisem linkuje do `/o-nas/#ekspert`. **Do potwierdzenia u prawnika:**
+„broker" przy osobie obok spółki działającej jako agent.
 
 ## Zakażenie HIV/WZW nie jest wyłączeniem
 

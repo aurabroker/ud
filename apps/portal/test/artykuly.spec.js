@@ -137,7 +137,8 @@ test('kafelek z okładką ma oba warianty szerokości', () => {
   const zeZdjeciem = zrzut.artykuly.filter((a) => a.obraz);
   for (const a of zeZdjeciem) {
     expect(a.obrazDuzy, `„${a.slug}" ma okładkę bez wariantu 1600 px`).toBeTruthy();
-    expect(lista, `„${a.slug}" — brak srcset w kafelku`).toContain(`${a.obraz} 800w`);
+    // Okładki idą przez /media/ (functions/media/[plik].js), nie wprost z kubełka.
+    expect(lista, `„${a.slug}" — brak srcset w kafelku`).toContain(`/media/${a.obraz.split('/').at(-1)} 800w`);
   }
   expect(zeZdjeciem.length, 'zrzut nie ma ani jednej okładki').toBeGreaterThan(0);
 });

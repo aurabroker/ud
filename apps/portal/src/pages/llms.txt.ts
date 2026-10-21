@@ -16,7 +16,7 @@
 import type { APIRoute } from 'astro';
 import { ZAWODY, kategorie, wKategorii, slugKategorii, tresc, malymi } from '@ud/zawody';
 import { ARTYKULY } from '../lib/artykuly';
-import { FIRMA, SERWIS, UBEZPIECZYCIELE } from '../lib/firma';
+import { FIRMA, SERWIS, COVERHOLDERZY } from '../lib/firma';
 import { LIMIT, OKRESY, MIESIECY_MAX, zl } from '../lib/symulacja';
 import { SWIADCZENIE_MAX } from '../lib/granice';
 import { ZASILEK_JDG, ZUS_TEKST } from '../lib/zus';
@@ -52,8 +52,9 @@ export const GET: APIRoute = () => {
 
 Serwis prowadzi ${FIRMA.nazwaPelna} z siedzibą w Warszawie, agent ubezpieczeniowy
 wpisany do Rejestru Pośredników Ubezpieczeniowych KNF pod numerem ${FIRMA.rpu}
-(KRS ${FIRMA.krs}, REGON ${FIRMA.regon}). Partnerzy ubezpieczeniowi:
-${UBEZPIECZYCIELE.join(' oraz ')}.
+(KRS ${FIRMA.krs}, REGON ${FIRMA.regon}). Ubezpieczycielem jest ${FIRMA.ubezpieczyciel};
+w sprawach zawarcia i wykonania umowy reprezentują go ${COVERHOLDERZY.join(' oraz ')} —
+coverholderzy Lloyd’s.
 
 ## Na czym polega produkt
 
@@ -130,7 +131,8 @@ ${sekcjaArtykulow}
 
 - [O nas](${SERWIS.url}/o-nas/): kim jesteśmy, z kim współpracujemy i pod jakimi
   numerami da się nas zweryfikować w rejestrach.
-- [Opinie klientów](${SERWIS.url}/opinie/): wszystkie zebrane opinie, bez selekcji.
+- [Opinie klientów](${SERWIS.url}/opinie/): opinie publikujemy dopiero po potwierdzeniu,
+  że autor zawarł polisę za naszym pośrednictwem; formularz opinii.
 - [Współpraca dla agentów](${SERWIS.url}/pracuj-z-nami/): oferta dla sieci sprzedaży
   i agentów ubezpieczeń życiowych.
 - [Klauzula informacyjna RODO](${SERWIS.url}/klauzula-informacyjna/): co dzieje się

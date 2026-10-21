@@ -5,7 +5,7 @@ import { symuluj, zl, zlZakres, LIMIT } from '../../lib/symulacja';
 import { ZUS_TEKST, ZASILEK_JDG } from '../../lib/zus';
 import { KROKI, PROG_KLAUZUL_NW, krokiSlownie } from '@ud/wniosek/schemat';
 import { HEALTH_SURVEY_THRESHOLD } from '@ud/wniosek/ankieta';
-import { FIRMA, UBEZPIECZYCIELE } from '../../lib/firma';
+import { COVERHOLDERZY } from '../../lib/firma';
 
 const sciezka = '/jak-to-dziala/';
 const tytul = 'Jak działa ubezpieczenie utraty dochodu — krok po kroku | UtrataDochodu.pl';
@@ -24,7 +24,7 @@ const ETAPY = [
   {
     tytul: 'Sprawdzamy wniosek i dobieramy wariant',
     czas: 'ten sam dzień',
-    opis: `Porównujemy warunki obu ubezpieczycieli (${UBEZPIECZYCIELE.join(' i ')}) `
+    opis: `Porównujemy warunki ${COVERHOLDERZY.join(' i ')} — coverholderów Lloyd’s — `
       + 'pod kątem Twojego zawodu. Dla zawodów medycznych właściwe są warianty MEDICA '
       + 'i MEDICARE, dla pozostałych — LW044.',
   },

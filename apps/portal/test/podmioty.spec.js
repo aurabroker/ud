@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
-import { FIRMA, COVERHOLDERZY, UBEZPIECZYCIELE, OPIS_PODMIOTOW } from '../src/lib/firma.ts';
+import * as firma from '../src/lib/firma.ts';
+
+const { FIRMA, COVERHOLDERZY, OPIS_PODMIOTOW } = firma;
 import { EKSPERT } from '../src/lib/ekspert.ts';
 
 /**
@@ -28,6 +30,8 @@ import { EKSPERT } from '../src/lib/ekspert.ts';
  */
 
 const STRONY = [
+  '/',
+  '/jak-to-dziala/',
   '/o-nas/',
   '/klauzula-informacyjna/',
   '/polityka-prywatnosci/',
@@ -116,11 +120,12 @@ test.describe('Leadenhall i CEU to coverholderzy, nie ubezpieczyciele', () => {
     expect(tekst).not.toMatch(/Agencja ubezpieczeniowa i coverholder/);
   });
 
-  test('firma.ts: stara nazwa to alias coverholderów, a opis ról mówi, kto jest kim', () => {
+  test('firma.ts: bez starej, błędnej nazwy, a opis ról mówi, kto jest kim', () => {
     expect(COVERHOLDERZY).toEqual(['Leadenhall Insurance S.A.', 'CEU sp. z o.o.']);
     expect(COVERHOLDERZY).not.toContain(FIRMA.ubezpieczyciel);
-    expect(UBEZPIECZYCIELE).toBe(COVERHOLDERZY);
-    expect(FIRMA.ubezpieczycieleWg).toBe(FIRMA.coverholderzyWg);
+    // Lista coverholderów nazywała się UBEZPIECZYCIELE — nie przywracaj tej nazwy.
+    expect('UBEZPIECZYCIELE' in firma).toBe(false);
+    expect('ubezpieczycieleWg' in FIRMA).toBe(false);
     expect(OPIS_PODMIOTOW).toContain(`Ubezpieczycielem jest ${FIRMA.ubezpieczyciel}`);
     for (const c of COVERHOLDERZY) expect(OPIS_PODMIOTOW).toContain(c);
     expect(OPIS_PODMIOTOW).toContain('coverholderzy Lloyd’s');

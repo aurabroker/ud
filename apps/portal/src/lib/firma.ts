@@ -68,26 +68,16 @@ export const FIRMA = {
 
   /** Przedstawiciele ubezpieczyciela (coverholderzy Lloyd’s) — patrz wyżej. */
   coverholderzyWg: COVERHOLDERZY_WG,
-
-  /**
-   * @deprecated Stara, BŁĘDNA nazwa: Leadenhall i CEU to coverholderzy, nie
-   * ubezpieczyciele. Ta sama mapa co `coverholderzyWg`; zostaje, dopóki
-   * importują ją pliki spoza pakietu poprawek z 21.10.2026. Nie używaj
-   * w nowym kodzie.
-   */
-  ubezpieczycieleWg: COVERHOLDERZY_WG,
 } as const;
 
 /** Nazwy coverholderów do użycia w zdaniach: „Leadenhall Insurance S.A. oraz CEU sp. z o.o.". */
 export const COVERHOLDERZY: readonly string[] = Object.values(FIRMA.coverholderzyWg);
 
-/**
- * @deprecated Stara, BŁĘDNA nazwa — lista zawiera coverholderów, nie
- * ubezpieczycieli. Zostaje jako alias `COVERHOLDERZY`, dopóki importują ją
- * strony spoza pakietu poprawek z 21.10.2026 (`jak-to-dziala`, `llms.txt`).
- * Nie używaj w nowym kodzie, a w zdaniu nie nazywaj tej listy ubezpieczycielami.
+/*
+ * Do 21.10.2026 stały tu `UBEZPIECZYCIELE` i `FIRMA.ubezpieczycieleWg` — ta
+ * sama lista pod błędną nazwą. Usunięte, gdy ostatnie strony przeszły na
+ * `COVERHOLDERZY`; test/podmioty.spec.js pilnuje, żeby nie wróciły.
  */
-export const UBEZPIECZYCIELE = COVERHOLDERZY;
 
 /**
  * Kto jest kim — jedno zdanie do stron, które muszą to powiedzieć wprost
