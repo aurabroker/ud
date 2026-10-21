@@ -96,8 +96,8 @@
         "opis": "Nadgarstek, łokieć, obręcz barkowa. Osiem godzin dziennie przy klawiaturze w tej samej pozycji daje zapalenie pochewek ścięgnistych, które przy nawrotach kończy się zabiegiem i kilkutygodniową przerwą od pisania."
       },
       {
-        "tytul": "Choroby psychiczne — ryzyko realne, ale wyłączone",
-        "opis": "Depresja i zaburzenia lękowe są w tej branży statystycznie częstsze niż urazy fizyczne. Trzeba to powiedzieć wprost: żaden z wariantów polisy nie obejmuje chorób psychicznych ani wypalenia zawodowego jako samodzielnej diagnozy."
+        "tytul": "Choroby psychiczne — ryzyko realne, a ochrona wąska",
+        "opis": "Depresja i zaburzenia lękowe są w tej branży statystycznie częstsze niż urazy fizyczne. Trzeba to powiedzieć wprost: wypalenie zawodowe jako samodzielna diagnoza nie daje świadczenia w żadnym wariancie, a choroba psychiczna — w Leadenhall wtedy, gdy jest jedyną przyczyną niezdolności, w CEU bez tego zastrzeżenia."
       },
       {
         "tytul": "Pogorszenie ostrości widzenia",
@@ -111,7 +111,7 @@
       },
       {
         "pytanie": "Pracuję zdalnie z zagranicy — czy ochrona działa?",
-        "odpowiedz": "Działa — warunki obu ubezpieczycieli obejmują ochroną cały świat, całą dobę. Trzeba tylko pamiętać, że przy roszczeniu dokumentacja medyczna ma być po polsku (Leadenhall przyjmuje też angielską), a ubezpieczyciel może wezwać na badanie u swojego lekarza."
+        "odpowiedz": "Działa — warunki Leadenhall i CEU obejmują ochroną cały świat. Trzeba tylko pamiętać, że przy roszczeniu dokumentacja medyczna ma być po polsku (Leadenhall przyjmuje też angielską), a ubezpieczyciel może wezwać na badanie u swojego lekarza."
       }
     ]
   },
@@ -716,7 +716,7 @@
     "pytania": [
       {
         "pytanie": "Czy napaść podczas czynności to nieszczęśliwy wypadek?",
-        "odpowiedz": "Tak — zdarzenie nagłe, zewnętrzne i niezależne od woli poszkodowanego spełnia definicję wypadku. Objęte jest ryzyko następstw urazu; ewentualne skutki psychiczne pozostają poza zakresem."
+        "odpowiedz": "Tak — zdarzenie nagłe, zewnętrzne i niezależne od woli poszkodowanego spełnia definicję wypadku. Objęte jest ryzyko następstw urazu; ewentualne skutki psychiczne, jeśli tylko one wykluczają z pracy, pozostają poza zakresem."
       },
       {
         "pytanie": "Mam nieregularny dochód z opłat egzekucyjnych — co przyjąć za podstawę?",
@@ -876,7 +876,7 @@
     "ryzyka": [
       {
         "tytul": "Obciążenie materiałem dowodowym",
-        "opis": "Analiza akt spraw o przestępstwa przeciwko życiu i wolności seksualnej, wraz z dokumentacją fotograficzną. Następstwa tej ekspozycji są udokumentowane, ale mieszczą się w kategorii chorób psychicznych — a te są z ochrony wyłączone."
+        "opis": "Analiza akt spraw o przestępstwa przeciwko życiu i wolności seksualnej, wraz z dokumentacją fotograficzną. Następstwa tej ekspozycji są udokumentowane, ale mieszczą się w kategorii chorób psychicznych — Leadenhall nie płaci, gdy to one jedyne odbierają zdolność do pracy, a CEU nie stawia nawet tego warunku."
       },
       {
         "tytul": "Uraz przy oględzinach i wizjach lokalnych",
@@ -890,7 +890,7 @@
     "pytania": [
       {
         "pytanie": "Wynagrodzenie za opinie dostaję po roku — co przyjąć za dochód?",
-        "odpowiedz": "Rozliczenie roczne, a nie bieżące wpływy. Przy dochodzie tak mocno odroczonym liczy się to, co wpłynęło w dwunastu miesiącach przed zawarciem umowy — dłuższego okresu ubezpieczyciel nie uśrednia, więc przypadkowa luka w tym oknie obniża limit świadczenia."
+        "odpowiedz": "Przychód z dwunastu miesięcy bezpośrednio przed zawarciem umowy, a nie z roku podatkowego. Jeśli opinie rozliczasz w działalności, wchodzą do niego te złożone w tym okresie, choćby zapłata przyszła później; poza działalnością — te opłacone w tym okresie. Dłuższego okresu ubezpieczyciel nie uśrednia, więc przypadkowa luka w tym oknie obniża limit świadczenia."
       },
       {
         "pytanie": "Łączę pracę na uczelni z opiniowaniem — jaki mam limit?",
@@ -1161,7 +1161,7 @@
   },
   "taksowkarz": {
     "wstep": "Taksówkarz zarabia wyłącznie wtedy, gdy siedzi za kierownicą. Nie ma tu żadnego składnika, który pracuje bez niego — samochód stojący pod domem generuje raty i ubezpieczenie, a nie kursy.",
-    "dochod": "Przychód powstaje z pojedynczych kursów, rozliczanych tego samego dnia, po odjęciu prowizji aplikacji i paliwa. Marża jest cienka, więc każdy dzień postoju odejmuje się od niewielkiej różnicy między obrotem a kosztami.",
+    "dochod": "Pieniądze wpływają z pojedynczych kursów, rozliczanych tego samego dnia, a od razu odchodzą od nich prowizja aplikacji i paliwo. Marża jest cienka, więc każdy dzień postoju odejmuje się od niewielkiej różnicy między obrotem a kosztami.",
     "przerwa": "Licencja na przewóz osób wymaga ważnych badań lekarskich i psychologicznych, a te podlegają okresowej weryfikacji. Miesiąc bez pracy to miesiąc rat leasingowych, OC, przeglądu i abonamentu aplikacji — kosztów, które nie zależą od przejechanych kilometrów. Przy pracy przez aplikację dochodzi utrata rankingu, który po powrocie odbudowuje się tygodniami.",
     "ryzyka": [
       {
@@ -1503,7 +1503,7 @@
       },
       {
         "pytanie": "Czy uraz przy interwencji jest objęty?",
-        "odpowiedz": "Tak. Uderzenie albo upadek w trakcie interwencji spełnia definicję wypadku: jest nagłe, zewnętrzne i niezależne od Twojej woli. Objęte są następstwa fizyczne; ewentualne skutki psychiczne pozostają poza zakresem ochrony."
+        "odpowiedz": "Tak. Uderzenie albo upadek w trakcie interwencji spełnia definicję wypadku: jest nagłe, zewnętrzne i niezależne od Twojej woli. Objęte są następstwa fizyczne; ewentualne skutki psychiczne pozostają poza zakresem ochrony, gdy są jedyną przyczyną niezdolności (w CEU — bez tego zastrzeżenia)."
       }
     ]
   },
@@ -1702,7 +1702,7 @@
     "pytania": [
       {
         "pytanie": "Opinie sądowe płacą po latach — co przyjąć za dochód?",
-        "odpowiedz": "Rozliczenie roczne, nie bieżące wpływy. Granicę świadczenia wyznacza jednak przychód z dwunastu miesięcy przed zawarciem umowy, nie średnia z kilku lat — przy opiniach płatnych po latach warto sprawdzić, ile wpłynęło właśnie w tym okresie."
+        "odpowiedz": "Przychód z dwunastu miesięcy przed zawarciem umowy — nie z roku podatkowego ani średnia z kilku lat. Przy opiniach sądowych rozliczanych w działalności przychód powstaje co do zasady w dniu złożenia opinii, więc do tego okresu wchodzą także opinie jeszcze niezapłacone, a nie wchodzą pieniądze, które przyszły teraz za opinie sprzed niego."
       },
       {
         "pytanie": "Czy oględziny obiektów po pożarze zmieniają wycenę?",
@@ -2021,7 +2021,7 @@
     "pytania": [
       {
         "pytanie": "Mam tantiemy z licencji — czy wliczają się do dochodu?",
-        "odpowiedz": "To zależy od ubezpieczyciela. CEU wprost wyłącza z przychodu tantiemy i wynagrodzenia za prawa autorskie, a w Leadenhall decyduje, czy są przychodem z wykonywania zawodu wpisanego w polisę. Tantiemy płyną zresztą dalej mimo przerwy w pracy — a to oznacza, że realna strata jest niższa niż całość dochodu."
+        "odpowiedz": "To zależy od wariantu. CEU wprost wyłącza z przychodu tantiemy i wynagrodzenia za prawa autorskie, a w Leadenhall decyduje, czy są przychodem z wykonywania zawodu wpisanego w polisę. Tantiemy płyną zresztą dalej mimo przerwy w pracy — a to oznacza, że realna strata jest niższa niż całość dochodu."
       },
       {
         "pytanie": "Pracuję na umowach o dzieło z wydawcami — jaki mam limit?",
@@ -2112,7 +2112,7 @@
       },
       {
         "pytanie": "Mam koncerty, lekcje i tantiemy — jak wykazać dochód?",
-        "odpowiedz": "Sumujesz wszystkie źródła z rozliczenia rocznego. Tantiemy warto wykazać osobno, bo płyną dalej mimo przerwy — dzięki temu suma odpowiada realnej stracie, a nie całemu dochodowi."
+        "odpowiedz": "Sumujesz koncerty, sesje i lekcje z dwunastu miesięcy przed zawarciem umowy. Tantiem CEU do podstawy nie wlicza, a w Leadenhall wchodzą tylko wtedy, gdy są przychodem z wykonywania zawodu wpisanego w polisę — płyną zresztą dalej mimo przerwy, więc realna strata jest niższa niż cały dochód."
       }
     ]
   },
@@ -2170,7 +2170,7 @@
       },
       {
         "pytanie": "Wyjeżdżam na relacje za granicę — czy ochrona działa?",
-        "odpowiedz": "Ochrona obejmuje cały świat, ale oba towarzystwa wyłączają szkody spowodowane wojną i działaniami wojennymi, więc uraz odniesiony w strefie konfliktu zbrojnego może zostać bez wypłaty. To warto ustalić przed wyjazdem, a nie po zdarzeniu."
+        "odpowiedz": "Ochrona obejmuje cały świat, ale warunki Leadenhall i CEU wyłączają szkody spowodowane wojną i działaniami wojennymi, więc uraz odniesiony w strefie konfliktu zbrojnego może zostać bez wypłaty. To warto ustalić przed wyjazdem, a nie po zdarzeniu."
       }
     ]
   },
@@ -3210,7 +3210,7 @@
     "pytania": [
       {
         "pytanie": "Czy zwyrodnienie moich stawów będzie uznane za niezdolność?",
-        "odpowiedz": "Jeśli uniemożliwia tylko iniekcje dostawowe, to niezdolność do części zawodu, a za taką polisa nie płaci — wymaga niezdolności całkowitej. W Leadenhall choroba zwyrodnieniowa daje ponadto świadczenie okresowe najwyżej przez 24 miesiące i nie daje świadczenia z tytułu trwałej niezdolności; warunkiem pozostaje też, żeby schorzenie nie było leczone w ciągu 24 miesięcy przed zawarciem umowy."
+        "odpowiedz": "Jeśli uniemożliwia tylko iniekcje dostawowe, to niezdolność do części zawodu, a za taką polisa nie płaci — wymaga niezdolności całkowitej. Choroba zwyrodnieniowa ma w Leadenhall własne granice: w wariancie Medica dla lekarzy świadczenie okresowe z jej powodu wynosi najwyżej 30% kwoty z polisy i trwa najwyżej 12 miesięcy, a z tytułu trwałej niezdolności nie przysługuje wcale. Warunkiem jest też, żeby schorzenie nie było konsultowane ani leczone w ciągu 24 miesięcy przed początkiem ochrony."
       },
       {
         "pytanie": "Prowadzę pacjentów w programach lekowych — czy to wykazać?",
@@ -3431,7 +3431,7 @@
         "opis": "Interwencje przy pobudzeniu psychoruchowym i przymusie bezpośrednim odbywają się w bezpośrednim kontakcie fizycznym. Złamania, urazy głowy i uszkodzenia stawów są tu następstwem realnym, objętym ochroną jako wypadek."
       },
       {
-        "tytul": "Skutki obciążenia psychicznego — wyłączone z ochrony",
+        "tytul": "Skutki obciążenia psychicznego — wyłączone, gdy są jedyną przyczyną",
         "opis": "To jest ryzyko definiujące tę specjalizację i jednocześnie wyłączone w każdym wariancie, gdy jego skutki są jedyną przyczyną niezdolności; w CEU wyłączenie nie ma nawet tego zastrzeżenia. Piszemy o tym wprost, bo psychiatra ma prawo wiedzieć, że akurat jego główne zagrożenie zawodowe zostaje poza zakresem umowy."
       },
       {
@@ -3441,12 +3441,12 @@
     ],
     "pytania": [
       {
-        "pytanie": "Skoro choroby psychiczne są wyłączone, czy polisa ma dla mnie sens?",
+        "pytanie": "Skoro choroby psychiczne są wyłączone, gdy same odbierają zdolność do pracy, czy polisa ma dla mnie sens?",
         "odpowiedz": "Ma, ale trzeba wiedzieć, na co. Chroni przed skutkami urazu, choroby somatycznej i wypadku — w granicach pozostałych wyłączeń z OWU, wśród których to jedno jest dla psychiatry najważniejsze. Zatajanie tego byłoby wobec psychiatry szczególnie nie w porządku."
       },
       {
         "pytanie": "Wydaję opinie sądowo-psychiatryczne — czy to osobne źródło?",
-        "odpowiedz": "Wchodzi do łącznego dochodu z działalności. Wypłata następuje po zakończeniu sprawy, więc liczy się to, co faktycznie wpłynęło w dwunastu miesiącach przed zawarciem umowy, a nie opinie dopiero oczekujące na zapłatę."
+        "odpowiedz": "Wchodzi do łącznego przychodu z zawodu. W działalności przychodem jest wynagrodzenie za opinię wydaną w dwunastu miesiącach przed zawarciem umowy, nawet jeśli sąd jeszcze go nie wypłacił — co do zasady liczy się dzień złożenia opinii, a nie wpływu pieniędzy. Opinie rozliczane poza działalnością liczą się dopiero wtedy, gdy zapłata wpłynęła."
       }
     ]
   },
@@ -3871,7 +3871,7 @@
       },
       {
         "tytul": "Skutki przewlekłego napięcia przy awarii",
-        "opis": "Odpowiedzialność za systemy, których przestój liczy się w tysiącach złotych na minutę. Nadciśnienie i zaburzenia rytmu pojawiają się w tej roli wcześnie, a diagnozy z kręgu psychicznego są z ochrony wyłączone."
+        "opis": "Odpowiedzialność za systemy, których przestój liczy się w tysiącach złotych na minutę. Nadciśnienie i zaburzenia rytmu pojawiają się w tej roli wcześnie, a niezdolność, której jedyną przyczyną jest diagnoza z kręgu psychicznego, Leadenhall wyłącza z ochrony (CEU — bez tego zastrzeżenia)."
       }
     ],
     "pytania": [
@@ -3993,7 +3993,7 @@
     "pytania": [
       {
         "pytanie": "Mam udział w zyskach z gry — czy to wchodzi do dochodu?",
-        "odpowiedz": "Wchodzi dopiero po wypłacie i rozliczeniu, bo suma liczy się od dochodu udokumentowanego, a nie od oczekiwanego. Udział wypłacony wcześniej niż dwanaście miesięcy przed zawarciem umowy nie podniesie już limitu świadczenia, bo tylko ten okres się liczy."
+        "odpowiedz": "To zależy, z jakiego tytułu go dostajesz. Premia od wyników wypłacana przez studio w ramach kontraktu za Twoją pracę jest przychodem z zawodu i liczy się, jeśli przypadła na dwanaście miesięcy przed zawarciem umowy. Udział w sprzedaży gry będący wynagrodzeniem za prawa autorskie, a także przychód płynący bez Twojego dalszego zaangażowania, CEU wyłącza z podstawy wprost; w Leadenhall liczy się tylko przychód z wykonywania zawodu wpisanego w polisę."
       },
       {
         "pytanie": "Kontrakty kończą się razem z projektem — czy to problem?",
@@ -4327,7 +4327,7 @@
     "ryzyka": [
       {
         "tytul": "Skutki pracy pod presją nieodwracalności",
-        "opis": "Błąd w kodzie kontraktu jest ostateczny i publiczny, a jego skutki finansowe natychmiastowe. Ten rodzaj napięcia jest w tej roli stały, a rozpoznania z kręgu psychicznego są z ochrony wyłączone."
+        "opis": "Błąd w kodzie kontraktu jest ostateczny i publiczny, a jego skutki finansowe natychmiastowe. Ten rodzaj napięcia jest w tej roli stały, a rozpoznanie z kręgu psychicznego, które samo uniemożliwia pracę, nie daje świadczenia w Leadenhall; w CEU nie daje go nawet bez tego warunku."
       },
       {
         "tytul": "Zespoły przeciążeniowe kończyny górnej",
@@ -4341,7 +4341,7 @@
     "pytania": [
       {
         "pytanie": "Nagrody za podatności są nieregularne — czy wchodzą do dochodu?",
-        "odpowiedz": "Wchodzą, o ile są rozliczone i opodatkowane w ramach działalności. Do limitu świadczenia wejdą jednak tylko te nagrody, które wpłynęły w dwunastu miesiącach przed zawarciem umowy."
+        "odpowiedz": "Wchodzą, o ile są rozliczone i opodatkowane w ramach działalności. Do limitu świadczenia wejdą jednak tylko te nagrody, które przypadły na dwanaście miesięcy przed zawarciem umowy."
       },
       {
         "pytanie": "Czy odpowiedzialność za błąd w kontrakcie jest objęta polisą?",
@@ -4422,7 +4422,7 @@
       },
       {
         "tytul": "Choroby układu krążenia od odpowiedzialności długoterminowej",
-        "opis": "Decyzje o skutkach rozłożonych na lata, podejmowane przy niepełnej informacji. Ten rodzaj obciążenia jest w tej roli stały, a diagnozy z kręgu psychicznego pozostają poza ochroną."
+        "opis": "Decyzje o skutkach rozłożonych na lata, podejmowane przy niepełnej informacji. Ten rodzaj obciążenia jest w tej roli stały, a diagnoza z kręgu psychicznego zostaje poza ochroną Leadenhall, gdy wyłącznie ona odbiera zdolność do pracy — w CEU bez zastrzeżenia o jedynej przyczynie."
       }
     ],
     "pytania": [
@@ -4567,7 +4567,7 @@
       },
       {
         "tytul": "Choroby układu krążenia od pracy prowizyjnej",
-        "opis": "Dochód zależny wprost od wyniku miesiąca, bez części stałej, przy zobowiązaniach o stałej wysokości. Ten układ obciąża układ krążenia w sposób udokumentowany, a rozpoznania psychiatryczne są z ochrony wyłączone."
+        "opis": "Dochód zależny wprost od wyniku miesiąca, bez części stałej, przy zobowiązaniach o stałej wysokości. Ten układ obciąża układ krążenia w sposób udokumentowany, a rozpoznania psychiatryczne wyłączają świadczenie w Leadenhall wtedy, gdy są jedyną przyczyną niezdolności, w CEU — także bez tego warunku."
       }
     ],
     "pytania": [
@@ -4973,7 +4973,7 @@
       },
       {
         "tytul": "Choroby układu krążenia od pracy w konflikcie",
-        "opis": "Zebrania wspólnot, spory między mieszkańcami i rozliczenia z wykonawcami. Ekspozycja na konflikt jest w tej roli stała, a diagnozy z kręgu psychicznego pozostają poza ochroną."
+        "opis": "Zebrania wspólnot, spory między mieszkańcami i rozliczenia z wykonawcami. Ekspozycja na konflikt jest w tej roli stała, a diagnoza z kręgu psychicznego pozostaje poza ochroną, kiedy sama nie pozwala pracować; CEU wyłącza ją nawet bez tego zastrzeżenia."
       }
     ],
     "pytania": [
@@ -5089,7 +5089,7 @@
       },
       {
         "tytul": "Choroby układu krążenia od odpowiedzialności za wynik",
-        "opis": "Rozliczanie z celów, których realizacja zależy od pracy innych ludzi. Ten układ obciąża szczególnie mocno, a rozpoznania z kręgu psychicznego są z ochrony wyłączone."
+        "opis": "Rozliczanie z celów, których realizacja zależy od pracy innych ludzi. Ten układ obciąża szczególnie mocno, a rozpoznanie z kręgu psychicznego jako jedyna przyczyna niezdolności nie daje świadczenia w Leadenhall, w CEU zaś bez tego zastrzeżenia."
       }
     ],
     "pytania": [
@@ -5331,7 +5331,7 @@
       },
       {
         "pytanie": "Prowadzę rekrutacje na własny rachunek — jaki mam limit?",
-        "odpowiedz": "Działalność gospodarcza daje limit osiemdziesięciu procent. Przy dochodzie w całości prowizyjnym liczą się prowizje wypłacone w dwunastu miesiącach przed zawarciem umowy — wcześniejszy lepszy okres nie podniesie limitu."
+        "odpowiedz": "Działalność gospodarcza daje limit osiemdziesięciu procent. Przy dochodzie w całości prowizyjnym liczą się prowizje przypadające na dwanaście miesięcy przed zawarciem umowy — co do zasady za rekrutacje zakończone w tym czasie, a przy wybranym kasowym PIT zapłacone w tym czasie; wcześniejszy lepszy okres nie podniesie limitu."
       }
     ]
   },
@@ -5447,7 +5447,7 @@
       },
       {
         "pytanie": "Jak wykazać dochód, skoro wypłacam sobie z zysku?",
-        "odpowiedz": "Na podstawie zeznania rocznego i rozliczenia spółki, jeśli działasz w tej formie. Wypłata z zysku spółki to jednak przychód z kapitału, a nie z wykonywania zawodu: CEU wyłącza go z podstawy wprost, a Leadenhall liczy tylko przychód z zawodu wpisanego w polisę. Podstawą jest więc wynagrodzenie za pełnioną funkcję albo przychód z własnej działalności."
+        "odpowiedz": "Na podstawie rozliczenia podatkowego i rozliczenia spółki, jeśli działasz w tej formie. Dywidenda ze spółki kapitałowej to przychód z kapitału, a nie z wykonywania zawodu: CEU wyłącza go z podstawy wprost, a Leadenhall liczy tylko przychód z zawodu wpisanego w polisę — podstawą jest wtedy wynagrodzenie za pełnioną funkcję. Udział wspólnika spółki cywilnej, jawnej czy partnerskiej jest natomiast przychodem z działalności: CEU w wariancie dla zatrudniających liczy z niego przychód osobisty, bez części wypracowanej przez pracowników i pozostałych wspólników, a Leadenhall — przychód z wykonywania zawodu wpisanego w polisę."
       }
     ]
   }
