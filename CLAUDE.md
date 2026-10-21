@@ -891,6 +891,78 @@ Pilnuje tego `test/kalkulator.spec.js`: okresy muszą być wymienione
 w komplecie, przy składce musi stać, którego wariantu dotyczy, a ciąg
 „zamiast 12" nie może wrócić na stronę.
 
+**Okres to czas NAJDŁUŻSZY, nie najkrótszy** (LW044 § 15 pkt 9: okres
+odszkodowawczy). Do 21.10.2026 kalkulator pisał „minimum przez 24 miesiące".
+Piszemy „najdłużej przez", a o starcie wypłaty — „po okresie wyczekiwania
+ustalonym w umowie". **„Od pierwszego dnia niezdolności" nie wraca** (stało
+w stopce 231 stron, w opisie i FAQ strony głównej): LW044 za sam okres
+wyczekiwania świadczenia nie daje. Słowo „karencja" też nie — patrz
+„okres wyczekiwania" niżej.
+
+## Kalkulator — zasiłek ZUS i tylko B2B (od 21.10.2026)
+
+Do 21.10.2026 serwis podawał zasiłek **2 240 zł** na prawie dwustu stronach,
+w plikach `.md`, `llms.txt` i w dwóch blokach FAQ w danych strukturalnych.
+To była płaca minimalna z 2021 r. (2 800 zł, stary `Calculator.js` wypisywał ją
+jako kwotę zasiłku) pomnożona przez portal jeszcze raz przez 0,8.
+
+Teraz liczy to **`src/lib/zus.ts`** ze stałych roku (płaca minimalna,
+prognoza przeciętnego wynagrodzenia) i jest jedynym źródłem kwot i zdań
+o ZUS-ie — `ZUS_TEKST` idzie do kalkulatora, stron, `llms.txt` i FAQ.
+Decyzje właściciela z 21.10.2026:
+
+| Co | Jak |
+|---|---|
+| Kwota główna | duży ZUS z najniższą podstawą (60% prognozy) **i** dobrowolnym chorobowym: 3 902 zł (2026) |
+| Dopiski przy kwocie | preferencyjny ZUS około 995 zł, bez chorobowego 0 zł |
+| Wzór | 80% podstawy po odliczeniu 13,71%; przedsiębiorca dopiero po 90 dniach chorobowego, najdłużej 182 dni |
+| Etat | **kalkulator go nie liczy** — jedno zdanie opisu bez kwot (`ZUS_TEKST.etat`); na etacie zasiłek zależy od pensji, a przełącznik pokazywał przy nim zasiłek przedsiębiorcy |
+| Limit 80% B2B / 65% etat | zostaje („jest dobrze") |
+| Najwyższe świadczenie | 50 000 zł/mies. — podawane publicznie; liczba z `RYZYKA` w `@ud/wniosek` (`SWIADCZENIE_MAX`), nie wpisana drugi raz |
+
+Zasiłek to kwota **brutto**, a dochód w kalkulatorze — netto. Dlatego tabele
+pokazują zasiłek i świadczenie z polisy **obok siebie, bez sumy „ZUS +
+polisa"**: suma brutto z netto przekraczała dochód i przeczyła zdaniu, że
+ubezpieczenie nie może być korzystniejsze niż praca. Składka jest opisana jako
+kwota **razem z opłatą dystrybucyjną** (tak liczy kalibracja, `premium_total`).
+
+**Co rok w styczniu `test/zus.spec.js` robi się czerwony** (`ROK` starszy niż
+bieżący). To test, nie bramka w buildzie — nowe kwoty wpisuje się w `zus.ts`
+(płaca minimalna, prognoza przeciętnego wynagrodzenia), test sprawdza, że
+podstawy wynikają z nich, i skanuje cały build (bez wpisów bloga) na „2 240 zł",
+„2 800 zł", „od pierwszego dnia niezdolności", „karencj", „minimum przez N
+miesięcy" i „zł / dzień".
+
+### Astro gubi spację przy łamaniu linii obok `{wyrażenia}`
+
+W szablonie `.astro` odstęp z przełamaniem linii **tuż przed albo tuż po
+wyrażeniu albo znaczniku** znika: `przez {MIESIECY_WYPLATY}⏎miesiące` dało
+„24miesiące", `stawki⏎{OPIS_KALIBRACJI}` — „stawkiz ofert",
+`.⏎{ZUS_TEKST.brutto}` — „0 zł.Zasiłek", a `</a>⏎<span>` wychodzi jako
+`</a><span>`. Łam linię między dwoma zwykłymi słowami albo dopisz `{' '}`.
+Svelte tego nie robi. Na ekranie bloki stoją jeden pod drugim i nic nie
+widać, ale w `.md` i w nazwie odnośnika (czytnik ekranu, robot) słowa się
+sklejają — stąd „Alergologświadczenie do 500 zł / dzień" na stronach kategorii.
+
+### Dane zawodów: dochód przykładowy, nie limit dzienny
+
+Pole `swiadczenieDzienne` (250–600 zł) przyszło ze starego serwisu i stało na
+każdym kafelku stron kategorii jako „świadczenie do 500 zł / dzień". **Limitu
+dziennego w ofercie nie ma.** Od 21.10.2026 w `zawody.json` jest
+`dochodPrzykladowy` — miesięczny dochód, dla którego strona zawodu liczy
+przykład (wartości przeliczone tak, żeby przykłady się nie zmieniły). Na
+kafelku stoi pierwsze ryzyko zawodu. Nie przywracaj kwot dziennych.
+
+Pomocniki w `@ud/zawody` (test: `packages/zawody/test/pomocnicy.test.js`):
+
+- `liczebnik(n, [1, 2–4, 5+])` — „43 zawody", nie „43 zawodów".
+- `malymi()` zamiast `toLowerCase()` na odmianach i nazwach grup —
+  „specjalisty HR", „AI engineera", „IT / tech" zamiast „hr", „ai", „it".
+- `pokrewne()` bierze kolejne zawody po bieżącym, z zawinięciem. Pierwsze
+  z alfabetu zostawiały 61 ze 188 stron bez odnośnika z tej sekcji.
+- `przekierowania()` daje każdą regułę także bez ukośnika na końcu — Pages
+  dopasowuje `_redirects` dosłownie i `/stary-adres` kończył się 404.
+
 ## Kalkulator — stawka pochodzi z ofert, nie z sufitu
 
 Stawka 1,5% ze starego `Calculator.js` leżała **poniżej najtańszej oferty,
