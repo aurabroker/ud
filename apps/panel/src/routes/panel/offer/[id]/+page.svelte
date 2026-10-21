@@ -28,7 +28,7 @@
   const klient = $derived(data.clients.find((x) => x.id === data.offer.client_id) || null);
   const telefon = $derived(data.offer.client_phone || klient?.phone || '');
   const email = $derived(data.offer.client_email || klient?.email || '');
-  // Zawód podany przez klienta, a obok — gdy inny — ten, pod którym wycenił go ubezpieczyciel.
+  // Zawód podany przez klienta; z oferty ubezpieczyciela tylko, gdy klient go nie podał.
   const zawod = $derived(zawodKlienta(data.zawodKlienta, data.documents));
 
   // pola edycji
@@ -79,7 +79,6 @@
     <span><span class="muted">E-mail:</span> {#if email}<a href="mailto:{email}">{email}</a>{:else}—{/if}</span>
     <span class="of-zawod"><span class="muted">Zawód:</span>
       {#if zawod.zawod}<strong>{zawod.zawod}</strong>{#if zawod.zOferty}<span class="muted">{' (z oferty ubezpieczyciela)'}</span>{/if}{:else}—{/if}
-      {#if zawod.wOfercie}<span class="muted">{` · w ofercie ubezpieczyciela: ${zawod.wOfercie}`}</span>{/if}
     </span>
   </div>
   {#if data.offer.client_id}

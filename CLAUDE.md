@@ -1680,13 +1680,15 @@ wszystkich wariantów oferty. Wybór był zapisany poprawnie
 - **Mail „Decyzja klienta" do agenta** niesie numer wariantu, kwoty i link do
   oferty w panelu; wartości są escape'owane.
 - **Zawód w karcie kontaktu (v.0.73)** to ten, który wskazał klient
-  (`ud_clients.profession`), a obok — gdy inny — zawód, pod którym wycenił go
-  ubezpieczyciel (`ud_offer_documents.profession` z PDF-u): „Stylistka
-  paznokci · w ofercie ubezpieczyciela: Kosmetyczka". Na 20.10.2026 tak było
-  w 13 z 41 ofert. Nie pokazuj tylko jednego z nich — rozjazd jest dokładnie
-  tym, o co klient zapyta. Klient bez zawodu w kartotece → zawód z oferty
-  z dopiskiem. `src/lib/zawodKlienta.js`; loader czyta zawód tylko
-  przypiętego klienta, nie całej listy wyboru.
+  (`ud_clients.profession`). Zawodu z oferty ubezpieczyciela
+  (`ud_offer_documents.profession`) obok **nie** pokazujemy — v.0.73 dopisywał
+  „· w ofercie ubezpieczyciela: Kosmetyczka", a v.0.74 to zdjął decyzją
+  właściciela z 21.10.2026: „stylistka paznokci to to samo co kosmetyczka".
+  Ubezpieczyciel ma własną listę zawodów i agent sam wybiera z niej pozycję,
+  więc różnica nazw to nie rozjazd do wyjaśniania. Nie przywracaj dopisku.
+  Zawód z oferty pokazuje się tylko wtedy, gdy klient żadnego nie podał
+  (z dopiskiem „z oferty ubezpieczyciela"). `src/lib/zawodKlienta.js`; loader
+  czyta zawód tylko przypiętego klienta, nie całej listy wyboru.
 
 Test: `pnpm test:wybor` w `apps/panel` (na kodzie sprzed zmiany 16 czerwonych).
 
