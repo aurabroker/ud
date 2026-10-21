@@ -20,10 +20,12 @@ const sciezka = `/blog/${a.slug}/`;
 const tytul = `${a.tytul} | UtrataDochodu.pl`;
 const opis = a.zajawka;
 /**
- * Okładka do podglądu linku i do danych strukturalnych — wariant 1600 px.
- * Facebook zaleca obrazek podglądu szeroki co najmniej na 1200 px, a Google
- * przy dużych miniaturach w Discover — na 1200 px; wariant 800 px nie
- * spełnia żadnego z tych progów. Adres jest już na naszej domenie
+ * Okładka do podglądu linku i do danych strukturalnych — największy wariant
+ * z normalizacji (`obrazDuzy`, nominalnie 1600 px). Facebook zaleca co
+ * najmniej 1200 px, Google przy dużych miniaturach w Discover — 1200 px.
+ * Normalizacja nie powiększa, a nazwę -1600 nadaje zawsze: przy węższym
+ * źródle plik ma szerokość źródła (21.10.2026: w-pracy-duzo-wypadkow
+ * 800×600, kto-placi-za-l4-… 1200×630). Adres jest już na naszej domenie
  * (`/media/…`, patrz przezMedia w lib/artykuly.ts).
  */
 const okladka = a.obrazDuzy ?? a.obraz;

@@ -16,7 +16,7 @@
 import type { APIRoute } from 'astro';
 import { ZAWODY, kategorie, wKategorii, slugKategorii, tresc, malymi } from '@ud/zawody';
 import { ARTYKULY } from '../lib/artykuly';
-import { FIRMA, SERWIS, COVERHOLDERZY } from '../lib/firma';
+import { FIRMA, SERWIS, OPIS_UBEZPIECZYCIELA } from '../lib/firma';
 import { LIMIT, OKRESY, MIESIECY_MAX, zl } from '../lib/symulacja';
 import { SWIADCZENIE_MAX } from '../lib/granice';
 import { ZASILEK_JDG, ZUS_TEKST } from '../lib/zus';
@@ -52,9 +52,7 @@ export const GET: APIRoute = () => {
 
 Serwis prowadzi ${FIRMA.nazwaPelna} z siedzibą w Warszawie, agent ubezpieczeniowy
 wpisany do Rejestru Pośredników Ubezpieczeniowych KNF pod numerem ${FIRMA.rpu}
-(KRS ${FIRMA.krs}, REGON ${FIRMA.regon}). Ubezpieczycielem jest ${FIRMA.ubezpieczyciel};
-w sprawach zawarcia i wykonania umowy reprezentują go ${COVERHOLDERZY.join(' oraz ')} —
-coverholderzy Lloyd’s.
+(KRS ${FIRMA.krs}, REGON ${FIRMA.regon}). ${OPIS_UBEZPIECZYCIELA}
 
 ## Na czym polega produkt
 
@@ -76,7 +74,9 @@ niezdolnością do wykonywania zawodu z powodu choroby lub nieszczęśliwego wyp
   niezdolność do pracy oraz śmierć i inwalidztwo wskutek nieszczęśliwego wypadku
   (świadczenia jednorazowe).
 - **Warianty:** Leadenhall MEDICARE (LW047), MEDICA (LW046) dla zawodów medycznych
-  oraz Utrata Dochodu (LW044) dla pozostałych. Warunki szczególne HIV/WZW
+  oraz Utrata Dochodu (LW044) dla pozostałych; CEU Utrata Dochodu i LOI Premium dla osób,
+  które nie zatrudniają nikogo, kto przejmuje ich obowiązki, oraz CEU Utrata Dochodu
+  dla zatrudniających. Warunki szczególne HIV/WZW
   (LW048 do MEDICA, LW049 do MEDICARE) dokupuje się tylko do wariantów medycznych:
   dają osobne świadczenie za samo zakażenie po niezamierzonym kontakcie z krwią
   lub płynami ustrojowymi w pracy — jednorazową wypłatę oraz zwrot kosztów leków
@@ -87,7 +87,8 @@ niezdolnością do wykonywania zawodu z powodu choroby lub nieszczęśliwego wyp
 Te wyłączenia są istotne i często pomijane w materiałach marketingowych:
 
 - wypalenie zawodowe jako samodzielna diagnoza,
-- choroby psychiczne,
+- choroby psychiczne — w Leadenhall, gdy są jedyną przyczyną niezdolności; w CEU depresja
+  i podobne rozpoznania bez tego zastrzeżenia,
 - częściowa niezdolność do pracy,
 - schorzenia leczone w ciągu 24 miesięcy przed zawarciem umowy, o ile nie
   zostały zgłoszone i zaakceptowane przez ubezpieczyciela,

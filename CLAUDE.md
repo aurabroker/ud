@@ -79,12 +79,19 @@ serwisów. Portal podaje warianty spod `/media/<plik>`
 (`functions/media/[plik].js` strumieniuje plik, jak `/owu/`); adres przepisuje
 build (`przezMedia()` w `src/lib/artykuly.ts`), a `artykuly.json` i pliki
 treści zostają z adresami z bazy. Funkcja przepuszcza tylko nazwy z
-normalizacji (`<slug>-cover|contentN-800|1600.webp`) — nie jest otwartym proxy
-do kubełka. Pilnuje tego `test/media.spec.js`.
+normalizacji (`<slug>-cover|contentN-800|1600.webp`) **i tylko dla slugów
+z `artykuly.json`** — katalog `normalized/` trzyma warianty wszystkich jedenastu
+serwisów, więc sam kształt nazwy wpuściłby zdjęcia cudzych marek pod naszą
+domenę. Ten sam warunek (`dozwolony()`) stosuje `przezMedia()`. Funkcja
+odpowiada 304 na `If-None-Match` (bufor dostaje nagłówki warunkowe żądania).
+Importuje `artykuly.json` — wrangler 4 bundluje to bez problemu (sprawdzone
+`wrangler pages functions build`, 21.10.2026). Pilnuje tego `test/media.spec.js`.
 
 Domyślny `og:image` to `public/og-domyslny.jpg` (1200×630, odtwarzany
-`node scripts/og-domyslny.mjs`), wpisy mają `og:type article` i okładkę
-1600 px. Do 21.10.2026 karta OG wskazywała plik, którego nie było, na 34
+`node scripts/og-domyslny.mjs`), wpisy mają `og:type article` i największy
+wariant okładki (`obrazDuzy`, nominalnie 1600 px). Normalizacja nie powiększa,
+więc wpis z wąskim źródłem dostaje pod nazwą -1600 plik węższy
+(w-pracy-duzo-wypadkow: 800×600 — za mało na dużą miniaturę w Discover). Do 21.10.2026 karta OG wskazywała plik, którego nie było, na 34
 stronach. Pilnuje tego `test/og.spec.js`.
 
 ### Renderowanie zdjęcia — wzorzec obowiązkowy
@@ -326,6 +333,20 @@ w niewłaściwy.
 ```
 NODE_PATH=$(npm root -g) node tests/quick-form-test.js
 ```
+
+### Portal: skrypt Turnstile na KAŻDEJ stronie z formularzem
+
+Komponenty portalu (`Opinia.svelte`, `SzybkiKontakt.svelte`, `Wniosek.svelte`)
+montują widżet przez `window.turnstile` — bez
+`<script … turnstile/v0/api.js?render=explicit&onload=onloadTurnstileCallback>`
+na stronie token idzie pusty, a funkcja odpowiada 400. Skrypt stał tylko na
+`/wniosek/`, więc **od 14.10 do 21.10.2026 `/opinie/` i `/pracuj-z-nami/` nie
+przyjęły ani jednego zgłoszenia**, bez śladu w `ud_errors`. Nowa strona
+z takim formularzem dostaje ten sam tag przed `</Baza>`. Pilnuje tego
+`test/turnstile.spec.js` (każda strona z wyspą `kluczTurnstile` w dist ma
+skrypt) — testy formularzy podają atrapę **zamiast** api.js przez
+`page.route`, nie `addInitScript`: tamta wersja przechodziła na stronie bez
+skryptu.
 
 ---
 

@@ -80,8 +80,9 @@ ${pytania}
 ## Wyłączenia
 
 Nieobjęte ochroną: wypalenie zawodowe jako samodzielna diagnoza, choroby
-psychiczne, częściowa niezdolność do pracy, schorzenia leczone w ciągu
-24 miesięcy przed zawarciem umowy.
+psychiczne jako jedyna przyczyna niezdolności (w CEU także bez tego warunku),
+częściowa niezdolność do pracy, schorzenia leczone w ciągu 24 miesięcy przed
+zawarciem umowy.
 
 ## Zawody pokrewne
 

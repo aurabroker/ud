@@ -29,6 +29,10 @@ import { EKSPERT } from '../src/lib/ekspert.ts';
  * i „każda przechodzi weryfikację" — jedyną weryfikacją był Turnstile.
  */
 
+/** Zastępuje api.js Cloudflare'a: definiuje window.turnstile i woła callback, jak prawdziwy skrypt. */
+const ATRAPA_TURNSTILE = 'window.turnstile={render:()=>"w1",getResponse:()=>"token-testowy",reset(){},remove(){}};'
+  + 'window.onloadTurnstileCallback&&window.onloadTurnstileCallback();';
+
 const STRONY = [
   '/',
   '/jak-to-dziala/',
@@ -207,9 +211,13 @@ test.describe('/opinie/: bez opinii, których nikt nie potwierdził', () => {
   });
 
   test('formularz opinii dalej wysyła ocenę do review-submit', async ({ page }) => {
-    await page.route('https://challenges.cloudflare.com/**', (route) => route.abort());
-    await page.addInitScript(() => {
-      window.turnstile = { render: () => 'w1', getResponse: () => 'token-testowy', reset() {}, remove() {} };
+    // Atrapa podana W MIEJSCE skryptu Cloudflare, a nie wstrzyknięta z góry:
+    // wersja z addInitScript przechodziła na stronie, która skryptu w ogóle nie
+    // ładowała — a wtedy prawdziwy klient nie wysłał nic (do 21.10.2026).
+    let pobranoSkrypt = false;
+    await page.route('https://challenges.cloudflare.com/turnstile/v0/api.js*', (route) => {
+      pobranoSkrypt = true;
+      return route.fulfill({ contentType: 'application/javascript', body: ATRAPA_TURNSTILE });
     });
     let cialo = null;
     await page.route('**/functions/v1/review-submit', async (route) => {
@@ -224,6 +232,7 @@ test.describe('/opinie/: bez opinii, których nikt nie potwierdził', () => {
     await page.getByRole('button', { name: 'Wyślij opinię' }).click();
 
     await expect(page.getByRole('status')).toContainText('gdy potwierdzimy, że jesteś naszym klientem');
+    expect(pobranoSkrypt, 'strona nie wczytuje skryptu Turnstile').toBe(true);
     expect(cialo).toMatchObject({ name: 'Anna', city: 'Poznań', rating: 5, 'cf-turnstile-response': 'token-testowy' });
   });
 });

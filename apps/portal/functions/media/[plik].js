@@ -17,11 +17,15 @@
  * Adresy przepisuje build (`src/lib/artykuly.ts`, funkcja `przezMedia`):
  * artykuly.json i pliki treści zostają takie jak w bazie.
  *
- * Funkcja nie jest otwartym proxy do kubełka: przepuszcza wyłącznie nazwy
- * wariantów z normalizacji (`<slug>-cover-800.webp`,
- * `<slug>-content1-1600.webp`…). Oryginały z aparatu — do 15,9 MB — i każda
- * inna ścieżka dostają 404 bez zapytania do Supabase.
+ * Funkcja nie jest otwartym proxy do kubełka: przepuszcza wyłącznie warianty
+ * z normalizacji (`<slug>-cover-800.webp`, `<slug>-content1-1600.webp`…)
+ * i tylko dla slugów wpisów portalu z `artykuly.json`. Katalog `normalized/`
+ * trzyma warianty wszystkich jedenastu serwisów z `aura_articles`, więc sam
+ * kształt nazwy wpuściłby zdjęcia cudzych marek pod naszą domenę. Oryginały
+ * z aparatu — do 15,9 MB — i każda inna ścieżka dostają 404 bez zapytania
+ * do Supabase.
  */
+import dane from '../../src/dane/artykuly.json' with { type: 'json' };
 
 /** Publiczny katalog wariantów. Ten sam prefiks przepisuje `artykuly.ts`. */
 export const ZRODLO =
@@ -33,6 +37,16 @@ export const ZRODLO =
  * build nie przepisze adresu, którego funkcja potem nie poda.
  */
 export const NAZWA_PLIKU = /^[a-z0-9-]+-(cover|content\d+)-(800|1600)\.webp$/;
+
+/** Slugi wpisów portalu — tylko ich warianty funkcja podaje. */
+const SLUGI = new Set(dane.artykuly.map((a) => a.slug));
+
+/**
+ * Jedyny warunek dostępu, wspólny dla funkcji i `przezMedia()` w artykuly.ts:
+ * build nie przepisze na /media/ adresu, którego funkcja potem nie poda.
+ */
+export const dozwolony = (plik) =>
+  NAZWA_PLIKU.test(plik) && SLUGI.has(plik.replace(/-(cover|content\d+)-(800|1600)\.webp$/, ''));
 
 /**
  * Doba w przeglądarce, tydzień na krawędzi. Bez `immutable`: nazwa pliku nie
@@ -55,6 +69,28 @@ const blad = (tekst, status, dodatkowe = {}) =>
 /** Odpowiedź na HEAD to te same nagłówki bez treści. */
 const bezTresci = (odp) => new Response(null, { status: odp.status, headers: odp.headers });
 
+/**
+ * Klucz bufora z nagłówkami warunkowymi żądania. Cache API Workers sam
+ * odpowiada wtedy 304 (If-None-Match / If-Modified-Since) albo 206 (Range);
+ * goły klucz zwracał zawsze pełne 200 i ETag z Supabase do niczego nie służył.
+ */
+const WARUNKOWE = ['if-none-match', 'if-modified-since', 'range'];
+const zWarunkami = (url, request) => {
+  const h = new Headers();
+  for (const n of WARUNKOWE) {
+    const v = request.headers.get(n);
+    if (v) h.set(n, v);
+  }
+  return new Request(url, { method: 'GET', headers: h });
+};
+
+/** Czy If-None-Match żądania trafia w ETag pliku (porównanie słabe, RFC 9110). */
+const pasujeEtag = (inm, etag) => {
+  if (!inm || !etag) return false;
+  const bez = (t) => t.trim().replace(/^W\//, '');
+  return inm.split(',').some((t) => t.trim() === '*' || bez(t) === bez(etag));
+};
+
 export async function onRequest({ params, request, waitUntil }) {
   const metoda = request.method.toUpperCase();
   if (metoda !== 'GET' && metoda !== 'HEAD') {
@@ -64,7 +100,7 @@ export async function onRequest({ params, request, waitUntil }) {
   const plik = String(params?.plik ?? '');
   // Kształt sprawdzamy, zanim cokolwiek pójdzie dalej. Bez tego adres stałby
   // się otwartym proxy do całego publicznego kubełka, z oryginałami włącznie.
-  if (!NAZWA_PLIKU.test(plik)) return blad('Nie znaleziono pliku.', 404);
+  if (!dozwolony(plik)) return blad('Nie znaleziono pliku.', 404);
 
   const adres = new URL(request.url);
   const podglad = adres.hostname.endsWith('.pages.dev');
@@ -75,7 +111,7 @@ export async function onRequest({ params, request, waitUntil }) {
   const bufor = globalThis.caches?.default;
 
   if (bufor) {
-    const zapisana = await bufor.match(klucz).catch(() => undefined);
+    const zapisana = await bufor.match(zWarunkami(klucz.url, request)).catch(() => undefined);
     if (zapisana) return metoda === 'HEAD' ? bezTresci(zapisana) : zapisana;
   }
 
@@ -110,6 +146,17 @@ export async function onRequest({ params, request, waitUntil }) {
   if (bufor) {
     const zapis = bufor.put(klucz, odpowiedz.clone()).catch(() => {});
     if (typeof waitUntil === 'function') waitUntil(zapis);
+  }
+
+  // Przy chybieniu w bufor warunek sprawdzamy sami — dopiero PO zapisie do
+  // bufora, żeby pierwszy klient z ETagiem nie zostawił bufora pustego.
+  if (pasujeEtag(request.headers.get('if-none-match'), naglowki.get('etag'))) {
+    odpowiedz.body?.cancel().catch(() => {});
+    const h304 = new Headers({ ETag: naglowki.get('etag'), 'Cache-Control': BUFOR });
+    const zmieniono = naglowki.get('last-modified');
+    if (zmieniono) h304.set('Last-Modified', zmieniono);
+    if (podglad) h304.set('X-Robots-Tag', 'noindex, nofollow');
+    return new Response(null, { status: 304, headers: h304 });
   }
 
   if (metoda === 'HEAD') {

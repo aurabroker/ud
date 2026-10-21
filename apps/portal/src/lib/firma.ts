@@ -85,12 +85,24 @@ export const COVERHOLDERZY: readonly string[] = Object.values(FIRMA.coverholderz
  * „przedstawicielem Ubezpieczyciela w sprawach związanych z zawarciem
  * i wykonaniem Umowy ubezpieczenia" (LW044 § 1 ust. 3).
  */
-export const OPIS_PODMIOTOW =
+/**
+ * Ubezpieczyciel, coverholderzy i droga zgłaszania szkód. „Przedstawiciel
+ * w sprawach zawarcia i wykonania umowy" to brzmienie wyłącznie LW044 § 1
+ * ust. 3; w CEU likwidację szkód ubezpieczyciel powierzył WAGAS S.A.
+ * (OWU CEU Utrata dochodu § 24 ust. 4, LOI Premium § 19 ust. 3, dla
+ * zatrudniających § 24 ust. 4), a w Leadenhall roszczenia idą przez Leadenhall
+ * (LW044, „Roszczenia" ust. 2). Bez tego model odsyłał klienta CEU do CEU.
+ */
+export const OPIS_UBEZPIECZYCIELA =
   `Ubezpieczycielem jest ${FIRMA.ubezpieczyciel} z siedzibą w Brukseli; `
-  + `${COVERHOLDERZY.join(' i ')} to coverholderzy Lloyd’s, czyli przedstawiciele `
-  + 'ubezpieczyciela w sprawach zawarcia i wykonania umowy; '
-  + `${FIRMA.nazwa} jest agentem ubezpieczeniowym wpisanym do Rejestru Pośredników `
-  + `Ubezpieczeniowych KNF pod numerem ${FIRMA.rpu}.`;
+  + `${COVERHOLDERZY.join(' i ')} to coverholderzy Lloyd’s, za których pośrednictwem `
+  + 'zawiera się umowę. Roszczenia z produktów Leadenhall zgłasza się do ubezpieczyciela '
+  + 'za pośrednictwem Leadenhall Insurance S.A., a z produktów CEU — za pośrednictwem '
+  + 'WAGAS S.A., której ubezpieczyciel powierzył likwidację szkód.';
+
+export const OPIS_PODMIOTOW =
+  `${OPIS_UBEZPIECZYCIELA} ${FIRMA.nazwa} jest agentem ubezpieczeniowym wpisanym do `
+  + `Rejestru Pośredników Ubezpieczeniowych KNF pod numerem ${FIRMA.rpu}.`;
 
 export const SERWIS = {
   url: 'https://utratadochodu.pl',

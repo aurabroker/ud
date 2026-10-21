@@ -49,7 +49,7 @@ const brakWKubelku = () => new Response(
  * Woła funkcję jak Pages: `params.plik` to ostatni człon ścieżki.
  * `siec` to podstawiony fetch; zwracamy też listę adresów, o które pytał.
  */
-async function zadanie(sciezka, { metoda = 'GET', siec = zKubelka, host = 'utratadochodu.pl', bufor } = {}) {
+async function zadanie(sciezka, { metoda = 'GET', siec = zKubelka, host = 'utratadochodu.pl', bufor, naglowki = {} } = {}) {
   const wolane = [];
   const prawdziwy = globalThis.fetch;
   const prawdziweCaches = globalThis.caches;
@@ -63,7 +63,7 @@ async function zadanie(sciezka, { metoda = 'GET', siec = zKubelka, host = 'utrat
   try {
     const url = new URL(`https://${host}${sciezka}`);
     const odp = await onRequest({
-      request: new Request(url, { method: metoda }),
+      request: new Request(url, { method: metoda, headers: naglowki }),
       params: { plik: decodeURIComponent(url.pathname.slice('/media/'.length)) },
       env: {},
       waitUntil: (p) => czekaj.push(p),
@@ -92,6 +92,39 @@ function atrapaBufora() {
     },
   };
 }
+
+test('If-None-Match z ETagiem pliku: 304 bez treści, z ETagiem i buforem', async () => {
+  // Bez tego każda rewalidacja po dobie (także Googlebota-Image) ściągała cały plik.
+  const etag = '"74a5bba093a9aaf23ca96cbacdacf1a9"';
+  for (const inm of [etag, `W/${etag}`, `"inny", ${etag}`]) {
+    const { odp } = await zadanie(`/media/${PLIK}`, { naglowki: { 'If-None-Match': inm } });
+    expect(odp.status, inm).toBe(304);
+    expect(await odp.text(), inm).toBe('');
+    expect(odp.headers.get('etag')).toBe(etag);
+    expect(odp.headers.get('cache-control')).toBe(BUFOR);
+    expect(odp.headers.get('x-robots-tag')).toBeNull();
+  }
+  // Inny ETag — pełna odpowiedź.
+  const { odp } = await zadanie(`/media/${PLIK}`, { naglowki: { 'If-None-Match': '"inny"' } });
+  expect(odp.status).toBe(200);
+});
+
+test('bufor dostaje nagłówki warunkowe żądania (Cache API sam odpowie 304/206), zapis bez nich', async () => {
+  const bufor = atrapaBufora();
+  const widziane = [];
+  const match = bufor.match.bind(bufor);
+  bufor.match = async (z) => { widziane.push(z.headers.get('if-none-match')); return match(z); };
+  const put = bufor.put.bind(bufor);
+  const klucze = [];
+  bufor.put = async (z, o) => { klucze.push(z.headers.get('if-none-match')); return put(z, o); };
+
+  const { odp } = await zadanie(`/media/${PLIK}`, { bufor, naglowki: { 'If-None-Match': '"74a5bba093a9aaf23ca96cbacdacf1a9"' } });
+  expect(odp.status).toBe(304);
+  expect(widziane).toEqual(['"74a5bba093a9aaf23ca96cbacdacf1a9"']);
+  // Pierwszy klient z ETagiem napełnia bufor pełną odpowiedzią, kluczem bez warunków.
+  expect(klucze).toEqual([null]);
+  expect(bufor.wpisy.size).toBe(1);
+});
 
 test('wariant z normalizacji wychodzi z naszej domeny jako WebP', async () => {
   const { odp, wolane } = await zadanie(`/media/${PLIK}`);
@@ -167,6 +200,11 @@ test('biała lista: tylko nazwy wariantów, bez pytania Supabase o resztę', asy
     'zawal-cover-800.webp%00.jpg',
     '-cover-800.webp',
     '',
+    // warianty innych serwisów z aura_articles: kształt nazwy poprawny, slug nie nasz
+    // (oba pliki istnieją w kubełku — sprawdzone 21.10.2026)
+    'przewodnik-po-gwarancjach-ubezpieczeniowych-content1-1600.webp',
+    'czym-jest-plynnosc-finansowa-w-firmie-content1-1600.webp',
+    'inny-serwis-cover-800.webp',
   ];
   for (const nazwa of odrzucone) {
     const { odp, wolane } = await zadanie(`/media/${encodeURIComponent(nazwa)}`);

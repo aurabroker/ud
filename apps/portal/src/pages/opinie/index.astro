@@ -28,8 +28,6 @@ import { funkcja, TURNSTILE_KLUCZ } from '../../lib/uslugi';
 
 const sciezka = '/opinie/';
 const tytul = 'Opinie klientów | UtrataDochodu.pl';
-const opis = 'Opinie osób, które zawarły polisę przez UtrataDochodu.pl. Publikujemy je '
-  + 'po potwierdzeniu, że autor jest naszym klientem — także krytyczne.';
 
 const URL_FUNKCJI = funkcja('review-submit');
 const KLUCZ_TURNSTILE = TURNSTILE_KLUCZ;
@@ -45,6 +43,12 @@ type Opinia = {
   potwierdzonoKlienta?: string;
 };
 const OPINIE = (dane.opinie as Opinia[]).filter((o) => Boolean(o.potwierdzonoKlienta));
+/** Opis w wynikach wyszukiwania nie może obiecywać opinii, których na stronie nie ma. */
+const opis = OPINIE.length === 0
+  ? 'Zbieramy pierwsze opinie klientów UtrataDochodu.pl. Publikujemy wyłącznie opinie osób, '
+    + 'które zawarły polisę za naszym pośrednictwem — także krytyczne.'
+  : 'Opinie osób, które zawarły polisę przez UtrataDochodu.pl. Publikujemy je '
+    + 'po potwierdzeniu, że autor jest naszym klientem — także krytyczne.';
 const data = (iso: string) =>
   new Date(iso).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -123,4 +127,10 @@ const jsonld = graf([
       <Opinia client:visible urlFunkcji={URL_FUNKCJI} kluczTurnstile={KLUCZ_TURNSTILE} />
     </aside>
   </div>
+  <!-- Bez tego skryptu widżet się nie montuje, token idzie pusty, a funkcja
+       odpowiada 400 — od 14.10.2026 do 21.10.2026 ten formularz nie wysłał
+       ani jednego zgłoszenia. render=explicit, bo komponent sam tworzy widżet
+       (zamontuj() w onMount albo onloadTurnstileCallback). -->
+  <script is:inline async defer
+          src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onloadTurnstileCallback"></script>
 </Baza>

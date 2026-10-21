@@ -137,4 +137,10 @@ const jsonld = graf([
       </div>
     </div>
   </section>
+  <!-- Bez tego skryptu widżet się nie montuje, token idzie pusty, a funkcja
+       odpowiada 400 — od 14.10.2026 do 21.10.2026 ten formularz nie wysłał
+       ani jednego zgłoszenia. render=explicit, bo komponent sam tworzy widżet
+       (zamontuj() w onMount albo onloadTurnstileCallback). -->
+  <script is:inline async defer
+          src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onloadTurnstileCallback"></script>
 </Baza>

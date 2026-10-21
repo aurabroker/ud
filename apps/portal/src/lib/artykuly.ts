@@ -13,7 +13,7 @@
  * usterka, dla wyszukiwarki — brak struktury nagłówkowej w połowie tekstu.
  */
 import dane from '../dane/artykuly.json';
-import { ZRODLO, NAZWA_PLIKU } from '../../functions/media/[plik].js';
+import { ZRODLO, dozwolony } from '../../functions/media/[plik].js';
 
 const TRESCI = import.meta.glob<string>('../dane/artykuly/*.html', {
   query: '?raw',
@@ -50,8 +50,8 @@ export interface Artykul {
  * w buildzie: artykuly.json i pliki treści zostają identyczne z bazą
  * (pełna synchronizacja i porównania md5 opierają się na tym).
  *
- * Przepisujemy tylko to, co funkcja potem poda — to samo wyrażenie
- * `NAZWA_PLIKU`. Adres spoza wzorca zostaje bez zmian i wychodzi w teście
+ * Przepisujemy tylko to, co funkcja potem poda — ten sam warunek
+ * `dozwolony()` (kształt nazwy i slug wpisu z artykuly.json). Adres spoza wzorca zostaje bez zmian i wychodzi w teście
  * `media.spec.js`, zamiast zamienić się na stronie w pusty obrazek.
  */
 export function przezMedia(adres: string): string;
@@ -59,7 +59,7 @@ export function przezMedia(adres: string | null): string | null;
 export function przezMedia(adres: string | null): string | null {
   if (!adres?.startsWith(ZRODLO)) return adres;
   const plik = adres.slice(ZRODLO.length);
-  return NAZWA_PLIKU.test(plik) ? `/media/${plik}` : adres;
+  return dozwolony(plik) ? `/media/${plik}` : adres;
 }
 
 /** Wszystkie adresy kubełka w atrybucie (`src` albo lista `srcset`). */
