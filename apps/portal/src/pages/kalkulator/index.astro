@@ -2,19 +2,20 @@
 import Baza from '../../layouts/Baza.astro';
 import Kalkulator from '../../components/Kalkulator.svelte';
 import { graf, organizacja, serwis, strona, okruszki, faq } from '../../lib/seo';
-import { symuluj, zl, ZUS_MIESIECZNIE, LIMIT, MIESIECY_WYPLATY, OKRESY } from '../../lib/symulacja';
+import { symuluj, zl, zlZakres, LIMIT, MIESIECY_WYPLATY, OKRESY, ZAKRES_DOCHODU } from '../../lib/symulacja';
+import { ZASILEK_JDG, ZUS_TEKST, WYCZEKIWANIE_DOBROWOLNE_DNI, OKRES_ZASILKOWY_DNI } from '../../lib/zus';
 
 const sciezka = '/kalkulator/';
 const tytul = 'Kalkulator ubezpieczenia utraty dochodu | UtrataDochodu.pl';
-const opis = 'Policz, ile dostaniesz z ZUS na zwolnieniu i ile dołoży polisa. '
-  + 'Symulacja przy dochodzie od 5 000 do 100 000 zł, dla B2B i umowy o pracę.';
+const opis = 'Policz, ile dostaniesz z ZUS na zwolnieniu, ile wypłaci polisa i ile może kosztować. '
+  + `Symulacja dla działalności i kontraktu B2B przy dochodzie od ${zl(ZAKRES_DOCHODU.min)} `
+  + `do ${zl(ZAKRES_DOCHODU.max)}.`;
 
 /** Kilka punktów odniesienia w HTML-u — kalkulator jest wyspą, więc bez nich
  *  robot i model językowy zobaczyłyby pustą ramkę. */
 const PRZYKLADY = [10000, 18000, 30000, 50000].map((d) => ({
   dochod: d,
-  b2b: symuluj({ dochod: d, zatrudnienie: 'b2b' }),
-  etat: symuluj({ dochod: d, zatrudnienie: 'etat' }),
+  ...symuluj({ dochod: d }),
 }));
 
 const PYTANIA = [
@@ -26,16 +27,26 @@ const PYTANIA = [
   },
   {
     pytanie: 'Skąd bierze się kwota zasiłku z ZUS w kalkulatorze?',
-    odpowiedz: `Kalkulator zakłada najniższą podstawę wymiaru składek (${zl(ZUS_MIESIECZNIE)}) `
-      + `i zasiłek w wysokości 80% tej podstawy, czyli ${zl(Math.round(ZUS_MIESIECZNIE * 0.8))} `
-      + 'miesięcznie. Jeśli opłacasz składki od wyższej podstawy, Twój zasiłek będzie wyższy.',
+    odpowiedz: `Zasiłek chorobowy to ${ZUS_TEKST.wzor}. Kalkulator pokazuje go ${ZUS_TEKST.scenariusz}: `
+      + `${zl(ZASILEK_JDG.duzy)} miesięcznie, przed podatkiem. Dla porównania: ${ZUS_TEKST.dopiski}. `
+      + `Zasiłek przysługuje najdłużej przez ${OKRES_ZASILKOWY_DNI} dni, a przedsiębiorcy dopiero po `
+      + `${WYCZEKIWANIE_DOBROWOLNE_DNI} dniach nieprzerwanego opłacania chorobowego. Jeśli opłacasz `
+      + 'składki od wyższej podstawy, Twój zasiłek będzie wyższy.',
+  },
+  {
+    pytanie: 'Czy kalkulator liczy też umowę o pracę?',
+    odpowiedz: `Nie — tylko działalność i kontrakt B2B. ${ZUS_TEKST.etat} Na etacie polisa `
+      + `obejmuje do ${Math.round(LIMIT.etat * 100)}% dochodu, a składkę wylicza ubezpieczyciel `
+      + 'na podstawie wniosku.',
   },
   {
     pytanie: 'Jak długo wypłacane jest świadczenie?',
-    odpowiedz: `Do wyboru są cztery okresy: ${OKRESY.join(', ')} miesięcy. Wybiera się go `
-      + 'przy zawarciu umowy, a świadczenie wypłacane jest co miesiąc przez cały ten czas, '
-      + `dopóki trwa orzeczona niezdolność do wykonywania zawodu. Kalkulator liczy składkę `
-      + `dla wariantu najkrótszego, ${MIESIECY_WYPLATY}-miesięcznego — dłuższy okres wypłaty ją podnosi.`,
+    odpowiedz: `Do wyboru są cztery okresy: ${OKRESY.join(', ')} miesięcy. To najdłuższy czas `
+      + 'wypłaty, wybierany przy zawarciu umowy: świadczenie przychodzi co miesiąc, dopóki trwa '
+      + 'orzeczona niezdolność do wykonywania zawodu, ale nie dłużej niż wybrany okres. '
+      + 'Pierwsza wypłata przysługuje po okresie wyczekiwania ustalonym w umowie. Kalkulator '
+      + `liczy składkę dla wariantu najkrótszego, ${MIESIECY_WYPLATY}-miesięcznego — dłuższy `
+      + 'okres wypłaty ją podnosi.',
   },
   {
     pytanie: 'Dlaczego świadczenie nie może pokryć 100% dochodu?',
@@ -73,9 +84,9 @@ const jsonld = graf([
           Kalkulator ubezpieczenia utraty dochodu
         </h1>
         <p data-odpowiedz class="text-[1.12rem] leading-relaxed text-tekst-drugi max-w-[38em] mt-5 mb-0">
-          Podaj miesięczny dochód i formę zatrudnienia. Zobaczysz, ile realnie wpłynie
-          na konto z ZUS na zwolnieniu i ile dołożyłaby polisa. To symulacja
-          poglądowa, nie oferta.
+          Podaj miesięczny dochód z działalności albo kontraktu B2B. Zobaczysz, ile
+          wypłaci ZUS na zwolnieniu, ile wypłacałaby polisa i ile może kosztować.
+          To symulacja poglądowa, nie oferta.
         </p>
       </div>
       <div class="w-full">
@@ -87,37 +98,39 @@ const jsonld = graf([
   <section class="max-w-[1200px] mx-auto px-5 py-16">
     <h2 class="text-[clamp(1.5rem,3.5vw,2.2rem)] leading-tight mb-3">Punkty odniesienia</h2>
     <p class="text-[1.05rem] leading-relaxed text-tekst-drugi max-w-[42em] mt-0 mb-8">
-      Cztery przykłady policzone tą samą formułą, co kalkulator obok. Kolumna
-      „bez polisy” to sam zasiłek z ZUS przy najniższej podstawie.
+      Cztery przykłady dla działalności i kontraktu B2B, policzone tą samą formułą,
+      co kalkulator obok. Zasiłek z ZUS nie rośnie razem z dochodem — liczy się
+      od zadeklarowanej podstawy składek.
     </p>
 
     <div class="border border-linia overflow-x-auto">
       <table class="w-full border-collapse text-left min-w-[42rem]">
-        <caption class="sr-only">Miesięczne wpływy na zwolnieniu przy różnych poziomach dochodu</caption>
+        <caption class="sr-only">Miesięczny zasiłek z ZUS, świadczenie z polisy i składka przy różnych poziomach dochodu, działalność i kontrakt B2B</caption>
         <thead>
           <tr class="bg-tlo-jasne border-b border-linia-mocna">
-            <th scope="col" class="font-mono text-[11px] tracking-[0.11em] uppercase font-semibold text-tekst-drugi px-5 py-4">Dochód</th>
-            <th scope="col" class="font-mono text-[11px] tracking-[0.11em] uppercase font-semibold text-alarm px-5 py-4">Bez polisy (ZUS)</th>
-            <th scope="col" class="font-mono text-[11px] tracking-[0.11em] uppercase font-semibold text-akcent-ciemny px-5 py-4">Z polisą — B2B</th>
-            <th scope="col" class="font-mono text-[11px] tracking-[0.11em] uppercase font-semibold text-akcent-ciemny px-5 py-4">Z polisą — etat</th>
+            <th scope="col" class="font-mono text-[11px] tracking-[0.11em] uppercase font-semibold text-tekst-drugi px-5 py-4">Dochód netto</th>
+            <th scope="col" class="font-mono text-[11px] tracking-[0.11em] uppercase font-semibold text-alarm px-5 py-4">Zasiłek ZUS</th>
+            <th scope="col" class="font-mono text-[11px] tracking-[0.11em] uppercase font-semibold text-akcent-ciemny px-5 py-4">Świadczenie z polisy</th>
+            <th scope="col" class="font-mono text-[11px] tracking-[0.11em] uppercase font-semibold text-tekst-drugi px-5 py-4">Składka miesięczna</th>
           </tr>
         </thead>
         <tbody>
           {PRZYKLADY.map((p) => (
             <tr class="border-b border-linia last:border-0">
               <th scope="row" class="px-5 py-4 font-semibold text-[15.5px] whitespace-nowrap">{zl(p.dochod)}</th>
-              <td class="px-5 py-4 font-mono text-[15.5px] text-alarm whitespace-nowrap">{zl(p.b2b.zus)}</td>
-              <td class="px-5 py-4 font-mono text-[15.5px] font-semibold text-akcent-ciemny whitespace-nowrap">{zl(p.b2b.zus + p.b2b.swiadczenie)}</td>
-              <td class="px-5 py-4 font-mono text-[15.5px] font-semibold text-akcent-ciemny whitespace-nowrap">{zl(p.etat.zus + p.etat.swiadczenie)}</td>
+              <td class="px-5 py-4 font-mono text-[15.5px] text-alarm whitespace-nowrap">{zl(p.zus)}</td>
+              <td class="px-5 py-4 font-mono text-[15.5px] font-semibold text-akcent-ciemny whitespace-nowrap">{zl(p.swiadczenie)}</td>
+              <td class="px-5 py-4 font-mono text-[15.5px] whitespace-nowrap">{zlZakres(p.skladkaOd, p.skladkaDo)}</td>
             </tr>
           ))}
         </tbody>
       </table>
     </div>
-    <p class="text-[13px] leading-relaxed text-tekst-trzeci mt-4 mb-0 max-w-[46em]">
-      Założenia: najniższa podstawa ZUS ({zl(ZUS_MIESIECZNIE)}), zasiłek 80% podstawy,
-      świadczenie z polisy {Math.round(LIMIT.b2b * 100)}% dochodu na B2B
-      i {Math.round(LIMIT.etat * 100)}% na umowie o pracę. Symulacja, nie oferta.
+    <p class="text-[13px] leading-relaxed text-tekst-drugi mt-4 mb-0 max-w-[46em]">
+      Założenia: zasiłek to {ZUS_TEKST.wzor}, {ZUS_TEKST.scenariusz}; {ZUS_TEKST.dopiski}.{' '}
+      {ZUS_TEKST.brutto} Świadczenie z polisy to {Math.round(LIMIT.b2b * 100)}% dochodu,
+      wypłacane najdłużej przez {MIESIECY_WYPLATY} miesiące. Składka razem z opłatą
+      dystrybucyjną, jako przedział z ostatnio wystawionych ofert. Symulacja, nie oferta.
     </p>
   </section>
 

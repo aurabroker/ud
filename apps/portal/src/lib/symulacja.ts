@@ -20,6 +20,8 @@
  * patrz `sprawdzKalibracje()` niżej.
  */
 import kalibracja from './kalibracja.json' with { type: 'json' };
+import { ZASILEK_JDG } from './zus';
+import { RYZYKA } from '@ud/wniosek/schemat';
 
 /**
  * Okresy wypłaty świadczenia dostępne w ofercie, w miesiącach.
@@ -141,16 +143,33 @@ export function sprawdzKalibracje(k: unknown): Kalibracja {
 
 const KALIBRACJA = sprawdzKalibracje(kalibracja);
 
-/** Najniższa podstawa wymiaru składek ZUS — z niej liczy się zasiłek na B2B. */
-export const ZUS_MIESIECZNIE = 2800;
-
-/** Maksymalny udział dochodu, jaki obejmuje polisa. */
+/**
+ * Maksymalny udział dochodu, jaki obejmuje polisa.
+ *
+ * Symulacja liczy wyłącznie B2B (decyzja właściciela z 21.10.2026): na etacie
+ * zasiłek zależy od pensji i nie ma jednej kwoty do pokazania obok suwaka.
+ * Limit dla etatu zostaje, bo stoi w tekstach.
+ */
 export const LIMIT = {
   b2b: 0.8,
   etat: 0.65,
 } as const;
 
-export type Zatrudnienie = keyof typeof LIMIT;
+/**
+ * Zakres suwaka w kalkulatorze. Stoi tutaj, bo opis strony /kalkulator/ podaje
+ * go słowami — przy osobnych liczbach opis obiecywał „od 5 000 do 100 000 zł",
+ * a suwak kończył się na 60 000.
+ */
+export const ZAKRES_DOCHODU = { min: 3000, max: 60000, krok: 500 } as const;
+
+/**
+ * Najwyższe świadczenie miesięczne, jakie przyjmuje wniosek — granica z kreatora
+ * i funkcji `form-submit` (decyzja właściciela z 12.10.2026; podawana publicznie
+ * od 21.10.2026). Bierzemy ją z `@ud/wniosek`, żeby strona nie obiecywała innej
+ * liczby niż ta, którą formularz przepuści.
+ */
+export const SWIADCZENIE_MAX: number =
+  RYZYKA.find((r) => r.klucz === 'riskTempIncapacity')!.max;
 
 /**
  * Stawka miesięczna jako udział świadczenia, wariant 24-miesięczny.
@@ -204,9 +223,8 @@ export const MNOZNIK_HIV_WZW = 1.07;
 export const MNOZNIK_OKRESU: Record<number, number> = KALIBRACJA.okresy;
 
 export interface Zalozenia {
-  /** Miesięczny dochód netto w złotych. */
+  /** Miesięczny dochód netto w złotych, działalność albo kontrakt B2B. */
   dochod: number;
-  zatrudnienie: Zatrudnienie;
   /** Klauzula HIV/WZW podnosi stawkę. */
   hivWzw?: boolean;
 }
@@ -220,16 +238,14 @@ export interface Wynik {
   skladkaOd: number;
   /** Składka przy najwyższej stawce osoby z kalibracji (`STAWKA.gora`). */
   skladkaDo: number;
-  /** Zasiłek ZUS przy najniższej podstawie. */
+  /** Zasiłek ZUS brutto na dużym ZUS-ie z chorobowym — `ZASILEK_JDG.duzy` w zus.ts. */
   zus: number;
-  /** Ile realnie brakuje bez polisy. */
-  luka: number;
   limit: number;
 }
 
-export function symuluj({ dochod, zatrudnienie, hivWzw = false }: Zalozenia): Wynik {
-  const limit = LIMIT[zatrudnienie];
-  const swiadczenie = Math.round(dochod * limit);
+export function symuluj({ dochod, hivWzw = false }: Zalozenia): Wynik {
+  const limit = LIMIT.b2b;
+  const swiadczenie = Math.min(Math.round(dochod * limit), SWIADCZENIE_MAX);
   const klauzula = hivWzw ? MNOZNIK_HIV_WZW : 1;
   const skladka = (stawka: number) => Math.round(swiadczenie * stawka * klauzula);
 
@@ -238,8 +254,7 @@ export function symuluj({ dochod, zatrudnienie, hivWzw = false }: Zalozenia): Wy
     skladka: skladka(STAWKA.srodek),
     skladkaOd: skladka(STAWKA.dol),
     skladkaDo: skladka(STAWKA.gora),
-    zus: Math.round(ZUS_MIESIECZNIE * 0.8),
-    luka: Math.max(0, dochod - ZUS_MIESIECZNIE * 0.8),
+    zus: ZASILEK_JDG.duzy,
     limit,
   };
 }
@@ -248,7 +263,7 @@ export function symuluj({ dochod, zatrudnienie, hivWzw = false }: Zalozenia): Wy
  * Formatowanie kwot — spacja jako separator tysięcy, tak jak w polskiej normie.
  *
  * useGrouping: 'always' jest tu konieczne. Domyślne 'auto' nie grupuje liczb
- * czterocyfrowych, więc obok „14 400 zł" stawało „2240 zł" — w jednej tabeli,
+ * czterocyfrowych, więc obok „14 400 zł" stawało „3902 zł" — w jednej tabeli,
  * jedno pod drugim.
  */
 const liczba = (kwota: number) =>

@@ -2,7 +2,8 @@
 import Baza from '../layouts/Baza.astro';
 import Kalkulator from '../components/Kalkulator.svelte';
 import { kategorie, ZAWODY } from '@ud/zawody';
-import { symuluj, zl, ZUS_MIESIECZNIE } from '../lib/symulacja';
+import { symuluj, zl, zlZakres, SWIADCZENIE_MAX } from '../lib/symulacja';
+import { ZASILEK_JDG, ZUS_TEKST } from '../lib/zus';
 import { graf, organizacja, serwis, strona, faq } from '../lib/seo';
 import { FIRMA } from '../lib/firma';
 import { Image } from 'astro:assets';
@@ -11,8 +12,8 @@ import { obrazKategorii, opisIlustracji } from '../lib/obrazy';
 
 const sciezka = '/';
 const tytul = 'Ubezpieczenie utraty dochodu dla samozatrudnionych | UtrataDochodu.pl';
-const opis = 'Prywatne L4 dla B2B i kontraktowych. Polisa wypłaca do 80% dochodu od pierwszego '
-  + 'dnia niezdolności do pracy, gdy ZUS liczy zasiłek od zadeklarowanej podstawy.';
+const opis = 'Prywatne L4 dla B2B i kontraktowych. Polisa wypłaca co miesiąc do 80% dochodu, '
+  + 'gdy ZUS liczy zasiłek od zadeklarowanej podstawy, a nie od tego, co zarabiasz.';
 
 const PYTANIA = [
   {
@@ -22,17 +23,21 @@ const PYTANIA = [
   },
   {
     pytanie: 'Ile wynosi zasiłek chorobowy z ZUS na kontrakcie B2B?',
-    odpowiedz: 'Zasiłek to 80% podstawy wymiaru składek. Przy najniższej podstawie daje to około '
-      + `${zl(Math.round(ZUS_MIESIECZNIE * 0.8))} miesięcznie, niezależnie od tego, ile się faktycznie zarabia.`,
+    odpowiedz: `Zasiłek to ${ZUS_TEKST.wzor}. Na dużym ZUS-ie z najniższą podstawą i z dobrowolnym `
+      + `chorobowym daje to ${zl(ZASILEK_JDG.duzy)} miesięcznie przed podatkiem, niezależnie od tego, `
+      + `ile się faktycznie zarabia; ${ZUS_TEKST.dopiski}.`,
   },
   {
     pytanie: 'Jaki procent dochodu pokrywa polisa?',
     odpowiedz: 'Do 80% udokumentowanego dochodu przy samozatrudnieniu i kontrakcie B2B, do 65% przy '
-      + 'umowie o pracę. Limit wynika z zasady, że ubezpieczenie nie może być korzystniejsze niż praca.',
+      + `umowie o pracę, najwyżej ${zl(SWIADCZENIE_MAX)} miesięcznie. Limit wynika z zasady, że `
+      + 'ubezpieczenie nie może być korzystniejsze niż praca.',
   },
   {
     pytanie: 'Od kiedy wypłacane jest świadczenie?',
-    odpowiedz: 'Od pierwszego dnia niezdolności do pracy, po upływie karencji ustalonej w umowie.',
+    odpowiedz: 'Po upływie okresu wyczekiwania ustalonego w umowie, liczonego od początku '
+      + 'niezdolności do pracy. Później co miesiąc, dopóki trwa niezdolność, najdłużej przez '
+      + 'okres wybrany w umowie.',
   },
   {
     pytanie: 'Czego polisa nie obejmuje?',
@@ -46,7 +51,7 @@ const PYTANIA = [
   },
 ];
 
-const przyklad = symuluj({ dochod: 18000, zatrudnienie: 'b2b' });
+const przyklad = symuluj({ dochod: 18000 });
 
 const jsonld = graf([
   organizacja(),
@@ -78,8 +83,7 @@ const hero = obrazHero();
         </h1>
         <p data-odpowiedz class="text-[clamp(1.05rem,2vw,1.2rem)] leading-relaxed text-tekst-drugi max-w-[32em] m-0">
           Na B2B zasiłek z ZUS liczy się od zadeklarowanej podstawy, nie od tego, co realnie zarabiasz.
-          Polisa wypłaca do 80% dochodu na B2B i do 65% na umowie o pracę — świadczenie możliwe
-          od pierwszego dnia niezdolności.
+          Polisa wypłaca co miesiąc do 80% dochodu na B2B i do 65% na umowie o pracę.
         </p>
         <div class="flex flex-wrap gap-3 mt-9">
           <a href="/wniosek/" class="bg-akcent-ciemny text-white px-8 py-4 font-bold hover:bg-akcent-hover">
@@ -109,31 +113,34 @@ const hero = obrazHero();
       Ile realnie dostaniesz z ZUS, gdy zachorujesz?
     </h2>
     <p data-odpowiedz class="text-[1.12rem] leading-relaxed text-tekst-drugi max-w-[42em] mt-0 mb-9">
-      Zasiłek chorobowy wynosi 80% podstawy wymiaru składek — nie 80% Twojego dochodu. Przy najniższej
+      Zasiłek chorobowy to {ZUS_TEKST.wzor} — nie 80% Twojego dochodu. Przy najniższej
       podstawie różnica dla specjalisty na kontrakcie sięga kilkunastu tysięcy złotych miesięcznie.
     </p>
 
     <div class="border border-linia overflow-x-auto">
       <table class="w-full border-collapse text-left min-w-[36rem]">
-        <caption class="sr-only">Miesięczne świadczenie z ZUS i z polisy przy dochodzie 18 000 zł</caption>
+        <caption class="sr-only">Miesięczny zasiłek z ZUS i świadczenie z polisy przy dochodzie 18 000 zł na B2B</caption>
         <thead>
           <tr class="bg-tlo-jasne border-b border-linia-mocna">
             <th scope="col" class="font-mono text-[11px] tracking-[0.11em] uppercase font-semibold text-tekst-drugi px-6 py-4">Miesiąc na zwolnieniu</th>
-            <th scope="col" class="font-mono text-[11px] tracking-[0.11em] uppercase font-semibold text-tekst-drugi px-6 py-4">Tylko ZUS</th>
-            <th scope="col" class="font-mono text-[11px] tracking-[0.11em] uppercase font-semibold text-akcent-ciemny px-6 py-4">ZUS + polisa</th>
+            <th scope="col" class="font-mono text-[11px] tracking-[0.11em] uppercase font-semibold text-tekst-drugi px-6 py-4">Zasiłek ZUS</th>
+            <th scope="col" class="font-mono text-[11px] tracking-[0.11em] uppercase font-semibold text-akcent-ciemny px-6 py-4">Świadczenie z polisy</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <th scope="row" class="px-6 py-5 font-semibold text-[16px]">Dochód {zl(18000)}, najniższy ZUS</th>
+            <th scope="row" class="px-6 py-5 font-semibold text-[16px]">Dochód {zl(18000)} na B2B, duży ZUS z chorobowym</th>
             <td class="px-6 py-5 font-mono text-xl font-semibold text-alarm">{zl(przyklad.zus)}</td>
-            <td class="px-6 py-5 font-mono text-xl font-semibold text-akcent-ciemny">{zl(przyklad.zus + przyklad.swiadczenie)}</td>
+            <td class="px-6 py-5 font-mono text-xl font-semibold text-akcent-ciemny">{zl(przyklad.swiadczenie)}</td>
           </tr>
         </tbody>
       </table>
     </div>
-    <p class="text-[13px] leading-relaxed text-tekst-trzeci mt-4 mb-0">
-      Symulacja, nie oferta. Realną składkę wylicza system ubezpieczyciela po ocenie ryzyka.
+    <p class="text-[13px] leading-relaxed text-tekst-drugi mt-4 mb-0">
+      Symulacja, nie oferta. Zasiłek {ZUS_TEKST.scenariusz}; {ZUS_TEKST.dopiski}.{' '}
+      {ZUS_TEKST.brutto} Szacowana składka przy tym świadczeniu:{' '}
+      {zlZakres(przyklad.skladkaOd, przyklad.skladkaDo)} miesięcznie, razem z opłatą dystrybucyjną.
+      Realną składkę wylicza system ubezpieczyciela po ocenie ryzyka.
     </p>
   </section>
 

@@ -8,7 +8,7 @@ import { sprawdzKalibracje, bledyKalibracji, MNOZNIK_HIV_WZW } from '../src/lib/
  * na sztywno trzeba by poprawiać przy każdym scaleniu, a test pilnowałby
  * wtedy wczorajszych stawek zamiast tego, czy strona liczy z pliku.
  *
- *   suma    = dochód × limit          (0,8 na B2B, 0,65 na umowie o pracę)
+ *   suma    = dochód × 0,8            (kalkulator liczy tylko B2B / JDG)
  *   stawka  = stawka.dol … stawka.gora z kalibracja.json, ×1,07 z HIV/WZW
  *   składka = round(suma × stawka)
  *
@@ -46,16 +46,33 @@ test('wartości domyślne: 18 000 zł na B2B', async ({ page }) => {
   // 18 000 × 0,8 = 14 400;  przy 0,0202 … 0,0322: 290,88 → 291 … 463,68 → 464
   await expect(wynik(page, 'Świadczenie z polisy')).toHaveText('14 400 zł');
   await expect(wynik(page, 'Szacowana składka')).toHaveText(zakres(14400));
-  // 2800 × 0,8 = 2240 — zasiłek nie zależy od dochodu, tylko od podstawy.
-  await expect(wynik(page, 'Zasiłek ZUS')).toHaveText('2 240 zł');
+  // Duży ZUS 2026: 5 652 × (1 − 0,1371) × 0,8 = 3 901,69 → 3 902. Zasiłek nie
+  // zależy od dochodu, tylko od podstawy. Do 21.10.2026 stało tu 2 240 zł —
+  // płaca minimalna z 2021 r. pomnożona przez 0,8 (patrz src/lib/zus.ts).
+  await expect(wynik(page, 'Zasiłek chorobowy z ZUS')).toHaveText('3 902 zł');
+  const zus = page.locator('dt', { hasText: 'Zasiłek chorobowy z ZUS' });
+  await expect(zus).toContainText('duży ZUS z chorobowym');
+  await expect(zus).toContainText('na preferencyjnym ZUS-ie około 995 zł, bez chorobowego 0 zł');
 });
 
-test('umowa o pracę obniża limit z 80% do 65%', async ({ page }) => {
-  await page.getByText('Umowa o pracę').click();
-  // 18 000 × 0,65 = 11 700;  przy 0,0202 … 0,0322: 236,34 → 236 … 376,74 → 377
-  await expect(wynik(page, 'Świadczenie z polisy')).toHaveText('11 700 zł');
-  await expect(wynik(page, 'Szacowana składka')).toHaveText(zakres(11700));
-  await expect(page.getByText('do 65% udokumentowanego dochodu')).toBeVisible();
+/**
+ * Tylko B2B (decyzja właściciela z 21.10.2026). Przełącznik „Umowa o pracę"
+ * pokazywał przy etacie zasiłek przedsiębiorcy — a na etacie zasiłek zależy
+ * od pensji. Etat dostaje zdanie opisu, bez kwot.
+ */
+test('kalkulator liczy tylko B2B, etat opisuje zdaniem', async ({ page }) => {
+  await expect(page.getByRole('radio')).toHaveCount(0);
+  await expect(page.getByText('Forma zatrudnienia')).toHaveCount(0);
+  await expect(page.locator('[data-etat]').first()).toHaveText(
+    'Na umowie o pracę ZUS wypłaca co najmniej 80% pensji przez 182 dni. '
+    + 'Polisa chroni dochód przy dłuższej niezdolności.',
+  );
+  await expect(page.getByText('do 80% udokumentowanego dochodu z działalności').first()).toBeVisible();
+});
+
+test('składka jest podana razem z opłatą dystrybucyjną', async ({ page }) => {
+  const kwoty = page.locator('dl').filter({ hasText: 'Szacowana składka' }).first();
+  await expect(kwoty).toContainText('razem z opłatą dystrybucyjną');
 });
 
 test('klauzula HIV/WZW podnosi stawkę o 7%', async ({ page }) => {
@@ -102,21 +119,24 @@ test('przy składce stoi, że przedział pochodzi z wystawionych ofert', async (
  */
 test('kalkulator wymienia cztery okresy i mówi, którego dotyczy składka', async ({ page }) => {
   const kwoty = page.locator('dl').filter({ hasText: 'Świadczenie z polisy' }).first();
-  await expect(kwoty).toContainText('minimum przez 24 miesiące');
-  await expect(page.getByText(/wypłacane jest przez 24, 36, 48 albo 60 miesięcy/)).toBeVisible();
+  // Okres odszkodowawczy to NAJDŁUŻSZY czas wypłaty (LW044 § 15 pkt 9), nie
+  // najkrótszy. Do 21.10.2026 stało tu „minimum przez 24 miesiące".
+  await expect(kwoty).toContainText('najdłużej przez 24 miesiące');
+  await expect(page.getByText(/minimum przez/)).toHaveCount(0);
+  await expect(page.getByText(/wypłacane jest najdłużej przez 24, 36, 48 albo 60 miesięcy/)).toBeVisible();
   await expect(page.getByText(/składka dotyczy wariantu najkrótszego, 24-miesięcznego/)).toBeVisible();
   await expect(page.getByText(/zamiast 12/)).toHaveCount(0);
 });
 
 test('strona kalkulatora tłumaczy okresy wypłaty w pytaniach', async ({ page }) => {
   await page.goto('/kalkulator/');
-  // Pytanie jest trzecie z kolei, a otwarte z marszu są dwa pierwsze.
+  // Pytanie jest czwarte z kolei, a otwarte z marszu są dwa pierwsze.
   await page.locator('summary', { hasText: 'Jak długo wypłacane jest świadczenie' }).click();
   await expect(page.getByText(/Do wyboru są cztery okresy: 24, 36, 48, 60 miesięcy/)).toBeVisible();
 });
 
 test('suwak zmienia świadczenie', async ({ page }) => {
-  const suwak = page.getByLabel('Miesięczny dochód netto w złotych');
+  const suwak = page.getByLabel('Miesięczny dochód netto z działalności lub kontraktu B2B, w złotych');
   await suwak.fill('30000');
   // 30 000 × 0,8 = 24 000;  przy 0,0202 … 0,0322: 484,8 → 485 … 772,8 → 773
   await expect(wynik(page, 'Świadczenie z polisy')).toHaveText('24 000 zł');

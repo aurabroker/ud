@@ -14,7 +14,8 @@
 import { ZAWODY, zawod, pokrewne, slugKategorii, tresc } from '@ud/zawody';
 import Baza from '../../layouts/Baza.astro';
 import Kalkulator from '../../components/Kalkulator.svelte';
-import { symuluj, zl, zlZakres, ZUS_MIESIECZNIE, OPIS_KALIBRACJI } from '../../lib/symulacja';
+import { symuluj, zl, zlZakres, OPIS_KALIBRACJI, MIESIECY_WYPLATY } from '../../lib/symulacja';
+import { ZUS_TEKST } from '../../lib/zus';
 import { graf, organizacja, serwis, strona, okruszki, usluga, faq } from '../../lib/seo';
 import { FIRMA } from '../../lib/firma';
 import { Image, getImage } from 'astro:assets';
@@ -43,7 +44,7 @@ const opis = `Ile realnie dostaje ${o.mianownik.toLowerCase()} na zwolnieniu i j
 
 /** Kwoty przykładowe — dochód dobrany do wysokości świadczenia z danych zawodu. */
 const dochodPrzykladowy = Math.max(8000, Math.round((z.swiadczenieDzienne ?? 400) * 30 / 0.8 / 1000) * 1000);
-const wynik = symuluj({ dochod: dochodPrzykladowy, zatrudnienie: 'b2b' });
+const wynik = symuluj({ dochod: dochodPrzykladowy });
 
 const sciezkaOkruszkow = [
   { nazwa: 'Strona główna', url: '/' },
@@ -129,7 +130,7 @@ const ogObraz = zdjecie
         Ubezpieczenie utraty dochodu dla {o.dopelniacz.toLowerCase()}
       </h1>
       <p data-odpowiedz class="text-[clamp(1.05rem,2vw,1.16rem)] leading-relaxed text-tekst-drugi max-w-[34em] m-0">
-        {t?.wstep ?? `Na kontrakcie zasiłek chorobowy liczy się od zadeklarowanej podstawy ZUS, nie od tego, co ${o.mianownik.toLowerCase()} realnie zarabia. Polisa wypłaca do 80% dochodu na B2B i do 65% na umowie o pracę, a świadczenie jest możliwe od pierwszego dnia niezdolności do pracy.`}
+        {t?.wstep ?? `Na kontrakcie zasiłek chorobowy liczy się od zadeklarowanej podstawy ZUS, nie od tego, co ${o.mianownik.toLowerCase()} realnie zarabia. Polisa wypłaca co miesiąc do 80% dochodu na B2B i do 65% na umowie o pracę.`}
       </p>
 
       <div class="flex flex-wrap gap-3 mt-8">
@@ -157,7 +158,7 @@ const ogObraz = zdjecie
           Jak wygląda dochód w tym zawodzie?
         </h2>
         <p data-odpowiedz class="text-lg leading-relaxed font-medium text-tekst m-0 mb-3">
-          {t?.dochod ?? `Zarobki ${o.dopelniacz.toLowerCase()} na kontrakcie zależą od wykonanej pracy, a nie od gotowości do niej. ZUS liczy zasiłek od zadeklarowanej podstawy składek, więc przy najniższej podstawie różnica sięga kilkunastu tysięcy złotych miesięcznie.`}
+          {t?.dochod ?? `Zarobki ${o.dopelniacz.toLowerCase()} na kontrakcie zależą od wykonanej pracy, a nie od gotowości do niej. ZUS liczy zasiłek od zadeklarowanej podstawy składek, więc przy najniższej podstawie zostaje on daleko za dochodem.`}
         </p>
       </section>
 
@@ -195,42 +196,42 @@ const ogObraz = zdjecie
           Ile {o.mianownik.toLowerCase()} dostanie z ZUS na zwolnieniu?
         </h2>
         <p data-odpowiedz class="text-lg leading-relaxed font-medium text-tekst m-0 mb-6">
-          Zasiłek chorobowy to 80% podstawy wymiaru składek, a nie 80% dochodu. Przy najniższej
-          podstawie daje to {zl(wynik.zus)} miesięcznie, niezależnie od tego, ile się zarabia.
+          Zasiłek chorobowy to {ZUS_TEKST.wzor}, a nie 80% dochodu. Na dużym ZUS-ie z najniższą
+          podstawą i z dobrowolnym chorobowym daje to {zl(wynik.zus)} miesięcznie przed podatkiem,
+          niezależnie od tego, ile się zarabia; {ZUS_TEKST.dopiski}.
         </p>
 
         <div class="border border-linia overflow-x-auto">
-          <table class="w-full border-collapse text-left min-w-[36rem]">
+          <table class="w-full border-collapse text-left min-w-[20rem]">
             <caption class="sr-only">
-              Porównanie miesięcznego świadczenia z ZUS i z polisy przy dochodzie {zl(dochodPrzykladowy)}
+              Zasiłek z ZUS, świadczenie z polisy i szacowana składka przy dochodzie {zl(dochodPrzykladowy)} na B2B
             </caption>
-            <thead>
-              <tr class="bg-tlo-jasne border-b border-linia-mocna">
-                <th scope="col" class="font-mono text-[11px] tracking-[0.11em] uppercase font-semibold text-tekst-drugi px-6 py-4">Miesiąc na zwolnieniu</th>
-                <th scope="col" class="font-mono text-[11px] tracking-[0.11em] uppercase font-semibold text-tekst-drugi px-6 py-4">Tylko ZUS</th>
-                <th scope="col" class="font-mono text-[11px] tracking-[0.11em] uppercase font-semibold text-akcent-ciemny px-6 py-4">ZUS + polisa</th>
-              </tr>
-            </thead>
             <tbody>
-              <tr class="border-b border-linia-lekka">
-                <th scope="row" class="px-6 py-5 font-semibold text-[16px]">Dochód {zl(dochodPrzykladowy)}, najniższy ZUS</th>
-                <td class="px-6 py-5 font-mono text-xl font-semibold text-alarm">{zl(wynik.zus)}</td>
-                <td class="px-6 py-5 font-mono text-xl font-semibold text-akcent-ciemny">{zl(wynik.zus + wynik.swiadczenie)}</td>
+              <tr class="border-b border-linia">
+                <th scope="row" class="px-6 py-4 font-semibold text-[15.5px]">Dochód miesięczny netto</th>
+                <td class="px-6 py-4 font-mono text-lg">{zl(dochodPrzykladowy)}</td>
               </tr>
-              <tr>
-                <th scope="row" class="px-6 py-5 font-semibold text-[16px]">Różnica w skali miesiąca</th>
-                <td class="px-6 py-5 font-mono text-[15px] text-tekst-trzeci">—</td>
-                <td class="px-6 py-5 font-mono text-xl font-semibold text-akcent-ciemny">+{zl(wynik.swiadczenie)}</td>
+              <tr class="border-b border-linia">
+                <th scope="row" class="px-6 py-4 font-semibold text-[15.5px]">Zasiłek z ZUS (duży ZUS z chorobowym)</th>
+                <td class="px-6 py-4 font-mono text-lg text-alarm font-semibold">{zl(wynik.zus)}</td>
+              </tr>
+              <tr class="border-b border-linia">
+                <th scope="row" class="px-6 py-4 font-semibold text-[15.5px]">Świadczenie z polisy (80% dochodu)</th>
+                <td class="px-6 py-4 font-mono text-lg text-akcent-ciemny font-semibold">{zl(wynik.swiadczenie)}</td>
+              </tr>
+              <tr class="bg-tlo-jasne">
+                <th scope="row" class="px-6 py-5 font-semibold text-[16px]">Szacowana składka miesięczna</th>
+                <td class="px-6 py-5 font-mono text-xl font-semibold whitespace-nowrap">{zlZakres(wynik.skladkaOd, wynik.skladkaDo)}</td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        <p class="text-[13px] leading-relaxed text-tekst-trzeci mt-4 mb-0">
-          Symulacja, nie oferta. Kwoty policzone dla dochodu {zl(dochodPrzykladowy)} i limitu 80% na B2B;
-          zasiłek ZUS przy podstawie {zl(ZUS_MIESIECZNIE)}. Realną składkę wylicza system ubezpieczyciela
-          po ocenie ryzyka. Szacunek przy tej sumie: {zlZakres(wynik.skladkaOd, wynik.skladkaDo)} miesięcznie —
-          przedział od najtańszej do najdroższej stawki {OPIS_KALIBRACJI}.
+        <p class="text-[13px] leading-relaxed text-tekst-drugi mt-4 mb-0">
+          Symulacja, nie oferta. Świadczenie wypłacane co miesiąc, najdłużej
+          przez {MIESIECY_WYPLATY} miesiące w najkrótszym wariancie. Zasiłek {ZUS_TEKST.scenariusz}.{' '}
+          {ZUS_TEKST.brutto} Składka razem z opłatą dystrybucyjną — przedział od najtańszej
+          do najdroższej stawki {OPIS_KALIBRACJI}. Realną składkę wylicza system ubezpieczyciela po ocenie ryzyka.
         </p>
       </section>
 

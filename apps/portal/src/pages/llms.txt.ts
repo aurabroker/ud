@@ -17,7 +17,8 @@ import type { APIRoute } from 'astro';
 import { ZAWODY, kategorie, wKategorii, slugKategorii, tresc } from '@ud/zawody';
 import { ARTYKULY } from '../lib/artykuly';
 import { FIRMA, SERWIS, UBEZPIECZYCIELE } from '../lib/firma';
-import { ZUS_MIESIECZNIE, LIMIT, OKRESY, zl } from '../lib/symulacja';
+import { LIMIT, OKRESY, SWIADCZENIE_MAX, zl } from '../lib/symulacja';
+import { ZASILEK_JDG, ZUS_TEKST } from '../lib/zus';
 import { krokiSlownie } from '@ud/wniosek/schemat';
 
 export const GET: APIRoute = () => {
@@ -59,13 +60,16 @@ Ubezpieczenie utraty dochodu, zwane też prywatnym L4, chroni przed całkowitą
 niezdolnością do wykonywania zawodu z powodu choroby lub nieszczęśliwego wypadku.
 
 - **Limit świadczenia:** do ${Math.round(LIMIT.b2b * 100)}% udokumentowanego dochodu przy samozatrudnieniu
-  i kontrakcie B2B, do ${Math.round(LIMIT.etat * 100)}% przy umowie o pracę i umowie zlecenia.
-- **Punkt odniesienia:** zasiłek chorobowy z ZUS wynosi 80% podstawy wymiaru składek.
-  Przy najniższej podstawie daje to około ${zl(Math.round(ZUS_MIESIECZNIE * 0.8))} miesięcznie, niezależnie
-  od faktycznych zarobków — i to jest luka, którą polisa zamyka.
-- **Okres wypłaty:** świadczenie miesięczne wypłacane przez ${OKRESY.slice(0, -1).join(', ')}
+  i kontrakcie B2B, do ${Math.round(LIMIT.etat * 100)}% przy umowie o pracę i umowie zlecenia,
+  najwyżej ${zl(SWIADCZENIE_MAX)} miesięcznie.
+- **Punkt odniesienia:** zasiłek chorobowy z ZUS to ${ZUS_TEKST.wzor}. Przedsiębiorca
+  ${ZUS_TEKST.scenariusz} dostaje ${zl(ZASILEK_JDG.duzy)} miesięcznie przed podatkiem,
+  niezależnie od faktycznych zarobków; ${ZUS_TEKST.dopiski}. To jest luka, którą polisa zamyka.
+  ${ZUS_TEKST.etat}
+- **Okres wypłaty:** świadczenie miesięczne wypłacane najdłużej przez ${OKRESY.slice(0, -1).join(', ')}
   albo ${OKRESY.at(-1)} miesięcy — okres wybiera się przy zawarciu umowy, najkrótszy
-  wariant to ${OKRESY[0]} miesiące.
+  wariant to ${OKRESY[0]} miesiące. Pierwsza wypłata przysługuje po okresie wyczekiwania
+  ustalonym w umowie.
 - **Ryzyka:** okresowa niezdolność do pracy (świadczenie miesięczne), trwała
   niezdolność do pracy oraz śmierć i inwalidztwo wskutek nieszczęśliwego wypadku
   (świadczenia jednorazowe).
