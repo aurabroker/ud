@@ -13,6 +13,7 @@
  *   powód do nieufności wobec całej strony.
  */
 import { FIRMA, SERWIS } from './firma';
+import { EKSPERT } from './ekspert';
 
 export type Okruszek = { nazwa: string; url: string };
 
@@ -47,6 +48,36 @@ export function organizacja() {
     ],
     areaServed: { '@type': 'Country', name: 'Polska' },
     knowsLanguage: 'pl',
+  };
+}
+
+/**
+ * Ekspert serwisu jako autor wpisów — węzeł Person.
+ *
+ * Wszystko z `EKSPERT` (lib/ekspert.ts), nic ponad to: bez `sameAs`, zdjęcia,
+ * uprawnień i lat doświadczenia, których właściciel nie podał. `@id` wskazuje
+ * stronę /o-nas/, bo tam stoi ten sam opis dla człowieka; strona, która chce
+ * opisać eksperta w swoim JSON-LD, bierze ten sam węzeł, żeby oba wskazania
+ * były jedną osobą, a nie dwiema.
+ *
+ * `jobTitle` to sama rola, bez „od 2009 roku" — rok jest w opisie, a tytuł
+ * stanowiska ma być stanowiskiem. Gdyby rola przestała pasować do tego
+ * wzorca, idzie cała, zamiast uciętej w połowie.
+ */
+export function ekspert() {
+  const odRoku = ` od ${EKSPERT.odRoku} roku`;
+  const stanowisko: string = EKSPERT.rola.endsWith(odRoku)
+    ? EKSPERT.rola.slice(0, -odRoku.length)
+    : EKSPERT.rola;
+  return {
+    '@type': 'Person',
+    '@id': `${SERWIS.url}/o-nas/#ekspert`,
+    name: EKSPERT.imie,
+    jobTitle: stanowisko,
+    description: EKSPERT.opis,
+    knowsAbout: EKSPERT.specjalizacja,
+    url: abs('/o-nas/'),
+    worksFor: { '@id': `${SERWIS.url}/#organizacja` },
   };
 }
 

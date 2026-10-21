@@ -13,6 +13,10 @@
  *
  * Bez okruszków i bez JSON-LD: to nie jest miejsce w strukturze serwisu,
  * tylko odpowiedź na pomyłkę. `bezIndeksu` trzyma ją poza wyszukiwarką.
+ *
+ * Bez adresu kanonicznego (`kanoniczny={false}`): ta treść stoi pod każdym
+ * nieznanym adresem, a „/404/" jako kanoniczny wskazywał adres, który sam
+ * przekierowuje. Strona błędu nie ma swojego adresu do wskazania.
  */
 import Baza from '../layouts/Baza.astro';
 import { ZAWODY } from '@ud/zawody';
@@ -44,7 +48,7 @@ const DROGI = [
   },
 ];
 ---
-<Baza tytul={tytul} opis={opis} sciezka="/404/" bezIndeksu wariantMarkdown={false}>
+<Baza tytul={tytul} opis={opis} sciezka="/404/" bezIndeksu wariantMarkdown={false} kanoniczny={false}>
   <div class="bg-linear-102 from-tlo via-tlo-cyjan to-tlo-hero border-b border-linia">
     <div class="max-w-[1200px] mx-auto px-5 py-16">
       <p class="font-mono text-xs tracking-[0.16em] uppercase text-akcent-tekst font-semibold m-0">

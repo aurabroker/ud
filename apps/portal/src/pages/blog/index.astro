@@ -54,6 +54,11 @@ const jsonld = graf([
  * Wcześniej w kafelku lądował oryginał z kubełka — od 2 do 16 MB. Adres
  * surowy zostaje jako awaryjny, gdyby normalizacja nie zdążyła: ciężkie
  * zdjęcie jest gorsze niż lekkie, ale lepsze niż puste miejsce.
+ *
+ * `a.obraz` i `a.obrazDuzy` wskazują już naszą domenę (`/media/<plik>`):
+ * Storage dokleja do każdego pliku `x-robots-tag: none`, więc zdjęcia
+ * z kubełka nie trafiały do indeksu grafiki. Adres przepisuje build
+ * (przezMedia w lib/artykuly.ts), plik podaje functions/media/[plik].js.
  */
 ---
 <Baza tytul={tytul} opis={opis} sciezka={sciezka} jsonld={jsonld}>

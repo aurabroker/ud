@@ -5,8 +5,9 @@
  */
 import Baza from '../../../layouts/Baza.astro';
 import { ARTYKULY, artykul, powiazane, dataPl } from '../../../lib/artykuly';
-import { graf, organizacja, serwis, strona, okruszki, abs } from '../../../lib/seo';
+import { graf, organizacja, serwis, strona, okruszki, abs, ekspert } from '../../../lib/seo';
 import { FIRMA } from '../../../lib/firma';
+import { EKSPERT } from '../../../lib/ekspert';
 import { ZAWODY, kategorie } from '@ud/zawody';
 
 export function getStaticPaths() {
@@ -18,6 +19,15 @@ const a = artykul(slug!)!;
 const sciezka = `/blog/${a.slug}/`;
 const tytul = `${a.tytul} | UtrataDochodu.pl`;
 const opis = a.zajawka;
+/**
+ * Okładka do podglądu linku i do danych strukturalnych — wariant 1600 px.
+ * Facebook zaleca obrazek podglądu szeroki co najmniej na 1200 px, a Google
+ * przy dużych miniaturach w Discover — na 1200 px; wariant 800 px nie
+ * spełnia żadnego z tych progów. Adres jest już na naszej domenie
+ * (`/media/…`, patrz przezMedia w lib/artykuly.ts).
+ */
+const okladka = a.obrazDuzy ?? a.obraz;
+const AUTOR = ekspert();
 
 const sciezkaOkruszkow = [
   { nazwa: 'Strona główna', url: '/' },
@@ -30,6 +40,7 @@ const jsonld = graf([
   serwis(),
   okruszki(sciezkaOkruszkow),
   strona({ url: sciezka, tytul: a.tytul, opis, okruszki: sciezkaOkruszkow }),
+  AUTOR,
   {
     '@type': 'BlogPosting',
     '@id': `${abs(sciezka)}#wpis`,
@@ -38,13 +49,15 @@ const jsonld = graf([
     datePublished: a.opublikowano,
     dateModified: a.zmieniono,
     inLanguage: 'pl-PL',
-    // Autorem jest firma, nie osoba — nie mamy imiennych autorów, a wymyślanie
-    // ich to dokładnie ten rodzaj sygnału, który Google traktuje jak oszustwo.
-    author: { '@id': 'https://utratadochodu.pl/#organizacja' },
+    // Autor to ekspert serwisu z lib/ekspert.ts — dane podał właściciel
+    // (21.10.2026). Wydawcą zostaje firma. Nic ponad to, co jest w EKSPERT:
+    // zmyślone kwalifikacje Google traktuje jak oszustwo, a model językowy
+    // cytuje je dalej.
+    author: { '@id': AUTOR['@id'] },
     publisher: { '@id': 'https://utratadochodu.pl/#organizacja' },
     mainEntityOfPage: { '@id': `${abs(sciezka)}#strona` },
     keywords: a.tagi.join(', ') || undefined,
-    ...(a.obraz ? { image: a.obraz } : {}),
+    ...(okladka ? { image: abs(okladka) } : {}),
     isPartOf: { '@id': 'https://utratadochodu.pl/blog/#blog' },
   },
 ]);
@@ -54,7 +67,8 @@ const POWIAZANE = powiazane(a.slug);
 const spis = a.naglowki.filter((n) => n.poziom === 2);
 const KATEGORIE = kategorie();
 ---
-<Baza tytul={tytul} opis={opis} sciezka={sciezka} jsonld={jsonld} obraz={a.obraz ?? undefined}>
+<Baza tytul={tytul} opis={opis} sciezka={sciezka} jsonld={jsonld} obraz={okladka ?? undefined}
+      artykul={{ opublikowano: a.opublikowano, zmieniono: a.zmieniono }}>
   <div class="bg-tlo-jasne border-b border-linia">
     <div class="max-w-[1200px] mx-auto px-5 py-12">
       <nav aria-label="Okruszki" class="mb-5">
@@ -75,10 +89,25 @@ const KATEGORIE = kategorie();
   </div>
 
   <div class="max-w-[1200px] mx-auto px-5 py-12 grid gap-12 lg:grid-cols-[minmax(0,1fr)_17rem] items-start">
-    <article class="wpis max-w-[40em] min-w-0">
-      <p data-odpowiedz class="wstep">{a.zajawka}</p>
-      <Fragment set:html={a.tresc} />
-    </article>
+    <div class="max-w-[40em] min-w-0">
+      <article class="wpis">
+        <p data-odpowiedz class="wstep">{a.zajawka}</p>
+        <Fragment set:html={a.tresc} />
+      </article>
+
+      {/* Ramka autora — ten sam ekspert, co `author` w JSON-LD. Poza
+          <article class="wpis">, bo tamte style akapitów są dla treści wpisu.
+          Tekst wprost z EKSPERT.opis: nic dopisanego tutaj. */}
+      <section aria-label="Autor wpisu" class="mt-12 border border-linia bg-tlo-jasne p-6">
+        <p class="text-[15.5px] leading-relaxed text-tekst-drugi m-0">
+          <span class="font-semibold text-tekst">Autor:</span> {EKSPERT.opis}
+        </p>
+        <a href="/o-nas/" rel="author"
+           class="inline-block mt-3 text-[14.5px] font-semibold text-akcent-hover hover:text-akcent-ciemny">
+          O autorze i o serwisie →
+        </a>
+      </section>
+    </div>
 
     <aside class="lg:sticky lg:top-8 flex flex-col gap-8">
       {spis.length >= 3 && (
