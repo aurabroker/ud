@@ -1,27 +1,60 @@
 ---
 import Baza from '../../layouts/Baza.astro';
 import { graf, organizacja, serwis, strona, okruszki } from '../../lib/seo';
-import { FIRMA } from '../../lib/firma';
+import { FIRMA, COVERHOLDERZY } from '../../lib/firma';
+import { EKSPERT } from '../../lib/ekspert';
 import { ZAWODY } from '@ud/zawody';
 
 const sciezka = '/o-nas/';
 const tytul = 'O nas — Aura Expert i nasi partnerzy ubezpieczeniowi | UtrataDochodu.pl';
-const opis = 'Kto stoi za serwisem UtrataDochodu.pl, z jakimi ubezpieczycielami pracujemy '
-  + 'i dlaczego akurat z nimi. Numery rejestrowe do sprawdzenia.';
+const opis = 'Kto stoi za serwisem UtrataDochodu.pl, kto jest ubezpieczycielem, z jakimi '
+  + 'coverholderami Lloyd’s pracujemy i dlaczego akurat z nimi. Numery rejestrowe do sprawdzenia.';
 
+/**
+ * Leadenhall i CEU to coverholderzy Lloyd’s — przedstawiciele ubezpieczyciela,
+ * nie ubezpieczyciele (OWU LW044 § 1 ust. 3, OWU CEU § 1). Do 21.10.2026 karta
+ * Leadenhall nazywała go „agencją ubezpieczeniową", Lloyd’s — „największym
+ * rynkiem ubezpieczeniowym na świecie", a karta CEU twierdziła, że CEU
+ * likwiduje szkody. OWU CEU mówią co innego: likwidację szkód powierzono
+ * WAGAS S.A. (§ 24 ust. 4 OWU Utrata dochodu i OWU dla zatrudniających,
+ * § 19 ust. 3 OWU LOI Premium).
+ */
 const PARTNERZY = [
   {
-    nazwa: 'Leadenhall Insurance S.A.',
-    rola: 'Coverholder rynku Lloyd’s',
-    opis: 'Agencja ubezpieczeniowa i coverholder rynku londyńskiego. Daje dostęp do '
-      + 'pojemności finansowej Lloyd’s, czyli największego rynku ubezpieczeniowego na świecie. '
+    nazwa: FIRMA.coverholderzyWg.leadenhall,
+    rola: 'Coverholder Lloyd’s',
+    opis: 'Działa w Polsce jako coverholder Lloyd’s, czyli przedstawiciel ubezpieczyciela '
+      + 'w sprawach zawarcia i wykonania umowy. Daje dostęp do pojemności finansowej Lloyd’s. '
       + 'Stąd pochodzą warianty MEDICARE, MEDICA i LW044, na których opiera się nasza oferta.',
   },
   {
-    nazwa: 'CEU sp. z o.o.',
+    nazwa: FIRMA.coverholderzyWg.ceu,
     rola: 'Coverholder specjalizujący się w wolnych zawodach',
-    opis: 'Coverholder wyspecjalizowany w rozwiązaniach dla wolnych zawodów, branży '
-      + 'medycznej i kontraktów B2B. Prowadzi likwidację szkód na terenie Polski.',
+    opis: 'Coverholder Lloyd’s wyspecjalizowany w rozwiązaniach dla wolnych zawodów, branży '
+      + 'medycznej i kontraktów B2B. Szkody z umów zawartych za jego pośrednictwem likwiduje '
+      + 'w imieniu ubezpieczyciela WAGAS S.A.',
+  },
+];
+
+/** Kto jest kim — role nazwane tak, jak w OWU i w karcie produktu. */
+const PODMIOTY = [
+  {
+    rola: 'Ubezpieczyciel',
+    nazwa: FIRMA.ubezpieczyciel,
+    opis: 'Udziela ochrony ubezpieczeniowej. Wskazują go karta produktu i polisa. '
+      + `Siedziba: ${FIRMA.ubezpieczycielSiedziba}.`,
+  },
+  {
+    rola: 'Coverholderzy Lloyd’s',
+    nazwa: COVERHOLDERZY.join(' i '),
+    opis: 'Przedstawiciele ubezpieczyciela w sprawach zawarcia i wykonania umowy. '
+      + 'Przygotowują oferty, a ich nazwy stoją na ogólnych warunkach ubezpieczenia (OWU).',
+  },
+  {
+    rola: 'Agent ubezpieczeniowy',
+    nazwa: FIRMA.nazwa,
+    opis: `Wpisany do Rejestru Pośredników Ubezpieczeniowych KNF pod numerem ${FIRMA.rpu}. `
+      + 'Przyjmuje wniosek, dobiera wariant i prowadzi sprawę do wystawienia polisy.',
   },
 ];
 const sciezkaOkruszkow = [
@@ -65,23 +98,50 @@ const REJESTRY = [
       <p data-odpowiedz class="text-[1.14rem] leading-relaxed text-tekst-drugi max-w-[42em] mt-6 mb-0">
         Operatorem marki {FIRMA.marka} jest {FIRMA.nazwaPelna} — agent ubezpieczeniowy
         wpisany do Rejestru Pośredników Ubezpieczeniowych prowadzonego przez Komisję
-        Nadzoru Finansowego pod numerem {FIRMA.rpu}. Nie jesteśmy ubezpieczycielem;
-        polisę wystawia towarzystwo, w którego imieniu działamy.
+        Nadzoru Finansowego pod numerem {FIRMA.rpu}. Nie jesteśmy ubezpieczycielem:
+        ochrony udziela {FIRMA.ubezpieczyciel}, a w sprawach zawarcia i wykonania
+        umowy reprezentują go {COVERHOLDERZY.join(' i ')} — coverholderzy Lloyd’s.
       </p>
     </div>
   </div>
 
+  <section id="ekspert" aria-labelledby="ekspert-naglowek" class="max-w-[1200px] mx-auto px-5 pt-16">
+    <h2 id="ekspert-naglowek" class="text-[clamp(1.6rem,4vw,2.3rem)] leading-tight mb-4">Kto odpowiada za treści</h2>
+    <div class="border-l-[3px] border-akcent bg-tlo-jasne p-7 max-w-[46em]">
+      <p class="font-mono text-[11px] tracking-[0.12em] uppercase text-akcent-tekst font-semibold m-0 mb-2">
+        Ekspert serwisu
+      </p>
+      <h3 class="text-[20px] font-semibold m-0 mb-3 leading-snug">{EKSPERT.imie}</h3>
+      <p class="text-[1.05rem] leading-relaxed text-tekst-drugi m-0">
+        {EKSPERT.opis} Odpowiada merytorycznie za treści w serwisie {FIRMA.marka}.
+        Wiążące są ogólne warunki ubezpieczenia — znajdziesz je w sekcji
+        {' '}<a href="/dokumenty/" class="text-akcent-hover underline decoration-linia-mocna underline-offset-2">Dokumenty</a>.
+      </p>
+    </div>
+  </section>
+
   <section class="max-w-[1200px] mx-auto px-5 py-16">
     <h2 class="text-[clamp(1.6rem,4vw,2.3rem)] leading-tight mb-4">Z kim współpracujemy</h2>
-    <p class="text-[1.05rem] leading-relaxed text-tekst-drugi max-w-[44em] mt-0 mb-9">
+    <p class="text-[1.05rem] leading-relaxed text-tekst-drugi max-w-[44em] mt-0 mb-6">
       Ubezpieczenie utraty dochodu to produkt niszowy — wymaga zaplecza kapitałowego
       i doświadczenia w ocenie ryzyka zawodowego. Na polskim rynku pracujemy wyłącznie
       z autoryzowanymi przedstawicielami (coverholderami).
     </p>
+    <dl class="border border-linia bg-tlo m-0 mb-9 max-w-[46em]">
+      {PODMIOTY.map((p) => (
+        <div class="px-6 py-5 border-b border-linia last:border-0">
+          <dt class="font-mono text-[11px] tracking-[0.12em] uppercase text-akcent-tekst font-semibold mb-1">{p.rola}</dt>
+          <dd class="m-0">
+            <p class="font-semibold text-[16.5px] leading-snug m-0">{p.nazwa}</p>
+            <p class="text-[15px] leading-relaxed text-tekst-drugi m-0 mt-1">{p.opis}</p>
+          </dd>
+        </div>
+      ))}
+    </dl>
     <div class="grid gap-6 grid-cols-[repeat(auto-fit,minmax(20rem,1fr))]">
       {PARTNERZY.map((p) => (
         <article class="border border-linia bg-tlo p-7">
-          <p class="font-mono text-[11px] tracking-[0.12em] uppercase text-akcent-ciemny font-semibold m-0 mb-2">{p.rola}</p>
+          <p class="font-mono text-[11px] tracking-[0.12em] uppercase text-akcent-tekst font-semibold m-0 mb-2">{p.rola}</p>
           <h3 class="text-[20px] font-semibold m-0 mb-3 leading-snug">{p.nazwa}</h3>
           <p class="text-[15.5px] leading-relaxed text-tekst-drugi m-0">{p.opis}</p>
         </article>

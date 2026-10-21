@@ -10,9 +10,15 @@
  * zostały zaakceptowane przez prawnika (potwierdzenie właściciela, 01.10.2026),
  * razem z treścią zgody (ZGODA_KONTAKT w packages/wniosek/src/schemat.js).
  * Zmiana któregokolwiek z tych miejsc wymaga ponownej akceptacji.
+ *
+ * 21.10.2026: lista odbiorców. Leadenhall i CEU stały tu jako „ubezpieczyciele,
+ * w imieniu których działamy", a to coverholderzy Lloyd’s — przedstawiciele
+ * ubezpieczyciela (OWU LW044 § 1 ust. 3, OWU CEU § 1). Ubezpieczycielem jest
+ * Lloyd’s Insurance Company S.A. (karty produktu, polisa). Poprawka
+ * zaakceptowana przez prawnika (potwierdzenie właściciela, 21.10.2026).
  */
 import Tekst from '../../layouts/Tekst.astro';
-import { FIRMA, UBEZPIECZYCIELE } from '../../lib/firma';
+import { FIRMA, COVERHOLDERZY } from '../../lib/firma';
 import { KROKI, krokiSlownie } from '@ud/wniosek/schemat';
 
 const sciezka = '/klauzula-informacyjna/';
@@ -25,7 +31,7 @@ const opis = 'Obowiązek informacyjny z art. 13 RODO dla osób składających wn
   naglowek="Klauzula informacyjna RODO"
   opis={opis}
   sciezka={sciezka}
-  zaktualizowano="2026-10-01"
+  zaktualizowano="2026-10-21"
   wOkruszkach="Klauzula informacyjna">
 
   <p data-odpowiedz>
@@ -120,7 +126,11 @@ const opis = 'Obowiązek informacyjny z art. 13 RODO dla osób składających wn
 
   <h2>Komu przekazujemy dane</h2>
   <ul>
-    <li>Ubezpieczycielom, w imieniu których działamy: {UBEZPIECZYCIELE.join(' oraz ')}.</li>
+    <li>
+      Ubezpieczycielowi ({FIRMA.ubezpieczyciel}) oraz jego przedstawicielom
+      ({COVERHOLDERZY.join(' oraz ')}) — coverholderom Lloyd’s, którzy reprezentują
+      ubezpieczyciela w sprawach zawarcia i wykonania umowy.
+    </li>
     <li>Dostawcom usług informatycznych utrzymującym bazę danych i pocztę.</li>
     <li>Podmiotom świadczącym nam obsługę prawną i księgową.</li>
     <li>Organom uprawnionym na podstawie przepisów prawa.</li>

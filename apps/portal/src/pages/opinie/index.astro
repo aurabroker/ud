@@ -2,10 +2,23 @@
 /**
  * Opinie klientów.
  *
- * Świadomie bez znacznika AggregateRating. Google nie dopuszcza do wyników
- * rozszerzonych ocen, które firma zbiera sama o sobie („self-serving reviews"),
- * a przy dwóch opiniach oznaczenie ich schematem to prosta droga do ręcznej kary.
- * Opinie zostają więc zwykłą treścią strony — wiarygodną, bo widać ich liczbę.
+ * 21.10.2026 zdjęte obie opublikowane opinie: właściciel potwierdził, że nie
+ * pochodziły od klientów. Strona twierdziła przy tym, że „wszystkie opinie
+ * publikujemy po weryfikacji" i że „każda przechodzi weryfikację" — a jedyną
+ * weryfikacją był Turnstile, który odsiewa boty, nie sprawdza, czy autor ma
+ * polisę. Opinia konsumencka pokazana jako opinia klienta, choć nikt tego nie
+ * sprawdził, to nieuczciwa praktyka rynkowa.
+ *
+ * Dlatego strona pokazuje WYŁĄCZNIE opinie z polem `potwierdzonoKlienta`
+ * (data, ISO), wpisywanym ręcznie po sprawdzeniu, że autor zawarł polisę za
+ * naszym pośrednictwem. `scripts/synchronizuj.mjs` tego pola nie zna
+ * i przepisuje do opinie.json wszystko z `ud_review.approved = true` — także
+ * te dwie zdjęte — więc bez tego filtra pełna synchronizacja opublikowałaby je
+ * z powrotem po cichu. Pilnuje tego test/podmioty.spec.js.
+ *
+ * Świadomie bez znacznika AggregateRating ani Review. Google nie dopuszcza do
+ * wyników rozszerzonych ocen, które firma zbiera sama o sobie („self-serving
+ * reviews"). Opinie zostają zwykłą treścią strony.
  */
 import Baza from '../../layouts/Baza.astro';
 import Opinia from '../../components/Opinia.svelte';
@@ -15,13 +28,23 @@ import { funkcja, TURNSTILE_KLUCZ } from '../../lib/uslugi';
 
 const sciezka = '/opinie/';
 const tytul = 'Opinie klientów | UtrataDochodu.pl';
-const opis = 'Co mówią osoby, które zawarły polisę przez UtrataDochodu.pl. '
-  + 'Wszystkie opinie publikujemy po weryfikacji, bez selekcji ocen.';
+const opis = 'Opinie osób, które zawarły polisę przez UtrataDochodu.pl. Publikujemy je '
+  + 'po potwierdzeniu, że autor jest naszym klientem — także krytyczne.';
 
 const URL_FUNKCJI = funkcja('review-submit');
 const KLUCZ_TURNSTILE = TURNSTILE_KLUCZ;
 
-const OPINIE = dane.opinie;
+type Opinia = {
+  imie: string;
+  miasto: string;
+  zawod?: string | null;
+  ocena: number;
+  tresc: string;
+  data: string;
+  /** Data (ISO) sprawdzenia, że autor jest naszym klientem. Bez niej opinii nie pokazujemy. */
+  potwierdzonoKlienta?: string;
+};
+const OPINIE = (dane.opinie as Opinia[]).filter((o) => Boolean(o.potwierdzonoKlienta));
 const data = (iso: string) =>
   new Date(iso).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -51,7 +74,9 @@ const jsonld = graf([
       <p data-odpowiedz class="text-[1.12rem] leading-relaxed text-tekst-drugi max-w-[40em] mt-5 mb-0">
         {OPINIE.length === 0
           ? 'Zbieramy pierwsze opinie. Jeśli masz u nas polisę, napisz, jak poszło.'
-          : `Publikujemy ${OPINIE.length === 1 ? 'jedną opinię' : `wszystkie ${OPINIE.length} opinie`}, jakie do nas trafiły — bez wybierania tylko tych dobrych. Każda przechodzi weryfikację, żeby nie trafiały tu wpisy od botów.`}
+          : `Opinie potwierdzonych klientów: ${OPINIE.length}.`}
+        {' '}Opinię publikujemy dopiero wtedy, gdy potwierdzimy, że autor zawarł polisę
+        za naszym pośrednictwem — także wtedy, gdy jest krytyczna.
       </p>
     </div>
   </div>
@@ -91,8 +116,9 @@ const jsonld = graf([
     <aside class="border border-linia bg-tlo-jasne p-7">
       <h2 class="text-[20px] font-semibold mt-0 mb-2">Masz u nas polisę?</h2>
       <p class="text-[15px] leading-relaxed text-tekst-drugi mt-0 mb-6">
-        Napisz, jak wyglądała obsługa. Opinia pojawi się po weryfikacji — także
-        wtedy, gdy jest krytyczna.
+        Napisz, jak wyglądała obsługa. Opinia pojawi się tutaj, gdy potwierdzimy,
+        że jesteś naszym klientem — także wtedy, gdy jest krytyczna. Formularz
+        jest zabezpieczony przed botami.
       </p>
       <Opinia client:visible urlFunkcji={URL_FUNKCJI} kluczTurnstile={KLUCZ_TURNSTILE} />
     </aside>
