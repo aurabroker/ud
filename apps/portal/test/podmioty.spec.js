@@ -84,6 +84,9 @@ test.describe('Leadenhall i CEU to coverholderzy, nie ubezpieczyciele', () => {
       const mnoga = czlony(tekst).filter((c) => MNOGA.test(c));
       expect(mnoga, 'liczba mnoga „ubezpieczycieli" — ubezpieczycielem jest wyłącznie '
         + `${FIRMA.ubezpieczyciel}`).toEqual([]);
+
+      // Nazwa kończąca się kropką na końcu zdania: „CEU sp. z o.o.." (stało w klauzuli).
+      expect(tekst).not.toMatch(/(?:o\.o|S\.A)\.\./);
     });
   }
 
