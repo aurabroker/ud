@@ -12,7 +12,7 @@
  */
 import Baza from '../../layouts/Baza.astro';
 import { graf, organizacja, serwis, strona, okruszki } from '../../lib/seo';
-import { FIRMA } from '../../lib/firma';
+import { FIRMA, COVERHOLDERZY } from '../../lib/firma';
 import dane from '../../dane/dokumenty.json';
 import { adresDokumentu } from '../../lib/owu';
 
@@ -27,17 +27,23 @@ const NAZWY_RODZAJU: Record<string, string> = {
   'warunki-szczegolne': 'Warunki szczególne',
 };
 
-/** Nazwy bierzemy z FIRMA — klucze odpowiadają kolumnie `insurer_type`. */
-const NAZWY_UBEZPIECZYCIELA: Record<string, string> = FIRMA.ubezpieczycieleWg;
+/**
+ * Nazwy bierzemy z FIRMA — klucze odpowiadają kolumnie `insurer_type`.
+ *
+ * Pole w danych nazywa się `ubezpieczyciel` (tak jak kolumna w bazie), ale
+ * Leadenhall i CEU to coverholderzy Lloyd’s, nie ubezpieczyciele — grupy na
+ * stronie podpisujemy więc jako coverholderów (OWU LW044 § 1 ust. 3, OWU CEU § 1).
+ */
+const NAZWY_COVERHOLDERA: Record<string, string> = FIRMA.coverholderzyWg;
 
-/** Grupujemy po ubezpieczycielu — tak, jak klient wybiera ofertę. */
+/** Grupujemy po coverholderze — tak, jak klient wybiera ofertę. */
 const grupy = [...new Set(dane.dokumenty.map((d) => d.ubezpieczyciel))].map((u) => ({
   klucz: u,
-  nazwa: NAZWY_UBEZPIECZYCIELA[u] ?? u,
+  nazwa: NAZWY_COVERHOLDERA[u] ?? u,
   dokumenty: dane.dokumenty.filter((d) => d.ubezpieczyciel === u),
 }));
 
-/** Ubezpieczyciele, z którymi pracujemy, a których dokumentów jeszcze nie ma
+/** Coverholderzy, z którymi pracujemy, a których dokumentów jeszcze nie ma
  *  w bibliotece. Pusty stan pokazujemy wprost, zamiast udawać, że go nie ma. */
 const brakujacy = ['ceu'].filter((u) => !grupy.some((g) => g.klucz === u));
 
@@ -80,6 +86,11 @@ const jsonld = graf([
         Unii. Wszystko pobierzesz bez logowania i bez podawania danych.
       </p>
       <p class="text-[15px] leading-relaxed text-tekst-drugi max-w-[42em] mt-4 mb-0">
+        We wszystkich produktach ubezpieczycielem jest {FIRMA.ubezpieczyciel}.
+        Dokumenty są pogrupowane według jego przedstawicieli (coverholderów Lloyd’s):
+        {' '}{COVERHOLDERZY.join(' i ')}.
+      </p>
+      <p class="text-[15px] leading-relaxed text-tekst-drugi max-w-[42em] mt-4 mb-0">
         Streszczenie najważniejszych wyłączeń po ludzku znajdziesz na stronie
         {' '}<a href="/wylaczenia/" class="text-akcent-hover underline decoration-linia-mocna underline-offset-2">czego to ubezpieczenie nie obejmuje</a>.
       </p>
@@ -89,6 +100,7 @@ const jsonld = graf([
   <div class="max-w-[1200px] mx-auto px-5 py-14 flex flex-col gap-14">
     {grupy.map((g) => (
       <section aria-labelledby={`u-${g.klucz}`}>
+        <p class="font-mono text-[11px] tracking-[0.12em] uppercase text-akcent-tekst font-semibold m-0 mb-1.5">Coverholder Lloyd’s</p>
         <h2 id={`u-${g.klucz}`} class="text-[clamp(1.35rem,3vw,1.8rem)] pb-3 mb-6 border-b-2 border-akcent">
           {g.nazwa}
         </h2>
@@ -117,10 +129,10 @@ const jsonld = graf([
     {brakujacy.map((u) => (
       <section aria-labelledby={`u-${u}`}>
         <h2 id={`u-${u}`} class="text-[clamp(1.35rem,3vw,1.8rem)] pb-3 mb-6 border-b-2 border-linia-mocna text-tekst-drugi">
-          {NAZWY_UBEZPIECZYCIELA[u] ?? u}
+          {NAZWY_COVERHOLDERA[u] ?? u}
         </h2>
         <p class="border border-dashed border-linia-mocna p-7 text-[15.5px] leading-relaxed text-tekst-drugi m-0 max-w-[42em]">
-          Dokumentów tego ubezpieczyciela nie ma jeszcze w bibliotece. Dołączamy je do
+          Dokumentów tego coverholdera nie ma jeszcze w bibliotece. Dołączamy je do
           oferty indywidualnie — jeśli potrzebujesz ich wcześniej, napisz na
           {' '}<a href={`mailto:${FIRMA.email}`} class="text-akcent-hover underline decoration-linia-mocna underline-offset-2">{FIRMA.email}</a>,
           odeślemy tego samego dnia.
