@@ -988,6 +988,30 @@ podstawy wynikają z nich, i skanuje cały build (bez wpisów bloga) na „2 240
 „2 800 zł", „od pierwszego dnia niezdolności", „karencj", „minimum przez N
 miesięcy" i „zł / dzień".
 
+### Symulator „Odkładać samemu czy się ubezpieczyć?" (od 22.10.2026)
+
+`/kalkulator/#odkladanie` — ile miesięcy odkładania daje równowartość jednego
+i dwóch miesięcy świadczenia (pomysł właściciela: klientka uznała 250 zł
+składki za dużo przy świadczeniu 10 000 zł). Rachunek w `src/lib/odkladanie.ts`,
+wyspa `Odkladanie.svelte`, pytanie w FAQ strony liczone tym samym kodem.
+Agent może wysłać link z kwotami klienta:
+`https://utratadochodu.pl/kalkulator/?odkladam=250&swiadczenie=10000#odkladanie`
+(czytane tylko z adresu; śmieci i wartości spoza zakresu wracają do zakresu,
+świadczenie najwyżej `SWIADCZENIE_MAX`). Kalkulator na każdej stronie linkuje
+tu ze swoim świadczeniem.
+
+- **Zdanie „odłożone pieniądze zostają Twoje — składka nie wraca" zostaje**
+  przy wyniku, razem z okresem wyczekiwania i wyłączeniami. Bez niego symulator
+  jest reklamą, a nie porównaniem.
+- **Nie dopisuj „ile lat na całe 24/60 miesięcy świadczenia".** Przy takim
+  horyzoncie o wyniku decyduje założenie o odsetkach, nie rachunek (240 000 zł
+  po 250 zł: 80 lat bez odsetek, 36 przy 4% rocznie).
+- `liczebnik` żyje w `@ud/zawody/liczebnik` — osobny eksport, żeby wyspa nie
+  wciągała do przeglądarki danych wszystkich zawodów.
+
+Pilnuje tego `test/odkladanie.spec.js` (rachunek, pola i suwaki, adres, 390 px,
+treść w `.md` i w FAQPage).
+
 ### Astro gubi spację przy łamaniu linii obok `{wyrażenia}`
 
 W szablonie `.astro` odstęp z przełamaniem linii **tuż przed albo tuż po

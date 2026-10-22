@@ -1,10 +1,12 @@
 ---
 import Baza from '../../layouts/Baza.astro';
 import Kalkulator from '../../components/Kalkulator.svelte';
+import Odkladanie from '../../components/Odkladanie.svelte';
 import { graf, organizacja, serwis, strona, okruszki, faq } from '../../lib/seo';
-import { symuluj, zl, zlZakres, LIMIT, MIESIECY_WYPLATY, MIESIECY_MAX, OKRESY, ZAKRES_DOCHODU } from '../../lib/symulacja';
+import { symuluj, zl, zlZakres, LIMIT, MIESIECY_WYPLATY, MIESIECY_MAX, OKRESY, ZAKRES_DOCHODU, STAWKA } from '../../lib/symulacja';
 import { SWIADCZENIE_MAX } from '../../lib/granice';
 import { ZASILEK_JDG, ZUS_TEKST, WYCZEKIWANIE_DOBROWOLNE_DNI, OKRES_ZASILKOWY_DNI } from '../../lib/zus';
+import { PRZYKLAD, miesiaceDoKwoty, czasSlownie } from '../../lib/odkladanie';
 
 const sciezka = '/kalkulator/';
 const tytul = 'Kalkulator ubezpieczenia utraty dochodu | UtrataDochodu.pl';
@@ -18,6 +20,15 @@ const PRZYKLADY = [10000, 18000, 30000, 50000].map((d) => ({
   dochod: d,
   ...symuluj({ dochod: d }),
 }));
+
+/** Przykład właściciela do pytania „czy nie lepiej odkładać" — liczby z tego samego rachunku co symulator. */
+const ODKLADANIE = {
+  ...PRZYKLAD,
+  naJeden: czasSlownie(miesiaceDoKwoty(PRZYKLAD.swiadczenie, PRZYKLAD.odkladam)),
+  naDwa: czasSlownie(miesiaceDoKwoty(2 * PRZYKLAD.swiadczenie, PRZYKLAD.odkladam)),
+  skladkaOd: Math.round(PRZYKLAD.swiadczenie * STAWKA.dol),
+  skladkaDo: Math.round(PRZYKLAD.swiadczenie * STAWKA.gora),
+};
 
 const PYTANIA = [
   {
@@ -56,6 +67,17 @@ const PYTANIA = [
       + `oraz ${Math.round(LIMIT.etat * 100)}% przy umowie o pracę, a świadczenie miesięczne `
       + `wynosi najwyżej ${zl(SWIADCZENIE_MAX)}. Zasada jest taka, że `
       + 'ubezpieczenie nie może być korzystniejsze finansowo niż praca.',
+  },
+  {
+    pytanie: 'Czy nie lepiej odkładać co miesiąc zamiast płacić składkę?',
+    odpowiedz: `Odkładając ${zl(ODKLADANIE.odkladam)} miesięcznie, równowartość jednego miesiąca `
+      + `świadczenia ${zl(ODKLADANIE.swiadczenie)} zbierasz ${ODKLADANIE.naJeden}, a dwóch — `
+      + `${ODKLADANIE.naDwa} (bez odsetek). Polisa z takim świadczeniem kosztuje szacunkowo `
+      + `${zlZakres(ODKLADANIE.skladkaOd, ODKLADANIE.skladkaDo)} miesięcznie (wariant z wypłatą do `
+      + `${MIESIECY_WYPLATY} miesięcy) i wypłaca je co miesiąc, `
+      + 'dopóki trwa niezdolność objęta umową — po okresie wyczekiwania i najdłużej przez wybrany '
+      + `okres, do ${MIESIECY_MAX} miesięcy. Odłożone pieniądze zostają jednak Twoje, a składka `
+      + 'nie wraca, jeśli nic się nie stanie. Symulator na tej stronie liczy to dla Twoich kwot.',
   },
 ];
 
@@ -136,6 +158,18 @@ const jsonld = graf([
       dotyczy wariantu z wypłatą do {MIESIECY_WYPLATY} miesięcy, razem z opłatą dystrybucyjną, jako
       przedział z ostatnio wystawionych ofert. Symulacja, nie oferta.
     </p>
+  </section>
+
+  <section id="odkladanie" class="border-t border-linia">
+    <div class="max-w-[1200px] mx-auto px-5 py-16">
+      <h2 class="text-[clamp(1.5rem,3.5vw,2.2rem)] leading-tight mb-3">Odkładać samemu czy się ubezpieczyć?</h2>
+      <p class="text-[1.05rem] leading-relaxed text-tekst-drugi max-w-[42em] mt-0 mb-8">
+        Zamiast płacić składkę, możesz co miesiąc odkładać pieniądze. Sprawdź, ile potrwa,
+        zanim uzbierasz równowartość jednego i dwóch miesięcy świadczenia. Przesuń suwak
+        albo wpisz kwotę.
+      </p>
+      <Odkladanie client:visible maxSwiadczenie={SWIADCZENIE_MAX} />
+    </div>
   </section>
 
   <section class="bg-tlo-jasne border-y border-linia">

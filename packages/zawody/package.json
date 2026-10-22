@@ -9,6 +9,7 @@
       "default": "./src/index.js"
     },
     "./odmiana": "./src/odmiana.js",
+    "./liczebnik": "./src/liczebnik.js",
     "./data": "./data/zawody.json",
     "./tresc": "./src/tresc.js"
   },

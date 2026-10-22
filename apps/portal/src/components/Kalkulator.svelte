@@ -105,6 +105,10 @@
      class="block text-center bg-akcent-ciemny text-white py-4 font-bold mt-2 hover:bg-akcent-hover">
     Przejdź do wniosku
   </a>
+  <a href={`/kalkulator/?swiadczenie=${wynik.swiadczenie}#odkladanie`} data-odkladanie
+     class="block text-center text-[14px] text-akcent-tekst underline underline-offset-2 mt-3 hover:text-akcent-hover">
+    Wolisz odkładać sam? Policz, ile to potrwa
+  </a>
 
   <p class="text-[12.5px] leading-relaxed text-tekst-drugi mt-4 mb-0">
     To jest symulacja, nie oferta. Realną składkę wylicza system ubezpieczyciela po ocenie

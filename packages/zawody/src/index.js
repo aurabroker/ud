@@ -83,18 +83,9 @@ export function malymi(tekst) {
     /\p{Lu}/u.test(slowo.slice(1)) ? slowo : slowo.toLowerCase());
 }
 
-/**
- * Liczebnik z rzeczownikiem w poprawnej formie: 1 zawód, 2 zawody, 5 zawodów,
- * 12 zawodów, 22 zawody. „43 zawodów" stało na stronie kategorii.
- * @param {number} n
- * @param {[string, string, string]} formy  [1, 2–4, 5+]
- */
-export function liczebnik(n, [jeden, kilka, wiele]) {
-  const forma = n === 1 ? jeden
-    : (n % 10 >= 2 && n % 10 <= 4 && !(n % 100 >= 12 && n % 100 <= 14)) ? kilka
-    : wiele;
-  return `${n} ${forma}`;
-}
+// Osobny plik, żeby wyspy Svelte mogły go importować (`@ud/zawody/liczebnik`)
+// bez ciągnięcia do przeglądarki danych wszystkich zawodów.
+export { liczebnik } from './liczebnik.js';
 
 /** Slug kategorii do adresu — bez polskich znaków i spacji. */
 export function slugKategorii(nazwa) {
