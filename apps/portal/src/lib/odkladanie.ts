@@ -58,6 +58,21 @@ export function dniSwiadczenia(kwota: number, swiadczenieMies: number): number {
   return Math.floor(kwota / (swiadczenieMies / DNI_W_MIESIACU) + 1e-9);
 }
 
+/**
+ * „9 dni", „1,5 miesiąca", „12 miesięcy" — ile świadczenia jest wart `kwota`,
+ * w dopełniaczu („równowartość …"). Poniżej miesiąca w dniach, od miesiąca
+ * w miesiącach z jednym miejscem po przecinku (ułamek bierze dopełniacz
+ * liczby pojedynczej: „2,5 miesiąca").
+ */
+export function rownowartoscSlownie(kwota: number, swiadczenieMies: number): string {
+  const dni = dniSwiadczenia(kwota, swiadczenieMies);
+  if (dni < 1) return 'mniej niż 1 dnia';
+  if (dni < DNI_W_MIESIACU) return liczebnik(dni, ['dnia', 'dni', 'dni']);
+  const miesiace = Math.floor((kwota / swiadczenieMies) * 10 + 1e-9) / 10;
+  if (Number.isInteger(miesiace)) return liczebnik(miesiace, ['miesiąca', 'miesięcy', 'miesięcy']);
+  return `${String(miesiace).replace('.', ',')} miesiąca`;
+}
+
 /** „3 lata i 4 miesiące", „1 rok", „5 miesięcy". */
 export function czasSlownie(miesiace: number): string {
   if (!Number.isFinite(miesiace)) return 'nigdy';
@@ -69,9 +84,16 @@ export function czasSlownie(miesiace: number): string {
   return czesci.join(' i ');
 }
 
-/** Liczba z zakresu, zaokrąglona do kroku; puste pole i śmieci z adresu → wartość domyślna. */
+/**
+ * Liczba z zakresu, zaokrąglona do kroku; puste pole i śmieci z adresu →
+ * wartość domyślna. Przy kwotach w pełnych złotych (krok ≥ 1) kropka albo
+ * przecinek przed trzema cyframi to separator tysięcy: „1.500" to 1 500 zł,
+ * nie półtorej złotówki przycięte do minimum.
+ */
 export function wZakresie(v: unknown, min: number, max: number, krok: number, domyslna: number): number {
-  const tekst = typeof v === 'number' ? '' : String(v ?? '').replace(/\s/g, '').replace(',', '.');
+  let tekst = typeof v === 'number' ? '' : String(v ?? '').replace(/\s/g, '');
+  if (krok >= 1) tekst = tekst.replace(/[.,](?=\d{3}(?!\d))/g, '');
+  tekst = tekst.replace(',', '.');
   if (typeof v !== 'number' && tekst === '') return domyslna;
   const n = typeof v === 'number' ? v : Number(tekst);
   if (!Number.isFinite(n)) return domyslna;

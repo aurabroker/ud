@@ -7,6 +7,7 @@ import { symuluj, zl, zlZakres, LIMIT, MIESIECY_WYPLATY, MIESIECY_MAX, OKRESY, Z
 import { SWIADCZENIE_MAX } from '../../lib/granice';
 import { ZASILEK_JDG, ZUS_TEKST, WYCZEKIWANIE_DOBROWOLNE_DNI, OKRES_ZASILKOWY_DNI } from '../../lib/zus';
 import { PRZYKLAD, miesiaceDoKwoty, czasSlownie } from '../../lib/odkladanie';
+import { liczebnik } from '@ud/zawody/liczebnik';
 
 const sciezka = '/kalkulator/';
 const tytul = 'Kalkulator ubezpieczenia utraty dochodu | UtrataDochodu.pl';
@@ -73,10 +74,12 @@ const PYTANIA = [
     odpowiedz: `Odkładając ${zl(ODKLADANIE.odkladam)} miesięcznie, równowartość jednego miesiąca `
       + `świadczenia ${zl(ODKLADANIE.swiadczenie)} zbierasz ${ODKLADANIE.naJeden}, a dwóch — `
       + `${ODKLADANIE.naDwa} (bez odsetek). Polisa z takim świadczeniem kosztuje szacunkowo `
-      + `${zlZakres(ODKLADANIE.skladkaOd, ODKLADANIE.skladkaDo)} miesięcznie (wariant z wypłatą do `
-      + `${MIESIECY_WYPLATY} miesięcy) i wypłaca je co miesiąc, `
-      + 'dopóki trwa niezdolność objęta umową — po okresie wyczekiwania i najdłużej przez wybrany '
-      + `okres, do ${MIESIECY_MAX} miesięcy. Odłożone pieniądze zostają jednak Twoje, a składka `
+      + `${zlZakres(ODKLADANIE.skladkaOd, ODKLADANIE.skladkaDo)} miesięcznie, razem z opłatą `
+      + `dystrybucyjną, w wariancie z wypłatą najdłużej przez `
+      + `${liczebnik(MIESIECY_WYPLATY, ['miesiąc', 'miesiące', 'miesięcy'])} — to `
+      + 'symulacja z ostatnio wystawionych ofert, nie oferta. Świadczenie przychodzi co miesiąc po '
+      + 'okresie wyczekiwania, dopóki trwa niezdolność objęta umową; dłuższy okres wypłaty, do '
+      + `${MIESIECY_MAX} miesięcy, podnosi składkę. Odłożone pieniądze zostają jednak Twoje, a składka `
       + 'nie wraca, jeśli nic się nie stanie. Symulator na tej stronie liczy to dla Twoich kwot.',
   },
 ];

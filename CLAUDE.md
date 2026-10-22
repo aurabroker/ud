@@ -1003,6 +1003,16 @@ tu ze swoim świadczeniem.
 - **Zdanie „odłożone pieniądze zostają Twoje — składka nie wraca" zostaje**
   przy wyniku, razem z okresem wyczekiwania i wyłączeniami. Bez niego symulator
   jest reklamą, a nie porównaniem.
+- **Przy składce: wariant z wypłatą najdłużej przez 24 miesiące, razem
+  z opłatą dystrybucyjną, świadczenie po okresie wyczekiwania.** Pierwsza
+  wersja pisała „wypłaca 10 000 zł za każdy miesiąc niezdolności, najdłużej
+  przez 60 miesięcy" — to „od pierwszego dnia" innymi słowami i cena wariantu
+  24-miesięcznego przy okresie 60-miesięcznym (przegląd z 22.10.2026). FAQ
+  trzyma te same zastrzeżenia w samej odpowiedzi, bo FAQPage cytuje się bez
+  reszty strony.
+- Pole i suwak to jedna wartość (`class Pole` w wyspie): wyczyszczone albo
+  przekroczone pole nie przestawia wyniku ani suwaka na wartość startową,
+  po wyjściu z pola wraca do liczby, z której liczony jest wynik.
 - **Nie dopisuj „ile lat na całe 24/60 miesięcy świadczenia".** Przy takim
   horyzoncie o wyniku decyduje założenie o odsetkach, nie rachunek (240 000 zł
   po 250 zł: 80 lat bez odsetek, 36 przy 4% rocznie).
