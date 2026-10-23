@@ -447,7 +447,7 @@ Stan po audycie z 24.09.2026:
 | `send-digest-email`, `sync-beauty-companies` | pg_cron | nagłówek `x-cron-token` z Vaulta |
 | `normalize-article-images` | pg_cron | nagłówek `x-blog-token` z Vaulta |
 | `review-admin` | panel opinii | JWT + `profiles.rola = 'admin'` |
-| `kalibrator` | pg_cron (zadanie `kalibracja-stawek`) — wdrożona 20.10.2026 (v1), **zadanie wyłączone** | nagłówek `x-cron-token` z Vaulta, sprawdzany przed pierwszym odczytem; `verify_jwt = false` |
+| `kalibrator` | pg_cron (zadanie `kalibracja-stawek`) — wdrożona 20.10.2026 (v1), zadanie **włączone 23.10.2026**, tryb `na_sucho` | nagłówek `x-cron-token` z Vaulta, sprawdzany przed pierwszym odczytem; `verify_jwt = false` |
 | `send-offer-email` | stary `js/client.js` w udapp — w praktyce nikt | treść wyłącznie z bazy, wysyłka tylko do 30 min po wyborze |
 | `div-send-email` | formularz kancelarii (rozwod.waw.pl) | **żadna** — patrz niżej |
 | pozostałe trzy | — | `verify_jwt = true` |
@@ -1140,8 +1140,11 @@ i kalibrator go nie rusza.
 Opis metody i bramek: `apps/portal/MODEL-SKLADKI.md`, część „Kalibrator".
 Tu tylko to, co trzeba wiedzieć, zanim się go dotknie.
 
-**Stan na 20.10.2026: WDROŻONE, zadanie cron wyłączone.** Po „wypychaj"
-właściciela (20.10):
+**Stan na 23.10.2026: WDROŻONE, zadanie cron WŁĄCZONE, tryb `na_sucho`.**
+Cron włączony 23.10.2026 decyzją właściciela („włącz cron"); pierwszy przebieg
+w poniedziałek 26.10 o 05:40 UTC (6:40 czasu polskiego). Od tego dnia co dzień
+roboczy mail z porównaniem na `biuro@utratadochodu.com`, zero zapisów do
+GitHuba. Po „wypychaj" właściciela (20.10):
 
 - push `14547bd` — portal z nowymi stawkami na żywej stronie (14 400 zł:
   291–464 zł zamiast 291–351 zł);
@@ -1161,8 +1164,8 @@ tylko metryczka urosła: 13 osób, 14 ofert, 29 wariantów, 7 par (w pliku 10 /
 11 / 22 / 5 z 14.10). Sama metryczka nie jest zmianą — `zrodlo` w pliku
 odświeży się przy pierwszej propozycji ze zmienionymi stawkami.
 
-**Zostaje po stronie właściciela:** włączenie crona (krok 5 niżej), około
-dwóch tygodni na sucho, potem token GitHuba i tryb `propozycja`.
+**Zostaje po stronie właściciela:** około dwóch tygodni na sucho (od
+26.10.2026), potem token GitHuba i tryb `propozycja`.
 
 Przepływ: pg_cron `kalibracja-stawek` (pn–pt 05:40 UTC, **powstaje
 wyłączone**) → `ud_kalibracja_uruchom()` (token z Vaulta) → funkcja
@@ -1222,7 +1225,7 @@ push zostanie odrzucony. Nigdy `--force` na tej gałęzi.
 
 ### Wdrożenie — kolejność (dopiero po „wypychaj")
 
-Kroki 1–4 wykonane 20.10.2026 (stan wyżej); krok 5 czeka na zgodę właściciela.
+Kroki 1–4 wykonane 20.10.2026, krok 5 — 23.10.2026 (stan wyżej).
 
 1. Push (portal z nowymi stawkami, migracja i funkcja w repo).
 2. Migracja przez MCP (funkcje bez UPDATE/DELETE w ciele, więc przejdzie);
