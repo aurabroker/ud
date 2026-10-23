@@ -3,6 +3,20 @@
   "zrodlo": "aura_articles (status=published, platforms zawiera UtrataDochodu.pl); zdjęcia z preview_image_800/1600",
   "artykuly": [
     {
+      "slug": "nowotwory-utrata-dochodu-b2b",
+      "tytul": "193 tysiące nowych diagnoz raka w rok. Ile zapłaci ZUS na B2B i gdzie kończy się polisa",
+      "zajawka": "W 2023 r. KRN zarejestrował 192 922 nowe zachorowania na nowotwory złośliwe. Sprawdź, ile zapłaci ZUS na B2B w czasie leczenia i co o raku mówią OWU polis od utraty dochodu.",
+      "tagi": [
+        "ZUS",
+        "OWU",
+        "nowotwory"
+      ],
+      "opublikowano": "2026-10-23T10:15:58Z",
+      "utworzono": "2026-10-23T10:15:58Z",
+      "obraz": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/nowotwory-utrata-dochodu-b2b-cover-800.webp",
+      "obrazDuzy": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/nowotwory-utrata-dochodu-b2b-cover-1600.webp"
+    },
+    {
       "slug": "zawal-udar-utrata-dochodu",
       "tytul": "Zawał albo udar. Co roku dotyka to ponad 140 tysięcy Polaków — i ile kosztuje to Twój dochód",
       "zajawka": "Ponad 140 tys. zawałów i udarów rocznie. Sprawdź, ile zapłaci ZUS na B2B po zawale lub udarze i jaka luka zostaje w Twoim budżecie.",
