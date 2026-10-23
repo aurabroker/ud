@@ -2631,10 +2631,16 @@ Kontrasty, które już policzyliśmy dla tła białego:
 | `--color-tekst-drugi` | 5,52:1 | 4,5:1 dla drobnego tekstu |
 | `--color-tekst-trzeci` | 2,65:1 | **za mało na tekst** — tylko do ozdobników |
 | `--color-alarm` (kwoty ZUS, błędy formularzy) | 5,98:1 | 4,5:1 — do 22.10.2026 #D6453D, 4,40:1 |
+| `--color-akcent-ciemny` (linki, kwoty świadczenia, tło przycisków z białym napisem) | 5,97:1 | 4,5:1 — do 23.10.2026 #0E96D0, 3,34:1 |
+| `--color-akcent-hover` | 7,65:1 | 4,5:1 — do 23.10.2026 #0B7CAF, 4,65:1 na bieli, 4,45:1 na `tlo-jasne` |
+| `--color-akcent` (#1BAEE5) | 2,55:1 | **tylko ozdoby, obramowania i znak marki** — nie tekst |
 
 Tekst stoi także na cyjanowych tłach (`tlo-jasne`, `tlo-cyjan`, `tlo-mocne`) —
 `test/kontrast.spec.js` liczy kontrast tokenów tekstu z `global.css` na każdym
-z nich. Nowy kolor tekstu dopisz do tego testu.
+z nich, biały napis na przyciskach i kolory w samodzielnym CSS banera zgód
+(`zgody.js`) i okienka awarii (`awaria.js`) — tych tokeny z `global.css` nie
+obejmują, więc zmiana palety idzie też tam. Nowy kolor tekstu dopisz do tego
+testu.
 
 `--color-tekst-trzeci` nie nadaje się na treść, którą ktoś ma przeczytać.
 Etykiety typu „Jednorazowe świadczenie" trafiły tam przez pomyłkę i wróciły
@@ -2783,10 +2789,11 @@ możliwym zdjęciem (czerń pod spodem), w obrębie kolumny tekstu:
 
 Dwie rzeczy, których nie ruszaj bez ponownego przeliczenia:
 
-- **Etykieta mono nie może wrócić na `--color-akcent-ciemny`** — ten daje na
-  czystej bieli 3,34:1, czyli za mało dla 12 px. Stąd `--color-akcent-tekst`
-  (#0A6A96, 5,97:1). `--color-akcent-hover` też nie wystarczy (4,65:1 zostawia
-  zero zapasu, gdy tłem jest zasłona, a nie biel).
+- **Etykieta mono stoi na `--color-akcent-tekst`** (#0A6A96, 5,97:1). Do
+  23.10.2026 `--color-akcent-ciemny` był jaśniejszy (#0E96D0, 3,34:1 na bieli
+  — za mało dla 12 px); od tego dnia oba mają tę samą wartość. Nie rozjaśniaj
+  `--color-akcent-ciemny` z powrotem — stoi na nim tekst i biały napis każdego
+  przycisku „Policz składkę".
 - **Wersja mobilna zasłony liczy stopnie w pikselach, nie w procentach.**
   Wysokość pasa zależy od długości tekstu, a ten jest inny na każdej ze 188
   podstron; przy procentach tekst potrafiłby wypaść tam, gdzie zasłona jeszcze

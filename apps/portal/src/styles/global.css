@@ -12,15 +12,20 @@
   --color-tlo-mocne:  #DDF1FA;
   --color-tlo-hero:   #CBE9F8;
 
-  /* Akcent — cyjan ze znaku marki. */
+  /* Akcent — cyjan ze znaku marki. Jasny #1BAEE5 (2,55:1 na bieli) tylko na
+     ozdoby, obramowania i znak; tekst i przyciski z białym napisem biorą
+     ciemny. Do 23.10.2026 ciemny był #0E96D0 (3,34:1), a hover #0B7CAF (4,65:1
+     na bieli, poniżej 4,5:1 na cyjanowych tłach) — linki, kwoty w tabelach
+     i biały napis na przyciskach miały za mały kontrast. Ten sam odcień,
+     ciemniej: 5,97:1 na bieli, 5,13:1 na --color-tlo-mocne. Pilnuje tego
+     test/kontrast.spec.js. */
   --color-akcent:        #1BAEE5;
-  --color-akcent-ciemny: #0E96D0;
-  --color-akcent-hover:  #0B7CAF;
+  --color-akcent-ciemny: #0A6A96;
+  --color-akcent-hover:  #08597F;
 
-  /* Cyjan dla drobnego tekstu (etykiety mono nad zdjęciem).
-     --color-akcent-ciemny daje na bieli 3,34:1, a WCAG wymaga 4,5:1 dla tekstu
-     poniżej 24 px; --color-akcent-hover ma 4,65:1, czyli za mało zapasu, gdy
-     tło nie jest czystą bielą, tylko zasłoną nad zdjęciem. Ten daje 5,97:1. */
+  /* Cyjan dla drobnego tekstu (etykiety mono nad zdjęciem) — od 23.10.2026
+     równy --color-akcent-ciemny; został osobno, bo jego kontrast nad zasłoną
+     zdjęcia jest policzony w CLAUDE.md („Kadr i tekst na zdjęciu"). */
   --color-akcent-tekst:  #0A6A96;
 
   /* Linie. */
