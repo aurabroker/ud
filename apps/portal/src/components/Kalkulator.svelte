@@ -17,12 +17,21 @@
    * o pracę" pokazywał obok etatu zasiłek przedsiębiorcy — na etacie zasiłek
    * zależy od pensji, więc jednej kwoty do pokazania nie ma. Etat dostaje
    * zdanie opisu, bez kwot.
+   *
+   * `zOdkladaniem` (tylko /kalkulator/, decyzja właściciela z 23.10.2026):
+   * karta w dwóch kolumnach — obok składki od razu wynik odkładania
+   * (Odkladanie.svelte) dla tego samego świadczenia. Strona może wtedy podać
+   * dochód w adresie: ?dochod=30000, a dawne linki ?swiadczenie=14400 dają
+   * dochód, z którego wychodzi to świadczenie.
    */
+  import { onMount } from 'svelte';
   import { symuluj, zl, zlZakres, LIMIT, MIESIECY_WYPLATY, MIESIECY_MAX, OKRESY, OPIS_KALIBRACJI, ZAKRES_DOCHODU }
     from '../lib/symulacja';
   import { ZUS_TEKST, ZASILEK_JDG } from '../lib/zus';
+  import { wZakresie } from '../lib/odkladanie';
+  import Odkladanie from './Odkladanie.svelte';
 
-  let { dochodPoczatkowy = 18000, zawod = '', kompaktowy = false } = $props();
+  let { dochodPoczatkowy = 18000, zawod = '', kompaktowy = false, zOdkladaniem = false } = $props();
 
   let dochod = $state(dochodPoczatkowy);
   let hivWzw = $state(false);
@@ -35,9 +44,21 @@
 
   /** „24, 36, 48 albo 60" — bez przecinka przed ostatnim. */
   const okresy = OKRESY.slice(0, -1).join(', ') + ' albo ' + OKRESY.at(-1);
+
+  onMount(() => {
+    if (!zOdkladaniem) return;
+    const q = new URLSearchParams(window.location.search);
+    if (q.has('dochod')) dochod = wZakresie(q.get('dochod'), MIN, MAX, KROK, dochod);
+    else if (q.has('swiadczenie')) {
+      const s = wZakresie(q.get('swiadczenie'), 0, Infinity, 1, NaN);
+      if (Number.isFinite(s)) dochod = wZakresie(s / LIMIT.b2b, MIN, MAX, KROK, dochod);
+    }
+  });
 </script>
 
-<div class="border border-linia bg-tlo p-7 {kompaktowy ? '' : 'shadow-[0_18px_46px_-16px_rgba(15,46,64,0.18)]'}">
+<div class="border border-linia bg-tlo p-7 {kompaktowy ? '' : 'shadow-[0_18px_46px_-16px_rgba(15,46,64,0.18)]'}
+            {zOdkladaniem ? 'md:grid md:grid-cols-2 md:gap-x-8' : ''}">
+<div>
   <h2 class="text-xl m-0 mb-1">Symulacja składki{zawod ? ` dla ${zawod}` : ''}</h2>
   <p class="text-[14px] leading-relaxed text-tekst-drugi mt-0 mb-6">
     Przesuń suwak, żeby zobaczyć, jak zmienia się świadczenie i szacowana składka.
@@ -78,7 +99,7 @@
         Świadczenie z polisy<span class="sr-only">:</span>
         <span class="block text-[13px]">wypłacane co miesiąc, najdłużej przez {MIESIECY_MAX} miesięcy</span>
       </dt>
-      <dd class="font-mono text-2xl font-semibold text-akcent-ciemny m-0">{zl(wynik.swiadczenie)}</dd>
+      <dd class="font-mono text-2xl font-semibold text-akcent-ciemny m-0 whitespace-nowrap">{zl(wynik.swiadczenie)}</dd>
     </div>
     <div class="flex items-baseline justify-between gap-4 py-4 border-b border-linia-lekka">
       <dt class="text-[15px] text-tekst-drugi">
@@ -105,11 +126,21 @@
      class="block text-center bg-akcent-ciemny text-white py-4 font-bold mt-2 hover:bg-akcent-hover">
     Przejdź do wniosku
   </a>
-  <a href={`/kalkulator/?swiadczenie=${wynik.swiadczenie}#odkladanie`} data-odkladanie
-     class="block text-center text-[14px] text-akcent-tekst underline underline-offset-2 mt-3 hover:text-akcent-hover">
-    Wolisz odkładać samodzielnie? Policz, ile to potrwa
-  </a>
-
+  {#if !zOdkladaniem}
+    <a href={`/kalkulator/?dochod=${dochod}#odkladanie`} data-odkladanie
+       class="block text-center text-[14px] text-akcent-tekst underline underline-offset-2 mt-3 hover:text-akcent-hover">
+      Wolisz odkładać samodzielnie? Policz, ile to potrwa
+    </a>
+  {/if}
+</div>
+{#if zOdkladaniem}
+  <div id="odkladanie" class="border-t border-linia mt-8 pt-7 md:border-t-0 md:mt-0 md:pt-0 md:border-l md:pl-8">
+    <Odkladanie swiadczenie={wynik.swiadczenie} skladka={wynik.skladkaDo} />
+  </div>
+{/if}
+<!-- Przypisy pod obiema kolumnami: na telefonie odkładanie stoi zaraz pod
+     przyciskiem wniosku, a nie pod trzema akapitami drobnego druku. -->
+<div class={zOdkladaniem ? 'md:col-span-2 border-t border-linia mt-8 pt-2' : ''}>
   <p class="text-[12.5px] leading-relaxed text-tekst-drugi mt-4 mb-0">
     To jest symulacja, nie oferta. Realną składkę wylicza system ubezpieczyciela po ocenie
     ryzyka — może różnić się od tej kwoty. Zasiłek ZUS to {ZUS_TEKST.wzor},
@@ -126,4 +157,5 @@
     zawarciu umowy. Powyższa składka dotyczy wariantu najkrótszego, {MIESIECY_WYPLATY}-miesięcznego;
     dłuższy okres wypłaty podnosi składkę.
   </p>
+</div>
 </div>

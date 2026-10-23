@@ -2,28 +2,22 @@
  * odkladanie.ts — „wolę odkładać sam": ile trwa uzbieranie świadczenia.
  *
  * Pomysł właściciela z 21.10.2026: klientka uznała 250 zł składki za dużo
- * i chciała tyle odkładać, przy świadczeniu 10 000 zł miesięcznie. Odkładając
- * 250 zł, równowartość JEDNEGO miesiąca świadczenia zbiera się 40 miesięcy.
+ * i chciała tyle odkładać, przy świadczeniu 10 000 zł miesięcznie. Od
+ * 23.10.2026 wynik stoi w karcie kalkulatora obok składki, a oprocentowanie
+ * jest stałe: 3% rocznie (decyzja właściciela — bez pola do wpisywania).
  *
  * Uczciwie wobec odkładania: odłożone pieniądze zostają u klienta, a składka
- * nie wraca, jeśli nic się nie stanie — strona mówi to przy wyniku. Odsetki
- * ustawia się suwakiem (domyślnie 0, bez inflacji). Przy jednym–dwóch
- * miesiącach świadczenia odsetki zmieniają wynik o kilka procent (250 zł na
- * 10 000 zł: 40 miesięcy bez odsetek, 38 przy 4% rocznie); dlatego nie
- * pokazujemy „ile lat na całe 24 miesiące świadczenia" — tam wynik bez
- * odsetek wychodzi ponad dwa razy dłuższy (80 lat wobec 36 przy 4% rocznie)
- * i to założenie, a nie rachunek, decydowałoby o liczbie na ekranie.
+ * nie wraca, jeśli nic się nie stanie — strona mówi to przy wyniku. Nie
+ * pokazujemy „ile lat na całe 24 miesiące świadczenia": przy takim horyzoncie
+ * o wyniku decyduje założenie o odsetkach, nie rachunek (240 000 zł po 250 zł:
+ * 80 lat bez odsetek, 36 przy 4% rocznie).
  */
 import { liczebnik } from '@ud/zawody/liczebnik';
 
 /** Zakres suwaka „ile odkładasz miesięcznie". */
 export const ZAKRES_ODKLADANIA = { min: 50, max: 2000, krok: 10 } as const;
-/** Najniższe świadczenie na suwaku; najwyższe przychodzi z granicy wniosku (granice.ts). */
-export const SWIADCZENIE_MIN = 2000;
-/** Krok 100 zł: świadczenie z kalkulatora (80% dochodu, dochód co 500 zł) to wielokrotność 400. */
-export const SWIADCZENIE_KROK = 100;
-/** Oprocentowanie oszczędności rocznie, po podatku — w procentach. */
-export const ZAKRES_PROCENTU = { min: 0, max: 8, krok: 0.5 } as const;
+/** Oprocentowanie oszczędności, które przyjmujemy — w procentach rocznie. */
+export const OPROCENTOWANIE = 3;
 
 /** Przykład właściciela — wartości startowe symulatora. */
 export const PRZYKLAD = { odkladam: 250, swiadczenie: 10000 } as const;

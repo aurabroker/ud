@@ -988,39 +988,49 @@ podstawy wynikają z nich, i skanuje cały build (bez wpisów bloga) na „2 240
 „2 800 zł", „od pierwszego dnia niezdolności", „karencj", „minimum przez N
 miesięcy" i „zł / dzień".
 
-### Symulator „Odkładać samemu czy się ubezpieczyć?" (od 22.10.2026)
+### Odkładanie obok składki — „Gdyby odkładać samodzielnie" (od 22.10.2026)
 
-`/kalkulator/#odkladanie` — ile miesięcy odkładania daje równowartość jednego
-i dwóch miesięcy świadczenia (pomysł właściciela: klientka uznała 250 zł
-składki za dużo przy świadczeniu 10 000 zł). Rachunek w `src/lib/odkladanie.ts`,
-wyspa `Odkladanie.svelte`, pytanie w FAQ strony liczone tym samym kodem.
-Agent może wysłać link z kwotami klienta:
-`https://utratadochodu.pl/kalkulator/?odkladam=250&swiadczenie=10000#odkladanie`
-(czytane tylko z adresu; śmieci i wartości spoza zakresu wracają do zakresu,
-świadczenie najwyżej `SWIADCZENIE_MAX`). Kalkulator na każdej stronie linkuje
-tu ze swoim świadczeniem.
+Ile miesięcy odkładania daje równowartość jednego i dwóch miesięcy
+świadczenia (pomysł właściciela: klientka uznała 250 zł składki za dużo przy
+świadczeniu 10 000 zł). Od 23.10.2026 (decyzja właściciela: „strona ciągnie się
+do dołu w nieskończoność") to **druga kolumna karty kalkulatora na
+`/kalkulator/`**, nie osobna sekcja: tekst wstępu 1/3, karta 2/3
+(`xl:grid-cols-[1fr_2fr]`), w karcie składka | odkładanie, przypisy pod obiema
+kolumnami. Obok siebie od 1280 px — przy 1024 px kolumny miały po 290 px
+i wyniki łamały się na dwie linie. Na telefonie odkładanie stoi zaraz pod
+przyciskiem wniosku.
 
+- `Kalkulator.svelte` z `zOdkladaniem` (tylko `/kalkulator/`) renderuje
+  `Odkladanie.svelte` ze świadczeniem i górną granicą składki. Rachunek:
+  `src/lib/odkladanie.ts`; pytanie w FAQ strony liczone tym samym kodem.
+- **Oprocentowanie stałe: 3% rocznie** (`OPROCENTOWANIE`), bez pola — decyzja
+  właściciela. Przy wyniku stoi „przyjmujemy oprocentowanie oszczędności 3%
+  rocznie, wpłatę na koniec każdego miesiąca, bez inflacji".
+- **Kwota odkładana idzie za GÓRNĄ granicą składki** (w dziesiątkach złotych),
+  dopóki klient nie wpisze własnej; „Odkładaj tyle co składka" wraca do niej.
+  Górna, nie dolna: z nią odkładanie wychodzi najkrócej, więc porównanie nie
+  jest ustawione pod polisę.
+- Adresy: `?dochod=30000` ustawia dochód, `?odkladam=250` kwotę (link od
+  agenta: `https://utratadochodu.pl/kalkulator/?dochod=12500&odkladam=250#odkladanie`),
+  dawne `?swiadczenie=10000` daje dochód 12 500 zł. Czytane tylko z adresu.
+  Kalkulator na innych stronach linkuje tu z `?dochod=`.
 - **Zdanie „odłożone pieniądze zostają Twoje — składka nie wraca" zostaje**
-  przy wyniku, razem z okresem wyczekiwania i wyłączeniami. Bez niego symulator
-  jest reklamą, a nie porównaniem.
-- **Przy składce: wariant z wypłatą najdłużej przez 24 miesiące, razem
-  z opłatą dystrybucyjną, świadczenie po okresie wyczekiwania.** Pierwsza
-  wersja pisała „wypłaca 10 000 zł za każdy miesiąc niezdolności, najdłużej
-  przez 60 miesięcy" — to „od pierwszego dnia" innymi słowami i cena wariantu
-  24-miesięcznego przy okresie 60-miesięcznym (przegląd z 22.10.2026). FAQ
-  trzyma te same zastrzeżenia w samej odpowiedzi, bo FAQPage cytuje się bez
-  reszty strony.
-- Pole i suwak to jedna wartość (`class Pole` w wyspie): wyczyszczone albo
-  przekroczone pole nie przestawia wyniku ani suwaka na wartość startową,
-  po wyjściu z pola wraca do liczby, z której liczony jest wynik.
+  przy wyniku, razem z okresem wyczekiwania i wyłączeniami. Bez niego to
+  reklama, a nie porównanie. Nie pisz przy świadczeniu „za każdy miesiąc
+  niezdolności" (to „od pierwszego dnia" innymi słowami) — przegląd z 22.10.
+- Pole i suwak to jedna wartość: wyczyszczone albo przekroczone pole nie
+  przestawia wyniku ani suwaka, po wyjściu z pola wraca do liczby, z której
+  liczony jest wynik.
 - **Nie dopisuj „ile lat na całe 24/60 miesięcy świadczenia".** Przy takim
   horyzoncie o wyniku decyduje założenie o odsetkach, nie rachunek (240 000 zł
   po 250 zł: 80 lat bez odsetek, 36 przy 4% rocznie).
 - `liczebnik` żyje w `@ud/zawody/liczebnik` — osobny eksport, żeby wyspa nie
   wciągała do przeglądarki danych wszystkich zawodów.
 
-Pilnuje tego `test/odkladanie.spec.js` (rachunek, pola i suwaki, adres, 390 px,
-treść w `.md` i w FAQPage).
+Pilnuje tego `test/odkladanie.spec.js` (rachunek miesiąc po miesiącu, kwota za
+składką i własna, adresy, układ 1/3–2/3 przy 1440 px i kolejność na 390 px,
+treść w `.md` i w FAQPage). Kalibrator dalej czyta przedział składki dla
+14 400 zł z `kalkulator/index.md` — karta startuje od dochodu 18 000 zł.
 
 ### Astro gubi spację przy łamaniu linii obok `{wyrażenia}`
 

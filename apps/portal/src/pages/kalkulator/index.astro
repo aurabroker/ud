@@ -1,12 +1,11 @@
 ---
 import Baza from '../../layouts/Baza.astro';
 import Kalkulator from '../../components/Kalkulator.svelte';
-import Odkladanie from '../../components/Odkladanie.svelte';
 import { graf, organizacja, serwis, strona, okruszki, faq } from '../../lib/seo';
 import { symuluj, zl, zlZakres, LIMIT, MIESIECY_WYPLATY, MIESIECY_MAX, OKRESY, ZAKRES_DOCHODU, STAWKA } from '../../lib/symulacja';
 import { SWIADCZENIE_MAX } from '../../lib/granice';
 import { ZASILEK_JDG, ZUS_TEKST, WYCZEKIWANIE_DOBROWOLNE_DNI, OKRES_ZASILKOWY_DNI } from '../../lib/zus';
-import { PRZYKLAD, miesiaceDoKwoty, czasSlownie } from '../../lib/odkladanie';
+import { PRZYKLAD, OPROCENTOWANIE, miesiaceDoKwoty, czasSlownie } from '../../lib/odkladanie';
 import { liczebnik } from '@ud/zawody/liczebnik';
 
 const sciezka = '/kalkulator/';
@@ -25,8 +24,8 @@ const PRZYKLADY = [10000, 18000, 30000, 50000].map((d) => ({
 /** Przykład właściciela do pytania „czy nie lepiej odkładać" — liczby z tego samego rachunku co symulator. */
 const ODKLADANIE = {
   ...PRZYKLAD,
-  naJeden: czasSlownie(miesiaceDoKwoty(PRZYKLAD.swiadczenie, PRZYKLAD.odkladam)),
-  naDwa: czasSlownie(miesiaceDoKwoty(2 * PRZYKLAD.swiadczenie, PRZYKLAD.odkladam)),
+  naJeden: czasSlownie(miesiaceDoKwoty(PRZYKLAD.swiadczenie, PRZYKLAD.odkladam, OPROCENTOWANIE)),
+  naDwa: czasSlownie(miesiaceDoKwoty(2 * PRZYKLAD.swiadczenie, PRZYKLAD.odkladam, OPROCENTOWANIE)),
   skladkaOd: Math.round(PRZYKLAD.swiadczenie * STAWKA.dol),
   skladkaDo: Math.round(PRZYKLAD.swiadczenie * STAWKA.gora),
 };
@@ -73,14 +72,15 @@ const PYTANIA = [
     pytanie: 'Czy nie lepiej odkładać co miesiąc zamiast płacić składkę?',
     odpowiedz: `Odkładając ${zl(ODKLADANIE.odkladam)} miesięcznie, równowartość jednego miesiąca `
       + `świadczenia ${zl(ODKLADANIE.swiadczenie)} zbierasz ${ODKLADANIE.naJeden}, a dwóch — `
-      + `${ODKLADANIE.naDwa} (bez odsetek). Polisa z takim świadczeniem kosztuje szacunkowo `
-      + `${zlZakres(ODKLADANIE.skladkaOd, ODKLADANIE.skladkaDo)} miesięcznie, razem z opłatą `
+      + `${ODKLADANIE.naDwa} (przy oprocentowaniu ${OPROCENTOWANIE}% rocznie). Polisa z takim świadczeniem `
+      + `kosztuje szacunkowo ${zlZakres(ODKLADANIE.skladkaOd, ODKLADANIE.skladkaDo)} miesięcznie, razem z opłatą `
       + `dystrybucyjną, w wariancie z wypłatą najdłużej przez `
       + `${liczebnik(MIESIECY_WYPLATY, ['miesiąc', 'miesiące', 'miesięcy'])} — to `
       + 'symulacja z ostatnio wystawionych ofert, nie oferta. Świadczenie przychodzi co miesiąc po '
       + 'okresie wyczekiwania, dopóki trwa niezdolność objęta umową; dłuższy okres wypłaty, do '
       + `${MIESIECY_MAX} miesięcy, podnosi składkę. Odłożone pieniądze zostają jednak Twoje, a składka `
-      + 'nie wraca, jeśli nic się nie stanie. Symulator na tej stronie liczy to dla Twoich kwot.',
+      + 'nie wraca, jeśli nic się nie stanie. Kalkulator na tej stronie liczy to obok składki, '
+      + 'dla Twojego dochodu.',
   },
 ];
 
@@ -99,7 +99,11 @@ const jsonld = graf([
 ---
 <Baza tytul={tytul} opis={opis} sciezka={sciezka} jsonld={jsonld}>
   <div class="bg-linear-102 from-tlo via-tlo-cyjan to-tlo-hero border-b border-linia">
-    <div class="max-w-[1200px] mx-auto px-5 py-14 lg:py-16 grid gap-12 lg:grid-cols-[1fr_26em] items-start">
+    <!-- Tekst 1/3, karta kalkulatora z odkładaniem 2/3 (decyzja właściciela z 23.10.2026):
+         wynik odkładania stoi obok składki, zamiast w osobnej sekcji na dole strony.
+         Obok siebie od 1280 px — przy 1024 px karta na 2/3 dawała kolumny po 290 px
+         i wyniki łamały się na dwie linie; węższe okno stawia tekst nad kartą. -->
+    <div class="max-w-[1200px] mx-auto px-5 py-14 lg:py-16 grid gap-10 xl:gap-12 xl:grid-cols-[1fr_2fr] items-start">
       <div>
         <nav aria-label="Okruszki" class="mb-5">
           <ol class="flex flex-wrap gap-2 text-[13px] text-tekst-trzeci list-none m-0 p-0">
@@ -108,7 +112,7 @@ const jsonld = graf([
             <li aria-current="page" class="text-tekst-drugi">Kalkulator</li>
           </ol>
         </nav>
-        <h1 class="text-[clamp(2rem,5vw,2.9rem)] leading-[1.07] max-w-[15em] m-0">
+        <h1 class="text-[clamp(2rem,5vw,2.6rem)] leading-[1.07] max-w-[15em] m-0">
           Kalkulator ubezpieczenia utraty dochodu
         </h1>
         <p data-odpowiedz class="text-[1.12rem] leading-relaxed text-tekst-drugi max-w-[38em] mt-5 mb-0">
@@ -118,7 +122,7 @@ const jsonld = graf([
         </p>
       </div>
       <div class="w-full">
-        <Kalkulator client:idle />
+        <Kalkulator client:idle zOdkladaniem />
       </div>
     </div>
   </div>
@@ -161,18 +165,6 @@ const jsonld = graf([
       dotyczy wariantu z wypłatą do {MIESIECY_WYPLATY} miesięcy, razem z opłatą dystrybucyjną, jako
       przedział z ostatnio wystawionych ofert. Symulacja, nie oferta.
     </p>
-  </section>
-
-  <section id="odkladanie" class="border-t border-linia">
-    <div class="max-w-[1200px] mx-auto px-5 py-16">
-      <h2 class="text-[clamp(1.5rem,3.5vw,2.2rem)] leading-tight mb-3">Odkładać samemu czy się ubezpieczyć?</h2>
-      <p class="text-[1.05rem] leading-relaxed text-tekst-drugi max-w-[42em] mt-0 mb-8">
-        Zamiast płacić składkę, możesz co miesiąc odkładać pieniądze. Sprawdź, ile potrwa,
-        zanim uzbierasz równowartość jednego i dwóch miesięcy świadczenia. Przesuń suwak
-        albo wpisz kwotę.
-      </p>
-      <Odkladanie client:visible maxSwiadczenie={SWIADCZENIE_MAX} />
-    </div>
   </section>
 
   <section class="bg-tlo-jasne border-y border-linia">
