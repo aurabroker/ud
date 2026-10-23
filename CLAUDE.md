@@ -2630,6 +2630,11 @@ Kontrasty, które już policzyliśmy dla tła białego:
 | `--color-linia-pole` (krawędź pola) | 3,09:1 | 3:1 dla elementów interfejsu |
 | `--color-tekst-drugi` | 5,52:1 | 4,5:1 dla drobnego tekstu |
 | `--color-tekst-trzeci` | 2,65:1 | **za mało na tekst** — tylko do ozdobników |
+| `--color-alarm` (kwoty ZUS, błędy formularzy) | 5,98:1 | 4,5:1 — do 22.10.2026 #D6453D, 4,40:1 |
+
+Tekst stoi także na cyjanowych tłach (`tlo-jasne`, `tlo-cyjan`, `tlo-mocne`) —
+`test/kontrast.spec.js` liczy kontrast tokenów tekstu z `global.css` na każdym
+z nich. Nowy kolor tekstu dopisz do tego testu.
 
 `--color-tekst-trzeci` nie nadaje się na treść, którą ktoś ma przeczytać.
 Etykiety typu „Jednorazowe świadczenie" trafiły tam przez pomyłkę i wróciły

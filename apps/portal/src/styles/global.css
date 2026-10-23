@@ -40,8 +40,11 @@
   --color-tekst-drugi: #4E6D7D;
   --color-tekst-trzeci:#8AA3AF;
 
-  /* Ostrzeżenie — jedyny kolor spoza cyjanu, dla kwot „bez polisy". */
-  --color-alarm: #D6453D;
+  /* Ostrzeżenie — jedyny kolor spoza cyjanu, dla kwot „bez polisy" i błędów
+     formularzy (13 px). Do 22.10.2026 #D6453D: 4,40:1 na bieli, czyli za mało
+     dla zwykłego tekstu. Ten sam odcień, ciemniej: 5,98:1 na bieli, 5,13:1 na
+     --color-tlo-mocne. Pilnuje tego test/kontrast.spec.js. */
+  --color-alarm: #B5352E;
 
   /* Fasety ikon — od najjaśniejszej do najciemniejszej. */
   --color-faseta-1: #B3E3F8;
