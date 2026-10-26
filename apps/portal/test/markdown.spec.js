@@ -176,6 +176,17 @@ test('obrazek-ozdoba (alt="") nie trafia do Markdownu', () => {
   expect(sprawdzonych, 'żadna strona nie ma obrazka-ozdoby w treści — test nic nie sprawdził').toBeGreaterThan(0);
 });
 
+test('wpis bloga: data, czas czytania i tagi nie sklejają się w Markdownie', () => {
+  // Kropki-separatory są aria-hidden; bez nich wychodziło „26 października 20267 min czytaniaZUS".
+  const wpisy = WSZYSTKIE.filter((a) => /^\/blog\/[^/]+\/$/.test(a));
+  expect(wpisy.length).toBeGreaterThan(5);
+  for (const adres of wpisy) {
+    const md = readFileSync(join(DIST, adres, 'index.md'), 'utf8');
+    expect(md, `${adres}: sklejona linia z datą`).toMatch(/\d{4} · \d+ min czytania/);
+    expect(md, `${adres}: data przyklejona do czasu czytania`).not.toMatch(/\d{4}\d+ min czytania/);
+  }
+});
+
 test('adresy w Markdownie są bezwzględne', () => {
   const md = readFileSync(join(DIST, 'programista', 'index.md'), 'utf8');
   const wzgledne = [...md.matchAll(/\]\((\/[^)]*)\)/g)].map((t) => t[1]);

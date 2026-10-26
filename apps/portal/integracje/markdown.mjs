@@ -93,6 +93,12 @@ export function markdownDlaAgentow({ serwis }) {
             continue;
           }
 
+          // Kropka między datą, czasem czytania i tagami wpisu jest ukryta przed
+          // czytnikiem ekranu, więc wypadała razem z ozdobami — a z nią odstęp:
+          // „26 października 20267 min czytaniaZUS". W Markdownie zostaje tekstem.
+          for (const kropka of tresc.querySelectorAll('span[aria-hidden="true"]')) {
+            if (kropka.text.trim() === '·') kropka.replaceWith(' · ');
+          }
           tresc.querySelectorAll(DO_USUNIECIA).forEach((w) => w.remove());
           nadajPelneAdresy(tresc, serwis);
 
