@@ -199,6 +199,26 @@
     return !!plik && plik.indexOf(location.origin) === 0;
   }
 
+  /* Przeglądarki wbudowane w aplikacje (Facebook, Instagram, Messenger, Chrome
+     i Edge na iOS) wstrzykują do strony własny kod i wołają funkcje, których
+     na stronie nie ma. Taki błąd ma za plik adres strony, więc wyglądał na nasz:
+     „Can't find variable: _AutofillCallbackHandler @ https://utratadochodu.pl/
+     ?fbclid=…:1" (iPhone, FBAN/FBIOS, 25.10.2026) — strona działała, a klient
+     dostawał okienko awarii. Dwa sygnały: znana nazwa z takiego kodu albo
+     „plik" = sama strona i linia 1. W pierwszej linii naszego HTML-a nie ma
+     skryptu (pilnuje tego test/awaria.spec.js), więc nasz błąd tak nie wygląda. */
+  var WSTRZYKNIETE = /_AutofillCallbackHandler|_pcmBridgeCallbackHandler|__gCrWeb|instantSearchSDKJSBridge|webkit\.messageHandlers|WeixinJSBridge|zaloJSV2|vivoNewsDetailPage|ztePageScrollModule|SymBrowser_|getReadModeConfig|getReadModeRender|getReadModeExtract/;
+
+  function bezKotwicy(adres) {
+    var i = adres.indexOf('#');
+    return i < 0 ? adres : adres.slice(0, i);
+  }
+
+  function wstrzykniety(tekst, plik, linia) {
+    if (WSTRZYKNIETE.test(tekst)) return true;
+    return !!plik && (linia || 0) <= 1 && bezKotwicy(plik) === bezKotwicy(location.href);
+  }
+
   function auto(kod, szczegoly) {
     if (autoZuzyty) return;
     autoZuzyty = true;
@@ -208,6 +228,7 @@
   window.addEventListener('error', function (e) {
     if (e && e.target && e.target !== window && e.target.tagName) return; // błąd wczytania zasobu — nie straszymy
     if (!naszSkrypt(e && e.filename)) return;
+    if (wstrzykniety((e.message || '') + ' ' + ((e.error && e.error.stack) || ''), e.filename, e.lineno)) return;
     auto('SKRYPT', (e.message || '') + ' @ ' + (e.filename || '') + ':' + (e.lineno || 0));
   });
 
@@ -215,6 +236,7 @@
     var r = e && e.reason;
     var stack = (r && r.stack) || '';
     if (stack.indexOf(location.origin) === -1) return; // nie nasz kod
+    if (WSTRZYKNIETE.test(((r && r.message) || '') + ' ' + stack)) return;
     auto('PROMISE', (r && r.message) || String(r));
   });
 
