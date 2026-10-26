@@ -757,6 +757,10 @@ w formacie llmstxt.org, ten — wierną kopią jednej podstrony.
   chce go *bardziej* niż HTML-a — porównujemy wagi `q`, a przy remisie wygrywa
   typ wymieniony imiennie. Naiwne „czy nagłówek zawiera markdown" wysłałoby
   Markdown przeglądarce, bo jej Accept kończy się typem zbiorczym.
+- **Obrazek z `alt=""` do `.md` nie idzie** (`DO_USUNIECIA` w
+  `integracje/markdown.mjs`). Ozdoba nic agentowi nie mówi, a ikona przy
+  punkcie listy dawała `1. ![](…)` i wypychała treść punktu poza listę.
+  Obrazek z opisem (infografika) zostaje.
 - **Brak pliku `.md` nie daje 404.** Warstwa zasobów Pages podaje wtedy stronę
   główną ze statusem 200. Samo `response.ok` tego nie odsiewa, więc middleware
   sprawdza typ MIME odpowiedzi — inaczej agent dostaje HTML opisany jako

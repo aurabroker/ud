@@ -154,6 +154,28 @@ test('w Markdownie nie ma nawigacji, stopki ani banera zgód', () => {
   expect(md, 'sam znacznik nawigacji').not.toContain('Przejdź do treści');
 });
 
+test('obrazek-ozdoba (alt="") nie trafia do Markdownu', () => {
+  // Ikona przy punkcie listy dawała „1. ![](…)" i wypychała treść punktu
+  // poza listę. Sprawdzane na każdej stronie, która ma taki obrazek w treści.
+  let sprawdzonych = 0;
+  for (const adres of WSZYSTKIE) {
+    const html = readFileSync(join(DIST, adres, 'index.html'), 'utf8');
+    const tresc = html.split('id="tresc"')[1] ?? '';
+    const ozdoby = [...tresc.matchAll(/<img\b[^>]*>/g)]
+      .map((m) => m[0])
+      .filter((img) => /\balt=""/.test(img))
+      .map((img) => img.match(/\bsrc="([^"]+)"/)?.[1])
+      .filter(Boolean);
+    if (!ozdoby.length) continue;
+    sprawdzonych++;
+    const md = readFileSync(join(DIST, adres, 'index.md'), 'utf8');
+    for (const src of ozdoby) {
+      expect(md, `${adres}: ozdoba ${src} w Markdownie`).not.toContain(src.split('/').at(-1));
+    }
+  }
+  expect(sprawdzonych, 'żadna strona nie ma obrazka-ozdoby w treści — test nic nie sprawdził').toBeGreaterThan(0);
+});
+
 test('adresy w Markdownie są bezwzględne', () => {
   const md = readFileSync(join(DIST, 'programista', 'index.md'), 'utf8');
   const wzgledne = [...md.matchAll(/\]\((\/[^)]*)\)/g)].map((t) => t[1]);

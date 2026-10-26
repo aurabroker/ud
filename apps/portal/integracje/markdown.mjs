@@ -31,8 +31,12 @@ import { NodeHtmlMarkdown } from 'node-html-markdown';
  */
 import { countTokens } from 'gpt-tokenizer/encoding/o200k_base';
 
-/** Elementy, które w tekście są szumem albo nie mają odpowiednika w Markdownie. */
-const DO_USUNIECIA = 'script, style, svg, noscript, template, [aria-hidden="true"]';
+/**
+ * Elementy, które w tekście są szumem albo nie mają odpowiednika w Markdownie.
+ * Obrazek z `alt=""` jest z definicji ozdobą — ikona przy punkcie listy
+ * w artykule dawała `1. ![](…)` i wypychała treść punktu poza listę.
+ */
+const DO_USUNIECIA = 'script, style, svg, noscript, template, [aria-hidden="true"], img[alt=""]';
 
 /**
  * Listy definicji (`<dl>`) nie mają odpowiednika w Markdownie, a stoją na nich
