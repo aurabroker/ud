@@ -992,16 +992,19 @@ To są ustawienia w panelu Cloudflare i decyzje klienta:
 - Podpis prawnika pod regulaminem, polityką prywatności i klauzulą
   informacyjną oraz okresy retencji danych.
 - **Web Analytics w projekcie Pages `utratadochodu` — do wyłączenia** (stan
-  26.10.2026). Pages wstrzykuje beacon z tokenem witryny `e52e5eac…`, której host
-  to wyłącznie `utratadochodu.pages.dev`; na `utratadochodu.pl` pomiar wraca
-  bez nagłówka CORS („blocked by CORS policy … cloudflareinsights.com/cdn-cgi/rum")
-  i nic się nie liczy. Strefa `utratadochodu.pl` ma własną witrynę Web Analytics
-  z automatyczną instalacją (`5ffa234b…`). Panel: Workers & Pages →
-  `utratadochodu` → Settings → Web Analytics → wyłącz. Potem sprawdź źródło
-  strony: beacon strefy ma token `34add153…`; gdyby nie było żadnego, włącz
-  automatyczną instalację dla `utratadochodu.pl` w Analytics → Web Analytics.
+  26.10.2026). Pages wstrzykuje beacon z tokenem `375a50f7…` (witryna
+  `e52e5eac…`, host wyłącznie `utratadochodu.pages.dev`); na `utratadochodu.pl`
+  pomiar wraca bez nagłówka CORS („blocked by CORS policy …
+  cloudflareinsights.com/cdn-cgi/rum") i nic się nie liczy. Strefa
+  `utratadochodu.pl` ma własną witrynę (`5ffa234b…`, beacon `34add153…`)
+  z automatyczną instalacją na wszystkie ścieżki, ale na stronie jej nie ma —
+  stoi tylko beacon z Pages. Przełącznik jest w zakładce **Metrics**, nie
+  w Settings (dokumentacja Pages „Enable Web Analytics"): Workers & Pages →
+  `utratadochodu` → Metrics → Web Analytics → Disable. Pages wstrzykuje
+  beacon przy wdrożeniu, więc potem Deployments → Retry deployment (albo
+  dowolny push). Na końcu sprawdź źródło strony: ma zostać `34add153…`.
   Odczyt `GET /accounts/<id>/rum/site_info/list` działa z sandboksa, API Pages —
-  nie (Authentication error).
+  nie (Authentication error), więc przełącznika stąd nie ruszymy.
 
 ---
 
