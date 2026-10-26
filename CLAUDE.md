@@ -991,20 +991,24 @@ To są ustawienia w panelu Cloudflare i decyzje klienta:
   Nie są sekretami, widać je w źródle strony.
 - Podpis prawnika pod regulaminem, polityką prywatności i klauzulą
   informacyjną oraz okresy retencji danych.
-- **Web Analytics w projekcie Pages `utratadochodu` — do wyłączenia** (stan
-  26.10.2026). Pages wstrzykuje beacon z tokenem `375a50f7…` (witryna
+- **Web Analytics w projekcie Pages `utratadochodu` WYŁĄCZONE 26.10.2026**
+  (właściciel). Pages wstrzykiwał beacon z tokenem `375a50f7…` (witryna
   `e52e5eac…`, host wyłącznie `utratadochodu.pages.dev`); na `utratadochodu.pl`
-  pomiar wraca bez nagłówka CORS („blocked by CORS policy …
-  cloudflareinsights.com/cdn-cgi/rum") i nic się nie liczy. Strefa
+  pomiar wracał bez nagłówka CORS („blocked by CORS policy …
+  cloudflareinsights.com/cdn-cgi/rum") i nic się nie liczyło. Strefa
   `utratadochodu.pl` ma własną witrynę (`5ffa234b…`, beacon `34add153…`)
-  z automatyczną instalacją na wszystkie ścieżki, ale na stronie jej nie ma —
-  stoi tylko beacon z Pages. Przełącznik jest w zakładce **Metrics**, nie
-  w Settings (dokumentacja Pages „Enable Web Analytics"): Workers & Pages →
-  `utratadochodu` → Metrics → Web Analytics → Disable. Pages wstrzykuje
-  beacon przy wdrożeniu, więc potem Deployments → Retry deployment (albo
-  dowolny push). Na końcu sprawdź źródło strony: ma zostać `34add153…`.
+  z automatyczną instalacją, ale nie dokłada jej, gdy na stronie stoi już
+  beacon z Pages. **Nie włączaj Web Analytics w projekcie Pages z powrotem.**
+  Przełącznik jest w zakładce **Metrics**, nie w Settings: Workers & Pages →
+  `utratadochodu` → Metrics → Web Analytics; Pages wstrzykuje beacon przy
+  wdrożeniu, więc zmiana działa po Retry deployment. Po wyłączeniu witryna
+  `e52e5eac…` zniknęła z listy, a strona ma beacon `34add153…`. **Strefa
+  wstrzykuje go tylko przy nagłówkach przeglądarki** — goły `curl`
+  (Accept `*/*`) dostaje stronę bez żadnego beaconu, więc sprawdzaj
+  z `-A` i `Accept: text/html…` albo w Chromium. Samego wysłania pomiaru
+  stąd nie widać: proxy sandboksa blokuje `static.cloudflareinsights.com`.
   Odczyt `GET /accounts/<id>/rum/site_info/list` działa z sandboksa, API Pages —
-  nie (Authentication error), więc przełącznika stąd nie ruszymy.
+  nie (Authentication error).
 
 ---
 
