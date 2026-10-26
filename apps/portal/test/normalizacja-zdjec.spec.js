@@ -57,8 +57,12 @@ const ImageMagick = {
 
 const rozne = (a, b) => (a ?? null) !== (b ?? null);
 
-/** Atrapa Supabase: trzy tabele, kubełek i RPC tokenu. */
-function atrapaSupabase(artykuly) {
+/**
+ * Atrapa Supabase: trzy tabele, kubełek i RPC tokenu. `bladWysylki` — ścieżki,
+ * których pierwsza wysyłka do kubełka się nie uda (np. 503 Storage).
+ */
+function atrapaSupabase(artykuly, { bladWysylki = [] } = {}) {
+  const doZepsucia = new Set(bladWysylki);
   const stan = { artykuly, rejestr: [], kopie: [], pliki: new Map(), wysylki: [], odczyty: 0 };
 
   // public.aura_articles_mark_images_pending() — BEFORE UPDATE.
@@ -122,6 +126,7 @@ function atrapaSupabase(artykuly) {
     storage: {
       from: () => ({
         async upload(sciezka, dane) {
+          if (doZepsucia.delete(sciezka)) return { error: { message: 'atrapa: 503 Storage' } };
           const tresc = Buffer.from(dane).toString();
           stan.wysylki.push({ sciezka, tresc });
           stan.pliki.set(sciezka, tresc);
@@ -133,8 +138,13 @@ function atrapaSupabase(artykuly) {
   return { klient, stan };
 }
 
-async function zaladuj(artykuly) {
-  const { klient, stan } = atrapaSupabase(artykuly);
+/**
+ * `okladkaZmienna` — adres okładki oddaje za każdym razem inne bajty (generator
+ * bez stałego pliku); `bladWysylki` — patrz atrapaSupabase().
+ */
+async function zaladuj(artykuly, { okladkaZmienna = false, bladWysylki = [] } = {}) {
+  const { klient, stan } = atrapaSupabase(artykuly, { bladWysylki });
+  let pobranOkladki = 0;
   let handler = null;
   const zmienne = { SUPABASE_URL: URL_BAZY, SUPABASE_SERVICE_ROLE_KEY: 'klucz' };
   const Deno = {
@@ -144,7 +154,8 @@ async function zaladuj(artykuly) {
   };
   const fetchAtrapa = async (adres, opcje = {}) => {
     if (String(adres) !== OKLADKA) throw new Error(`atrapa fetch: nieoczekiwany adres ${adres}`);
-    const bajty = obrazek('okladka', 2400, 1600);
+    if (opcje.method !== 'HEAD') pobranOkladki++;
+    const bajty = obrazek(okladkaZmienna ? `okladka${pobranOkladki}` : 'okladka', 2400, 1600);
     return {
       ok: true,
       status: 200,
@@ -207,6 +218,7 @@ test('okładka i sześć ikon: trzy wywołania crona, każdy plik ma swój obraz
   expect(a.images_status, 'po pierwszym wywołaniu zostały cztery ikony — to nie jest „ready"').toBe('pending');
   expect(r1.dane.zostalo, 'cron musi wiedzieć, że artykuł czeka').toBe(1);
   expect(a.images_attempts, 'przebieg z postępem oddaje próbę').toBe(0);
+  expect(a.images_error).toBeNull();
 
   await wywolaj();
   expect(a.images_status).toBe('pending');
@@ -293,7 +305,8 @@ test('obrazek dopisany do znormalizowanego artykułu dostaje kolejny numer, a st
   for (const nr of [1, 2, 3]) expect(wPliku('lekarz', nr)).toBe(`stary${nr}`);
   bezNadpisan();
   expect(a.content).toBe([zNormalizacji('lekarz', 4), ...stara].join('\n'));
-  expect(a.preview_image_800, 'bez okładki: kafelek bierze obrazek nr 1').toBe(`${KATALOG_URL}/lekarz-content1-800.webp`);
+  expect(a.preview_image_800, 'bez okładki kafelek bierze PIERWSZY obrazek z treści, nie plik nr 1')
+    .toBe(`${KATALOG_URL}/lekarz-content4-800.webp`);
 });
 
 test('ten sam obrazek wklejony dwa razy dostaje jeden plik', async () => {
@@ -372,4 +385,84 @@ test('zły token: 401 i ani jednego odczytu artykułów', async () => {
   expect(r.status).toBe(401);
   expect(stan.odczyty).toBe(0);
   expect(stan.artykuly[0].images_attempts).toBe(0);
+});
+
+test('ręczne wywołanie artykułu z licznikiem na limicie oddaje go z powrotem cronowi', async () => {
+  // Pięć nieudanych przebiegów (np. usługa skalowania leżała) — status 'error',
+  // licznik 5. Po naprawie przyczyny ktoś woła funkcję ręcznie dla tego slugu.
+  const tresc = ikony(1, 6).map(img).join('');
+  const { stan, wywolaj, wPliku } = await zaladuj([artykul({ content: tresc, images_status: 'error', images_attempts: 5 })]);
+  const a = stan.artykuly[0];
+
+  await wywolaj({ slug: 'lekarz' });
+  expect(a.images_status).toBe('pending');
+  expect(a.images_attempts, 'z 5 cron by go już nie wziął').toBe(4);
+  await wywolaj();
+  await wywolaj();
+  expect(a.images_status).toBe('ready');
+  for (let nr = 1; nr <= 6; nr++) expect(wPliku('lekarz', nr)).toBe(`ikona${nr}`);
+});
+
+test('okładka spod zmiennego adresu i uszkodzone obrazki nie kręcą się w cronie bez końca', async () => {
+  // Okładka przerabiana w każdym przebiegu to nie postęp: treść stoi w miejscu.
+  const tresc = [img('zepsuty1'), img('zepsuty2'), img('zepsuty3'), img('ikona1')].join('');
+  const { stan, wywolaj } = await zaladuj([artykul({ content: tresc })], { okladkaZmienna: true });
+  const a = stan.artykuly[0];
+
+  let wywolan = 0;
+  while (a.images_status === 'pending' && wywolan < 20) { await wywolaj(); wywolan++; }
+  expect(wywolan, 'MAKS_PROB przebiegów bez postępu').toBe(5);
+  expect(a.images_status).toBe('error');
+  expect(a.images_error).toContain('przerwane po 5 próbach');
+});
+
+test('numer bierze się też z adresów w treści, gdy rejestr tego artykułu jest pusty (skopiowany wiersz)', async () => {
+  const tresc = [zNormalizacji('lekarz', 2), img('nowy')].join('');
+  const { stan, wywolaj, wPliku } = await zaladuj([artykul({ content: tresc, preview_image_url: null })]);
+
+  await wywolaj();
+  expect(wPliku('lekarz', 3)).toBe('nowy');
+  expect(stan.wysylki.some((w) => w.sciezka.includes('content2-')), 'plik content2 należy do treści — nie ruszamy').toBe(false);
+  expect(stan.artykuly[0].content).toBe([zNormalizacji('lekarz', 2), zNormalizacji('lekarz', 3)].join(''));
+});
+
+test('bez okładki: redakcja podmienia jedyny obrazek — kafelek idzie za nowym, nie za usuniętym', async () => {
+  const { stan, wywolaj, wPliku } = await zaladuj([artykul({
+    content: `<p>tekst</p>${img('nowy')}`,
+    preview_image_url: null,
+    preview_image_800: `${KATALOG_URL}/lekarz-content1-800.webp`,
+    preview_image_1600: `${KATALOG_URL}/lekarz-content1-1600.webp`,
+  })]);
+  for (const w of [800, 1600]) stan.pliki.set(`normalized/lekarz-content1-${w}.webp`, 'WEBP:stary:256x256');
+  stan.rejestr.push({
+    article_id: 'a1', image_role: 'content', seq: 1, source_sha256: 'suma-starego',
+    url_800: `${KATALOG_URL}/lekarz-content1-800.webp`, url_1600: `${KATALOG_URL}/lekarz-content1-1600.webp`,
+  });
+
+  await wywolaj();
+  const a = stan.artykuly[0];
+  expect(wPliku('lekarz', 2)).toBe('nowy');
+  expect(wPliku('lekarz', 1), 'stary plik zostaje nietknięty').toBe('stary');
+  expect(a.content).toBe(`<p>tekst</p>${zNormalizacji('lekarz', 2)}`);
+  expect(a.preview_image_800).toBe(`${KATALOG_URL}/lekarz-content2-800.webp`);
+});
+
+test('bez okładki: pierwszy obrazek padł po nadaniu numeru — kafelek i tak dostaje pierwszy z treści', async () => {
+  const { stan, wywolaj, wPliku } = await zaladuj(
+    [artykul({ content: [img('pierwszy'), img('drugi')].join(''), preview_image_url: null })],
+    { bladWysylki: ['normalized/lekarz-content1-800.webp'] },
+  );
+  const a = stan.artykuly[0];
+
+  await wywolaj();
+  expect(a.images_status).toBe('error');
+  expect(a.images_error).toContain('content1: upload normalized/lekarz-content1-800.webp: atrapa: 503 Storage');
+
+  await wywolaj({ slug: 'lekarz' });
+  expect(a.images_status).toBe('ready');
+  expect(wPliku('lekarz', 3)).toBe('pierwszy');
+  expect(wPliku('lekarz', 2)).toBe('drugi');
+  expect(a.content).toBe([zNormalizacji('lekarz', 3), zNormalizacji('lekarz', 2)].join(''));
+  expect(a.preview_image_800, 'kafelek: pierwszy obrazek z treści, choć numeru 1 nie ma wcale')
+    .toBe(`${KATALOG_URL}/lekarz-content3-800.webp`);
 });

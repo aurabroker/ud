@@ -263,10 +263,29 @@ type WpisRejestru = { image_role: string; seq: number; source_sha256: string; ur
 function kolejnyNumer(slug: string, rejestr: WpisRejestru[], tresc: string): number {
   let najwiekszy = 0;
   for (const z of rejestr) if (z.image_role === 'content') najwiekszy = Math.max(najwiekszy, z.seq);
-  const doWzoru = slug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const wzor = new RegExp(`/${KATALOG}/${doWzoru}-content(\\d+)-\\d+\\.webp`, 'g');
-  for (const m of tresc.matchAll(wzor)) najwiekszy = Math.max(najwiekszy, Number(m[1]));
+  for (const m of tresc.matchAll(adresyWTresci(slug))) najwiekszy = Math.max(najwiekszy, Number(m[1]));
   return najwiekszy + 1;
+}
+
+/** Adresy `normalized/<slug>-contentN-<szerokość>.webp` w treści; grupa 1 to N. */
+function adresyWTresci(slug: string): RegExp {
+  const doWzoru = slug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`/${KATALOG}/${doWzoru}-content(\\d+)-\\d+\\.webp`, 'g');
+}
+
+/**
+ * Pierwszy obrazek z treści, który ma pliki w kubełku — w kolejności z treści,
+ * nie po numerze. Numer mówi, w którym przebiegu obrazek przemielono: obrazek
+ * nr 1 mógł z treści zniknąć (redakcja go podmieniła) albo nie powstać wcale
+ * (padł po nadaniu numeru) — kafelek pokazywałby wtedy zdjęcie spoza artykułu
+ * albo nic.
+ */
+function pierwszyWTresci(slug: string, rejestr: WpisRejestru[], tresc: string): WpisRejestru | null {
+  for (const m of tresc.matchAll(adresyWTresci(slug))) {
+    const wpis = rejestr.find((z) => z.image_role === 'content' && z.seq === Number(m[1]));
+    if (wpis) return wpis;
+  }
+  return null;
 }
 
 /**
@@ -332,16 +351,17 @@ async function przetworzArtykul(artykul: Record<string, unknown>, budzet: { zdje
   const bledy: string[] = [];
   let okladka800: string | null = null;
   let okladka1600: string | null = null;
-  let zTresci800: string | null = null;
-  let zTresci1600: string | null = null;
   let zrobione = 0;
 
   // Rejestr z poprzedniego przebiegu — po sumie kontrolnej poznajemy, że to
   // samo źródło już przemieliliśmy, i nie robimy tego drugi raz.
-  const { data: znane } = await baza
+  const { data: znane, error: bladRejestru } = await baza
     .from('aura_article_images')
     .select('image_role, seq, source_sha256, url_800, url_1600')
     .eq('article_id', artykul.id as string);
+  // Bez rejestru numer wziąłby się z samej treści i mógłby trafić w plik, który
+  // już coś pokazuje. Lepiej nic nie zrobić i spróbować w następnym przebiegu.
+  if (bladRejestru) throw new Error(`odczyt rejestru: ${bladRejestru.message}`);
   // Dopisujemy do niego w trakcie przebiegu: ten sam obrazek wklejony dwa
   // razy dostaje jeden plik, a numer nie wraca do puli.
   const rejestr: WpisRejestru[] = [...(znane ?? [])];
@@ -440,10 +460,6 @@ async function przetworzArtykul(artykul: Record<string, unknown>, budzet: { zdje
         okladka800 = url800;
         okladka1600 = url1600;
       } else if (zrodlo.doPodmiany) {
-        if (zrodlo.seq === 1) {
-          zTresci800 = url800;
-          zTresci1600 = url1600;
-        }
         podmiany.push([zrodlo.doPodmiany, zrodlo.doPodmiany.startsWith('src="') ? `src="${url1600}"` : url1600]);
       }
     } catch (e) {
@@ -468,12 +484,9 @@ async function przetworzArtykul(artykul: Record<string, unknown>, budzet: { zdje
   // Redakcja bywa, że wstawia zdjęcie do treści, a pola okładki zostawia puste
   // — cztery z trzynastu artykułów tak wyglądały. Artykuł ma wtedy zdjęcie,
   // tylko nikt go nie wskazał; bierzemy pierwsze z treści, zamiast pokazywać
-  // na liście kafelek zastępczy. Przy powtórnym przebiegu treść jest już
-  // przepisana i regexp nic w niej nie znajdzie — wtedy pyta rejestr.
+  // na liście kafelek zastępczy.
   if (!okladka800) {
-    const pierwsze = zTresci800
-      ? { url_800: zTresci800, url_1600: zTresci1600 as string }
-      : rejestr.find((z) => z.image_role === 'content' && z.seq === 1);
+    const pierwsze = pierwszyWTresci(slug, rejestr, tresc);
     if (pierwsze) {
       okladka800 = pierwsze.url_800;
       okladka1600 = pierwsze.url_1600;
@@ -487,8 +500,13 @@ async function przetworzArtykul(artykul: Record<string, unknown>, budzet: { zdje
   // swoją próbę (inaczej artykuł z szesnastoma obrazkami utknąłby na
   // MAKS_PROB); przebieg bez postępu ją zużywa i po MAKS_PROB kończy się
   // błędem, żeby artykuł nie wisiał w kolejce bez końca.
+  //
+  // Postęp to zmiana treści — obrazek z treści podmieniony na plik. Sama
+  // okładka się nie liczy: zostaje na liście źródeł w każdym przebiegu, więc
+  // okładka spod adresu, który za każdym razem oddaje inne bajty, i uszkodzone
+  // obrazki zjadające resztę budżetu kręciłyby się w cronie bez końca.
   const kompletny = odwiedzonych === zrodla.length;
-  const postep = zrobione > 0 || tresc !== artykul.content;
+  const postep = tresc !== artykul.content;
   const zostalo = zrodla.length - odwiedzonych;
   let stan: 'ready' | 'error' | 'pending';
   if (kompletny) stan = bledy.length ? 'error' : 'ready';
@@ -503,8 +521,9 @@ async function przetworzArtykul(artykul: Record<string, unknown>, budzet: { zdje
   };
   // Wyzwalacz aura_articles_images_pending przepuszcza zapis, w którym zmienia
   // się stan albo licznik prób — tu stan zostaje 'pending', więc zmiana licznika
-  // jest też tym, co go przepuszcza.
-  if (!kompletny && postep) zmiana.images_attempts = poprzednieProby;
+  // jest też tym, co go przepuszcza. Najwyżej MAKS_PROB − 1: artykuł z licznikiem
+  // już na limicie (ręczne wywołanie po pięciu nieudanych) musi wrócić do crona.
+  if (!kompletny && postep) zmiana.images_attempts = Math.min(poprzednieProby, MAKS_PROB - 1);
   if (okladka800) {
     zmiana.preview_image_800 = okladka800;
     zmiana.preview_image_1600 = okladka1600;
