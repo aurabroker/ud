@@ -233,18 +233,34 @@ Okładka i infografika w jednym wywołaniu przekroczyły limit workera
 (546 `WORKER_RESOURCE_LIMIT`). Drugie wywołanie zrobiło resztę, bo okładka była
 już w `aura_article_images` — przy dwóch obrazkach licz się z dwoma wywołaniami.
 
-**Więcej niż trzy obrazki (z okładką) — przed każdym kolejnym wywołaniem
-przywróć pełną treść.** Funkcja robi trzy nowe zdjęcia na wywołanie
-(`MAKS_ZDJEC`), po czym przepisuje treść **częściowo** i stawia `ready`.
-Przy następnym przebiegu pozostałe data URI dostałyby numery od 1 i nadpisały
-pliki `content1…` innym obrazkiem. Tak poszło 26.10.2026
-(„przychodzi-lekarz-do-lekarza": okładka i sześć ikon, trzy wywołania): po
-każdym `update aura_articles set content = <kopia z aura_article_content_backup>`
-(tam leży wersja z wszystkimi data URI, zapisana przy pierwszym przepisaniu)
-i kolejne wywołanie — rejestr rozpoznaje zrobione obrazki po sumie, budżet
-idzie na następne trzy. Naprawa w samej funkcji (numer z pozycji w pełnej
-treści albo brak częściowego przepisania) czeka na decyzję — kod jest wspólny
-dla jedenastu serwisów.
+**Więcej niż trzy obrazki (z okładką) — kilka wywołań, nic nie przywracasz.**
+Funkcja robi trzy nowe zdjęcia na wywołanie (`MAKS_ZDJEC`). Do 26.10.2026
+przebieg przerwany na tym limicie przepisywał treść częściowo i stawiał
+`ready`: cron już artykułu nie brał, a ręczne wywołanie numerowało pozostałe
+obrazki od 1 i nadpisywało pliki `content1…` innym obrazkiem
+(„przychodzi-lekarz-do-lekarza": okładka i sześć ikon — wtedy obchodzone
+przywracaniem treści z `aura_article_content_backup` przed każdym
+wywołaniem). Od wersji z 26.10.2026:
+
+- **numer obrazka z treści bierze się z rejestru**, nie z kolejności:
+  obrazek już przemielony poznajemy po sumie (pod dowolnym numerem), nowy
+  dostaje 1 + największy numer z rejestru i z adresów `<slug>-contentN-` w treści
+  (`kolejnyNumer()`). Świeży artykuł dostaje dalej 1, 2, 3… w kolejności
+  z treści; obrazek dopisany do znormalizowanego artykułu — kolejny wolny numer;
+  ten sam obrazek wklejony dwa razy — jeden plik;
+- **przebieg przerwany na limicie zostaje `pending`** i cron (co 10 minut) bierze
+  następne trzy. Przebieg z postępem oddaje próbę (`images_attempts` wraca do
+  wartości sprzed wywołania — inaczej artykuł z szesnastoma obrazkami utknąłby
+  na `MAKS_PROB`), przebieg bez postępu ją zużywa i po pięciu kończy się `error`
+  („przerwane po 5 próbach…"). Odpowiedź niesie `zostalo` i `stan`;
+- **wywołanie nie zaczyna kolejnego artykułu bez budżetu** (dawniej przy
+  `limit` > 1 albo `wszystkie` taki artykuł dostawał `ready` bez obejrzenia).
+
+Artykuł z wieloma obrazkami: jedno `aura_normalize_article_images('{"slug": …}')`
+i albo czekasz na cron, albo wołasz dalej, dopóki `images_status` nie będzie
+`ready`. Pilnuje tego `test/normalizacja-zdjec.spec.js` — prawdziwe źródło
+funkcji na atrapach bazy (z wyzwalaczem `aura_articles_images_pending`),
+kubełka i ImageMagick; na wersji sprzed poprawki 9 z 10 testów jest czerwonych.
 
 **Lista z ikonami w treści:** `<ol class="ikony" role="list">`, w każdym `<li>`
 najpierw `<img … alt="" width="256" height="256">` (ikona jest ozdobą, treść
@@ -572,6 +588,13 @@ Zasady:
   nie psują strony użytkownikowi, a modal tylko by straszył.
 - Podpięty w: `style.js` (wniosek), `app.js` (szybki kontakt),
   `opinia.html` (opinie). Nową ścieżkę wysyłki podpinaj tak samo.
+- **Portal (`apps/portal/public/awaria.js`) przemilcza kod wstrzyknięty przez
+  przeglądarki w aplikacjach** (Facebook, Instagram, Chrome i Edge na iOS):
+  znane nazwy (`_AutofillCallbackHandler`, `webkit.messageHandlers`…) albo błąd
+  z „plikiem" = adres strony w linii 1. 25.10.2026 klient z Facebooka na iPhonie
+  dostał okienko awarii przez „Can't find variable: _AutofillCallbackHandler".
+  Reguła linii 1 działa, bo w pierwszej linii naszego HTML-a nie ma skryptu —
+  pilnuje tego `test/awaria.spec.js` (portal).
 - Test: `NODE_PATH=$(npm root -g) node tests/awaria-test.js`.
 
 ## Ikona strony (favicon)
@@ -947,6 +970,17 @@ To są ustawienia w panelu Cloudflare i decyzje klienta:
   Nie są sekretami, widać je w źródle strony.
 - Podpis prawnika pod regulaminem, polityką prywatności i klauzulą
   informacyjną oraz okresy retencji danych.
+- **Web Analytics w projekcie Pages `utratadochodu` — do wyłączenia** (stan
+  26.10.2026). Pages wstrzykuje beacon z tokenem witryny `e52e5eac…`, której host
+  to wyłącznie `utratadochodu.pages.dev`; na `utratadochodu.pl` pomiar wraca
+  bez nagłówka CORS („blocked by CORS policy … cloudflareinsights.com/cdn-cgi/rum")
+  i nic się nie liczy. Strefa `utratadochodu.pl` ma własną witrynę Web Analytics
+  z automatyczną instalacją (`5ffa234b…`). Panel: Workers & Pages →
+  `utratadochodu` → Settings → Web Analytics → wyłącz. Potem sprawdź źródło
+  strony: beacon strefy ma token `34add153…`; gdyby nie było żadnego, włącz
+  automatyczną instalację dla `utratadochodu.pl` w Analytics → Web Analytics.
+  Odczyt `GET /accounts/<id>/rum/site_info/list` działa z sandboksa, API Pages —
+  nie (Authentication error).
 
 ---
 
