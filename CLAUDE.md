@@ -233,6 +233,32 @@ Okładka i infografika w jednym wywołaniu przekroczyły limit workera
 (546 `WORKER_RESOURCE_LIMIT`). Drugie wywołanie zrobiło resztę, bo okładka była
 już w `aura_article_images` — przy dwóch obrazkach licz się z dwoma wywołaniami.
 
+**Więcej niż trzy obrazki (z okładką) — przed każdym kolejnym wywołaniem
+przywróć pełną treść.** Funkcja robi trzy nowe zdjęcia na wywołanie
+(`MAKS_ZDJEC`), po czym przepisuje treść **częściowo** i stawia `ready`.
+Przy następnym przebiegu pozostałe data URI dostałyby numery od 1 i nadpisały
+pliki `content1…` innym obrazkiem. Tak poszło 26.10.2026
+(„przychodzi-lekarz-do-lekarza": okładka i sześć ikon, trzy wywołania): po
+każdym `update aura_articles set content = <kopia z aura_article_content_backup>`
+(tam leży wersja z wszystkimi data URI, zapisana przy pierwszym przepisaniu)
+i kolejne wywołanie — rejestr rozpoznaje zrobione obrazki po sumie, budżet
+idzie na następne trzy. Naprawa w samej funkcji (numer z pozycji w pełnej
+treści albo brak częściowego przepisania) czeka na decyzję — kod jest wspólny
+dla jedenastu serwisów.
+
+**Lista z ikonami w treści:** `<ol class="ikony" role="list">`, w każdym `<li>`
+najpierw `<img … alt="" width="256" height="256">` (ikona jest ozdobą, treść
+niesie tekst obok), potem `<p>`. Style stoją w `blog/[slug]/index.astro` —
+bez nich ikona rozciąga się na całą szerokość jak infografika. Źródło ikony
+ma 256 px, więc warianty `-800`/`-1600` też mają 256 px (normalizacja nie
+powiększa).
+
+**Źródła, których sandbox nie otwiera** (money.pl, NIL, PDF-y izb lekarskich —
+proxy odpowiada 403), czyta się przez bazę:
+`net.http_get('https://r.jina.ai/<adres>')` oddaje tekst strony albo PDF-a do
+`net._http_response`, a stamtąd `regexp_matches` wyciąga zdania z liczbami.
+Tylko dokumenty publiczne — adres idzie przez cudzą usługę.
+
 **Tabele w treści** `normalizuj()` owija w kontener przewijany w poziomie
 (`.tabela`). Bez niego tabela z pięcioma kolumnami rozpychała stronę na
 telefonie. Pilnuje tego `artykuly.spec.js`, także przy szerokości 390 px.
@@ -2938,3 +2964,14 @@ Kadr 3:2, rozdzielczość 2K, sto kredytów za ujęcie. Pliku nie wgrywa się do
 repozytorium: adres z generatora idzie do `aura_articles.preview_image_url`,
 a normalizacja sama go pobiera i zapisuje warianty 800/1600 w kubełku (patrz
 „Nowy artykuł w portalu").
+
+**Bloom (trybloom.ai) zamiast Artlista**, gdy ten wymaga ponownego logowania
+(26.10.2026, „przychodzi-lekarz-do-lekarza"): okładka z `bytedance/seedream-5-pro`
+(`size: "2400x1600"`), ikony z `openai/gpt-image-2.5-flare` — pierwsza z opisu,
+pięć kolejnych z nią jako obrazem wzorcowym, żeby zestaw był spójny. Marka
+UtrataDochodu w Bloom ma starą paletę i nie przyjmuje briefów („not ready for
+briefs"), więc kolory serwisu podajesz w promptcie. Wynik leży pod stałym
+adresem `https://www.rainbrand.com/img/<id>` — ten idzie do
+`preview_image_url`. Z sandboksa ten host jest zablokowany, ale narzędzie
+zapisuje kopię WebP w pełnej rozdzielczości w `tool-results/` sesji — stamtąd
+ikony poszły do repozytorium i dalej drogą przez GitHub.

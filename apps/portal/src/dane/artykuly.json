@@ -3,6 +3,20 @@
   "zrodlo": "aura_articles (status=published, platforms zawiera UtrataDochodu.pl); zdjęcia z preview_image_800/1600",
   "artykuly": [
     {
+      "slug": "przychodzi-lekarz-do-lekarza",
+      "tytul": "Przychodzi lekarz do lekarza. Ile traci specjalista na kontrakcie, gdy sam trafi na L4",
+      "zajawka": "73% specjalistów pracuje na B2B, a przy minimalnym dużym ZUS zasiłek pokrywa ok. 15% mediany kontraktu. Sprawdź, co zmienia polisa dla lekarzy.",
+      "tagi": [
+        "ZUS",
+        "OWU",
+        "lekarze"
+      ],
+      "opublikowano": "2026-10-26T20:05:49Z",
+      "utworzono": "2026-10-26T20:05:49Z",
+      "obraz": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/przychodzi-lekarz-do-lekarza-cover-800.webp",
+      "obrazDuzy": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/przychodzi-lekarz-do-lekarza-cover-1600.webp"
+    },
+    {
       "slug": "nowotwory-utrata-dochodu-b2b",
       "tytul": "193 tysiące nowych diagnoz raka w rok. Ile zapłaci ZUS na B2B i gdzie kończy się polisa",
       "zajawka": "W 2023 r. KRN zarejestrował 192 922 nowe zachorowania na nowotwory złośliwe. Sprawdź, ile zapłaci ZUS na B2B w czasie leczenia i co o raku mówią OWU polis od utraty dochodu.",

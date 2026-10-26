@@ -240,6 +240,30 @@ const KATEGORIE = kategorie();
     margin: 1.8rem 0;
     border: 1px solid var(--color-linia);
   }
+  /* Lista z ikonami (<ol class="ikony">): ikona po lewej zamiast numeru,
+     treść obok. Ikony to warianty z normalizacji jak każdy obrazek w treści,
+     tylko pokazane małe — bez tej reguły rozciągnęłyby się na całą szerokość. */
+  .wpis :global(ol.ikony) {
+    list-style: none;
+    padding-left: 0;
+  }
+  .wpis :global(ol.ikony > li) {
+    display: grid;
+    grid-template-columns: 3.5rem 1fr;
+    gap: 0 1rem;
+    align-items: start;
+    margin-bottom: 1.4rem;
+  }
+  .wpis :global(ol.ikony > li > img) {
+    width: 3.5rem;
+    height: auto;
+    margin: 0.3rem 0 0;
+    border: 0;
+  }
+  @media (min-width: 640px) {
+    .wpis :global(ol.ikony > li) { grid-template-columns: 4.5rem 1fr; gap: 0 1.25rem; }
+    .wpis :global(ol.ikony > li > img) { width: 4.5rem; }
+  }
   /* Kontener z normalizuj() (krok 8): przewija tabelę, nie stronę. Minimalna
      szerokość tabeli trzyma kolumny czytelne — lepiej przewinąć niż czytać
      liczby łamane po jednej cyfrze. */
