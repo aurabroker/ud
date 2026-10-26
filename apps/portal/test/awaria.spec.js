@@ -15,26 +15,29 @@ import { join } from 'node:path';
 const DIST = 'dist';
 const modal = (page) => page.locator('#ud-awaria');
 
-/** Wywołuje zdarzenie `error` tak, jak robi to przeglądarka po błędzie skryptu. */
+/**
+ * Wywołuje zdarzenie `error` tak, jak robi to przeglądarka po błędzie skryptu.
+ * `plik: 'strona'` to adres dokumentu — przeglądarka podaje go BEZ #kotwicy,
+ * choć `location.href` ją ma (sprawdzone w Chromium).
+ */
 const bladSkryptu = (page, { komunikat, plik, linia }) => page.evaluate(({ komunikat, plik, linia }) => {
   window.dispatchEvent(new ErrorEvent('error', {
-    message: komunikat, filename: plik === 'strona' ? location.href : location.origin + plik, lineno: linia,
+    message: komunikat, filename: plik === 'strona' ? location.href.split('#')[0] : location.origin + plik, lineno: linia,
   }));
 }, { komunikat, plik, linia });
 
 test('błąd wstrzyknięty przez przeglądarkę Facebooka nie otwiera okienka awarii', async ({ page }) => {
   await page.goto('/?fbclid=IwZXh0bgNhZW0CMTEAAR0');
-  // Dokładnie ten, który zgłosił klient — wywołany tak, jak robi to aplikacja:
-  // skrypt dopisany do strony, bez własnego pliku.
-  await page.addScriptTag({ content: '_AutofillCallbackHandler.zapamietaj({});' });
+  // Dokładnie ten, który zgłosił klient: adres strony z fbclid, linia 1.
   await bladSkryptu(page, { komunikat: "ReferenceError: Can't find variable: _AutofillCallbackHandler", plik: 'strona', linia: 1 });
   await bladSkryptu(page, { komunikat: "TypeError: undefined is not an object (evaluating 'window.webkit.messageHandlers')", plik: 'strona', linia: 3 });
   await page.waitForTimeout(300);
   await expect(modal(page)).toHaveCount(0);
 });
 
-test('nieznany kod wstrzyknięty w linię 1 adresu strony też nie straszy', async ({ page }) => {
-  await page.goto('/kalkulator/');
+test('nieznany kod wstrzyknięty w linię 1 adresu strony też nie straszy — także pod adresem z #kotwicą', async ({ page }) => {
+  // Link agenta z CLAUDE.md: zapytanie i kotwica w jednym adresie.
+  await page.goto('/kalkulator/?dochod=12500&odkladam=250#odkladanie');
   await bladSkryptu(page, { komunikat: 'ReferenceError: noweNarzedzieAplikacji is not defined', plik: 'strona', linia: 1 });
   await page.waitForTimeout(300);
   await expect(modal(page)).toHaveCount(0);
