@@ -23,7 +23,7 @@ import {
  * `aura_articles.preview_image_800/1600` i podmienia adresy w treści.
  * Każdy serwis czyta gotowy, lekki adres i nie musi nic o tym wiedzieć.
  *
- * Wołana przez pg_cron (co godzinę) i ręcznie przez `net.http_post`.
+ * Wołana przez pg_cron (co dziesięć minut) i ręcznie przez `net.http_post`.
  * Nie ma tu JWT do sprawdzenia — żądanie idzie z wnętrza bazy — więc wpuszcza
  * wyłącznie nagłówek `x-blog-token` zgodny z sekretem w Vault.
  *
@@ -194,7 +194,13 @@ function zDataUri(dane: string): Uint8Array {
 
 type Zrodlo = {
   rola: 'cover' | 'content';
+  /**
+   * Numer w nazwie pliku (`<slug>-content<seq>-…`). Obrazek z treści dostaje
+   * go dopiero w pętli, gdy znamy jego sumę — patrz `kolejnyNumer()`.
+   */
   seq: number;
+  /** Miejsce w tym przebiegu (okładka 1, obrazki z treści od 1) — do komunikatów. */
+  poz: number;
   /** Adres źródła albo null, gdy obrazek był wklejony w treść jako data URI. */
   adres: string | null;
   /** Dokładny tekst do podmiany w treści; null dla okładki. */
@@ -214,16 +220,17 @@ function zrodlaArtykulu(artykul: Record<string, unknown>): Zrodlo[] {
 
   const okladka = (artykul.preview_image_url as string) || (artykul.thumbnail_url as string) || null;
   if (okladka && !okladka.includes(`/${KATALOG}/`)) {
-    zrodla.push({ rola: 'cover', seq: 1, adres: okladka, doPodmiany: null, bajty: null });
+    zrodla.push({ rola: 'cover', seq: 1, poz: 1, adres: okladka, doPodmiany: null, bajty: null });
   }
 
   const tresc = (artykul.content as string) ?? '';
-  let seq = 0;
+  let poz = 0;
 
   for (const trafienie of tresc.matchAll(DATA_URI)) {
     zrodla.push({
       rola: 'content',
-      seq: ++seq,
+      seq: 0,
+      poz: ++poz,
       adres: null,
       doPodmiany: trafienie[0],
       bajty: zDataUri(trafienie[1]),
@@ -233,10 +240,33 @@ function zrodlaArtykulu(artykul: Record<string, unknown>): Zrodlo[] {
   for (const trafienie of tresc.matchAll(W_TRESCI)) {
     const adres = trafienie[1];
     if (adres.includes(`/${KATALOG}/`)) continue; // już znormalizowany
-    zrodla.push({ rola: 'content', seq: ++seq, adres, doPodmiany: adres, bajty: null });
+    zrodla.push({ rola: 'content', seq: 0, poz: ++poz, adres, doPodmiany: adres, bajty: null });
   }
 
   return zrodla;
+}
+
+type WpisRejestru = { image_role: string; seq: number; source_sha256: string; url_800: string; url_1600: string };
+
+/**
+ * Pierwszy numer, którego ten artykuł jeszcze nie użył — ani w rejestrze, ani
+ * w adresach `<slug>-contentN-…` w treści.
+ *
+ * Do 26.10.2026 numer brał się z kolejności obrazków, które w treści jeszcze
+ * czekały. Przebieg przerwany na limicie zdjęć przepisywał treść częściowo, więc
+ * w następnym pozostałe obrazki liczyły się od 1 i nadpisywały pliki `content1…`
+ * innym obrazkiem („przychodzi-lekarz-do-lekarza": okładka i sześć ikon). Ten sam
+ * los czekał obrazek dopisany do artykułu już znormalizowanego. Numer z rejestru
+ * nie zależy od tego, co w treści zostało — zajęty plik nie dostanie drugiego
+ * obrazka. Świeży artykuł dostaje dalej 1, 2, 3… w kolejności z treści.
+ */
+function kolejnyNumer(slug: string, rejestr: WpisRejestru[], tresc: string): number {
+  let najwiekszy = 0;
+  for (const z of rejestr) if (z.image_role === 'content') najwiekszy = Math.max(najwiekszy, z.seq);
+  const doWzoru = slug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const wzor = new RegExp(`/${KATALOG}/${doWzoru}-content(\\d+)-\\d+\\.webp`, 'g');
+  for (const m of tresc.matchAll(wzor)) najwiekszy = Math.max(najwiekszy, Number(m[1]));
+  return najwiekszy + 1;
 }
 
 /**
@@ -288,9 +318,11 @@ async function przetworzArtykul(artykul: Record<string, unknown>, budzet: { zdje
   // Licznik rośnie PRZED pracą. Gdy worker padnie na limicie pamięci, nie
   // dopisze już niczego do bazy — a ten zapis jest, więc artykuł nie wraca
   // do kolejki w nieskończoność.
+  const poprzednieProby = (artykul.images_attempts as number) ?? 0;
+  const proba = poprzednieProby + 1;
   await baza
     .from('aura_articles')
-    .update({ images_attempts: ((artykul.images_attempts as number) ?? 0) + 1 })
+    .update({ images_attempts: proba })
     .eq('id', artykul.id as string);
 
   const zrodla = zrodlaArtykulu(artykul);
@@ -310,9 +342,15 @@ async function przetworzArtykul(artykul: Record<string, unknown>, budzet: { zdje
     .from('aura_article_images')
     .select('image_role, seq, source_sha256, url_800, url_1600')
     .eq('article_id', artykul.id as string);
+  // Dopisujemy do niego w trakcie przebiegu: ten sam obrazek wklejony dwa
+  // razy dostaje jeden plik, a numer nie wraca do puli.
+  const rejestr: WpisRejestru[] = [...(znane ?? [])];
+  let nastepny = kolejnyNumer(slug, rejestr, tresc);
+  let odwiedzonych = 0;
 
   for (const zrodlo of zrodla) {
     if (budzet.zdjec <= 0 || Date.now() > budzet.koniec) break;
+    odwiedzonych++;
 
     try {
       const sciezka = zrodlo.adres ? wKubelku(zrodlo.adres) : null;
@@ -349,17 +387,22 @@ async function przetworzArtykul(artykul: Record<string, unknown>, budzet: { zdje
         }
         sha = await suma(bajty);
       }
-      const wpis = (znane ?? []).find(
-        (z) => z.image_role === zrodlo.rola && z.seq === zrodlo.seq && z.source_sha256 === sha,
-      );
+      // Okładka ma jeden plik i nowa podmienia starą. Obrazek z treści
+      // poznajemy po samej sumie, bez numeru — numer zależy od przebiegu,
+      // w którym obrazek przemielono, a nie od miejsca w treści.
+      const wpis = zrodlo.rola === 'cover'
+        ? rejestr.find((z) => z.image_role === 'cover' && z.seq === 1 && z.source_sha256 === sha)
+        : rejestr.find((z) => z.image_role === 'content' && z.source_sha256 === sha);
 
       let url800: string;
       let url1600: string;
 
       if (wpis) {
+        zrodlo.seq = wpis.seq;
         url800 = wpis.url_800;
         url1600 = wpis.url_1600;
       } else {
+        if (zrodlo.rola === 'content') zrodlo.seq = nastepny++;
         budzet.zdjec--;
         const zRenderera = przezRenderer ? await wariantyZRenderera(sciezka!) : null;
         if (przezRenderer && !zRenderera) {
@@ -389,6 +432,7 @@ async function przetworzArtykul(artykul: Record<string, unknown>, budzet: { zdje
           bytes_1600: warianty.get(1600)!.byteLength,
         }, { onConflict: 'article_id,image_role,seq' });
         if (error) throw new Error(`rejestr: ${error.message}`);
+        rejestr.push({ image_role: zrodlo.rola, seq: zrodlo.seq, source_sha256: sha, url_800: url800, url_1600: url1600 });
         zrobione++;
       }
 
@@ -403,7 +447,7 @@ async function przetworzArtykul(artykul: Record<string, unknown>, budzet: { zdje
         podmiany.push([zrodlo.doPodmiany, zrodlo.doPodmiany.startsWith('src="') ? `src="${url1600}"` : url1600]);
       }
     } catch (e) {
-      bledy.push(`${zrodlo.rola}${zrodlo.seq}: ${e instanceof Error ? e.message : String(e)}`);
+      bledy.push(`${zrodlo.rola}${zrodlo.poz}: ${e instanceof Error ? e.message : String(e)}`);
     }
   }
 
@@ -429,18 +473,38 @@ async function przetworzArtykul(artykul: Record<string, unknown>, budzet: { zdje
   if (!okladka800) {
     const pierwsze = zTresci800
       ? { url_800: zTresci800, url_1600: zTresci1600 as string }
-      : (znane ?? []).find((z) => z.image_role === 'content' && z.seq === 1);
+      : rejestr.find((z) => z.image_role === 'content' && z.seq === 1);
     if (pierwsze) {
       okladka800 = pierwsze.url_800;
       okladka1600 = pierwsze.url_1600;
     }
   }
 
+  // Przebieg przerwany na limicie zdjęć albo czasu nie jest gotowy, nawet bez
+  // błędów: do 26.10.2026 dostawał 'ready', cron go już nie brał, a reszta
+  // obrazków zostawała w treści jako data URI. Teraz zostaje 'pending'
+  // i następne wywołanie bierze kolejne obrazki. Przebieg z postępem oddaje
+  // swoją próbę (inaczej artykuł z szesnastoma obrazkami utknąłby na
+  // MAKS_PROB); przebieg bez postępu ją zużywa i po MAKS_PROB kończy się
+  // błędem, żeby artykuł nie wisiał w kolejce bez końca.
+  const kompletny = odwiedzonych === zrodla.length;
+  const postep = zrobione > 0 || tresc !== artykul.content;
+  const zostalo = zrodla.length - odwiedzonych;
+  let stan: 'ready' | 'error' | 'pending';
+  if (kompletny) stan = bledy.length ? 'error' : 'ready';
+  else stan = !postep && proba >= MAKS_PROB ? 'error' : 'pending';
+  const opis = [...bledy];
+  if (stan === 'error' && !kompletny) opis.push(`przerwane po ${proba} próbach — zostało ${zostalo} z ${zrodla.length} źródeł`);
+
   const zmiana: Record<string, unknown> = {
-    images_status: bledy.length ? 'error' : 'ready',
-    images_error: bledy.length ? bledy.join('; ').slice(0, 1000) : null,
+    images_status: stan,
+    images_error: opis.length ? opis.join('; ').slice(0, 1000) : null,
     images_checked_at: new Date().toISOString(),
   };
+  // Wyzwalacz aura_articles_images_pending przepuszcza zapis, w którym zmienia
+  // się stan albo licznik prób — tu stan zostaje 'pending', więc zmiana licznika
+  // jest też tym, co go przepuszcza.
+  if (!kompletny && postep) zmiana.images_attempts = poprzednieProby;
   if (okladka800) {
     zmiana.preview_image_800 = okladka800;
     zmiana.preview_image_1600 = okladka1600;
@@ -454,6 +518,8 @@ async function przetworzArtykul(artykul: Record<string, unknown>, budzet: { zdje
     slug,
     zrodel: zrodla.length,
     przetworzonych: zrobione,
+    zostalo,
+    stan,
     trescPrzepisana: podmiany.length > 0,
     okladka: Boolean(okladka800),
     bledy,
@@ -490,12 +556,14 @@ Deno.serve(async (req) => {
   const budzet = { zdjec: MAKS_ZDJEC, koniec: Date.now() + CZAS_NA_PRACE };
   const zrobione = [];
   for (const artykul of artykuly) {
+    // Bez zdjęć w budżecie artykułu nie zaczynamy: przebieg nic by nie zrobił,
+    // a zużyłby próbę (dawniej wręcz stawiał 'ready' bez obejrzenia źródeł).
+    if (budzet.zdjec <= 0 || Date.now() > budzet.koniec) break;
     try {
       zrobione.push(await przetworzArtykul(artykul, budzet));
     } catch (e) {
       zrobione.push({ slug: artykul.slug, bledy: [e instanceof Error ? e.message : String(e)] });
     }
-    if (Date.now() > budzet.koniec) break;
   }
 
   const { count } = await baza
