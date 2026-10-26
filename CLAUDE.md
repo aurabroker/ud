@@ -274,6 +274,13 @@ kubełka i ImageMagick; 15 przypadków, na wersji sprzed poprawki 9 z pierwszych
 agentów (numeracja, stan i wyzwalacz, środowisko Deno, testy) — z niego kafelek,
 limit prób i okładka bez postępu.
 
+**Stan na 26.10.2026: WDROŻONE jako v10** (`verify_jwt = false`, jeden plik
+`index.ts`, `ezbr_sha256` `b1269eba…`). Osobny agent pobrał treść przez
+`get_edge_function`: md5 `4008ebeabcae1ae2031b8d85d7ece806`, równe
+repozytorium. Sondy: POST bez tokenu → 401, zły token → 401. Wywołanie przez
+`aura_normalize_article_images('{}')` (token z Vaulta) → 200, „nic nie czeka”
+(wszystkie 18 artykułów `ready`).
+
 **Lista z ikonami w treści:** `<ol class="ikony" role="list">`, w każdym `<li>`
 najpierw `<img … alt="" width="256" height="256">` (ikona jest ozdobą, treść
 niesie tekst obok), potem `<p>`. Style stoją w `blog/[slug]/index.astro` —
