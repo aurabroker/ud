@@ -249,10 +249,19 @@ wywołaniem). Od wersji z 26.10.2026:
   z treści; obrazek dopisany do znormalizowanego artykułu — kolejny wolny numer;
   ten sam obrazek wklejony dwa razy — jeden plik;
 - **przebieg przerwany na limicie zostaje `pending`** i cron (co 10 minut) bierze
-  następne trzy. Przebieg z postępem oddaje próbę (`images_attempts` wraca do
-  wartości sprzed wywołania — inaczej artykuł z szesnastoma obrazkami utknąłby
-  na `MAKS_PROB`), przebieg bez postępu ją zużywa i po pięciu kończy się `error`
-  („przerwane po 5 próbach…"). Odpowiedź niesie `zostalo` i `stan`;
+  następne trzy. Przebieg z postępem (treść się zmieniła) oddaje próbę:
+  `images_attempts` wraca do wartości sprzed wywołania, najwyżej `MAKS_PROB − 1`
+  — inaczej artykuł z szesnastoma obrazkami utknąłby na limicie, a ręczne
+  wywołanie artykułu po pięciu nieudanych nie oddałoby go cronowi. Przebieg bez
+  postępu próbę zużywa i po pięciu kończy się `error` („przerwane po 5
+  próbach…"). Sama okładka postępem nie jest — okładka spod adresu, który za
+  każdym razem daje inne bajty, kręciłaby się w cronie bez końca. Odpowiedź
+  niesie `zostalo` i `stan`;
+- **kafelek artykułu bez okładki to pierwszy obrazek w kolejności z treści**
+  (`pierwszyWTresci()`), nie plik nr 1 — numer mówi, kiedy obrazek przemielono,
+  a nr 1 mógł z treści zniknąć albo nie powstać;
+- **błąd odczytu rejestru przerywa przebieg** — bez rejestru numer wziąłby się
+  z samej treści;
 - **wywołanie nie zaczyna kolejnego artykułu bez budżetu** (dawniej przy
   `limit` > 1 albo `wszystkie` taki artykuł dostawał `ready` bez obejrzenia).
 
@@ -260,7 +269,10 @@ Artykuł z wieloma obrazkami: jedno `aura_normalize_article_images('{"slug": …
 i albo czekasz na cron, albo wołasz dalej, dopóki `images_status` nie będzie
 `ready`. Pilnuje tego `test/normalizacja-zdjec.spec.js` — prawdziwe źródło
 funkcji na atrapach bazy (z wyzwalaczem `aura_articles_images_pending`),
-kubełka i ImageMagick; na wersji sprzed poprawki 9 z 10 testów jest czerwonych.
+kubełka i ImageMagick; 15 przypadków, na wersji sprzed poprawki 9 z pierwszych
+10 czerwonych. Przed wdrożeniem poprawka przeszła przegląd czterech niezależnych
+agentów (numeracja, stan i wyzwalacz, środowisko Deno, testy) — z niego kafelek,
+limit prób i okładka bez postępu.
 
 **Lista z ikonami w treści:** `<ol class="ikony" role="list">`, w każdym `<li>`
 najpierw `<img … alt="" width="256" height="256">` (ikona jest ozdobą, treść
@@ -780,6 +792,8 @@ w formacie llmstxt.org, ten — wierną kopią jednej podstrony.
   chce go *bardziej* niż HTML-a — porównujemy wagi `q`, a przy remisie wygrywa
   typ wymieniony imiennie. Naiwne „czy nagłówek zawiera markdown" wysłałoby
   Markdown przeglądarce, bo jej Accept kończy się typem zbiorczym.
+- **Kropka `·` w `<span aria-hidden="true">` zostaje w `.md` tekstem** — inaczej
+  linia wpisu sklejała się w „26 października 20267 min czytaniaZUS".
 - **Obrazek z `alt=""` do `.md` nie idzie** (`DO_USUNIECIA` w
   `integracje/markdown.mjs`). Ozdoba nic agentowi nie mówi, a ikona przy
   punkcie listy dawała `1. ![](…)` i wypychała treść punktu poza listę.
