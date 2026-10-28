@@ -49,12 +49,14 @@ const brakWKubelku = () => new Response(
  * Woła funkcję jak Pages: `params.plik` to ostatni człon ścieżki.
  * `siec` to podstawiony fetch; zwracamy też listę adresów, o które pytał.
  */
-async function zadanie(sciezka, { metoda = 'GET', siec = zKubelka, host = 'utratadochodu.pl', bufor, naglowki = {} } = {}) {
+async function zadanie(sciezka, { metoda = 'GET', siec = zKubelka, host = 'utratadochodu.pl', bufor, naglowki = {}, env = {} } = {}) {
   const wolane = [];
+  const zNaglowkami = [];
   const prawdziwy = globalThis.fetch;
   const prawdziweCaches = globalThis.caches;
-  globalThis.fetch = async (adres) => {
+  globalThis.fetch = async (adres, init) => {
     wolane.push(String(adres));
+    zNaglowkami.push(new Headers(init?.headers));
     return siec(String(adres));
   };
   if (bufor) globalThis.caches = { default: bufor };
@@ -65,11 +67,11 @@ async function zadanie(sciezka, { metoda = 'GET', siec = zKubelka, host = 'utrat
     const odp = await onRequest({
       request: new Request(url, { method: metoda, headers: naglowki }),
       params: { plik: decodeURIComponent(url.pathname.slice('/media/'.length)) },
-      env: {},
+      env,
       waitUntil: (p) => czekaj.push(p),
     });
     await Promise.all(czekaj);
-    return { odp, wolane };
+    return { odp, wolane, zNaglowkami };
   } finally {
     globalThis.fetch = prawdziwy;
     if (prawdziweCaches === undefined) delete globalThis.caches;
@@ -134,6 +136,60 @@ test('wariant z normalizacji wychodzi z naszej domeny jako WebP', async () => {
   expect(await odp.text()).toContain('WEBP');
   expect(wolane, 'funkcja pyta o plik spod innego adresu niż publiczny katalog wariantów')
     .toEqual([`${ZRODLO}${PLIK}`]);
+});
+
+/* ── Klucz serwisowy: prywatna ścieżka Storage omija bufor CDN Supabase ── */
+
+const KLUCZ = 'klucz-serwisowy-testowy';
+const PRYWATNA = `https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/article-images/normalized/${PLIK}`;
+
+test('z kluczem serwisowym plik idzie prywatną ścieżką Storage, z kluczem tylko w nagłówkach', async () => {
+  // Publiczny adres idzie przez CDN Supabase, który trzyma kopię rok i nie
+  // widzi nadpisania okładki pod tą samą nazwą (28.10.2026: stary wariant 1600
+  // okładki lekarzy). Prywatna ścieżka odpowiada private, no-cache.
+  const { odp, wolane, zNaglowkami } = await zadanie(`/media/${PLIK}`, { env: { SUPABASE_SERVICE_ROLE_KEY: KLUCZ } });
+
+  expect(odp.status).toBe(200);
+  expect(await odp.text()).toContain('WEBP');
+  expect(wolane).toEqual([PRYWATNA]);
+  expect(zNaglowkami[0].get('apikey')).toBe(KLUCZ);
+  expect(zNaglowkami[0].get('authorization')).toBe(`Bearer ${KLUCZ}`);
+  // Klucz nie wychodzi do klienta ani w nagłówkach, ani w adresie.
+  for (const [nazwa, wartosc] of odp.headers) {
+    expect(`${nazwa}: ${wartosc}`).not.toContain(KLUCZ);
+  }
+  expect(wolane[0]).not.toContain(KLUCZ);
+  // Nagłówki odpowiedzi jak dotąd: private/no-cache ze Storage nie przechodzi.
+  expect(odp.headers.get('cache-control')).toBe(BUFOR);
+});
+
+test('PUBLIC_SUPABASE_URL z otoczenia wskazuje host prywatnej ścieżki', async () => {
+  const { wolane } = await zadanie(`/media/${PLIK}`, {
+    env: { SUPABASE_SERVICE_ROLE_KEY: KLUCZ, PUBLIC_SUPABASE_URL: 'https://inny.supabase.co' },
+  });
+  expect(wolane).toEqual([`https://inny.supabase.co/storage/v1/object/article-images/normalized/${PLIK}`]);
+});
+
+test('odmowa albo awaria prywatnej ścieżki nie wyłącza zdjęć: zapas publicznym adresem', async () => {
+  const odmowy = [
+    () => new Response('{"statusCode":"403","error":"Unauthorized","message":"invalid signature"}', { status: 400 }),
+    () => new Response('awaria', { status: 500 }),
+    () => { throw new TypeError('fetch failed'); },
+  ];
+  for (const odmowa of odmowy) {
+    const siec = (adres) => (adres === PRYWATNA ? odmowa() : zKubelka());
+    const { odp, wolane, zNaglowkami } = await zadanie(`/media/${PLIK}`, { env: { SUPABASE_SERVICE_ROLE_KEY: KLUCZ }, siec });
+    expect(odp.status).toBe(200);
+    expect(wolane).toEqual([PRYWATNA, `${ZRODLO}${PLIK}`]);
+    // Publiczny adres nie dostaje klucza.
+    expect(zNaglowkami[1].get('authorization')).toBeNull();
+    expect(zNaglowkami[1].get('apikey')).toBeNull();
+  }
+});
+
+test('z kluczem brak pliku dalej daje 404', async () => {
+  const { odp } = await zadanie(`/media/${PLIK}`, { env: { SUPABASE_SERVICE_ROLE_KEY: KLUCZ }, siec: brakWKubelku });
+  expect(odp.status).toBe(404);
 });
 
 test('x-robots-tag i reszta nagłówków Storage zostają po tamtej stronie', async () => {

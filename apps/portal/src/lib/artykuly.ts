@@ -206,5 +206,15 @@ export function powiazane(slug: string, ile = 3): Artykul[] {
     .slice(0, ile);
 }
 
+/**
+ * Napis nad tytułem kafla na liście bloga — zwykle pierwszy tag. „ZUS” stoi
+ * na pierwszym miejscu w wielu wpisach i sam nic o nich nie mówi, więc obok
+ * idzie ostatni tag: słowo kluczowe tego artykułu („ZUS · kierowcy”). Decyzja
+ * właściciela z 28.10.2026. Nowy wpis z ZUS na początku tagów ma mieć na końcu
+ * słowo, które go wyróżnia.
+ */
+export const etykietaKafla = (tagi: string[]): string[] =>
+  tagi[0] === 'ZUS' && tagi.length > 1 ? [tagi[0], tagi[tagi.length - 1]] : tagi.slice(0, 1);
+
 export const dataPl = (iso: string) =>
   new Date(iso).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' });

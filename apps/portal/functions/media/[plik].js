@@ -17,6 +17,10 @@
  * Adresy przepisuje build (`src/lib/artykuly.ts`, funkcja `przezMedia`):
  * artykuly.json i pliki treści zostają takie jak w bazie.
  *
+ * Zmienne (te same, co w functions/owu): SUPABASE_SERVICE_ROLE_KEY — bez niej
+ * plik idzie publicznym adresem, przez bufor CDN Supabase (patrz `pobierz`);
+ * PUBLIC_SUPABASE_URL — opcjonalna.
+ *
  * Funkcja nie jest otwartym proxy do kubełka: przepuszcza wyłącznie warianty
  * z normalizacji (`<slug>-cover-800.webp`, `<slug>-content1-1600.webp`…).
  * Oryginały z aparatu — do 15,9 MB — i każda inna ścieżka dostają 404 bez
@@ -36,6 +40,41 @@
 /** Publiczny katalog wariantów. Ten sam prefiks przepisuje `artykuly.ts`. */
 export const ZRODLO =
   'https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/';
+
+const DOMYSLNY_URL = 'https://kukvgsjrmrqtzhkszzum.supabase.co';
+
+/**
+ * Plik z kubełka — prywatną ścieżką Storage z kluczem serwisowym, a gdy
+ * klucza nie ma albo ta droga zawiedzie, publicznym adresem.
+ *
+ * Publiczny adres idzie przez CDN Supabase, który trzyma kopię rok
+ * (`max-age` z normalizacji) i nie unieważnia jej, gdy normalizacja nadpisze
+ * okładkę pod tą samą nazwą. Zapytanie nie wchodzi do klucza jego bufora,
+ * więc `?v=` nic tu nie da (sprawdzone 28.10.2026). Prywatna ścieżka
+ * odpowiada `private, no-cache` i omija ten bufor — po podmianie okładki
+ * wystarczy wyczyścić nasz.
+ *
+ * Klucz idzie wyłącznie w nagłówkach zapytania do Supabase; nazwa pliku
+ * przeszła już przez `dozwolony()`, więc ścieżka nie wyjdzie poza katalog.
+ * Zapasowa droga zostaje, żeby brak sekretu (podgląd bez zmiennych) albo
+ * odmowa Storage nie wyłączyły zdjęć na całym blogu.
+ */
+async function pobierz(plik, env) {
+  const klucz = env?.SUPABASE_SERVICE_ROLE_KEY;
+  if (klucz) {
+    const url = env.PUBLIC_SUPABASE_URL ?? DOMYSLNY_URL;
+    try {
+      const odp = await fetch(`${url}/storage/v1/object/article-images/normalized/${plik}`, {
+        headers: { apikey: klucz, Authorization: `Bearer ${klucz}` },
+      });
+      if (odp.ok && odp.body) return odp;
+      odp.body?.cancel().catch(() => {});
+    } catch {
+      // Zapasowa droga niżej.
+    }
+  }
+  return fetch(`${ZRODLO}${plik}`);
+}
 
 /**
  * Jedyne nazwy, jakie funkcja podaje — dokładnie te, które daje `nazwaPliku()`
@@ -93,7 +132,7 @@ const pasujeEtag = (inm, etag) => {
   return inm.split(',').some((t) => t.trim() === '*' || bez(t) === bez(etag));
 };
 
-export async function onRequest({ params, request, waitUntil }) {
+export async function onRequest({ params, request, env, waitUntil }) {
   const metoda = request.method.toUpperCase();
   if (metoda !== 'GET' && metoda !== 'HEAD') {
     return blad('Metoda niedozwolona.', 405, { Allow: 'GET, HEAD' });
@@ -119,7 +158,7 @@ export async function onRequest({ params, request, waitUntil }) {
 
   let obiekt;
   try {
-    obiekt = await fetch(`${ZRODLO}${plik}`);
+    obiekt = await pobierz(plik, env);
   } catch {
     return blad('Nie udało się podać pliku.', 502);
   }

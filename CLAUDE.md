@@ -84,19 +84,25 @@ normalizacji (`<slug>-cover|contentN-800|1600.webp`); ten sam warunek
 `If-None-Match` (bufor dostaje nagłówki warunkowe żądania). Pilnuje tego
 `test/media.spec.js`.
 
-**Nowa okładka pod tą samą nazwą nie wychodzi sama (otwarte).** Normalizacja
-zapisuje warianty z `max-age` na rok, a CDN Supabase nie unieważnia kopii po
-nadpisaniu. Zapytanie nie wchodzi do klucza ich bufora: `?d=2026-10-27`,
-o który nikt wcześniej nie pytał, i losowe `?x=…` dawały od razu `HIT`.
-28.10.2026, po podmianie okładki
-„przychodzi-lekarz-do-lekarza”, `/media/` podawał stary wariant 1600 także po
-wyczyszczeniu naszego bufora. Wtedy dodany znacznik `?d=<dzień>` cofnięto, bo
-nic nie dawał. Ominąć ich bufor da się prywatną ścieżką
-`/storage/v1/object/<kubełek>/…` z kluczem serwisowym, jak w `/owu/`
-(`private, no-cache`, `cf-cache-status: DYNAMIC`). Na to czeka zgoda
-właściciela. Nasz bufor czyścisz przez konektor Cloudflare: `POST
+**Nowa okładka pod tą samą nazwą — `/media/` czyta kubełek kluczem
+serwisowym (od 28.10.2026, zgoda właściciela).** Normalizacja zapisuje warianty
+z `max-age` na rok, a CDN Supabase nie unieważnia kopii po nadpisaniu.
+Zapytanie nie wchodzi do klucza ich bufora: `?d=2026-10-27`, o który nikt
+wcześniej nie pytał, i losowe `?x=…` dawały od razu `HIT` — dlatego znacznik
+`?d=<dzień>` z 28.10 cofnięto (po podmianie okładki
+„przychodzi-lekarz-do-lekarza” `/media/` podawał stary wariant 1600 także po
+wyczyszczeniu naszego bufora). Teraz `pobierz()` w funkcji idzie prywatną
+ścieżką `/storage/v1/object/article-images/normalized/<plik>` z
+`SUPABASE_SERVICE_ROLE_KEY` (ten sam sekret co `/owu/`; `private, no-cache`,
+`cf-cache-status: DYNAMIC` — omija ich bufor). Bez sekretu albo przy odmowie
+Storage (4xx/5xx, wyjątek) idzie publicznym adresem, żeby zdjęcia nie znikły
+z całego bloga; klucz siedzi tylko w nagłówkach zapytania do Supabase.
+Po podmianie okładki zostaje NASZ bufor (doba w przeglądarce, tydzień na
+krawędzi): czyścisz go przez konektor Cloudflare, `POST
 /zones/<strefa>/purge_cache` z adresami `/media/…`. Token środowiska
-(`CF_API`) tego nie umie (Authentication error).
+(`CF_API`) tego nie umie (Authentication error). Sprawdzasz po `etag` z
+`curl -sI https://utratadochodu.pl/media/<plik>` — ma się równać `etag`
+pliku z prywatnej ścieżki.
 
 **Znana słabość:** `normalized/` trzyma warianty wszystkich jedenastu serwisów,
 a funkcja sprawdza tylko kształt nazwy — wariant cudzego wpisu wyjdzie spod
@@ -222,6 +228,12 @@ Nowy artykuł idzie tak:
    zamiast czekać na cron; potem sprawdź `images_status = 'ready'`.
 3. Jeden wpis na początku `artykuly.json`, w formacie pozostałych, z adresami
    800/1600 w `obraz`/`obrazDuzy`, i plik `artykuly/<slug>.html` z treścią.
+   **Tagi: gdy pierwszy to „ZUS", ostatni ma wyróżniać wpis** („kierowcy",
+   „wypadek przy pracy"). Kafel na `/blog/` pokazuje wtedy „ZUS · <ostatni
+   tag>" (`etykietaKafla()` w `artykuly.ts`, decyzja właściciela z 28.10.2026)
+   — sam „ZUS" stał nad sześcioma wpisami i nic o nich nie mówił. Ten sam tag
+   dopisz w `aura_articles.tags`, żeby baza i repo się nie rozjechały.
+   Pilnuje tego `artykuly.spec.js` (etykiety „ZUS · …" różne od siebie).
 
 **Obrazek w treści (infografika, wykres) — z sandboksa nie wyślesz go do
 kubełka**, bo `article-images` przyjmuje wysyłki tylko od zalogowanych. Droga,

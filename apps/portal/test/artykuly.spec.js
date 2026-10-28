@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
+import { parse } from 'node-html-parser';
 
 /**
  * Testy bazy wiedzy.
@@ -141,4 +142,30 @@ test('kafelek z okładką ma oba warianty szerokości', () => {
     expect(lista, `„${a.slug}" — brak srcset w kafelku`).toContain(`/media/${a.obraz.split('/').at(-1)} 800w`);
   }
   expect(zeZdjeciem.length, 'zrzut nie ma ani jednej okładki').toBeGreaterThan(0);
+});
+
+test('kafel z „ZUS" nad tytułem pokazuje też słowo kluczowe artykułu', () => {
+  // „ZUS" był jedynym napisem nad tytułem w sześciu kaflach naraz i nic nie
+  // mówił o wpisie (właściciel, 28.10.2026). Obok idzie ostatni tag.
+  const lista = parse(readFileSync(join(DIST, 'index.html'), 'utf8'));
+  const etykiety = new Map();
+  for (const kafel of lista.querySelectorAll('article')) {
+    const slug = kafel.querySelector('h2 a')?.getAttribute('href')?.split('/')[2];
+    const napis = kafel.querySelector('p.font-mono')?.text.trim() ?? '';
+    if (slug) etykiety.set(slug, napis);
+  }
+
+  const zZus = zrzut.artykuly.filter((a) => a.tagi[0] === 'ZUS');
+  expect(zZus.length, 'w zrzucie nie ma wpisu z ZUS na początku tagów').toBeGreaterThan(0);
+  for (const a of zrzut.artykuly) {
+    const oczekiwana = a.tagi[0] === 'ZUS' && a.tagi.length > 1
+      ? `ZUS · ${a.tagi.at(-1)}`
+      : (a.tagi[0] ?? '');
+    expect(etykiety.get(a.slug), `kafel „${a.slug}"`).toBe(oczekiwana);
+  }
+  // Słowo kluczowe ma wyróżniać wpis: żadne dwa kafle z ZUS nie mają tego samego napisu.
+  const napisy = zZus.map((a) => etykiety.get(a.slug));
+  expect(new Set(napisy).size, `powtórzone napisy: ${napisy.join(' | ')}`).toBe(napisy.length);
+  // Samo „ZUS" nie zostało na żadnym kaflu.
+  expect(napisy.filter((n) => n === 'ZUS')).toEqual([]);
 });
