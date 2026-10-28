@@ -53,9 +53,23 @@ export const dozwolony = (plik) => NAZWA_PLIKU.test(plik);
 /**
  * Doba w przeglądarce, tydzień na krawędzi. Bez `immutable`: nazwa pliku nie
  * niesie skrótu treści, a normalizacja po zmianie zdjęcia zapisuje wariant pod
- * TĄ SAMĄ nazwą — poprawiona okładka ma dojść najpóźniej po tygodniu.
+ * TĄ SAMĄ nazwą — poprawiona okładka ma dojść najpóźniej po tygodniu (i dobie,
+ * patrz `zrodloPliku`).
  */
 export const BUFOR = 'public, max-age=86400, s-maxage=604800';
+
+/**
+ * Adres pliku w kubełku ze znacznikiem doby w zapytaniu.
+ *
+ * Normalizacja zapisuje warianty z `cache-control: max-age=31536000`, a CDN
+ * Supabase nie unieważnia kopii, gdy plik zmieni się pod tą samą nazwą.
+ * 28.10.2026 po podmianie okładki „przychodzi-lekarz-do-lekarza" funkcja
+ * dostawała z Supabase stary wariant 1600 także po wyczyszczeniu naszego
+ * bufora. Inne zapytanie to inny klucz w ich buforze, więc ich kopia żyje
+ * najwyżej dobę. Kubełek parametru nie czyta.
+ */
+export const zrodloPliku = (plik, teraz = new Date()) =>
+  `${ZRODLO}${plik}?d=${teraz.toISOString().slice(0, 10)}`;
 
 const blad = (tekst, status, dodatkowe = {}) =>
   new Response(tekst, {
@@ -119,7 +133,7 @@ export async function onRequest({ params, request, waitUntil }) {
 
   let obiekt;
   try {
-    obiekt = await fetch(`${ZRODLO}${plik}`);
+    obiekt = await fetch(zrodloPliku(plik));
   } catch {
     return blad('Nie udało się podać pliku.', 502);
   }

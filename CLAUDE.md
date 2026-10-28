@@ -84,6 +84,16 @@ normalizacji (`<slug>-cover|contentN-800|1600.webp`); ten sam warunek
 `If-None-Match` (bufor dostaje nagłówki warunkowe żądania). Pilnuje tego
 `test/media.spec.js`.
 
+**Nowa okładka pod tą samą nazwą nie wychodzi sama.** Normalizacja zapisuje
+warianty z `max-age` na rok, a CDN Supabase nie unieważnia kopii po
+nadpisaniu. 28.10.2026, po podmianie okładki „przychodzi-lekarz-do-lekarza”,
+`/media/` dawał stary wariant 1600 także po wyczyszczeniu naszego bufora.
+Od tego dnia funkcja pyta kubełek z `?d=<dzień>` (`zrodloPliku()`), więc kopia
+Supabase żyje najwyżej dobę. Nasz bufor (tydzień, plus doba w przeglądarce)
+czyścisz po podmianie przez konektor Cloudflare: `POST
+/zones/<strefa>/purge_cache` z adresami `/media/…`. Token środowiska
+(`CF_API`) tego nie umie (Authentication error).
+
 **Znana słabość:** `normalized/` trzyma warianty wszystkich jedenastu serwisów,
 a funkcja sprawdza tylko kształt nazwy — wariant cudzego wpisu wyjdzie spod
 naszej domeny, jeśli ktoś zna jego nazwę. Listy slugów nie da się w funkcji
