@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { onRequest, ZRODLO, NAZWA_PLIKU, BUFOR, zrodloPliku } from '../functions/media/[plik].js';
+import { onRequest, ZRODLO, NAZWA_PLIKU, BUFOR } from '../functions/media/[plik].js';
 import { onRequest as middleware } from '../functions/_middleware.js';
 
 /**
@@ -77,11 +77,6 @@ async function zadanie(sciezka, { metoda = 'GET', siec = zKubelka, host = 'utrat
   }
 }
 
-/** Adres, o który funkcja pyta kubełek: plik ze znacznikiem doby (`zrodloPliku`). */
-const wKubelku = (nazwa) => new RegExp(
-  `^${(ZRODLO + nazwa).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\?d=\\d{4}-\\d{2}-\\d{2}$`,
-);
-
 /** Atrapa `caches.default` — Map po adresie żądania, jak Cache API Workers. */
 function atrapaBufora() {
   const wpisy = new Map();
@@ -137,19 +132,8 @@ test('wariant z normalizacji wychodzi z naszej domeny jako WebP', async () => {
   expect(odp.status).toBe(200);
   expect(odp.headers.get('content-type')).toBe('image/webp');
   expect(await odp.text()).toContain('WEBP');
-  expect(wolane).toHaveLength(1);
-  expect(wolane[0], 'funkcja pyta o plik spod innego adresu niż publiczny katalog wariantów')
-    .toMatch(wKubelku(PLIK));
-});
-
-test('zapytanie do Supabase zmienia się co dobę — ich CDN trzyma stary wariant rok', () => {
-  // Normalizacja zapisuje poprawioną okładkę pod tą samą nazwą, a kubełek
-  // wystawia ją z max-age na rok. Bez znacznika funkcja dostawała z Supabase
-  // starą kopię także po wyczyszczeniu naszego bufora (28.10.2026).
-  const dzis = zrodloPliku(PLIK, new Date('2026-10-28T23:59:00Z'));
-  expect(dzis).toBe(`${ZRODLO}${PLIK}?d=2026-10-28`);
-  expect(zrodloPliku(PLIK, new Date('2026-10-28T00:00:00Z'))).toBe(dzis);
-  expect(zrodloPliku(PLIK, new Date('2026-10-29T00:00:00Z'))).not.toBe(dzis);
+  expect(wolane, 'funkcja pyta o plik spod innego adresu niż publiczny katalog wariantów')
+    .toEqual([`${ZRODLO}${PLIK}`]);
 });
 
 test('x-robots-tag i reszta nagłówków Storage zostają po tamtej stronie', async () => {
@@ -196,8 +180,7 @@ test('biała lista: tylko nazwy wariantów, bez pytania Supabase o resztę', asy
   for (const nazwa of dozwolone) {
     const { odp, wolane } = await zadanie(`/media/${nazwa}`);
     expect(odp.status, nazwa).toBe(200);
-    expect(wolane).toHaveLength(1);
-    expect(wolane[0]).toMatch(wKubelku(nazwa));
+    expect(wolane).toEqual([`${ZRODLO}${nazwa}`]);
   }
 
   const odrzucone = [

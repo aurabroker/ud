@@ -84,13 +84,17 @@ normalizacji (`<slug>-cover|contentN-800|1600.webp`); ten sam warunek
 `If-None-Match` (bufor dostaje nagłówki warunkowe żądania). Pilnuje tego
 `test/media.spec.js`.
 
-**Nowa okładka pod tą samą nazwą nie wychodzi sama.** Normalizacja zapisuje
-warianty z `max-age` na rok, a CDN Supabase nie unieważnia kopii po
-nadpisaniu. 28.10.2026, po podmianie okładki „przychodzi-lekarz-do-lekarza”,
-`/media/` dawał stary wariant 1600 także po wyczyszczeniu naszego bufora.
-Od tego dnia funkcja pyta kubełek z `?d=<dzień>` (`zrodloPliku()`), więc kopia
-Supabase żyje najwyżej dobę. Nasz bufor (tydzień, plus doba w przeglądarce)
-czyścisz po podmianie przez konektor Cloudflare: `POST
+**Nowa okładka pod tą samą nazwą nie wychodzi sama (otwarte).** Normalizacja
+zapisuje warianty z `max-age` na rok, a CDN Supabase nie unieważnia kopii po
+nadpisaniu. Zapytanie nie wchodzi do klucza ich bufora: `?d=2026-10-27`,
+o który nikt wcześniej nie pytał, i losowe `?x=…` dawały od razu `HIT`.
+28.10.2026, po podmianie okładki
+„przychodzi-lekarz-do-lekarza”, `/media/` podawał stary wariant 1600 także po
+wyczyszczeniu naszego bufora. Wtedy dodany znacznik `?d=<dzień>` cofnięto, bo
+nic nie dawał. Ominąć ich bufor da się prywatną ścieżką
+`/storage/v1/object/<kubełek>/…` z kluczem serwisowym, jak w `/owu/`
+(`private, no-cache`, `cf-cache-status: DYNAMIC`). Na to czeka zgoda
+właściciela. Nasz bufor czyścisz przez konektor Cloudflare: `POST
 /zones/<strefa>/purge_cache` z adresami `/media/…`. Token środowiska
 (`CF_API`) tego nie umie (Authentication error).
 
