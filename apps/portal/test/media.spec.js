@@ -332,7 +332,10 @@ test('każdy adres /media/ w HTML-u to wariant z danych, który funkcja poda', (
   const uzyte = new Set();
   for (const plik of plikiHtml()) {
     const html = readFileSync(plik, 'utf8');
-    for (const m of html.matchAll(/(?:https:\/\/utratadochodu\.pl)?\/media\/([^"'\s,)?#]+)/g)) {
+    // Tylko nasze adresy: względne albo z naszą domeną. Ścieżka /media/ na
+    // cudzym hoście (źródło w artykule, np. architekci.pl/media/…pdf) to nie
+    // jest wywołanie naszej funkcji — przed 28.10.2026 test brał ją za nasze.
+    for (const m of html.matchAll(/(?:https:\/\/utratadochodu\.pl|(?<![\w.\-]))\/media\/([^"'\s,)?#]+)/g)) {
       expect(m[1], `${plik}: /media/${m[1]} — funkcja odpowie na to 404`).toMatch(NAZWA_PLIKU);
       expect(zDanych.has(m[1]), `${plik}: /media/${m[1]} — takiej nazwy nie ma w danych artykułów`).toBe(true);
       uzyte.add(m[1]);
