@@ -162,7 +162,17 @@ const KALIBRACJA = sprawdzKalibracje(kalibracja);
 export const LIMIT = {
   b2b: 0.8,
   etat: 0.65,
+  /**
+   * CEU „Utrata dochodu" (OWU v9.8, § 6 ust. 2 pkt 2 i § 10 ust. 3): 65%
+   * 1/12 przychodu przy KAŻDEJ formie zatrudnienia, także na B2B. Do 28.10.2026
+   * strony podawały 80% dla B2B bez tego wyjątku.
+   */
+  ceu: 0.65,
 } as const;
+
+/** Wyjątek od limitu B2B — dopisywany wszędzie, gdzie tekst podaje limit jako regułę. */
+export const LIMIT_CEU_ZDANIE = `W ubezpieczeniu CEU „Utrata dochodu” limit wynosi `
+  + `${Math.round(LIMIT.ceu * 100)}% także przy samozatrudnieniu i kontrakcie B2B.`;
 
 /**
  * Zakres suwaka w kalkulatorze. Stoi tutaj, bo opis strony /kalkulator/ podaje

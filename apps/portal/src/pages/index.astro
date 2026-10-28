@@ -2,7 +2,7 @@
 import Baza from '../layouts/Baza.astro';
 import Kalkulator from '../components/Kalkulator.svelte';
 import { kategorie, ZAWODY, liczebnik } from '@ud/zawody';
-import { symuluj, zl, zlZakres, MIESIECY_MAX } from '../lib/symulacja';
+import { symuluj, zl, zlZakres, MIESIECY_MAX, LIMIT_CEU_ZDANIE } from '../lib/symulacja';
 import { SWIADCZENIE_MAX } from '../lib/granice';
 import { ZASILEK_JDG, ZUS_TEKST } from '../lib/zus';
 import { graf, organizacja, serwis, strona, faq } from '../lib/seo';
@@ -31,7 +31,7 @@ const PYTANIA = [
   {
     pytanie: 'Jaki procent dochodu pokrywa polisa?',
     odpowiedz: 'Do 80% udokumentowanego dochodu przy samozatrudnieniu i kontrakcie B2B, do 65% przy '
-      + `umowie o pracę, najwyżej ${zl(SWIADCZENIE_MAX)} miesięcznie. Limit wynika z zasady, że `
+      + `umowie o pracę, najwyżej ${zl(SWIADCZENIE_MAX)} miesięcznie. ${LIMIT_CEU_ZDANIE} Limit wynika z zasady, że `
       + 'ubezpieczenie nie może być korzystniejsze niż praca.',
   },
   {

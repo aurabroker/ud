@@ -17,7 +17,7 @@ import type { APIRoute } from 'astro';
 import { ZAWODY, kategorie, wKategorii, slugKategorii, tresc, malymi } from '@ud/zawody';
 import { ARTYKULY } from '../lib/artykuly';
 import { FIRMA, SERWIS, OPIS_UBEZPIECZYCIELA } from '../lib/firma';
-import { LIMIT, OKRESY, MIESIECY_MAX, zl } from '../lib/symulacja';
+import { LIMIT, LIMIT_CEU_ZDANIE, OKRESY, MIESIECY_MAX, zl } from '../lib/symulacja';
 import { SWIADCZENIE_MAX } from '../lib/granice';
 import { ZASILEK_JDG, ZUS_TEKST } from '../lib/zus';
 import { krokiSlownie } from '@ud/wniosek/schemat';
@@ -61,7 +61,7 @@ niezdolnością do wykonywania zawodu z powodu choroby lub nieszczęśliwego wyp
 
 - **Limit świadczenia:** do ${Math.round(LIMIT.b2b * 100)}% udokumentowanego dochodu przy samozatrudnieniu
   i kontrakcie B2B, do ${Math.round(LIMIT.etat * 100)}% przy umowie o pracę i umowie zlecenia,
-  najwyżej ${zl(SWIADCZENIE_MAX)} miesięcznie.
+  najwyżej ${zl(SWIADCZENIE_MAX)} miesięcznie. ${LIMIT_CEU_ZDANIE}
 - **Punkt odniesienia:** zasiłek chorobowy z ZUS to ${ZUS_TEKST.wzor}. Przedsiębiorca
   ${ZUS_TEKST.scenariusz} dostaje ${zl(ZASILEK_JDG.duzy)} miesięcznie przed podatkiem,
   niezależnie od faktycznych zarobków; ${ZUS_TEKST.dopiski}. To jest luka, którą polisa zamyka.

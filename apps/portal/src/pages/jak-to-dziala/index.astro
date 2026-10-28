@@ -1,7 +1,7 @@
 ---
 import Baza from '../../layouts/Baza.astro';
 import { graf, organizacja, serwis, strona, okruszki, faq, usluga } from '../../lib/seo';
-import { symuluj, zl, zlZakres, LIMIT } from '../../lib/symulacja';
+import { symuluj, zl, zlZakres, LIMIT, LIMIT_CEU_ZDANIE } from '../../lib/symulacja';
 import { ZUS_TEKST, ZASILEK_JDG } from '../../lib/zus';
 import { KROKI, PROG_KLAUZUL_NW, krokiSlownie } from '@ud/wniosek/schemat';
 import { HEALTH_SURVEY_THRESHOLD } from '@ud/wniosek/ankieta';
@@ -57,9 +57,9 @@ const PYTANIA = [
   },
   {
     pytanie: 'Od czego zależy wysokość świadczenia?',
-    odpowiedz: `Od udokumentowanego dochodu i formy zatrudnienia. Limit wynosi `
+    odpowiedz: `Od udokumentowanego dochodu, formy zatrudnienia i produktu. Limit wynosi do `
       + `${Math.round(LIMIT.b2b * 100)}% dochodu przy samozatrudnieniu i kontrakcie B2B `
-      + `oraz ${Math.round(LIMIT.etat * 100)}% przy umowie o pracę. Ubezpieczenie nie może `
+      + `oraz do ${Math.round(LIMIT.etat * 100)}% przy umowie o pracę. ${LIMIT_CEU_ZDANIE} Ubezpieczenie nie może `
       + 'być korzystniejsze finansowo niż praca — inaczej zniknąłby bodziec do powrotu.',
   },
   {

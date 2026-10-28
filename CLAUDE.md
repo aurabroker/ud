@@ -1064,7 +1064,7 @@ Decyzje właściciela z 21.10.2026:
 | Dopiski przy kwocie | preferencyjny ZUS około 995 zł, bez chorobowego 0 zł |
 | Wzór | 80% podstawy po odliczeniu 13,71%; najdłużej 182 dni; przedsiębiorca po 90 dniach nieprzerwanego ubezpieczenia chorobowego — wcześniejsze, np. z etatu, się wlicza przy przerwie do 30 dni |
 | Etat | **kalkulator go nie liczy** — jedno zdanie opisu bez kwot (`ZUS_TEKST.etat`); na etacie zasiłek zależy od pensji, a przełącznik pokazywał przy nim zasiłek przedsiębiorcy |
-| Limit 80% B2B / 65% etat | zostaje („jest dobrze") |
+| Limit 80% B2B / 65% etat | zostaje („jest dobrze"); od 28.10.2026 tam, gdzie tekst podaje limit jako regułę, stoi też `LIMIT_CEU_ZDANIE` — w CEU „Utrata dochodu" 65% także na B2B (OWU v9.8 § 6 ust. 2 pkt 2, § 10 ust. 3; decyzja właściciela) |
 | Najwyższe świadczenie | 50 000 zł/mies. — podawane publicznie; liczba z `RYZYKA` w `@ud/wniosek` (`SWIADCZENIE_MAX`), nie wpisana drugi raz |
 
 Zasiłek to kwota **brutto**, a dochód w kalkulatorze — netto. Dlatego tabele
