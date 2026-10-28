@@ -81,8 +81,9 @@ build (`przezMedia()` w `src/lib/artykuly.ts`), a `artykuly.json` i pliki
 treści zostają z adresami z bazy. Funkcja przepuszcza tylko nazwy z
 normalizacji (`<slug>-cover|contentN-800|1600.webp`); ten sam warunek
 (`dozwolony()`) stosuje `przezMedia()`. Funkcja odpowiada 304 na
-`If-None-Match` (bufor dostaje nagłówki warunkowe żądania). Pilnuje tego
-`test/media.spec.js`.
+`If-None-Match` z ETagiem pliku, a adres z zapytaniem (`?v=…`) dostaje 301 na
+czysty — bufor strefy ma zapytanie w kluczu i `?v=` wołałoby Supabase przy
+każdym żądaniu. Pilnuje tego `test/media.spec.js`.
 
 **Nowa okładka pod tą samą nazwą — `/media/` czyta kubełek kluczem
 serwisowym (od 28.10.2026, zgoda właściciela).** Normalizacja zapisuje warianty
@@ -100,9 +101,19 @@ z całego bloga; klucz siedzi tylko w nagłówkach zapytania do Supabase.
 Po podmianie okładki zostaje NASZ bufor (doba w przeglądarce, tydzień na
 krawędzi): czyścisz go przez konektor Cloudflare, `POST
 /zones/<strefa>/purge_cache` z adresami `/media/…`. Token środowiska
-(`CF_API`) tego nie umie (Authentication error). Sprawdzasz po `etag` z
-`curl -sI https://utratadochodu.pl/media/<plik>` — ma się równać `etag`
-pliku z prywatnej ścieżki.
+(`CF_API`) tego nie umie (Authentication error). Sprawdzasz po `etag` i `age`
+z `curl -sI https://utratadochodu.pl/media/<plik>` — `etag` ma się równać
+`etag` pliku z prywatnej ścieżki, a `utratadochodu.pages.dev/media/<plik>`
+(bez bufora strefy) pokazuje, co daje sama funkcja.
+
+**Funkcja nie trzyma niczego w Cache API (`caches.default`) i ma tak zostać.**
+Do 28.10.2026 trzymała: po wdrożeniu klucza serwisowego i wyczyszczeniu
+bufora po adresie, a potem po prefiksie, domena dalej podawała stary wariant
+1600 lekarzy (`age` 49 486 s, `last-modified` 26.10), a pages.dev ten sam kod
+z nowym plikiem. Wpisów Cache API nie usuwa czyszczenie po adresie ani po
+prefiksie (dokumentacja Cloudflare: tylko „Purge Everything” albo Cache-Tag),
+więc stara kopia żyła do 7 dni (`s-maxage`) osobno w każdym węźle. Bufor
+strefy domyślnie trzyma `.webp` i wystarcza.
 
 **Znana słabość:** `normalized/` trzyma warianty wszystkich jedenastu serwisów,
 a funkcja sprawdza tylko kształt nazwy — wariant cudzego wpisu wyjdzie spod

@@ -79,6 +79,9 @@ async function zadanie(sciezka, { metoda = 'GET', siec = zKubelka, host = 'utrat
   }
 }
 
+const KLUCZ = 'klucz-serwisowy-testowy';
+const PRYWATNA = `https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/article-images/normalized/${PLIK}`;
+
 /** Atrapa `caches.default` — Map po adresie żądania, jak Cache API Workers. */
 function atrapaBufora() {
   const wpisy = new Map();
@@ -111,21 +114,51 @@ test('If-None-Match z ETagiem pliku: 304 bez treści, z ETagiem i buforem', asyn
   expect(odp.status).toBe(200);
 });
 
-test('bufor dostaje nagłówki warunkowe żądania (Cache API sam odpowie 304/206), zapis bez nich', async () => {
+test('stara kopia w caches.default nie wychodzi: funkcja nie czyta Cache API', async () => {
+  // 28.10.2026: po podmianie okładki „przychodzi-lekarz-do-lekarza” domena
+  // podawała stary wariant 1600 (age 49 486 s), choć Supabase i pages.dev
+  // dawały już nowy. Wpisy Cache API nie znikają po czyszczeniu bufora strefy
+  // po adresie ani po prefiksie (dokumentacja Cloudflare: tylko „Purge
+  // Everything” i Cache-Tag), więc taka kopia wisiała do 7 dni (s-maxage).
   const bufor = atrapaBufora();
-  const widziane = [];
-  const match = bufor.match.bind(bufor);
-  bufor.match = async (z) => { widziane.push(z.headers.get('if-none-match')); return match(z); };
+  const stara = new Response('STARA', { headers: { 'content-type': 'image/webp', etag: '"stary"' } });
+  bufor.wpisy.set(`https://utratadochodu.pl/media/${PLIK}`, stara);
+  const zapisy = [];
   const put = bufor.put.bind(bufor);
-  const klucze = [];
-  bufor.put = async (z, o) => { klucze.push(z.headers.get('if-none-match')); return put(z, o); };
+  bufor.put = async (z, o) => { zapisy.push(z.url); return put(z, o); };
 
-  const { odp } = await zadanie(`/media/${PLIK}`, { bufor, naglowki: { 'If-None-Match': '"74a5bba093a9aaf23ca96cbacdacf1a9"' } });
-  expect(odp.status).toBe(304);
-  expect(widziane).toEqual(['"74a5bba093a9aaf23ca96cbacdacf1a9"']);
-  // Pierwszy klient z ETagiem napełnia bufor pełną odpowiedzią, kluczem bez warunków.
-  expect(klucze).toEqual([null]);
-  expect(bufor.wpisy.size).toBe(1);
+  for (const metoda of ['GET', 'HEAD']) {
+    const { odp, wolane } = await zadanie(`/media/${PLIK}`, { bufor, metoda });
+    expect(odp.status, metoda).toBe(200);
+    expect(odp.headers.get('etag'), `${metoda}: kopia z Cache API zamiast pliku z kubełka`)
+      .toBe('"74a5bba093a9aaf23ca96cbacdacf1a9"');
+    expect(wolane, metoda).toEqual([`${ZRODLO}${PLIK}`]);
+  }
+  const { odp } = await zadanie(`/media/${PLIK}`, { bufor, naglowki: { 'If-None-Match': '"stary"' } });
+  expect(odp.status, 'ETag starej kopii nie może dać 304').toBe(200);
+  expect(await odp.text()).toContain('WEBP');
+  expect(zapisy, 'funkcja dalej pisze do Cache API — tej kopii nikt nie wyczyści').toEqual([]);
+});
+
+test('zapytanie w adresie: 301 na adres bez zapytania, bez pytania Supabase', async () => {
+  // Bufor strefy ma zapytanie w kluczu: `?v=1`, `?v=2`… omijałyby go i za
+  // każdym razem woływały Supabase (prywatna ścieżka nie ma bufora).
+  for (const metoda of ['GET', 'HEAD']) {
+    for (const zapytanie of ['?v=2', '?d=2026-10-27', '?x=1&y=2']) {
+      const { odp, wolane } = await zadanie(`/media/${PLIK}${zapytanie}`, { metoda, env: { SUPABASE_SERVICE_ROLE_KEY: KLUCZ } });
+      expect(odp.status, `${metoda} ${zapytanie}`).toBe(301);
+      expect(odp.headers.get('location')).toBe(`/media/${PLIK}`);
+      expect(odp.headers.get('cache-control')).toBe(BUFOR);
+      expect(wolane, `${metoda} ${zapytanie}`).toEqual([]);
+    }
+  }
+  // Biała lista idzie przed przekierowaniem: obca nazwa z zapytaniem to 404.
+  const obca = await zadanie('/media/okladka.webp?v=1');
+  expect(obca.odp.status).toBe(404);
+  expect(obca.wolane).toEqual([]);
+  // Podgląd dostaje noindex także na przekierowaniu.
+  const podglad = await zadanie(`/media/${PLIK}?v=1`, { host: 'abc123.utratadochodu.pages.dev' });
+  expect(podglad.odp.headers.get('x-robots-tag')).toBe('noindex, nofollow');
 });
 
 test('wariant z normalizacji wychodzi z naszej domeny jako WebP', async () => {
@@ -139,9 +172,6 @@ test('wariant z normalizacji wychodzi z naszej domeny jako WebP', async () => {
 });
 
 /* ── Klucz serwisowy: prywatna ścieżka Storage omija bufor CDN Supabase ── */
-
-const KLUCZ = 'klucz-serwisowy-testowy';
-const PRYWATNA = `https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/article-images/normalized/${PLIK}`;
 
 test('z kluczem serwisowym plik idzie prywatną ścieżką Storage, z kluczem tylko w nagłówkach', async () => {
   // Publiczny adres idzie przez CDN Supabase, który trzyma kopię rok i nie
@@ -290,30 +320,6 @@ test('tylko GET i HEAD', async () => {
   expect(odp.headers.get('content-type')).toBe('image/webp');
   expect(odp.headers.get('x-robots-tag')).toBeNull();
   expect(odp.body, 'HEAD z treścią').toBeNull();
-});
-
-test('caches.default: drugie żądanie nie woła Supabase, zapytanie nie omija bufora', async () => {
-  const bufor = atrapaBufora();
-
-  const pierwsze = await zadanie(`/media/${PLIK}`, { bufor });
-  expect(pierwsze.wolane).toHaveLength(1);
-  expect([...bufor.wpisy.keys()], 'klucz bufora z zapytaniem albo spoza /media/')
-    .toEqual([`https://utratadochodu.pl/media/${PLIK}`]);
-
-  const drugie = await zadanie(`/media/${PLIK}?v=2`, { bufor });
-  expect(drugie.wolane, 'trafienie w bufor, a funkcja i tak pyta Supabase').toEqual([]);
-  expect(drugie.odp.status).toBe(200);
-  expect(drugie.odp.headers.get('content-type')).toBe('image/webp');
-  expect(drugie.odp.headers.get('x-robots-tag')).toBeNull();
-
-  const glowa = await zadanie(`/media/${PLIK}`, { bufor, metoda: 'HEAD' });
-  expect(glowa.wolane).toEqual([]);
-  expect(glowa.odp.body).toBeNull();
-
-  // Błąd nie trafia do bufora.
-  const bufor2 = atrapaBufora();
-  await zadanie(`/media/${PLIK}`, { bufor: bufor2, siec: brakWKubelku });
-  expect(bufor2.wpisy.size).toBe(0);
 });
 
 test('podgląd na pages.dev nie konkuruje z domeną o zdjęcia', async () => {

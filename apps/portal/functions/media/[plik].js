@@ -93,6 +93,14 @@ export const dozwolony = (plik) => NAZWA_PLIKU.test(plik);
  * Doba w przeglądarce, tydzień na krawędzi. Bez `immutable`: nazwa pliku nie
  * niesie skrótu treści, a normalizacja po zmianie zdjęcia zapisuje wariant pod
  * TĄ SAMĄ nazwą — poprawiona okładka ma dojść najpóźniej po tygodniu.
+ *
+ * Krawędź to bufor strefy (Cloudflare domyślnie trzyma `.webp`), czyszczony
+ * po adresie. Funkcja NIE trzyma niczego w Cache API (`caches.default`):
+ * do 28.10.2026 trzymała, a takich wpisów nie usuwa ani czyszczenie po
+ * adresie, ani po prefiksie (dokumentacja Cloudflare: tylko „Purge
+ * Everything” albo Cache-Tag). Po podmianie okładki „przychodzi-lekarz-do-
+ * lekarza” domena podawała stary wariant 1600 z `age` 13 godzin, choć bufor
+ * strefy był wyczyszczony, a Supabase dawał już nowy plik.
  */
 export const BUFOR = 'public, max-age=86400, s-maxage=604800';
 
@@ -107,24 +115,6 @@ const blad = (tekst, status, dodatkowe = {}) =>
     },
   });
 
-/** Odpowiedź na HEAD to te same nagłówki bez treści. */
-const bezTresci = (odp) => new Response(null, { status: odp.status, headers: odp.headers });
-
-/**
- * Klucz bufora z nagłówkami warunkowymi żądania. Cache API Workers sam
- * odpowiada wtedy 304 (If-None-Match / If-Modified-Since) albo 206 (Range);
- * goły klucz zwracał zawsze pełne 200 i ETag z Supabase do niczego nie służył.
- */
-const WARUNKOWE = ['if-none-match', 'if-modified-since', 'range'];
-const zWarunkami = (url, request) => {
-  const h = new Headers();
-  for (const n of WARUNKOWE) {
-    const v = request.headers.get(n);
-    if (v) h.set(n, v);
-  }
-  return new Request(url, { method: 'GET', headers: h });
-};
-
 /** Czy If-None-Match żądania trafia w ETag pliku (porównanie słabe, RFC 9110). */
 const pasujeEtag = (inm, etag) => {
   if (!inm || !etag) return false;
@@ -132,7 +122,7 @@ const pasujeEtag = (inm, etag) => {
   return inm.split(',').some((t) => t.trim() === '*' || bez(t) === bez(etag));
 };
 
-export async function onRequest({ params, request, env, waitUntil }) {
+export async function onRequest({ params, request, env }) {
   const metoda = request.method.toUpperCase();
   if (metoda !== 'GET' && metoda !== 'HEAD') {
     return blad('Metoda niedozwolona.', 405, { Allow: 'GET, HEAD' });
@@ -146,14 +136,12 @@ export async function onRequest({ params, request, env, waitUntil }) {
   const adres = new URL(request.url);
   const podglad = adres.hostname.endsWith('.pages.dev');
 
-  // Klucz bufora bez zapytania i zawsze jako GET: `?v=1`, `?v=2`… nie mogą
-  // omijać bufora i za każdym razem wołać Supabase.
-  const klucz = new Request(`${adres.origin}/media/${plik}`, { method: 'GET' });
-  const bufor = globalThis.caches?.default;
-
-  if (bufor) {
-    const zapisana = await bufor.match(zWarunkami(klucz.url, request)).catch(() => undefined);
-    if (zapisana) return metoda === 'HEAD' ? bezTresci(zapisana) : zapisana;
+  // Bufor strefy ma zapytanie w kluczu, więc `?v=1`, `?v=2`… omijałyby go
+  // i za każdym razem wołały Supabase. Jeden adres na plik — reszta dostaje 301.
+  if (adres.search) {
+    const naglowki = { Location: `/media/${plik}`, 'Cache-Control': BUFOR };
+    if (podglad) naglowki['X-Robots-Tag'] = 'noindex, nofollow';
+    return new Response(null, { status: 301, headers: naglowki });
   }
 
   let obiekt;
@@ -166,9 +154,13 @@ export async function onRequest({ params, request, env, waitUntil }) {
   // Brak obiektu Storage zgłasza jako 400 z `"statusCode":"404"` w treści,
   // nie jako 404. Dla nas to jedno i to samo: takiego pliku nie ma.
   if (obiekt.status === 400 || obiekt.status === 404) {
+    obiekt.body?.cancel().catch(() => {});
     return blad('Nie znaleziono pliku.', 404);
   }
-  if (!obiekt.ok || !obiekt.body) return blad('Nie udało się podać pliku.', 502);
+  if (!obiekt.ok || !obiekt.body) {
+    obiekt.body?.cancel().catch(() => {});
+    return blad('Nie udało się podać pliku.', 502);
+  }
 
   const naglowki = new Headers({
     'Content-Type': 'image/webp',
@@ -182,17 +174,10 @@ export async function onRequest({ params, request, env, waitUntil }) {
   // Podgląd na pages.dev nie może konkurować z domeną o te same pliki.
   if (podglad) naglowki.set('X-Robots-Tag', 'noindex, nofollow');
 
-  const odpowiedz = new Response(obiekt.body, { status: 200, headers: naglowki });
-
-  if (bufor) {
-    const zapis = bufor.put(klucz, odpowiedz.clone()).catch(() => {});
-    if (typeof waitUntil === 'function') waitUntil(zapis);
-  }
-
-  // Przy chybieniu w bufor warunek sprawdzamy sami — dopiero PO zapisie do
-  // bufora, żeby pierwszy klient z ETagiem nie zostawił bufora pustego.
+  // Rewalidacja (przeglądarka po dobie, Googlebot-Image) z aktualnym ETagiem
+  // dostaje 304 bez treści. Trafienie w bufor strefy obsługuje Cloudflare sam.
   if (pasujeEtag(request.headers.get('if-none-match'), naglowki.get('etag'))) {
-    odpowiedz.body?.cancel().catch(() => {});
+    obiekt.body.cancel().catch(() => {});
     const h304 = new Headers({ ETag: naglowki.get('etag'), 'Cache-Control': BUFOR });
     const zmieniono = naglowki.get('last-modified');
     if (zmieniono) h304.set('Last-Modified', zmieniono);
@@ -201,10 +186,9 @@ export async function onRequest({ params, request, env, waitUntil }) {
   }
 
   if (metoda === 'HEAD') {
-    // Treść nie wychodzi, więc nie trzymamy otwartego strumienia. Kopia dla
-    // bufora czyta dalej — anulowanie jednej gałęzi nie zamyka drugiej.
-    odpowiedz.body?.cancel().catch(() => {});
-    return bezTresci(odpowiedz);
+    // Treść nie wychodzi, więc nie trzymamy otwartego strumienia.
+    obiekt.body.cancel().catch(() => {});
+    return new Response(null, { status: 200, headers: naglowki });
   }
-  return odpowiedz;
+  return new Response(obiekt.body, { status: 200, headers: naglowki });
 }
