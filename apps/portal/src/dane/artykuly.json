@@ -3,6 +3,20 @@
   "zrodlo": "aura_articles (status=published, platforms zawiera UtrataDochodu.pl); zdjęcia z preview_image_800/1600",
   "artykuly": [
     {
+      "slug": "przychodzi-kosmetyczka-do-lekarza",
+      "tytul": "Przychodzi kosmetyczka do lekarza. Ile zasiłku dostanie we własnym gabinecie i co liczy polisa",
+      "zajawka": "Na uldze na start zasiłek to 0 zł, na preferencyjnym ZUS z dobrowolnym chorobowym ok. 995 zł. Ile kosmetyczka dostaje na L4 w 2026 r. i co liczy polisa?",
+      "tagi": [
+        "ZUS",
+        "OWU",
+        "branża beauty"
+      ],
+      "opublikowano": "2026-10-30T07:30:00Z",
+      "utworzono": "2026-10-30T07:30:00Z",
+      "obraz": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/przychodzi-kosmetyczka-do-lekarza-cover-800.webp",
+      "obrazDuzy": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/przychodzi-kosmetyczka-do-lekarza-cover-1600.webp"
+    },
+    {
       "slug": "przychodzi-kierowca-do-lekarza",
       "tytul": "Przychodzi kierowca do lekarza. Ile kierowca zawodowy traci na L4, gdy wypłata to w dużej części diety",
       "zajawka": "Mediana zarobków kierowcy to 9 tys. zł na rękę, ale zasiłek liczy się bez diet. Sprawdź, ile kierowca dostaje na L4 w 2026 r. i co zmienia polisa.",
