@@ -3,6 +3,20 @@
   "zrodlo": "aura_articles (status=published, platforms zawiera UtrataDochodu.pl); zdjęcia z preview_image_800/1600",
   "artykuly": [
     {
+      "slug": "przychodzi-architekt-do-lekarza",
+      "tytul": "Przychodzi architekt do lekarza. Pracownia, projekt i dochód na L4",
+      "zajawka": "Nadzór autorski nie może po prostu stanąć, a OC nie płaci za Twój dochód. Sprawdź, ile architekt dostaje z ZUS na L4 w 2026 r. i co liczy polisa.",
+      "tagi": [
+        "ZUS",
+        "OWU",
+        "architekci"
+      ],
+      "opublikowano": "2026-10-31T07:30:00Z",
+      "utworzono": "2026-10-31T07:30:00Z",
+      "obraz": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/przychodzi-architekt-do-lekarza-cover-800.webp",
+      "obrazDuzy": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/przychodzi-architekt-do-lekarza-cover-1600.webp"
+    },
+    {
       "slug": "przychodzi-kosmetyczka-do-lekarza",
       "tytul": "Przychodzi kosmetyczka do lekarza. Ile zasiłku dostanie we własnym gabinecie i co liczy polisa",
       "zajawka": "Na uldze na start zasiłek to 0 zł, na preferencyjnym ZUS z dobrowolnym chorobowym ok. 995 zł. Ile kosmetyczka dostaje na L4 w 2026 r. i co liczy polisa?",
