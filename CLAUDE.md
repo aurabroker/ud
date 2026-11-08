@@ -245,6 +245,12 @@ Nowy artykuł idzie tak:
    — sam „ZUS" stał nad sześcioma wpisami i nic o nich nie mówił. Ten sam tag
    dopisz w `aura_articles.tags`, żeby baza i repo się nie rozjechały.
    Pilnuje tego `artykuly.spec.js` (etykiety „ZUS · …" różne od siebie).
+   **Każdy obrazek w treści ma `alt` z opisem** — edytor CMS-a go nie
+   wymaga, a Bing (08.11.2026) zgłosił trzy takie wpisy. Opis dopisz w pliku
+   treści i tym samym `replace` w `aura_articles.content` (zmiana treści
+   przestawia wpis na `pending`; `aura_normalize_article_images` oddaje go
+   jako `ready` bez zmian). Pusty `alt=""` tylko dla ozdób (`ol.ikony`).
+   Pilnuje tego `test/obrazki-alt.spec.js`.
 
 **Obrazek w treści (infografika, wykres) — z sandboksa nie wyślesz go do
 kubełka**, bo `article-images` przyjmuje wysyłki tylko od zalogowanych. Droga,
@@ -948,6 +954,51 @@ Mapy strony w nagłówku nie ma, bo deklaruje ją `robots.txt` — ten mechanizm
 rozumie każdy robot i nie ma powodu mówić tego samego dwa razy.
 
 ---
+
+### IndexNow — zgłoszenia z builda produkcyjnego (od 08.11.2026)
+
+Bing Webmaster Tools zgłaszał „Protokół IndexNow nie został wdrożony" —
+o nowym wpisie dowiadywał się z mapy strony, kiedy sam do niej zajrzał.
+Teraz robi to integracja `ud:indexnow` (`integracje/indexnow.mjs`), na końcu
+builda, po sitemap i `ud:markdown`:
+
+1. Zapisuje `dist/indexnow.json`: dla każdego adresu z mapy strony SHA-256
+   jego pliku `.md`. **Skrót z `.md`, nie z HTML-a** — HTML ma nazwy plików
+   z `/_astro/`, więc każda zmiana CSS-u zmieniałaby skrót wszystkich stron
+   i każde wdrożenie zgłaszałoby cały serwis. Dwa buildy tego samego kodu
+   dają identyczny manifest (sprawdzone).
+2. **Tylko build produkcyjny** (`CF_PAGES=1` i `CF_PAGES_BRANCH` =
+   `GALAZ_PRODUKCYJNA`) pobiera `https://utratadochodu.pl/indexnow.json` —
+   manifest wdrożenia, które ten build zastąpi — i wysyła do
+   `api.indexnow.org` adresy nowe, zmienione i usunięte. Zmiana gałęzi
+   produkcyjnej w Pages = zmiana tej stałej, inaczej zgłoszenia po cichu
+   ustaną.
+3. 404 na manifeście = pierwsze wdrożenie, zgłaszamy wszystko. **Każda inna
+   niepewność (5xx, sieć, zepsuty plik) = nic nie zgłaszamy** — zgłaszanie
+   całego serwisu przy każdej awarii uczyłoby Binga ignorować zgłoszenia.
+   Pusta mapa strony też nic nie zgłasza (to awaria builda, nie usunięcie).
+4. **Nic nie przerywa builda.** Wynik leży w polu `zgloszenie` manifestu na
+   żywej stronie: `curl -s https://utratadochodu.pl/indexnow.json | jq
+   .zgloszenie` (`zgloszono` + `status` 200/202, `bez-zmian`, `pominiete`
+   z powodem, `odmowa`). API Pages, a więc i logu builda, stąd nie widać.
+
+Klucz (`KLUCZ` w integracji) leży w `public/<klucz>.txt` — sam klucz, bez
+nowej linii; nie jest sekretem, protokół każe go wystawić. Plik klucza
+i manifest są wypisane z `_routes.json`. Wymiana klucza: nowa stała, nowy
+plik, stary plik usunąć, nowy wpis w `_routes.json` (test pilnuje jednego
+pliku klucza).
+
+Zgłoszenie idzie kilkadziesiąt sekund **przed** tym, jak wdrożenie zacznie
+odpowiadać — Bing nie pobiera stron w tej samej minucie. `api.indexnow.org`
+i `www.bing.com` są z sandboksa zablokowane (proxy), więc ręcznego zgłoszenia
+stąd nie wyślesz; w razie potrzeby przez `net.http_post` w bazie albo
+`submit_indexnow_urls` konektora OpenSEO. **Crawler Hints w Cloudflare tego
+nie zastąpi**: zgłasza zmiany po `MISS` w buforze, a nasze strony HTML idą
+przez funkcję (`DYNAMIC`). Google IndexNow nie czyta.
+
+Pilnuje tego `test/indexnow.spec.js` (plik klucza, `_routes.json`, manifest
+z builda, cały przebieg na podstawionej sieci: podgląd bez sieci, pierwsze
+wdrożenie, różnica, awarie, odmowa IndexNow, hook bez wyjątku).
 
 ## Przepięcie domeny — co musi być, zanim pójdzie
 

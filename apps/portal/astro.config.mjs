@@ -6,6 +6,7 @@ import { EnumChangefreq } from 'sitemap';
 import tailwind from '@tailwindcss/vite';
 import { przekierowania } from '@ud/zawody';
 import { markdownDlaAgentow } from './integracje/markdown.mjs';
+import { indexNow } from './integracje/indexnow.mjs';
 import { writeFileSync, appendFileSync, existsSync, readdirSync, lstatSync, realpathSync, readFileSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 
@@ -175,6 +176,12 @@ export default defineConfig({
         return { ...item, priority: 0.8, changefreq: EnumChangefreq.MONTHLY };
       },
     }),
+    /**
+     * Zgłasza Bingowi przez IndexNow strony nowe, zmienione i usunięte. Stoi
+     * po sitemap i po `ud:markdown`: adresy bierze z mapy strony, a skróty
+     * treści z plików .md (integracje/indexnow.mjs).
+     */
+    indexNow({ serwis: SITE }),
   ],
 
   /**
