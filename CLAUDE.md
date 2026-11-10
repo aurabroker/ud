@@ -981,6 +981,22 @@ builda, po sitemap i `ud:markdown`:
    żywej stronie: `curl -s https://utratadochodu.pl/indexnow.json | jq
    .zgloszenie` (`zgloszono` + `status` 200/202, `bez-zmian`, `pominiete`
    z powodem, `odmowa`). API Pages, a więc i logu builda, stąd nie widać.
+5. **Porażka nie przepada.** Różnica liczy się względem pola `zgloszone`
+   (skróty z ostatniego UDANEGO zgłoszenia; manifest z wersji 1 — `strony`).
+   Po odmowie albo braku odpowiedzi manifest niesie stare `zgloszone` dalej,
+   więc następne wdrożenie zgłasza te same adresy jeszcze raz. Do 10.11.2026
+   tak nie było: build `bfb2168` dostał od `api.indexnow.org` „brak
+   odpowiedzi" po 10 s i 16 adresów przepadło. Dlatego też limit 20 s
+   i zapasowy punkt: przy braku odpowiedzi albo 5xx zgłoszenie idzie do
+   `www.bing.com/indexnow` (`punkt` w manifeście mówi, który przyjął); 4xx
+   nie idzie drugi raz, bo drugi punkt sprawdza ten sam klucz. Przepada tylko
+   to, co zmieniło się we wdrożeniu, przy którym nie dało się odczytać
+   manifestu z żywej strony.
+
+Ręczne zgłoszenie przez bazę (z sandboksa IndexNow jest zablokowany):
+`net.http_post(url := 'https://api.indexnow.org/indexnow', body := jsonb_build_object('host', 'utratadochodu.pl', 'key', <KLUCZ>, 'keyLocation', …, 'urlList', …), headers := '{"Content-Type": "application/json"}', timeout_milliseconds := 30000)`
+— nagłówek dokładnie `application/json`, z `charset` pg_net odmawia.
+10.11.2026 tak poszło całe 235 adresów: HTTP 200, klucz przyjęty.
 
 Klucz (`KLUCZ` w integracji) leży w `public/<klucz>.txt` — sam klucz, bez
 nowej linii; nie jest sekretem, protokół każe go wystawić. Plik klucza
@@ -998,7 +1014,8 @@ przez funkcję (`DYNAMIC`). Google IndexNow nie czyta.
 
 Pilnuje tego `test/indexnow.spec.js` (plik klucza, `_routes.json`, manifest
 z builda, cały przebieg na podstawionej sieci: podgląd bez sieci, pierwsze
-wdrożenie, różnica, awarie, odmowa IndexNow, hook bez wyjątku).
+wdrożenie, różnica, awarie, odmowa IndexNow, zapasowy punkt, ponowienie
+przy kolejnym wdrożeniu, hook bez wyjątku).
 
 ## Przepięcie domeny — co musi być, zanim pójdzie
 

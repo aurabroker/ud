@@ -11,7 +11,9 @@
  * strony, bez nawigacji, stopki i skryptów — integracja `ud:markdown`). Zmiana
  * w układzie, CSS-ie albo stopce nie zmienia więc żadnego skrótu; zmienia go
  * zdanie w treści. Poprzedni manifest bierzemy z żywej strony — to jest
- * wdrożenie, które ten build za chwilę zastąpi — i zgłaszamy różnicę: nowe
+ * wdrożenie, które ten build za chwilę zastąpi — i zgłaszamy różnicę względem
+ * skrótów z ostatniego UDANEGO zgłoszenia (`zgloszone`; po porażce manifest
+ * niesie je dalej, więc następne wdrożenie ponawia te same adresy): nowe
  * i zmienione adresy oraz te, których już nie ma (IndexNow przyjmuje też
  * usunięte). Bazy, crona ani funkcji brzegowej to nie potrzebuje: stanem jest
  * manifest, który i tak leży na stronie.
@@ -41,6 +43,13 @@ export const KLUCZ = 'ab14d61f6bf3411dd6176692785d41e2';
 export const PUNKT = 'https://api.indexnow.org/indexnow';
 
 /**
+ * Bing wprost — gdy wspólny punkt nie odpowie albo odda 5xx. 10.11.2026 build
+ * produkcyjny dostał od api.indexnow.org „brak odpowiedzi" po 10 s, a to samo
+ * zgłoszenie wysłane chwilę później z bazy przeszło z 200.
+ */
+export const PUNKT_ZAPASOWY = 'https://www.bing.com/indexnow';
+
+/**
  * Gałąź produkcyjna projektu Pages `utratadochodu`. Build każdej innej gałęzi
  * to podgląd na `<hash>.utratadochodu.pages.dev` — nie zgłaszamy go, bo
  * zgłoszenie dotyczy zawsze domeny, a ten build na domenę nie trafi.
@@ -49,7 +58,7 @@ export const GALAZ_PRODUKCYJNA = 'claude/portal-rebuild-seo-llm-yz2x4t';
 
 /** Protokół przyjmuje do 10 000 adresów w jednym zgłoszeniu. */
 const NAJWIECEJ = 10_000;
-const CZAS_MS = 10_000;
+const CZAS_MS = 20_000;
 export const PLIK = 'indexnow.json';
 
 const skrot = (tekst) => createHash('sha256').update(tekst).digest('hex');
@@ -94,7 +103,8 @@ export function doZgloszenia(stare, nowe) {
 }
 
 /**
- * Poprzedni manifest z żywej strony.
+ * Punkt odniesienia z żywej strony: skróty z ostatniego UDANEGO zgłoszenia
+ * (`zgloszone`; manifest z wersji 1 go nie miał — wtedy `strony`).
  * - `{ strony }` — jest i da się go odczytać,
  * - `{ strony: {} }` — 404: pierwsze wdrożenie z IndexNow, zgłaszamy wszystko,
  * - `{ blad }` — sieć, 5xx, zepsuty plik: NIE wiemy, co się zmieniło, więc nie
@@ -110,31 +120,43 @@ export async function poprzedni(serwis, { fetch: pobierz = globalThis.fetch } = 
     if (odp.status === 404) return { strony: {}, pierwszy: true };
     if (!odp.ok) return { blad: `manifest z żywej strony: HTTP ${odp.status}` };
     const dane = await odp.json();
-    if (!dane || typeof dane.strony !== 'object' || Array.isArray(dane.strony)) {
+    const odniesienie = dane?.zgloszone ?? dane?.strony;
+    if (!odniesienie || typeof odniesienie !== 'object' || Array.isArray(odniesienie)) {
       return { blad: 'manifest z żywej strony bez pola „strony"' };
     }
-    return { strony: dane.strony };
+    return { strony: odniesienie };
   } catch (e) {
     return { blad: `manifest z żywej strony: ${e?.name === 'TimeoutError' ? 'brak odpowiedzi' : String(e?.message ?? e)}` };
   }
 }
 
-/** Zgłoszenie do IndexNow. Zwraca status HTTP albo opis błędu — nigdy nie rzuca. */
+/**
+ * Zgłoszenie do IndexNow: wspólny punkt, a gdy nie odpowie albo odda 5xx —
+ * Bing wprost. Odmowa 4xx (zły klucz, 422, 429) nie idzie drugi raz: drugi
+ * punkt sprawdza ten sam klucz. Zwraca status HTTP albo opis błędu — nigdy
+ * nie rzuca.
+ */
 export async function zglos(serwis, sciezki, { fetch: pobierz = globalThis.fetch } = {}) {
   const host = new URL(serwis).host;
   const urlList = sciezki.slice(0, NAJWIECEJ).map((s) => `${serwis}${s}`);
-  try {
-    const odp = await pobierz(PUNKT, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json; charset=utf-8' },
-      body: JSON.stringify({ host, key: KLUCZ, keyLocation: `${serwis}/${KLUCZ}.txt`, urlList }),
-      signal: AbortSignal.timeout(CZAS_MS),
-    });
-    // 200 — przyjęte; 202 — przyjęte, klucz sprawdzą później (pierwsze zgłoszenie).
-    return { status: odp.status, przyjete: odp.status === 200 || odp.status === 202, adresow: urlList.length };
-  } catch (e) {
-    return { blad: e?.name === 'TimeoutError' ? 'brak odpowiedzi IndexNow' : String(e?.message ?? e), adresow: urlList.length };
+  const cialo = JSON.stringify({ host, key: KLUCZ, keyLocation: `${serwis}/${KLUCZ}.txt`, urlList });
+  let wynik;
+  for (const punkt of [PUNKT, PUNKT_ZAPASOWY]) {
+    try {
+      const odp = await pobierz(punkt, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json; charset=utf-8' },
+        body: cialo,
+        signal: AbortSignal.timeout(CZAS_MS),
+      });
+      // 200 — przyjęte; 202 — przyjęte, klucz sprawdzą później (pierwsze zgłoszenie).
+      wynik = { status: odp.status, przyjete: odp.status === 200 || odp.status === 202, adresow: urlList.length, punkt };
+      if (odp.status < 500) return wynik;
+    } catch (e) {
+      wynik = { blad: e?.name === 'TimeoutError' ? 'brak odpowiedzi IndexNow' : String(e?.message ?? e), adresow: urlList.length, punkt };
+    }
   }
+  return wynik;
 }
 
 /**
@@ -144,6 +166,10 @@ export async function zglos(serwis, sciezki, { fetch: pobierz = globalThis.fetch
 export async function przebieg({ dist, serwis, env = process.env, fetch: pobierz = globalThis.fetch, teraz = () => new Date() }) {
   const strony = manifest(dist, adresyZMapy(dist), serwis);
   let zgloszenie;
+  // Skróty, które uznajemy za zgłoszone. Po nieudanym zgłoszeniu zostaje punkt
+  // odniesienia sprzed niego, więc następne wdrożenie ponowi te same adresy —
+  // do 10.11.2026 manifest zapisywał nowe skróty i porażka przepadała.
+  let zgloszone = strony;
 
   if (env.CF_PAGES !== '1' || env.CF_PAGES_BRANCH !== GALAZ_PRODUKCYJNA) {
     zgloszenie = { stan: 'pominiete', powod: 'build nieprodukcyjny' };
@@ -160,8 +186,10 @@ export async function przebieg({ dist, serwis, env = process.env, fetch: pobierz
         zgloszenie = { stan: 'bez-zmian' };
       } else {
         const wynik = await zglos(serwis, sciezki, { fetch: pobierz });
+        if (!wynik.przyjete) zgloszone = stary.strony;
         zgloszenie = {
           stan: wynik.przyjete ? 'zgloszono' : 'odmowa',
+          punkt: wynik.punkt,
           ...(wynik.status ? { status: wynik.status } : {}),
           ...(wynik.blad ? { powod: wynik.blad } : {}),
           adresow: wynik.adresow,
@@ -174,10 +202,11 @@ export async function przebieg({ dist, serwis, env = process.env, fetch: pobierz
   }
 
   const tresc = {
-    wersja: 1,
+    wersja: 2,
     commit: env.CF_PAGES_COMMIT_SHA ?? null,
     zgloszenie: { ...zgloszenie, kiedy: teraz().toISOString() },
     strony,
+    zgloszone,
   };
   writeFileSync(join(dist, PLIK), JSON.stringify(tresc) + '\n', 'utf8');
   return tresc;

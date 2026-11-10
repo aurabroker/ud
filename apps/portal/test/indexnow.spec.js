@@ -3,7 +3,7 @@ import { readFileSync, readdirSync, existsSync, mkdtempSync, mkdirSync, writeFil
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import {
-  KLUCZ, PUNKT, GALAZ_PRODUKCYJNA, PLIK, adresyZMapy, doZgloszenia, przebieg, indexNow,
+  KLUCZ, PUNKT, PUNKT_ZAPASOWY, GALAZ_PRODUKCYJNA, PLIK, adresyZMapy, doZgloszenia, przebieg, indexNow,
 } from '../integracje/indexnow.mjs';
 
 /**
@@ -74,12 +74,17 @@ function katalog(strony) {
   return dist;
 }
 
-/** Podstawiony fetch: `zywy` odpowiada na manifest, `indexnow` na zgłoszenie. */
-function siec({ zywy, indexnow = () => new Response(null, { status: 200 }) }) {
+/**
+ * Podstawiony fetch: `zywy` odpowiada na manifest, `indexnow` na zgłoszenie do
+ * wspólnego punktu, `bing` — do zapasowego.
+ */
+function siec({ zywy, indexnow = () => new Response(null, { status: 200 }), bing = () => new Response(null, { status: 200 }) }) {
   const wolane = [];
   const fetch = async (adres, init = {}) => {
     wolane.push({ adres: String(adres), metoda: init.method ?? 'GET', cialo: init.body ? JSON.parse(init.body) : null });
-    return String(adres) === PUNKT ? indexnow() : zywy();
+    if (String(adres) === PUNKT) return indexnow();
+    if (String(adres) === PUNKT_ZAPASOWY) return bing();
+    return zywy();
   };
   return { fetch, wolane };
 }
@@ -117,6 +122,7 @@ test('pierwsze wdrożenie (404 na manifeście): zgłoszenie całego serwisu, w f
     const zapisany = JSON.parse(readFileSync(join(dist, PLIK), 'utf8'));
     expect(zapisany.commit).toBe('abc123');
     expect(zapisany.zgloszenie.stan).toBe('zgloszono');
+    expect(zapisany.zgloszone, 'po udanym zgłoszeniu punkt odniesienia = bieżące skróty').toEqual(zapisany.strony);
   } finally { rmSync(dist, { recursive: true, force: true }); }
 });
 
@@ -160,20 +166,65 @@ test('niepewny manifest z żywej strony: nic nie zgłaszamy (zamiast całego ser
   } finally { rmSync(dist, { recursive: true, force: true }); }
 });
 
-test('odmowa albo awaria IndexNow: zapisany ślad, build idzie dalej', async () => {
+test('odmowa 4xx: bez drugiego punktu (ten sam klucz), ślad w manifeście, build idzie dalej', async () => {
   const dist = katalog({ '/': 'start' });
   try {
-    const przypadki = [
-      [() => new Response('klucz', { status: 403 }), { stan: 'odmowa', status: 403 }],
-      [() => new Response('za dużo', { status: 429 }), { stan: 'odmowa', status: 429 }],
-      [() => { throw new TypeError('fetch failed'); }, { stan: 'odmowa', powod: 'fetch failed' }],
-    ];
-    for (const [indexnow, oczekiwane] of przypadki) {
-      const { fetch } = siec({ zywy: () => new Response('', { status: 404 }), indexnow });
+    for (const status of [403, 422, 429]) {
+      const { fetch, wolane } = siec({ zywy: () => new Response('', { status: 404 }), indexnow: () => new Response('nie', { status }) });
       const wynik = await przebieg({ dist, serwis: SERWIS, env: PRODUKCJA, fetch });
-      expect(wynik.zgloszenie).toMatchObject(oczekiwane);
+      expect(wynik.zgloszenie).toMatchObject({ stan: 'odmowa', status, punkt: PUNKT });
+      expect(wolane.filter((w) => w.metoda === 'POST').map((w) => w.adres), String(status)).toEqual([PUNKT]);
       expect(JSON.parse(readFileSync(join(dist, PLIK), 'utf8')).zgloszenie.stan).toBe('odmowa');
     }
+  } finally { rmSync(dist, { recursive: true, force: true }); }
+});
+
+test('wspólny punkt milczy albo oddaje 5xx: zgłoszenie idzie do Binga wprost', async () => {
+  // 10.11.2026: build dostał od api.indexnow.org „brak odpowiedzi".
+  const dist = katalog({ '/': 'start' });
+  try {
+    const awarie = {
+      'brak odpowiedzi': () => { throw new DOMException('timeout', 'TimeoutError'); },
+      'zerwane połączenie': () => { throw new TypeError('fetch failed'); },
+      '503': () => new Response('', { status: 503 }),
+    };
+    for (const [nazwa, indexnow] of Object.entries(awarie)) {
+      const { fetch, wolane } = siec({ zywy: () => new Response('', { status: 404 }), indexnow, bing: () => new Response(null, { status: 202 }) });
+      const wynik = await przebieg({ dist, serwis: SERWIS, env: PRODUKCJA, fetch });
+      expect(wolane.filter((w) => w.metoda === 'POST').map((w) => w.adres), nazwa).toEqual([PUNKT, PUNKT_ZAPASOWY]);
+      expect(wolane[1].cialo, nazwa).toEqual(wolane[2].cialo);
+      expect(wynik.zgloszenie, nazwa).toMatchObject({ stan: 'zgloszono', status: 202, punkt: PUNKT_ZAPASOWY });
+    }
+  } finally { rmSync(dist, { recursive: true, force: true }); }
+});
+
+test('nieudane zgłoszenie nie przepada: następne wdrożenie zgłasza te adresy jeszcze raz', async () => {
+  const dist = katalog({ '/': 'start', '/blog/': 'nowy wpis', '/blog/nowy/': 'nowy' });
+  try {
+    const { strony } = await przebieg({ dist, serwis: SERWIS, env: {} });
+    const zywe = { ...strony, '/blog/': 'stary-skrot' };
+    delete zywe['/blog/nowy/'];
+
+    // 1. Oba punkty milczą — manifest zapisuje bieżące skróty, ale punkt
+    //    odniesienia zostaje sprzed zgłoszenia.
+    const awaria = () => { throw new DOMException('timeout', 'TimeoutError'); };
+    const pierwsza = siec({ zywy: () => json({ wersja: 1, strony: zywe }), indexnow: awaria, bing: awaria });
+    const nieudane = await przebieg({ dist, serwis: SERWIS, env: PRODUKCJA, fetch: pierwsza.fetch });
+    expect(nieudane.zgloszenie).toMatchObject({ stan: 'odmowa', powod: 'brak odpowiedzi IndexNow', adresow: 2 });
+    expect(nieudane.strony).toEqual(strony);
+    expect(nieudane.zgloszone).toEqual(zywe);
+
+    // 2. Następne wdrożenie, ta sama treść: ten manifest jest już na żywej
+    //    stronie — zgłoszenie idzie jeszcze raz, z tymi samymi adresami.
+    const druga = siec({ zywy: () => json(nieudane) });
+    const ponowione = await przebieg({ dist, serwis: SERWIS, env: PRODUKCJA, fetch: druga.fetch });
+    expect(druga.wolane[1].cialo.urlList).toEqual([`${SERWIS}/blog/`, `${SERWIS}/blog/nowy/`]);
+    expect(ponowione.zgloszenie.stan).toBe('zgloszono');
+    expect(ponowione.zgloszone).toEqual(strony);
+
+    // 3. I dopiero po udanym — bez zmian.
+    const trzecia = siec({ zywy: () => json(ponowione) });
+    expect((await przebieg({ dist, serwis: SERWIS, env: PRODUKCJA, fetch: trzecia.fetch })).zgloszenie.stan).toBe('bez-zmian');
   } finally { rmSync(dist, { recursive: true, force: true }); }
 });
 
