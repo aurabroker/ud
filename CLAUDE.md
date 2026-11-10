@@ -3119,6 +3119,19 @@ repozytorium: adres z generatora idzie do `aura_articles.preview_image_url`,
 a normalizacja sama go pobiera i zapisuje warianty 800/1600 w kubełku (patrz
 „Nowy artykuł w portalu").
 
+**Okładka z generatora cięższa niż ~0,5 MB — przez wsrv.nl w 1600 px.**
+Plik spoza kubełka normalizacja dekoduje sama (usługa skalowania Supabase
+bierze tylko pliki z kubełka i powyżej 1,5 MB). Okładki 2K z Artlista ważą
+280–430 kB i przechodzą; okładki partii 1 „Przychodzi… do lekarza” (generacje
+z 30.10.2026) ważą 0,8–1,0 MB i każde wywołanie kończyło się 546
+`WORKER_RESOURCE_LIMIT` (10.11.2026, stomatolog: dwie próby). Działa adres
+`https://wsrv.nl/?url=<adres generatora, zakodowany>&w=1600&output=jpg&q=90` —
+ten sam obraz, JPEG 1600 px, ~340 kB; warianty wychodzą 1600×1067. W SQL:
+`'https://wsrv.nl/?url=' || replace(replace(replace(replace(replace(replace(preview_image_url,'%','%25'),'&','%26'),'?','%3F'),'=','%3D'),'/','%2F'),':','%3A') || '&w=1600&output=jpg&q=90'`.
+Rozmiar źródła sprawdzisz przed publikacją: `net.http_get` z nagłówkiem
+`Range: bytes=0-0` i `headers->>'content-range'`. Adres idzie przez cudzą
+usługę — tylko dla obrazu, który i tak będzie publiczny.
+
 **Bloom (trybloom.ai) zamiast Artlista**, gdy ten wymaga ponownego logowania
 (26.10.2026, „przychodzi-lekarz-do-lekarza"): okładka z `bytedance/seedream-5-pro`
 (`size: "2400x1600"`), ikony z `openai/gpt-image-2.5-flare` — pierwsza z opisu,
