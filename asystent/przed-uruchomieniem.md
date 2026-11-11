@@ -1,8 +1,9 @@
 # Asystentka AI na stronie — co musi być przed uruchomieniem
 
-Agent w ElevenLabs istnieje i przechodzi testy, ale **na stronie go nie ma**.
-Widżet wolno wstawić dopiero po punktach z części A i B. Źródło: przegląd
-z 11.11.2026 (trzech recenzentów: fakty, prawo, odporność rozmowy).
+Agent w ElevenLabs istnieje, ale **testów jeszcze nie przechodzi i na stronie
+go nie ma** (stan i wyniki: „Jak testujemy” niżej). Widżet wolno wstawić
+dopiero po zielonych testach oraz punktach z części A i B. Źródło listy:
+przegląd z 11.11.2026 (trzech recenzentów: fakty, prawo, odporność rozmowy).
 
 ## A. Decyzje prawnika (i właściciela)
 
@@ -62,9 +63,9 @@ z 11.11.2026 (trzech recenzentów: fakty, prawo, odporność rozmowy).
 stronie (Monika)”. Stary agent (`agent_7401m4ba22wqfthb27mhyj0tfcd0`)
 nietknięty.
 
-- Instrukcja = `instrukcja.md` (wersja 2: 18 729 znaków, liczba sprawdzona
-  po wgraniu), pierwsza wiadomość = `pierwsza-wiadomosc.txt`, bez
-  przerywania.
+- Instrukcja = `instrukcja.md` (wersja 3: 21 944 znaki, liczba sprawdzona
+  po wgraniu — **wersja nieprzetestowana**, patrz niżej), pierwsza
+  wiadomość = `pierwsza-wiadomosc.txt`, bez przerywania.
 - Model rozmowy `claude-sonnet-4-6`, temperatura 0,2, strefa Europe/Warsaw.
 - **Domyślnie czat tekstowy** (`text_only`): bez przetwarzania głosu, adresy
   klikalne (także `/kup-online?z=asystent`), niższy koszt. Strona może
@@ -84,7 +85,7 @@ nietknięty.
 - Ocena każdej rozmowy: 4 kryteria (bez danych osobowych, bez obietnic,
   następny krok, zgodność z bazą) i 5 pól bez danych osobowych (temat, forma
   pracy, dokąd skierowano, prośba o człowieka, pytanie bez odpowiedzi).
-- Testy: 23 rozmowy z `testy.json` podpięte do agenta.
+- Testy: 26 rozmów z `testy.json` podpiętych do agenta.
 
 ## B. Wstawienie na stronę (praca w repozytorium, po części A)
 
@@ -128,6 +129,34 @@ w ElevenLabs, każdy test dwa razy, (2) niezależny przegląd zapisów względem
 stron i OWU (tekst OWU: `pdftotext` z `/owu/<slug>.pdf`), z weryfikacją
 zarzutów przez drugiego recenzenta. Dopiero oba wyniki razem mówią, czy
 wersja jest gotowa.
+
+### Wyniki (11.11.2026)
+
+| Przebieg | Instrukcja | Oceniający ElevenLabs | Przegląd zapisów (potwierdzone) |
+|---|---|---|---|
+| 1 | v1, tryb głosowy | 37/46 | 42 usterki |
+| 2 | v2, czat tekstowy | 33/52 | 44 (5 blokujących, 33 poważne, 6 do poprawy w samych testach) |
+| 3 | v3 | **nie uruchomiony** — w koncie ElevenLabs skończyły się kredyty („Insufficient credits”) | — |
+
+Blokujące z przebiegu 2, każde wpisane do v3 jako gotowa formuła:
+czat kryzysowy z adresem strony zamiast trzech numerów; wymyślony warunek
+świadczenia HIV; okres wyczekiwania przy etacie powiązany z końcem
+zasiłku; wyłączenie „kręgosłupa i stawów” zamiast chorób
+zwyrodnieniowych; pytanie o zdrowie klienta, który zgłasza szkodę z polisy.
+Najwięcej usterek: ZUS obok polisy (od którego dnia płaci, co pokrywa okres
+wyczekiwania), klient z istniejącą polisą, kryzys.
+
+**v3 nie jest sprawdzona.** Po odnowieniu kredytów: przebieg 3 (26 testów
+× 2) i przegląd zapisów. Zanim się go uruchomi, warto poprawić warunki
+testów wskazane w przeglądzie 2 (`od-pierwszego-dnia` warunek 6,
+`zus-plus-polisa`, `po-angielsku`, `juz-po-wypadku`, `tryb-testowy`,
+`dochod-spoza-tabeli`) — inaczej oceniający dalej będzie zaliczał błędy
+i odrzucał poprawne odpowiedzi. Gdy v3 nie zejdzie do zera blokujących,
+do decyzji właściciela: mocniejszy model rozmowy (droższy) albo węższy
+zakres asystentki (np. tylko kalkulator i odesłanie do wniosku).
+
+Koszt: dwa przebiegi zużyły około 119 tys. kredytów. Konto jest wspólne
+z agentem Beauty — dopóki kredyty się nie odnowią, on też nie odpowiada.
 
 ## Do poprawy na stronie (wyszło przy przeglądzie, nie ruszone)
 

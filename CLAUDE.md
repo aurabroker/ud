@@ -1143,7 +1143,14 @@ słowa właściciela. Wszystko, co o nim wiadomo, leży w `asystent/`:
 | `testy.json` | 26 rozmów symulowanych z identyfikatorami testów w ElevenLabs |
 | `przed-uruchomieniem.md` | lista dla prawnika (A), wstawienie na stronę (B), stan agenta, dwie warstwy testów, błąd na stronie do decyzji |
 
-**Na stronę dopiero po A i B z `przed-uruchomieniem.md`** — m.in. punkt
+**Stan na 11.11.2026: testów nie przechodzi.** Przebieg 2 (instrukcja v2,
+czat): oceniający ElevenLabs 33/52, przegląd zapisów potwierdził 44 usterki,
+w tym 5 blokujących. Instrukcja v3 (poprawki z przeglądu) jest wgrana
+i sprawdzona co do liczby znaków, ale **nieprzetestowana** — w koncie
+ElevenLabs skończyły się kredyty (konto wspólne z agentem Beauty). Wyniki
+i dalsze kroki: „Jak testujemy” w `przed-uruchomieniem.md`.
+
+**Na stronę dopiero po zielonych testach v3 i po A i B z `przed-uruchomieniem.md`** — m.in. punkt
 o asystentce w polityce prywatności (zatwierdzony przez prawnika), CSP,
 skrypt widżetu ładowany po kliknięciu, tylko `/kalkulator/`.
 
