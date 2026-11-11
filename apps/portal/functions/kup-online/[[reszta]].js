@@ -57,8 +57,12 @@ export function czlowiek(request) {
   if (request.method.toUpperCase() !== 'GET') return false;
   const ua = request.headers.get('user-agent') ?? '';
   if (!ua.trim() || ROBOT.test(ua)) return false;
-  const cel = `${request.headers.get('sec-purpose') ?? ''} ${request.headers.get('purpose') ?? ''}`;
-  return !/prefetch|prerender/i.test(cel);
+  // X-Purpose: preview — aplikacja Facebooka na Androidzie pobiera stronę,
+  // gdy post tylko pojawi się na ekranie (z x-fb-http-engine: Liger), a nie
+  // gdy ktoś w niego stuknie. Bez tego każde przewinięcie posta liczyłoby się
+  // jak kliknięcie.
+  const cel = ['sec-purpose', 'purpose', 'x-purpose'].map((n) => request.headers.get(n) ?? '').join(' ');
+  return !/prefetch|prerender|preview/i.test(cel);
 }
 
 async function zapisz(env, wiersz) {

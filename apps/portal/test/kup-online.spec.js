@@ -14,6 +14,7 @@ import { onRequest as middleware } from '../functions/_middleware.js';
  */
 
 const PRZEGLADARKA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1';
+const FACEBOOK_ANDROID = 'Mozilla/5.0 (Linux; Android 14; SM-S918B Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/129.0.6668.100 Mobile Safari/537.36 [FB_IAB/FB4A;FBAV/485.0.0.40.94;]';
 const KLUCZ = 'klucz-serwisowy-testowy';
 const TABELA = 'https://kukvgsjrmrqtzhkszzum.supabase.co/rest/v1/ud_klikniecia';
 const BLEDY = 'https://kukvgsjrmrqtzhkszzum.supabase.co/rest/v1/ud_errors';
@@ -66,6 +67,13 @@ test('kliknięcie człowieka idzie do ud_klikniecia: tylko cel i źródło, kluc
   expect(wolane[0].adres).not.toContain(KLUCZ);
 });
 
+test('stuknięcie w aplikacji Facebooka (bez X-Purpose) liczy się jak kliknięcie', async () => {
+  const { wolane } = await wejscie('/kup-online?z=facebook', {
+    naglowki: { 'user-agent': FACEBOOK_ANDROID, 'x-fb-http-engine': 'Liger' },
+  });
+  expect(wolane.map((w) => w.cialo)).toEqual([{ cel: 'leadenhall', zrodlo: 'facebook' }]);
+});
+
 test('źródło: biała lista znaków, reszta to „inne", brak to „bezposrednio"', () => {
   expect(zrodlo(null)).toBe('bezposrednio');
   expect(zrodlo('')).toBe('bezposrednio');
@@ -84,6 +92,9 @@ test('nie liczą się: HEAD, prefetch, roboty, podglądy linków, pusty User-Age
     HEAD: { metoda: 'HEAD' },
     'prefetch Chrome': { naglowki: { 'user-agent': PRZEGLADARKA, 'sec-purpose': 'prefetch;prerender' } },
     'prefetch Safari': { naglowki: { 'user-agent': PRZEGLADARKA, purpose: 'prefetch' } },
+    'podgląd w aplikacji Facebooka (post na ekranie)': {
+      naglowki: { 'user-agent': FACEBOOK_ANDROID, 'x-purpose': 'preview', 'x-fb-http-engine': 'Liger' },
+    },
     Googlebot: { naglowki: { 'user-agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)' } },
     bingbot: { naglowki: { 'user-agent': 'Mozilla/5.0 (compatible; bingbot/2.0)' } },
     WhatsApp: { naglowki: { 'user-agent': 'WhatsApp/2.23.20.0' } },

@@ -1035,9 +1035,34 @@ odpowiada 302 na `CEL` i w tle zapisuje kliknięcie w `ud_klikniecia`
   licznik nie potrzebuje zgody i liczy wszystkich. Źródło z `?z=` przechodzi
   białą listę `^[a-z0-9-]{1,32}$` (inne → `inne`, brak → `bezposrednio`);
   ta sama reguła stoi w CHECK tabeli. RLS bez polityk, tylko `service_role`.
-- **Nie liczą się:** HEAD, prefetch (`Sec-Purpose`/`Purpose`), roboty,
+- **Nie liczą się:** HEAD, prefetch (`Sec-Purpose`/`Purpose`, a od
+  11.11.2026 także `X-Purpose: preview` — aplikacja Facebooka na Androidzie
+  pobiera stronę, gdy post tylko pojawi się na ekranie), roboty,
   podglądy linków (WhatsApp, Messenger, Slack pobierają adres przy samym
-  wklejeniu), pusty User-Agent i wejścia na `*.pages.dev`.
+  wklejeniu), pusty User-Agent i wejścia na `*.pages.dev`. Liczby
+  z Facebooka mogą być więc zaniżone: stuknięcie podane z pobranej
+  wcześniej kopii do nas nie dochodzi.
+- **Link na Facebooku — przed pierwszym postem test.** Robot Facebooka
+  idzie za naszym 302 i czyta `<link rel="canonical">` Leadenhall
+  (`og:url` tam nie ma), więc karta posta (tytuł, zdjęcie, domena) i liczniki
+  udostępnień będą z ich `/info/?employeeCode=trcVyBxTrw`. Dokąd prowadzi
+  stuknięcie w kartę, Meta nie dokumentuje: badanie NDSS 2020 widziało adres
+  wklejony, starsze relacje — canonical (przegląd 11.11.2026, dziewięciu
+  agentów, bez rozstrzygnięcia). Test: Sharing Debugger („Canonical URL”,
+  „Redirect Path”) i post „Tylko ja” — w `l.facebook.com/l.php?u=…` ma stać
+  `kup-online` albo `CVRZSKkHi7`, nie `trcVyBxTrw`. Adres zostaw w treści
+  posta (zwykły link w tekście prowadzi tam, gdzie wpisano). **Nie podawaj
+  robotowi Facebooka innej strony niż ludziom** (200 z naszym `og:url`,
+  302 dla reszty): karta z naszą domeną i automatyczne przejście na
+  leadenhall.com to u Mety „zwodnicze przekierowanie”, przy reklamie grozi
+  blokadą konta. Pewna droga to zwykła strona na naszej domenie, ta sama dla
+  wszystkich, z przyciskiem do `/kup-online`.
+- **Przycisk „Udostępnij” w Safari na iOS i Chrome na Androidzie wysyła
+  canonical**, czyli adres z `trcVyBxTrw` — klient, który na ich stronie
+  udostępni ją dalej, wysyła kod domowy Leadenhall. Naprawić to może tylko
+  Leadenhall: canonical z kodem z adresu. Sam canonical bez kodu nie
+  wystarczy — nowy odwiedzający bez kodu dostaje kod domowy z ich skryptu;
+  chroniłby tylko kod zapamiętany wcześniej w tej przeglądarce.
 - **Przekierowanie nie czeka na bazę** (`waitUntil`) i ma `no-store` — wpis
   w buforze albo zapamiętane przekierowanie omijałyby licznik. Nieudany zapis
   idzie do `ud_errors` (źródło `kup-online`); licznik, który po cichu stoi,
