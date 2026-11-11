@@ -10,6 +10,11 @@
  * być dowolnie dużo. Kolumn jest najwyżej `MIEJSC`: te z największą liczbą
  * kliknięć w całym okresie, reszta trafia do „pozostałe" — inaczej jeden
  * link z literówką albo cudzy żart w adresie rozpychałby tabelę.
+ *
+ * Zwija już baza (`ud_klikniecia_tabela`, wiersze z `zrodlo = POZOSTALE`):
+ * zwijanie tutaj działałoby dopiero po limicie 1000 wierszy PostgREST, więc
+ * zalew różnych `?z=` wypychałby prawdziwe tygodnie. Funkcja zwija też sama,
+ * gdyby dostała wiersze niezwinięte.
  */
 
 export const MIEJSC = 6;
@@ -17,14 +22,19 @@ export const TYGODNI = 12;
 /** Kolumna zbiorcza dla miejsc spoza pierwszej szóstki. */
 export const POZOSTALE = '__pozostale';
 
-/** Jak miejsca nazywa funkcja portalu, gdy `?z=` brak albo jest nieczytelne. */
+/**
+ * Jak miejsca nazywa funkcja portalu, gdy `?z=` brak albo jest nieczytelne.
+ * „inne" da się też wpisać w link świadomie, stąd etykieta bez rozstrzygania.
+ */
 const ETYKIETY = {
   bezposrednio: 'bez oznaczenia',
-  inne: 'nieczytelne',
+  inne: 'inne lub nieczytelne',
   [POZOSTALE]: 'pozostałe',
 };
 
-export const etykietaMiejsca = (zrodlo) => ETYKIETY[zrodlo] ?? zrodlo;
+// Tylko własne klucze: `?z=constructor` przechodzi białą listę, a zwykłe
+// ETYKIETY['constructor'] oddałoby funkcję Object z prototypu.
+export const etykietaMiejsca = (zrodlo) => (Object.hasOwn(ETYKIETY, zrodlo) ? ETYKIETY[zrodlo] : zrodlo);
 
 /**
  * Poniedziałek tygodnia sprzed `tygodni - 1` tygodni, jako „RRRR-MM-DD" —
@@ -46,14 +56,21 @@ export function dzisWPolsce(teraz = new Date()) {
 
 export function klikniecia(wiersze) {
   const zaMiejsce = new Map();
-  for (const w of wiersze) zaMiejsce.set(w.zrodlo, (zaMiejsce.get(w.zrodlo) ?? 0) + w.klikniec);
+  let zwinieteWBazie = false;
+  let miejscZBazy = 0;
+  for (const w of wiersze) {
+    miejscZBazy = Math.max(miejscZBazy, w.miejsc_wszystkich ?? 0);
+    // „pozostałe" z bazy nie konkuruje o kolumnę — zawsze stoi na końcu.
+    if (w.zrodlo === POZOSTALE) { zwinieteWBazie = true; continue; }
+    zaMiejsce.set(w.zrodlo, (zaMiejsce.get(w.zrodlo) ?? 0) + w.klikniec);
+  }
 
-  // Kolejność kolumn: najwięcej kliknięć pierwsze, przy remisie alfabetycznie —
-  // żeby tabela nie skakała między odświeżeniami.
+  // Kolejność kolumn: najwięcej kliknięć pierwsze, przy remisie po nazwie
+  // (porządek bajtów, jak collate "C" w bazie) — żeby tabela nie skakała.
   const wgLiczby = [...zaMiejsce.entries()].sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1));
   const glowne = wgLiczby.slice(0, MIEJSC).map(([z]) => z);
   const sa = new Set(glowne);
-  const kolumny = wgLiczby.length > MIEJSC ? [...glowne, POZOSTALE] : glowne;
+  const kolumny = zwinieteWBazie || wgLiczby.length > MIEJSC ? [...glowne, POZOSTALE] : glowne;
   const kolumna = (z) => (sa.has(z) ? z : POZOSTALE);
 
   const pusty = () => Object.fromEntries(kolumny.map((k) => [k, 0]));
@@ -70,5 +87,5 @@ export function klikniecia(wiersze) {
   for (const r of rzedy) for (const k of kolumny) razem[k] += r.liczby[k];
   const wszystkie = rzedy.reduce((s, r) => s + r.razem, 0);
 
-  return { kolumny, rzedy, razem, wszystkie, miejscWszystkich: zaMiejsce.size };
+  return { kolumny, rzedy, razem, wszystkie, miejscWszystkich: Math.max(miejscZBazy, zaMiejsce.size) };
 }

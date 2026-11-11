@@ -58,6 +58,29 @@ test(`ponad ${MIEJSC} miejsc: reszta w „pozostałe", suma się zgadza`, () => 
   assert.equal(k.miejscWszystkich, MIEJSC + 3);
 });
 
+test(`dokładnie ${MIEJSC} miejsc: bez kolumny „pozostałe"; ${MIEJSC + 1} — zwinięte dokładnie jedno`, () => {
+  const ile = (n) => Array.from({ length: n }, (_, i) => ({ tydzien: '2026-11-09', zrodlo: `m${i}`, klikniec: 10 - i }));
+  const rowno = klikniecia(ile(MIEJSC));
+  assert.equal(rowno.kolumny.length, MIEJSC);
+  assert.ok(!rowno.kolumny.includes(POZOSTALE), 'pusta kolumna „pozostałe" przy równo sześciu miejscach');
+  const jedno = klikniecia(ile(MIEJSC + 1));
+  assert.deepEqual(jedno.kolumny, [...ile(MIEJSC).map((w) => w.zrodlo), POZOSTALE]);
+  assert.equal(jedno.razem[POZOSTALE], 10 - MIEJSC, 'zwinięte jest tylko najmniejsze miejsce');
+});
+
+test('wiersze zwinięte już w bazie: „pozostałe" zawsze na końcu, liczba miejsc z bazy', () => {
+  // Tak oddaje je ud_klikniecia_tabela: najczęstsze miejsca + suma reszty pod POZOSTALE.
+  const k = klikniecia([
+    { tydzien: '2026-11-09', zrodlo: POZOSTALE, klikniec: 40, miejsc_wszystkich: 25 },
+    { tydzien: '2026-11-09', zrodlo: 'facebook', klikniec: 3, miejsc_wszystkich: 25 },
+    { tydzien: '2026-11-02', zrodlo: 'mail', klikniec: 2, miejsc_wszystkich: 25 },
+  ]);
+  assert.deepEqual(k.kolumny, ['facebook', 'mail', POZOSTALE], 'największa suma nie wypycha „pozostałe" na początek');
+  assert.equal(k.razem[POZOSTALE], 40);
+  assert.equal(k.miejscWszystkich, 25);
+  assert.equal(k.wszystkie, 45);
+});
+
 test('kolumna miejsca idzie za sumą z CAŁEGO okresu, nie z jednego tygodnia', () => {
   // „mail" ma w sumie więcej, choć w najnowszym tygodniu prowadzi „blog".
   const k = klikniecia([
@@ -83,9 +106,11 @@ test('remis: kolejność alfabetyczna, stała między odświeżeniami', () => {
 
 test('etykiety: brak ?z= i nieczytelne ?z= po polsku, reszta bez zmian', () => {
   assert.equal(etykietaMiejsca('bezposrednio'), 'bez oznaczenia');
-  assert.equal(etykietaMiejsca('inne'), 'nieczytelne');
+  assert.equal(etykietaMiejsca('inne'), 'inne lub nieczytelne');
   assert.equal(etykietaMiejsca(POZOSTALE), 'pozostałe');
   assert.equal(etykietaMiejsca('kalkulator'), 'kalkulator');
+  // Przechodzi białą listę źródeł; nie może sięgnąć do prototypu obiektu.
+  assert.equal(etykietaMiejsca('constructor'), 'constructor');
 });
 
 test('odTygodnia: poniedziałek sprzed 11 tygodni (12 tygodni razem z bieżącym)', () => {

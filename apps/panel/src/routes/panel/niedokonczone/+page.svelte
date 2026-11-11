@@ -144,12 +144,9 @@
         </tbody>
       </table>
     </div>
-    {#if data.klik.miejscWszystkich > MIEJSC || data.klikUciete}
+    {#if data.klik.miejscWszystkich > MIEJSC}
       <p class="card-pad muted" style="font-size:.85rem;margin:0;">
-        {#if data.klik.miejscWszystkich > MIEJSC}
-          Różnych miejsc: {data.klik.miejscWszystkich}; poza {MIEJSC} najczęstszymi są zebrane w „pozostałe".
-        {/if}
-        {#if data.klikUciete}Tabela może być niepełna — za dużo wierszy naraz.{/if}
+        Różnych miejsc: {data.klik.miejscWszystkich}; poza {MIEJSC} najczęstszymi są zebrane w „pozostałe".
       </p>
     {/if}
   {/if}
