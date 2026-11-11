@@ -1017,6 +1017,58 @@ z builda, cały przebieg na podstawionej sieci: podgląd bez sieci, pierwsze
 wdrożenie, różnica, awarie, odmowa IndexNow, zapasowy punkt, ponowienie
 przy kolejnym wdrożeniu, hook bez wyjątku).
 
+### `/kup-online` — link sprzedażowy Leadenhall z licznikiem (od 11.11.2026)
+
+Klient, który woli kupić sam, przez internet, idzie na stronę sprzedaży
+Leadenhall z naszym kodem pośrednika — Leadenhall przypisuje nam polisę po
+`employeeCode` w adresie (potwierdzone przez właściciela). Leadenhall
+raportuje sprzedaż, nie wejścia, więc ruch liczymy sami:
+`https://utratadochodu.pl/kup-online?z=<miejsce>` (`functions/kup-online/[[reszta]].js`)
+odpowiada 302 na `CEL` i w tle zapisuje kliknięcie w `ud_klikniecia`
+(migracja `20261111101126_klikniecia.sql`, wdrożona przez MCP 11.11.2026).
+
+- **Link Leadenhall wychodzi bez zmian** — `?z=` ani UTM-y do niego nie
+  przechodzą. Ich strona (Webflow, `utratadochodu.leadenhall.com`) czyta kod
+  z adresu i zapisuje go w `localStorage` („URL → localStorage → domyślny”,
+  sprawdzone przez `net.http_get` 11.11.2026). Nowy link = nowa stała `CEL`.
+- **W bazie: czas, cel, źródło.** Bez IP, User-Agenta i ciasteczek, więc
+  licznik nie potrzebuje zgody i liczy wszystkich. Źródło z `?z=` przechodzi
+  białą listę `^[a-z0-9-]{1,32}$` (inne → `inne`, brak → `bezposrednio`);
+  ta sama reguła stoi w CHECK tabeli. RLS bez polityk, tylko `service_role`.
+- **Nie liczą się:** HEAD, prefetch (`Sec-Purpose`/`Purpose`), roboty,
+  podglądy linków (WhatsApp, Messenger, Slack pobierają adres przy samym
+  wklejeniu), pusty User-Agent i wejścia na `*.pages.dev`.
+- **Przekierowanie nie czeka na bazę** (`waitUntil`) i ma `no-store` — wpis
+  w buforze albo zapamiętane przekierowanie omijałyby licznik. Nieudany zapis
+  idzie do `ud_errors` (źródło `kup-online`); licznik, który po cichu stoi,
+  wygląda jak brak zainteresowania. Bez `SUPABASE_SERVICE_ROLE_KEY`
+  przekierowanie działa, tylko nic się nie liczy.
+- **Nie w ramce.** Leadenhall ramek nie zabrania (brak `X-Frame-Options`
+  i CSP), ale kod pośrednika siedzi w `localStorage`, a w ramce z cudzej
+  domeny przeglądarki trzymają go osobno od zwykłej wizyty u Leadenhall —
+  klient, który wróci do nich wprost (mail, inna karta, telefon), mógłby
+  przyjść bez naszego kodu. Do tego ankieta zdrowotna i płatność pod naszym
+  adresem.
+- **Do wiedzy przy tekstach:** online Leadenhall sprzedaje LW050 TTD UNIPRO
+  i LW051 MULTIPRO (OWU na tej stronie), nie LW044 z naszych ofert; ich strona
+  ma w `<link rel="canonical">` inny kod (`trcVyBxTrw`) niż nasz link —
+  zapytać Leadenhall, czyj to kod. Przy linku na naszej stronie: Leadenhall
+  to coverholder Lloyd's (`firma.ts`), nie ubezpieczyciel.
+
+Wejścia tygodniowo z podziałem na miejsca:
+
+```sql
+select date_trunc('week', czas at time zone 'Europe/Warsaw')::date as tydzien,
+       zrodlo, count(*)
+from public.ud_klikniecia where cel = 'leadenhall'
+group by 1, 2 order by 1 desc, 3 desc;
+```
+
+Pilnuje tego `test/kup-online.spec.js` (link bez zmian, `no-store`
+i `noindex`, zapis tylko celu i źródła, biała lista źródła zgodna z CHECK,
+czego nie liczymy, awaria bazy → `ud_errors`, przekierowanie nie czeka na
+bazę, middleware przepuszcza 302).
+
 ## Przepięcie domeny — co musi być, zanim pójdzie
 
 **Stan na 14.10.2026: przepięcie już się odbyło.** `utratadochodu.pl` podaje
