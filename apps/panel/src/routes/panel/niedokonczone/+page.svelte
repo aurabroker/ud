@@ -1,6 +1,7 @@
 <script>
   import { enhance } from '$app/forms';
   import { KROKI } from '@ud/wniosek';
+  import { etykietaMiejsca, MIEJSC, TYGODNI } from '$lib/klikniecia.js';
 
   let { data, form } = $props();
 
@@ -93,6 +94,62 @@
       <p class="card-pad muted" style="font-size:.85rem;margin:0;">
         Największy spadek: z kroku „{tytulKroku[data.lejek.gardlo.z]}" do „{tytulKroku[data.lejek.gardlo.do]}"
         (−{data.lejek.gardlo.spadek}).
+      </p>
+    {/if}
+  {/if}
+</div>
+
+<!-- Kup online ────────────────────────────────────────────────────────── -->
+<div class="card" style="margin-bottom:1.25rem;">
+  <div class="card-pad" style="padding-bottom:.5rem;">
+    <h2 style="font-size:1.05rem;">Kup online u Leadenhall — kliknięcia</h2>
+    <p class="muted" style="font-size:.85rem;">
+      Wejścia na stronę sprzedaży Leadenhall z naszym kodem przez
+      <code>https://utratadochodu.pl/kup-online?z=miejsce</code>, z ostatnich {TYGODNI} tygodni.
+      Miejsce to to, co stoi po <code>?z=</code> (np. <code>?z=facebook</code>, <code>?z=mail</code>).
+      Liczymy kliknięcia ludzi — bez robotów i podglądów linków; z Facebooka liczba bywa zaniżona.
+      Kliknięcie to nie zakup: sprzedaż raportuje Leadenhall.
+    </p>
+  </div>
+
+  {#if data.klikError}
+    <div class="card-pad"><div class="error-box">Nie udało się wczytać kliknięć: {data.klikError}</div></div>
+  {:else if data.klik.rzedy.length === 0}
+    <div class="card-pad muted" style="text-align:center;padding:1.5rem 1rem;">
+      W ostatnich {TYGODNI} tygodniach nikt nie kliknął.
+    </div>
+  {:else}
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Tydzień</th>
+            {#each data.klik.kolumny as k}<th style="text-align:right;">{etykietaMiejsca(k)}</th>{/each}
+            <th style="text-align:right;">Razem</th>
+          </tr>
+        </thead>
+        <tbody>
+          {#each data.klik.rzedy as r}
+            <tr>
+              <td class="muted" style="white-space:nowrap;">{tydzien(r.tydzien)}</td>
+              {#each data.klik.kolumny as k}<td style="text-align:right;">{r.liczby[k]}</td>{/each}
+              <td style="text-align:right;font-weight:600;">{r.razem}</td>
+            </tr>
+          {/each}
+          <tr style="font-weight:700;">
+            <td>Razem</td>
+            {#each data.klik.kolumny as k}<td style="text-align:right;">{data.klik.razem[k]}</td>{/each}
+            <td style="text-align:right;">{data.klik.wszystkie}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    {#if data.klik.miejscWszystkich > MIEJSC || data.klikUciete}
+      <p class="card-pad muted" style="font-size:.85rem;margin:0;">
+        {#if data.klik.miejscWszystkich > MIEJSC}
+          Różnych miejsc: {data.klik.miejscWszystkich}; poza {MIEJSC} najczęstszymi są zebrane w „pozostałe".
+        {/if}
+        {#if data.klikUciete}Tabela może być niepełna — za dużo wierszy naraz.{/if}
       </p>
     {/if}
   {/if}

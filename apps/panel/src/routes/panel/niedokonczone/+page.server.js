@@ -14,6 +14,10 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { createAdminClient } from '$lib/server/supabase.js';
 import { lejek } from '$lib/lejek.js';
+import { klikniecia, odTygodnia, dzisWPolsce } from '$lib/klikniecia.js';
+
+/** Domyślny limit PostgREST — dojście do niego znaczy, że tabela może być ucięta. */
+const LIMIT_KLIKNIEC = 1000;
 
 /**
  * Czy treść zgody na kontakt (ZGODA_KONTAKT w @ud/wniosek) jest zatwierdzona.
@@ -40,7 +44,7 @@ export async function load({ locals }) {
   await wymagajSesji(locals);
   const sb = createAdminClient();
 
-  const [szkice, widok] = await Promise.all([
+  const [szkice, widok, klik] = await Promise.all([
     sb.from('ud_wnioski_szkice')
       .select('id, created_at, updated_at, ostatni_krok, imie, email, phone, przypomnienie_wyslane_at')
       .eq('zgoda_kontakt', true)
@@ -52,11 +56,22 @@ export async function load({ locals }) {
       .select('tydzien, ostatni_krok, szkicow')
       .order('tydzien', { ascending: false })
       .limit(120),
+    // Kliknięcia /kup-online (portal) — tydzień × miejsce, bez danych osobowych.
+    sb.from('ud_klikniecia_tydzien')
+      .select('tydzien, zrodlo, klikniec')
+      .eq('cel', 'leadenhall')
+      .gte('tydzien', odTygodnia(dzisWPolsce()))
+      .order('tydzien', { ascending: false })
+      .limit(LIMIT_KLIKNIEC),
   ]);
 
   return {
     szkice: szkice.data || [],
     lejek: lejek(widok.data || []),
+    // Osobny błąd: tabela kliknięć to dodatek, nie może zasłonić listy osób do kontaktu.
+    klik: klikniecia(klik.data || []),
+    klikUciete: (klik.data?.length ?? 0) >= LIMIT_KLIKNIEC,
+    klikError: klik.error?.message || '',
     zgodaZatwierdzona: ZGODA_ZATWIERDZONA,
     loadError: szkice.error?.message || widok.error?.message || '',
   };

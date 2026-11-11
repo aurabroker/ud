@@ -13,6 +13,7 @@
     "test:wybor": "node scripts/test-wybor.mjs",
     "test:owu": "node scripts/test-owu.mjs",
     "test:lejek": "node scripts/test-lejek.mjs",
+    "test:klikniecia": "node scripts/test-klikniecia.mjs",
     "test:leady-sql": "node scripts/test-leady-sql.mjs",
     "test:leady-api": "node scripts/test-leady-api.mjs",
     "test:leady-model": "node scripts/test-leady-model.mjs",

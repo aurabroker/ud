@@ -1091,6 +1091,24 @@ odpowiada 302 na `CEL` i w tle zapisuje kliknięcie w `ud_klikniecia`
   canonical) nadpisuje nasz kod w `localStorage`; adres bez kodu go zostawia.
   Inna przeglądarka albo telefon zaczynają bez naszego kodu.
 
+**W panelu (od v.0.75):** Niedokończone → „Kup online u Leadenhall —
+kliknięcia", pod lejkiem: tydzień × miejsce z ostatnich 12 tygodni, sześć
+najczęstszych miejsc, reszta w „pozostałe" (`?z=` wpisuje każdy, kto ma
+link). Czyta widok `ud_klikniecia_tydzien` (migracja
+`20261111130054_klikniecia_tydzien.sql`, `security_invoker`, tylko
+`service_role`); rachunek w `src/lib/klikniecia.js`, test
+`pnpm test:klikniecia`. Błąd tego zapytania pokazuje się w samej tabeli —
+nie zasłania listy osób do kontaktu.
+
+**API Leadenhall, które woła ich strona (11.11.2026), i nic więcej:**
+`GET /iau_live/bts/api/employee-code/<kod>/employee` — publicznie, bez
+logowania: imię, nazwisko, e-mail, telefon, nazwa agencji i tagi pośrednika
+(stąd ich stopka); `POST /iau_live/b2c/api/tracking/PA-MISC-B2C/events/<zdarzenie>`
+— ich własny pomiar (`landing-page`, `page`, `industry-seen`,
+`industry-confirmed`, z `employeeCode`), z przeglądarki tylko zapis. Raport
+wejść i wybranych zawodów dla naszego kodu może dać tylko Leadenhall.
+Innych adresów ich API nie sprawdzamy — to cudzy system.
+
 Wejścia tygodniowo z podziałem na miejsca:
 
 ```sql
