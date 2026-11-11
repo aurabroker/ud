@@ -1128,6 +1128,48 @@ i `noindex`, zapis tylko celu i źródła, biała lista źródła zgodna z CHECK
 czego nie liczymy, awaria bazy → `ud_errors`, przekierowanie nie czeka na
 bazę, middleware przepuszcza 302).
 
+## Asystentka AI (ElevenLabs) — zbudowana, NIE na stronie (od 11.11.2026)
+
+Agent `agent_8401m75hfzvbefm8thwzfzktybrg` („UtrataDochodu.pl — asystentka na
+stronie (Monika)”), zbudowany od nowa na wzór agenta Beauty. Stary agent
+(`agent_7401m4ba22wqfthb27mhyj0tfcd0`) nietknięty — nie archiwizuj go bez
+słowa właściciela. Wszystko, co o nim wiadomo, leży w `asystent/`:
+
+| Plik | Co |
+|---|---|
+| `instrukcja.md` | instrukcja (system prompt); w ElevenLabs ma być identyczna — po wgraniu porównaj `prompt_chars` z `agents_get_config_summary` z liczbą znaków pliku |
+| `pierwsza-wiadomosc.txt` | powitanie: AI, nie porada, zapis tekstu 30 dni u ElevenLabs, nie podawaj danych |
+| `baza-wiedzy.json` | 23 dokumenty z naszej domeny (strony `.md`, `llms.txt`, OWU i karty z `/owu/`), odświeżane codziennie |
+| `testy.json` | 26 rozmów symulowanych z identyfikatorami testów w ElevenLabs |
+| `przed-uruchomieniem.md` | lista dla prawnika (A), wstawienie na stronę (B), stan agenta, dwie warstwy testów, błąd na stronie do decyzji |
+
+**Na stronę dopiero po A i B z `przed-uruchomieniem.md`** — m.in. punkt
+o asystentce w polityce prywatności (zatwierdzony przez prawnika), CSP,
+skrypt widżetu ładowany po kliknięciu, tylko `/kalkulator/`.
+
+Rzeczy, których nie upraszczaj:
+
+- **Oceniający ElevenLabs nie wystarcza.** Pierwszy przebieg: 37/46
+  zaliczonych, a niezależny przegląd zapisów względem stron i OWU potwierdził
+  42 usterki (m.in. klauzula „od 1-ego dnia” przypisana Leadenhall, „ZUS przy
+  B2B od pierwszego dnia” bez warunku chorobowego, ocena roszczenia klienta
+  z polisą). Po każdej zmianie instrukcji: cały zestaw dwa razy + przegląd
+  zapisów z weryfikacją zarzutów.
+- **Baza wiedzy to żywe strony serwisu.** Zmiana kalkulatora, `zus.ts`,
+  `llms.txt` albo OWU dociera do asystentki w ciągu doby (auto-sync) — po
+  takiej zmianie uruchom testy. Nowy dokument potrzebuje indeksu RAG dla
+  `multilingual_e5_large_instruct`, inaczej asystentka go nie znajdzie.
+- **Czat tekstowy domyślnie** (`text_only`); liczby dla głosu normalizuje
+  silnik ElevenLabs (`text_normalisation_type: elevenlabs`). Przy normalizacji
+  „w instrukcji” model pisał numery i adresy słownie także w czacie.
+- **Maskowania danych w zapisach nie ma** — ElevenLabs daje je tylko
+  w planie Enterprise. Ochroną jest instrukcja (nie pyta, nie powtarza)
+  i 30 dni retencji.
+- **Rozmowy tylko z `utratadochodu.pl`** (allowlista + wymagany Origin),
+  limit 300 rozmów dziennie i 10 naraz; strona może nadpisać wyłącznie
+  `text_only`.
+- Odesłanie do zakupu online: `/kup-online?z=asystent` (licznik kliknięć).
+
 ## Przepięcie domeny — co musi być, zanim pójdzie
 
 **Stan na 14.10.2026: przepięcie już się odbyło.** `utratadochodu.pl` podaje

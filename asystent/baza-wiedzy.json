@@ -1,0 +1,29 @@
+{
+  "_opis": "Baza wiedzy asystentki w ElevenLabs: dokumenty z adresów serwisu, odświeżane automatycznie codziennie (auto-sync, minimum_frequency_days = 1 na folderze). Folder w ElevenLabs: „UtrataDochodu.pl — asystentka portalu”. Agent: agent_8401m75hfzvbefm8thwzfzktybrg. Wyszukiwanie: RAG, model multilingual_e5_large_instruct — nowy dokument potrzebuje indeksu dla tego modelu (agents_compute_kb_rag_index), inaczej agent go nie znajdzie. Cztery strony (kalkulator, wyłączenia, jak to działa, kontakt) są zawsze w kontekście (usage_mode prompt), reszta przez wyszukiwanie. Nowa strona do bazy = nowy dokument w tym folderze, indeks, wpis w knowledge_base agenta i wpis tutaj.",
+  "folder_id": "oFhSdKD91hnvn4aXn4cI",
+  "dokumenty": [
+    { "id": "0fvLqRVabY0CqIEkdNHY", "url": "https://utratadochodu.pl/llms.txt", "tryb": "auto" },
+    { "id": "sEOlquhgHK5J7Y4X0h7F", "url": "https://utratadochodu.pl/jak-to-dziala/index.md", "tryb": "prompt" },
+    { "id": "LMxQz0vMoS3wY2syRnca", "url": "https://utratadochodu.pl/wylaczenia/index.md", "tryb": "prompt" },
+    { "id": "U2QzVTxN3DBfiD4k1RN3", "url": "https://utratadochodu.pl/kalkulator/index.md", "tryb": "prompt" },
+    { "id": "8RvDTKY3EtTB33kDjfqZ", "url": "https://utratadochodu.pl/dokumenty/index.md", "tryb": "auto" },
+    { "id": "ebarHjPsm4hnoG5hesgQ", "url": "https://utratadochodu.pl/o-nas/index.md", "tryb": "auto" },
+    { "id": "GjNFkyqP3hnstx7LsjKs", "url": "https://utratadochodu.pl/kontakt/index.md", "tryb": "prompt" },
+    { "id": "Qq0pn5uaxCt8nTfUYsXO", "url": "https://utratadochodu.pl/blog/kiedy-nie-warto-kupowac-ubezpieczenia-od-utraty-dochodu/index.md", "tryb": "auto" },
+    { "id": "W8z88R7zoPOD1yBj1lo8", "url": "https://utratadochodu.pl/blog/7-rzeczy-ktore-wykluczaja-wyplate-owu/index.md", "tryb": "auto" },
+    { "id": "wpDj5u8E973UWZsopsC4", "url": "https://utratadochodu.pl/owu/leadenhall-utrata-dochodu.pdf", "tryb": "auto" },
+    { "id": "rVX6377BQe4gn4Ew9Nmi", "url": "https://utratadochodu.pl/owu/karta-produktu-leadenhall-utrata-dochodu.pdf", "tryb": "auto" },
+    { "id": "7C8QXySpcgdaRD8U3z3i", "url": "https://utratadochodu.pl/owu/karta-produktu-ceu-utrata-dochodu.pdf", "tryb": "auto" },
+    { "id": "yP5BYZFQXO85sTeHeBR5", "url": "https://utratadochodu.pl/owu/karta-produktu-ceu-loi-premium.pdf", "tryb": "auto" },
+    { "id": "ntHGmpjQz3UOBqTy1mB3", "url": "https://utratadochodu.pl/owu/karta-produktu-leadenhall-medica.pdf", "tryb": "auto" },
+    { "id": "iiQ5GqlTN9m20GwilQyN", "url": "https://utratadochodu.pl/owu/karta-produktu-leadenhall-medicare.pdf", "tryb": "auto" },
+    { "id": "ZfwIepFFLZiA06KkHXyP", "url": "https://utratadochodu.pl/owu/leadenhall-medica.pdf", "tryb": "auto" },
+    { "id": "B8uY1xQvSosvdDCoqQlS", "url": "https://utratadochodu.pl/owu/leadenhall-medicare.pdf", "tryb": "auto" },
+    { "id": "dDcPS3d5mH2sGFb7xtMq", "url": "https://utratadochodu.pl/owu/leadenhall-medica-warunki-szczegolne-hiv-wzw.pdf", "tryb": "auto" },
+    { "id": "SONWfeMFzizUkdSVEKED", "url": "https://utratadochodu.pl/owu/leadenhall-medicare-warunki-szczegolne-hiv-wzw.pdf", "tryb": "auto" },
+    { "id": "DO41QsfbRibZh7YGxGGE", "url": "https://utratadochodu.pl/owu/ceu-utrata-dochodu.pdf", "tryb": "auto" },
+    { "id": "nA8fMNNqDleUvO7MtRBt", "url": "https://utratadochodu.pl/owu/ceu-loi-premium.pdf", "tryb": "auto" },
+    { "id": "zHWmBOqQq4n8NgjjsUQ6", "url": "https://utratadochodu.pl/owu/ceu-utrata-dochodu-dla-zatrudniajacych.pdf", "tryb": "auto" },
+    { "id": "2C6z3N2vSZPCNzLWDv7Z", "url": "https://utratadochodu.pl/owu/karta-produktu-ceu-utrata-dochodu-dla-zatrudniajacych.pdf", "tryb": "auto" }
+  ]
+}
