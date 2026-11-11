@@ -1050,10 +1050,21 @@ odpowiada 302 na `CEL` i w tle zapisuje kliknięcie w `ud_klikniecia`
   przyjść bez naszego kodu. Do tego ankieta zdrowotna i płatność pod naszym
   adresem.
 - **Do wiedzy przy tekstach:** online Leadenhall sprzedaje LW050 TTD UNIPRO
-  i LW051 MULTIPRO (OWU na tej stronie), nie LW044 z naszych ofert; ich strona
-  ma w `<link rel="canonical">` inny kod (`trcVyBxTrw`) niż nasz link —
-  zapytać Leadenhall, czyj to kod. Przy linku na naszej stronie: Leadenhall
-  to coverholder Lloyd's (`firma.ts`), nie ubezpieczyciel.
+  i LW051 MULTIPRO (OWU na tej stronie), nie LW044 z naszych ofert. Przy
+  linku na naszej stronie: Leadenhall to coverholder Lloyd's (`firma.ts`),
+  nie ubezpieczyciel.
+- **`utratadochodu.leadenhall.com` to WŁASNY serwis sprzedaży Leadenhall**
+  (nazwa produktu w subdomenie, nie strona zrobiona pod nas). Kod
+  `trcVyBxTrw` z ich `<link rel="canonical">` to ich kod domowy
+  (`DEFAULT_EMPLOYEE_CODE_PROD`, w EIS pracownik Leadenhall z tagiem
+  `LH_INTERNAL`) — wpisywany każdemu, kto przyjdzie bez kodu; sprawdzone
+  11.11.2026 przez `net.http_get` na
+  `/iau_live/bts/api/employee-code/<kod>/employee`. Nasz `CVRZSKkHi7` to
+  Aura Expert bez tagów, więc klient z naszego linku trafia do ich
+  „przestrzeni partnera" (`/partner`). Przypisanie to ostatni kod z adresu:
+  adres z `trcVyBxTrw` (udostępnienie strony — serwisy społecznościowe biorą
+  canonical) nadpisuje nasz kod w `localStorage`; adres bez kodu go zostawia.
+  Inna przeglądarka albo telefon zaczynają bez naszego kodu.
 
 Wejścia tygodniowo z podziałem na miejsca:
 
