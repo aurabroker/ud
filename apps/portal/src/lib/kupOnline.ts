@@ -16,6 +16,16 @@
  * z naszych ofert — stąd „inne warunki niż w ofercie”.
  */
 import { FIRMA } from './firma';
+import { RYZYKA } from '@ud/wniosek/schemat';
+
+/** Ryzyko z kreatora — nazwy w ramce są te same co we wniosku. */
+function ryzyko(klucz: string) {
+  const r = RYZYKA.find((x) => x.klucz === klucz);
+  if (!r) throw new Error(`kupOnline.ts: brak ryzyka ${klucz} w @ud/wniosek`);
+  return r;
+}
+const zMalej = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
+const OKRESOWA = ryzyko('riskTempIncapacity');
 
 /**
  * Czy ramka stoi na stronie. Włączamy po akceptacji tekstu przez prawnika
@@ -32,10 +42,20 @@ export const KUP_ONLINE_MIEJSCE = 'wniosek';
 export const KUP_ONLINE = {
   etykieta: 'Zakup online',
   naglowek: 'Wolisz kupić sam, przez internet?',
+  /**
+   * Zakres — wyróżniony w ramce. Online jest wyłącznie okresowa niezdolność
+   * do pracy (OWU LW050 TTD UNIPRO i LW051 TTD MULTIPRO; potwierdzenie
+   * właściciela 12.11.2026). Trwała niezdolność i NW są tylko we wniosku.
+   */
+  zakres: {
+    online: `tylko ${zMalej(OKRESOWA.etykieta)} (${zMalej(OKRESOWA.rodzaj)})`,
+    tylkoWOfercie: ['riskPermIncapacity', 'riskDeathInvalidity']
+      .map((k) => zMalej(ryzyko(k).etykieta)).join(', '),
+  },
   /* „Mogą się różnić”, nie „inne”: LW050 („Beauty”) bywa też w naszych polisach. */
-  opis: `${FIRMA.coverholderzyWg.leadenhall}, przedstawiciel (coverholder) Lloyd’s, sprzedaje `
-    + 'online własne warianty ubezpieczenia utraty dochodu. Ich warunki mogą się różnić '
-    + 'od wariantów z oferty, którą przygotujemy po wniosku, a porównania z CEU tam nie dostaniesz.',
+  opis: `Ten zakres sprzedaje online ${FIRMA.coverholderzyWg.leadenhall}, przedstawiciel (coverholder) `
+    + 'Lloyd’s, na własnych warunkach. Mogą się różnić od wariantów z oferty, którą '
+    + 'przygotujemy po wniosku, a porównania z CEU tam nie dostaniesz.',
   odnosnik: 'Kup online u Leadenhall',
   /** Dla czytnika ekranu w nazwie odnośnika (WCAG G201). */
   nowaKarta: '(otworzy się w nowej karcie)',

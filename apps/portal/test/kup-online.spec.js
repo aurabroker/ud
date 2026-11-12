@@ -201,7 +201,12 @@ test.describe('ramka „Zakup online” na /wniosek/', () => {
     expect(KUP_ONLINE.opis).toContain(FIRMA.coverholderzyWg.leadenhall);
     expect(KUP_ONLINE.opis).toContain('(coverholder) Lloyd’s');
     expect(KUP_ONLINE.opis).not.toMatch(/ubezpieczyciel/i);
-    expect(KUP_ONLINE.opis).toContain('mogą się różnić od wariantów z oferty');
+    expect(KUP_ONLINE.opis).toContain('Mogą się różnić od wariantów z oferty');
+    // Zakres: online WYŁĄCZNIE okresowa niezdolność (OWU LW050/LW051 TTD), reszta tylko we wniosku.
+    expect(KUP_ONLINE.zakres.online).toBe('tylko okresowa niezdolność do pracy (miesięczne świadczenie)');
+    expect(KUP_ONLINE.zakres.tylkoWOfercie).toContain('trwała niezdolność do pracy');
+    expect(KUP_ONLINE.zakres.tylkoWOfercie).toContain('śmierć / inwalidztwo');
+    expect(KUP_ONLINE.zakres.online).not.toMatch(/trwał|śmier/);
     // Bez obietnicy zachowania wniosku: w przeglądarkach aplikacji link otwiera się w tym samym widoku.
     expect(KUP_ONLINE.dopisek).not.toMatch(/zostanie otwarty|pozostanie/);
   });
@@ -233,6 +238,8 @@ test.describe('ramka „Zakup online” na /wniosek/', () => {
     const aside = h.slice(h.indexOf('<aside'), h.indexOf('</aside>'));
     expect(aside).toContain(`href="${KUP_ONLINE.adres}"`);
     expect(aside).toContain(FIRMA.coverholderzyWg.leadenhall);
+    expect(aside, 'zakres online nie jest wyróżniony w ramce').toContain('data-kup-online-zakres');
+    expect(aside).toContain(KUP_ONLINE.zakres.online);
     const wyspa = h.slice(h.indexOf('<astro-island'), h.indexOf('</astro-island>'));
     expect(wyspa, 'link w wyspie kreatora').not.toContain('/kup-online');
     const a = aside.match(/<a[^>]*href="\/kup-online[^"]*"[^>]*>/)[0];

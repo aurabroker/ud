@@ -104,7 +104,17 @@ const KLUCZ_TURNSTILE = TURNSTILE_KLUCZ;
             <p class="font-mono text-[11px] tracking-[0.12em] uppercase text-akcent-ciemny font-semibold m-0 mb-3">
               {KUP_ONLINE.etykieta}
             </p>
-            <h2 class="text-xl m-0 mb-2">{KUP_ONLINE.naglowek}</h2>
+            <h2 class="text-xl m-0 mb-3">{KUP_ONLINE.naglowek}</h2>
+            <ul class="list-none m-0 mb-4 p-0 bg-tlo border border-linia-mocna text-[15px] leading-snug" data-kup-online-zakres>
+              <li class="flex gap-3 px-4 py-3">
+                <span aria-hidden="true" class="font-bold text-akcent-ciemny">✓</span>
+                <span><strong>Online:</strong> {KUP_ONLINE.zakres.online}</span>
+              </li>
+              <li class="flex gap-3 px-4 py-3 border-t border-linia">
+                <span aria-hidden="true" class="font-bold text-alarm">✗</span>
+                <span><strong>Tylko w ofercie po wniosku:</strong> {KUP_ONLINE.zakres.tylkoWOfercie}</span>
+              </li>
+            </ul>
             <p class="text-[15px] leading-relaxed text-tekst-drugi m-0 mb-5">{KUP_ONLINE.opis}</p>
             <a href={KUP_ONLINE.adres} target="_blank" rel="noopener nofollow"
                class="block text-center bg-tlo border-2 border-akcent-ciemny text-akcent-ciemny font-bold px-5 py-3.5 hover:bg-akcent-ciemny hover:text-white">

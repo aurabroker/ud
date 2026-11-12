@@ -1075,9 +1075,11 @@ odpowiada 302 na `CEL` i w tle zapisuje kliknięcie w `ud_klikniecia`
   przyjść bez naszego kodu. Do tego ankieta zdrowotna i płatność pod naszym
   adresem.
 - **Do wiedzy przy tekstach:** online Leadenhall sprzedaje LW050 TTD UNIPRO
-  i LW051 MULTIPRO (OWU na tej stronie), nie LW044 z naszych ofert. Przy
-  linku na naszej stronie: Leadenhall to coverholder Lloyd's (`firma.ts`),
-  nie ubezpieczyciel.
+  i LW051 MULTIPRO (OWU na tej stronie), nie LW044 z naszych ofert —
+  **wyłącznie okresową niezdolność do pracy** (TTD w nazwach plików OWU;
+  potwierdzenie właściciela 12.11.2026). Trwałej niezdolności i NW online nie
+  ma — te są tylko w ofercie po wniosku. Przy linku na naszej stronie:
+  Leadenhall to coverholder Lloyd's (`firma.ts`), nie ubezpieczyciel.
 - **`utratadochodu.leadenhall.com` to WŁASNY serwis sprzedaży Leadenhall**
   (nazwa produktu w subdomenie, nie strona zrobiona pod nas). Kod
   `trcVyBxTrw` z ich `<link rel="canonical">` to ich kod domowy
@@ -1123,10 +1125,16 @@ w jednym pliku; nazwa Leadenhall z `firma.ts`.
 - **Przy linku agenta (`?agent=`) ramki nie ma** — usuwa ją wbudowany skrypt
   zaraz za nią (nic nie zapisuje w urządzeniu, działa przed malowaniem).
   Klient agenta, który kupiłby online, poszedłby na kod firmy.
+- **Zakres stoi na wierzchu ramki** (prośba właściciela z 12.11.2026):
+  „✓ Online: tylko okresowa niezdolność do pracy (miesięczne świadczenie)”
+  i „✗ Tylko w ofercie po wniosku: trwała niezdolność do pracy, śmierć /
+  inwalidztwo w wyniku nieszczęśliwego wypadku”. Nazwy ryzyk idą z `RYZYKA`
+  w `@ud/wniosek` — te same co w kreatorze.
 - **Tekst: „ich warunki mogą się różnić”, nie „to inne warunki”** — LW050
   („Beauty”) bywa też w naszych polisach. `asystent/instrukcja.md` mówi
-  ostrzej („nie te same warianty”); do wyrównania przy następnej zmianie
-  instrukcji (wymaga ponownych testów asystentki).
+  ostrzej („nie te same warianty”) i nie mówi, że online jest tylko okresowa
+  niezdolność; do wyrównania przy następnej zmianie instrukcji (wymaga
+  ponownych testów asystentki).
 - Przy `false` HTML jest jak przed zmianą (komentarz w szablonie stoi
   w wyrażeniu `{/* */}`, nie trafia do strony), ale cztery klasy ramki
   zostają w CSS (Tailwind skanuje źródło) — plik CSS ma nowy skrót.
