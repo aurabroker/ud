@@ -2,6 +2,8 @@ import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { onRequest, CEL, zrodlo } from '../functions/kup-online/[[reszta]].js';
 import { onRequest as middleware } from '../functions/_middleware.js';
+import { KUP_ONLINE, KUP_ONLINE_MIEJSCE, KUP_ONLINE_NA_STRONIE } from '../src/lib/kupOnline.ts';
+import { FIRMA } from '../src/lib/firma.ts';
 
 /**
  * /kup-online — przekierowanie na stronę sprzedaży Leadenhall z naszym kodem
@@ -177,4 +179,67 @@ test('middleware przepuszcza przekierowanie bez zmian', async () => {
   expect(wynik.status).toBe(302);
   expect(wynik.headers.get('location')).toBe(CEL);
   expect(wynik.headers.get('link')).toBeNull();
+});
+
+/**
+ * Ramka „Zakup online” na /wniosek/ (src/lib/kupOnline.ts, wariant A z 12.11.2026):
+ * statyczna, w bocznej kolumnie, POZA kreatorem — link nie może trafić do wyspy
+ * ani formularza (ścieżka, którą wpływają pieniądze). Przełącznik
+ * KUP_ONLINE_NA_STRONIE czeka na akceptację tekstu przez prawnika: przy `false`
+ * linku nie ma w buildzie, przy `true` ramka jest sprawdzana w całości.
+ */
+test.describe('ramka „Zakup online” na /wniosek/', () => {
+  const html = () => readFileSync('dist/wniosek/index.html', 'utf8');
+
+  test('miejsce w liczniku przechodzi białą listę i nie zlewa się z „inne” ani „bezposrednio”', () => {
+    expect(zrodlo(KUP_ONLINE_MIEJSCE)).toBe(KUP_ONLINE_MIEJSCE);
+    expect(['inne', 'bezposrednio']).not.toContain(KUP_ONLINE_MIEJSCE);
+    expect(KUP_ONLINE.adres).toBe(`/kup-online?z=${KUP_ONLINE_MIEJSCE}`);
+  });
+
+  test('tekst: Leadenhall to coverholder Lloyd’s, a online to inne warunki niż oferta', () => {
+    expect(KUP_ONLINE.opis).toContain(FIRMA.coverholderzyWg.leadenhall);
+    expect(KUP_ONLINE.opis).toContain('(coverholder) Lloyd’s');
+    expect(KUP_ONLINE.opis).not.toMatch(/ubezpieczyciel/i);
+    expect(KUP_ONLINE.opis).toContain('inne warunki niż w ofercie');
+  });
+
+  test('przełącznik: wyłączony — linku nie ma; włączony — jedna ramka w <aside>, poza kreatorem', () => {
+    const h = html();
+    const linki = h.match(/href="\/kup-online[^"]*"/g) ?? [];
+    if (!KUP_ONLINE_NA_STRONIE) {
+      expect(linki, 'ramka wyłączona, a link jest w buildzie').toEqual([]);
+      expect(h).not.toContain('data-kup-online');
+      return;
+    }
+    expect(linki).toEqual([`href="${KUP_ONLINE.adres}"`]);
+    const aside = h.slice(h.indexOf('<aside'), h.indexOf('</aside>'));
+    expect(aside).toContain(`href="${KUP_ONLINE.adres}"`);
+    expect(aside).toContain(FIRMA.coverholderzyWg.leadenhall);
+    const wyspa = h.slice(h.indexOf('<astro-island'), h.indexOf('</astro-island>'));
+    expect(wyspa, 'link w wyspie kreatora').not.toContain('/kup-online');
+    const a = aside.match(/<a[^>]*href="\/kup-online[^"]*"[^>]*>/)[0];
+    expect(a).toMatch(/target="_blank"/);
+    expect(a).toMatch(/rel="[^"]*noopener[^"]*"/);
+    expect(a).toMatch(/rel="[^"]*nofollow[^"]*"/);
+  });
+
+  test('układ: na komputerze obok kreatora, na telefonie pod przyciskiem „Dalej”', async ({ page }) => {
+    test.skip(!KUP_ONLINE_NA_STRONIE, 'ramka wyłączona przełącznikiem KUP_ONLINE_NA_STRONIE');
+    const ramka = page.locator('[data-kup-online]');
+    const dalej = page.getByRole('button', { name: 'Dalej' });
+
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/wniosek/');
+    await expect(ramka).toBeVisible();
+    const [r, d] = [await ramka.boundingBox(), await dalej.boundingBox()];
+    expect(r.x, 'ramka ma stać w prawej kolumnie').toBeGreaterThan(d.x + d.width);
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/wniosek/');
+    const [r2, d2] = [await ramka.boundingBox(), await dalej.boundingBox()];
+    expect(r2.y, 'na telefonie ramka ma być pod kreatorem').toBeGreaterThan(d2.y + d2.height);
+    const szerokosc = await page.evaluate(() => document.documentElement.scrollWidth);
+    expect(szerokosc).toBeLessThanOrEqual(390);
+  });
 });

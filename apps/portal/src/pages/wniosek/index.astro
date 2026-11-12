@@ -13,6 +13,7 @@ import { graf, organizacja, serwis, strona, okruszki } from '../../lib/seo';
 import { FIRMA } from '../../lib/firma';
 import { funkcja, TURNSTILE_KLUCZ } from '../../lib/uslugi';
 import { krokiSlownie } from '@ud/wniosek/schemat';
+import { KUP_ONLINE, KUP_ONLINE_NA_STRONIE } from '../../lib/kupOnline';
 
 const sciezka = '/wniosek/';
 const tytul = 'Wniosek o ubezpieczenie utraty dochodu | UtrataDochodu.pl';
@@ -95,6 +96,22 @@ const KLUCZ_TURNSTILE = TURNSTILE_KLUCZ;
           {FIRMA.telefonWyswietlany}
         </a>
       </div>
+      <!-- Zakup online u Leadenhall: poza kreatorem, bez warunku podania danych
+           (src/lib/kupOnline.ts). Na telefonie kolumna stoi pod kreatorem. -->
+      {KUP_ONLINE_NA_STRONIE && (
+        <div class="border-2 border-akcent bg-tlo-mocne p-6" data-kup-online>
+          <p class="font-mono text-[11px] tracking-[0.12em] uppercase text-akcent-ciemny font-semibold m-0 mb-3">
+            {KUP_ONLINE.etykieta}
+          </p>
+          <h2 class="text-xl m-0 mb-2">{KUP_ONLINE.naglowek}</h2>
+          <p class="text-[15px] leading-relaxed text-tekst-drugi m-0 mb-5">{KUP_ONLINE.opis}</p>
+          <a href={KUP_ONLINE.adres} target="_blank" rel="noopener nofollow"
+             class="block text-center bg-tlo border-2 border-akcent-ciemny text-akcent-ciemny font-bold px-5 py-3.5 hover:bg-akcent-ciemny hover:text-white">
+            {KUP_ONLINE.odnosnik}&nbsp;→
+          </a>
+          <p class="text-[13px] leading-relaxed text-tekst-drugi mt-3 mb-0">{KUP_ONLINE.dopisek}</p>
+        </div>
+      )}
 
       <p class="text-[13px] leading-relaxed text-tekst-trzeci m-0">
         Kwoty pokazywane w kreatorze to symulacja, nie oferta. Realną składkę wylicza

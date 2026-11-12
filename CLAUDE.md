@@ -1091,6 +1091,40 @@ odpowiada 302 na `CEL` i w tle zapisuje kliknięcie w `ud_klikniecia`
   canonical) nadpisuje nasz kod w `localStorage`; adres bez kodu go zostawia.
   Inna przeglądarka albo telefon zaczynają bez naszego kodu.
 
+**Ramka „Zakup online” na `/wniosek/` (wariant A, decyzja właściciela
+12.11.2026) — przełącznik `KUP_ONLINE_NA_STRONIE` w `src/lib/kupOnline.ts`,
+na 12.11 WYŁĄCZONY do akceptacji tekstu przez prawnika** (punkt A5
+w `asystent/przed-uruchomieniem.md`: kto przy sprzedaży online z naszym kodem
+robi analizę potrzeb i obowiązki informacyjne agenta). Włączenie = `true`,
+build, testy, brama, push. Tekst, etykieta i adres (`?z=wniosek`) stoją
+w jednym pliku; nazwa Leadenhall z `firma.ts`.
+
+- **Statyczna ramka w bocznej kolumnie, POZA kreatorem** — nie w kroku
+  kontakt i nie „dopiero po e-mailu i telefonie”. Bez zaznaczonej zgody
+  kontakt ze szkicu i tak nie jest zapisywany (ok. 45% szkiców), więc bramka
+  nie dawała leada, tylko przeszkodę; zgoda nie może odblokowywać linku
+  (RODO art. 7 ust. 4); kreator to ścieżka, którą wpływają pieniądze.
+  Przegląd z 11.11.2026: trzy niezależne oceny (sprzedaż, prawo, technika)
+  i sceptyk.
+- **Na telefonie kolumna stoi pod kreatorem** (za przyciskiem „Dalej” kroku
+  kontakt), na komputerze widać ją przez cały wniosek. Tak ma być: najpierw
+  wniosek, link jest wyjściem dla kogoś, kto i tak by odszedł.
+- **Przypomnień nie wyciszamy** i nie oznaczamy szkicu „poszedł do
+  Leadenhall” (kolumna z datą przy e-mailu to nowe dane osobowe i nowa
+  klauzula). Osoba ze zgodą, którą Leadenhall odrzuci (np. na ankiecie
+  zdrowotnej), wraca do nas tylko przez przypomnienie i „Niedokończone” —
+  zgoda v1-2026-10 to obejmuje.
+- **Nowa karta** (`target="_blank"`): kreator zostaje otwarty ze stanem
+  w pamięci. Ramki nie da się ukryć przy `?agent=` (statyczny HTML) — klient
+  z linku agenta, który kupi online, idzie na kod firmy.
+- Ramka trafia też do `/wniosek/index.md` (część `<main>`).
+
+Pilnuje tego `test/kup-online.spec.js`: przy `false` linku nie ma w buildzie;
+przy `true` jedna ramka w `<aside>`, poza wyspą kreatora, `target="_blank"`
+z `noopener nofollow`, Leadenhall jako coverholder, a w przeglądarce — obok
+kreatora przy 1440 px, pod „Dalej” przy 390 px, bez poziomego przewijania
+(ten test jest pomijany, dopóki przełącznik jest wyłączony).
+
 **W panelu (od v.0.75):** Niedokończone → „Kup online u Leadenhall —
 kliknięcia", pod lejkiem: tydzień × miejsce z ostatnich 12 tygodni, sześć
 najczęstszych miejsc, reszta w „pozostałe" (`?z=` wpisuje każdy, kto ma
