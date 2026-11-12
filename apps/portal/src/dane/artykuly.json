@@ -3,6 +3,20 @@
   "zrodlo": "aura_articles (status=published, platforms zawiera UtrataDochodu.pl); zdjęcia z preview_image_800/1600",
   "artykuly": [
     {
+      "slug": "przychodzi-pielegniarka-do-lekarza",
+      "tytul": "Przychodzi pielęgniarka do lekarza. Ile daje ZUS z etatu, a ile z kontraktu",
+      "zajawka": "Kontrakt obok pełnego etatu daje pielęgniarce na L4 0 zł z ZUS. Ile wynosi zasiłek z etatu w 2026 r. i co liczy polisa dla personelu medycznego?",
+      "tagi": [
+        "ZUS",
+        "OWU",
+        "pielęgniarki"
+      ],
+      "opublikowano": "2026-11-12T07:30:00Z",
+      "utworzono": "2026-11-12T07:30:00Z",
+      "obraz": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/przychodzi-pielegniarka-do-lekarza-cover-800.webp",
+      "obrazDuzy": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/przychodzi-pielegniarka-do-lekarza-cover-1600.webp"
+    },
+    {
       "slug": "przychodzi-stomatolog-do-lekarza",
       "tytul": "Przychodzi stomatolog do lekarza. Ile traci dentysta z własnym gabinetem, gdy sam trafi na L4",
       "zajawka": "Przy dużym ZUS z chorobowym dentysta dostanie na L4 ok. 3 902 zł miesięcznie, a gabinet dalej płaci czynsz i pensje. Co zmienia polisa dla stomatologa?",
