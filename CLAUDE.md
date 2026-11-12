@@ -1107,23 +1107,38 @@ w jednym pliku; nazwa Leadenhall z `firma.ts`.
   Przegląd z 11.11.2026: trzy niezależne oceny (sprzedaż, prawo, technika)
   i sceptyk.
 - **Na telefonie kolumna stoi pod kreatorem** (za przyciskiem „Dalej” kroku
-  kontakt), na komputerze widać ją przez cały wniosek. Tak ma być: najpierw
-  wniosek, link jest wyjściem dla kogoś, kto i tak by odszedł.
+  kontakt), na komputerze — w kolumnie obok kreatora, widoczna u góry każdego
+  kroku (kolumna nie jest przyklejona; przy przewijaniu długiego kroku znika,
+  „Dalej” przewija z powrotem do góry). Tak ma być: najpierw wniosek, link
+  jest wyjściem dla kogoś, kto i tak by odszedł.
 - **Przypomnień nie wyciszamy** i nie oznaczamy szkicu „poszedł do
   Leadenhall” (kolumna z datą przy e-mailu to nowe dane osobowe i nowa
   klauzula). Osoba ze zgodą, którą Leadenhall odrzuci (np. na ankiecie
   zdrowotnej), wraca do nas tylko przez przypomnienie i „Niedokończone” —
   zgoda v1-2026-10 to obejmuje.
-- **Nowa karta** (`target="_blank"`): kreator zostaje otwarty ze stanem
-  w pamięci. Ramki nie da się ukryć przy `?agent=` (statyczny HTML) — klient
-  z linku agenta, który kupi online, idzie na kod firmy.
+- **Nowa karta** (`target="_blank"`, w nazwie odnośnika dla czytnika ekranu
+  „otworzy się w nowej karcie”). Tekst nie obiecuje, że wniosek zostanie
+  otwarty: przeglądarki wbudowane w aplikacje (Facebook, Instagram) ładują
+  link w tym samym widoku, a stan kreatora żyje tylko w pamięci.
+- **Przy linku agenta (`?agent=`) ramki nie ma** — usuwa ją wbudowany skrypt
+  zaraz za nią (nic nie zapisuje w urządzeniu, działa przed malowaniem).
+  Klient agenta, który kupiłby online, poszedłby na kod firmy.
+- **Tekst: „ich warunki mogą się różnić”, nie „to inne warunki”** — LW050
+  („Beauty”) bywa też w naszych polisach. `asystent/instrukcja.md` mówi
+  ostrzej („nie te same warianty”); do wyrównania przy następnej zmianie
+  instrukcji (wymaga ponownych testów asystentki).
+- Przy `false` HTML jest jak przed zmianą (komentarz w szablonie stoi
+  w wyrażeniu `{/* */}`, nie trafia do strony), ale cztery klasy ramki
+  zostają w CSS (Tailwind skanuje źródło) — plik CSS ma nowy skrót.
 - Ramka trafia też do `/wniosek/index.md` (część `<main>`).
 
-Pilnuje tego `test/kup-online.spec.js`: przy `false` linku nie ma w buildzie;
-przy `true` jedna ramka w `<aside>`, poza wyspą kreatora, `target="_blank"`
-z `noopener nofollow`, Leadenhall jako coverholder, a w przeglądarce — obok
-kreatora przy 1440 px, pod „Dalej” przy 390 px, bez poziomego przewijania
-(ten test jest pomijany, dopóki przełącznik jest wyłączony).
+Pilnuje tego `test/kup-online.spec.js`: kreator nie ma linku na żadnym kroku
+(źródła `Wniosek.svelte`, `packages/wniosek/src` i bundel — SSR pokazuje tylko
+krok kontakt); przy `false` linku ani śladu ramki nie ma w HTML-u; przy `true`
+jedna ramka w `<aside>`, `target="_blank"` z `noopener nofollow`, Leadenhall
+jako coverholder, a w przeglądarce — obok kreatora przy 1440 px, pod „Dalej”
+przy 390 px, bez poziomego przewijania i bez ramki przy `?agent=` (ten test
+jest pomijany, dopóki przełącznik jest wyłączony).
 
 **W panelu (od v.0.75):** Niedokończone → „Kup online u Leadenhall —
 kliknięcia", pod lejkiem: tydzień × miejsce z ostatnich 12 tygodni, sześć

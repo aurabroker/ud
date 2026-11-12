@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { onRequest, CEL, zrodlo } from '../functions/kup-online/[[reszta]].js';
 import { onRequest as middleware } from '../functions/_middleware.js';
 import { KUP_ONLINE, KUP_ONLINE_MIEJSCE, KUP_ONLINE_NA_STRONIE } from '../src/lib/kupOnline.ts';
@@ -201,7 +201,23 @@ test.describe('ramka „Zakup online” na /wniosek/', () => {
     expect(KUP_ONLINE.opis).toContain(FIRMA.coverholderzyWg.leadenhall);
     expect(KUP_ONLINE.opis).toContain('(coverholder) Lloyd’s');
     expect(KUP_ONLINE.opis).not.toMatch(/ubezpieczyciel/i);
-    expect(KUP_ONLINE.opis).toContain('inne warunki niż w ofercie');
+    expect(KUP_ONLINE.opis).toContain('mogą się różnić od wariantów z oferty');
+    // Bez obietnicy zachowania wniosku: w przeglądarkach aplikacji link otwiera się w tym samym widoku.
+    expect(KUP_ONLINE.dopisek).not.toMatch(/zostanie otwarty|pozostanie/);
+  });
+
+  test('kreator nie ma linku na żadnym kroku — źródła i bundel, nie tylko HTML z SSR', () => {
+    // SSR wyspy pokazuje tylko krok „kontakt”; pozostałe kroki powstają po hydratacji,
+    // więc sam HTML nie wystarcza. Link w kreatorze = wyjście ze ścieżki pieniędzy.
+    const zakazane = /kup-online|kupOnline|KUP_ONLINE/;
+    expect(readFileSync('src/components/Wniosek.svelte', 'utf8')).not.toMatch(zakazane);
+    const katalog = '../../packages/wniosek/src';
+    for (const plik of readdirSync(katalog)) {
+      expect(readFileSync(`${katalog}/${plik}`, 'utf8'), plik).not.toMatch(zakazane);
+    }
+    const bundle = readdirSync('dist/_astro').filter((f) => /^Wniosek\..*\.js$/.test(f));
+    expect(bundle.length).toBeGreaterThan(0);
+    for (const plik of bundle) expect(readFileSync(`dist/_astro/${plik}`, 'utf8'), plik).not.toContain('/kup-online');
   });
 
   test('przełącznik: wyłączony — linku nie ma; włączony — jedna ramka w <aside>, poza kreatorem', () => {
@@ -210,6 +226,7 @@ test.describe('ramka „Zakup online” na /wniosek/', () => {
     if (!KUP_ONLINE_NA_STRONIE) {
       expect(linki, 'ramka wyłączona, a link jest w buildzie').toEqual([]);
       expect(h).not.toContain('data-kup-online');
+      expect(h, 'ślad ramki w HTML-u (komentarz, tekst) mimo wyłączonego przełącznika').not.toMatch(/Zakup online|Leadenhall:/);
       return;
     }
     expect(linki).toEqual([`href="${KUP_ONLINE.adres}"`]);
@@ -224,8 +241,13 @@ test.describe('ramka „Zakup online” na /wniosek/', () => {
     expect(a).toMatch(/rel="[^"]*nofollow[^"]*"/);
   });
 
-  test('układ: na komputerze obok kreatora, na telefonie pod przyciskiem „Dalej”', async ({ page }) => {
+  test('układ: obok kreatora przy 1440 px, pod „Dalej” przy 390 px, ukryta przy linku agenta', async ({ page }) => {
     test.skip(!KUP_ONLINE_NA_STRONIE, 'ramka wyłączona przełącznikiem KUP_ONLINE_NA_STRONIE');
+    // Atrapa zamiast prawdziwego Turnstile — wynik nie zależy od sieci (jak w podmioty.spec.js).
+    await page.route('**/turnstile/v0/api.js', (r) => r.fulfill({
+      contentType: 'application/javascript',
+      body: 'window.turnstile={render(){return "w1"},remove(){},getResponse(){return ""},reset(){}};',
+    }));
     const ramka = page.locator('[data-kup-online]');
     const dalej = page.getByRole('button', { name: 'Dalej' });
 
@@ -241,5 +263,10 @@ test.describe('ramka „Zakup online” na /wniosek/', () => {
     expect(r2.y, 'na telefonie ramka ma być pod kreatorem').toBeGreaterThan(d2.y + d2.height);
     const szerokosc = await page.evaluate(() => document.documentElement.scrollWidth);
     expect(szerokosc).toBeLessThanOrEqual(390);
+
+    // Link agenta: klient zostaje przy agencie, ramki nie ma.
+    await page.goto('/wniosek/?agent=7');
+    await expect(dalej).toBeVisible();
+    await expect(ramka).toHaveCount(0);
   });
 });

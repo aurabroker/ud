@@ -32,11 +32,16 @@ export const KUP_ONLINE_MIEJSCE = 'wniosek';
 export const KUP_ONLINE = {
   etykieta: 'Zakup online',
   naglowek: 'Wolisz kupić sam, przez internet?',
+  /* „Mogą się różnić”, nie „inne”: LW050 („Beauty”) bywa też w naszych polisach. */
   opis: `${FIRMA.coverholderzyWg.leadenhall}, przedstawiciel (coverholder) Lloyd’s, sprzedaje `
-    + 'online własne warianty ubezpieczenia utraty dochodu. To inne warunki niż w ofercie, '
-    + 'którą przygotujemy po wniosku, i bez porównania z CEU.',
-  odnosnik: 'Kup online w Leadenhall',
-  dopisek: 'Strona Leadenhall otworzy się w nowej karcie, a ten wniosek zostanie otwarty. '
-    + 'Ankietę zdrowotną wypełnisz u nich.',
+    + 'online własne warianty ubezpieczenia utraty dochodu. Ich warunki mogą się różnić '
+    + 'od wariantów z oferty, którą przygotujemy po wniosku, a porównania z CEU tam nie dostaniesz.',
+  odnosnik: 'Kup online u Leadenhall',
+  /** Dla czytnika ekranu w nazwie odnośnika (WCAG G201). */
+  nowaKarta: '(otworzy się w nowej karcie)',
+  /* Bez obietnicy, że wniosek „zostanie otwarty”: przeglądarki wbudowane
+     w aplikacje (Facebook, Instagram) otwierają link w tym samym widoku,
+     a stan kreatora żyje tylko w pamięci. */
+  dopisek: 'Strona Leadenhall otworzy się w nowej karcie. Ankietę zdrowotną wypełnisz u nich.',
   adres: `/kup-online?z=${KUP_ONLINE_MIEJSCE}`,
 } as const;
