@@ -1095,10 +1095,11 @@ odpowiada 302 na `CEL` i w tle zapisuje kliknięcie w `ud_klikniecia`
 
 **Ramka „Zakup online” na `/wniosek/` (wariant A, decyzja właściciela
 12.11.2026) — przełącznik `KUP_ONLINE_NA_STRONIE` w `src/lib/kupOnline.ts`,
-WŁĄCZONY 12.11.2026 decyzją właściciela („włącz”)**. Wyłączenie = `false`,
-build, testy, brama, push. Zmiana tekstu idzie przez prawnika (punkt A5
-w `asystent/przed-uruchomieniem.md`: kto przy sprzedaży online z naszym kodem
-robi analizę potrzeb i obowiązki informacyjne agenta). Tekst, etykieta i adres (`?z=wniosek`) stoją
+WŁĄCZONY 12.11.2026 decyzją właściciela („włącz”); tekst ramki
+zaakceptował prawnik tego samego dnia (potwierdzenie właściciela)**.
+Wyłączenie = `false`, build, testy, brama, push. **Każda zmiana tekstu
+(`KUP_ONLINE`) wymaga ponownej akceptacji prawnika** — tak jak klauzula
+i polityka prywatności. Tekst, etykieta i adres (`?z=wniosek`) stoją
 w jednym pliku; nazwa Leadenhall z `firma.ts`.
 
 - **Statyczna ramka w bocznej kolumnie, POZA kreatorem** — nie w kroku

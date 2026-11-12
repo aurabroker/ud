@@ -23,6 +23,9 @@ przegląd z 11.11.2026 (trzech recenzentów: fakty, prawo, odporność rozmowy).
    zapłaty i widać ją w ofercie.
 5. **`/kup-online`.** Kto przy sprzedaży online z naszym kodem robi analizę
    wymagań i potrzeb i obowiązki informacyjne? Czy asystentka może tam kierować?
+   Tekst ramki „Zakup online” na `/wniosek/` (`apps/portal/src/lib/kupOnline.ts`)
+   prawnik zaakceptował 12.11.2026 — do ustalenia zostaje, co o zakupie online
+   może mówić sama asystentka.
 6. **„Broker ubezpieczeniowy od 2009 roku”** przy Marku Cieśli (strona
    /o-nas/, w bazie wiedzy asystentki) — otwarte już w CLAUDE.md. Asystentka
    ma zakaz nazywania kogokolwiek z serwisu brokerem.

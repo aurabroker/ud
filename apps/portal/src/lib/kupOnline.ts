@@ -29,9 +29,10 @@ const OKRESOWA = ryzyko('riskTempIncapacity');
 
 /**
  * Czy ramka stoi na stronie. WŁĄCZONA 12.11.2026 decyzją właściciela
- * („włącz”). `false` zdejmuje ją przy następnym wdrożeniu bez ruszania
- * czegokolwiek innego. Zmiana tekstu — przez prawnika (punkt A5
- * w asystent/przed-uruchomieniem.md). Pilnuje tego test/kup-online.spec.js —
+ * („włącz”); tekst ramki zaakceptował prawnik tego samego dnia
+ * (potwierdzenie właściciela). `false` zdejmuje ją przy następnym wdrożeniu
+ * bez ruszania czegokolwiek innego. Każda zmiana tekstu (`KUP_ONLINE` niżej)
+ * — znów przez prawnika. Pilnuje tego test/kup-online.spec.js —
  * przy `false` link nie może pojawić się w buildzie, przy `true` sprawdza
  * ramkę w całości.
  */
