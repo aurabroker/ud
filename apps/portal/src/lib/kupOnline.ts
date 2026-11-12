@@ -28,13 +28,14 @@ const zMalej = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
 const OKRESOWA = ryzyko('riskTempIncapacity');
 
 /**
- * Czy ramka stoi na stronie. Włączamy po akceptacji tekstu przez prawnika
- * (asystent/przed-uruchomieniem.md, punkt A5: kto przy sprzedaży online
- * z naszym kodem robi analizę potrzeb i obowiązki informacyjne agenta).
- * Pilnuje tego test/kup-online.spec.js — przy `false` link nie może
- * pojawić się w buildzie, przy `true` sprawdza ramkę w całości.
+ * Czy ramka stoi na stronie. WŁĄCZONA 12.11.2026 decyzją właściciela
+ * („włącz”). `false` zdejmuje ją przy następnym wdrożeniu bez ruszania
+ * czegokolwiek innego. Zmiana tekstu — przez prawnika (punkt A5
+ * w asystent/przed-uruchomieniem.md). Pilnuje tego test/kup-online.spec.js —
+ * przy `false` link nie może pojawić się w buildzie, przy `true` sprawdza
+ * ramkę w całości.
  */
-export const KUP_ONLINE_NA_STRONIE = false;
+export const KUP_ONLINE_NA_STRONIE = true;
 
 /** Miejsce w liczniku kliknięć (`?z=`) — przechodzi białą listę funkcji. */
 export const KUP_ONLINE_MIEJSCE = 'wniosek';
