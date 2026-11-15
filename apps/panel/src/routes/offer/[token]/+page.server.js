@@ -3,16 +3,18 @@ import { createAdminClient } from '$lib/server/supabase.js';
 import { isVerified } from '$lib/server/clientAuth.js';
 import { getSettings } from '$lib/server/settings.js';
 import { offerConditionsHtml } from '$lib/server/offerConditions.js';
+import { linkOfertyAktywny } from '$lib/server/linkOferty.js';
 
 export async function load({ params, cookies }) {
   const sb = createAdminClient();
   const { data: offer } = await sb
     .from('ud_offers')
-    .select('id, name, offer_number, client_name, broker_message, share_token, status, client_choice')
+    .select('id, name, offer_number, client_name, broker_message, share_token, status, client_choice, share_expires_at')
     .eq('share_token', params.token)
     .maybeSingle();
 
   if (!offer) throw error(404, 'Oferta nie istnieje lub link wygasł.');
+  if (!linkOfertyAktywny(offer)) throw error(410, 'Link do oferty wygasł. Poproś agenta o nowy link.');
 
   const verified = await isVerified(cookies, offer.id);
 

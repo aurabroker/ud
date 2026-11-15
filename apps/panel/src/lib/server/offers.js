@@ -9,6 +9,7 @@ import { sendEmail } from './email.js';
 import { sendSms } from './sms.js';
 import { SMS_OFERTA, numerDoSms } from './smsOferta.js';
 import { offerLinkEmail } from './templates.js';
+import { waznoscPoWysylce } from './linkOferty.js';
 import { resolveOwus, pokryteBazy, bezInnychWersji } from './owuMatch.js';
 import { buildSummaryDocDefinition } from './pdf/summaryDoc.js';
 import { renderPdf, loadLogo } from './pdf/engine.js';
@@ -650,9 +651,12 @@ export async function sendOfferToClient(offerId) {
   // Status „Wysłana" tylko wtedy, gdy e-mail faktycznie wyszedł — inaczej
   // oferta wyglądałaby na wysłaną mimo odrzucenia przez Resend.
   if (email.sent) {
+    // Wysłany link ma przed sobą pełny termin ważności (nie krótszy niż był).
+    // Link bez terminu (sprzed 13.11.2026) zostaje bez zmian — decyzja właściciela.
+    const waznosc = waznoscPoWysylce(offer.share_expires_at);
     await sb
       .from('ud_offers')
-      .update({ status: 'sent', sent_at: new Date().toISOString(), wersja })
+      .update({ status: 'sent', sent_at: new Date().toISOString(), wersja, ...(waznosc ? { share_expires_at: waznosc } : {}) })
       .eq('id', offerId);
   }
 
