@@ -3,7 +3,7 @@
 -- STATUS: SZABLON — CZEKA NA DECYZJĘ WŁAŚCICIELA. Wszystkie polecenia są
 -- zakomentowane; uruchomienie pliku w tej postaci niczego nie zmienia.
 --
--- Stan po migracji 20261113000003_oferty_wygasanie_linku: nowe oferty mają
+-- Stan po migracji 20261116170158_oferty_wygasanie_linku: nowe oferty mają
 -- share_expires_at = utworzenie + 60 dni, a 52 starsze linki mają NULL. Panel
 -- traktuje NULL jak „bez terminu”, więc do decyzji wszystkie stare linki działają.
 --

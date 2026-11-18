@@ -2351,7 +2351,9 @@ stronę chroni hasło z limitem prób.
 
 Kolejność wdrożenia: **migracja `…_oferty_wygasanie_linku.sql`, potem panel**
 — panel czyta `share_expires_at`; bez kolumny zapytanie o ofertę zwróci błąd
-i strona oferty odpowie 404 każdemu klientowi.
+i strona oferty odpowie 404 każdemu klientowi. **Migracja zastosowana na
+produkcji 16.11.2026** (wersja `20261116170158`; testy na produkcji 15/15),
+więc panel z tą zmianą można wdrożyć w dowolnej chwili.
 
 Testy w `apps/panel`: `pnpm test:link-oferty` (helper i strażnik tras bez bazy +
 SQL na jednorazowym Postgresie: `supabase/tests/link-oferty.sql`, ten sam plik

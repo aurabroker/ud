@@ -1,7 +1,7 @@
 /**
  * Ważność linku do oferty (/offer/<share_token>).
  *
- * Kolumna ud_offers.share_expires_at (migracja 20261113000003_oferty_wygasanie_linku):
+ * Kolumna ud_offers.share_expires_at (migracja 20261116170158_oferty_wygasanie_linku):
  * nowe oferty dostają w bazie 60 dni od utworzenia, wysyłka do klienta przedłuża
  * termin (waznoscPoWysylce). Linki sprzed 13.11.2026 mają NULL — datę ustali
  * właściciel (supabase/pending/20261113000004_…); do tego czasu działają bez terminu.

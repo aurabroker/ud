@@ -79,13 +79,14 @@ Testy na jednorazowym Postgresie wczytują wszystkie części po kolei:
 
 ## Link do oferty — termin ważności (13.11.2026)
 
-- `20261113000003_oferty_wygasanie_linku.sql` — `ud_offers.share_expires_at`
+- `20261116170158_oferty_wygasanie_linku.sql` — `ud_offers.share_expires_at`
   (nowe oferty: 60 dni od utworzenia; stare zostają z NULL do decyzji
   właściciela) i `ud_offer_by_token` bez danych klienta, tylko dla ważnego
-  linku, tylko `service_role`. Zawiera `DROP FUNCTION`, więc MCP wstrzymuje ją
-  do potwierdzenia — **przez SQL Editor** (albo zatwierdzenie w MCP), potem:
-  `insert into supabase_migrations.schema_migrations (version, name) values ('20261113000003', 'oferty_wygasanie_linku');`
-  Kolejność: baza, potem panel (panel czyta nową kolumnę).
+  linku, tylko `service_role`. **Zastosowana przez MCP 16.11.2026** — zawiera
+  `DROP FUNCTION`, więc MCP poprosił o potwierdzenie i właściciel je dał
+  (pierwsza próba 13.11 przepadła bez potwierdzenia, bez śladu w bazie).
+  Nazwa pliku = wersja w bazie. Testy na produkcji: 15/15, dane testowe
+  wycofane. Kolejność: baza (zrobione), potem panel — panel czyta nową kolumnę.
 - `supabase/pending/20261113000004_oferty_waznosc_istniejacych_linkow.sql` —
   szablon dat dla starych linków; czeka na decyzję właściciela.
 
