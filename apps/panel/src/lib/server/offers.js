@@ -656,7 +656,7 @@ export async function sendOfferToClient(offerId) {
     const waznosc = waznoscPoWysylce(offer.share_expires_at);
     const { error: eZapis } = await sb
       .from('ud_offers')
-      .update({ status: 'sent', sent_at: new Date().toISOString(), wersja, ...(waznosc ? { share_expires_at: waznosc } : {}) })
+      .update({ status: 'sent', sent_at: new Date().toISOString(), wersja, share_expires_at: waznosc })
       .eq('id', offerId);
     // Mail już wyszedł, więc nie rzucamy — ale agent musi wiedzieć, że status
     // i termin linku się nie zapisały (wygasły link poszedłby do klienta jako 410).

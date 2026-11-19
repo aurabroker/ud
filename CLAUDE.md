@@ -2333,12 +2333,13 @@ i `download` odmawiają **przed** sprawdzeniem hasła (wygasły link nie zużywa
 prób PIN-u i nie zakłada nowego).
 
 **Od 19.11.2026 `share_expires_at` jest `NOT NULL`** (migracja
-`…_oferty_waznosc_starych_linkow.sql`, decyzja właściciela „60 dni od ostatniej
-wysyłki + C”). Linki sprzed 13.11.2026 dostały termin: oferta zamknięta
+`20261119204221_oferty_waznosc_starych_linkow.sql`, decyzja właściciela „60 dni
+od ostatniej wysyłki + C”, zastosowana przez MCP przed panelem v.0.78 — push na
+gałąź produkcyjną wdraża `udappnew` od razu). Linki sprzed 13.11.2026 dostały termin: oferta zamknięta
 (kupiona, odrzucona, w archiwum) — nieważny od razu; pozostałe — `sent_at` + 60
 dni, a nigdy niewysłana — `created_at` + 60 dni. Bez dolnej granicy „nie krócej
-niż N dni od dziś” (właściciel jej nie chciał): z 53 starych linków 23 wygasły od
-razu, 30 zostało ważnych (najdłużej do 18.01.2027). Ta sama reguła poszła na kopie
+niż N dni od dziś” (właściciel jej nie chciał): z 53 starych linków 24 wygasły od
+razu, 29 zostało ważnych (najdłużej do 18.01.2027). Ta sama reguła poszła na kopie
 w `ud_offers_kosz` — przywrócenie wstawia ofertę z JSON-a przez
 `jsonb_populate_record` i kopia bez klucza padłaby na `NOT NULL`. Panel od
 v.0.78 nie ma gałęzi „NULL = bez terminu”: brak daty = link nieważny,

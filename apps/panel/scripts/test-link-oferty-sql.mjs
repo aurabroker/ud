@@ -60,8 +60,10 @@ try {
   `);
   if (r.status !== 0) throw new Error(`oferty sprzed migracji:\n${r.stderr}`);
 
+  // Jak MCP apply_migration na produkcji: cała migracja w jednej transakcji
+  // (set local i lock table działają tylko w transakcji).
   for (const przebieg of process.env.LINK_MIGRACJA ? [1] : [1, 2]) {
-    r = klaster.psql(migracja);
+    r = klaster.psql(`begin;\n${migracja}\ncommit;`);
     if (r.status !== 0) throw new Error(`migracja (przebieg ${przebieg}):\n${r.stderr}`);
   }
 

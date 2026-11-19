@@ -7,7 +7,7 @@
 --      apps/panel/src/lib/server/linkOferty.js).
 --    * ISTNIEJĄCE oferty (53 wiersze, 52 z linkiem, stan 13.11.2026) zostają z NULL:
 --      datę dostaną po decyzji właściciela — dostały 19.11.2026 w
---      supabase/migrations/20261119120000_oferty_waznosc_starych_linkow.sql.
+--      supabase/migrations/20261119204221_oferty_waznosc_starych_linkow.sql.
 --      Kolumnę dodajemy BEZ wartości domyślnej i dopiero potem ją ustawiamy: przy
 --      ADD COLUMN … DEFAULT now() + … Postgres wpisałby tę datę także starym wierszom.
 --    * Panel (service_role) do czasu tej decyzji traktuje NULL jak „bez terminu”.

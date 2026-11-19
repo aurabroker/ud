@@ -1,5 +1,7 @@
 -- ============================================================
 -- Link do oferty: termin ważności dla linków sprzed 13.11.2026 i NOT NULL.
+-- STATUS: ZASTOSOWANA na produkcji 19.11.2026 o 20:42 UTC przez MCP (wersja = nazwa
+-- pliku), przed panelem v.0.78. Liczby z chwili zastosowania: supabase/migrations/README.md.
 --
 -- Decyzja właściciela z 19.11.2026: „60 dni od ostatniej wysyłki + C”:
 --   * oferta ZAMKNIĘTA (kupiona, odrzucona albo w archiwum) — link nieważny od razu
@@ -9,11 +11,10 @@
 --     utworzenia (tak samo liczy domyślna wartość kolumny dla nowych ofert).
 -- Bez dolnej granicy „nie krócej niż N dni od dziś” — właściciel jej nie chciał.
 --
--- Stan przed (19.11.2026, same liczby, bez danych klientów): 53 oferty bez terminu —
--- 5 zamkniętych, 42 wysłane lub obejrzane (12 z ostatnią wysyłką ponad 60 dni temu),
--- 6 roboczych nigdy niewysłanych. Wygasa od razu 23, ważnych zostaje 30 (najdłużej do
--- 18.01.2027). Agent przywraca link przyciskiem „Odnów link” na stronie oferty albo
--- ponowną wysyłką (obie drogi: co najmniej 60 dni od teraz).
+-- Skutek zależy od dnia zastosowania (reguła liczy od dat wysyłki) — liczby z chwili
+-- zastosowania stoją w supabase/migrations/README.md. Agent przywraca link przyciskiem
+-- „Odnów link” na stronie oferty albo ponowną wysyłką (obie drogi: co najmniej 60 dni
+-- od teraz).
 --
 -- Kosz ofert (ud_offers_kosz): ud_oferta_z_kosza() wstawia ofertę z kopii JSON przez
 -- jsonb_populate_record, więc kopia zrobiona przed tą migracją (bez klucza albo z null)
@@ -29,6 +30,10 @@
 -- ============================================================
 
 set local lock_timeout = '5s';
+-- Najsilniejsza blokada od razu: bez niej UPDATE (blokady wierszy), a potem ALTER
+-- (ACCESS EXCLUSIVE) mógłby się zakleszczyć z równoległym zapisem panelu do tego
+-- samego wiersza. Tabela ma kilkadziesiąt wierszy — blokada trwa milisekundy.
+lock table public.ud_offers in access exclusive mode;
 
 update public.ud_offers
    set share_expires_at = case
@@ -56,7 +61,15 @@ $kosz$;
 
 alter table public.ud_offers alter column share_expires_at set not null;
 
+comment on column public.ud_offers.share_expires_at is
+  'Koniec ważności linku /offer/<share_token>. NOT NULL od 19.11.2026; nowe oferty: '
+  'utworzenie + 60 dni, wysyłka i „Odnów link” w panelu: co najmniej 60 dni od teraz. '
+  'Brak daty albo data w przeszłości = link nieważny (panel 410, ud_offer_by_token pusto).';
+
 -- ROLLBACK (przywraca „bez terminu” — tylko na wyraźne słowo właściciela, razem
--- z panelem v.0.77, który NULL obsługuje):
+-- z panelem v.0.77, który NULL obsługuje). Wszystkie oferty sprzed dodania kolumny
+-- (migracja 20261116170158) miały NULL, więc granicą jest data utworzenia; cofa to
+-- także późniejsze odnowienia i wysyłki tych ofert:
 --   alter table public.ud_offers alter column share_expires_at drop not null;
---   update public.ud_offers set share_expires_at = null where id = any(<lista id z PR>);
+--   update public.ud_offers set share_expires_at = null
+--    where created_at < timestamptz '2026-11-16 17:01:58+00';
