@@ -2322,7 +2322,7 @@ wszystkich wariantów oferty. Wybór był zapisany poprawnie
 
 Test: `pnpm test:wybor` w `apps/panel` (na kodzie sprzed zmiany 16 czerwonych).
 
-### Link do oferty wygasa (od 13.11.2026)
+### Link do oferty wygasa (panel v.0.77, od 13.11.2026)
 
 `ud_offers.share_expires_at` to koniec ważności linku `/offer/<share_token>`.
 Nowa oferta dostaje w bazie **60 dni od utworzenia**, a udana wysyłka do
@@ -2337,7 +2337,16 @@ terminu** (`linkOfertyAktywny`). Wysyłka ich nie przedłuża — nie podejmuje
 decyzji za właściciela. Szablon z wariantami dat i `NOT NULL`:
 `supabase/pending/20261113000004_oferty_waznosc_istniejacych_linkow.sql`
 (polecenia zakomentowane). Po nim gałąź „NULL = bez terminu" w
-`linkOfertyAktywny` do usunięcia.
+`linkOfertyAktywny` do usunięcia. Szablon uzupełnia też kopie w
+`ud_offers_kosz` — przywrócenie wstawia ofertę z JSON-a sprzed zmiany i bez
+tego kroku padłoby na `NOT NULL`.
+
+**Agent widzi termin na stronie oferty** (karta „Link dla klienta"): „Link
+ważny do …" albo czerwone „Link wygasł …", i przycisk „Przedłuż o 60 dni" /
+„Odnów link na 60 dni" (akcja `przedluzLink`, ta sama reguła co wysyłka:
+`waznoscPoWysylce`, nigdy nie skraca). Bez tego „Kopiuj" podawał po cichu link,
+który klient zobaczy jako wygasły. Link bez terminu dostaje tylko dopisek —
+przycisku nie ma, bo o tych linkach decyduje właściciel.
 
 **Nowa trasa pod `/offer/[token]` musi dobrać `share_expires_at` i zawołać
 `linkOfertyAktywny(offer)` przed hasłem i danymi** — pilnuje tego

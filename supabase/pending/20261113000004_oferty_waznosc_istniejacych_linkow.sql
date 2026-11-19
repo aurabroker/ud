@@ -38,6 +38,15 @@
 --        end
 --  where share_expires_at is null;
 
+-- Kosz ofert — PRZED „NOT NULL”. ud_oferta_z_kosza() wstawia ofertę z kopii JSON
+-- (jsonb_populate_record), więc kopia zrobiona przed tą zmianą wróciłaby z NULL
+-- w share_expires_at i przywrócenie padłoby na NOT NULL. Ten sam wariant co wyżej:
+-- update public.ud_offers_kosz
+--    set oferta = jsonb_set(oferta, '{share_expires_at}',
+--          to_jsonb(greatest((oferta->>'created_at')::timestamptz + interval '60 days',
+--                            now() + interval '14 days')))
+--  where coalesce(oferta->>'share_expires_at', '') = '';
+
 -- Część „NOT NULL” — po każdym wariancie. Od tej chwili panel też egzekwuje datę
 -- dla wszystkich linków (gałąź „NULL = bez terminu” w linkOferty.js można usunąć).
 -- alter table public.ud_offers alter column share_expires_at set not null;

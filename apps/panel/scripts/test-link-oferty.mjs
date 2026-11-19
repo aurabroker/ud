@@ -86,5 +86,27 @@ test('sendOfferToClient przedłuża termin linku', () => {
   assert.match(fragment, /share_expires_at: waznosc/);
 });
 
+console.log('# strona oferty w panelu');
+test('load podaje agentowi termin i stan linku', () => {
+  const zrodlo = readFileSync(join(panel, 'src/routes/panel/offer/[id]/+page.server.js'), 'utf8');
+  assert.match(zrodlo, /linkWaznyDo: offer\.share_expires_at \?\? null/);
+  assert.match(zrodlo, /linkAktywny: linkOfertyAktywny\(offer\)/);
+});
+test('„Przedłuż” liczy termin tą samą regułą co wysyłka i nie rusza linków bez terminu', () => {
+  const zrodlo = readFileSync(join(panel, 'src/routes/panel/offer/[id]/+page.server.js'), 'utf8');
+  const i = zrodlo.indexOf('przedluzLink:');
+  assert.ok(i > 0, 'brak akcji przedluzLink');
+  const fragment = zrodlo.slice(i, zrodlo.indexOf('\n  },', i));
+  assert.match(fragment, /safeGetSession\(\)/);
+  assert.match(fragment, /waznoscPoWysylce\(o\.share_expires_at\)/);
+  assert.match(fragment, /if \(!nowa\) return fail\(400/);
+});
+test('strona pokazuje termin i przycisk przedłużenia', () => {
+  const zrodlo = readFileSync(join(panel, 'src/routes/panel/offer/[id]/+page.svelte'), 'utf8');
+  assert.match(zrodlo, /data\.linkWaznyDo === null/);
+  assert.match(zrodlo, /action="\?\/przedluzLink"/);
+  assert.match(zrodlo, /Link wygasł/);
+});
+
 console.log(`\nWynik: ${ok} ok, ${bledy.length} źle${bledy.length ? ' — ' + bledy.join('; ') : ''}`);
 process.exit(bledy.length ? 1 : 0);

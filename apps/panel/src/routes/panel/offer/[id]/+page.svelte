@@ -237,6 +237,20 @@
     </form>
     <a class="btn btn-ghost" href="/panel/offer/{data.offer.id}/summary" target="_blank" rel="noopener">⬇ Pobierz PDF</a>
   </div>
+  {#if data.linkWaznyDo === null}
+    <p class="muted" style="margin-top:.6rem;font-size:.9rem;">Link bez terminu ważności (utworzony przed 13.11.2026).</p>
+  {:else}
+    <div style="margin-top:.6rem;display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;font-size:.9rem;">
+      {#if data.linkAktywny}
+        <span>Link ważny do <strong>{dateP(data.linkWaznyDo)}</strong>.</span>
+      {:else}
+        <span role="alert" style="color:#b42318;"><strong>Link wygasł {dateP(data.linkWaznyDo)}</strong> — klient zobaczy komunikat, że link wygasł. Odnów go przed wysłaniem.</span>
+      {/if}
+      <form method="POST" action="?/przedluzLink" use:enhance>
+        <button class="btn btn-ghost" type="submit">{data.linkAktywny ? 'Przedłuż o 60 dni' : 'Odnów link na 60 dni'}</button>
+      </form>
+    </div>
+  {/if}
   {#if data.offer.access_code}
     <p style="margin-top:.6rem;font-size:.9rem;">
       🔑 Kod dostępu klienta: <strong style="letter-spacing:.1em;font-size:1.05rem;">{data.offer.access_code}</strong>

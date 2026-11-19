@@ -4,6 +4,7 @@ import { klienciWidoczni } from '$lib/server/widocznosc.js';
 import { sendOfferToClient, deleteOfferDocument, addDocumentsToOffer, refreshOfferDocuments, addAttachmentsToOffer, oznaczKupiona, ustawArchiwum, historiaWysylek } from '$lib/server/offers.js';
 import { clientBaseUrl } from '$lib/server/appUrl.js';
 import { przeniesDoKosza } from '$lib/server/kosz.js';
+import { linkOfertyAktywny, waznoscPoWysylce } from '$lib/server/linkOferty.js';
 
 export async function load({ params, locals }) {
   const { user } = await locals.safeGetSession();
@@ -43,7 +44,11 @@ export async function load({ params, locals }) {
     clients: clients || [],
     zawodKlienta: przypiety?.profession ?? null,
     wysylki,
-    link: `${clientBaseUrl()}/offer/${offer.share_token}`
+    link: `${clientBaseUrl()}/offer/${offer.share_token}`,
+    // Termin linku dla agenta: „Kopiuj” nie może po cichu podać linku, który klient zobaczy jako wygasły.
+    // null = link sprzed 13.11.2026, bez terminu do decyzji właściciela.
+    linkWaznyDo: offer.share_expires_at ?? null,
+    linkAktywny: linkOfertyAktywny(offer)
   };
 }
 
@@ -81,6 +86,22 @@ export const actions = {
     } catch (e) {
       return fail(400, { error: e?.message || 'Błąd wysyłki' });
     }
+  },
+
+  // Przedłużenie linku bez ponownej wysyłki (link udostępniany ręcznie przez „Kopiuj”).
+  // Ta sama reguła co przy wysyłce: co najmniej 60 dni od teraz, nigdy krócej niż było;
+  // link bez terminu (sprzed 13.11.2026) zostaje bez zmian — o nim decyduje właściciel.
+  przedluzLink: async ({ params, locals }) => {
+    const { user } = await locals.safeGetSession();
+    if (!user) throw redirect(303, '/login');
+    const sb = createAdminClient();
+    const { data: o, error: e1 } = await sb.from('ud_offers').select('id, share_expires_at').eq('id', params.id).maybeSingle();
+    if (e1 || !o) return fail(404, { error: 'Oferta nie znaleziona' });
+    const nowa = waznoscPoWysylce(o.share_expires_at);
+    if (!nowa) return fail(400, { error: 'Ten link nie ma terminu ważności — nie trzeba go przedłużać.' });
+    const { error: e2 } = await sb.from('ud_offers').update({ share_expires_at: nowa }).eq('id', o.id);
+    if (e2) return fail(400, { error: 'Przedłużenie linku: ' + e2.message });
+    return { przedluzono: nowa };
   },
 
   save: async ({ params, request, locals }) => {
