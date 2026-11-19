@@ -2322,7 +2322,7 @@ wszystkich wariantów oferty. Wybór był zapisany poprawnie
 
 Test: `pnpm test:wybor` w `apps/panel` (na kodzie sprzed zmiany 16 czerwonych).
 
-### Link do oferty wygasa (panel v.0.77, od 13.11.2026)
+### Link do oferty wygasa (panel v.0.77–0.78, od 13.11.2026)
 
 `ud_offers.share_expires_at` to koniec ważności linku `/offer/<share_token>`.
 Nowa oferta dostaje w bazie **60 dni od utworzenia**, a udana wysyłka do
@@ -2332,14 +2332,21 @@ oferty 410 „Link do oferty wygasł", a `unlock`, `choice`, `question`
 i `download` odmawiają **przed** sprawdzeniem hasła (wygasły link nie zużywa
 prób PIN-u i nie zakłada nowego).
 
-**Linki sprzed 13.11.2026 mają `NULL` i do decyzji właściciela działają bez
-terminu** (`linkOfertyAktywny`). Wysyłka ich nie przedłuża — nie podejmuje
-decyzji za właściciela. Szablon z wariantami dat i `NOT NULL`:
-`supabase/pending/20261113000004_oferty_waznosc_istniejacych_linkow.sql`
-(polecenia zakomentowane). Po nim gałąź „NULL = bez terminu" w
-`linkOfertyAktywny` do usunięcia. Szablon uzupełnia też kopie w
-`ud_offers_kosz` — przywrócenie wstawia ofertę z JSON-a sprzed zmiany i bez
-tego kroku padłoby na `NOT NULL`.
+**Od 19.11.2026 `share_expires_at` jest `NOT NULL`** (migracja
+`20261119204221_oferty_waznosc_starych_linkow.sql`, decyzja właściciela „60 dni
+od ostatniej wysyłki + C”, zastosowana przez MCP przed panelem v.0.78 — push na
+gałąź produkcyjną wdraża `udappnew` od razu). Linki sprzed 13.11.2026 dostały termin: oferta zamknięta
+(kupiona, odrzucona, w archiwum) — nieważny od razu; pozostałe — `sent_at` + 60
+dni, a nigdy niewysłana — `created_at` + 60 dni. Bez dolnej granicy „nie krócej
+niż N dni od dziś” (właściciel jej nie chciał): z 53 starych linków 24 wygasły od
+razu, 29 zostało ważnych (najdłużej do 18.01.2027). Ta sama reguła poszła na kopie
+w `ud_offers_kosz` — przywrócenie wstawia ofertę z JSON-a przez
+`jsonb_populate_record` i kopia bez klucza padłaby na `NOT NULL`. Panel od
+v.0.78 nie ma gałęzi „NULL = bez terminu”: brak daty = link nieważny,
+a `waznoscPoWysylce(null)` daje pełny termin od teraz. **Kolejność była: najpierw
+migracja, potem panel v.0.78** — odwrotnie stare linki byłyby przez chwilę
+nieważne. Dodając kolumnę `NOT NULL` do tabel ofert, uzupełnij też kopie
+w koszu (sekcja „Kosz ofert”).
 
 **Agent widzi termin na stronie oferty** (karta „Link dla klienta"): „Link
 ważny do …" albo czerwone „Link wygasł …", i przycisk „Ustaw ważność: 60 dni
@@ -2347,15 +2354,13 @@ od dziś" / „Odnów link: 60 dni od dziś" (akcja `przedluzLink`, ta sama regu
 co wysyłka: `waznoscPoWysylce` — termin = później z dwóch: obecny albo dziś +
 60 dni, więc NIE dodaje 60 dni i nigdy nie skraca; stąd etykieta „od dziś”, nie
 „przedłuż o”). Bez tego „Kopiuj" podawał po cichu link, który klient zobaczy
-jako wygasły. Link bez terminu dostaje tylko dopisek — przycisku nie ma, bo
-o tych linkach decyduje właściciel. Nieudany zapis statusu i terminu po
+jako wygasły. Nieudany zapis statusu i terminu po
 wysłanym mailu pokazuje się agentowi (`zapisPoWysylce`) — mail już wyszedł,
 więc wysyłka się nie cofa, ale wygasły link poszedłby do klienta jako 410.
 
-**Brak pola `share_expires_at` w obiekcie oferty (`undefined`) = link
-nieaktywny**, nie „bez terminu” — tylko prawdziwe `NULL` z bazy znaczy „bez
-terminu”. Zapytanie, które zapomni dobrać kolumnę, zamyka link zamiast go
-po cichu otwierać.
+**Brak daty w obiekcie oferty (`null` albo brak pola, gdy zapytanie zapomni
+dobrać kolumnę) = link nieaktywny** — zamyka link zamiast go po cichu
+otwierać.
 
 **Nowa trasa pod `/offer/[token]` musi dobrać `share_expires_at` i zawołać
 `linkOfertyAktywny(offer)` przed hasłem i danymi** — pilnuje tego

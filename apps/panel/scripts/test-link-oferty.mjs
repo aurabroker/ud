@@ -40,14 +40,15 @@ test('brak oferty — nieaktywny', () => assert.equal(linkOfertyAktywny(null, te
 test('termin w przyszłości — aktywny', () => assert.equal(linkOfertyAktywny({ share_expires_at: za(1) }, teraz), true));
 test('termin minął — nieaktywny', () => assert.equal(linkOfertyAktywny({ share_expires_at: za(-1) }, teraz), false));
 test('termin równy „teraz” — nieaktywny', () => assert.equal(linkOfertyAktywny({ share_expires_at: teraz.toISOString() }, teraz), false));
-test('link sprzed 13.11.2026 (NULL) — aktywny do decyzji właściciela', () =>
-  assert.equal(linkOfertyAktywny({ share_expires_at: null }, teraz), true));
+test('NULL — nieaktywny (od 19.11.2026 kolumna NOT NULL, NULL to błąd, nie „bez terminu”)', () =>
+  assert.equal(linkOfertyAktywny({ share_expires_at: null }, teraz), false));
 test('brak pola (zapytanie bez share_expires_at) — nieaktywny, nie „bez terminu”', () =>
   assert.equal(linkOfertyAktywny({}, teraz), false));
 test('zepsuta data — nieaktywny', () => assert.equal(linkOfertyAktywny({ share_expires_at: 'jutro' }, teraz), false));
 
 console.log('# waznoscPoWysylce');
-test('NULL zostaje NULL (wysyłka nie decyduje o starych linkach)', () => assert.equal(waznoscPoWysylce(null, teraz), null));
+test('NULL — pełny termin od teraz', () => assert.equal(waznoscPoWysylce(null, teraz), za(WAZNOSC_LINKU_DNI)));
+test('zepsuta data — pełny termin od teraz', () => assert.equal(waznoscPoWysylce('jutro', teraz), za(WAZNOSC_LINKU_DNI)));
 test('termin minął — nowy pełny termin od wysyłki', () => assert.equal(waznoscPoWysylce(za(-5), teraz), za(WAZNOSC_LINKU_DNI)));
 test('termin krótszy niż pełny — przedłużony', () => assert.equal(waznoscPoWysylce(za(10), teraz), za(WAZNOSC_LINKU_DNI)));
 test('termin dłuższy niż pełny — bez skracania', () => assert.equal(waznoscPoWysylce(za(90), teraz), za(90)));
@@ -97,18 +98,17 @@ test('load podaje agentowi termin i stan linku', () => {
   assert.match(zrodlo, /linkWaznyDo: offer\.share_expires_at \?\? null/);
   assert.match(zrodlo, /linkAktywny: linkOfertyAktywny\(offer\)/);
 });
-test('„Przedłuż” liczy termin tą samą regułą co wysyłka i nie rusza linków bez terminu', () => {
+test('„Odnów link” liczy termin tą samą regułą co wysyłka', () => {
   const zrodlo = readFileSync(join(panel, 'src/routes/panel/offer/[id]/+page.server.js'), 'utf8');
   const i = zrodlo.indexOf('przedluzLink:');
   assert.ok(i > 0, 'brak akcji przedluzLink');
   const fragment = zrodlo.slice(i, zrodlo.indexOf('\n  },', i));
   assert.match(fragment, /safeGetSession\(\)/);
   assert.match(fragment, /waznoscPoWysylce\(o\.share_expires_at\)/);
-  assert.match(fragment, /if \(!nowa\) return fail\(400/);
+  assert.match(fragment, /update\(\{ share_expires_at: nowa \}\)/);
 });
 test('strona pokazuje termin i przycisk przedłużenia', () => {
   const zrodlo = readFileSync(join(panel, 'src/routes/panel/offer/[id]/+page.svelte'), 'utf8');
-  assert.match(zrodlo, /data\.linkWaznyDo === null/);
   assert.match(zrodlo, /action="\?\/przedluzLink"/);
   assert.match(zrodlo, /Link wygasł/);
   // Akcja ustawia „60 dni od dziś”, nie dodaje 60 dni — etykieta ma to mówić.

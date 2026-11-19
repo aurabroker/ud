@@ -87,8 +87,19 @@ Testy na jednorazowym Postgresie wczytują wszystkie części po kolei:
   (pierwsza próba 13.11 przepadła bez potwierdzenia, bez śladu w bazie).
   Nazwa pliku = wersja w bazie. Testy na produkcji: 15/15, dane testowe
   wycofane. Kolejność: baza (zrobione), potem panel — panel czyta nową kolumnę.
-- `supabase/pending/20261113000004_oferty_waznosc_istniejacych_linkow.sql` —
-  szablon dat dla starych linków; czeka na decyzję właściciela.
+- `20261119204221_oferty_waznosc_starych_linkow.sql` — termin dla linków sprzed
+  13.11.2026 (decyzja właściciela z 19.11.2026: zamknięte — od razu nieważne,
+  pozostałe — 60 dni od ostatniej wysyłki albo od utworzenia), ta sama reguła na
+  kopiach w koszu ofert, potem `share_expires_at` `NOT NULL` i nowy opis kolumny.
+  Zastąpiła szablon `supabase/pending/20261113000004_…` (usunięty).
+  **Zastosowana przez MCP 19.11.2026 o 20:42 UTC** (wersja = nazwa pliku),
+  przed panelem v.0.78. Stan w chwili zastosowania (same liczby): 53 oferty bez
+  terminu — 5 zamkniętych, 42 wysłane lub obejrzane, 6 roboczych nigdy
+  niewysłanych; nieważnych od razu 24 (5 zamkniętych, 13 z ostatnią wysyłką
+  ponad 60 dni temu, 6 roboczych), ważnych 29 (najdłużej do 18.01.2027);
+  1 kopia w koszu dostała termin. Po zastosowaniu: 0 ofert i 0 kopii bez
+  terminu, 0 kolizji z wysyłką w trakcie; `supabase/tests/link-oferty.sql` na
+  produkcji 18/18, dane testowe wycofane.
 
 Testy: `pnpm test:link-oferty` w `apps/panel`; na produkcji
 `supabase/tests/link-oferty.sql` jako jedno zapytanie (kończy się wyjątkiem

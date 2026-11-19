@@ -6,8 +6,8 @@
 --    * NOWE oferty: domyślnie 60 dni od utworzenia (wysyłka przedłuża, patrz
 --      apps/panel/src/lib/server/linkOferty.js).
 --    * ISTNIEJĄCE oferty (53 wiersze, 52 z linkiem, stan 13.11.2026) zostają z NULL:
---      datę dostaną po decyzji właściciela — szablon w
---      supabase/pending/20261113000004_oferty_waznosc_istniejacych_linkow.sql.
+--      datę dostaną po decyzji właściciela — dostały 19.11.2026 w
+--      supabase/migrations/20261119204221_oferty_waznosc_starych_linkow.sql.
 --      Kolumnę dodajemy BEZ wartości domyślnej i dopiero potem ją ustawiamy: przy
 --      ADD COLUMN … DEFAULT now() + … Postgres wpisałby tę datę także starym wierszom.
 --    * Panel (service_role) do czasu tej decyzji traktuje NULL jak „bez terminu”.

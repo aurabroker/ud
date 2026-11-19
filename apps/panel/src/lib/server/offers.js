@@ -653,11 +653,10 @@ export async function sendOfferToClient(offerId) {
   let zapisPoWysylce = null;
   if (email.sent) {
     // Wysłany link ma przed sobą pełny termin ważności (nie krótszy niż był).
-    // Link bez terminu (sprzed 13.11.2026) zostaje bez zmian — decyzja właściciela.
     const waznosc = waznoscPoWysylce(offer.share_expires_at);
     const { error: eZapis } = await sb
       .from('ud_offers')
-      .update({ status: 'sent', sent_at: new Date().toISOString(), wersja, ...(waznosc ? { share_expires_at: waznosc } : {}) })
+      .update({ status: 'sent', sent_at: new Date().toISOString(), wersja, share_expires_at: waznosc })
       .eq('id', offerId);
     // Mail już wyszedł, więc nie rzucamy — ale agent musi wiedzieć, że status
     // i termin linku się nie zapisały (wygasły link poszedłby do klienta jako 410).
