@@ -6,8 +6,10 @@
 --   * na produkcji: jako jedno zapytanie (np. MCP execute_sql). Test czyta wyłącznie
 --     oferty, które sam wstawił (nazwa i token z prefiksem "zz-test-").
 --
--- testy.lokalnie = on (ustawia skrypt lokalny) włącza sprawdzenie oferty wstawionej
--- PRZED migracją: istniejące linki mają dostać datę dopiero po decyzji właściciela.
+-- testy.lokalnie = on (ustawia skrypt lokalny) włącza sprawdzenie ofert i kopii w koszu
+-- wstawionych PRZED migracjami (termin z migracji …_oferty_waznosc_starych_linkow:
+-- zamknięte — od razu nieważne, pozostałe — 60 dni od ostatniej wysyłki albo od
+-- utworzenia) oraz przypadek NULL, którego na produkcji już nie da się wstawić.
 -- Wynik: wiadomość wyjątku "TESTY_WYNIK pass=N fail=M [| FAIL: …]" i NOTICE PASS/FAIL.
 
 do $testy$
@@ -16,6 +18,7 @@ declare
   t_ok text := 'zz-test-' || replace(gen_random_uuid()::text, '-', '');
   t_exp text := 'zz-test-' || replace(gen_random_uuid()::text, '-', '');
   t_null text := 'zz-test-' || replace(gen_random_uuid()::text, '-', '');
+  o record;
   t_arch text := 'zz-test-' || replace(gen_random_uuid()::text, '-', '');
   t_def text := 'zz-test-' || replace(gen_random_uuid()::text, '-', '');
   v_exp timestamptz;
@@ -56,7 +59,6 @@ begin
           t_ok, 'sent', '{"x": 1}', now() + interval '30 days');
   insert into public.ud_offers (name, client_name, client_email, share_token, status, share_expires_at, archived_at)
   values ('zz-test-oferta', 'Klient Testowy', 'klient@example.invalid', t_exp,  'sent', now() - interval '1 minute', null),
-         ('zz-test-oferta', 'Klient Testowy', 'klient@example.invalid', t_null, 'sent', null, null),
          ('zz-test-oferta', 'Klient Testowy', 'klient@example.invalid', t_arch, 'sent', now() + interval '30 days', now());
 
   -- Nowa oferta bez jawnej daty dostaje domyślną ważność.
@@ -65,9 +67,65 @@ begin
   perform pg_temp.sprawdz(v_exp between now() + interval '59 days' and now() + interval '61 days',
     'nowa oferta: share_expires_at domyślnie ok. 60 dni od utworzenia');
 
+  -- ── Termin obowiązkowy (migracja …_oferty_waznosc_starych_linkow, 19.11.2026) ──
+  perform pg_temp.sprawdz((select attnotnull from pg_attribute where attrelid = 'public.ud_offers'::regclass
+                           and attname = 'share_expires_at'),
+    'ud_offers.share_expires_at: NOT NULL');
+  select count(*) into n from public.ud_offers where share_expires_at is null;
+  perform pg_temp.sprawdz(n = 0, 'ud_offers: żadna oferta bez terminu linku');
+  begin
+    insert into public.ud_offers (name, share_token, status, share_expires_at) values ('zz-test-oferta', t_null, 'sent', null);
+    perform pg_temp.sprawdz(false, 'ud_offers: jawne share_expires_at = NULL jest odrzucane');
+  exception when not_null_violation then
+    perform pg_temp.sprawdz(true, 'ud_offers: jawne share_expires_at = NULL jest odrzucane');
+  end;
+  if to_regclass('public.ud_offers_kosz') is not null then
+    execute $q$select count(*) from public.ud_offers_kosz where coalesce(oferta->>'share_expires_at', '') = ''$q$ into n;
+    perform pg_temp.sprawdz(n = 0, 'kosz ofert: każda kopia ma termin linku (przywrócenie nie padnie na NOT NULL)');
+  end if;
+
   if lokalnie then
-    select count(*) into n from public.ud_offers where name = 'zz-test-sprzed-migracji' and share_expires_at is null;
-    perform pg_temp.sprawdz(n = 1, 'oferta sprzed migracji: share_expires_at zostaje puste (decyzja właściciela)');
+    -- Oferty wstawione przez skrypt PRZED migracjami (bez kolumny share_expires_at).
+    for o in select name, status, sent_at, created_at, archived_at, share_expires_at
+               from public.ud_offers where name like 'zz-test-sprzed-%' loop
+      if o.status in ('bought', 'rejected') or o.archived_at is not null then
+        perform pg_temp.sprawdz(o.share_expires_at <= now() and o.share_expires_at > now() - interval '1 hour',
+          'stara oferta zamknięta (' || o.name || '): link nieważny od razu');
+      elsif o.sent_at is not null then
+        perform pg_temp.sprawdz(o.share_expires_at = o.sent_at + interval '60 days',
+          'stara oferta wysłana (' || o.name || '): 60 dni od ostatniej wysyłki');
+      else
+        perform pg_temp.sprawdz(o.share_expires_at = o.created_at + interval '60 days',
+          'stara oferta niewysłana (' || o.name || '): 60 dni od utworzenia');
+      end if;
+    end loop;
+    select count(*) into n from public.ud_offers where name like 'zz-test-sprzed-%';
+    perform pg_temp.sprawdz(n = 8, 'skrypt wstawił 8 ofert sprzed migracji (jest: ' || n || ')');
+    select count(*) into n from public.ud_offers where name like 'zz-test-sprzed-%' and share_expires_at > now();
+    perform pg_temp.sprawdz(n = 3, 'stare oferty: ważne zostają tylko 3 (wysłana niedawno, wybrana, robocza nowa)');
+
+    -- Kopie w koszu: ta sama reguła na JSON-ie, kopia z terminem bez zmian.
+    for o in select oferta from public.ud_offers_kosz where oferta->>'name' like 'zz-test-kosz-%' loop
+      if o.oferta->>'name' = 'zz-test-kosz-z-terminem' then
+        perform pg_temp.sprawdz((o.oferta->>'share_expires_at')::timestamptz = timestamptz '2030-01-01 00:00:00+00',
+          'kosz: kopia z terminem zostaje bez zmian');
+      elsif o.oferta->>'status' in ('bought', 'rejected') then
+        perform pg_temp.sprawdz((o.oferta->>'share_expires_at')::timestamptz <= now(),
+          'kosz: kopia zamkniętej oferty — link nieważny');
+      else
+        perform pg_temp.sprawdz((o.oferta->>'share_expires_at')::timestamptz
+                                  = (o.oferta->>'sent_at')::timestamptz + interval '60 days',
+          'kosz: kopia (' || (o.oferta->>'name') || ') — 60 dni od ostatniej wysyłki');
+      end if;
+    end loop;
+    select count(*) into n from public.ud_offers_kosz where oferta->>'name' like 'zz-test-kosz-%';
+    perform pg_temp.sprawdz(n = 4, 'skrypt wstawił 4 kopie do kosza (jest: ' || n || ')');
+
+    -- NULL nie da się już zapisać; żeby sprawdzić, że ud_offer_by_token i tak go nie
+    -- przepuszcza (gdyby ktoś zdjął NOT NULL), zdejmujemy je w wycofywanej transakcji.
+    alter table public.ud_offers alter column share_expires_at drop not null;
+    insert into public.ud_offers (name, client_name, client_email, share_token, status, share_expires_at)
+    values ('zz-test-oferta', 'Klient Testowy', 'klient@example.invalid', t_null, 'sent', null);
   end if;
 
   -- ── Kształt wyniku i uprawnienia ───────────────────────────────────────────
@@ -89,8 +147,10 @@ begin
     'ud_offer_by_token: ważny link — nazwa, numer i data ważności');
   select count(*) into n from public.ud_offer_by_token(t_exp);
   perform pg_temp.sprawdz(n = 0, 'ud_offer_by_token: wygasły link — brak wiersza');
-  select count(*) into n from public.ud_offer_by_token(t_null);
-  perform pg_temp.sprawdz(n = 0, 'ud_offer_by_token: link bez daty ważności — brak wiersza');
+  if lokalnie then
+    select count(*) into n from public.ud_offer_by_token(t_null);
+    perform pg_temp.sprawdz(n = 0, 'ud_offer_by_token: link bez daty ważności — brak wiersza');
+  end if;
   select count(*) into n from public.ud_offer_by_token(t_arch);
   perform pg_temp.sprawdz(n = 0, 'ud_offer_by_token: oferta w archiwum — brak wiersza');
   select count(*) into n from public.ud_offer_by_token('zz-test-nie-istnieje');

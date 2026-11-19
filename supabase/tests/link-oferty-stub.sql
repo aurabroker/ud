@@ -45,3 +45,11 @@ create function public.ud_offer_by_token(p_token text) returns setof public.ud_o
   where o.share_token is not null
     and o.share_token = p_token;
 $$;
+
+-- Kosz ofert — tylko to, czego dotyka migracja …_oferty_waznosc_starych_linkow
+-- (pełna tabela: supabase/migrations/20261013150000_oferty_kosz.sql).
+create table if not exists public.ud_offers_kosz (
+  id       uuid primary key default gen_random_uuid(),
+  offer_id uuid not null,
+  oferta   jsonb not null
+);

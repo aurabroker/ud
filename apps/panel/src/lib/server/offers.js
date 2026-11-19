@@ -653,7 +653,6 @@ export async function sendOfferToClient(offerId) {
   let zapisPoWysylce = null;
   if (email.sent) {
     // Wysłany link ma przed sobą pełny termin ważności (nie krótszy niż był).
-    // Link bez terminu (sprzed 13.11.2026) zostaje bez zmian — decyzja właściciela.
     const waznosc = waznoscPoWysylce(offer.share_expires_at);
     const { error: eZapis } = await sb
       .from('ud_offers')

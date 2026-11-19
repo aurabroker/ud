@@ -5,12 +5,14 @@
  *   node scripts/test-link-oferty-sql.mjs
  *
  * Ładuje atrapę Supabase (lib/pg-tymczasowy.mjs) i supabase/tests/link-oferty-stub.sql
- * (kolumny linku, RLS i uprawnienia jak w produkcji, ud_offer_by_token sprzed zmiany),
- * wstawia ofertę „sprzed migracji”, stosuje migrację dwa razy (idempotencja), potem
- * supabase/tests/link-oferty.sql — asercje PASS/FAIL. Plik testów zawsze kończy się
- * wyjątkiem "TESTY_WYNIK", żeby ten sam plik dało się puścić na produkcji bez śladu.
+ * (kolumny linku, RLS i uprawnienia jak w produkcji, ud_offer_by_token sprzed zmiany,
+ * minimalny kosz ofert), wstawia oferty i kopie w koszu „sprzed migracji”, stosuje obie
+ * migracje (…_oferty_wygasanie_linku i …_oferty_waznosc_starych_linkow) dwa razy
+ * (idempotencja), potem supabase/tests/link-oferty.sql — asercje PASS/FAIL. Plik testów
+ * zawsze kończy się wyjątkiem "TESTY_WYNIK", żeby ten sam plik dało się puścić na
+ * produkcji bez śladu.
  *
- * LINK_MIGRACJA=plik.sql podmienia migrację (np. pusty plik: testy mają być czerwone).
+ * LINK_MIGRACJA=plik.sql podmienia obie migracje (np. pusty plik: testy mają być czerwone).
  * Bez binariów Postgresa kończy się błędem, nie zielonym wynikiem.
  */
 import { readFileSync, readdirSync } from 'node:fs';
@@ -20,7 +22,7 @@ import { uruchomKlaster, wczytaj, korzen } from './lib/pg-tymczasowy.mjs';
 const migracja = process.env.LINK_MIGRACJA
   ? readFileSync(resolve(process.env.LINK_MIGRACJA), 'utf8')
   : readdirSync(join(korzen, 'supabase/migrations'))
-      .filter((p) => /_oferty_wygasanie_linku\.sql$/.test(p))
+      .filter((p) => /_oferty_(wygasanie_linku|waznosc_starych_linkow)\.sql$/.test(p))
       .sort()
       .map((p) => wczytaj(`supabase/migrations/${p}`))
       .join('\n');
@@ -35,10 +37,28 @@ try {
 
 let wyjscie = 1;
 try {
-  let r = klaster.psql(
-    "insert into public.ud_offers (name, share_token, status) values ('zz-test-sprzed-migracji', 'zz-test-stary-link', 'sent');"
-  );
-  if (r.status !== 0) throw new Error(`oferta sprzed migracji:\n${r.stderr}`);
+  // Oferty i kopie w koszu sprzed migracji: każda gałąź reguły z …_oferty_waznosc_starych_linkow.
+  let r = klaster.psql(`
+    insert into public.ud_offers (name, share_token, status, created_at, sent_at, archived_at) values
+      ('zz-test-sprzed-kupiona',          'zz-test-s1', 'bought',   now() - interval '120 days', now() - interval '100 days', null),
+      ('zz-test-sprzed-odrzucona',        'zz-test-s2', 'rejected', now() - interval '20 days',  now() - interval '10 days',  null),
+      ('zz-test-sprzed-archiwum',         'zz-test-s3', 'sent',     now() - interval '20 days',  now() - interval '10 days',  now() - interval '1 day'),
+      ('zz-test-sprzed-wyslana-dawno',    'zz-test-s4', 'viewed',   now() - interval '120 days', now() - interval '100 days', null),
+      ('zz-test-sprzed-wyslana-niedawno', 'zz-test-s5', 'sent',     now() - interval '40 days',  now() - interval '10 days',  null),
+      ('zz-test-sprzed-wybrana',          'zz-test-s6', 'chosen',   now() - interval '30 days',  now() - interval '5 days',   null),
+      ('zz-test-sprzed-robocza',          'zz-test-s7', 'draft',    now() - interval '10 days',  null,                        null),
+      ('zz-test-sprzed-robocza-stara',    'zz-test-s8', 'draft',    now() - interval '100 days', null,                        null);
+    insert into public.ud_offers_kosz (offer_id, oferta) values
+      (gen_random_uuid(), jsonb_build_object('name', 'zz-test-kosz-otwarta', 'status', 'sent',
+         'sent_at', now() - interval '10 days', 'created_at', now() - interval '20 days', 'archived_at', null)),
+      (gen_random_uuid(), jsonb_build_object('name', 'zz-test-kosz-kupiona', 'status', 'bought',
+         'sent_at', now() - interval '10 days', 'created_at', now() - interval '20 days')),
+      (gen_random_uuid(), jsonb_build_object('name', 'zz-test-kosz-z-terminem', 'status', 'sent',
+         'share_expires_at', '2030-01-01T00:00:00+00:00')),
+      (gen_random_uuid(), jsonb_build_object('name', 'zz-test-kosz-null', 'status', 'viewed',
+         'sent_at', now() - interval '100 days', 'share_expires_at', null));
+  `);
+  if (r.status !== 0) throw new Error(`oferty sprzed migracji:\n${r.stderr}`);
 
   for (const przebieg of process.env.LINK_MIGRACJA ? [1] : [1, 2]) {
     r = klaster.psql(migracja);
