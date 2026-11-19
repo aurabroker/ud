@@ -2342,11 +2342,20 @@ decyzji za właściciela. Szablon z wariantami dat i `NOT NULL`:
 tego kroku padłoby na `NOT NULL`.
 
 **Agent widzi termin na stronie oferty** (karta „Link dla klienta"): „Link
-ważny do …" albo czerwone „Link wygasł …", i przycisk „Przedłuż o 60 dni" /
-„Odnów link na 60 dni" (akcja `przedluzLink`, ta sama reguła co wysyłka:
-`waznoscPoWysylce`, nigdy nie skraca). Bez tego „Kopiuj" podawał po cichu link,
-który klient zobaczy jako wygasły. Link bez terminu dostaje tylko dopisek —
-przycisku nie ma, bo o tych linkach decyduje właściciel.
+ważny do …" albo czerwone „Link wygasł …", i przycisk „Ustaw ważność: 60 dni
+od dziś" / „Odnów link: 60 dni od dziś" (akcja `przedluzLink`, ta sama reguła
+co wysyłka: `waznoscPoWysylce` — termin = później z dwóch: obecny albo dziś +
+60 dni, więc NIE dodaje 60 dni i nigdy nie skraca; stąd etykieta „od dziś”, nie
+„przedłuż o”). Bez tego „Kopiuj" podawał po cichu link, który klient zobaczy
+jako wygasły. Link bez terminu dostaje tylko dopisek — przycisku nie ma, bo
+o tych linkach decyduje właściciel. Nieudany zapis statusu i terminu po
+wysłanym mailu pokazuje się agentowi (`zapisPoWysylce`) — mail już wyszedł,
+więc wysyłka się nie cofa, ale wygasły link poszedłby do klienta jako 410.
+
+**Brak pola `share_expires_at` w obiekcie oferty (`undefined`) = link
+nieaktywny**, nie „bez terminu” — tylko prawdziwe `NULL` z bazy znaczy „bez
+terminu”. Zapytanie, które zapomni dobrać kolumnę, zamyka link zamiast go
+po cichu otwierać.
 
 **Nowa trasa pod `/offer/[token]` musi dobrać `share_expires_at` i zawołać
 `linkOfertyAktywny(offer)` przed hasłem i danymi** — pilnuje tego

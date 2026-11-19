@@ -42,6 +42,8 @@ test('termin minął — nieaktywny', () => assert.equal(linkOfertyAktywny({ sha
 test('termin równy „teraz” — nieaktywny', () => assert.equal(linkOfertyAktywny({ share_expires_at: teraz.toISOString() }, teraz), false));
 test('link sprzed 13.11.2026 (NULL) — aktywny do decyzji właściciela', () =>
   assert.equal(linkOfertyAktywny({ share_expires_at: null }, teraz), true));
+test('brak pola (zapytanie bez share_expires_at) — nieaktywny, nie „bez terminu”', () =>
+  assert.equal(linkOfertyAktywny({}, teraz), false));
 test('zepsuta data — nieaktywny', () => assert.equal(linkOfertyAktywny({ share_expires_at: 'jutro' }, teraz), false));
 
 console.log('# waznoscPoWysylce');
@@ -84,6 +86,9 @@ test('sendOfferToClient przedłuża termin linku', () => {
   const fragment = zrodlo.slice(i, zrodlo.indexOf('\nexport ', i + 10));
   assert.match(fragment, /waznoscPoWysylce\(offer\.share_expires_at\)/);
   assert.match(fragment, /share_expires_at: waznosc/);
+  // Mail już wyszedł — nieudany zapis statusu i terminu nie może przejść po cichu.
+  assert.match(fragment, /const \{ error: eZapis \} = await sb/);
+  assert.match(fragment, /zapisPoWysylce = /);
 });
 
 console.log('# strona oferty w panelu');
@@ -106,6 +111,10 @@ test('strona pokazuje termin i przycisk przedłużenia', () => {
   assert.match(zrodlo, /data\.linkWaznyDo === null/);
   assert.match(zrodlo, /action="\?\/przedluzLink"/);
   assert.match(zrodlo, /Link wygasł/);
+  // Akcja ustawia „60 dni od dziś”, nie dodaje 60 dni — etykieta ma to mówić.
+  assert.doesNotMatch(zrodlo, /Przedłuż o 60 dni/);
+  assert.match(zrodlo, /form\?\.przedluzono/);
+  assert.match(zrodlo, /form\.zapisPoWysylce/);
 });
 
 console.log(`\nWynik: ${ok} ok, ${bledy.length} źle${bledy.length ? ' — ' + bledy.join('; ') : ''}`);

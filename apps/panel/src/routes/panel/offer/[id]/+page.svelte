@@ -119,6 +119,7 @@
 
 {#if form?.error}<div class="error-box">{form.error}</div>{/if}
 {#if form?.saved && !form?.refreshed && !form?.filesAdded}<div class="ok-box">Zapisano.</div>{/if}
+{#if form?.przedluzono}<div class="ok-box">Link ważny do {dateP(form.przedluzono)}.</div>{/if}
 {#if form?.filesAdded}<div class="ok-box">Dodano plików do oferty: {form.filesAdded}.</div>{/if}
 {#if form?.refreshed}
   <div class="{form.refreshed.errors?.length ? 'error-box' : 'ok-box'}">
@@ -218,6 +219,9 @@
         {:else}<span class="muted">nie wysłano</span>{/if}
       </li>
     </ul>
+    {#if form.zapisPoWysylce}
+      <p role="alert" style="color:var(--red-700);margin:.35rem 0 0;"><strong>Uwaga:</strong> e-mail wyszedł, ale status oferty i termin linku nie zapisały się ({form.zapisPoWysylce}). Sprawdź termin linku niżej i w razie potrzeby kliknij „Odnów”.</p>
+    {/if}
     {#if form.pinDev}<strong>PIN testowy: {form.pinDev}</strong> (widoczny tylko bez realnej wysyłki).<br />{/if}
     <a href="/panel/logi">Historia wysyłek →</a>
   </div>
@@ -247,7 +251,7 @@
         <span role="alert" style="color:#b42318;"><strong>Link wygasł {dateP(data.linkWaznyDo)}</strong> — klient zobaczy komunikat, że link wygasł. Odnów go przed wysłaniem.</span>
       {/if}
       <form method="POST" action="?/przedluzLink" use:enhance>
-        <button class="btn btn-ghost" type="submit">{data.linkAktywny ? 'Przedłuż o 60 dni' : 'Odnów link na 60 dni'}</button>
+        <button class="btn btn-ghost" type="submit">{data.linkAktywny ? 'Ustaw ważność: 60 dni od dziś' : 'Odnów link: 60 dni od dziś'}</button>
       </form>
     </div>
   {/if}

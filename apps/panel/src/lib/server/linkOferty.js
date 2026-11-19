@@ -24,7 +24,10 @@ export const KOLUMNA_WAZNOSCI = 'share_expires_at';
 export function linkOfertyAktywny(oferta, teraz = new Date()) {
   if (!oferta) return false;
   // NULL = link sprzed wprowadzenia terminów; decyzja właściciela jeszcze nie zapadła.
-  if (oferta.share_expires_at == null) return true;
+  if (oferta.share_expires_at === null) return true;
+  // Brak pola (zapytanie bez share_expires_at) to błąd w kodzie, nie „bez terminu”:
+  // zamykamy, zamiast po cichu otwierać każdy wygasły link.
+  if (oferta.share_expires_at === undefined) return false;
   const koniec = new Date(oferta.share_expires_at);
   if (Number.isNaN(koniec.getTime())) return false;
   return koniec > teraz;
