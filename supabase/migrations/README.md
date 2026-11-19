@@ -76,3 +76,20 @@ wyminięcia. Migracja z takimi funkcjami idzie przez SQL Editor.
 
 Testy na jednorazowym Postgresie wczytują wszystkie części po kolei:
 `pnpm test:leady-sql` w `apps/panel` (stub środowiska w `supabase/tests/`).
+
+## Link do oferty — termin ważności (13.11.2026)
+
+- `20261116170158_oferty_wygasanie_linku.sql` — `ud_offers.share_expires_at`
+  (nowe oferty: 60 dni od utworzenia; stare zostają z NULL do decyzji
+  właściciela) i `ud_offer_by_token` bez danych klienta, tylko dla ważnego
+  linku, tylko `service_role`. **Zastosowana przez MCP 16.11.2026** — zawiera
+  `DROP FUNCTION`, więc MCP poprosił o potwierdzenie i właściciel je dał
+  (pierwsza próba 13.11 przepadła bez potwierdzenia, bez śladu w bazie).
+  Nazwa pliku = wersja w bazie. Testy na produkcji: 15/15, dane testowe
+  wycofane. Kolejność: baza (zrobione), potem panel — panel czyta nową kolumnę.
+- `supabase/pending/20261113000004_oferty_waznosc_istniejacych_linkow.sql` —
+  szablon dat dla starych linków; czeka na decyzję właściciela.
+
+Testy: `pnpm test:link-oferty` w `apps/panel`; na produkcji
+`supabase/tests/link-oferty.sql` jako jedno zapytanie (kończy się wyjątkiem
+`TESTY_WYNIK …`, który wycofuje dane testowe).

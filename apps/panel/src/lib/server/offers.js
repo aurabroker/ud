@@ -9,6 +9,7 @@ import { sendEmail } from './email.js';
 import { sendSms } from './sms.js';
 import { SMS_OFERTA, numerDoSms } from './smsOferta.js';
 import { offerLinkEmail } from './templates.js';
+import { waznoscPoWysylce } from './linkOferty.js';
 import { resolveOwus, pokryteBazy, bezInnychWersji } from './owuMatch.js';
 import { buildSummaryDocDefinition } from './pdf/summaryDoc.js';
 import { renderPdf, loadLogo } from './pdf/engine.js';
@@ -649,11 +650,18 @@ export async function sendOfferToClient(offerId) {
 
   // Status „Wysłana" tylko wtedy, gdy e-mail faktycznie wyszedł — inaczej
   // oferta wyglądałaby na wysłaną mimo odrzucenia przez Resend.
+  let zapisPoWysylce = null;
   if (email.sent) {
-    await sb
+    // Wysłany link ma przed sobą pełny termin ważności (nie krótszy niż był).
+    // Link bez terminu (sprzed 13.11.2026) zostaje bez zmian — decyzja właściciela.
+    const waznosc = waznoscPoWysylce(offer.share_expires_at);
+    const { error: eZapis } = await sb
       .from('ud_offers')
-      .update({ status: 'sent', sent_at: new Date().toISOString(), wersja })
+      .update({ status: 'sent', sent_at: new Date().toISOString(), wersja, ...(waznosc ? { share_expires_at: waznosc } : {}) })
       .eq('id', offerId);
+    // Mail już wyszedł, więc nie rzucamy — ale agent musi wiedzieć, że status
+    // i termin linku się nie zapisały (wygasły link poszedłby do klienta jako 410).
+    if (eZapis) zapisPoWysylce = eZapis.message || String(eZapis);
   }
 
   // SMS: tylko zawiadomienie, że oferta czeka w skrzynce (decyzja właściciela
@@ -678,7 +686,7 @@ export async function sendOfferToClient(offerId) {
 
   // pinDev zwracany tylko w trybie stub (brak realnej wysyłki), do testów
   const pinDev = email.stub ? pin : undefined;
-  return { ok: true, email, sms, pinDev, wersja };
+  return { ok: true, email, sms, pinDev, wersja, zapisPoWysylce };
 }
 
 /**

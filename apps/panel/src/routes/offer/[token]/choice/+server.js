@@ -4,6 +4,7 @@ import { isVerified } from '$lib/server/clientAuth.js';
 import { sendEmail } from '$lib/server/email.js';
 import { clientBaseUrl } from '$lib/server/appUrl.js';
 import { krotkiOpis } from '$lib/wybranyWariant.js';
+import { linkOfertyAktywny } from '$lib/server/linkOferty.js';
 
 const esc = (v) =>
   String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -16,10 +17,11 @@ export async function POST({ params, request, cookies }) {
   const sb = createAdminClient();
   const { data: offer } = await sb
     .from('ud_offers')
-    .select('id, name, client_name, user_id')
+    .select('id, name, client_name, user_id, share_expires_at')
     .eq('share_token', params.token)
     .maybeSingle();
   if (!offer) return json({ ok: false, error: 'Oferta nie istnieje.' }, { status: 404 });
+  if (!linkOfertyAktywny(offer)) return json({ ok: false, error: 'Link do oferty wygasł.' }, { status: 410 });
   if (!(await isVerified(cookies, offer.id))) return json({ ok: false, error: 'Wymagane hasło.' }, { status: 403 });
 
   let choice;

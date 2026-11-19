@@ -2,6 +2,7 @@ import { json } from '@sveltejs/kit';
 import { createAdminClient } from '$lib/server/supabase.js';
 import { verifyPin, hashPin } from '$lib/server/crypto.js';
 import { setVerifiedCookie } from '$lib/server/clientAuth.js';
+import { linkOfertyAktywny } from '$lib/server/linkOferty.js';
 
 export async function POST({ params, request, cookies }) {
   const { pin } = await request.json().catch(() => ({}));
@@ -12,10 +13,14 @@ export async function POST({ params, request, cookies }) {
   const sb = createAdminClient();
   const { data: offer } = await sb
     .from('ud_offers')
-    .select('id, share_token, access_code')
+    .select('id, share_token, access_code, share_expires_at')
     .eq('share_token', params.token)
     .maybeSingle();
   if (!offer) return json({ ok: false, error: 'Oferta nie istnieje.' }, { status: 404 });
+  // Przed sprawdzeniem hasła: wygasły link nie zużywa prób i nie zakłada nowego PIN-u.
+  if (!linkOfertyAktywny(offer)) {
+    return json({ ok: false, error: 'Link do oferty wygasł. Poproś agenta o nowy link.' }, { status: 410 });
+  }
 
   let { data: pinRow } = await sb
     .from('ud_offer_pins')

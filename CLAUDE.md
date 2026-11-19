@@ -2322,6 +2322,61 @@ wszystkich wariantów oferty. Wybór był zapisany poprawnie
 
 Test: `pnpm test:wybor` w `apps/panel` (na kodzie sprzed zmiany 16 czerwonych).
 
+### Link do oferty wygasa (panel v.0.77, od 13.11.2026)
+
+`ud_offers.share_expires_at` to koniec ważności linku `/offer/<share_token>`.
+Nowa oferta dostaje w bazie **60 dni od utworzenia**, a udana wysyłka do
+klienta przedłuża termin do co najmniej 60 dni od wysyłki (`waznoscPoWysylce`
+w `src/lib/server/linkOferty.js`, nigdy nie skraca). Wygasły link: strona
+oferty 410 „Link do oferty wygasł", a `unlock`, `choice`, `question`
+i `download` odmawiają **przed** sprawdzeniem hasła (wygasły link nie zużywa
+prób PIN-u i nie zakłada nowego).
+
+**Linki sprzed 13.11.2026 mają `NULL` i do decyzji właściciela działają bez
+terminu** (`linkOfertyAktywny`). Wysyłka ich nie przedłuża — nie podejmuje
+decyzji za właściciela. Szablon z wariantami dat i `NOT NULL`:
+`supabase/pending/20261113000004_oferty_waznosc_istniejacych_linkow.sql`
+(polecenia zakomentowane). Po nim gałąź „NULL = bez terminu" w
+`linkOfertyAktywny` do usunięcia. Szablon uzupełnia też kopie w
+`ud_offers_kosz` — przywrócenie wstawia ofertę z JSON-a sprzed zmiany i bez
+tego kroku padłoby na `NOT NULL`.
+
+**Agent widzi termin na stronie oferty** (karta „Link dla klienta"): „Link
+ważny do …" albo czerwone „Link wygasł …", i przycisk „Ustaw ważność: 60 dni
+od dziś" / „Odnów link: 60 dni od dziś" (akcja `przedluzLink`, ta sama reguła
+co wysyłka: `waznoscPoWysylce` — termin = później z dwóch: obecny albo dziś +
+60 dni, więc NIE dodaje 60 dni i nigdy nie skraca; stąd etykieta „od dziś”, nie
+„przedłuż o”). Bez tego „Kopiuj" podawał po cichu link, który klient zobaczy
+jako wygasły. Link bez terminu dostaje tylko dopisek — przycisku nie ma, bo
+o tych linkach decyduje właściciel. Nieudany zapis statusu i terminu po
+wysłanym mailu pokazuje się agentowi (`zapisPoWysylce`) — mail już wyszedł,
+więc wysyłka się nie cofa, ale wygasły link poszedłby do klienta jako 410.
+
+**Brak pola `share_expires_at` w obiekcie oferty (`undefined`) = link
+nieaktywny**, nie „bez terminu” — tylko prawdziwe `NULL` z bazy znaczy „bez
+terminu”. Zapytanie, które zapomni dobrać kolumnę, zamyka link zamiast go
+po cichu otwierać.
+
+**Nowa trasa pod `/offer/[token]` musi dobrać `share_expires_at` i zawołać
+`linkOfertyAktywny(offer)` przed hasłem i danymi** — pilnuje tego
+`scripts/test-link-oferty.mjs` (czyta źródła wszystkich tras).
+
+`ud_offer_by_token` (SQL) nie jest używana przez panel. Do 13.11 zwracała
+anonimowo cały wiersz oferty (e-mail, telefon, kod dostępu) z pominięciem PIN-u;
+teraz zwraca tylko nazwę, numer, status i termin, wyłącznie dla ważnego linku
+poza archiwum, i tylko `service_role`. Licznika otwarć nie ma — świadomie:
+stronę chroni hasło z limitem prób.
+
+Kolejność wdrożenia: **migracja `…_oferty_wygasanie_linku.sql`, potem panel**
+— panel czyta `share_expires_at`; bez kolumny zapytanie o ofertę zwróci błąd
+i strona oferty odpowie 404 każdemu klientowi. **Migracja zastosowana na
+produkcji 16.11.2026** (wersja `20261116170158`; testy na produkcji 15/15),
+więc panel z tą zmianą można wdrożyć w dowolnej chwili.
+
+Testy w `apps/panel`: `pnpm test:link-oferty` (helper i strażnik tras bez bazy +
+SQL na jednorazowym Postgresie: `supabase/tests/link-oferty.sql`, ten sam plik
+idzie na produkcji jako jedno zapytanie i wszystko wycofuje).
+
 ### Podmiana wersji OWU — co wolno, a co urywa dostęp
 
 Na stronie pokazujemy **tylko aktualne OWU**. Wgląd w wersje historyczne idzie
