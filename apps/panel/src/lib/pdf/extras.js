@@ -18,6 +18,8 @@ import { parseAmount } from './helpers.js';
  * @property {number|null} amount suma ubezpieczenia, gdy oferta ją podaje
  * @property {string|null} offer_label nazwa użyta w ofercie
  * @property {number} order kolejność w tabeli
+ * @property {string} [klauzula] numer klauzuli i OWU (CEU: wypłata od 1. dnia)
+ * @property {number} [prog_przychodu] próg średniego miesięcznego przychodu z klauzuli
  */
 
 /**
@@ -48,7 +50,7 @@ export const EXTRA_REGISTRY = {
 
 /** Kolejność pozycji spoza katalogu symboli (HIV/WZW, ryzyka aktywnego życia). */
 /** @type {Record<string, number>} */
-const KEY_ORDER = { hiv_wzw: 70, active_life: 80 };
+const KEY_ORDER = { first_day: 5, hiv_wzw: 70, active_life: 80 };
 const DEFAULT_ORDER = 90;
 
 /** Etykiety dla pozycji nieopisanych symbolem klauzuli. */
@@ -56,7 +58,10 @@ const DEFAULT_ORDER = 90;
 const KEY_LABEL = {
   hiv_wzw: 'Zakażenie HIV / WZW przy pracy',
   active_life: 'Ryzyka aktywnego życia',
-  hospital_daily: 'Dzienne świadczenie szpitalne i rekonwalescencja'
+  hospital_daily: 'Dzienne świadczenie szpitalne i rekonwalescencja',
+  // Warunki (30 dni niezdolności, próg przychodu, wyłączenia) drukowane pod
+  // tabelą — EXTRA_NOTES.first_day w comparisonRows.js.
+  first_day: 'Wypłata od 1. dnia (gdy niezdolność trwa min. 30 dni)'
 };
 
 /**
@@ -103,7 +108,9 @@ function pushExtra(list, item) {
     amount: item.amount ?? null,
     offer_label: item.offer_label || null,
     order: reg?.order ?? KEY_ORDER[item.key] ?? DEFAULT_ORDER,
-    ...(reg?.limitation ? { limitation: true } : {})
+    ...(reg?.limitation ? { limitation: true } : {}),
+    ...(item.klauzula ? { klauzula: item.klauzula } : {}),
+    ...(item.prog_przychodu != null ? { prog_przychodu: item.prog_przychodu } : {})
   });
 }
 
@@ -192,8 +199,42 @@ function detectLeadenhall(text) {
 }
 
 /**
+ * Klauzula „Wypłata świadczenia od 1-ego dnia" — numer i próg przychodu zależą
+ * od OWU (sprawdzone w OWU z 01.04.2026: LOI PREMIUM v1.2 klauzula 2 — 20 000 zł,
+ * Utrata Dochodu v9.8 klauzula 13 — 15 000 zł). Produkt nierozpoznany: bez progu.
+ * @param {string} text
+ */
+function klauzulaPierwszegoDnia(text) {
+  if (/LOI\s+PREMIUM/i.test(text)) return { klauzula: 'Klauzula 2 OWU LOI PREMIUM', prog_przychodu: 20000 };
+  // „dla zatrudniających" to osobne OWU; „niezatrudniających" (LOI PREMIUM, Utrata Dochodu) nie.
+  if (/Utrata\s+Dochodu/i.test(text) && !/(?:^|\s)zatrudniających/i.test(text)) {
+    return { klauzula: 'Klauzula 13 OWU Utrata Dochodu', prog_przychodu: 15000 };
+  }
+  return { klauzula: null, prog_przychodu: null };
+}
+
+/** Nazwa klauzuli CEU bez nagłówka pozycji i punktora („l " z czcionki symboli). */
+function cleanCEULabel(raw) {
+  return String(raw || '')
+    .replace(/^\s*(?:\d+\.\s*)?Klauzule\s+opcjonalne\s*/i, '')
+    .replace(/^[l•●▪■◦-]\s+(?=\S)/, '')
+    .trim();
+}
+
+/** Wspólny klucz klauzuli CEU — ten sam wiersz tabeli co odpowiednik u Leadenhall. */
+function keyCEU(label) {
+  if (/szpital/i.test(label)) return 'hospital_daily';
+  if (/HIV|WZW/i.test(label)) return 'hiv_wzw';
+  if (/od\s+(?:1|pierwszego)\W*\w*\s+dnia/i.test(label)) return 'first_day';
+  return `ceu_${slug(label)}`;
+}
+
+/**
  * CEU: pozycja „Klauzule opcjonalne”. Każda klauzula ma własny status
  * („Objęta ubezpieczeniem” / „Nie objęta ubezpieczeniem”) i opcjonalną kwotę.
+ * Oferta LOI PREMIUM z 20.11.2026 ma nazwę i status w osobnych liniach, nazwy
+ * poprzedzone punktorem „l ", a klauzulę wypłaty od 1. dnia — w komentarzu
+ * (pozycja 12: „Klauzula wypłaty od 1-ego dnia włączona do ubezpieczenia.").
  * @param {string} text
  * @returns {Extra[]}
  */
@@ -205,15 +246,25 @@ function detectCEU(text) {
     /Klauzule\s+opcjonalne/i,
     /Ryzyka\s+aktywnego|Składka|Łączna\s+składka|Ogólne\s+Warunki/i
   );
+  const pierwszyDzien = klauzulaPierwszegoDnia(text);
 
   const line = /([A-ZŁŚŻŹĆŃ][^\n]{5,120}?)\s+(Nie\s+objęt\w+|Objęt\w+)\s+ubezpieczeniem([^\n]*)/gi;
   let m;
   while ((m = line.exec(sec))) {
-    const offerLabel = m[1].trim();
+    const offerLabel = cleanCEULabel(m[1]);
+    if (!offerLabel) continue;
     const covered = !/^Nie/i.test(m[2]);
     const amount = parseAmount((m[3].match(/([\d  ]+(?:,\d{2})?)\s*(?:zł|PLN)/i) || [])[1]);
-    const key = /szpital/i.test(offerLabel) ? 'hospital_daily' : `ceu_${slug(offerLabel)}`;
-    pushExtra(out, { key, covered, amount, offer_label: offerLabel });
+    const key = keyCEU(offerLabel);
+    pushExtra(out, { key, covered, amount, offer_label: offerLabel, ...(key === 'first_day' ? pierwszyDzien : {}) });
+  }
+
+  // Wypłata od 1. dnia wpisana zdaniem, poza listą klauzul opcjonalnych.
+  const fd = text.match(
+    /Klauzul\w*\s+wypłaty\s+(?:świadczenia\s+)?od\s+(?:1|pierwszego)\W*\w*\s+dnia\s+(nie\s+)?(?:(?:został\w*|jest)\s+)?włączon/i
+  );
+  if (fd) {
+    pushExtra(out, { key: 'first_day', covered: !fd[1], amount: null, offer_label: null, ...pierwszyDzien });
   }
 
   // Ryzyka aktywnego wypoczynku / życia — osobna pozycja oferty.

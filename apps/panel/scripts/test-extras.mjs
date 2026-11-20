@@ -5,6 +5,7 @@
  * Próbki tekstu odwzorowują układ realnych ofert, ale bez danych osobowych.
  */
 import { detectExtras } from '../src/lib/pdf/extras.js';
+import { parseCEU } from '../src/lib/pdf/parseCEU.js';
 import { comparisonRows, extraKeys, extraNotes } from '../src/lib/comparisonRows.js';
 import { coversHivWzw, offerConditionsHtml } from '../src/lib/server/offerConditions.js';
 import { conditionsContent } from '../src/lib/server/pdf/conditionsDoc.js';
@@ -86,6 +87,96 @@ const ceuList = detectExtras(CEU, 'ceu');
 check('szpital objęty', ceuList.find((e) => e.key === 'hospital_daily')?.covered, true);
 check('kwota szpitalna', ceuList.find((e) => e.key === 'hospital_daily')?.amount, 300);
 check('pogrzeb nieobjęty', ceuList.find((e) => /pogrzeb/.test(e.key))?.covered, false);
+
+// --- CEU LOI PREMIUM: układ prawdziwej oferty z 20.11.2026 (dane zmyślone) ---
+// Nazwa klauzuli i status w osobnych liniach, punktor „l ", jeden okres
+// oczekiwania dla wypadku i choroby, wypłata od 1. dnia zdaniem w pozycji 12.
+const CEU_LOIP = `Oferta nr LOIP/2026/009999 Strona 1 z 2
+Oferta nr LOIP/2026/009999
+z dnia 20-11-2026 ważna do 19-12-2026
+UBEZPIECZENIE LOI PREMIUM
+dla osób niezatrudniających pracowników
+2. Coverholder CEU sp. z o.o. z siedzibą w Warszawie
+3. Ubezpieczający Będzie określony w polisie
+4. Ubezpieczony Jan Testowy
+,
+Data urodzenia: 01-01-1990
+Polska
+Zawód: Architekt danych
+Rodzaj zatrudnienia: Samozatrudnienie, umowa cywilnoprawna, działalność gospodarcza,
+kontrakt menadżerski
+5. Okres Ubezpieczenia 12 miesięcy
+6. Świadczenia l Czasowa całkowita niezdolność do pracy w wyniku Zachorowania lub Nieszczęśliwego wypadku
+Objęta ubezpieczeniem
+Maksymalne świadczenie miesięczne 20 000,00 zł
+nie może przekroczyć 80% kwoty stanowiącej 1/12 Ubezpieczonego przychodu za okres 12
+miesięcy bezpośrednio poprzedzających zawarcie Umowy ubezpieczenia oraz 5 000 PLN/dzień
+Suma ubezpieczenia 480 000,00 zł
+Okres świadczeń 24 miesiące
+Okres oczekiwania 30 dni
+l Trwała całkowita niezdolność do pracy w wyniku Zachorowania lub Nieszczęślwiego wypadku
+Objęta ubezpieczeniem
+Suma ubezpieczenia 500 000,00 zł
+nie może przekroczyć 10-krotności Ubezpieczonego przychodu za okres 12 miesięcy bezpośrednio
+poprzedzających zawarcie Umowy ubezpieczenia
+Okres oczekiwania 24 miesiące
+7. Klauzule opcjonalne l Dzienne świadczenie z tytułu pobytu w szpitalu
+Nie objęte ubezpieczeniem
+l Zakażenie HIV/WZW
+Nie objęte ubezpieczeniem
+8. Ryzyka aktywnego
+życia Umowa ubezpieczenia nie obejmuje żadnego z ryzyk aktywnego życia, o których mowa w § 14
+warunków ubezpieczenia z dnia 01.04.2026 (wersja 1.2).
+=== STRONA 2 ===
+9. Składka Łączna składka roczna 4 608,48 zł
+Składka miesięczna, 12 rat po 384,04 zł
+10. OWU i Załączniki Ogólne Warunki Ubezpieczenia "LOI PREMIUM" (z dnia 01.04.2026 (wersja 1.2))
+12. Komentarze/
+Informacje dodatkowe Średnie miesięczne przychody za okres 12 miesięcy bezpośrednio poprzedzających zawarcie
+Umowy ubezpieczenia, tj. za okres od 01-10-2025 do 30-10-2026 wynoszą 25000,00 PLN.
+Klauzula wypłaty od 1-ego dnia włączona do ubezpieczenia.
+Warszawa, 20-11-2026`;
+
+console.log('\n=== CEU LOI PREMIUM — układ z 20.11.2026 ===');
+const loip = parseCEU(CEU_LOIP);
+check('ubezpieczony (pozycja 4, osobna linia)', loip.insured_name, 'Jan Testowy');
+check('okres oczekiwania — wypadek', loip.wait_accident, 30);
+check('okres oczekiwania — choroba', loip.wait_illness, 30);
+check('okres oczekiwania trwałej (nie do dni)', loip.perm_wait, '24 miesiące');
+check('świadczenie / suma / okres', [loip.temp_monthly_benefit, loip.temp_sum_insured, loip.indemnity_period], [20000, 480000, '24 miesiące']);
+check('trwała', [loip.perm_incapacity_covered, loip.perm_sum_insured], [true, 500000]);
+check('składka roczna / rata / raty', [loip.premium_total, loip.premium_monthly, loip.installments], [4608.48, 384.04, 12]);
+check('przychód / OWU', [loip.avg_monthly_income, loip.owu_symbol], [25000, 'LOI PREMIUM']);
+const loipEx = loip.parsed_raw.extras;
+check('klucze klauzul (bez punktora i nagłówka)', loipEx.map((e) => e.key), ['first_day', 'hiv_wzw', 'active_life', 'hospital_daily']);
+check('wypłata od 1. dnia objęta', loipEx.find((e) => e.key === 'first_day')?.covered, true);
+check('klauzula i próg z OWU LOI PREMIUM', [loipEx[0].klauzula, loipEx[0].prog_przychodu], ['Klauzula 2 OWU LOI PREMIUM', 20000]);
+check('HIV/WZW — wspólny klucz, nieobjęte', loipEx.find((e) => e.key === 'hiv_wzw')?.covered, false);
+check('szpital nieobjęty, nazwa bez nagłówka', [loipEx.find((e) => e.key === 'hospital_daily')?.covered, loipEx.find((e) => e.key === 'hospital_daily')?.offer_label], [false, 'Dzienne świadczenie z tytułu pobytu w szpitalu']);
+check('żaden klucz techniczny z punktora', loipEx.some((e) => /^ceu_l_|klauzule_opcjonalne/.test(e.key)), false);
+check('HIV z CEU nie zapala pozycji w warunkach', coversHivWzw([{ parsed_raw: loip.parsed_raw }]), false);
+const nieWlaczona = detectExtras(CEU_LOIP.replace('od 1-ego dnia włączona', 'od 1-ego dnia nie została włączona'), 'ceu');
+check('klauzula „nie została włączona" → Nie', nieWlaczona.find((e) => e.key === 'first_day')?.covered, false);
+check('bez zdania o klauzuli — brak pozycji', detectExtras(CEU_LOIP.replace(/Klauzula wypłaty[^\n]*\n/, ''), 'ceu').some((e) => e.key === 'first_day'), false);
+const ceuHiv = detectExtras(CEU_LOIP.replace('l Zakażenie HIV/WZW\nNie objęte', 'l Zakażenie HIV/WZW\nObjęte'), 'ceu');
+check('HIV/WZW objęte w CEU → pozycja w warunkach', coversHivWzw([{ parsed_raw: { extras: ceuHiv } }]), true);
+const udEx = detectExtras(CEU_LOIP.replace(/LOI PREMIUM/g, 'Utrata Dochodu'), 'ceu').find((e) => e.key === 'first_day');
+check('Utrata Dochodu — klauzula 13, próg 15 000', [udEx?.klauzula, udEx?.prog_przychodu], ['Klauzula 13 OWU Utrata Dochodu', 15000]);
+const zatrEx = detectExtras(CEU_LOIP.replace(/LOI PREMIUM/g, 'Utrata Dochodu').replace('niezatrudniających', 'zatrudniających'), 'ceu').find((e) => e.key === 'first_day');
+check('dla zatrudniających — bez progu (nie sprawdzone)', [zatrEx?.klauzula ?? null, zatrEx?.prog_przychodu ?? null], [null, null]);
+check('bez progu — warunek z klauzuli słowami', /kwotę określoną w klauzuli/.test(extraNotes([{ parsed_raw: { extras: [zatrEx] } }])[0]?.text || ''), true);
+
+const tabLoip = comparisonRows([{ ...loip }, docBezDodatkow()]);
+const rowFd = tabLoip.find((r) => r.key === 'extra:first_day');
+check('tabela: wiersz wypłaty od 1. dnia', rowFd?.cells.map((c) => c.text), ['TAK', '—']);
+check('tabela: wyczekiwanie 30 dni', tabLoip.filter((r) => r.key.startsWith('wait_')).map((r) => r.cells[0].text), ['30 dni', '30 dni']);
+const notatki = extraNotes([{ ...loip }]);
+check('pod tabelą: warunki klauzuli', notatki.map((n) => n.title), ['Wypłata świadczenia od 1. dnia — Klauzula 2 OWU LOI PREMIUM']);
+check('warunki: 30 dni, próg i kręgosłup', [/co najmniej 30 dni/.test(notatki[0].text), /20\s000 zł/.test(notatki[0].text), /kręgosłupa/.test(notatki[0].text)], [true, true, true]);
+
+function docBezDodatkow() {
+  return { parsed_raw: { extras: [] }, premium_total: 3036, premium_monthly: 253 };
+}
 
 console.log('\n=== TABELA PORÓWNANIA ===');
 const docA = { parsed_raw: { extras: zList }, premium_total: 6576, premium_monthly: 548 };

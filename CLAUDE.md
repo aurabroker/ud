@@ -2382,6 +2382,43 @@ Testy w `apps/panel`: `pnpm test:link-oferty` (helper i strażnik tras bez bazy 
 SQL na jednorazowym Postgresie: `supabase/tests/link-oferty.sql`, ten sam plik
 idzie na produkcji jako jedno zapytanie i wszystko wycofuje).
 
+### Oferta CEU LOI PREMIUM — czytnik sprawdzony na prawdziwej ofercie (panel v.0.79, 20.11.2026)
+
+`parseCEU.js` powstał na próbce i do 20.11.2026 nie przeczytał żadnej
+prawdziwej oferty CEU — pierwsza (`LOIP/2026/001093`, oferta UD/2026/CE/00052)
+wyszła z dziurami, które klient widział w tabeli porównania. Układ tej oferty:
+nazwa klauzuli i jej status w **osobnych liniach**, nazwy z punktorem „l "
+(znak z czcionki symboli), „4. Ubezpieczony Imię Nazwisko" w osobnej linii,
+**jeden** „Okres oczekiwania 30 dni" dla wypadku i choroby, a klauzula wypłaty
+od 1. dnia — zdaniem w pozycji 12 („Klauzula wypłaty od 1-ego dnia włączona do
+ubezpieczenia."), nie na liście klauzul opcjonalnych.
+
+- **Okres oczekiwania CEU idzie do obu kolumn** (`wait_accident` =
+  `wait_illness`; OWU LOI PREMIUM § 2 pkt 4 nie rozróżnia wypadku i choroby).
+  Wcześniej tabela pokazywała „—".
+- **Zakażenie HIV/WZW z CEU ma wspólny klucz `hiv_wzw`** — ten sam wiersz co
+  Leadenhall i ta sama reguła `coversHivWzw()`. Wcześniej punktor robił z niego
+  klucz techniczny `ceu_l_zakazenie_hiv_wzw`.
+- **Wypłata od 1. dnia (`first_day`) ma warunki pod tabelą** (`EXTRA_NOTES`
+  w `comparisonRows.js`, treść i tytuł liczone z pozycji): niezdolność
+  nieprzerwanie ≥ 30 dni **i** średni miesięczny przychód z 12 miesięcy przed
+  umową co najmniej **20 000 zł (LOI PREMIUM, klauzula 2)** albo **15 000 zł
+  (Utrata Dochodu, klauzula 13)**; nie dotyczy kręgosłupa, wad wrodzonych
+  i zwyrodnień (wtedy 30 dni okresu oczekiwania) ani niebezpiecznych
+  aktywności. Sprawdzone w OWU z 01.04.2026 (LOI PREMIUM v1.2, Utrata Dochodu
+  v9.8). Dla OWU „dla zatrudniających" próg nie jest wpisany (nie sprawdzony) —
+  notatka mówi „kwotę określoną w klauzuli". Sam wiersz „TAK" bez tej notatki
+  obiecywałby wypłatę od pierwszego dnia bez warunków — nie zdejmuj jej.
+- **Oferty już zapisane poprawia „Odśwież"** na stronie oferty
+  (`refreshOfferDocuments`: ponowny odczyt PDF-ów, brakujące OWU, nowe
+  podsumowanie) — bez migracji.
+- „Istotne informacje o warunkach oferty" (`offerConditions.js`) są pisane pod
+  Leadenhall (śmierć i inwalidztwo NW, rozszerzenia LW…) i pokazują się także
+  przy wariancie CEU — LOI PREMIUM śmierci nie obejmuje. Do osobnej decyzji.
+
+Test: `pnpm test:extras` (układ tej oferty z wymyślonymi danymi; na kodzie
+sprzed zmiany 16 czerwonych).
+
 ### Podmiana wersji OWU — co wolno, a co urywa dostęp
 
 Na stronie pokazujemy **tylko aktualne OWU**. Wgląd w wersje historyczne idzie
