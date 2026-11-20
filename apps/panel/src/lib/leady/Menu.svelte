@@ -81,6 +81,13 @@
         const biezacy = wiersze[aktywny];
         if (!biezacy) break;
         e.preventDefault();
+        // Pozycja-odnośnik (karta klienta, tel:, mailto:…): klik w sam odnośnik —
+        // nawigację robi przeglądarka albo router SvelteKita, menu zamyka jego onclick.
+        // Wcześniej Enter wołał tylko onwybierz, a odnośnik nigdzie nie prowadził.
+        if (biezacy.href && !biezacy.zablokowana) {
+          el?.querySelectorAll('[role="menuitem"]')[aktywny]?.click();
+          break;
+        }
         wybierz(biezacy);
         break;
       }
@@ -98,6 +105,15 @@
     if (p.zablokowana) return; // pozycja zostaje widoczna; przyczynę czyta się obok
     onwybierz(p);
   }
+
+  /**
+   * Odnośnik do trasy panelu („/panel/…") zabiera użytkownika z tej strony —
+   * fokusu nie ma komu oddać. tel:, mailto: i inne schematy zostawiają stronę
+   * na miejscu: wtedy fokus wraca do przycisku, z którego otwarto menu, inaczej
+   * spada na <body> i użytkownik klawiatury traci miejsce na liście.
+   * @param {string} href
+   */
+  const zostawiaStrone = (href) => String(href).startsWith('/');
 
   // Kliknięcie poza menu, zmiana rozmiaru, przewijanie — zamykają (menu zostałoby „w powietrzu").
   $effect(() => {
@@ -154,7 +170,7 @@
             data-akcja={p.id}
             class:aktywna={aktywny === indeks}
             onpointermove={() => { if (aktywny !== indeks) fokusuj(indeks); }}
-            onclick={() => onzamknij({ przywroc: false })}
+            onclick={() => onzamknij({ przywroc: !zostawiaStrone(p.href) })}
           >{p.etykieta}</a>
         {:else}
           <button
@@ -194,6 +210,7 @@
   .poz {
     display: block; width: 100%; text-align: left; background: transparent; border: 0; border-radius: 7px;
     padding: .5rem .6rem; font: inherit; font-size: .88rem; color: var(--slate-800); cursor: pointer; text-decoration: none;
+    overflow-wrap: anywhere; /* długi adres e-mail w „Napisz e-mail: …" nie wypycha menu poza ekran */
   }
   .poz:hover, .poz:focus-visible, .poz.aktywna { background: var(--slate-100); outline: none; }
   .poz:focus-visible { box-shadow: inset 0 0 0 2px var(--blue-600); }

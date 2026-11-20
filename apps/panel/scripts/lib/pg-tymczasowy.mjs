@@ -9,7 +9,8 @@
  * jako root.
  *
  * Zmienna LEADY_MIGRACJA podmienia plik migracji tablicy leadów (testy
- * mutacyjne: pogorszona migracja musi dać czerwony wynik).
+ * mutacyjne: pogorszona migracja musi dać czerwony wynik), a ZRODLA_MIGRACJA —
+ * plik statystyk według źródła (20261120110000_statystyki_zrodla.sql).
  */
 import { spawn, spawnSync } from 'node:child_process';
 import { chownSync, existsSync, mkdtempSync, readFileSync, readdirSync, rmSync } from 'node:fs';
@@ -108,6 +109,12 @@ export async function uruchomKlaster(opcje = {}) {
       ['stub', wczytaj('supabase/tests/stub.sql')],
       ['migracja szkiców', wczytaj('supabase/migrations/20261001101112_wnioski_szkice.sql')],
       ['migracja leadów', migracjaLeadow],
+      // Statystyki według źródła leada (panel v.0.80): sama funkcja nad tabelami
+      // leadów i kartoteką klientów, bez nowych tabel.
+      // ZRODLA_MIGRACJA podmienia ten plik (testy mutacyjne, jak LEADY_MIGRACJA).
+      ['migracja statystyk źródeł', process.env.ZRODLA_MIGRACJA
+        ? readFileSync(resolve(process.env.ZRODLA_MIGRACJA), 'utf8')
+        : wczytaj('supabase/migrations/20261120110000_statystyki_zrodla.sql')],
       ...(opcje.dodatkowe ?? []).map((nazwa) => [nazwa, wczytaj(`supabase/tests/${nazwa}`)]),
     ];
     for (const [nazwa, sql] of kroki) {

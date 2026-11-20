@@ -109,6 +109,16 @@
       Miejsce to to, co stoi po <code>?z=</code> (np. <code>?z=facebook</code>, <code>?z=mail</code>).
       Liczymy kliknięcia ludzi — bez robotów i podglądów linków; z Facebooka liczba bywa zaniżona.
       Kliknięcie to nie zakup: sprzedaż raportuje Leadenhall.
+      {#if data.klik.zReklamy !== null}
+        „W tym z reklamy" — wejścia z reklamy Google Ads (w adresie był identyfikator kliknięcia,
+        <code>gad_source</code> albo oznaczenie kampanii: <code>utm_source</code> ads/google przy
+        <code>utm_medium</code> cpc/internet/paid — ta sama reguła co „Google Ads" w Statystykach); samego
+        identyfikatora nie zapisujemy.
+        {#if data.klik.niezmierzone}
+          <span data-klik-niezmierzone>„—" = tydzień sprzed pomiaru (kliknięć sprzed 20.11.2026 nie sprawdzaliśmy
+          pod kątem reklamy), „≥" = tydzień zmierzony tylko w części.</span>
+        {/if}
+      {/if}
     </p>
   </div>
 
@@ -126,6 +136,7 @@
             <th>Tydzień</th>
             {#each data.klik.kolumny as k}<th style="text-align:right;">{etykietaMiejsca(k)}</th>{/each}
             <th style="text-align:right;">Razem</th>
+            {#if data.klik.zReklamy !== null}<th style="text-align:right;" data-klik-reklamy>w tym z reklamy</th>{/if}
           </tr>
         </thead>
         <tbody>
@@ -134,12 +145,14 @@
               <td class="muted" style="white-space:nowrap;">{tydzien(r.tydzien)}</td>
               {#each data.klik.kolumny as k}<td style="text-align:right;">{r.liczby[k]}</td>{/each}
               <td style="text-align:right;font-weight:600;">{r.razem}</td>
+              {#if data.klik.zReklamy !== null}<td style="text-align:right;" data-klik-reklamy>{r.reklamy}</td>{/if}
             </tr>
           {/each}
           <tr style="font-weight:700;">
             <td>Razem</td>
             {#each data.klik.kolumny as k}<td style="text-align:right;">{data.klik.razem[k]}</td>{/each}
             <td style="text-align:right;">{data.klik.wszystkie}</td>
+            {#if data.klik.zReklamy !== null}<td style="text-align:right;" data-klik-reklamy>{data.klik.reklamy}</td>{/if}
           </tr>
         </tbody>
       </table>

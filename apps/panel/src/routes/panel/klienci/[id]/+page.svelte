@@ -2,7 +2,10 @@
   import { dateP, dateTimeP, offerNoDisplay } from '$lib/format.js';
   import { wybranyWariant, krotkiOpis } from '$lib/wybranyWariant.js';
   let { data } = $props();
-  const c = data.client;
+  // $derived, nie stała: strzałki „Poprzedni / Następny klient" zmieniają tylko
+  // parametr trasy, więc SvelteKit nie tworzy strony od nowa — podaje nowe `data`.
+  const c = $derived(data.client);
+  const nav = $derived(data.nawigacja);
   const statusLabel = { draft: 'Szkic', sent: 'Wysłana', viewed: 'Otwarta', chosen: 'Wybrana', bought: 'Kupiona', rejected: 'Rezygnacja' };
 
   const val = (v) => (v === true ? 'Tak' : v === false ? 'Nie' : v == null || v === '' ? '—' : String(v));
@@ -46,7 +49,9 @@
   ];
   const G_ZGODY = [
     ['informed_accepted', 'Klauzula informacyjna'], ['exclusions_accepted', 'Akceptacja wyłączeń'],
-    ['source', 'Źródło zgłoszenia'], ['affiliate_code_used', 'Kod afiliacyjny']
+    // „Sposób", nie „Źródło": form / direct / manual / polisa to kanał zgłoszenia,
+    // a „Źródło" (reklama, link agenta…) ma własną sekcję niżej.
+    ['source', 'Sposób zgłoszenia'], ['affiliate_code_used', 'Kod afiliacyjny']
   ];
 
   // Pola pokazane w grupach — do wyłapania "pozostałych"
@@ -62,11 +67,35 @@
 
   // Sekcja tylko z niepustymi wierszami (dla grup opisowych)
   const nonEmpty = (group) => group.filter(([k]) => has(c[k]));
+
+  // Źródło wizyty z form_data.zrodlo (src/lib/zrodlo.js). Identyfikatora
+  // kliknięcia tu nie ma i nie będzie — serwer go wycina.
+  const zr = $derived(data.zrodlo);
+  /** @type {Record<string, string>} */
+  const ZRODLO_KLASA = { ads: 'badge-chosen', agent: 'badge-sent', inne: 'badge-viewed', brak: 'badge-draft' };
 </script>
 
 <svelte:head><title>{c.full_name} — Karta klienta</title></svelte:head>
 
-<a href="/panel/klienci" class="muted" style="text-decoration:none;">← Wróć do listy klientów</a>
+<nav class="kk-nav" aria-label="Lista klientów">
+  <a href="/panel/klienci{nav?.zapytanie ?? ''}" class="muted" style="text-decoration:none;" data-powrot>← Wróć do listy klientów</a>
+  <!-- Kolejność i filtry listy, z której agent przyszedł (?widok, ?zrodlo) — src/lib/klienci/lista.js. -->
+  <span class="kk-sasiedzi">
+    {#if nav?.poprzedni}
+      <a href="/panel/klienci/{nav.poprzedni.id}{nav.zapytanie}" rel="prev" data-poprzedni
+         title="Poprzedni klient: {nav.poprzedni.full_name || '—'}">← Poprzedni klient</a>
+    {:else}
+      <span class="kk-wylaczony" aria-disabled="true" data-poprzedni>← Poprzedni klient</span>
+    {/if}
+    {#if nav?.pozycja}<span class="muted" data-pozycja>{nav.pozycja} z {nav.razem}</span>{/if}
+    {#if nav?.nastepny}
+      <a href="/panel/klienci/{nav.nastepny.id}{nav.zapytanie}" rel="next" data-nastepny
+         title="Następny klient: {nav.nastepny.full_name || '—'}">Następny klient →</a>
+    {:else}
+      <span class="kk-wylaczony" aria-disabled="true" data-nastepny>Następny klient →</span>
+    {/if}
+  </span>
+</nav>
 
 <div style="display:flex;align-items:center;justify-content:space-between;margin:.5rem 0 1.5rem;flex-wrap:wrap;gap:1rem;">
   <div>
@@ -120,6 +149,28 @@
 </div>
 
 <div class="kk-sections">
+  <!-- Źródło wizyty (reklama, link agenta…) — bez identyfikatora kliknięcia -->
+  <div class="card card-pad" data-zrodlo-karta={zr?.klucz ?? 'brak'}>
+    <h3 style="font-size:1rem;margin-bottom:.75rem;">Źródło</h3>
+    <table>
+      <tbody>
+        <tr>
+          <td class="muted">Rodzaj</td>
+          <td style="text-align:right;font-weight:600;"><span class="badge {ZRODLO_KLASA[zr?.klucz] ?? 'badge-draft'}" data-zrodlo-rodzaj>{zr?.etykieta ?? 'Brak danych'}</span></td>
+        </tr>
+        {#if zr?.kampania}
+          <tr><td class="muted">Kampania</td><td style="text-align:right;font-weight:600;word-break:break-word;" data-zrodlo-kampania>{zr.kampania}</td></tr>
+        {/if}
+        {#if zr?.slowo}
+          <tr><td class="muted">Słowo kluczowe</td><td style="text-align:right;font-weight:600;word-break:break-word;" data-zrodlo-slowo>{zr.slowo}</td></tr>
+        {/if}
+      </tbody>
+    </table>
+    {#if !zr || zr.klucz === 'brak'}
+      <p class="muted" style="margin-top:.5rem;font-size:.82rem;" data-zrodlo-brak>Wejście bez parametrów kampanii (wyszukiwarka, adres wpisany ręcznie, link bez UTM-ów), wniosek sprzed zapisywania źródła albo klient dodany w panelu.</p>
+    {/if}
+  </div>
+
   <!-- Dane podstawowe -->
   <div class="card card-pad">
     <h3 style="font-size:1rem;margin-bottom:.75rem;">Dane osobowe / kontakt</h3>
@@ -217,6 +268,11 @@
 </div>
 
 <style>
+  .kk-nav { display: flex; align-items: center; justify-content: space-between; gap: .5rem 1rem; flex-wrap: wrap; }
+  .kk-sasiedzi { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; font-size: .88rem; }
+  .kk-sasiedzi a { text-decoration: none; font-weight: 600; }
+  .kk-sasiedzi a:hover { text-decoration: underline; }
+  .kk-wylaczony { color: var(--slate-400); cursor: default; }
   /* DWIE kolumny obok siebie, kompaktowo. Na wąskim ekranie -> 1 kolumna. */
   .kk-sections {
     display: grid;

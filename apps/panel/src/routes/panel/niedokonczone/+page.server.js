@@ -56,6 +56,8 @@ export async function load({ locals }) {
     // Kliknięcia /kup-online (portal) — tydzień × miejsce, bez danych osobowych.
     // Zwinięte w bazie do MIEJSC miejsc + „pozostałe": najwyżej 12 × 7 wierszy,
     // ile by różnych `?z=` nie było (limit 1000 wierszy PostgREST nie tnie).
+    // Od migracji 20261120100000 każdy wiersz ma też `z_reklamy` (wejścia
+    // z płatnego kliknięcia); przed nią go nie ma i strona o reklamie milczy.
     sb.rpc('ud_klikniecia_tabela', { p_od: odTygodnia(dzisWPolsce()), p_miejsc: MIEJSC }),
   ]);
 

@@ -110,7 +110,10 @@ console.log('\nKarta klienta');
 const karta = czytaj('src/routes/panel/klienci/[id]/+page.svelte');
 check('oferty klienta przed danymi osobowymi', karta.indexOf('Oferty klienta') > -1 && karta.indexOf('Oferty klienta') < karta.indexOf('Dane osobowe / kontakt'));
 check('kolumna „Wybór klienta" z opisem wariantu', karta.includes('<th>Wybór klienta</th>') && karta.includes('krotkiOpis(w)'));
-const kartaSerwer = czytaj('src/routes/panel/klienci/[id]/+page.server.js');
+// Od panelu v.0.80 dane karty składa kartaKlienta() w src/lib/server/klienci.js
+// (ta sama funkcja w teście SSR karty); +page.server.js tylko ją woła.
+check('loader karty woła kartaKlienta', czytaj('src/routes/panel/klienci/[id]/+page.server.js').includes('kartaKlienta('));
+const kartaSerwer = czytaj('src/lib/server/klienci.js');
 check('loader czyta wybór i kwoty wybranych wariantów', kartaSerwer.includes('client_choice') && /from\('ud_offer_documents'\)[\s\S]*premium_total[\s\S]*\.in\('id', ids\)/.test(kartaSerwer));
 check('loader bez select(*) przy wariantach', !/ud_offer_documents'\)\s*\.select\('\*'\)/.test(kartaSerwer));
 

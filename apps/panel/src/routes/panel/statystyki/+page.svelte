@@ -27,6 +27,13 @@
 
   const adres = (zmiana) => adresFiltra({ okres: st?.okres, agent: admin ? st?.agent : null }, zmiana);
 
+  // „Według źródła" (panel v.0.80): wiersze już zwinięte przez src/lib/zrodlo.js
+  // (ta sama reguła co na liście klientów). Osobne dane i osobny błąd — sekcja
+  // nie może zasłonić reszty statystyk.
+  const zr = $derived(data.zr);
+  /** @param {{ sprzedaze: number, z_danymi: number }} w */
+  const bezKwot = (w) => (w.sprzedaze > w.z_danymi ? ` (${w.sprzedaze - w.z_danymi} bez kwot)` : '');
+
   let dodawanie = $state(false);
   let dodano = $state(null);
   async function zapisano(w) {
@@ -129,6 +136,61 @@
     </section>
   {/if}
 
+  {#if zr || data.zrBlad}
+    <section class="card blok" aria-labelledby="st-zrodla" data-zrodla>
+      <h2 id="st-zrodla">Według źródła</h2>
+      {#if data.zrBlad}
+        <div class="error-box" role="alert" data-zrodla-blad>{data.zrBlad}</div>
+      {:else if zr}
+        <div class="przewijanie">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Źródło</th><th scope="col" class="liczb">Wnioski</th><th scope="col" class="liczb">Sprzedane polisy</th>
+                <th scope="col" class="liczb">Składki roczne</th><th scope="col" class="liczb">Prowizja</th>
+              </tr>
+            </thead>
+            <tbody>
+              {#each zr.wiersze as w (w.klucz)}
+                <tr data-zrodlo={w.klucz}>
+                  <th scope="row">{w.etykieta}</th>
+                  <td class="liczb">{w.wnioski}</td>
+                  <td class="liczb">{w.sprzedaze}{bezKwot(w)}</td>
+                  <td class="liczb">{kwota(w.skladka_roczna_suma)}</td>
+                  <td class="liczb">{kwota(w.prowizja_suma)}{#if w.bez_stawki}<span class="muted">{` (${sprzedazy(w.bez_stawki)} bez stawki)`}</span>{/if}</td>
+                </tr>
+                {#each w.pod as pw (pw.klucz)}
+                  <tr class="pod-wiersz" data-zrodlo-pod={w.klucz}>
+                    <th scope="row"><span class="wciecie">{w.klucz === 'ads' ? 'kampania' : 'utm_source'}:</span> {pw.etykieta}</th>
+                    <td class="liczb">{pw.wnioski}</td>
+                    <td class="liczb">{pw.sprzedaze}{bezKwot(pw)}</td>
+                    <td class="liczb">{kwota(pw.skladka_roczna_suma)}</td>
+                    <td class="liczb">{kwota(pw.prowizja_suma)}</td>
+                  </tr>
+                {/each}
+              {/each}
+            </tbody>
+            <tfoot>
+              <tr data-zrodlo="razem">
+                <th scope="row">Razem</th>
+                <td class="liczb">{zr.razem.wnioski}</td>
+                <td class="liczb">{zr.razem.sprzedaze}</td>
+                <td class="liczb">{kwota(zr.razem.skladka_roczna_suma)}</td>
+                <td class="liczb">{kwota(zr.razem.prowizja_suma)}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <p class="muted przypis" data-zrodla-przypis>
+          Wnioski liczone po dacie wniosku, sprzedaż po dacie sprzedaży — ta sama polisa może wpaść w inny okres niż jej wniosek.
+          {admin ? '' : 'Wnioski Twoich klientów i Twoje sprzedaże. '}„Brak danych” = wejście bez parametrów kampanii
+          (wyszukiwarka, adres wpisany ręcznie, link bez UTM-ów), wnioski sprzed 20.11.2026 i klienci dodani w panelu. Google Ads = kliknięcie w reklamę (identyfikator kliknięcia albo oznaczenie kampanii w adresie).
+          {#if zr.ucieto}<strong>{` Pominięto ${zr.ucieto} najrzadszych grup kampanii i źródeł — sumy ich nie obejmują.`}</strong>{/if}
+        </p>
+      {/if}
+    </section>
+  {/if}
+
   <section class="card blok" aria-labelledby="st-swiadczenia">
     <h2 id="st-swiadczenia">Świadczenia w sprzedanych wariantach</h2>
     <div class="przewijanie">
@@ -205,6 +267,11 @@
   tbody th { font-weight: 600; font-size: .9rem; text-transform: none; letter-spacing: 0; color: var(--slate-800); white-space: nowrap; }
   .pasek { display: block; height: 4px; margin-top: .35rem; background: var(--slate-100); border-radius: 4px; max-width: 12rem; }
   .pasek span { display: block; height: 100%; background: var(--blue-600); border-radius: 4px; }
+  tfoot th, tfoot td { border-top: 2px solid var(--slate-300); border-bottom: 0; font-weight: 700; }
+  .pod-wiersz th { font-weight: 400; padding-left: 1.6rem; color: var(--slate-700); }
+  .pod-wiersz th, .pod-wiersz td { font-size: .84rem; }
+  .wciecie { color: var(--slate-500); }
+  .przypis { margin: .7rem 0 0; font-size: .8rem; max-width: 52rem; }
   .uzupelnij { border-color: var(--amber-500); }
   .uzupelnij ul { margin: .5rem 0 0; padding-left: 1.1rem; }
   .pusto { text-align: center; margin: 1.5rem 0; }

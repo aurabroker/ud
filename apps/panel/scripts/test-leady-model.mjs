@@ -18,6 +18,10 @@ import { danePolisyZFormularza, dataPL, dataSprzedazyZOchrony, doCsv, dzienPL, p
 import { adresFiltra } from '../src/lib/statystyki/filtr.js';
 import { dataZPolisy, daneZPolisy, numerZNazwy } from '../src/lib/pdf/polisa.js';
 import { akcjaKlienta } from '../src/lib/klienci/akcja.js';
+import { filtryListy, listaWidoku, porownajKlientow, sasiedzi, wWidoku, zapytanieListy } from '../src/lib/klienci/lista.js';
+import { najnowszaWyslana, stanOferty } from '../src/lib/klienci/oferta.js';
+import { adresEmail, akcjeKlienta, numerTel } from '../src/lib/klienci/menu.js';
+import { swiadczenieZKolumny } from '../src/lib/server/klienci.js';
 import { coOdczytano, polisaZDokumentu } from '../src/lib/server/leady.js';
 
 let pass = 0;
@@ -446,6 +450,130 @@ await t('Klienci → „Akcja": etap leada po polsku, wygasła polisa, powód re
   const arch = akcjaKlienta({ ...L, zarchiwizowano_at: '2026-10-01' }, e('oferta'), '2026-10-05');
   assert.deepEqual([arch.archiwum, arch.link], [true, null]);
   assert.deepEqual([akcjaKlienta(null, null, '2026-10-05').etykieta, akcjaKlienta(null, null, '2026-10-05').link], ['—', null]);
+});
+
+// ── Klienci (20.11.2026): kolejność listy i strzałki na karcie, stan oferty, menu, świadczenie ──
+await t('Klienci → filtry listy z adresu i z powrotem; nieznane wartości = bez filtra', () => {
+  assert.deepEqual(filtryListy(new URLSearchParams('widok=archiwum&zrodlo=ads')), { archiwum: true, zrodlo: 'ads' });
+  assert.deepEqual(filtryListy(new URLSearchParams('widok=xyz&zrodlo=google')), { archiwum: false, zrodlo: null });
+  assert.deepEqual(filtryListy(null), { archiwum: false, zrodlo: null });
+  assert.equal(zapytanieListy({ archiwum: false, zrodlo: null }), '');
+  assert.equal(zapytanieListy({ archiwum: true, zrodlo: null }), '?widok=archiwum');
+  assert.equal(zapytanieListy({ archiwum: true, zrodlo: 'brak' }), '?widok=archiwum&zrodlo=brak');
+  assert.equal(zapytanieListy(filtryListy(new URLSearchParams('zrodlo=agent'))), '?zrodlo=agent');
+});
+
+await t('Klienci → kolejność: najnowsi u góry, remis — identyfikator malejąco, bez daty na końcu; sąsiedzi z tej samej kolejności', () => {
+  const w = (id, created_at, archiwum = false, klucz = 'brak') => ({ id, created_at, archiwum, zrodlo: { klucz } });
+  const A = w('a', '2026-11-01T10:00:00.000001+00:00');
+  const B = w('b', '2026-11-03T10:00:00+00:00', false, 'ads');
+  const C = w('c', '2026-11-01T10:00:00.000001+00:00', false, 'ads');   // ta sama chwila co A
+  const D = w('d', null);
+  const E = w('e', '2026-11-02T10:00:00+00:00', true, 'ads');
+  const wszystkie = [A, B, C, D, E];
+  assert.deepEqual(listaWidoku(wszystkie, { archiwum: false }).map((x) => x.id), ['b', 'c', 'a', 'd']);
+  assert.deepEqual([...wszystkie].sort(porownajKlientow).map((x) => x.id), ['b', 'e', 'c', 'a', 'd']);
+  assert.equal(porownajKlientow(A, A), 0);
+  assert.deepEqual(listaWidoku(wszystkie, { archiwum: false, zrodlo: 'ads' }).map((x) => x.id), ['b', 'c']);
+  assert.deepEqual(listaWidoku(wszystkie, { archiwum: true }).map((x) => x.id), ['e']);
+  assert.deepEqual(wWidoku(wszystkie, true).map((x) => x.id), ['e']);
+  // Lista nie zależy od kolejności wejścia.
+  assert.deepEqual(listaWidoku([D, A, C, B], {}).map((x) => x.id), ['b', 'c', 'a', 'd']);
+
+  const s = (biezacy, filtry = {}) => {
+    const r = sasiedzi(wszystkie, biezacy, filtry);
+    return [r.poprzedni?.id ?? null, r.nastepny?.id ?? null, r.pozycja, r.razem];
+  };
+  assert.deepEqual(s(B), [null, 'c', 1, 4]);
+  assert.deepEqual(s(C), ['b', 'a', 2, 4]);
+  assert.deepEqual(s(D), ['a', null, 4, 4]);
+  assert.deepEqual(s(C, { zrodlo: 'ads' }), ['b', null, 2, 2]);
+  // Klient spoza widoku (E w archiwum, karta z listy bieżącej): sąsiedzi z miejsca, w którym by stał, bez pozycji.
+  assert.deepEqual(s(E), ['b', 'c', null, 4]);
+  assert.deepEqual(s(A, { archiwum: true }), ['e', null, null, 1]);
+});
+
+await t('Klienci → stan najnowszej wysłanej oferty: otwarta, nieotwarta, ponowna wysyłka, decyzja', () => {
+  // 12:00 czasu polskiego (zima: +01:00) — „DD.MM" nie zależy od strefy maszyny.
+  const d = (dzien, godz = '12:00') => `2026-11-${dzien}T${godz}:00+01:00`;
+  assert.equal(najnowszaWyslana([]), null);
+  assert.equal(najnowszaWyslana(null), null);
+  const o1 = { id: '1', sent_at: d('01'), status: 'viewed', viewed_at: d('02') };
+  const o2 = { id: '2', sent_at: d('05'), status: 'sent' };
+  const szkic = { id: '3', sent_at: null, status: 'draft' };
+  const arch = { id: '4', sent_at: d('09'), status: 'sent', archived_at: d('10') };
+  // Archiwum się liczy: nowsza wysłana (choćby zarchiwizowana) zastępuje starszą — nie wracamy do o2.
+  assert.equal(najnowszaWyslana([o1, szkic, o2, arch]).id, '4');
+  assert.equal(najnowszaWyslana([o1, szkic, o2]).id, '2');
+  assert.equal(najnowszaWyslana([arch]).id, '4', 'jedyna wysłana w archiwum — też jest linijka');
+  assert.equal(najnowszaWyslana([{ id: 'a', sent_at: d('05') }, { id: 'b', sent_at: d('05') }]).id, 'b', 'remis — identyfikator');
+  assert.equal(najnowszaWyslana([szkic]), null);
+  assert.equal(stanOferty(null), null);
+  assert.equal(stanOferty(szkic), null);
+
+  const st = (o) => { const r = stanOferty(o); return [r.stan, r.etykieta]; };
+  assert.deepEqual(st({ sent_at: d('10'), viewed_at: d('12'), status: 'viewed', wersja: 1 }), ['otwarta', 'wysłana 10.11 · otwarta 12.11']);
+  assert.deepEqual(st({ sent_at: d('15'), viewed_at: null, status: 'sent', wersja: 1 }), ['nieotwarta', 'wysłana 15.11 · nieotwarta']);
+  // Ponowna wysyłka po otwarciu poprzedniej wersji: viewed_at starsze niż sent_at.
+  assert.deepEqual(st({ sent_at: d('16'), viewed_at: d('12'), status: 'sent', wersja: 2 }),
+    ['nieotwarta', 'wysłana ponownie 16.11 · nieotwarta (poprzednia wersja otwarta 12.11)']);
+  assert.deepEqual(st({ sent_at: d('16'), viewed_at: null, status: 'sent', wersja: 3 }), ['nieotwarta', 'wysłana ponownie 16.11 · nieotwarta']);
+  assert.deepEqual(st({ sent_at: d('16'), viewed_at: d('17'), status: 'viewed', wersja: 2 }), ['otwarta', 'wysłana ponownie 16.11 · otwarta 17.11']);
+  // Ta sama chwila (otwarcie tuż po wysyłce) = otwarta.
+  assert.equal(stanOferty({ sent_at: d('16'), viewed_at: d('16'), status: 'viewed' }).stan, 'otwarta');
+  // Status „otwarta" bez daty (stary wiersz) — otwarta, bez daty.
+  assert.deepEqual(st({ sent_at: d('03'), viewed_at: null, status: 'viewed' }), ['otwarta', 'wysłana 03.11 · otwarta']);
+  assert.deepEqual(st({ sent_at: d('05'), viewed_at: d('06'), status: 'chosen', wybrano_at: d('07') }),
+    ['otwarta', 'wysłana 05.11 · otwarta 06.11 · wariant wybrany 07.11']);
+  assert.deepEqual(st({ sent_at: d('03'), viewed_at: d('04'), status: 'rejected', rezygnacja_at: null, decided_at: d('08') }),
+    ['otwarta', 'wysłana 03.11 · otwarta 04.11 · rezygnacja 08.11']);
+  // Wybór w karcie otwartej przed ponowną wysyłką: ani „otwarta", ani „nieotwarta".
+  assert.deepEqual(st({ sent_at: d('16'), viewed_at: d('10'), status: 'chosen', wersja: 2, wybrano_at: d('17') }),
+    ['decyzja', 'wysłana ponownie 16.11 · wariant wybrany 17.11']);
+  assert.deepEqual(st({ sent_at: d('16'), viewed_at: null, status: 'bought' }), ['decyzja', 'wysłana 16.11']);
+  // Strefa: 23:30 UTC 14.11 to już 15.11 w Polsce.
+  assert.equal(stanOferty({ sent_at: '2026-11-14T23:30:00Z', status: 'sent' }).etykieta, 'wysłana 15.11 · nieotwarta');
+  // Zepsute daty nie dają „Invalid Date" ani NaN.
+  assert.equal(stanOferty({ sent_at: 'nie-data', status: 'sent' }), null);
+  assert.deepEqual(st({ sent_at: d('15'), viewed_at: 'nie-data', status: 'sent' }), ['nieotwarta', 'wysłana 15.11 · nieotwarta']);
+  const tytul = stanOferty({ offer_number: 'UD/2026/1', sent_at: d('10'), viewed_at: d('12'), status: 'viewed' }).tytul;
+  assert.equal(tytul, 'Najnowsza wysłana oferta UD/2026/1: wysłana 10.11.2026, otwarta 12.11.2026. Otwarta = klient wpisał kod i zobaczył ofertę.');
+  // Oferta w archiwum: ten sam stan, z dopiskiem — w linijce i w podpowiedzi.
+  assert.deepEqual(st(arch), ['nieotwarta', 'wysłana 09.11 · nieotwarta · w archiwum']);
+  assert.deepEqual(st({ sent_at: d('16'), viewed_at: d('16', '13:00'), status: 'bought', archived_at: d('17') }),
+    ['otwarta', 'wysłana 16.11 · otwarta 16.11 · w archiwum']);
+  assert.match(stanOferty({ ...arch, offer_number: 'UD/2026/4' }).tytul, /^Najnowsza wysłana oferta UD\/2026\/4 \(w archiwum\): wysłana 09\.11\.2026/);
+});
+
+await t('Klienci → menu klienta: pozycje z danych, filtry listy w adresie karty, bez pustych kontaktów', () => {
+  const pelny = { id: 'k1', phone: ' 500 100 200 ', email: 'a@b.pl', akcja: { link: '/panel/leady?lead=L1' } };
+  const p = akcjeKlienta(pelny, '?zrodlo=ads');
+  assert.deepEqual(p.map((x) => ('separator' in x ? '—' : x.id)), ['karta', 'oferta', 'tablica', '—', 'zadzwon', 'email', 'kopiuj-telefon']);
+  const po = Object.fromEntries(p.filter((x) => !('separator' in x)).map((x) => [x.id, x]));
+  assert.equal(po.karta.href, '/panel/klienci/k1?zrodlo=ads');
+  assert.equal(po.oferta.href, '/panel/new?client=k1');
+  assert.equal(po.zadzwon.href, 'tel:500100200');
+  assert.equal(po.zadzwon.etykieta, 'Zadzwoń: 500 100 200');
+  assert.equal(po.email.href, 'mailto:a@b.pl');
+  assert.equal(po['kopiuj-telefon'].href, undefined);
+  assert.deepEqual(akcjeKlienta({ id: 'k2', phone: null, email: '', akcja: { link: null } }).map((x) => x.id), ['karta', 'oferta']);
+  assert.equal(numerTel('+48 600-200-300'), '+48600200300');
+  assert.equal(numerTel('brak'), null);
+  assert.equal(numerTel(500100200), null);
+  assert.equal(adresEmail(' a@b.pl '), 'a@b.pl');
+  assert.equal(adresEmail('bez-malpy'), null);
+  assert.equal(adresEmail('a b@c.pl'), null);
+});
+
+await t('Klienci → „Świadczenie": kolumna tekstowa jak w SQL (ud_kwota), reszta = brak', () => {
+  assert.equal(swiadczenieZKolumny('8000'), 8000);
+  assert.equal(swiadczenieZKolumny('12 500 zł'), 12500);
+  assert.equal(swiadczenieZKolumny('7 500,50'), 7500.5);
+  assert.equal(swiadczenieZKolumny(9000), 9000);
+  assert.equal(swiadczenieZKolumny('0'), 0);
+  for (const v of [null, undefined, '', '   ', 'abc', '1e5', '-5000', '5000abc', NaN, -1, Infinity, {}, [1]]) {
+    assert.equal(swiadczenieZKolumny(v), null, String(v));
+  }
 });
 
 // ── Dane polisy z PDF (src/lib/pdf/polisa.js) ────────────────────────────────

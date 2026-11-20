@@ -8,7 +8,7 @@
  * wejść i złą decyzję, gdzie stawiać link do zakupu online.
  */
 import assert from 'node:assert/strict';
-import { klikniecia, odTygodnia, dzisWPolsce, etykietaMiejsca, MIEJSC, POZOSTALE } from '../src/lib/klikniecia.js';
+import { klikniecia, odTygodnia, dzisWPolsce, etykietaMiejsca, opisReklamy, MIEJSC, POZOSTALE } from '../src/lib/klikniecia.js';
 
 let ok = 0;
 const test = (nazwa, fn) => { fn(); ok += 1; console.log(`  ✓ ${nazwa}`); };
@@ -111,6 +111,77 @@ test('etykiety: brak ?z= i nieczytelne ?z= po polsku, reszta bez zmian', () => {
   assert.equal(etykietaMiejsca('kalkulator'), 'kalkulator');
   // Przechodzi białą listę źródeł; nie może sięgnąć do prototypu obiektu.
   assert.equal(etykietaMiejsca('constructor'), 'constructor');
+});
+
+test('bez kolumny z_reklamy (panel przed migracją): o reklamie nic — null, nie zera', () => {
+  const k = klikniecia([
+    { tydzien: '2026-11-09', zrodlo: 'kalkulator', klikniec: 5 },
+    { tydzien: '2026-11-02', zrodlo: 'facebook', klikniec: 2 },
+  ]);
+  assert.equal(k.zReklamy, null);
+  for (const r of k.rzedy) assert.ok(!('zReklamy' in r), 'wiersz tygodnia bez pola zReklamy');
+  assert.equal(k.wszystkie, 7, 'reszta tabeli bez zmian');
+  assert.equal(klikniecia([]).zReklamy, null, 'pusty widok: nic o reklamie');
+});
+
+test('z_reklamy: suma na tydzień (po wszystkich miejscach, także zwiniętych) i razem', () => {
+  const k = klikniecia([
+    { tydzien: '2026-11-09', zrodlo: 'kalkulator', klikniec: 5, z_reklamy: 3, zmierzonych: 5, miejsc_wszystkich: 9 },
+    { tydzien: '2026-11-09', zrodlo: POZOSTALE, klikniec: 4, z_reklamy: 1, zmierzonych: 4, miejsc_wszystkich: 9 },
+    { tydzien: '2026-11-02', zrodlo: 'facebook', klikniec: 2, z_reklamy: 0, zmierzonych: 2, miejsc_wszystkich: 9 },
+    { tydzien: '2026-11-02', zrodlo: 'kalkulator', klikniec: 1, z_reklamy: 1, zmierzonych: 1, miejsc_wszystkich: 9 },
+  ]);
+  assert.deepEqual(k.rzedy.map((r) => [r.tydzien, r.razem, r.zReklamy, r.reklamy]), [['2026-11-09', 9, 4, '4'], ['2026-11-02', 3, 1, '1']]);
+  assert.equal(k.zReklamy, 5);
+  assert.equal(k.reklamy, '5');
+  assert.equal(k.niezmierzone, false);
+  assert.equal(k.wszystkie, 12);
+});
+
+test('z_reklamy = 0 przy zmierzonych kliknięciach: pokazujemy zera (baza je podała), nie chowamy kolumny', () => {
+  const k = klikniecia([{ tydzien: '2026-11-09', zrodlo: 'mail', klikniec: 2, z_reklamy: 0, zmierzonych: 2 }]);
+  assert.equal(k.zReklamy, 0);
+  assert.equal(k.rzedy[0].reklamy, '0');
+  assert.equal(k.reklamy, '0');
+});
+
+test('kliknięcia sprzed pomiaru (platne NULL): „—" zamiast 0, tydzień częściowy „≥ N", suma też „≥"', () => {
+  // 09.11: 5 kliknięć sprzed migracji; 16.11: 6 sprzed i 3 po (2 z reklamy); 23.11: wszystko zmierzone.
+  const k = klikniecia([
+    { tydzien: '2026-11-09', zrodlo: 'kalkulator', klikniec: 5, z_reklamy: 0, zmierzonych: 0 },
+    { tydzien: '2026-11-16', zrodlo: 'kalkulator', klikniec: 9, z_reklamy: 2, zmierzonych: 3 },
+    { tydzien: '2026-11-23', zrodlo: 'wniosek', klikniec: 4, z_reklamy: 1, zmierzonych: 4 },
+  ]);
+  assert.deepEqual(k.rzedy.map((r) => [r.tydzien, r.reklamy]), [['2026-11-23', '1'], ['2026-11-16', '≥ 2'], ['2026-11-09', '—']]);
+  assert.equal(k.reklamy, '≥ 3');
+  assert.equal(k.niezmierzone, true);
+  // Same niezmierzone tygodnie: kolumna jest, ale bez jednego fałszywego zera.
+  const stare = klikniecia([{ tydzien: '2026-11-09', zrodlo: 'mail', klikniec: 5, z_reklamy: 0, zmierzonych: 0 }]);
+  assert.deepEqual([stare.rzedy[0].reklamy, stare.reklamy, stare.niezmierzone], ['—', '—', true]);
+});
+
+test('opisReklamy: —, ≥ N, N', () => {
+  assert.equal(opisReklamy(0, 0, 5), '—');
+  assert.equal(opisReklamy(2, 3, 9), '≥ 2');
+  assert.equal(opisReklamy(0, 3, 9), '≥ 0');
+  assert.equal(opisReklamy(1, 4, 4), '1');
+  assert.equal(opisReklamy(0, 4, 4), '0');
+});
+
+test('z_reklamy albo zmierzonych tylko w części wierszy albo śmieci: o reklamie nic (nie zgadujemy)', () => {
+  for (const zly of [undefined, null, '3', -1, 1.5, NaN]) {
+    for (const [kol, inna] of [['z_reklamy', 'zmierzonych'], ['zmierzonych', 'z_reklamy']]) {
+      const k = klikniecia([
+        { tydzien: '2026-11-09', zrodlo: 'mail', klikniec: 2, z_reklamy: 1, zmierzonych: 2 },
+        { tydzien: '2026-11-09', zrodlo: 'blog', klikniec: 2, [inna]: 1, [kol]: zly },
+      ]);
+      assert.equal(k.zReklamy, null, `${kol}=${String(zly)}`);
+      assert.equal(k.reklamy, null);
+      assert.ok(!('zReklamy' in k.rzedy[0]));
+    }
+  }
+  // Wiersz z samym z_reklamy (bez zmierzonych) — kolumny nie ma.
+  assert.equal(klikniecia([{ tydzien: '2026-11-09', zrodlo: 'mail', klikniec: 2, z_reklamy: 1 }]).zReklamy, null);
 });
 
 test('odTygodnia: poniedziałek sprzed 11 tygodni (12 tygodni razem z bieżącym)', () => {

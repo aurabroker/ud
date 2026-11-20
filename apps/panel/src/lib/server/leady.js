@@ -16,6 +16,7 @@
  *  - Błędy bazy nie wychodzą do przeglądarki surowym komunikatem.
  */
 import { numerZNazwy } from '../pdf/polisa.js';
+import { zrodlaWStatystykach } from '../zrodlo.js';
 
 export const SORTOWANIA = ['dzialanie', 'data', 'wartosc'];
 export const ROZMIAR_STRONY = 25;
@@ -597,6 +598,47 @@ export async function statystyki(sb, userId, parametry) {
   const wynik = await rpc(sb, 'ud_leady_statystyki', { p_user: userId, p_od: od, p_do: doo, p_agent: agent });
   if (!wynik) throw blad(403, 'Brak dostępu do statystyk.');
   return { ...wynik, okres };
+}
+
+/**
+ * Statystyki według źródła leada (Statystyki → „Według źródła"): wnioski,
+ * sprzedane polisy, składki roczne i prowizja na rodzaj źródła — Google Ads,
+ * link agenta, inne, brak danych. Te same parametry (okres, agent) i ta sama
+ * widoczność co `statystyki` — rozstrzyga SQL (ud_leady_statystyki_zrodla).
+ *
+ * SQL oddaje surowe grupy (platne, utm_source, …); rodzaj liczy
+ * `zrodlaWStatystykach` z src/lib/zrodlo.js — ta sama reguła co na liście
+ * klientów i na karcie. Funkcji SQL może jeszcze nie być w bazie (panel
+ * wdrożony przed migracją): wtedy osobny komunikat, a strona pokazuje resztę
+ * statystyk bez tej sekcji.
+ * @param {any} sb @param {string} userId @param {URLSearchParams | Record<string, unknown>} parametry
+ */
+export async function statystykiZrodel(sb, userId, parametry) {
+  /** @param {string} k */
+  const pobierz = (k) => {
+    const v = parametry instanceof URLSearchParams ? parametry.get(k) : parametry?.[k];
+    return typeof v === 'string' ? v : '';
+  };
+  const okres = OKRESY_STATYSTYK.includes(pobierz('okres')) ? pobierz('okres') : 'wszystko';
+  const agent = jestUuid(pobierz('agent')) ? pobierz('agent') : null;
+  const { od, do: doo } = graniceOkresu(okres);
+  const { data, error } = await sb.rpc('ud_leady_statystyki_zrodla', { p_user: userId, p_od: od, p_do: doo, p_agent: agent });
+  if (error) {
+    console.error('[leady] ud_leady_statystyki_zrodla', error.code || '', error.message || error);
+    if (error.code === 'PGRST202' || /Could not find the function/i.test(error.message || '')) {
+      throw blad(503, 'Statystyki według źródła nie są jeszcze włączone w bazie — reszta statystyk działa. Zgłoś to administratorowi.');
+    }
+    throw blad(502, 'Nie udało się wczytać statystyk według źródła. Odśwież stronę za chwilę.', { ponow: true });
+  }
+  if (!data) throw blad(403, 'Brak dostępu do statystyk.');
+  const grupy = Array.isArray(data.grupy) ? data.grupy : [];
+  return {
+    ...zrodlaWStatystykach(grupy),
+    okres,
+    agent: data.agent ?? null,
+    // Grup ponad limit SQL (500) nie ma w sumach — strona to mówi.
+    ucieto: Math.max(0, (Number(data.grup_wszystkich) || 0) - grupy.length),
+  };
 }
 
 /**
