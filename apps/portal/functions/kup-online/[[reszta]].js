@@ -24,6 +24,25 @@
  * i ciasteczek: w bazie jest tylko czas, cel i źródło (tabela `ud_klikniecia`,
  * migracja `20261111101126_klikniecia.sql`).
  *
+ * Od 20.11.2026 także: czy wejście przyszło z reklamy. Klient z kampanii
+ * Google Ads może kupić online i nie złożyć wniosku — wtedy nie ma go ani
+ * w `ud_clients`, ani w konwersjach Ads. public/zrodlo.js dokleja parametry
+ * kampanii do odnośnika `/kup-online`, a tu zapisujemy z nich trzy rzeczy:
+ * `platne` — wejście z reklamy według TEJ SAMEJ reguły, co „Google Ads"
+ * w panelu (apps/panel/src/lib/zrodlo.js, `rodzajZrodla`): w adresie był
+ * poprawny gclid, gbraid, wbraid albo gad_source, ALBO utm_source ads/google
+ * przy utm_medium cpc/internet/paid (kampania UD_2026 bez identyfikatora, np.
+ * gdy Safari go wycięło). Inaczej „z reklamy" na Niedokończonych i „Google Ads"
+ * w Statystykach liczyłyby dwie różne rzeczy, a właściciel je porównuje.
+ * Do tego `utm_campaign` i `gad_campaignid` — tylko poprawne, inaczej pomijane.
+ * SAMEGO IDENTYFIKATORA KLIKNIĘCIA NIE ZAPISUJEMY: tu nie znamy zgody na
+ * marketing, a bez niej klient odmówił pomiaru skuteczności reklam.
+ * Reguły wartości to kopia packages/wniosek/src/zrodlo.js (funkcje Pages nie
+ * importują pakietów workspace'u) i CHECK-ów migracji
+ * `20261120100000_klikniecia_zrodlo_reklamy.sql`; zgodność pilnuje
+ * test/zrodlo.spec.js. Parametry kampanii do Leadenhall NIE przechodzą —
+ * przekierowanie idzie na CEL bez zmian.
+ *
  * Zmienne (te same, co w functions/owu): SUPABASE_SERVICE_ROLE_KEY — bez niej
  * przekierowanie działa, tylko nic się nie liczy; PUBLIC_SUPABASE_URL —
  * opcjonalna.
@@ -46,6 +65,61 @@ export function zrodlo(wartosc) {
   return /^[a-z0-9-]{1,32}$/.test(z) ? z : 'inne';
 }
 
+/*
+ * Reklama — kopia reguł z packages/wniosek/src/zrodlo.js, tylko to, co
+ * zapisujemy. Wartość po trim; liczy się pierwsze wystąpienie (`get`).
+ */
+const PLATNE = ['gclid', 'gbraid', 'wbraid', 'gad_source'];
+const IDENTYFIKATOR = /^[A-Za-z0-9_-]{1,200}$/;
+const GAD = /^[A-Za-z0-9_-]{1,32}$/;
+const UTM_MAKS = 100;
+// eslint-disable-next-line no-control-regex
+const STERUJACY = /[\u0000-\u001F\u007F]/;
+// Kopia ZRODLA_REKLAMY / MEDIA_REKLAMY z apps/panel/src/lib/zrodlo.js — tamten
+// plik jest regułą; test/zrodlo.spec.js porównuje obie zachowaniem.
+const ZRODLA_REKLAMY = ['ads', 'google'];
+const MEDIA_REKLAMY = ['cpc', 'internet', 'paid'];
+
+/** Wartość parametru po trim albo null, gdy go nie ma albo jest niepoprawna. */
+function poprawnaWartosc(parametry, klucz) {
+  const surowa = parametry.get(klucz);
+  if (surowa === null) return null;
+  const v = surowa.trim();
+  if (klucz.startsWith('utm_')) return v.length >= 1 && v.length <= UTM_MAKS && !STERUJACY.test(v) ? v : null;
+  if (klucz === 'gad_source' || klucz === 'gad_campaignid') return GAD.test(v) ? v : null;
+  return IDENTYFIKATOR.test(v) ? v : null;
+}
+
+/** utm_source ads/google przy utm_medium cpc/internet/paid — jak reguła a) w panelu. */
+function oznaczenieReklamy(parametry) {
+  const zrodloUtm = (poprawnaWartosc(parametry, 'utm_source') ?? '').toLowerCase();
+  const medium = (poprawnaWartosc(parametry, 'utm_medium') ?? '').toLowerCase();
+  return ZRODLA_REKLAMY.includes(zrodloUtm) && MEDIA_REKLAMY.includes(medium);
+}
+
+/**
+ * Część wiersza `ud_klikniecia` o reklamie: `platne` zawsze (true albo false —
+ * NULL w tabeli znaczy „kliknięcie sprzed pomiaru"), `utm_campaign`
+ * i `gad_campaignid` tylko poprawne. Bez identyfikatora kliknięcia. Nie rzuca —
+ * licznik nie może zatrzymać przekierowania.
+ * @param {URLSearchParams} parametry
+ * @returns {{ platne: boolean, utm_campaign?: string, gad_campaignid?: string }}
+ */
+export function reklama(parametry) {
+  try {
+    const wynik = {
+      platne: PLATNE.some((k) => poprawnaWartosc(parametry, k) !== null) || oznaczenieReklamy(parametry),
+    };
+    for (const k of ['utm_campaign', 'gad_campaignid']) {
+      const v = poprawnaWartosc(parametry, k);
+      if (v !== null) wynik[k] = v;
+    }
+    return wynik;
+  } catch {
+    return { platne: false };
+  }
+}
+
 /**
  * Roboty, podglądy linków i narzędzia. Komunikatory (WhatsApp, Messenger,
  * Slack, Telegram) pobierają adres, gdy ktoś go tylko wkleja — to nie jest
@@ -65,6 +139,19 @@ export function czlowiek(request) {
   return !/prefetch|prerender|preview/i.test(cel);
 }
 
+/**
+ * PostgREST nie zna którejś kolumny z ciała (PGRST204) — tak odpowiada baza
+ * sprzed migracji 20261120100000 na `platne`, `utm_campaign`, `gad_campaignid`.
+ */
+async function brakKolumny(odp) {
+  if (odp.status !== 400) return false;
+  try {
+    return (await odp.json())?.code === 'PGRST204';
+  } catch {
+    return false;
+  }
+}
+
 async function zapisz(env, wiersz) {
   const klucz = env?.SUPABASE_SERVICE_ROLE_KEY;
   if (!klucz) return;
@@ -75,11 +162,20 @@ async function zapisz(env, wiersz) {
     'Content-Type': 'application/json',
     Prefer: 'return=minimal',
   };
+  const wstaw = (w) => fetch(`${url}/rest/v1/ud_klikniecia`, {
+    method: 'POST', headers: naglowki, body: JSON.stringify(w), signal: AbortSignal.timeout(CZAS_MS),
+  });
   let powod;
   try {
-    const odp = await fetch(`${url}/rest/v1/ud_klikniecia`, {
-      method: 'POST', headers: naglowki, body: JSON.stringify(wiersz), signal: AbortSignal.timeout(CZAS_MS),
-    });
+    let odp = await wstaw(wiersz);
+    // Portal wyszedł przed migracją 20261120100000 (push wdraża go od razu, jak
+    // panel v.0.70 przed koszem ofert): baza nie zna nowych kolumn i odrzuca
+    // CAŁY wiersz. Wtedy jeszcze raz samym celem i źródłem, jak przed zmianą —
+    // licznik liczy dalej, ginie tylko informacja o reklamie (po migracji takie
+    // wiersze mają `platne` NULL = „sprzed pomiaru", panel nie udaje zer).
+    // Bez wpisu w ud_errors: byłby jeden na każde kliknięcie, a brak kolumny
+    // „z reklamy" w panelu i tak to widać.
+    if (await brakKolumny(odp)) odp = await wstaw({ cel: wiersz.cel, zrodlo: wiersz.zrodlo });
     if (odp.ok) return;
     powod = `HTTP ${odp.status}`;
   } catch (e) {
@@ -109,7 +205,9 @@ export async function onRequest({ request, params, env, waitUntil }) {
 
   const adres = new URL(request.url);
   if (czlowiek(request) && !adres.hostname.endsWith('.pages.dev')) {
-    const zapis = zapisz(env, { cel: 'leadenhall', zrodlo: zrodlo(adres.searchParams.get('z')) });
+    const zapis = zapisz(env, {
+      cel: 'leadenhall', zrodlo: zrodlo(adres.searchParams.get('z')), ...reklama(adres.searchParams),
+    });
     if (typeof waitUntil === 'function') waitUntil(zapis);
   }
 

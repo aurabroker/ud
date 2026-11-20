@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { readFileSync, readdirSync } from 'node:fs';
-import { onRequest, CEL, zrodlo } from '../functions/kup-online/[[reszta]].js';
+import { onRequest, CEL, zrodlo, reklama } from '../functions/kup-online/[[reszta]].js';
 import { onRequest as middleware } from '../functions/_middleware.js';
 import { KUP_ONLINE, KUP_ONLINE_MIEJSCE, KUP_ONLINE_NA_STRONIE } from '../src/lib/kupOnline.ts';
 import { FIRMA } from '../src/lib/firma.ts';
@@ -12,7 +12,9 @@ import { FIRMA } from '../src/lib/firma.ts';
  * Czego pilnuje: link Leadenhall wychodzi BEZ ZMIAN (inaczej przepada
  * przypisanie polisy), przekierowanie nie czeka na bazę i nie trafia do
  * bufora, liczą się tylko kliknięcia ludzi, a do bazy idą wyłącznie czas,
- * cel i źródło z białej listy. Sieć jest podstawiona.
+ * cel i źródło z białej listy oraz (od 20.11.2026) flaga „z reklamy”
+ * z nazwą kampanii — nigdy identyfikator kliknięcia, IP ani User-Agent.
+ * Sieć jest podstawiona.
  */
 
 const PRZEGLADARKA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1';
@@ -59,11 +61,11 @@ test('przekierowanie na link Leadenhall bez żadnej zmiany, bez bufora i bez ind
   }
 });
 
-test('kliknięcie człowieka idzie do ud_klikniecia: tylko cel i źródło, klucz w nagłówkach', async () => {
+test('kliknięcie człowieka idzie do ud_klikniecia: tylko cel, źródło i flaga reklamy, klucz w nagłówkach', async () => {
   const { wolane } = await wejscie('/kup-online?z=Kalkulator');
   expect(wolane).toHaveLength(1);
   expect(wolane[0].adres).toBe(TABELA);
-  expect(wolane[0].cialo).toEqual({ cel: 'leadenhall', zrodlo: 'kalkulator' });
+  expect(wolane[0].cialo).toEqual({ cel: 'leadenhall', zrodlo: 'kalkulator', platne: false });
   expect(wolane[0].naglowki.get('apikey')).toBe(KLUCZ);
   expect(wolane[0].naglowki.get('authorization')).toBe(`Bearer ${KLUCZ}`);
   expect(wolane[0].adres).not.toContain(KLUCZ);
@@ -73,7 +75,87 @@ test('stuknięcie w aplikacji Facebooka (bez X-Purpose) liczy się jak kliknięc
   const { wolane } = await wejscie('/kup-online?z=facebook', {
     naglowki: { 'user-agent': FACEBOOK_ANDROID, 'x-fb-http-engine': 'Liger' },
   });
-  expect(wolane.map((w) => w.cialo)).toEqual([{ cel: 'leadenhall', zrodlo: 'facebook' }]);
+  expect(wolane.map((w) => w.cialo)).toEqual([{ cel: 'leadenhall', zrodlo: 'facebook', platne: false }]);
+});
+
+/**
+ * Wejście z reklamy (od 20.11.2026): public/zrodlo.js dokleja parametry
+ * kampanii do odnośnika /kup-online. Zapisujemy `platne`, `utm_campaign`
+ * i `gad_campaignid` — sam identyfikator kliknięcia nie, bo tu nie znamy
+ * zgody na marketing. Do Leadenhall nic z tego nie przechodzi.
+ */
+const DOZWOLONE_KOLUMNY = ['cel', 'zrodlo', 'platne', 'utm_campaign', 'gad_campaignid'];
+
+test('kliknięcie z reklamy: platne, kampania i gad_campaignid w wierszu — bez gclid, IP i User-Agenta', async () => {
+  const { odp, wolane } = await wejscie('/kup-online?z=wniosek&gclid=Cj0KCQiA_x-1&utm_campaign=jesien26&gad_campaignid=123'
+    + '&utm_source=ads&gad_source=1&gbraid=GB1&wbraid=WB1', {
+    naglowki: {
+      'user-agent': PRZEGLADARKA, 'cf-connecting-ip': '203.0.113.7', 'x-forwarded-for': '203.0.113.7',
+      referer: 'https://utratadochodu.pl/wniosek/?gclid=Cj0KCQiA_x-1',
+    },
+  });
+  expect(odp.status).toBe(302);
+  expect(odp.headers.get('location'), 'parametry reklamy przeszły do Leadenhall').toBe(CEL);
+  expect(odp.headers.get('cache-control')).toBe('no-store');
+  expect(odp.headers.get('x-robots-tag')).toBe('noindex, nofollow');
+  expect(wolane).toHaveLength(1);
+  expect(wolane[0].cialo).toEqual({
+    cel: 'leadenhall', zrodlo: 'wniosek', platne: true, utm_campaign: 'jesien26', gad_campaignid: '123',
+  });
+  const zapis = JSON.stringify(wolane[0].cialo);
+  for (const zakazane of ['Cj0KCQiA_x-1', 'GB1', 'WB1', '203.0.113.7', 'Mozilla', 'gclid', 'gbraid', 'wbraid', 'ads']) {
+    expect(zapis, `w wierszu jest ${zakazane}`).not.toContain(zakazane);
+  }
+  for (const klucz of Object.keys(wolane[0].cialo)) expect(DOZWOLONE_KOLUMNY).toContain(klucz);
+});
+
+test('kliknięcie z reklamy: niepoprawna kampania pominięta, reszta zapisana', async () => {
+  const przypadki = [
+    // [adres, oczekiwany wiersz bez celu]
+    [`/kup-online?z=blog&gclid=abc&utm_campaign=${'k'.repeat(101)}`, { zrodlo: 'blog', platne: true }],
+    [`/kup-online?z=blog&gclid=abc&utm_campaign=${'k'.repeat(100)}`, { zrodlo: 'blog', platne: true, utm_campaign: 'k'.repeat(100) }],
+    ['/kup-online?utm_campaign=a%09b&gad_campaignid=1%202', { zrodlo: 'bezposrednio', platne: false }],
+    ['/kup-online?utm_campaign=%20&gad_campaignid=', { zrodlo: 'bezposrednio', platne: false }],
+    ['/kup-online?utm_campaign=%20jesien26%20', { zrodlo: 'bezposrednio', platne: false, utm_campaign: 'jesien26' }],
+    [`/kup-online?gad_campaignid=${'9'.repeat(33)}`, { zrodlo: 'bezposrednio', platne: false }],
+    ['/kup-online?gclid=%3Cscript%3E', { zrodlo: 'bezposrednio', platne: false }],
+    ['/kup-online?gad_source=1', { zrodlo: 'bezposrednio', platne: true }],
+    ['/kup-online?gbraid=x', { zrodlo: 'bezposrednio', platne: true }],
+    ['/kup-online?wbraid=x', { zrodlo: 'bezposrednio', platne: true }],
+    ['/kup-online?gad_campaignid=123', { zrodlo: 'bezposrednio', platne: false, gad_campaignid: '123' }],
+    ['/kup-online?utm_campaign=pierwsza&utm_campaign=druga', { zrodlo: 'bezposrednio', platne: false, utm_campaign: 'pierwsza' }],
+    // Kampania bez identyfikatora kliknięcia (Safari go wycina) — reklama według tej samej reguły co
+    // „Google Ads" w panelu: utm_source ads/google przy utm_medium cpc/internet/paid.
+    ['/kup-online?z=wniosek&utm_source=ads&utm_medium=internet&utm_campaign=UD_2026',
+      { zrodlo: 'wniosek', platne: true, utm_campaign: 'UD_2026' }],
+    ['/kup-online?utm_source=%20Google%20&utm_medium=CPC', { zrodlo: 'bezposrednio', platne: true }],
+    ['/kup-online?utm_source=ads&utm_medium=paid', { zrodlo: 'bezposrednio', platne: true }],
+    ['/kup-online?utm_source=ads&utm_medium=organic', { zrodlo: 'bezposrednio', platne: false }],
+    ['/kup-online?utm_source=bing&utm_medium=cpc', { zrodlo: 'bezposrednio', platne: false }],
+    ['/kup-online?utm_source=ads', { zrodlo: 'bezposrednio', platne: false }],
+    [`/kup-online?utm_source=ads&utm_medium=${'c'.repeat(101)}`, { zrodlo: 'bezposrednio', platne: false }],
+  ];
+  for (const [adres, wiersz] of przypadki) {
+    const { odp, wolane } = await wejscie(adres);
+    expect(odp.headers.get('location'), adres).toBe(CEL);
+    expect(wolane.map((w) => w.cialo), adres).toEqual([{ cel: 'leadenhall', ...wiersz }]);
+  }
+});
+
+test('bez parametrów reklamy: platne false i żadnych kluczy kampanii', async () => {
+  for (const adres of ['/kup-online', '/kup-online?z=kalkulator', '/kup-online?utm_source=newsletter&utm_medium=email']) {
+    const { wolane } = await wejscie(adres);
+    expect(wolane).toHaveLength(1);
+    expect(wolane[0].cialo.platne, adres).toBe(false);
+    expect(wolane[0].cialo, adres).not.toHaveProperty('utm_campaign');
+    expect(wolane[0].cialo, adres).not.toHaveProperty('gad_campaignid');
+  }
+});
+
+test('reklama() nie rzuca — licznik nie może zatrzymać przekierowania', () => {
+  for (const zle of [null, undefined, {}, { get() { throw new Error('x'); } }]) {
+    expect(reklama(zle)).toEqual({ platne: false });
+  }
 });
 
 test('źródło: biała lista znaków, reszta to „inne", brak to „bezposrednio"', () => {
@@ -132,6 +214,50 @@ test('awaria bazy nie zatrzymuje klienta, a zostawia ślad w ud_errors', async (
   // Także gdy i dziennik błędów nie odpowiada — nic nie wybucha.
   const { odp } = await wejscie('/kup-online', { siec: () => { throw new TypeError('fetch failed'); } });
   expect(odp.status).toBe(302);
+});
+
+/**
+ * Portal wdrożony przed migracją 20261120100000 (push wdraża go od razu): baza
+ * nie zna `platne`, `utm_campaign`, `gad_campaignid` i odrzuca CAŁY wiersz
+ * kodem PGRST204. Bez ponowienia przepadałoby każde kliknięcie, nie tylko
+ * z reklamy — licznik stałby, a ud_errors dostawałby wpis na kliknięcie.
+ */
+const BRAK_KOLUMNY = () => new Response(JSON.stringify({
+  code: 'PGRST204', details: null, hint: null, message: "Could not find the 'platne' column of 'ud_klikniecia' in the schema cache",
+}), { status: 400, headers: { 'Content-Type': 'application/json' } });
+
+test('baza bez nowych kolumn (PGRST204): drugi zapis samym celem i źródłem, bez wpisu w ud_errors', async () => {
+  for (const adres of ['/kup-online?z=kalkulator', '/kup-online?z=wniosek&gclid=abc&utm_campaign=jesien26&gad_campaignid=123']) {
+    let proby = 0;
+    const siec = (url) => (url === TABELA && (proby += 1) === 1 ? BRAK_KOLUMNY() : new Response(null, { status: 201 }));
+    const { odp, wolane } = await wejscie(adres, { siec });
+    expect(odp.status, adres).toBe(302);
+    expect(odp.headers.get('location'), adres).toBe(CEL);
+    expect(wolane.map((w) => w.adres), adres).toEqual([TABELA, TABELA]);
+    expect(Object.keys(wolane[0].cialo), adres).toContain('platne');
+    expect(wolane[1].cialo, adres).toEqual({ cel: 'leadenhall', zrodlo: adres.includes('wniosek') ? 'wniosek' : 'kalkulator' });
+    expect(wolane[1].naglowki.get('apikey')).toBe(KLUCZ);
+  }
+});
+
+test('ponowienie tylko przy PGRST204: inny błąd 400 i porażka drugiego zapisu idą do ud_errors', async () => {
+  // CHECK tabeli (23514) to nie brak kolumny — ponowienie ukryłoby rozjazd reguł z bazą.
+  const check = () => new Response(JSON.stringify({ code: '23514', message: 'violates check constraint' }), { status: 400 });
+  let r = await wejscie('/kup-online?z=blog', { siec: (url) => (url === TABELA ? check() : new Response(null, { status: 201 })) });
+  expect(r.wolane.map((w) => w.adres)).toEqual([TABELA, BLEDY]);
+  expect(r.wolane[1].cialo.message).toBe('Kliknięcie nie zapisane: HTTP 400');
+  // 400 bez JSON-a też nie jest brakiem kolumny.
+  r = await wejscie('/kup-online?z=blog', { siec: (url) => (url === TABELA ? new Response('<html>', { status: 400 }) : new Response(null, { status: 201 })) });
+  expect(r.wolane.map((w) => w.adres)).toEqual([TABELA, BLEDY]);
+  // Drugi zapis też pada — ślad w ud_errors z jego statusem.
+  let proby = 0;
+  r = await wejscie('/kup-online?z=blog', {
+    siec: (url) => (url !== TABELA ? new Response(null, { status: 201 })
+      : (proby += 1) === 1 ? BRAK_KOLUMNY() : new Response('awaria', { status: 503 })),
+  });
+  expect(r.odp.status).toBe(302);
+  expect(r.wolane.map((w) => w.adres)).toEqual([TABELA, TABELA, BLEDY]);
+  expect(r.wolane[2].cialo.message).toBe('Kliknięcie nie zapisane: HTTP 503');
 });
 
 test('przekierowanie nie czeka na zapis w bazie', async () => {

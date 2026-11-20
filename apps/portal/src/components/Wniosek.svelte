@@ -16,7 +16,7 @@
     FORMY_ZATRUDNIENIA, FORMY_OPODATKOWANIA, LIMIT_DOCHODU,
     HEALTH_SURVEY_GROUPS, HEALTH_SURVEY_ITEMS, HEALTH_SURVEY_THRESHOLD,
     sprawdzKrok, ankietaRozszerzona, doWysylki, zLinkuAgenta, klauzuleDostepne, PROG_KLAUZUL_NW,
-    ZGODA_KONTAKT, GRANICE_CIALA,
+    ZGODA_KONTAKT, GRANICE_CIALA, zrodloZAdresu,
   } from '@ud/wniosek';
 
   let { zawody = [], zawodPoczatkowy = '', urlFunkcji, urlSzkicu = '', kluczTurnstile } = $props();
@@ -287,6 +287,22 @@
     szkicId?.then((id) => { if (id) void szkic({ akcja: 'krok', id, krok: zaliczony }); });
   }
 
+  /**
+   * Źródło wizyty (UTM-y, gad_*, flaga „płatne”, a gclid tylko przy zgodzie na
+   * marketing) z adresu strony — public/zrodlo.js niesie je w adresie od
+   * strony wejścia. Zgodę czytamy w chwili wysyłki, bo klient mógł ją dać albo
+   * cofnąć w trakcie. Cokolwiek tu pęknie, wniosek idzie bez źródła:
+   * źródło nigdy nie może zatrzymać wniosku. Do szkicu nie idzie.
+   */
+  function zrodloWizyty() {
+    try {
+      const zgoda = window.UDCookies?.stan?.()?.marketing === true;
+      return zrodloZAdresu(window.location.search, zgoda);
+    } catch {
+      return {};
+    }
+  }
+
   async function wyslij(e) {
     e.preventDefault();
     bledy = sprawdzKrok('zgody', dane);
@@ -306,8 +322,12 @@
       const res = await fetch(urlFunkcji, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        // Link agenta (?agent=<kod>) przypisuje lead temu agentowi w panelu.
-        body: JSON.stringify({ ...doWysylki(dane), ...zLinkuAgenta(window.location.search), 'cf-turnstile-response': token }),
+        // Link agenta (?agent=<kod>) przypisuje lead temu agentowi w panelu;
+        // `zrodlo` trafia do ud_clients.form_data (form-submit kopiuje ciało).
+        body: JSON.stringify({
+          ...doWysylki(dane), ...zLinkuAgenta(window.location.search), ...zrodloWizyty(),
+          'cf-turnstile-response': token,
+        }),
       });
       const wynik = await res.json().catch(() => ({}));
       if (res.ok && wynik.status !== 'error') {

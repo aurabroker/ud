@@ -97,6 +97,11 @@ const ogObraz = new URL(obraz ?? OG_DOMYSLNY.sciezka, SERWIS.url).href;
   <script is:inline define:vars={{ TAGI }}>window.UD_TAGI = TAGI;</script>
   <script is:inline src="/awaria.js"></script>
   <script is:inline src="/zgody.js"></script>
+  {/* zrodlo.js — niesie parametry kampanii (gclid, utm_*…) w adresie między
+      podstronami, dokleja je do odnośników w chwili kliknięcia; niczego nie
+      zapisuje w urządzeniu. `defer`: nie musi wyprzedzać niczego, a nie może
+      blokować renderu. Opis w samym pliku. */}
+  <script is:inline src="/zrodlo.js" defer></script>
 
   <title>{tytul}</title>
   <meta name="description" content={opis}>

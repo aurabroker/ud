@@ -66,3 +66,37 @@ export function krokiSlownie(n?: number): string;
 export function doWysylki(dane: Dane): Record<string, unknown>;
 /** Kod agenta z linku /wniosek/?agent=<kod> → { affiliateCode } albo {}. */
 export function zLinkuAgenta(search: string): { affiliateCode?: string };
+
+/** Parametr źródła wizyty z białej listy (adres strony → form_data.zrodlo). */
+export type ParametrZrodla =
+  | 'gclid' | 'gbraid' | 'wbraid'
+  | 'gad_source' | 'gad_campaignid'
+  | 'utm_source' | 'utm_medium' | 'utm_campaign' | 'utm_term' | 'utm_content';
+
+/** Kształt `ud_clients.form_data.zrodlo`. Identyfikator kliknięcia tylko przy zgodzie na marketing. */
+export interface ZrodloWizyty {
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
+  utm_term?: string;
+  utm_content?: string;
+  gad_source?: string;
+  gad_campaignid?: string;
+  /** W adresie był poprawny gclid, gbraid, wbraid albo gad_source. */
+  platne: boolean;
+  zgoda_marketing: boolean;
+  gclid?: string;
+  gbraid?: string;
+  wbraid?: string;
+}
+
+/** Biała lista, w stałej kolejności. */
+export const PARAMETRY_ZRODLA: readonly ParametrZrodla[];
+export const IDENTYFIKATORY_KLIKNIECIA: readonly ('gclid' | 'gbraid' | 'wbraid')[];
+export const PARAMETRY_PLATNE: readonly ('gclid' | 'gbraid' | 'wbraid' | 'gad_source')[];
+/** Czy wartość (po trim) przechodzi regułę danego parametru; spoza białej listy — false. */
+export function wartoscZrodlaPoprawna(klucz: string, wartosc: unknown): boolean;
+/** Poprawne parametry z białej listy jako pary [klucz, wartość], pierwsze wystąpienie. Nie rzuca. */
+export function parametryZrodla(search: unknown): [ParametrZrodla, string][];
+/** `{ zrodlo }` do wniosku albo `{}` bez parametrów. Nie rzuca. */
+export function zrodloZAdresu(search: unknown, zgodaMarketing: unknown): { zrodlo?: ZrodloWizyty };
