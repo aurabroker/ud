@@ -1031,8 +1031,11 @@ odpowiada 302 na `CEL` i w tle zapisuje kliknięcie w `ud_klikniecia`
   przechodzą. Ich strona (Webflow, `utratadochodu.leadenhall.com`) czyta kod
   z adresu i zapisuje go w `localStorage` („URL → localStorage → domyślny”,
   sprawdzone przez `net.http_get` 11.11.2026). Nowy link = nowa stała `CEL`.
-- **W bazie: czas, cel, źródło.** Bez IP, User-Agenta i ciasteczek, więc
-  licznik nie potrzebuje zgody i liczy wszystkich. Źródło z `?z=` przechodzi
+- **W bazie: czas, cel, źródło** — a od migracji `20261120100000` także
+  `platne` (wejście z reklamy) i nazwa kampanii (`utm_campaign`,
+  `gad_campaignid`), patrz „Źródło leada" niżej. Bez IP, User-Agenta,
+  ciasteczek i identyfikatora kliknięcia, więc licznik nie potrzebuje zgody
+  i liczy wszystkich. Źródło z `?z=` przechodzi
   białą listę `^[a-z0-9-]{1,32}$` (inne → `inne`, brak → `bezposrednio`);
   ta sama reguła stoi w CHECK tabeli. RLS bez polityk, tylko `service_role`.
 - **Nie liczą się:** HEAD, prefetch (`Sec-Purpose`/`Purpose`, a od
@@ -1163,6 +1166,14 @@ nie zasłania listy osób do kontaktu. **Nie oznaczaj linków `?z=inne` ani
 `?z=bezposrednio`** — tak funkcja portalu zapisuje `?z=` nieczytelne i brak
 `?z=`, więc w tabeli to się zleje.
 
+**Od v.0.80 komórka ma też „w tym z reklamy"** (kolumny `z_reklamy`
+i `zmierzonych` z widoku i z `ud_klikniecia_tabela`, migracja
+`20261120100000`). „—" = tydzień sprzed pomiaru (`platne` NULL — kliknięć
+sprzed 20.11.2026 nikt nie sprawdzał pod kątem reklamy, więc to nie jest
+zero), „≥ N" = tydzień zmierzony w części. Panel bez tej migracji (cztery
+kolumny wyniku) tej części po prostu nie pokazuje. „Z reklamy" liczy się tą
+samą regułą co „Google Ads" w Statystykach — patrz „Źródło leada".
+
 **API Leadenhall, które woła ich strona (11.11.2026), i nic więcej:**
 `GET /iau_live/bts/api/employee-code/<kod>/employee` — publicznie, bez
 logowania: imię, nazwisko, e-mail, telefon, nazwa agencji i tagi pośrednika
@@ -1182,9 +1193,148 @@ group by 1, 2 order by 1 desc, 3 desc;
 ```
 
 Pilnuje tego `test/kup-online.spec.js` (link bez zmian, `no-store`
-i `noindex`, zapis tylko celu i źródła, biała lista źródła zgodna z CHECK,
-czego nie liczymy, awaria bazy → `ud_errors`, przekierowanie nie czeka na
-bazę, middleware przepuszcza 302).
+i `noindex`, zapis celu, źródła i — bez identyfikatora kliknięcia — znacznika
+reklamy z kampanią, biała lista źródła zgodna z CHECK, czego nie liczymy,
+awaria bazy → `ud_errors`, baza bez nowych kolumn → zapis samym celem
+i źródłem, przekierowanie nie czeka na bazę, middleware przepuszcza 302).
+
+## Źródło leada — parametry w adresie, nie w urządzeniu (od 20.11.2026, etap 1)
+
+Pytanie właściciela: ile wniosków, sprzedanych polis i składek przyszło
+z Google Ads. Kampania kieruje na stronę główną z UTM-ami, Google dokleja
+`gclid` (czasem `gbraid`/`wbraid`) i `gad_*` — i do 20.11.2026 wszystko to
+ginęło przy pierwszym kliknięciu w odnośnik. Teraz każdy nowy wniosek z
+parametrami kampanii ma `ud_clients.form_data.zrodlo`, a panel go pokazuje.
+**Etap 1 niczego nie wysyła do Google Ads ani GA4.**
+
+**Stan na 20.11.2026: w repozytorium, NIEWDROŻONE.** Migracje
+`20261120100000_klikniecia_zrodlo_reklamy.sql`
+i `20261120110000_statystyki_zrodla.sql` nie są zastosowane, push czeka na
+„wypychaj". Zdanie do polityki prywatności czeka na prawnika (propozycja
+w raporcie z 20.11.2026) — nie publikuj go bez akceptacji.
+
+| Element | Co robi |
+|---|---|
+| `apps/portal/public/zrodlo.js` | dokleja parametry kampanii do odnośników wewnętrznych **w chwili kliknięcia** (`click` + `auxclick`); `Baza.astro` ładuje go po `zgody.js`, z `defer`; wypisany z `_routes.json` |
+| `packages/wniosek/src/zrodlo.js` | `zrodloZAdresu(search, zgodaMarketing)` → `{zrodlo: {…}}` albo `{}` — reguły wartości; skrypt portalu, `/kup-online` i CHECK-i to ich kopie |
+| `Wniosek.svelte` | `zrodloWizyty()` w `wyslij()` obok `zLinkuAgenta()`, w `try/catch` → `{}`. **Do `wniosek-szkic` źródło nie idzie** |
+| `form-submit` | **bez zmian** — kopiuje ciało żądania do `form_data` (`{...body}`), więc `zrodlo` ląduje tam samo. Sprawdzone 20.11.2026: produkcja v26 = repozytorium (poza opisanym zapisem NBSP/BOM w `liczbaScisla`) |
+| `functions/kup-online` | `platne`, `utm_campaign`, `gad_campaignid` w `ud_klikniecia` |
+| panel `src/lib/zrodlo.js` | **jedyna** reguła rodzaju źródła — lista klientów, karta i Statystyki |
+| `ud_leady_statystyki_zrodla()` | surowe grupy do Statystyk; rodzaju nie liczy (SQL liczący regułę drugi raz rozjechałby się z listą klientów przy pierwszej poprawce) |
+
+Parametry: `gclid`, `gbraid`, `wbraid`, `gad_source`, `gad_campaignid`,
+`utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content`.
+Identyfikatory kliknięcia `^[A-Za-z0-9_-]{1,200}$`, `gad_*`
+`^[A-Za-z0-9_-]{1,32}$`, `utm_*` 1–100 znaków po trim, bez znaków
+sterujących. Wartość niepoprawna nie jedzie dalej. Nie ruszamy obcych domen,
+`mailto:`/`tel:`, samych `#`, `download`, plików (`/owu/`, `/media/`,
+`/pobierz/`, `.pdf`, `.md`, `.txt`, `.xml` i inne) ani `/podziekowanie/`.
+Parametru, który odnośnik już ma (`?agent=`, `?dochod=`, `?odkladam=`,
+`?z=`), nie nadpisujemy; `#fragment` zostaje. Jedyna nawigacja programowa
+w portalu to przekierowanie na `/podziekowanie/` — celowo bez parametrów;
+na nowe jest `window.UDZrodlo.adres(href)`.
+
+### Dlaczego tak — trzy decyzje, których nie „upraszczaj"
+
+- **Adres, nie `sessionStorage` ani ciasteczko.** Zapis w urządzeniu na
+  potrzeby pomiaru wymaga zgody (art. 399 PKE) — ta sama zasada co przy
+  `?agent=` i identyfikatorze szkicu. Skrypt niczego nie zapisuje; test
+  sprawdza, że po przejściu kreatora w magazynach są tylko `ud_zgody`
+  i `ud:wniosek`. **W chwili kliknięcia, nie przy wczytaniu**: odnośniki
+  z wysp powstają po hydratacji, kalkulator przepisuje swoje przy każdej
+  zmianie kwoty, a roboty nie klikają — HTML, który czytają, ma czyste
+  adresy. **Skrypt nigdy nie rzuca i jest w ES5** (test parsuje go acornem
+  w trybie ES5): błąd z naszej domeny `awaria.js` zamienia w okienko awarii
+  na każdej stronie.
+- **`gclid`/`gbraid`/`wbraid` tylko przy zgodzie na marketing.**
+  Identyfikator kliknięcia służy wyłącznie pomiarowi skuteczności reklam
+  (etap 2: import konwersji offline do Ads) — kto nie zgodził się na cookies
+  marketingowe, odmówił właśnie tego. Bez zgody wniosek dostaje
+  `platne: true` (sam fakt wejścia z reklamy), parametry kampanii
+  i `zgoda_marketing: false`. Zgodę kreator czyta w chwili wysyłki:
+  `UDCookies.stan()?.marketing === true`. Panel identyfikatora nie pokazuje
+  nigdzie (`bezIdentyfikatorow()` czyści `form_data` przed kartą klienta).
+- **`form_data.zrodlo`, nie kolumna w `ud_clients`.** Kolumna to migracja
+  `ud_clients` i zmiana `form-submit` — jedynej ścieżki, którą wpływają
+  pieniądze (ABSOLUTE_RULE). `form_data` przyjmuje to, co przyszło, bez
+  zmian w funkcji i bez wyzwalacza; panel czyta ścieżką JSON
+  (`zrodlo:form_data->zrodlo` w jawnej liście kolumn). Cena: `form_data`
+  zapisuje każdy, kto przejdzie Turnstile, więc źródło da się podrobić —
+  psuje to tylko liczby w panelu, a SQL i panel obcinają `utm_*`
+  i kampanię do 100 znaków (jeden spreparowany wniosek z 2 MB w
+  `utm_campaign` szedłby inaczej w danych strony do każdego, kto otworzy
+  Statystyki).
+
+### Reguła rodzaju źródła (`rodzajZrodla`, panel)
+
+1. `zrodlo.platne === true` (JSON `true`, nie napis) **albo** `utm_source`
+   ads/google przy `utm_medium` cpc/internet/paid → **Google Ads** (druga
+   połowa łapie kampanię, której Safari wyciął `gclid`);
+2. niepusty `affiliate_code_used` → **Link agenta**;
+3. inny `utm_source` → **Inne: <utm_source>**;
+4. brak `zrodlo` → **Brak danych** — także każdy NOWY wniosek z wejścia bez
+   parametrów (wyszukiwarka, adres wpisany ręcznie, link bez UTM-ów), nie
+   tylko stare wnioski i klienci dodani w panelu. Panel tak to opisuje.
+
+`/kup-online` stosuje **tę samą** regułę 1 (kopia w `reklama()`; test
+porównuje obie zachowaniem), bo „z reklamy" na Niedokończonych i „Google
+Ads" w Statystykach właściciel czyta obok siebie.
+
+### Panel (v.0.80)
+
+- **Klienci:** kolumna „Źródło", filtr `?zrodlo=ads|agent|inne|brak`
+  w adresie; karta klienta — sekcja „Źródło" (rodzaj, kampania =
+  `utm_campaign`, a bez niej `gad_campaignid`, słowo kluczowe = `utm_term`).
+  Pole `source` na karcie nazywa się teraz „Sposób zgłoszenia" — to dwie
+  różne rzeczy.
+- **Statystyki → „Według źródła":** wnioski, sprzedane polisy (Wygrany),
+  Σ składek rocznych i prowizji w okresie, z podziałem na kampanie.
+  Widoczność jak w `ud_leady_statystyki` (agent — swoje, także z cudzym
+  agentem w adresie). Wnioski: klienci z `source` innym niż `manual`
+  i `polisa`, po dacie utworzenia, u agenta — klienci jego leadów;
+  sprzedaże, składki i prowizja **dokładnie** jak w `ud_leady_statystyki`
+  (test SQL porównuje sumy). Load woła `synchronizuj()` przed oboma RPC —
+  bez tego wniosek z `?agent=` brakowałby agentowi, dopóki ktoś nie otworzy
+  tablicy. Brak funkcji w bazie → komunikat tylko w tej sekcji.
+
+### Skutki uboczne, o których trzeba wiedzieć
+
+- **Istniejące tagi (GA4, Ads, Pixel — tylko po zgodzie) widzą teraz `gclid`
+  i UTM-y w adresach podstron.** Kto zgodzi się na cookies dopiero na
+  `/wniosek/`, ma tam `gclid`, więc łącznik konwersji Ads go złapie — liczba
+  konwersji z Ads i atrybucja w GA4 mogą po wdrożeniu WZROSNĄĆ (jak przy
+  `url_passthrough`). To nie jest błąd pomiaru, tylko koniec gubienia
+  parametrów. Pixel poza `TAGI.bezPixela` (np. `/kalkulator/`) dostaje
+  w adresie `gclid`.
+- **Adres skopiowany z paska niesie cudzy `gclid`.** Wniosek odbiorcy będzie
+  „Google Ads" z identyfikatorem pierwszej osoby. Import offline (etap 2)
+  musi wysłać jeden `gclid` najwyżej raz, a `gclid` u różnych klientów
+  pominąć.
+- Długie przytrzymanie „Otwórz w nowej karcie" na telefonie nie wysyła
+  `click` — taka karta parametrów nie dostaje.
+
+### Wdrożenie — kolejność
+
+1. Migracja `20261120100000` (ma `DROP FUNCTION` — gdy MCP odmówi, SQL
+   Editor), potem `20261120110000`; md5 treści funkcji, uprawnienia (tylko
+   `service_role`), nazwy plików = wersje w bazie.
+2. Push (portal i panel v.0.80 wychodzą razem).
+   Odwrotna kolejność nic nie psuje, tylko gubi dane: `/kup-online` przy
+   400 `PGRST204` zapisuje sam cel i źródło (`platne` NULL), panel chowa
+   „z reklamy" i pokazuje komunikat w sekcji źródeł.
+3. `sprawdz-wdrozenie.sh` na domenie, potem w przeglądarce: wejście
+   `/?utm_source=test&gclid=TEST`, kliknięcie w „Policz składkę" → adres
+   niesie parametry; wniosek testowy przez bramę (`form_data.zrodlo`).
+
+Testy: `packages/wniosek` `pnpm test` (`zrodlo.test.js`); portal
+`test/zrodlo.spec.js` (doklejanie, `?agent=` zostaje, wartości złe odpadają,
+magazyny, ciało `form-submit` z `zrodlo`, `gclid` tylko przy zgodzie,
+zgodność skryptu, pakietu, `reklama()`, reguły panelu i CHECK-ów)
+i `test/kup-online.spec.js`; panel `pnpm test:zrodlo`,
+`pnpm test:klikniecia` (z SQL), `pnpm test:leady-sql`
+(`supabase/tests/statystyki-zrodla.sql`), `klienci.spec.js`,
+`statystyki.spec.js`.
 
 ## Asystentka AI (ElevenLabs) — zbudowana, NIE na stronie (od 11.11.2026)
 
@@ -2899,6 +3049,65 @@ nad tabelą). Widok idzie przez adres, nie przez stan komponentu — da się go
 zapisać w zakładce i sprawdzić w SSR. W archiwum etap zostaje (np. „Klient
 ubezpieczony"), ale bez odnośnika: zarchiwizowanego leada nie ma na tablicy.
 Klient bez leada zostaje na liście. Karta klienta otwiera się z obu widoków.
+
+### Klienci: świadczenie, stan oferty, menu, sąsiedzi na karcie (v.0.80, 20.11.2026)
+
+Prośba właściciela z 20.11.2026. Kolumny: Klient (nazwisko, pod nim telefon
+jako `tel:`), **Świadczenie**, Akcja, Źródło, Przypisany do, Dodano —
+kolumny „Kontakt" już nie ma (e-mail jest w wyszukiwaniu i w menu).
+
+- **Świadczenie** = miesięczne świadczenie z okresowej niezdolności,
+  `ud_clients.temp_incapacity_sum`. Kolumna jest na produkcji **tekstem**
+  (20.11: 73 z 83 to same cyfry, 10 pustych) — czyta ją `kwotaZTekstu` jak
+  SQL-owe `ud_kwota`; do przeglądarki idzie liczba, śmieci dają „—", nigdy
+  NaN. Format „8000 zł/mies." — polski zapis nie grupuje liczb czterocyfrowych.
+- **Pod odznaką Akcja — stan najnowszej WYSŁANEJ oferty** (`sent_at`, także
+  w archiwum — archiwizacja to porządek na liście, nie koniec sprawy; wtedy
+  „· w archiwum"): `src/lib/klienci/oferta.js`. „Otwarta" znaczy, że klient
+  wpisał kod i zobaczył ofertę **po ostatniej wysyłce**: `viewed_at` ustawia
+  tylko pierwsze otwarcie w statusie `sent`, a ponowna wysyłka podbija
+  `sent_at` i `wersja`, więc `viewed_at` < `sent_at` to otwarcie poprzedniej
+  wersji (20.11: 6 z 18 ofert `sent`). Brzmienie:
+  „wysłana 10.11 · otwarta 12.11", „wysłana 15.11 · nieotwarta",
+  „wysłana ponownie 16.11 · nieotwarta (poprzednia wersja otwarta 12.11)",
+  na końcu decyzja („· wariant wybrany 07.11" / „· rezygnacja 08.11"); wybór
+  bez otwarcia po ostatniej wysyłce (karta otwarta wcześniej) nie twierdzi
+  ani „otwarta", ani „nieotwarta". Wyszukiwanie dokładnie „otwarta",
+  „nieotwarta" albo „decyzja" filtruje po stanie, nie po tekście —
+  „nieotwarta" i „poprzednia wersja otwarta" zawierają słowo „otwarta".
+- **Menu wiersza na lewy przycisk** (decyzja właściciela): kliknięcie
+  w wiersz poza odnośnikiem, przyciskiem i polem otwiera menu: Otwórz kartę
+  klienta, Utwórz ofertę, Pokaż na tablicy (gdy lead jest na tablicy),
+  Zadzwoń, Napisz e-mail, Kopiuj telefon. Nazwisko dalej prowadzi wprost do
+  karty. Lewy klik nie otwiera menu przy zaznaczonym tekście, drugim
+  kliknięciu podwójnego i z klawiszem modyfikującym; prawy klik — te same
+  wyjątki co na tablicy (Shift, odnośniki, pola, zaznaczenie zostawiają menu
+  przeglądarki; `src/lib/menuKontekstowe.js`, wspólne z `Tablica.svelte`).
+  Z klawiatury: przycisk „⋯" w pierwszej komórce. Komunikat „Skopiowano
+  telefon" idzie przez stały region `role="status"` (region dodany razem
+  z tekstem czytniki często przemilczają).
+- **`Menu.svelte` (wspólne z tablicą): Enter/Spacja na pozycji-odnośniku
+  klika odnośnik** — wcześniej Enter tylko zamykał menu i „Zadzwoń" na
+  tablicy nie dzwonił. Po `tel:`/`mailto:` fokus wraca na przycisk menu
+  (strona zostaje); po odnośniku wewnętrznym — nie.
+- **Karta klienta: „← Poprzedni klient" / „Następny klient →" i „N z M"**
+  w kolejności i z filtrami listy (`?widok=`, `?zrodlo=` jadą w odnośnikach
+  i w „Wróć do listy"). Kolejność i filtry są w JEDNYM module,
+  `src/lib/klienci/lista.js` (`created_at` malejąco, remis po `id`) —
+  `klienciWKolejnosci()` w `server/klienci.js` służy i liście, i strzałkom,
+  więc nie mogą się rozjechać. Strzałki liczą tylko widocznych klientów
+  (`klienciWidoczni`) i nie wołają synchronizacji tablicy. Gdy wyliczenie
+  sąsiadów się nie uda, karta i tak się pokazuje, ze strzałkami nieaktywnymi.
+  Dane karty są `$derived` — zwykłe `const` zostawiało po przejściu do
+  sąsiada poprzedniego klienta pod nowym adresem.
+- Lista i strzałki czytają wszystkich widocznych klientów, więc obie podlegają
+  limitowi 1000 wierszy PostgREST (lista podlegała mu już wcześniej).
+
+Testy: `klienci.spec.js` (SSR), `klienci-menu.spec.js` i
+`klienci-karta.spec.js` (przeglądarka, harnessy `test/leady/klienci.html`
+i `karta.html` z prawdziwymi stronami), `menu.spec.js`, `test:leady-model`.
+Panelowy `playwright.config.js` ma na sztywno `chromium-1194`; w obrazie bez
+niego: `PLAYWRIGHT_CHROMIUM=/opt/pw-browsers/chromium-<wersja>/chrome-linux64/chrome`.
 
 ### Nagłówek: „Ustawienia" zamiast trzech zakładek (v.0.66, 05.10.2026)
 
