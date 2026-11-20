@@ -3,6 +3,20 @@
   "zrodlo": "aura_articles (status=published, platforms zawiera UtrataDochodu.pl); zdjęcia z preview_image_800/1600",
   "artykuly": [
     {
+      "slug": "przychodzi-fizjoterapeuta-do-lekarza",
+      "tytul": "Przychodzi fizjoterapeuta do lekarza. Trzy kontrakty, jedna para rąk",
+      "zajawka": "Przy dużym ZUS z chorobowym fizjoterapeuta z trzema kontraktami dostanie na L4 ok. 3 902 zł, tyle co z jednym. Co płaci polisa, gdy zawiodą ręce?",
+      "tagi": [
+        "ZUS",
+        "OWU",
+        "fizjoterapeuci"
+      ],
+      "opublikowano": "2026-11-20T07:30:00Z",
+      "utworzono": "2026-11-20T07:30:00Z",
+      "obraz": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/przychodzi-fizjoterapeuta-do-lekarza-cover-800.webp",
+      "obrazDuzy": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/przychodzi-fizjoterapeuta-do-lekarza-cover-1600.webp"
+    },
+    {
       "slug": "przychodzi-elektryk-do-lekarza",
       "tytul": "Przychodzi elektryk do lekarza. Ten sam upadek z drabiny, dwie różne kwoty z ZUS",
       "zajawka": "Po wypadku u klienta elektryk na JDG dostanie z ZUS 100% podstawy, po upadku w domu bez chorobowego nic. Co zmienia polisa?",
