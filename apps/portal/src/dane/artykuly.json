@@ -3,6 +3,20 @@
   "zrodlo": "aura_articles (status=published, platforms zawiera UtrataDochodu.pl); zdjęcia z preview_image_800/1600",
   "artykuly": [
     {
+      "slug": "ciaza-wylaczenie-ubezpieczenie-utraty-dochodu",
+      "tytul": "Ciąża a ubezpieczenie od utraty dochodu. Dlaczego polisa nie zapłaci za L4 w ciąży i co chroni Twój dochód zamiast niej",
+      "zajawka": "Ciąża i poród są wyłączone we wszystkich OWU polis od utraty dochodu, które oferujemy. Sprawdź, ile płaci ZUS na B2B w 2026 r. i jak przygotować się przed ciążą.",
+      "tagi": [
+        "ZUS",
+        "OWU",
+        "ciąża"
+      ],
+      "opublikowano": "2026-11-23T22:07:00Z",
+      "utworzono": "2026-11-23T22:07:00Z",
+      "obraz": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/ciaza-wylaczenie-ubezpieczenie-utraty-dochodu-cover-800.webp",
+      "obrazDuzy": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/ciaza-wylaczenie-ubezpieczenie-utraty-dochodu-cover-1600.webp"
+    },
+    {
       "slug": "przychodzi-fizjoterapeuta-do-lekarza",
       "tytul": "Przychodzi fizjoterapeuta do lekarza. Trzy kontrakty, jedna para rąk",
       "zajawka": "Przy dużym ZUS z chorobowym fizjoterapeuta z trzema kontraktami dostanie na L4 ok. 3 902 zł, tyle co z jednym. Co płaci polisa, gdy zawiodą ręce?",
