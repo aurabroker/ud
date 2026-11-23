@@ -9,6 +9,7 @@ const KOLUMNY = [
     linki: [
       { nazwa: 'Jak to działa', url: '/jak-to-dziala/' },
       { nazwa: 'Kalkulator',    url: '/kalkulator/' },
+      { nazwa: 'Wyłączenia',    url: '/wylaczenia/' },
       { nazwa: 'Zawody',        url: '/zawody/' },
       { nazwa: 'Blog',          url: '/blog/' },
     ],
@@ -83,6 +84,8 @@ const KATEGORIE = kategorie();
         <a href={`mailto:${FIRMA.email}`} class="hover:text-akcent-ciemny">{FIRMA.email}</a>
         <span aria-hidden="true"> · </span>
         <a href={`tel:${FIRMA.telefon}`} class="hover:text-akcent-ciemny">{FIRMA.telefonWyswietlany}</a>
+        <span aria-hidden="true"> · </span>
+        <a href="/wylaczenia/" class="hover:text-akcent-ciemny">Czego polisa nie obejmuje</a>
       </span>
     </div>
   </div>

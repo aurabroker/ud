@@ -10,113 +10,31 @@
 import Baza from '../../layouts/Baza.astro';
 import { graf, organizacja, serwis, strona, okruszki, faq } from '../../lib/seo';
 import { FIRMA } from '../../lib/firma';
+import { GRUPY, ILE_POZYCJI, SPRAWDZONO } from '../../lib/wylaczenia';
 
 const sciezka = '/wylaczenia/';
 const tytul = 'Czego nie obejmuje ubezpieczenie utraty dochodu | UtrataDochodu.pl';
-const opis = 'Pełna lista wyłączeń: wypalenie zawodowe, choroby psychiczne, częściowa '
-  + 'niezdolność do pracy, schorzenia leczone przed zawarciem umowy. Bez gwiazdek.';
-
-/** Kategorie wyłączeń. Każda ma powód — sama lista bez uzasadnień jest bezużyteczna. */
-const GRUPY = [
-  {
-    tytul: 'Zdrowie psychiczne',
-    pozycje: [
-      {
-        co: 'Wypalenie zawodowe jako samodzielna diagnoza',
-        czemu: 'Wypalenie nie jest w klasyfikacji ICD jednostką chorobową, tylko zjawiskiem '
-          + 'związanym z pracą. Ubezpieczyciel nie ma na czym oprzeć oceny, jak długo potrwa '
-          + 'i kiedy się skończy, więc nie obejmuje go ochroną.',
-      },
-      {
-        // Leadenhall: „jeżeli jedyną przyczyną niezdolności do pracy jest…";
-        // CEU (§ 8 i § 13): „jeżeli jej przyczyną była depresja…". Stało tu, że
-        // wyłączenie obejmuje też zaburzenie wtórne wobec choroby somatycznej —
-        // w Leadenhall jest dokładnie odwrotnie.
-        co: 'Choroby i zaburzenia psychiczne jako przyczyna niezdolności',
-        czemu: 'Depresja, nerwica, zaburzenia lękowe, psychoza i rozstrój emocjonalny nie dają '
-          + 'świadczenia. W Leadenhall wyłączenie działa, gdy to jedyna przyczyna niezdolności: '
-          + 'jeśli pracować nie pozwala także choroba somatyczna objęta ochroną, liczy się ta '
-          + 'choroba. W CEU tego zastrzeżenia nie ma — świadczenie nie przysługuje, jeżeli '
-          + 'przyczyną niezdolności była depresja albo podobne rozpoznanie.',
-      },
-      {
-        co: 'Stres i przemęczenie',
-        czemu: 'Nie są rozpoznaniem, tylko opisem stanu. Zwolnienie wystawione z takim '
-          + 'uzasadnieniem nie uruchamia świadczenia.',
-      },
-    ],
-  },
-  {
-    tytul: 'Zakres niezdolności do pracy',
-    pozycje: [
-      {
-        co: 'Częściowa niezdolność do pracy',
-        czemu: 'Polisa wypłaca świadczenie za całkowitą niezdolność do wykonywania zawodu. '
-          + 'Praca w ograniczonym wymiarze albo przejście na lżejsze obowiązki oznacza, '
-          + 'że warunek wypłaty nie jest spełniony.',
-      },
-      {
-        co: 'Kwarantanna i izolacja bez orzeczonej niezdolności do pracy',
-        czemu: 'Sam nakaz pozostania w domu nie jest chorobą. Jeśli w trakcie izolacji '
-          + 'lekarz orzeknie niezdolność do pracy, liczy się to orzeczenie, nie sama izolacja.',
-      },
-      {
-        co: 'Przerwa w pracy z powodu braku zleceń',
-        czemu: 'Ubezpieczenie chroni przed utratą zdolności do pracy, a nie przed utratą '
-          + 'kontraktu. To jest różnica między tym produktem a ubezpieczeniem od utraty pracy.',
-      },
-    ],
-  },
-  {
-    tytul: 'Historia leczenia',
-    pozycje: [
-      {
-        co: 'Schorzenia leczone w ciągu 24 miesięcy przed zawarciem umowy',
-        czemu: 'Chyba że zostały zgłoszone w ankiecie medycznej i ubezpieczyciel przyjął je '
-          + 'do ochrony — czasem ze zwyżką składki, czasem z wyłączeniem konkretnego narządu. '
-          + 'Zatajenie takiego schorzenia jest najczęstszą przyczyną odmowy wypłaty.',
-      },
-      // Wad wrodzonych tu nie ma: nie wyłącza ich żadne z sześciu OWU (Leadenhall
-      // i CEU, sprawdzone 28.09.2026). CEU wymienia je tylko przy klauzuli wypłaty
-      // od pierwszego dnia — wtedy okres oczekiwania wraca do 30 dni.
-    ],
-  },
-  {
-    tytul: 'Okoliczności zdarzenia',
-    pozycje: [
-      // Zakażenia HIV/WZW tu nie ma i nie ma wrócić: OWU LW044, LW046 i LW047
-      // go nie wyłączają. Klauzula LW048/LW049 dokłada osobne świadczenie za samo
-      // zakażenie — bez niej niezdolność ocenia się na zasadach ogólnych (FAQ niżej).
-      {
-        co: 'Zdarzenia pod wpływem alkoholu, narkotyków i substancji odurzających',
-        czemu: 'Poza przypadkami zażycia zgodnie z zaleceniem lekarza.',
-      },
-      {
-        co: 'Umyślne samookaleczenie i próba samobójcza',
-        czemu: 'Standardowe wyłączenie w ubezpieczeniach osobowych.',
-      },
-      {
-        co: 'Udział w działaniach wojennych, zamieszkach i aktach terroru',
-        czemu: 'Ryzyka katastroficzne są wyłączone z ochrony indywidualnej.',
-      },
-      {
-        co: 'Wyczynowe uprawianie sportu i sporty wysokiego ryzyka',
-        czemu: 'Nurkowanie, wspinaczka, sporty motorowe, spadochroniarstwo. Część z nich '
-          + 'da się objąć ochroną po zgłoszeniu we wniosku — pytamy o to w kroku o zakresie.',
-      },
-      // Zabiegów medycyny estetycznej też nie: żadne OWU ich nie wyłącza.
-    ],
-  },
-];
+const opis = 'Pełna lista wyłączeń z sześciu OWU: ciąża i poród, choroby psychiczne, '
+  + 'schorzenia leczone przed umową, zwyrodnienia, częściowa niezdolność. Z paragrafami.';
 
 const PYTANIA = [
   {
+    pytanie: 'Czy ubezpieczenie od utraty dochodu obejmuje ciążę?',
+    odpowiedz: 'Nie, jeśli niezdolność do pracy wynika z ciąży albo porodu. Wyłączają to wszystkie '
+      + 'sześć OWU, które oferujemy: Leadenhall (LW044, LW046, LW047: § 11 ust. 1 lit. g) i CEU '
+      + '(Utrata dochodu i dla zatrudniających: § 18 pkt 7, LOI Premium: § 13 pkt 7). W ciąży polisa '
+      + 'wypłaci świadczenie tylko wtedy, gdy przyczyną niezdolności jest wypadek albo choroba '
+      + 'niezwiązana z ciążą. Dochód w ciąży chroni zasiłek z ZUS — na działalności tylko '
+      + 'z dobrowolnym ubezpieczeniem chorobowym.',
+  },
+  {
     pytanie: 'Czy ubezpieczenie utraty dochodu obejmuje depresję?',
-    odpowiedz: 'Nie, jeśli to depresja nie pozwala pracować. Warunki Leadenhall i CEU '
-      + 'wyłączają niezdolność spowodowaną depresją, nerwicą, zaburzeniami lękowymi '
-      + 'i rozstrojem emocjonalnym — także rozpoznanymi w trakcie trwania umowy. '
-      + 'W Leadenhall wyłączenie dotyczy sytuacji, w której zaburzenie jest jedyną '
-      + 'przyczyną niezdolności; gdy pracować nie pozwala też choroba somatyczna, liczy się ta choroba.',
+    odpowiedz: 'W CEU nie: OWU wyłączają niezdolność, której przyczyną była depresja, neuroza, '
+      + 'psychoza, stany lękowe, stres, przemęczenie albo rozstrój emocjonalny. Leadenhall wyłącza neurozę, '
+      + 'psychoneurozę, psychopatię, psychozę, stany lękowe, stres, przemęczenie, choroby umysłowe '
+      + 'i rozstrój emocjonalny, ale tylko wtedy, gdy są jedyną przyczyną niezdolności; depresji '
+      + 'nie wymienia osobno. Gdy pracować nie pozwala też choroba somatyczna objęta ochroną, '
+      + 'liczy się ta choroba.',
   },
   {
     pytanie: 'Czy polisa zadziała przy wypaleniu zawodowym?',
@@ -127,13 +45,15 @@ const PYTANIA = [
   {
     pytanie: 'Czy dostanę świadczenie, jeśli mogę pracować w mniejszym wymiarze?',
     odpowiedz: 'Nie. Świadczenie przysługuje za całkowitą niezdolność do wykonywania zawodu. '
-      + 'Częściowa niezdolność nie uruchamia wypłaty.',
+      + 'Częściowa niezdolność nie uruchamia wypłaty. Wyjątek to klauzula opcjonalna 9 w CEU: '
+      + 'obejmuje częściową niezdolność, ale tylko po nieszczęśliwym wypadku.',
   },
   {
     pytanie: 'Co się stanie, jeśli nie zgłoszę wcześniejszego leczenia?',
-    odpowiedz: 'Ubezpieczyciel może odmówić wypłaty, powołując się na zatajenie okoliczności '
-      + 'istotnych dla oceny ryzyka. Zgłoszenie schorzenia zwykle kończy się zwyżką składki '
-      + 'albo wyłączeniem jednego narządu — a nie odmową ubezpieczenia.',
+    odpowiedz: 'Ubezpieczyciel nie odpowiada za skutki okoliczności, o które pytał, a które nie '
+      + 'zostały mu podane (art. 815 Kodeksu cywilnego). Zgłoszenie schorzenia nie oznacza '
+      + 'automatycznie odmowy: ubezpieczyciel może przyjąć je do ochrony, podnieść składkę '
+      + 'albo je wyłączyć. Decyzję widać w ofercie, zanim cokolwiek podpiszesz.',
   },
   {
     pytanie: 'Czy zakażenie HIV albo WZW przy pracy jest objęte ochroną?',
@@ -160,7 +80,7 @@ const jsonld = graf([
   faq(PYTANIA, sciezka),
 ]);
 
-const ile = GRUPY.reduce((suma, g) => suma + g.pozycje.length, 0);
+const ile = ILE_POZYCJI;
 ---
 <Baza tytul={tytul} opis={opis} sciezka={sciezka} jsonld={jsonld}>
   <div class="bg-tlo-jasne border-b border-linia">
@@ -176,14 +96,15 @@ const ile = GRUPY.reduce((suma, g) => suma + g.pozycje.length, 0);
         Czego to ubezpieczenie nie obejmuje
       </h1>
       <p data-odpowiedz class="text-[1.12rem] leading-relaxed text-tekst-drugi max-w-[42em] mt-6 mb-0">
-        {ile} wyłączeń, zebranych w jednym miejscu, zanim wypełnisz wniosek.
-        Najważniejsze z nich: wypalenie zawodowe jako samodzielna diagnoza, choroby
+        {ile} wyłączeń z sześciu OWU, zebranych w jednym miejscu, zanim wypełnisz wniosek.
+        Najważniejsze z nich: ciąża i poród (wyłączone we wszystkich sześciu OWU), choroby
         psychiczne jako jedyna przyczyna niezdolności (w CEU także bez tego warunku),
-        częściowa niezdolność do pracy oraz schorzenia leczone w ciągu
-        24 miesięcy przed zawarciem umowy, jeśli nie zostały zgłoszone.
+        schorzenia leczone w ciągu 24 miesięcy przed ubezpieczeniem, zwyrodnienia
+        w Leadenhall i częściowa niezdolność do pracy.
       </p>
       <p class="text-[15px] leading-relaxed text-tekst-drugi max-w-[42em] mt-4 mb-0">
-        Lista jest streszczeniem. Wiążącą treścią są ogólne warunki ubezpieczenia —
+        Lista jest streszczeniem, sprawdzonym z tekstem OWU {SPRAWDZONO}. Przy każdej pozycji
+        podajemy paragrafy. Wiążącą treścią są ogólne warunki ubezpieczenia —
         <a href="/dokumenty/" class="text-akcent-hover underline decoration-linia-mocna underline-offset-2">pobierz je i sprawdź sam</a>.
       </p>
     </div>
@@ -201,6 +122,7 @@ const ile = GRUPY.reduce((suma, g) => suma + g.pozycje.length, 0);
             <li class="border-l-[3px] border-alarm pl-5">
               <h3 class="text-[17px] font-semibold m-0 mb-2 leading-snug">{p.co}</h3>
               <p class="text-[15px] leading-relaxed text-tekst-drugi m-0">{p.czemu}</p>
+              <p class="text-[13px] leading-relaxed text-tekst-drugi mt-2 mb-0">Źródło: {p.zrodla}</p>
             </li>
           ))}
         </ul>

@@ -21,6 +21,7 @@ import { LIMIT, LIMIT_CEU_ZDANIE, OKRESY, MIESIECY_MAX, zl } from '../lib/symula
 import { SWIADCZENIE_MAX } from '../lib/granice';
 import { ZASILEK_JDG, ZUS_TEKST } from '../lib/zus';
 import { krokiSlownie } from '@ud/wniosek/schemat';
+import { WYLACZENIA_KROTKO } from '../lib/wylaczenia';
 
 export const GET: APIRoute = () => {
   const kat = kategorie();
@@ -86,13 +87,9 @@ niezdolnością do wykonywania zawodu z powodu choroby lub nieszczęśliwego wyp
 
 Te wyłączenia są istotne i często pomijane w materiałach marketingowych:
 
-- wypalenie zawodowe jako samodzielna diagnoza,
-- choroby psychiczne — w Leadenhall, gdy są jedyną przyczyną niezdolności; w CEU depresja
-  i podobne rozpoznania bez tego zastrzeżenia,
-- częściowa niezdolność do pracy,
-- schorzenia leczone w ciągu 24 miesięcy przed zawarciem umowy, o ile nie
-  zostały zgłoszone i zaakceptowane przez ubezpieczyciela,
-- kwarantanna i izolacja bez orzeczonej niezdolności do pracy.
+${WYLACZENIA_KROTKO.map((w) => `- ${w}`).join('\n')}
+
+Pełna lista z paragrafami: [Wyłączenia](${SERWIS.url}/wylaczenia/).
 
 Zakażenie HIV albo WZW **nie** jest wyłączone: niezdolność do pracy, do której
 doprowadzi, ocenia się na zasadach ogólnych. Klauzula HIV/WZW nie jest warunkiem

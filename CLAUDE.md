@@ -1944,6 +1944,27 @@ Przed dopisaniem pozycji do tej listy sprawdź ją w tekście OWU — strona jes
 pisana pod cytowanie przez modele językowe, więc błąd wychodzi poza serwis.
 Pilnuje tego `test/wylaczenia.spec.js`.
 
+**23.11.2026 — druga weryfikacja, po pytaniu właściciela „dlaczego nie ma
+informacji o ciąży?”.** Na liście brakowało **ciąży i porodu**, wyłączonych we
+wszystkich sześciu OWU (Leadenhall § 11 ust. 1 lit. g z powikłaniami innymi niż
+uszkodzenia ciała; CEU § 18 pkt 7, LOI Premium § 13 pkt 7 — wyłączenie
+bezwzględne), **zwyrodnień** w Leadenhall (§ 9 ust. 3–4, § 7 ust. 2; MEDICA
+i MEDICARE 30% przez 12 miesięcy) i **pracy na wysokości > 2 m, pod ziemią, pod
+wodą, na morzu i w służbach ratowniczych** w CEU (§ 18 pkt 2). Poprawione też:
+terroryzm (wyłączony tylko z bronią jądrową, chemiczną albo biologiczną),
+depresja w Leadenhall (OWU jej nie wymieniają z nazwy — lista z § 9 ust. 5),
+krok wniosku z aktywnościami (`zdrowie`, nie „zakres”) i dwa zdania bez źródła
+(„najczęstsza przyczyna odmowy”, „zgłoszenie zwykle kończy się zwyżką”).
+**Lista żyje teraz w `src/lib/wylaczenia.ts`** — każda pozycja ma pole `zrodla`
+z paragrafami, strona je pokazuje, a `llms.txt` bierze z tego pliku
+`WYLACZENIA_KROTKO`. Pozycja bez paragrafu nie wchodzi. „Wyłączenia” są od
+23.11.2026 w menu głównym (od 1024 px; na telefonie menu nie ma, został przycisk
+„Zobacz, co nie jest objęte” na stronie głównej) i w stopce (kolumna
+„Ubezpieczenie” i dolny pasek — decyzja właściciela). OWU „dla zatrudniających”
+2.6 ma w § 18 pkt 2 „2 metrów nad poziomem morza” (w pozostałych: „gruntu na
+zewnątrz budynku”), a definicja niebezpiecznej aktywności odsyła do § 20 zamiast
+§ 19 — to błędy w samym OWU, zgłoszone właścicielowi.
+
 ---
 
 ## Granice wniosku — waga, wzrost, sumy (od 12.10.2026)

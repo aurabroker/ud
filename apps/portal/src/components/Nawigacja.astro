@@ -7,6 +7,7 @@ const { sciezka } = Astro.props;
 const POZYCJE = [
   { nazwa: 'Jak to działa', url: '/jak-to-dziala/' },
   { nazwa: 'Kalkulator',    url: '/kalkulator/' },
+  { nazwa: 'Wyłączenia',    url: '/wylaczenia/' },
   { nazwa: 'Zawody',        url: '/zawody/' },
   { nazwa: 'Blog',          url: '/blog/' },
   { nazwa: 'Dokumenty',     url: '/dokumenty/' },
@@ -24,11 +25,11 @@ const aktywna = (url: string) => sciezka === url || (url !== '/' && sciezka.star
       <span class="text-xl font-bold tracking-tight">Utrata<span class="text-akcent">Dochodu</span></span>
     </a>
 
-    <ul class="hidden lg:flex gap-7 items-center text-[15px] font-medium text-tekst-drugi list-none m-0 p-0">
+    <ul class="hidden lg:flex gap-5 xl:gap-7 items-center text-[15px] font-medium text-tekst-drugi list-none m-0 p-0">
       {POZYCJE.map((p) => (
         <li>
           <a href={p.url}
-             class:list={['hover:text-akcent-ciemny', aktywna(p.url) && 'text-akcent-ciemny font-bold']}
+             class:list={['whitespace-nowrap hover:text-akcent-ciemny', aktywna(p.url) && 'text-akcent-ciemny font-bold']}
              aria-current={aktywna(p.url) ? 'page' : undefined}>{p.nazwa}</a>
         </li>
       ))}
