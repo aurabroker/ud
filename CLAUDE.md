@@ -754,6 +754,27 @@ obecność banera — atrapa przechodzi każdy test oparty na DOM-ie.
 Do zamknięcia po stronie klienta: druga właściwość GA4 (`G-D9XHPWP5DE`) —
 inaczej historia ruchu zostaje rozbita na dwie niepełne właściwości.
 
+### Cloudflare Zaraz — GA4 WYŁĄCZONY 23.11.2026, nie włączaj z powrotem
+
+Strefa `utratadochodu.pl` miała w Zaraz narzędzie „Google Analytics 4”
+(`G-MGB0RBTCC9`, ta sama właściwość co portal) **bez modułu zgody**: Cloudflare
+wstrzykiwał `/cdn-cgi/zaraz/s.js` do każdej strony, stawiał ciasteczka
+`cf_zaraz_client`, `cfz_google-analytics_v4` i `cfzs_google-analytics_v4`
+i liczył odsłony w GA4 po stronie serwera — **zanim ktokolwiek kliknął
+w baner**, obok całego Consent Mode z `zgody.js`. Osobom ze zgodą odsłony
+liczyły się dwa razy (Zaraz + `gtag`). Testy portalu tego nie widziały: Zaraz
+dokłada skrypt na krawędzi, nie w buildzie. Znalezione 21.11.2026 przy
+sprawdzaniu źródła leada na żywej stronie, wyłączone 23.11.2026 decyzją
+właściciela („wyłącz ten ZARAZ G4”) — `tools.<id>.enabled = false` przez API
+(konektor Cloudflare; token środowiska `CF_API` Zaraz nie czyta). Narzędzie
+zostało w konfiguracji, wyłączone; bez włączonych narzędzi Zaraz nie wstrzykuje
+niczego. Po wyłączeniu: przed zgodą zero żądań do Google i zero ciasteczek poza
+`cf_clearance`, po „Akceptuję wszystkie” — `gtag/js?id=G-MGB0RBTCC9` z portalu.
+**Liczba odsłon w GA4 spadnie** (koniec liczenia bez zgody i podwójnego
+liczenia) — to poprawne. Sprawdzasz Chromium z nagłówkami przeglądarki
+(goły `curl` nie dostaje wstrzykniętych skryptów strefy): po wejściu na `/`
+nie ma `window.zaraz` ani ciasteczek `cfz_*`.
+
 ### Konwersja Ads liczy WNIOSKI, nie odsłony podziękowania
 
 Stary `thankyou.html` miał w treści goły strzał:
@@ -1207,10 +1228,15 @@ ginęło przy pierwszym kliknięciu w odnośnik. Teraz każdy nowy wniosek z
 parametrami kampanii ma `ud_clients.form_data.zrodlo`, a panel go pokazuje.
 **Etap 1 niczego nie wysyła do Google Ads ani GA4.**
 
-**Stan na 20.11.2026: w repozytorium, NIEWDROŻONE.** Migracje
-`20261120100000_klikniecia_zrodlo_reklamy.sql`
-i `20261120110000_statystyki_zrodla.sql` nie są zastosowane, push czeka na
-„wypychaj". Zdanie do polityki prywatności czeka na prawnika (propozycja
+**Stan na 23.11.2026: portal i panel v.0.80 WDROŻONE (push `79f4cad`
+21.11.2026 po „wypychaj"), migracje NIE.** `20261120100000_klikniecia_zrodlo_reklamy.sql`
+i `20261120110000_statystyki_zrodla.sql` czekają: MCP poprosił o potwierdzenie
+(pierwsza ma `DROP FUNCTION`), nikt nie odpowiedział, nic się nie zmieniło.
+Do ich zastosowania `/kup-online` zapisuje kliknięcia samym celem i źródłem,
+a sekcja „Według źródła" pokazuje komunikat — źródło wniosków
+(`form_data.zrodlo`) zapisuje się już teraz. Na żywej stronie sprawdzone:
+parametry jadą w adresie przez kalkulator do wniosku, magazyny przeglądarki
+puste. Zdanie do polityki prywatności czeka na prawnika (propozycja
 w raporcie z 20.11.2026) — nie publikuj go bez akceptacji.
 
 | Element | Co robi |
