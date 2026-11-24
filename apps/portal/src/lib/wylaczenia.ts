@@ -23,6 +23,8 @@ export interface Pozycja {
   co: string;
   czemu: string;
   zrodla: string;
+  /** Artykuł bloga, który omawia tę pozycję szerzej (adres względny). */
+  wiecej?: { url: string; tekst: string };
 }
 
 export interface Grupa {
@@ -47,6 +49,10 @@ export const GRUPY: Grupa[] = [
           + 'z ZUS, a na działalności tylko wtedy, gdy opłacasz dobrowolne ubezpieczenie chorobowe.',
         zrodla: 'Leadenhall LW044, LW046, LW047: § 11 ust. 1 lit. g · CEU Utrata dochodu: § 18 pkt 7, '
           + 'LOI Premium: § 13 pkt 7, dla zatrudniających: § 18 pkt 7',
+        wiecej: {
+          url: '/blog/ciaza-wylaczenie-ubezpieczenie-utraty-dochodu/',
+          tekst: 'Ciąża a ubezpieczenie od utraty dochodu: co obejmuje wyłączenie i ile płaci ZUS',
+        },
       },
     ],
   },

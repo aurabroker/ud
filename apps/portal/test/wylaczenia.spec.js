@@ -76,3 +76,12 @@ test('lista wyłączeń trzyma się OWU: bez HIV/WZW, wad wrodzonych i medycyny 
   expect(pozycje.length).toBeGreaterThan(3);
   for (const p of pozycje) expect(p, 'HIV/WZW na liście wyłączeń w llms.txt').not.toMatch(/HIV|WZW/);
 });
+
+test('pozycja z odnośnikiem „Więcej” prowadzi do artykułu, który jest w buildzie (ciąża)', () => {
+  const html = readFileSync(join(DIST, 'wylaczenia', 'index.html'), 'utf8');
+  const odnosniki = [...html.matchAll(/Więcej: <a href="([^"]+)"/g)].map((m) => m[1]);
+  expect(odnosniki).toContain('/blog/ciaza-wylaczenie-ubezpieczenie-utraty-dochodu/');
+  for (const url of odnosniki) {
+    expect(existsSync(join(DIST, url, 'index.html')), `brak strony ${url}`).toBe(true);
+  }
+});

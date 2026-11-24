@@ -123,6 +123,11 @@ const ile = ILE_POZYCJI;
               <h3 class="text-[17px] font-semibold m-0 mb-2 leading-snug">{p.co}</h3>
               <p class="text-[15px] leading-relaxed text-tekst-drugi m-0">{p.czemu}</p>
               <p class="text-[13px] leading-relaxed text-tekst-drugi mt-2 mb-0">Źródło: {p.zrodla}</p>
+              {p.wiecej && (
+                <p class="text-[15px] leading-relaxed mt-2 mb-0">
+                  Więcej: <a href={p.wiecej.url} class="text-akcent-hover underline decoration-linia-mocna underline-offset-2">{p.wiecej.tekst}</a>
+                </p>
+              )}
             </li>
           ))}
         </ul>
