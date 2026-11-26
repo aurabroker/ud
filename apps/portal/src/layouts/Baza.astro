@@ -15,6 +15,7 @@ import { TAGI } from '../lib/analityka';
 import Nawigacja from '../components/Nawigacja.astro';
 import Stopka from '../components/Stopka.astro';
 import { Font } from 'astro:assets';
+import { hreflangi, type Jezyk } from '../lib/jezyki';
 import '../styles/global.css';
 
 interface Props {
@@ -36,14 +37,42 @@ interface Props {
    * nagłówkiem `<link rel="alternate">` prowadziłoby agenta w pustkę.
    */
   wariantMarkdown?: boolean;
+  /**
+   * Język treści strony. Domyślnie polski; „uk" dla podstron pod `/uk/`.
+   * Od niego zależą `lang`, nawigacja, stopka i kroje pisma (niżej).
+   */
+  jezyk?: Jezyk;
 }
 
-const { tytul, opis, sciezka, jsonld, obraz, bezIndeksu = false, wariantMarkdown = true } = Astro.props;
+const { tytul, opis, sciezka, jsonld, obraz, bezIndeksu = false, wariantMarkdown = true, jezyk = 'pl' } = Astro.props;
 const kanoniczny = new URL(sciezka, SERWIS.url).href;
 const ogObraz = new URL(obraz ?? '/og-domyslny.jpg', SERWIS.url).href;
+
+/** Ta sama strona w drugim języku — puste, gdy przekładu nie ma. */
+const wersje = hreflangi(sciezka, jezyk);
+
+const NAPISY = {
+  pl: { skok: 'Przejdź do treści', ogLocale: 'pl_PL' },
+  uk: { skok: 'Перейти до змісту', ogLocale: 'uk_UA' },
+}[jezyk];
+
+/**
+ * Kroje dla cyrylicy.
+ *
+ * Newsreader i Public Sans nie mają cyrylicy (Google Fonts podaje dla nich
+ * tylko zestawy łacińskie), więc na stronie ukraińskiej przeglądarka brałaby
+ * z nich cyfry i wstawki łacińskie („ZUS", „B2B"), a litery ukraińskie z kroju
+ * zastępczego — dwa kroje w jednym zdaniu. Dlatego wersja ukraińska dostaje
+ * same kroje systemowe: wszystkie znaki z jednego kroju i zero pobierania.
+ * Zmienne noszą te same nazwy, więc reszta arkusza nie wie o różnicy.
+ */
+const KROJE_UK = ':root{'
+  + '--font-naglowek:Georgia,"Times New Roman","Noto Serif",serif;'
+  + '--font-tekst:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans",sans-serif;'
+  + '--font-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;}';
 ---
 <!doctype html>
-<html lang="pl">
+<html lang={jezyk}>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -70,6 +99,11 @@ const ogObraz = new URL(obraz ?? '/og-domyslny.jpg', SERWIS.url).href;
   <title>{tytul}</title>
   <meta name="description" content={opis}>
   <link rel="canonical" href={kanoniczny}>
+  {/* Wzajemne wskazanie wersji językowych: obie strony pary wymieniają obie
+      wersje i siebie. Bez wzajemności wyszukiwarka pomija cały zestaw. */}
+  {wersje.map((w) => (
+    <link rel="alternate" hreflang={w.hreflang} href={new URL(w.sciezka, SERWIS.url).href} />
+  ))}
 
   {wariantMarkdown && (
     <>
@@ -83,12 +117,18 @@ const ogObraz = new URL(obraz ?? '/og-domyslny.jpg', SERWIS.url).href;
     ? <meta name="robots" content="noindex, follow">
     : <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">}
 
-  <Font cssVariable="--font-naglowek" preload />
-  <Font cssVariable="--font-tekst" preload />
-  <Font cssVariable="--font-mono" />
+  {jezyk === 'uk'
+    ? <style is:inline set:html={KROJE_UK}></style>
+    : (
+      <>
+        <Font cssVariable="--font-naglowek" preload />
+        <Font cssVariable="--font-tekst" preload />
+        <Font cssVariable="--font-mono" />
+      </>
+    )}
 
   <meta property="og:type" content="website">
-  <meta property="og:locale" content="pl_PL">
+  <meta property="og:locale" content={NAPISY.ogLocale}>
   <meta property="og:site_name" content={SERWIS.nazwa}>
   <meta property="og:title" content={tytul}>
   <meta property="og:description" content={opis}>
@@ -103,7 +143,8 @@ const ogObraz = new URL(obraz ?? '/og-domyslny.jpg', SERWIS.url).href;
   {jsonld && <script type="application/ld+json" set:html={jsonld} />}
 
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <link rel="alternate" type="application/rss+xml" title="Baza wiedzy UtrataDochodu.pl" href="/blog/rss.xml">
+  {/* Kanał bloga jest po polsku — na stronie ukraińskiej nie ogłaszamy go jako jej wariantu. */}
+  {jezyk === 'pl' && <link rel="alternate" type="application/rss+xml" title="Baza wiedzy UtrataDochodu.pl" href="/blog/rss.xml">}
 </head>
 
 <body class="bg-tlo text-tekst antialiased">
@@ -113,15 +154,15 @@ const ogObraz = new URL(obraz ?? '/og-domyslny.jpg', SERWIS.url).href;
   <a href="#tresc"
      class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50
             focus:bg-akcent-ciemny focus:text-white focus:px-4 focus:py-2 focus:font-semibold">
-    Przejdź do treści
+    {NAPISY.skok}
   </a>
 
-  <Nawigacja sciezka={sciezka} />
+  <Nawigacja sciezka={sciezka} jezyk={jezyk} />
 
   <main id="tresc">
     <slot />
   </main>
 
-  <Stopka />
+  <Stopka sciezka={sciezka} jezyk={jezyk} />
 </body>
 </html>

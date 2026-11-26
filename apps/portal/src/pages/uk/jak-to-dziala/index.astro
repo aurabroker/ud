@@ -1,0 +1,228 @@
+---
+/**
+ * „Jak to działa" po ukraińsku — PRZEKŁAD `src/pages/jak-to-dziala/index.astro`.
+ *
+ * Kwoty, limity, progi i liczba kroków idą z tych samych źródeł co po polsku
+ * (`symulacja.ts`, `@ud/wniosek`). Etapy i pytania są tłumaczone zdanie
+ * w zdanie; `test/uk.spec.js` pilnuje, żeby było ich tyle samo co po polsku.
+ * Dopisane są tylko informacje o języku: formularz i dokumenty są po polsku.
+ */
+import Baza from '../../../layouts/Baza.astro';
+import { graf, organizacja, serwis, strona, okruszki, faq, usluga } from '../../../lib/seo';
+import { symuluj, zl, ZUS_MIESIECZNIE, LIMIT } from '../../../lib/symulacja';
+import { KROKI, PROG_KLAUZUL_NW } from '@ud/wniosek/schemat';
+import { HEALTH_SURVEY_THRESHOLD } from '@ud/wniosek/ankieta';
+import { UBEZPIECZYCIELE } from '../../../lib/firma';
+import { GLOWNA_UK, KROKI_UK, krokiUk } from '../../../lib/uk';
+
+const sciezka = '/uk/jak-to-dziala/';
+const tytul = 'Як працює страхування від втрати доходу — крок за кроком | UtrataDochodu.pl';
+const opis = 'Від чого залежить виплата, як рахують внесок, що відбувається після подання заявки '
+  + 'і скільки триває шлях від форми до поліса.';
+
+const przyklad = symuluj({ dochod: 18000, zatrudnienie: 'b2b' });
+const b2b = Math.round(LIMIT.b2b * 100);
+const etat = Math.round(LIMIT.etat * 100);
+
+const nazwyKrokow = KROKI.map((k) => KROKI_UK[k.id].tytul.toLowerCase()).join(', ');
+
+const ETAPY = [
+  {
+    tytul: 'Ви заповнюєте заявку',
+    czas: 'близько 5 хвилин',
+    opis: `${krokiUk(KROKI.length)}: ${nazwyKrokow}. Усе онлайн, без сканування документів `
+      + 'і без візиту до відділення. Форма заявки — польською мовою.',
+  },
+  {
+    tytul: 'Ми перевіряємо заявку й добираємо варіант',
+    czas: 'того самого дня',
+    opis: `Порівнюємо умови обох страховиків (${UBEZPIECZYCIELE.join(' та ')}) з огляду на вашу `
+      + 'професію. Для медичних професій призначені варіанти MEDICA та MEDICARE, для решти — LW044.',
+  },
+  {
+    tytul: 'Страховик оцінює ризик',
+    czas: '1–2 робочі дні',
+    opis: 'Це андеррайтинг: оцінка професії, віку, розміру доходу та медичної анкети. На цьому '
+      + 'етапі визначається реальний внесок — калькулятор на сайті рахує лише симуляцію.',
+  },
+  {
+    tytul: 'Ви отримуєте пропозицію й вирішуєте',
+    czas: 'без зобов’язань',
+    opis: 'Пропозиція надходить на e-mail разом із загальними умовами та карткою продукту — '
+      + 'польською мовою. До підписання вас ніщо не зобов’язує.',
+  },
+  {
+    tytul: 'Ви підписуєте поліс дистанційно',
+    czas: 'один день',
+    opis: 'Документи підписуєте електронно, внесок сплачуєте переказом. Захист починається '
+      + 'з дати, зазначеної в полісі.',
+  },
+];
+
+const PYTANIA = [
+  {
+    pytanie: 'Скільки часу минає від заявки до поліса?',
+    odpowiedz: 'Зазвичай 2–4 робочі дні. Найдовший етап — оцінка ризику страховиком, тобто '
+      + '1–2 дні. Решта залежить від того, як швидко ви надішлете рішення.',
+  },
+  {
+    pytanie: 'Від чого залежить розмір виплати?',
+    odpowiedz: `Від підтвердженого документами доходу та форми зайнятості. Ліміт становить `
+      + `${b2b}% доходу за самозайнятості та контракту B2B і ${etat}% — за трудового договору. `
+      + 'Страхування не може бути фінансово вигіднішим за роботу — інакше зник би стимул повертатися.',
+  },
+  {
+    pytanie: 'Чи потрібні медичні обстеження?',
+    odpowiedz: `За стандартних сум достатньо медичної анкети в заявці. Якщо сума на випадок `
+      + `постійної непрацездатності перевищує ${zl(HEALTH_SURVEY_THRESHOLD)}, з’являється розширена `
+      + 'анкета про стан здоров’я, а страховик може попросити про обстеження.',
+  },
+  {
+    pytanie: 'Як підтверджують дохід під час звернення по виплату?',
+    odpowiedz: 'За підприємницької діяльності — PIT за попередній рік і виписки або перелік фактур '
+      + 'за останні місяці. За трудового договору — довідка про заробіток (zaświadczenie '
+      + 'o zarobkach). Варто тримати ці документи під рукою, бо від них залежить швидкість виплати.',
+  },
+  {
+    pytanie: 'Коли доступні додаткові клаузули від нещасних випадків?',
+    odpowiedz: `Коли страхова сума на випадок смерті та інвалідності перевищує `
+      + `${zl(PROG_KLAUZUL_NW)}. Нижче цього порогу клаузули — виплата за перебування в лікарні, `
+      + 'медичні витрати, виплата у разі втрати свідомості — не пропонуються.',
+  },
+];
+
+const sciezkaOkruszkow = [
+  { ...GLOWNA_UK },
+  { nazwa: 'Як це працює', url: sciezka },
+];
+
+const jsonld = graf([
+  organizacja(),
+  serwis(),
+  okruszki(sciezkaOkruszkow),
+  strona({ url: sciezka, tytul, opis, okruszki: sciezkaOkruszkow, jezyk: 'uk' }),
+  usluga({
+    nazwa: 'Страхування від втрати доходу',
+    opis,
+    url: sciezka,
+    grupa: 'Самозайняті, контрактники та вільні професії',
+    typ: 'Страхування від втрати доходу',
+  }),
+  faq(PYTANIA, sciezka),
+  {
+    '@type': 'HowTo',
+    '@id': `https://utratadochodu.pl${sciezka}#jak`,
+    name: 'Як укласти договір страхування від втрати доходу',
+    inLanguage: 'uk',
+    totalTime: 'P4D',
+    step: ETAPY.map((e, i) => ({
+      '@type': 'HowToStep',
+      position: i + 1,
+      name: e.tytul,
+      text: e.opis,
+    })),
+  },
+]);
+---
+<Baza tytul={tytul} opis={opis} sciezka={sciezka} jsonld={jsonld} jezyk="uk">
+  <div class="bg-linear-102 from-tlo via-tlo-cyjan to-tlo-hero border-b border-linia">
+    <div class="max-w-[1200px] mx-auto px-5 py-16">
+      <nav aria-label="Навігаційний ланцюжок" class="mb-5">
+        <ol class="flex flex-wrap gap-2 text-[13px] text-tekst-drugi list-none m-0 p-0">
+          <li><a href={GLOWNA_UK.url} class="hover:text-akcent-ciemny">{GLOWNA_UK.nazwa}</a></li>
+          <li aria-hidden="true">/</li>
+          <li aria-current="page" class="text-tekst">Як це працює</li>
+        </ol>
+      </nav>
+      <h1 class="text-[clamp(2rem,5vw,3rem)] leading-[1.07] max-w-[16em] m-0">
+        Як працює страхування від втрати доходу
+      </h1>
+      <p data-odpowiedz class="text-[1.14rem] leading-relaxed text-tekst-drugi max-w-[42em] mt-6 mb-0">
+        Поліс виплачує щомісячну суму, коли хвороба або нещасний випадок не дають змоги
+        працювати за професією. Виплату рахують від підтвердженого документами доходу, а не від
+        бази нарахування внесків ZUS — і в цьому вся різниця.
+      </p>
+    </div>
+  </div>
+
+  <section class="max-w-[1200px] mx-auto px-5 py-16">
+    <h2 class="text-[clamp(1.6rem,4vw,2.4rem)] leading-tight mb-3">Звідки береться розрив</h2>
+    <p class="text-[1.08rem] leading-relaxed text-tekst-drugi max-w-[42em] mt-0 mb-8">
+      Допомога по хворобі від ZUS — це 80% бази нарахування внесків. За найнижчої бази це
+      {zl(przyklad.zus)} на місяць — незалежно від того, чи ви заробляєте 8 000 zł, чи 80 000 zł.
+    </p>
+
+    <div class="border border-linia overflow-x-auto max-w-[52em]">
+      <table class="w-full border-collapse text-left min-w-[34rem]">
+        <caption class="sr-only">Порівняння місячних надходжень на лікарняному при доході 18 000 zł на B2B</caption>
+        <tbody>
+          <tr class="border-b border-linia">
+            <th scope="row" class="px-6 py-4 font-semibold text-[15.5px]">Місячний дохід</th>
+            <td class="px-6 py-4 font-mono text-lg">{zl(18000)}</td>
+          </tr>
+          <tr class="border-b border-linia">
+            <th scope="row" class="px-6 py-4 font-semibold text-[15.5px]">Допомога від ZUS (найнижча база)</th>
+            <td class="px-6 py-4 font-mono text-lg text-alarm font-semibold">{zl(przyklad.zus)}</td>
+          </tr>
+          <tr class="border-b border-linia">
+            <th scope="row" class="px-6 py-4 font-semibold text-[15.5px]">Виплата за полісом ({b2b}%)</th>
+            <td class="px-6 py-4 font-mono text-lg text-akcent-ciemny font-semibold">{zl(przyklad.swiadczenie)}</td>
+          </tr>
+          <tr class="bg-tlo-jasne">
+            <th scope="row" class="px-6 py-5 font-semibold text-[16px]">Разом на лікарняному</th>
+            <td class="px-6 py-5 font-mono text-xl font-semibold text-akcent-ciemny">{zl(przyklad.zus + przyklad.swiadczenie)}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="text-[13px] leading-relaxed text-tekst-drugi mt-4 mb-0 max-w-[42em]">
+      Симуляція за припущення найнижчої бази ZUS ({zl(ZUS_MIESIECZNIE)}) і повного ліміту
+      виплати. Реальний внесок і суму розраховує страховик після оцінки ризику.
+    </p>
+  </section>
+
+  <section class="bg-tlo-jasne border-y border-linia">
+    <div class="max-w-[1200px] mx-auto px-5 py-16">
+      <h2 class="text-[clamp(1.6rem,4vw,2.4rem)] leading-tight mb-10">Від заявки до поліса</h2>
+      <ol class="list-none m-0 p-0 grid gap-px bg-linia border border-linia">
+        {ETAPY.map((e, i) => (
+          <li class="bg-tlo p-7 flex flex-col sm:flex-row gap-5 sm:gap-8">
+            <div class="shrink-0 sm:w-[9rem]">
+              <span class="font-mono text-[2rem] leading-none text-akcent" aria-hidden="true">
+                {String(i + 1).padStart(2, '0')}
+              </span>
+              <p class="font-mono text-[11.5px] tracking-[0.1em] uppercase text-tekst-drugi mt-2.5 mb-0">{e.czas}</p>
+            </div>
+            <div class="min-w-0">
+              <h3 class="text-[19px] font-semibold m-0 mb-2 leading-snug">{e.tytul}</h3>
+              <p class="text-[15.5px] leading-relaxed text-tekst-drugi m-0 max-w-[44em]">{e.opis}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="max-w-[1200px] mx-auto px-5 py-16">
+    <h2 class="text-[clamp(1.6rem,4vw,2.4rem)] leading-tight mb-8">Найчастіші запитання</h2>
+    <div class="border-t border-linia max-w-[52em]">
+      {PYTANIA.map((p, i) => (
+        <details class="border-b border-linia group" open={i < 2}>
+          <summary class="cursor-pointer list-none py-5 flex gap-4 items-start justify-between font-semibold text-[17px]">
+            {p.pytanie}
+            <span aria-hidden="true" class="text-akcent-ciemny shrink-0 group-open:rotate-45 transition-transform">+</span>
+          </summary>
+          <p class="text-[16px] leading-relaxed text-tekst-drugi pb-5 mt-0 max-w-[46em]">{p.odpowiedz}</p>
+        </details>
+      ))}
+    </div>
+    <div class="flex flex-wrap gap-3 mt-10">
+      <a href="/uk/wniosek/" class="bg-akcent-ciemny text-white px-8 py-4 font-bold hover:bg-akcent-hover">
+        Як подати заявку
+      </a>
+      <a href="/uk/wylaczenia/" class="border-[1.5px] border-akcent text-akcent-tekst bg-tlo px-8 py-[14px] font-semibold hover:bg-tlo-jasne">
+        Перевірити виключення
+      </a>
+    </div>
+  </section>
+</Baza>

@@ -2,41 +2,100 @@
 import { FIRMA } from '../lib/firma';
 import Znak from './Znak.astro';
 import { kategorie } from '@ud/zawody';
+import { GLOWNA, odpowiednik, PREFIKS_UK, type Jezyk } from '../lib/jezyki';
+import { ZAWODY_UK } from '../dane/uk/zawody';
 
-const KOLUMNY = [
-  {
-    tytul: 'Ubezpieczenie',
-    linki: [
-      { nazwa: 'Jak to działa', url: '/jak-to-dziala/' },
-      { nazwa: 'Kalkulator',    url: '/kalkulator/' },
-      { nazwa: 'Zawody',        url: '/zawody/' },
-      { nazwa: 'Blog',          url: '/blog/' },
-    ],
+interface Props { sciezka?: string; jezyk?: Jezyk }
+const { sciezka = '/', jezyk = 'pl' } = Astro.props;
+
+type Link = { nazwa: string; url: string; pl?: boolean };
+
+const KOLUMNY: Record<Jezyk, { tytul: string; linki: Link[] }[]> = {
+  pl: [
+    {
+      tytul: 'Ubezpieczenie',
+      linki: [
+        { nazwa: 'Jak to działa', url: '/jak-to-dziala/' },
+        { nazwa: 'Kalkulator',    url: '/kalkulator/' },
+        { nazwa: 'Zawody',        url: '/zawody/' },
+        { nazwa: 'Blog',          url: '/blog/' },
+      ],
+    },
+    {
+      tytul: 'Firma',
+      linki: [
+        { nazwa: 'O nas',          url: '/o-nas/' },
+        { nazwa: 'Pracuj z nami',  url: '/pracuj-z-nami/' },
+        { nazwa: 'Kontakt',        url: '/kontakt/' },
+        { nazwa: 'Opinie',         url: '/opinie/' },
+      ],
+    },
+    {
+      tytul: 'Dokumenty',
+      linki: [
+        { nazwa: 'OWU i karty produktu',      url: '/dokumenty/' },
+        { nazwa: 'Klauzula informacyjna RODO',url: '/klauzula-informacyjna/' },
+        { nazwa: 'Regulamin',                 url: '/regulamin/' },
+        { nazwa: 'Polityka prywatności',      url: '/polityka-prywatnosci/' },
+        { nazwa: 'Polityka cookies',          url: '/polityka-cookies/' },
+      ],
+    },
+  ],
+  uk: [
+    {
+      tytul: 'Страхування',
+      linki: [
+        { nazwa: 'Як це працює',       url: `${PREFIKS_UK}/jak-to-dziala/` },
+        { nazwa: 'Що не покривається', url: `${PREFIKS_UK}/wylaczenia/` },
+        { nazwa: 'Як подати заявку',   url: `${PREFIKS_UK}/wniosek/` },
+      ],
+    },
+    {
+      tytul: 'Професії',
+      linki: ZAWODY_UK.map((z) => ({ nazwa: z.nazwa, url: `${PREFIKS_UK}/${z.slug}/` })),
+    },
+    {
+      // Dokumenty i strony prawne istnieją tylko po polsku i tak są oznaczone:
+      // nazwa zostaje polska, bo taką klient zobaczy po kliknięciu, a `lang`
+      // mówi czytnikowi ekranu, jak ją przeczytać.
+      tytul: 'Польською мовою',
+      linki: [
+        { nazwa: 'OWU i karty produktu',       url: '/dokumenty/', pl: true },
+        { nazwa: 'Klauzula informacyjna RODO', url: '/klauzula-informacyjna/', pl: true },
+        { nazwa: 'Regulamin',                  url: '/regulamin/', pl: true },
+        { nazwa: 'Polityka prywatności',       url: '/polityka-prywatnosci/', pl: true },
+        { nazwa: 'Polityka cookies',           url: '/polityka-cookies/', pl: true },
+        { nazwa: 'Wszystkie zawody',           url: '/zawody/', pl: true },
+        { nazwa: 'Kontakt',                    url: '/kontakt/', pl: true },
+      ],
+    },
+  ],
+};
+
+const NAPISY = {
+  pl: {
+    opis: 'Prywatne ubezpieczenie utraty dochodu dla samozatrudnionych, kontraktowych, '
+      + 'freelancerów oraz etatowców. Świadczenie możliwe od pierwszego dnia niezdolności do pracy.',
+    branze: 'Zawody według branży',
   },
-  {
-    tytul: 'Firma',
-    linki: [
-      { nazwa: 'O nas',          url: '/o-nas/' },
-      { nazwa: 'Pracuj z nami',  url: '/pracuj-z-nami/' },
-      { nazwa: 'Kontakt',        url: '/kontakt/' },
-      { nazwa: 'Opinie',         url: '/opinie/' },
-    ],
+  uk: {
+    opis: 'Приватне страхування від втрати доходу для самозайнятих, контрактників, фрилансерів '
+      + 'і працівників на трудовому договорі в Польщі. Виплата можлива з першого дня непрацездатності.',
+    branze: '',
   },
-  {
-    tytul: 'Dokumenty',
-    linki: [
-      { nazwa: 'OWU i karty produktu',      url: '/dokumenty/' },
-      { nazwa: 'Klauzula informacyjna RODO',url: '/klauzula-informacyjna/' },
-      { nazwa: 'Regulamin',                 url: '/regulamin/' },
-      { nazwa: 'Polityka prywatności',      url: '/polityka-prywatnosci/' },
-      { nazwa: 'Polityka cookies',          url: '/polityka-cookies/' },
-    ],
-  },
-];
+}[jezyk];
 
 /** Kategorie zawodów w stopce to linkowanie wewnętrzne, nie ozdoba: dają
- *  robotowi ścieżkę do wszystkich podstron zawodów z każdego miejsca w serwisie. */
-const KATEGORIE = kategorie();
+ *  robotowi ścieżkę do wszystkich podstron zawodów z każdego miejsca w serwisie.
+ *  Strony kategorii są tylko po polsku, więc wersja ukraińska ich nie wymienia. */
+const KATEGORIE = jezyk === 'pl' ? kategorie() : [];
+
+/** Druga wersja językowa — ta sama strona, a bez przekładu strona główna. */
+const drugi: Jezyk = jezyk === 'pl' ? 'uk' : 'pl';
+const przelacznik = {
+  url: odpowiednik(sciezka, jezyk) ?? GLOWNA[drugi],
+  nazwa: drugi === 'uk' ? 'Українською' : 'Po polsku',
+};
 ---
 <footer class="bg-tlo-jasne border-t border-linia mt-20">
   <div class="max-w-[1200px] mx-auto px-5 py-14">
@@ -46,35 +105,43 @@ const KATEGORIE = kategorie();
           <Znak wysokosc={26} />
           <span class="text-lg font-bold tracking-tight">Utrata<span class="text-akcent">Dochodu</span></span>
         </div>
-        <p class="text-[14.5px] leading-relaxed text-tekst-drugi m-0">
-          Prywatne ubezpieczenie utraty dochodu dla samozatrudnionych, kontraktowych,
-          freelancerów oraz etatowców. Świadczenie możliwe od pierwszego dnia
-          niezdolności do pracy.
-        </p>
+        <p class="text-[14.5px] leading-relaxed text-tekst-drugi m-0">{NAPISY.opis}</p>
       </div>
 
-      {KOLUMNY.map((k) => (
+      {KOLUMNY[jezyk].map((k) => (
         <nav aria-label={k.tytul}>
           <h2 class="font-mono text-[11px] tracking-[0.12em] uppercase text-tekst-trzeci mb-3 font-semibold">{k.tytul}</h2>
           <ul class="flex flex-col gap-2.5 text-[14px] text-tekst-drugi list-none m-0 p-0">
-            {k.linki.map((l) => <li><a href={l.url} class="hover:text-akcent-ciemny">{l.nazwa}</a></li>)}
+            {k.linki.map((l) => (
+              <li>
+                <a href={l.url} class="hover:text-akcent-ciemny"
+                   lang={l.pl ? 'pl' : undefined} hreflang={l.pl ? 'pl' : undefined}>{l.nazwa}</a>
+              </li>
+            ))}
           </ul>
         </nav>
       ))}
     </div>
 
-    <nav aria-label="Zawody według branży" class="mt-12 pt-8 border-t border-linia">
-      <h2 class="font-mono text-[11px] tracking-[0.12em] uppercase text-tekst-trzeci mb-3 font-semibold">Zawody według branży</h2>
-      <ul class="flex flex-wrap gap-x-5 gap-y-2 text-[14px] text-tekst-drugi list-none m-0 p-0">
-        {KATEGORIE.map((k) => (
-          <li><a href={`/zawody/${k.slug}/`} class="hover:text-akcent-ciemny">{k.nazwa} <span class="text-tekst-trzeci">({k.liczba})</span></a></li>
-        ))}
-      </ul>
-    </nav>
+    {KATEGORIE.length > 0 && (
+      <nav aria-label={NAPISY.branze} class="mt-12 pt-8 border-t border-linia">
+        <h2 class="font-mono text-[11px] tracking-[0.12em] uppercase text-tekst-trzeci mb-3 font-semibold">{NAPISY.branze}</h2>
+        <ul class="flex flex-wrap gap-x-5 gap-y-2 text-[14px] text-tekst-drugi list-none m-0 p-0">
+          {KATEGORIE.map((k) => (
+            <li><a href={`/zawody/${k.slug}/`} class="hover:text-akcent-ciemny">{k.nazwa} <span class="text-tekst-trzeci">({k.liczba})</span></a></li>
+          ))}
+        </ul>
+      </nav>
+    )}
 
     <div class="flex flex-wrap gap-4 justify-between pt-7 mt-10 border-t border-linia text-[13px] text-tekst-trzeci">
       <span>© {new Date().getFullYear()} {FIRMA.nazwa} · KRS {FIRMA.krs} · REGON {FIRMA.regon}</span>
       <span>
+        {/* Przełącznik języka stoi tu na każdej szerokości ekranu — na telefonie
+            to jedyne miejsce strony polskiej, z którego widać wersję ukraińską. */}
+        <a href={przelacznik.url} lang={drugi} hreflang={drugi}
+           class="text-tekst-drugi font-semibold hover:text-akcent-ciemny">{przelacznik.nazwa}</a>
+        <span aria-hidden="true"> · </span>
         <a href={`mailto:${FIRMA.email}`} class="hover:text-akcent-ciemny">{FIRMA.email}</a>
         <span aria-hidden="true"> · </span>
         <a href={`tel:${FIRMA.telefon}`} class="hover:text-akcent-ciemny">{FIRMA.telefonWyswietlany}</a>

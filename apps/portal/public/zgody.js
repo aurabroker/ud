@@ -172,6 +172,52 @@
     if (el) el.remove();
   }
 
+  /**
+   * Napisy banera — w języku strony (`lang` na <html>; domyślnie polski).
+   *
+   * Wersja ukraińska jest PRZEKŁADEM polskiej, zdanie w zdanie: te same trzy
+   * kategorie, te same trzy przyciski, ta sama obietnica („do tego momentu nie
+   * wysyłamy żadnych danych"). Zgoda udzielona w banerze, którego treści
+   * odwiedzający nie rozumie, nie jest świadoma — dlatego strona po ukraińsku
+   * nie może pytać o zgodę po polsku. Logika poniżej nie zależy od języka;
+   * zmieniasz polskie zdanie — zmień jego odpowiednik.
+   */
+  var NAPISY = {
+    pl: {
+      tytul: 'Pliki cookies',
+      opis: 'Niezbędne cookies są potrzebne, żeby strona działała. ' +
+        'Analityczne i marketingowe uruchamiamy dopiero wtedy, gdy się zgodzisz — ' +
+        'do tego momentu nie wysyłamy żadnych danych do Google ani Meta. ' +
+        'Szczegóły w <a href="/polityka-cookies/">polityce cookies</a>.',
+      niezbedne: ['Niezbędne', 'Sesja formularza, zapamiętanie tej decyzji, ochrona przed botami. Zawsze włączone.'],
+      analityczne: ['Analityczne', 'Zliczanie odwiedzin i sprawdzanie, które podstrony są przydatne (Google Analytics 4).'],
+      marketingowe: ['Marketingowe', 'Pomiar skuteczności reklam i remarketing (Google Ads, Meta Pixel).'],
+      tak: 'Akceptuję wszystkie',
+      nie: 'Odrzucam wszystkie',
+      wiecej: 'Ustawienia',
+      zapisz: 'Zapisz wybrane'
+    },
+    uk: {
+      tytul: 'Файли cookie',
+      opis: 'Необхідні файли cookie потрібні, щоб сайт працював. ' +
+        'Аналітичні та маркетингові ми вмикаємо лише тоді, коли ви погодитеся, — ' +
+        'до цього моменту ми не надсилаємо жодних даних до Google чи Meta. ' +
+        'Деталі — в <a href="/polityka-cookies/" lang="pl" hreflang="pl">polityka cookies</a> (польською мовою).',
+      niezbedne: ['Необхідні', 'Сесія форми, збереження цього рішення, захист від ботів. Завжди ввімкнені.'],
+      analityczne: ['Аналітичні', 'Підрахунок відвідувань і перевірка, які сторінки корисні (Google Analytics 4).'],
+      marketingowe: ['Маркетингові', 'Вимірювання ефективності реклами та ремаркетинг (Google Ads, Meta Pixel).'],
+      tak: 'Приймаю всі',
+      nie: 'Відхиляю всі',
+      wiecej: 'Налаштування',
+      zapisz: 'Зберегти вибране'
+    }
+  };
+
+  function napisy() {
+    var jezyk = String(document.documentElement.getAttribute('lang') || 'pl').toLowerCase().slice(0, 2);
+    return NAPISY[jezyk] || NAPISY.pl;
+  }
+
   function pokaz(rozwiniete) {
     if (document.getElementById(ID)) return;
     if (!document.body) {
@@ -187,31 +233,30 @@
     box.setAttribute('aria-labelledby', ID + '-tytul');
     box.setAttribute('aria-describedby', ID + '-opis');
 
+    var t = napisy();
+
     box.innerHTML =
       '<div class="ud-z-srodek">' +
-        '<h2 id="' + ID + '-tytul">Pliki cookies</h2>' +
-        '<p id="' + ID + '-opis">Niezbędne cookies są potrzebne, żeby strona działała. ' +
-        'Analityczne i marketingowe uruchamiamy dopiero wtedy, gdy się zgodzisz — ' +
-        'do tego momentu nie wysyłamy żadnych danych do Google ani Meta. ' +
-        'Szczegóły w <a href="/polityka-cookies/">polityce cookies</a>.</p>' +
+        '<h2 id="' + ID + '-tytul">' + t.tytul + '</h2>' +
+        '<p id="' + ID + '-opis">' + t.opis + '</p>' +
         '<div class="ud-z-opcje" hidden>' +
           '<label class="ud-z-opcja ud-z-stala">' +
             '<input type="checkbox" checked disabled>' +
-            '<span><strong>Niezbędne</strong><span>Sesja formularza, zapamiętanie tej decyzji, ochrona przed botami. Zawsze włączone.</span></span>' +
+            '<span><strong>' + t.niezbedne[0] + '</strong><span>' + t.niezbedne[1] + '</span></span>' +
           '</label>' +
           '<label class="ud-z-opcja">' +
             '<input type="checkbox" data-zgoda="analityka">' +
-            '<span><strong>Analityczne</strong><span>Zliczanie odwiedzin i sprawdzanie, które podstrony są przydatne (Google Analytics 4).</span></span>' +
+            '<span><strong>' + t.analityczne[0] + '</strong><span>' + t.analityczne[1] + '</span></span>' +
           '</label>' +
           '<label class="ud-z-opcja">' +
             '<input type="checkbox" data-zgoda="marketing">' +
-            '<span><strong>Marketingowe</strong><span>Pomiar skuteczności reklam i remarketing (Google Ads, Meta Pixel).</span></span>' +
+            '<span><strong>' + t.marketingowe[0] + '</strong><span>' + t.marketingowe[1] + '</span></span>' +
           '</label>' +
         '</div>' +
         '<div class="ud-z-akcje">' +
-          '<button type="button" class="ud-z-tak" data-akcja="tak">Akceptuję wszystkie</button>' +
-          '<button type="button" class="ud-z-nie" data-akcja="nie">Odrzucam wszystkie</button>' +
-          '<button type="button" class="ud-z-wiecej" data-akcja="wiecej">Ustawienia</button>' +
+          '<button type="button" class="ud-z-tak" data-akcja="tak">' + t.tak + '</button>' +
+          '<button type="button" class="ud-z-nie" data-akcja="nie">' + t.nie + '</button>' +
+          '<button type="button" class="ud-z-wiecej" data-akcja="wiecej">' + t.wiecej + '</button>' +
         '</div>' +
       '</div>';
 
@@ -229,7 +274,7 @@
 
     function rozwin() {
       opcje.hidden = false;
-      wiecej.textContent = 'Zapisz wybrane';
+      wiecej.textContent = t.zapisz;
       wiecej.setAttribute('data-akcja', 'zapisz');
     }
     if (rozwiniete) rozwin();

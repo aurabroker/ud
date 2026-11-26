@@ -71,6 +71,8 @@ export function strona(opts: {
   opis: string;
   okruszki?: Okruszek[];
   zmodyfikowano?: Date;
+  /** Język treści (BCP 47). Domyślnie język serwisu; „uk" dla stron pod `/uk/`. */
+  jezyk?: string;
 }) {
   return {
     '@type': 'WebPage',
@@ -78,7 +80,7 @@ export function strona(opts: {
     url: abs(opts.url),
     name: opts.tytul,
     description: opts.opis,
-    inLanguage: SERWIS.jezyk,
+    inLanguage: opts.jezyk ?? SERWIS.jezyk,
     isPartOf: { '@id': `${SERWIS.url}/#serwis` },
     publisher: { '@id': `${SERWIS.url}/#organizacja` },
     ...(opts.okruszki ? { breadcrumb: { '@id': `${abs(opts.url)}#okruszki` } } : {}),
@@ -125,13 +127,17 @@ export function faq(pytania: { pytanie: string; odpowiedz: string }[], url: stri
 }
 
 /** Usługa — ubezpieczenie utraty dochodu dla konkretnej grupy zawodowej. */
-export function usluga(opts: { nazwa: string; opis: string; url: string; grupa: string }) {
+export function usluga(opts: {
+  nazwa: string; opis: string; url: string; grupa: string;
+  /** Nazwa rodzaju usługi w języku strony; domyślnie polska. */
+  typ?: string;
+}) {
   return {
     '@type': 'Service',
     '@id': `${abs(opts.url)}#usluga`,
     name: opts.nazwa,
     description: opts.opis,
-    serviceType: 'Ubezpieczenie utraty dochodu',
+    serviceType: opts.typ ?? 'Ubezpieczenie utraty dochodu',
     provider: { '@id': `${SERWIS.url}/#organizacja` },
     areaServed: { '@type': 'Country', name: 'Polska' },
     audience: { '@type': 'Audience', audienceType: opts.grupa },

@@ -2097,6 +2097,88 @@ które zgodę ma — nie z kartoteki klientów.
 
 ---
 
+## Wersja ukraińska (`/uk/`)
+
+Od 26.11.2026 część portalu ma odpowiednik po ukraińsku: strona główna,
+„Jak to działa", wyłączenia, przewodnik po wniosku i trzy zawody (programista,
+fryzjer, kosmetyczka). Powód: w latach 2022–2025 Ukraińcy założyli w Polsce
+109 tys. jednoosobowych firm (PIE), a po ukraińsku polskiej polisy od utraty
+dochodu nie opisywał nikt.
+
+| Co | Gdzie |
+|---|---|
+| lista par PL ↔ UK, `hreflang`, przełącznik | `src/lib/jezyki.ts` |
+| strony | `src/pages/uk/` |
+| treść trzech zawodów | `src/dane/uk/zawody.ts` |
+| nazwy kroków wniosku, granice wieku | `src/lib/uk.ts` |
+| napisy kalkulatora | `NAPISY` w `Kalkulator.svelte` |
+| napisy banera cookies | `NAPISY` w `public/zgody.js` |
+
+### Zasady, które łatwo złamać
+
+- **Kod języka to `uk`, nie `ua`.** `ua` jest kodem kraju; jako `lang` albo
+  `hreflang` jest błędny i wyszukiwarka go pomija.
+- **Podkatalog, nie domena `.ua`.** Klienci prowadzą firmy w Polsce, a końcówka
+  `.ua` kieruje wyszukiwarkę na Ukrainę i zaczyna od zera. Domena ukraińska
+  może najwyżej przekierowywać na `/uk/`.
+- **Formularz wniosku zostaje po polsku.** Zgody mają numer wersji i treść
+  zatwierdzoną przez prawnika, zapisaną też w funkcji brzegowej; odpowiedzi
+  w ankiecie medycznej są oświadczeniem klienta, a błąd przekładu obciążyłby
+  jego. `/uk/wniosek/` jest przewodnikiem po polskim kreatorze, nie jego
+  przekładem — dlatego nie ma pary `hreflang` z `/wniosek/`. Tłumaczenie
+  kreatora to osobna decyzja właściciela i prawnika, nie ciąg dalszy tej pracy.
+- **Treść ukraińska to przekład polskiej, zdanie w zdanie.** Polskie teksty
+  były sprawdzane z OWU; zdanie dopisane tylko po ukraińsku jest nowym
+  twierdzeniem o produkcie. Wyjątkiem jest sekcja „Якщо ви з України" na
+  `/uk/` i jedno zdanie o wojnie na `/uk/wylaczenia/` — tam każde zdanie ma
+  w komentarzu źródło (paragraf OWU, pole formularza albo przepis).
+- **Kwot, limitów i okresów nie wpisuj.** Idą z `symulacja.ts` i ze schematu
+  wniosku, tak jak po polsku.
+- **Poprawiasz polski tekst — popraw ukraiński.** Dotyczy wyłączeń, pytań,
+  etapów, treści trzech zawodów, napisów kalkulatora i banera cookies.
+- **Strona ukraińska nie ładuje Newsreadera ani Public Sans** — nie mają
+  cyrylicy. `Baza.astro` podstawia tam kroje systemowe pod te same zmienne.
+- **Odnośnik z ukraińskiej strony do polskiej ma `hreflang="pl"`** i polską
+  nazwę (dokumenty, strony prawne, lista zawodów).
+- **Obsługa jest po polsku i strona mówi to wprost** przy każdym telefonie.
+  Jeśli pojawi się obsługa po ukraińsku, zmień te zdania — nie wcześniej.
+
+### Nowy zawód po ukraińsku
+
+Wpis w `ZAWODY_UK` (`src/dane/uk/zawody.ts`) z przekładem treści z
+`packages/zawody/data/tresci.json`. Strona, para `hreflang`, kafelek na `/uk/`
+i odnośnik w stopce powstają same.
+
+### Do potwierdzenia przed publikacją (stan na 26.11.2026)
+
+Gałąź `claude/wersja-ukrainska` nie jest scalona. Zanim trafi na `main`:
+
+1. Leadenhall i CEU: czy przyjmują obywateli Ukrainy i jakich dokumentów
+   wymagają. Strona mówi tylko, że OWU nie stawia warunku obywatelstwa
+   (LW044 § 15 ust. 18, CEU § 29 pkt 12) — odczytane ze streszczenia PDF-ów,
+   nie z pełnego tekstu.
+2. Zdania o wojnie i stanie wojennym (LW044 § 11 ust. 1 lit. a i d; CEU § 18
+   pkt 6 i 10, § 29 pkt 20) oraz o dokumentach do wypłaty (LW044 § 14 ust. 6;
+   CEU § 11 ust. 2) — to samo źródło, do sprawdzenia z pełnym tekstem OWU.
+3. Przekład przeczytany przez osobę znającą ukraiński i polski.
+4. Baner cookies po ukraińsku — przekład 1:1 polskiego; akceptacja tak jak
+   przy treści polskiej.
+5. Kto odpowiada na zapytanie po ukraińsku.
+
+Polska pozycja na `/wylaczenia/` mówi „Udział w działaniach wojennych",
+a oba OWU wyłączają także zdarzenia SPOWODOWANE wojną. Wersja ukraińska mówi
+to drugie; polską warto sprawdzić przy okazji punktu 2.
+
+### Testy
+
+`test/uk.spec.js` — 21 testów. Większość sprawdza zgodność z wersją polską
+(te same kwoty, tyle samo wyłączeń, etapów, pytań, ryzyk), a nie samą wersję
+ukraińską; do tego `hreflang` w obie strony, etykiety przewodnika porównane
+ze źródłem kreatora, baner cookies po ruchu sieciowym i szerokość 390 px.
+Jakości przekładu testy nie sprawdzają.
+
+---
+
 ## Serwis jest jasny — bez trybu ciemnego
 
 Decyzja klienta, 2026-08-28. Nie proponuj ponownie i nie dokładaj wariantu

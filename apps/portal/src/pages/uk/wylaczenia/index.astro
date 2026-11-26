@@ -1,0 +1,242 @@
+---
+/**
+ * Wyłączenia odpowiedzialności — po ukraińsku.
+ *
+ * PRZEKŁAD `src/pages/wylaczenia/index.astro`, pozycja w pozycję. Tamta lista
+ * była porównana z sześcioma OWU (28.09.2026); tutaj nie wolno dopisać ani
+ * usunąć pozycji bez zrobienia tego samego po polsku — `test/uk.spec.js`
+ * porównuje liczbę grup, pozycji i pytań między obiema stronami.
+ *
+ * Jedno zdanie jest tylko tutaj (oznaczone niżej): przy wojnie. Dla klienta
+ * z Ukrainy to najważniejsze wyłączenie na liście, a OWU obu ubezpieczycieli
+ * mówi szerzej niż polska pozycja „udział w działaniach wojennych".
+ *
+ * HIV/WZW nie jest wyłączeniem — patrz CLAUDE.md. Na liście go nie ma, a pytanie
+ * mówi to wprost, jak po polsku.
+ */
+import Baza from '../../../layouts/Baza.astro';
+import { graf, organizacja, serwis, strona, okruszki, faq } from '../../../lib/seo';
+import { FIRMA } from '../../../lib/firma';
+import { GLOWNA_UK } from '../../../lib/uk';
+
+const sciezka = '/uk/wylaczenia/';
+const tytul = 'Чого не покриває страхування від втрати доходу | UtrataDochodu.pl';
+const opis = 'Повний список виключень: професійне вигорання, психічні захворювання, часткова '
+  + 'непрацездатність, захворювання, які лікували до укладення договору. Без зірочок.';
+
+const GRUPY = [
+  {
+    id: 'psychika',
+    tytul: 'Психічне здоров’я',
+    pozycje: [
+      {
+        co: 'Професійне вигорання як самостійний діагноз',
+        czemu: 'Вигорання в класифікації ICD (МКХ) є не захворюванням, а явищем, пов’язаним із '
+          + 'роботою. Страховик не має на що спертися, оцінюючи, скільки воно триватиме й коли '
+          + 'закінчиться, тому не охоплює його захистом.',
+      },
+      {
+        co: 'Психічні захворювання та розлади як причина непрацездатності',
+        czemu: 'Депресія, невроз, тривожні розлади, психоз і емоційний розлад не дають права на '
+          + 'виплату. У Leadenhall виключення діє, коли це єдина причина непрацездатності: якщо '
+          + 'працювати не дає також соматична хвороба, охоплена захистом, враховують саме цю '
+          + 'хворобу. У CEU такого застереження немає — виплата не належить, якщо причиною '
+          + 'непрацездатності була депресія або подібний діагноз.',
+      },
+      {
+        co: 'Стрес і перевтома',
+        czemu: 'Це не діагноз, а опис стану. Лікарняний, виданий із таким обґрунтуванням, '
+          + 'не запускає виплати.',
+      },
+    ],
+  },
+  {
+    id: 'zakres',
+    tytul: 'Обсяг непрацездатності',
+    pozycje: [
+      {
+        co: 'Часткова непрацездатність',
+        czemu: 'Поліс виплачує кошти за повну нездатність працювати за професією. Робота '
+          + 'в обмеженому обсязі або перехід на легші обов’язки означає, що умову виплати не виконано.',
+      },
+      {
+        co: 'Карантин та ізоляція без засвідченої непрацездатності',
+        czemu: 'Сам наказ залишатися вдома не є хворобою. Якщо під час ізоляції лікар засвідчить '
+          + 'непрацездатність, враховують цей висновок, а не саму ізоляцію.',
+      },
+      {
+        co: 'Перерва в роботі через брак замовлень',
+        czemu: 'Страхування захищає від втрати здатності працювати, а не від втрати контракту. '
+          + 'У цьому різниця між цим продуктом і страхуванням від втрати роботи.',
+      },
+    ],
+  },
+  {
+    id: 'historia',
+    tytul: 'Історія лікування',
+    pozycje: [
+      {
+        co: 'Захворювання, які лікували протягом 24 місяців до укладення договору',
+        czemu: 'Хіба що їх було вказано в медичній анкеті й страховик прийняв їх до захисту — '
+          + 'іноді з підвищенням внеску, іноді з виключенням конкретного органа. Приховування '
+          + 'такого захворювання — найчастіша причина відмови у виплаті.',
+      },
+    ],
+  },
+  {
+    id: 'okolicznosci',
+    tytul: 'Обставини події',
+    pozycje: [
+      {
+        co: 'Події під дією алкоголю, наркотиків та одурманливих речовин',
+        czemu: 'Крім випадків уживання за призначенням лікаря.',
+      },
+      {
+        co: 'Умисне самоушкодження та спроба самогубства',
+        czemu: 'Стандартне виключення в особистому страхуванні.',
+      },
+      {
+        co: 'Участь у воєнних діях, заворушеннях і актах терору',
+        // Drugie zdanie jest TYLKO w wersji ukraińskiej. Źródło: LW044 § 11 ust. 1 lit. a
+        // (roszczenia spowodowane wojną, działaniami wojennymi lub stanem wojennym)
+        // oraz CEU § 18 pkt 10 z definicją wojny w § 29 pkt 20.
+        czemu: 'Катастрофічні ризики виключено з індивідуального захисту. Умови обох страховиків '
+          + 'виключають не лише участь у воєнних діях, а й випадки, спричинені війною, воєнними '
+          + 'діями або воєнним станом.',
+      },
+      {
+        co: 'Спорт на змагальному рівні та спорт високого ризику',
+        czemu: 'Дайвінг, скелелазіння, моторні види спорту, парашутизм. Частину з них можна '
+          + 'охопити захистом, якщо вказати в заявці, — про це запитуємо на кроці про обсяг захисту.',
+      },
+    ],
+  },
+];
+
+const PYTANIA = [
+  {
+    pytanie: 'Чи покриває страхування від втрати доходу депресію?',
+    odpowiedz: 'Ні, якщо саме депресія не дає працювати. Умови обох страховиків виключають '
+      + 'непрацездатність, спричинену депресією, неврозом, тривожними розладами та емоційним '
+      + 'розладом — також діагностованими під час дії договору. У Leadenhall виключення стосується '
+      + 'ситуації, коли розлад є єдиною причиною непрацездатності; якщо працювати не дає також '
+      + 'соматична хвороба, враховують цю хворобу.',
+  },
+  {
+    pytanie: 'Чи спрацює поліс у разі професійного вигорання?',
+    odpowiedz: 'Ні, якщо вигорання — єдиний діагноз. Професійне вигорання не є захворюванням '
+      + 'у класифікації ICD (МКХ), тож не є підставою для виплати.',
+  },
+  {
+    pytanie: 'Чи отримаю виплату, якщо можу працювати в меншому обсязі?',
+    odpowiedz: 'Ні. Виплата належить за повну нездатність працювати за професією. Часткова '
+      + 'непрацездатність виплати не запускає.',
+  },
+  {
+    pytanie: 'Що буде, якщо я не повідомлю про попереднє лікування?',
+    odpowiedz: 'Страховик може відмовити у виплаті, пославшись на приховування обставин, істотних '
+      + 'для оцінки ризику. Повідомлення про захворювання зазвичай закінчується підвищенням внеску '
+      + 'або виключенням одного органа — а не відмовою в страхуванні.',
+  },
+  {
+    pytanie: 'Чи охоплює захист зараження ВІЛ або вірусним гепатитом на роботі?',
+    odpowiedz: 'Саме зараження не виключено. Якщо воно призведе до непрацездатності, її оцінюють '
+      + 'на загальних засадах — як за будь-якої іншої хвороби. Особливі умови HIV/WZW (LW048 до '
+      + 'варіанта MEDICA, LW049 до MEDICARE) додатково дають окрему виплату за саме зараження після '
+      + 'ненавмисного контакту з кров’ю або біологічними рідинами на роботі: одноразову виплату '
+      + '(за гепатиту B або C — після 12-місячного періоду очікування) та відшкодування вартості '
+      + 'антиретровірусних препаратів до 5 000 zł і консультацій з аналізами до 2 000 zł.',
+  },
+];
+
+const sciezkaOkruszkow = [
+  GLOWNA_UK,
+  { nazwa: 'Що не покривається', url: sciezka },
+];
+
+const jsonld = graf([
+  organizacja(),
+  serwis(),
+  okruszki([...sciezkaOkruszkow]),
+  strona({ url: sciezka, tytul, opis, okruszki: [...sciezkaOkruszkow], jezyk: 'uk' }),
+  faq(PYTANIA, sciezka),
+]);
+
+const ile = GRUPY.reduce((suma, g) => suma + g.pozycje.length, 0);
+---
+<Baza tytul={tytul} opis={opis} sciezka={sciezka} jsonld={jsonld} jezyk="uk">
+  <div class="bg-tlo-jasne border-b border-linia">
+    <div class="max-w-[1200px] mx-auto px-5 py-14 lg:py-18">
+      <nav aria-label="Навігаційний ланцюжок" class="mb-5">
+        <ol class="flex flex-wrap gap-2 text-[13px] text-tekst-drugi list-none m-0 p-0">
+          <li><a href={GLOWNA_UK.url} class="hover:text-akcent-ciemny">{GLOWNA_UK.nazwa}</a></li>
+          <li aria-hidden="true">/</li>
+          <li aria-current="page" class="text-tekst">Що не покривається</li>
+        </ol>
+      </nav>
+      <h1 class="text-[clamp(1.9rem,5vw,3rem)] leading-[1.08] max-w-[16em] m-0">
+        Чого це страхування не покриває
+      </h1>
+      <p data-odpowiedz class="text-[1.12rem] leading-relaxed text-tekst-drugi max-w-[42em] mt-6 mb-0">
+        Виключень — {ile}, і всі вони зібрані в одному місці, перш ніж ви заповните заявку.
+        Найважливіші: професійне вигорання як самостійний діагноз, психічні захворювання,
+        часткова непрацездатність і захворювання, які лікували протягом 24 місяців до
+        укладення договору, якщо про них не повідомили.
+      </p>
+      <p class="text-[15px] leading-relaxed text-tekst-drugi max-w-[42em] mt-4 mb-0">
+        Список є стислим викладом і перекладом польської сторінки. Обов’язковим є текст
+        загальних умов страхування (OWU) польською мовою —{' '}
+        <a href="/dokumenty/" lang="pl" hreflang="pl" class="text-akcent-tekst underline decoration-linia-mocna underline-offset-2">OWU i karty produktu</a>.
+      </p>
+    </div>
+  </div>
+
+  <div class="max-w-[1200px] mx-auto px-5 py-14 flex flex-col gap-12">
+    {GRUPY.map((g) => (
+      <section aria-labelledby={`g-${g.id}`}>
+        <h2 id={`g-${g.id}`}
+            class="text-[clamp(1.35rem,3vw,1.8rem)] pb-3 mb-6 border-b-2 border-akcent">
+          {g.tytul}
+        </h2>
+        <ul class="list-none m-0 p-0 grid gap-x-10 gap-y-7 grid-cols-[repeat(auto-fill,minmax(21rem,1fr))]">
+          {g.pozycje.map((p) => (
+            <li class="border-l-[3px] border-alarm pl-5">
+              <h3 class="text-[17px] font-semibold m-0 mb-2 leading-snug">{p.co}</h3>
+              <p class="text-[15px] leading-relaxed text-tekst-drugi m-0">{p.czemu}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+  </div>
+
+  <section class="bg-tlo-jasne border-y border-linia">
+    <div class="max-w-[1200px] mx-auto px-5 py-14">
+      <h2 class="text-[clamp(1.5rem,3.5vw,2.1rem)] leading-tight mb-8">Найчастіші запитання про виключення</h2>
+      <div class="border-t border-linia max-w-[52em]">
+        {PYTANIA.map((p, i) => (
+          <details class="border-b border-linia group" open={i < 2}>
+            <summary class="cursor-pointer list-none py-5 flex gap-4 items-start justify-between font-semibold text-[17px]">
+              {p.pytanie}
+              <span aria-hidden="true" class="text-akcent-ciemny shrink-0 group-open:rotate-45 transition-transform">+</span>
+            </summary>
+            <p class="text-[16px] leading-relaxed text-tekst-drugi pb-5 mt-0 max-w-[46em]">{p.odpowiedz}</p>
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <div class="max-w-[1200px] mx-auto px-5 py-14 flex flex-wrap gap-8 justify-between items-center">
+    <div class="max-w-[38em]">
+      <h2 class="text-[clamp(1.3rem,3vw,1.8rem)] leading-tight m-0 mb-2">Не впевнені, чи ваш випадок охоплено?</h2>
+      <p class="text-[16px] leading-relaxed text-tekst-drugi m-0">
+        Зателефонуйте й запитайте прямо, перш ніж заповнювати заявку. Це коротший шлях, ніж
+        читати сто сторінок умов. Розмова — польською мовою.
+      </p>
+    </div>
+    <a href={`tel:${FIRMA.telefon}`} class="bg-akcent-ciemny text-white px-8 py-4 font-bold text-lg hover:bg-akcent-hover">
+      {FIRMA.telefonWyswietlany}
+    </a>
+  </div>
+</Baza>
