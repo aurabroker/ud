@@ -3480,10 +3480,22 @@ z wersją ukraińską kieruj do niej. Scalenie do produkcyjnej = wdrożenie.
 - **Odnośnik z ukraińskiej strony do polskiej ma `hreflang="pl"`** i polską
   nazwę (dokumenty, strony prawne, lista zawodów, artykuł o ciąży,
   odkładanie na `/kalkulator/`).
-- **Przełącznik „UA" w pasku strony polskiej jest schowany poniżej 640 px
-  i od 1024 do 1279 px** — tam siedem pozycji menu i przycisk mieszczą się na
-  styk, a z przełącznikiem pasek wychodził 2 px poza ekran. W obu zakresach
-  wersję ukraińską wskazuje odnośnik „Українською" w stopce.
+- **Przełącznik języka to flaga w pasku, na każdej szerokości od 340 px**
+  (prośba właściciela z 26.11.2026). Flaga i nazwa należą do języka, NA KTÓRY
+  się przełącza: na stronie polskiej ukraińska, na ukraińskiej polska.
+  `Flaga.astro` to SVG, nie emoji (Windows nie ma flag w kroju systemowym),
+  z ramką — biała i żółta połowa zlewałyby się z białym paskiem — i z
+  `aria-hidden`; nazwę niesie `aria-label` odnośnika. Skrót „UA"/„PL" obok
+  flagi stoi od 640 px, a na stronie polskiej znika jeszcze od 1024 do
+  1279 px. **Szerokości paska są policzone, nie dobrane na oko** (komentarz
+  w `Nawigacja.astro`): poniżej 390 px logo ma 18 px, przycisk 14 px i węższe
+  marginesy (357,8 px z 360), od 390 px rozmiary pełne (386,5 px), a menu
+  strony polskiej od 1024 do 1279 px ma odstępy 16 zamiast 20 px. Przy okazji
+  zniknęło przewijanie w poziomie paska strony polskiej przy 360 px (było
+  12 px poza ekranem, także na produkcji). Poniżej 340 px flagi nie ma —
+  zostaje odnośnik „Українською" w stopce. Zmieniasz napis przycisku albo
+  dokładasz pozycję menu — przelicz; pilnuje tego test „pasek z flagą mieści
+  się w ekranie" (dziewięć szerokości, cztery strony).
 - **Obsługa jest po polsku i strona mówi to wprost** przy każdym telefonie.
   Jeśli pojawi się obsługa po ukraińsku, zmień te zdania — nie wcześniej.
 - **Polskie strony nie mogą się przez to zmienić.** Sprawdzone 26.11.2026:
@@ -3492,6 +3504,39 @@ z wersją ukraińską kieruj do niej. Scalenie do produkcyjnej = wdrożenie.
   z gałęzi produkcyjnej; w HTML-u polskich stron doszły tylko odnośniki
   `hreflang`, przełącznik w pasku i odnośnik w stopce. Po kolejnym scaleniu
   produkcyjnej powtórz to porównanie (dwa buildy, `diff` po `.md`).
+  Wyjątek, świadomy: pasek nawigacji (punkt o fladze wyżej) wygląda na
+  telefonie inaczej także na stronach polskich.
+
+### Pliki dla sprawdzających przekład
+
+```
+cd apps/portal && pnpm build && node scripts/przeklad-do-weryfikacji.mjs
+```
+
+Zapisuje do `apps/portal/przeklad-do-weryfikacji/` (katalog w `.gitignore` —
+wynik starzeje się przy każdej zmianie treści) instrukcję dla modelu
+sprawdzającego ze słownikiem, po jednym pliku na stronę ukraińską, plik
+z napisami wspólnymi (pasek, stopka, baner cookies) i `przeklad-uk-komplet.md`
+ze wszystkim naraz. Właściciel wrzuca je do innych modeli językowych
+(26.11.2026) — poprawki z ich odpowiedzi wprowadzasz w źródłach, potem build
+i skrypt jeszcze raz.
+
+- **Treść idzie z builda, nie ze źródeł** — segmenty to gotowe zdania
+  z kwotami, nie szablony z `${…}`. Pary stron skrypt bierze z `hreflang`,
+  więc nowy zawód po ukraińsku trafia do zestawienia sam.
+- **Skrypt nie zgaduje.** Sekcje zestawia po nagłówkach, akapity — tylko gdy
+  jest ich tyle samo; inaczej sekcja stoi „w całości" z uwagą. Inny układ
+  nagłówków albo termin ze słownika, którego nie ma w tekście, to ostrzeżenie
+  i kod wyjścia 2.
+- **Akapit dopisany tylko po ukraińsku wpisujesz w skrypcie świadomie**:
+  `DOPISKI_UK` (pojedynczy akapit), `TYLKO_UK` (cała sekcja, z zamierzoną
+  treścią po polsku) albo `ROZNE_CELOWO` (sekcja celowo inna). Test
+  „zestawienie do weryfikacji…" uruchamia skrypt i robi się czerwony, gdy
+  jakakolwiek sekcja ma po polsku i po ukraińsku inną liczbę akapitów —
+  26.11.2026 tak wyszedł akapit wstępu do ryzyk („Ryzyko w tym zawodzie różni
+  się od biurowego…"), którego strony zawodów po ukraińsku nie miały.
+- Zmieniasz słownik przekładu — zmień `SLOWNIK` w skrypcie; idzie do
+  instrukcji dla sprawdzającego.
 
 ### Nowy zawód po ukraińsku
 
@@ -3523,12 +3568,13 @@ Gałąź `claude/wersja-ukrainska` nie jest scalona. Zanim trafi na produkcyjną
 
 ### Testy
 
-`test/uk.spec.js` — 26 testów. Większość sprawdza zgodność z wersją polską
-(te same kwoty, tyle samo wyłączeń, etapów, pytań, ryzyk, te same paragrafy
-przy wyłączeniach, te same pola w zdaniach o ZUS-ie i w napisach kalkulatora),
-a nie samą wersję ukraińską; do tego zakazane zwroty, nazwy podmiotów,
-`hreflang` w obie strony, etykiety przewodnika porównane ze źródłem kreatora,
-baner cookies po ruchu sieciowym i szerokość 390 px. Kwoty w testach liczone
+`test/uk.spec.js` — 29 testów. Większość sprawdza zgodność z wersją polską
+(te same kwoty, tyle samo wyłączeń, etapów, pytań, ryzyk i akapitów w każdej
+sekcji, te same paragrafy przy wyłączeniach, te same pola w zdaniach o ZUS-ie
+i w napisach kalkulatora), a nie samą wersję ukraińską; do tego zakazane
+zwroty, nazwy podmiotów, `hreflang` w obie strony, flaga w przełączniku,
+etykiety przewodnika porównane ze źródłem kreatora, baner cookies po ruchu
+sieciowym i szerokość paska od 360 do 1440 px. Kwoty w testach liczone
 z tych samych plików co strona, nie wpisane. Jakości przekładu testy nie
 sprawdzają.
 

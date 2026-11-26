@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test';
-import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync, mkdtempSync, rmSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
+import { tmpdir } from 'node:os';
+import { spawnSync } from 'node:child_process';
 import { ZAWODY, TRESCI } from '@ud/zawody';
 import { KROKI } from '@ud/wniosek';
 import { PARY } from '../src/lib/jezyki.ts';
@@ -122,11 +124,100 @@ test('przełącznik języka prowadzi do tej samej strony, a bez przekładu — n
   expect(przelacznik(html('/kalkulator/'))).toBe('/uk/');
   expect(przelacznik(html('/uk/wniosek/'))).toBe('/');
 
-  // Na telefonie przełącznik w pasku strony polskiej jest schowany — wersję
-  // ukraińską musi wskazywać stopka, na każdej stronie.
+  // Poniżej 340 px flaga z paska znika — wersję ukraińską musi wskazywać
+  // także stopka, na każdej stronie.
   for (const s of ['/', '/kalkulator/', '/lekarz/']) {
     const stopka = html(s).slice(html(s).indexOf('<footer'));
     expect(stopka, `${s}: stopka bez odnośnika do wersji ukraińskiej`).toMatch(/<a href="\/uk\/[^"]*"[^>]*hreflang="uk"[^>]*>Українською</);
+  }
+});
+
+test('przełącznik języka ma flagę języka, na który przełącza, i nazwę dla czytnika ekranu', () => {
+  const przelacznik = (dokument) => dokument.slice(dokument.indexOf('<header'), dokument.indexOf('</header>'))
+    .match(/<a href="[^"]+"[^>]*hreflang="(?:uk|pl)"[\s\S]*?<\/a>/)?.[0] ?? '';
+  // Barwy: Ukraina niebieski nad żółtym, Polska biały nad czerwonym — w tej kolejności.
+  const FLAGI = {
+    uk: { barwy: ['#0057B7', '#FFD700'], nazwa: 'Українська версія', skrot: 'UA' },
+    pl: { barwy: ['#FFFFFF', '#DC143C'], nazwa: 'Wersja polska', skrot: 'PL' },
+  };
+  for (const [strona, na] of [['/', 'uk'], ['/lekarz/', 'uk'], ['/wniosek/', 'uk'], ['/uk/', 'pl'], ['/uk/wniosek/', 'pl']]) {
+    const a = przelacznik(html(strona));
+    const f = FLAGI[na];
+    expect(a, `${strona}: przełącznik bez języka docelowego`).toContain(`lang="${na}"`);
+    expect(a, `${strona}: przełącznik bez nazwy`).toContain(`aria-label="${f.nazwa}"`);
+    // Flaga to SVG (emoji flag nie ma w Windowsie) i jest ozdobą: nazwę niesie aria-label.
+    const svg = a.match(/<svg[\s\S]*?<\/svg>/)?.[0] ?? '';
+    expect(svg, `${strona}: brak flagi w przełączniku`).toContain('aria-hidden="true"');
+    expect([...svg.matchAll(/fill="(#[0-9A-Fa-f]{6})"/g)].map((m) => m[1].toUpperCase()), `${strona}: barwy flagi`).toEqual(f.barwy);
+    expect(a.replace(/<svg[\s\S]*?<\/svg>/, '').replace(/<[^>]+>/g, '').trim(), `${strona}: skrót języka`).toBe(f.skrot);
+  }
+});
+
+test('pasek z flagą mieści się w ekranie — telefon, tablet i komputer, obie wersje', async ({ page }) => {
+  // 360 i 375 px to telefony, na których pasek strony polskiej do 26.11.2026
+  // wychodził poza ekran albo dotykał krawędzi; 1024 i 1279 px — zakres,
+  // w którym siedem pozycji menu zostawia najmniej miejsca.
+  for (const szer of [360, 375, 390, 412, 640, 1024, 1279, 1280, 1440]) {
+    await page.setViewportSize({ width: szer, height: 800 });
+    for (const s of ['/', '/lekarz/', '/uk/', '/uk/wniosek/']) {
+      await page.goto(s);
+      const w = await page.evaluate(() => {
+        const nav = document.querySelector('header nav');
+        const odn = [...nav.querySelectorAll(':scope > a, :scope > div > a')];
+        const r = (e) => e.getBoundingClientRect();
+        const flaga = nav.querySelector('a[hreflang] svg');
+        return {
+          strona: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+          wewnatrz: r(nav).right - parseFloat(getComputedStyle(nav).paddingRight) - r(odn.at(-1)).right,
+          flaga: flaga ? { szer: r(flaga).width, lewa: r(flaga).left, prawa: r(flaga).right } : null,
+          // Elementy paska nie zachodzą na siebie: każdy zaczyna się za poprzednim.
+          kolejno: [...nav.children].every((e, i, t) => i === 0 || getComputedStyle(e).display === 'none'
+            || r(e).left >= r(t.slice(0, i).filter((x) => getComputedStyle(x).display !== 'none').at(-1)).right),
+          dotyk: (() => { const a = nav.querySelector('a[hreflang]'); return { szer: r(a).width, wys: r(a).height }; })(),
+        };
+      });
+      const gdzie = `${s} przy ${szer} px`;
+      expect(w.strona, `${gdzie}: strona przewija się w poziomie`).toBeLessThanOrEqual(0);
+      expect(w.wewnatrz, `${gdzie}: przycisk wchodzi w margines paska`).toBeGreaterThanOrEqual(-0.5);
+      expect(w.flaga?.szer ?? 0, `${gdzie}: flagi nie widać`).toBeGreaterThan(20);
+      expect(w.flaga.lewa, `${gdzie}: flaga poza ekranem`).toBeGreaterThanOrEqual(0);
+      expect(w.flaga.prawa, `${gdzie}: flaga poza ekranem`).toBeLessThanOrEqual(szer);
+      expect(w.kolejno, `${gdzie}: elementy paska zachodzą na siebie`).toBe(true);
+      // WCAG 2.5.8: cel dotyku co najmniej 24 × 24 px.
+      expect(Math.min(w.dotyk.szer, w.dotyk.wys), `${gdzie}: za małe pole dotyku flagi`).toBeGreaterThanOrEqual(24);
+    }
+  }
+});
+
+test('zestawienie do weryfikacji: każdy akapit polskiej strony ma odpowiednik po ukraińsku', () => {
+  // Skrypt, którym robimy pliki dla sprawdzających przekład, tnie obie wersje
+  // na sekcje i akapity. Gdy liczba akapitów w sekcji się różni, pokazuje
+  // sekcję „w całości" — a to znaczy, że po ukraińsku coś pominięto albo
+  // dopisano. 26.11.2026 tak wyszedł akapit wstępu do ryzyk, którego strony
+  // zawodów po ukraińsku nie miały. Celowe dopiski stoją w DOPISKI_UK,
+  // TYLKO_UK i ROZNE_CELOWO w skrypcie — nowy trzeba tam wpisać świadomie.
+  const katalog = mkdtempSync(join(tmpdir(), 'przeklad-'));
+  try {
+    const wynik = spawnSync(process.execPath, ['scripts/przeklad-do-weryfikacji.mjs', katalog], { encoding: 'utf8' });
+    // Kod 2 = ostrzeżenia: inny układ nagłówków, termin ze słownika nie występuje w tekście itd.
+    expect(wynik.status, wynik.stdout + wynik.stderr).toBe(0);
+    expect(wynik.stdout, 'sekcja z inną liczbą akapitów po polsku i po ukraińsku').not.toContain('w całości');
+
+    const pliki = readdirSync(katalog);
+    // Jeden plik na każdą stronę ukraińską, do tego napisy wspólne, instrukcja i komplet.
+    expect(pliki.filter((p) => /^\d\d-/.test(p)).length).toBe(stronyUk().length + 2);
+    const komplet = readFileSync(join(katalog, 'przeklad-uk-komplet.md'), 'utf8');
+    for (const p of pliki.filter((n) => n !== 'przeklad-uk-komplet.md')) {
+      expect(komplet, `komplet nie zawiera ${p}`).toContain(readFileSync(join(katalog, p), 'utf8').trim());
+    }
+    // Segment bez drugiej połowy byłby dla sprawdzającego „brakiem przekładu".
+    for (const p of pliki.filter((n) => /^0[1-9]-/.test(n))) {
+      const tekst = readFileSync(join(katalog, p), 'utf8');
+      const [pl, uk] = ['PL', 'UK'].map((j) => [...tekst.matchAll(new RegExp(`^\\*\\*\\[([\\d.]+)\\] ${j}\\*\\*$`, 'gm'))].map((m) => m[1]));
+      for (const id of pl) expect(uk, `${p}: segment ${id} bez wersji ukraińskiej`).toContain(id);
+    }
+  } finally {
+    rmSync(katalog, { recursive: true, force: true });
   }
 });
 

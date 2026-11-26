@@ -10,3 +10,7 @@ dist/
 .DS_Store
 test-results/
 playwright-report/
+
+# Zestawienie PL ↔ UK dla sprawdzających przekład — powstaje z builda
+# (apps/portal/scripts/przeklad-do-weryfikacji.mjs), starzeje się przy każdej zmianie treści.
+przeklad-do-weryfikacji/

@@ -1,0 +1,28 @@
+---
+/**
+ * Flaga.astro — flaga przy przełączniku języka.
+ *
+ * SVG, nie emoji: Windows nie ma w kroju systemowym flag i pokazałby w tym
+ * miejscu litery „UA". Proporcje jak w ustawach: Ukraina 2:3, Polska 5:8.
+ *
+ * Flaga jest OZDOBĄ (`aria-hidden`) — nazwę języka niesie `aria-label`
+ * odnośnika i skrót obok. Ramka jest potrzebna: biała połowa flagi polskiej
+ * i żółta ukraińskiej zlewałyby się z białym paskiem.
+ */
+import type { Jezyk } from '../lib/jezyki';
+
+interface Props { jezyk: Jezyk }
+const { jezyk } = Astro.props;
+
+const FLAGI = {
+  uk: { wysokosc: 16, viewBox: '0 0 3 2', gora: '#0057B7', dol: '#FFD700', polowa: 1 },
+  pl: { wysokosc: 15, viewBox: '0 0 8 5', gora: '#FFFFFF', dol: '#DC143C', polowa: 2.5 },
+}[jezyk];
+const [, , szer, wys] = FLAGI.viewBox.split(' ').map(Number);
+---
+<svg width="24" height={FLAGI.wysokosc} viewBox={FLAGI.viewBox} preserveAspectRatio="none"
+     class="flaga block shrink-0 box-content border border-linia-pole"
+     aria-hidden="true" focusable="false">
+  <rect width={szer} height={FLAGI.polowa} fill={FLAGI.gora}></rect>
+  <rect y={FLAGI.polowa} width={szer} height={wys - FLAGI.polowa} fill={FLAGI.dol}></rect>
+</svg>
