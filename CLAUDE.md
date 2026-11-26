@@ -1228,16 +1228,24 @@ ginęło przy pierwszym kliknięciu w odnośnik. Teraz każdy nowy wniosek z
 parametrami kampanii ma `ud_clients.form_data.zrodlo`, a panel go pokazuje.
 **Etap 1 niczego nie wysyła do Google Ads ani GA4.**
 
-**Stan na 23.11.2026: portal i panel v.0.80 WDROŻONE (push `79f4cad`
-21.11.2026 po „wypychaj"), migracje NIE.** `20261120100000_klikniecia_zrodlo_reklamy.sql`
-i `20261120110000_statystyki_zrodla.sql` czekają: MCP poprosił o potwierdzenie
-(pierwsza ma `DROP FUNCTION`), nikt nie odpowiedział, nic się nie zmieniło.
-Do ich zastosowania `/kup-online` zapisuje kliknięcia samym celem i źródłem,
-a sekcja „Według źródła" pokazuje komunikat — źródło wniosków
-(`form_data.zrodlo`) zapisuje się już teraz. Na żywej stronie sprawdzone:
-parametry jadą w adresie przez kalkulator do wniosku, magazyny przeglądarki
-puste. Zdanie do polityki prywatności czeka na prawnika (propozycja
-w raporcie z 20.11.2026) — nie publikuj go bez akceptacji.
+**Stan na 26.11.2026: WDROŻONE w całości.** Portal i panel v.0.80 — push
+`79f4cad` 21.11.2026 po „wypychaj"; migracje — 26.11.2026, wklejone przez
+właściciela w SQL Editor (MCP poprosił o potwierdzenie, bo pierwsza ma
+`DROP FUNCTION`, i nikt nie odpowiedział), wersje `20261120100000`
+i `20261120110000` odnotowane w `schema_migrations` ręcznie, pliki w repo
+noszą te same nazwy. Sprawdzone na produkcji: trzy nowe kolumny
+`ud_klikniecia` (`platne` bez wartości domyślnej, NULL dozwolony) z dwoma
+CHECK-ami, widok z `z_reklamy` i `zmierzonych` (`security_invoker`),
+`ud_klikniecia_tabela` z sześcioma kolumnami wyniku; treść obu funkcji =
+repozytorium (md5 `e6b84d0d…` i `226a00f7…`), wykonanie tylko
+`service_role`. Kolejność odwrotna zadziałała jak zaplanowano: przez 21–26.11
+`/kup-online` zapisał 4 kliknięcia samym celem i źródłem (`platne` NULL,
+w panelu „—"), zero wpisów w `ud_errors`. Pierwszy wniosek ze źródłem przyszedł
+z ChatGPT (`utm_source=chatgpt.com` — ChatGPT sam dokleja ten parametr do
+podawanych linków), więc w Statystykach to „Inne: chatgpt.com". Na żywej
+stronie: parametry jadą w adresie przez kalkulator do wniosku, magazyny
+przeglądarki puste. Zdanie do polityki prywatności czeka na prawnika
+(propozycja w raporcie z 20.11.2026) — nie publikuj go bez akceptacji.
 
 | Element | Co robi |
 |---|---|
