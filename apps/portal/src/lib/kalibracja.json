@@ -1,15 +1,23 @@
 {
-  "policzono": "2026-09-17",
+  "policzono": "2026-10-14",
   "zrodlo": {
-    "ofert": 15,
-    "wariantow": 48,
-    "obserwacji": 10,
-    "ubezpieczyciel": "Leadenhall"
+    "metoda": "osoby-v1",
+    "ubezpieczyciel": "Leadenhall",
+    "okno": {
+      "od": "2025-10-14",
+      "do": "2026-10-12"
+    },
+    "osob": 10,
+    "ofert": 11,
+    "wariantow": 22,
+    "par": {
+      "36": 5
+    }
   },
   "stawka": {
     "dol": 0.0202,
     "srodek": 0.022,
-    "gora": 0.0244
+    "gora": 0.0322
   },
   "okresy": {
     "24": 1,

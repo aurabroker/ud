@@ -32,7 +32,12 @@ export function parseCEU(text) {
   o.offer_valid_to = parseDateISO(firstMatch(text, /ważna\s+do\s+(\d{2}-\d{2}-\d{4})/i));
 
   // --- Ubezpieczony ---
-  o.insured_name = firstMatch(text, /polisie\s+([A-ZŁŚŻŹĆŃ][a-ząćęłńóśźż]+)/);
+  // Pozycja 4: „4. Ubezpieczony Imię Nazwisko" w osobnej linii (oferta z 20.11.2026).
+  // Wcześniejszy wzorzec zakładał nazwisko sklejone z pozycją 3 („…w polisie Jan")
+  // i brał tylko pierwsze słowo — zostaje jako zapas.
+  o.insured_name =
+    firstMatch(text, /(?:^|\n)[ \t]*(?:\d+\.[ \t]*)?Ubezpieczony[ \t]+([A-ZĄĆĘŁŃÓŚŹŻ][^\n,]*)/) ||
+    firstMatch(text, /polisie\s+([A-ZŁŚŻŹĆŃ][a-ząćęłńóśźż]+(?:[ \t]+[A-ZŁŚŻŹĆŃ][a-ząćęłńóśźż-]+)?)/);
   o.insured_birthdate = parseDateISO(firstMatch(text, /Data\s+urodzenia:\s*(\d{2}-\d{2}-\d{4})/i));
   o.profession = firstMatch(text, /Zawód:\s*([^\n]+)/i);
   o.employment_type = firstMatch(text, /Rodzaj\s+zatrudnienia:\s*([\s\S]+?)\n\s*\d+\.\s/i);
@@ -55,6 +60,14 @@ export function parseCEU(text) {
   if (waitM) {
     o.wait_accident = parseInt(waitM[1], 10);
     o.wait_illness = parseInt(waitM[2], 10);
+  } else {
+    // LOI PREMIUM: jeden okres oczekiwania dla wypadku i choroby („Okres oczekiwania 30 dni",
+    // OWU § 2 pkt 4). Bez tego tabela porównania pokazywała „—" w obu wierszach.
+    const wait = matchInt(tempSec, /Okres\s+oczekiwania\s+(\d+)\s*dni/i);
+    if (wait != null) {
+      o.wait_accident = wait;
+      o.wait_illness = wait;
+    }
   }
 
   // --- Świadczenia: Trwała (perm) ---

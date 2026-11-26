@@ -6,7 +6,7 @@
 import Baza from '../../layouts/Baza.astro';
 import SzybkiKontakt from '../../components/SzybkiKontakt.svelte';
 import { graf, organizacja, serwis, strona, okruszki } from '../../lib/seo';
-import { FIRMA, UBEZPIECZYCIELE } from '../../lib/firma';
+import { FIRMA, COVERHOLDERZY } from '../../lib/firma';
 import { ZAWODY } from '@ud/zawody';
 import { TURNSTILE_KLUCZ } from '../../lib/uslugi';
 
@@ -30,7 +30,7 @@ const ARGUMENTY = [
   },
   {
     tytul: 'Zaplecze, którego nie zbudujesz sam',
-    opis: `Pracujemy z ${UBEZPIECZYCIELE.join(' i ')}. Ocena ryzyka zawodowego dla `
+    opis: `Pracujemy z ${COVERHOLDERZY.join(' i ')} — coverholderami Lloyd’s. Ocena ryzyka zawodowego dla `
       + `${ZAWODY.length} grup, warianty medyczne z klauzulami HIV/WZW i underwriting `
       + 'przy wysokich sumach — to jest wiedza, którą wnosimy do wspólnego klienta.',
   },
@@ -43,7 +43,7 @@ const ARGUMENTY = [
   {
     tytul: 'Autorski system porównywania ofert',
     opis: 'Wniosek klienta trafia do naszego systemu, który zestawia warianty obu '
-      + 'ubezpieczycieli obok siebie: sumy, składki, okres wypłaty i wyłączenia. '
+      + 'coverholderów obok siebie: sumy, składki, okres wypłaty i wyłączenia. '
       + 'Zamiast czytać dwa komplety OWU, widzisz jedną tabelę i wiesz, gdzie '
       + 'przebiega różnica. Do klienta idzie gotowa oferta w PDF z Twoimi danymi, '
       + 'a komplet dokumentów — OWU i karty produktu — dopina się do niej sam.',
@@ -137,4 +137,10 @@ const jsonld = graf([
       </div>
     </div>
   </section>
+  <!-- Bez tego skryptu widżet się nie montuje, token idzie pusty, a funkcja
+       odpowiada 400 — od 14.10.2026 do 21.10.2026 ten formularz nie wysłał
+       ani jednego zgłoszenia. render=explicit, bo komponent sam tworzy widżet
+       (zamontuj() w onMount albo onloadTurnstileCallback). -->
+  <script is:inline async defer
+          src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onloadTurnstileCallback"></script>
 </Baza>

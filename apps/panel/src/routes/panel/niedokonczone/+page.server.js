@@ -14,6 +14,7 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { createAdminClient } from '$lib/server/supabase.js';
 import { lejek } from '$lib/lejek.js';
+import { klikniecia, odTygodnia, dzisWPolsce, MIEJSC } from '$lib/klikniecia.js';
 
 /**
  * Czy treść zgody na kontakt (ZGODA_KONTAKT w @ud/wniosek) jest zatwierdzona.
@@ -40,7 +41,7 @@ export async function load({ locals }) {
   await wymagajSesji(locals);
   const sb = createAdminClient();
 
-  const [szkice, widok] = await Promise.all([
+  const [szkice, widok, klik] = await Promise.all([
     sb.from('ud_wnioski_szkice')
       .select('id, created_at, updated_at, ostatni_krok, imie, email, phone, przypomnienie_wyslane_at')
       .eq('zgoda_kontakt', true)
@@ -52,11 +53,20 @@ export async function load({ locals }) {
       .select('tydzien, ostatni_krok, szkicow')
       .order('tydzien', { ascending: false })
       .limit(120),
+    // Kliknięcia /kup-online (portal) — tydzień × miejsce, bez danych osobowych.
+    // Zwinięte w bazie do MIEJSC miejsc + „pozostałe": najwyżej 12 × 7 wierszy,
+    // ile by różnych `?z=` nie było (limit 1000 wierszy PostgREST nie tnie).
+    // Od migracji 20261120100000 każdy wiersz ma też `z_reklamy` (wejścia
+    // z płatnego kliknięcia); przed nią go nie ma i strona o reklamie milczy.
+    sb.rpc('ud_klikniecia_tabela', { p_od: odTygodnia(dzisWPolsce()), p_miejsc: MIEJSC }),
   ]);
 
   return {
     szkice: szkice.data || [],
     lejek: lejek(widok.data || []),
+    // Osobny błąd: tabela kliknięć to dodatek, nie może zasłonić listy osób do kontaktu.
+    klik: klikniecia(klik.data || []),
+    klikError: klik.error?.message || '',
     zgodaZatwierdzona: ZGODA_ZATWIERDZONA,
     loadError: szkice.error?.message || widok.error?.message || '',
   };

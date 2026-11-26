@@ -1,7 +1,9 @@
 import { fail, redirect } from '@sveltejs/kit';
-import { deleteOffer, refreshOfferDocuments } from '$lib/server/offers.js';
+import { refreshOfferDocuments } from '$lib/server/offers.js';
+import { createAdminClient } from '$lib/server/supabase.js';
+import { przeniesDoKosza, listaKosza } from '$lib/server/kosz.js';
 
-export async function load({ locals, url }) {
+export async function load({ locals, url, parent }) {
   // Archiwum jest osobnym widokiem, nie filtrem domyślnym: sprawy zamknięte
   // mają zniknąć z listy bieżącej, ale nie wolno ich stracić z oczu.
   const archiwum = url.searchParams.get('widok') === 'archiwum';
@@ -13,19 +15,30 @@ export async function load({ locals, url }) {
     .order('created_at', { ascending: false })
     .limit(200);
 
-  const { data: offers } = await (archiwum
-    ? zapytanie.not('archived_at', 'is', null)
-    : zapytanie.is('archived_at', null));
+  // Licznik kosza przy przełączniku. Awaria (brak migracji, brak klucza
+  // serwisowego — createAdminClient rzuca od razu, stąd Promise.resolve)
+  // nie może zablokować listy ofert: wtedy po prostu bez licznika.
+  const { user } = await parent();
+  const kosz = Promise.resolve()
+    .then(() => listaKosza(createAdminClient(), user.id))
+    .then((l) => l.length, () => null);
 
-  // Licznik przy przełączniku — bez niego nie widać, czy archiwum w ogóle
-  // ma zawartość, a pusty widok wygląda jak awaria.
-  const { count: wArchiwum } = await locals.supabase
-    .from('ud_offers')
-    .select('id', { count: 'exact', head: true })
-    .eq('source', 'pdf_import')
-    .not('archived_at', 'is', null);
+  const [{ data: offers }, { count: wArchiwum }, wKoszu] = await Promise.all([
+    archiwum ? zapytanie.not('archived_at', 'is', null) : zapytanie.is('archived_at', null),
+    // Licznik przy przełączniku — bez niego nie widać, czy archiwum w ogóle
+    // ma zawartość, a pusty widok wygląda jak awaria.
+    locals.supabase
+      .from('ud_offers')
+      .select('id', { count: 'exact', head: true })
+      .eq('source', 'pdf_import')
+      .not('archived_at', 'is', null),
+    kosz
+  ]);
 
-  return { offers: offers || [], archiwum, wArchiwum: wArchiwum || 0 };
+  return {
+    offers: offers || [], archiwum, wArchiwum: wArchiwum || 0, wKoszu,
+    usunieto: url.searchParams.get('usunieto') === '1'
+  };
 }
 
 export const actions = {
@@ -62,13 +75,14 @@ export const actions = {
     return { refreshedAll: { ok, total: (offers || []).length, reparsed, docs, addedOwu, errors: errors.slice(0, 20) } };
   },
 
+  // „Usuń" przenosi do kosza na 30 dni (od 13.10.2026).
   delete: async ({ request, locals }) => {
     const { user } = await locals.safeGetSession();
     if (!user) throw redirect(303, '/login');
     const form = await request.formData();
     const id = String(form.get('id') || '');
     try {
-      await deleteOffer(id);
+      await przeniesDoKosza(createAdminClient(), id, user.id);
       return { deleted: true };
     } catch (e) {
       return fail(400, { error: e?.message || 'Błąd usuwania' });

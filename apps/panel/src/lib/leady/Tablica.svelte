@@ -18,6 +18,7 @@
    */
   import { onMount, setContext, tick } from 'svelte';
   import { kopiujDoSchowka } from './schowek.js';
+  import { czyNatywneMenu } from '../menuKontekstowe.js';
   import { StanTablicy } from './stan.svelte.js';
   import { utworzPrzeciaganie } from './przeciaganie.js';
   import { akcjeEtapu, akcjeLeada, czyMoznaPrzeniesc, komunikatPrzeniesienia, zSeparatorami } from './model.js';
@@ -82,13 +83,8 @@
     return { x: r.left, y: r.bottom + 4, xAlt: r.right, yAlt: r.top - 4 };
   };
 
-  /** Natywne menu zostaje: Shift, linki, pola formularzy, zaznaczony tekst. */
-  function czyNatywne(e) {
-    if (e.shiftKey) return true;
-    if (e.target.closest?.('a[href], input, textarea, select, [contenteditable="true"]')) return true;
-    const zaznaczenie = window.getSelection?.();
-    return Boolean(zaznaczenie && !zaznaczenie.isCollapsed && zaznaczenie.toString().trim() && zaznaczenie.containsNode?.(e.target, true));
-  }
+  /** Natywne menu zostaje: Shift, linki, pola formularzy, zaznaczony tekst (reguła wspólna z listą klientów). */
+  const czyNatywne = czyNatywneMenu;
 
   function otworzMenuLeada(leadId, trigger) {
     const k = kartaDo(leadId);

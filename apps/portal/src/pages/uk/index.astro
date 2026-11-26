@@ -18,21 +18,23 @@ import Baza from '../../layouts/Baza.astro';
 import Kalkulator from '../../components/Kalkulator.svelte';
 import { ZAWODY } from '@ud/zawody';
 import { ZAWODY_UK } from '../../dane/uk/zawody';
-import { symuluj, zl, ZUS_MIESIECZNIE, LIMIT } from '../../lib/symulacja';
+import { symuluj, zl, zlZakres, LIMIT, MIESIECY_MAX } from '../../lib/symulacja';
+import { SWIADCZENIE_MAX } from '../../lib/granice';
+import { ZASILEK_JDG, WYCZEKIWANIE_DOBROWOLNE_DNI } from '../../lib/zus';
 import { graf, organizacja, serwis, strona, faq } from '../../lib/seo';
-import { FIRMA, UBEZPIECZYCIELE } from '../../lib/firma';
+import { FIRMA, COVERHOLDERZY } from '../../lib/firma';
 import { Image } from 'astro:assets';
 import { obrazHero, zdjecieZawodu } from '../../lib/obrazy';
 import { zawod, slugKategorii } from '@ud/zawody';
-import { GRANICE_WIEKU } from '../../lib/uk';
+import { GRANICE_WIEKU, ZUS_TEKST_UK, LIMIT_CEU_ZDANIE_UK, liczebnikUk } from '../../lib/uk';
 
 const sciezka = '/uk/';
 const tytul = 'Страхування від втрати доходу в Польщі для JDG і B2B | UtrataDochodu.pl';
-const opis = 'Приватний лікарняний для самозайнятих у Польщі. Поліс виплачує до 80% доходу з першого '
-  + 'дня непрацездатності, тоді як ZUS рахує допомогу від задекларованої бази внесків.';
-
 const b2b = Math.round(LIMIT.b2b * 100);
 const etat = Math.round(LIMIT.etat * 100);
+
+const opis = `Приватний лікарняний для B2B і контрактників у Польщі. Поліс щомісяця виплачує до ${b2b}% `
+  + 'доходу, тоді як ZUS рахує допомогу від задекларованої бази внесків, а не від того, що ви заробляєте.';
 
 const PYTANIA = [
   {
@@ -43,24 +45,28 @@ const PYTANIA = [
   },
   {
     pytanie: 'Скільки становить допомога по хворобі від ZUS на контракті B2B?',
-    odpowiedz: 'Допомога по хворобі (zasiłek chorobowy) — це 80% бази нарахування внесків. За '
-      + `найнижчої бази це близько ${zl(Math.round(ZUS_MIESIECZNIE * 0.8))} на місяць, незалежно від `
-      + 'того, скільки ви насправді заробляєте.',
+    odpowiedz: `Допомога по хворобі (zasiłek chorobowy) — це ${ZUS_TEKST_UK.wzor}. На повному ZUS `
+      + '(duży ZUS) з найнижчою базою і з добровільним страхуванням на випадок хвороби це '
+      + `${zl(ZASILEK_JDG.duzy)} на місяць до оподаткування, незалежно від того, скільки ви насправді `
+      + `заробляєте; ${ZUS_TEKST_UK.dopiski}.`,
   },
   {
     pytanie: 'Який відсоток доходу покриває поліс?',
     odpowiedz: `До ${b2b}% підтвердженого доходу за самозайнятості та контракту B2B, до ${etat}% — за `
-      + 'трудового договору (umowa o pracę). Ліміт випливає з принципу, що страхування не може бути '
-      + 'вигіднішим за роботу.',
+      + `трудового договору (umowa o pracę), щонайбільше ${zl(SWIADCZENIE_MAX)} на місяць. `
+      + `${LIMIT_CEU_ZDANIE_UK} Ліміт випливає з принципу, що страхування не може бути вигіднішим `
+      + 'за роботу.',
   },
   {
     pytanie: 'Відколи виплачують кошти?',
-    odpowiedz: 'З першого дня непрацездатності, після завершення періоду очікування (okres '
-      + 'wyczekiwania), визначеного в договорі.',
+    odpowiedz: 'Після завершення періоду очікування (okres wyczekiwania), визначеного в договорі '
+      + 'й відлічуваного від початку непрацездатності. Далі щомісяця, доки триває непрацездатність, '
+      + `щонайдовше протягом ${MIESIECY_MAX} місяців — залежно від періоду, обраного в договорі.`,
   },
   {
     pytanie: 'Чого поліс не покриває?',
-    odpowiedz: 'Професійного вигорання як самостійного діагнозу, психічних захворювань, часткової '
+    odpowiedz: 'Професійного вигорання як самостійного діагнозу, психічних захворювань, коли вони '
+      + 'є єдиною причиною непрацездатності (у CEU — також без цієї умови), часткової '
       + 'непрацездатності та захворювань, які лікували протягом 24 місяців до укладення договору.',
   },
   {
@@ -72,23 +78,32 @@ const PYTANIA = [
 
 /**
  * Treść tylko dla wersji ukraińskiej. Źródła — przy każdej pozycji.
- * OWU: Leadenhall LW044/AD_D_TTD_PTD/PL/5 i CEU „Utrata Dochodu 2026 v. 9.8".
+ *
+ * Trzy rodzaje źródeł i trzy poziomy pewności:
+ *  - treść polskich stron sprawdzona z OWU (lista wyłączeń z paragrafami,
+ *    `packages/zawody/data/tresci.json`) — tłumaczymy ją tu zdanie w zdanie;
+ *  - schemat wniosku i potwierdzenie właściciela;
+ *  - dwie pozycje odczytane ze STRESZCZENIA plików OWU, nie z pełnego tekstu
+ *    (obywatelstwo i dokumenty CEU) — oznaczone „DO SPRAWDZENIA", wypisane też
+ *    w CLAUDE.md („Do potwierdzenia przed publikacją").
  */
 const DLA_UKRAINCOW = [
   {
-    // LW044 § 15 ust. 18 („osoba fizyczna określona w pozycji 3 Polisy"); CEU § 29 pkt 12
-    // („określona w Polisie osoba fizyczna objęta ochroną ubezpieczeniową"). Żadne z nich
-    // nie stawia warunku obywatelstwa ani miejsca zamieszkania.
+    // DO SPRAWDZENIA z pełnym tekstem OWU. LW044 § 15 ust. 18 („osoba fizyczna określona
+    // w pozycji 3 Polisy"); CEU § 29 pkt 12 („określona w Polisie osoba fizyczna objęta
+    // ochroną ubezpieczeniową") — żadne nie stawia warunku obywatelstwa ani miejsca zamieszkania.
     tytul: 'Громадянство',
-    opis: 'У загальних умовах страхування (OWU) обох страховиків немає вимоги польського '
+    opis: 'У загальних умовах страхування (OWU) Leadenhall і CEU немає вимоги польського '
       + 'громадянства: застрахований — це особа, вказана в полісі. Рішення про прийняття на '
       + 'страхування ухвалює страховик після оцінки ризику.',
   },
   {
-    // packages/wniosek/src/schemat.js: pesekPoprawny() i komunikat o wieku.
+    // Właściciel, 26.11.2026: „ubezpieczony musi mieć PESEL". Kreator: pole PESEL jest
+    // wymagane, pesekPoprawny() i komunikat o wieku w packages/wniosek/src/schemat.js.
     tytul: 'PESEL і вік',
-    opis: `Для заявки потрібен номер PESEL — форма перевіряє його контрольну цифру. Захист `
-      + `охоплює осіб віком від ${GRANICE_WIEKU.od} до ${GRANICE_WIEKU.do} років.`,
+    opis: 'Застрахована особа повинна мати номер PESEL — без нього заявку подати не можна; форма '
+      + `перевіряє його контрольну цифру. Захист охоплює осіб віком від ${GRANICE_WIEKU.od} до `
+      + `${GRANICE_WIEKU.do} років.`,
   },
   {
     // Formularz, zgody, OWU i obsługa szkody istnieją tylko po polsku.
@@ -97,34 +112,57 @@ const DLA_UKRAINCOW = [
       + 'мовою. Ця сторінка лише пояснює їх українською; обов’язковими є польські документи.',
   },
   {
-    // Ustawa zasiłkowa, art. 4 ust. 1 pkt 2: 90 dni nieprzerwanego ubezpieczenia
-    // chorobowego dla ubezpieczonych dobrowolnie. Po ukraińsku podaje to gov.pl/web/ua.
+    // zus.ts: WYCZEKIWANIE_DOBROWOLNE_DNI (art. 4 ust. 1 pkt 2 ustawy zasiłkowej). Zdanie
+    // o podstawie składek — jak w ZUS_TEKST. Po ukraińsku podaje to gov.pl/web/ua.
     tytul: 'ZUS і JDG',
     opis: 'Страхування на випадок хвороби в ZUS (ubezpieczenie chorobowe) для JDG є добровільним. '
-      + 'Право на допомогу виникає після 90 днів безперервного добровільного страхування, а її '
-      + 'розмір залежить від бази внесків, а не від доходу.',
+      + `Право на допомогу виникає після ${WYCZEKIWANIE_DOBROWOLNE_DNI} днів безперервного `
+      + 'добровільного страхування, а її розмір залежить від бази внесків, а не від доходу.',
   },
   {
-    // LW044 § 11 ust. 1 lit. a (wojna, działania wojenne, stan wojenny) i lit. d (służba
-    // w formacjach zbrojnych); CEU § 18 pkt 6 i 10 z definicją wojny w § 29 pkt 20.
-    // Zgłoszenie dłuższego pobytu za granicą — jak w pytaniu na polskiej stronie /programista/.
+    // Dwa zdania z polskich treści sprawdzonych z OWU, zestawione obok siebie:
+    //  - „warunki Leadenhall i CEU obejmują ochroną cały świat" — tresci.json, programista,
+    //    pytanie o pracę z zagranicy;
+    //  - wyłączenie wojny — src/lib/wylaczenia.ts, „Wojna, służba wojskowa…"
+    //    (Leadenhall § 11 ust. 1 lit. a–d, CEU Utrata dochodu § 18 pkt 6, 10–12).
+    // Strona NIE rozstrzyga, czy konkretne zdarzenie w Ukrainie „wynika z wojny" —
+    // to ocenia ubezpieczyciel; stąd rada, żeby zapytać przed wyjazdem.
     tytul: 'Поїздки в Україну',
-    opis: 'Обидва страховики виключають випадки, спричинені війною, воєнними діями або воєнним '
-      + 'станом, а також службу у збройних формуваннях. Перед поїздкою зателефонуйте й запитайте, '
-      + 'як це стосується вашого поліса. Про тривале перебування за кордоном страховик вимагає повідомити.',
+    opis: 'Умови Leadenhall і CEU охоплюють захистом увесь світ, але виключають війну та воєнні '
+      + 'дії, заколот і заворушення масштабу повстання, а також службу у збройних формуваннях. '
+      + 'Перед поїздкою зателефонуйте й запитайте, як це стосується вашого поліса.',
   },
   {
-    // LW044 § 14 ust. 6 (dokumentacja po polsku lub po angielsku); CEU § 11 ust. 2
-    // (ZUS ZLA, a bez prawa do ZLA — zaświadczenie o stanie zdrowia od lekarza prowadzącego).
+    // Pierwsze zdanie: tresci.json, programista („dokumentacja medyczna ma być po polsku
+    // (Leadenhall przyjmuje też angielską), a ubezpieczyciel może wezwać na badanie
+    // u swojego lekarza"). Drugie zdanie — DO SPRAWDZENIA z pełnym tekstem OWU
+    // (CEU § 11 ust. 2: ZUS ZLA, a bez prawa do ZLA zaświadczenie od lekarza prowadzącego).
     tytul: 'Документи для виплати',
-    opis: 'Leadenhall приймає медичну та фінансову документацію польською або англійською мовою, '
-      + 'тож документи українською потрібно перекласти. У CEU непрацездатність підтверджує '
-      + 'лікарняний ZUS ZLA, а якщо права на нього немає — довідка про стан здоров’я від лікаря, '
-      + 'який веде лікування.',
+    opis: 'Під час звернення по виплату медична документація має бути польською (Leadenhall '
+      + 'приймає також англійську), тож документи українською потрібно перекласти; страховик може '
+      + 'викликати на огляд до свого лікаря. У CEU непрацездатність підтверджує лікарняний ZUS ZLA, '
+      + 'а якщо права на нього немає — довідка про стан здоров’я від лікаря, який веде лікування.',
   },
 ];
 
-const przyklad = symuluj({ dochod: 18000, zatrudnienie: 'b2b' });
+const przyklad = symuluj({ dochod: 18000 });
+
+/* Zdania z kwotami składamy tutaj — Astro gubi spację obok {wyrażenia} na końcu linii. */
+const lead = 'На B2B допомогу по хворобі від ZUS рахують від задекларованої бази внесків, а не від '
+  + `того, що ви реально заробляєте. Поліс щомісяця виплачує до ${b2b}% доходу на B2B і до ${etat}% `
+  + 'на трудовому договорі.';
+const zusWstep = `Допомога по хворобі — це ${ZUS_TEKST_UK.wzor}, а не 80% вашого доходу. За `
+  + 'найнижчої бази різниця для фахівця на контракті сягає понад десять тисяч злотих на місяць.';
+const zusPrzypis = `Симуляція, а не пропозиція. Допомога ZUS — ${ZUS_TEKST_UK.scenariusz}; `
+  + `${ZUS_TEKST_UK.dopiski}. ${ZUS_TEKST_UK.brutto} Орієнтовний внесок за такої виплати: `
+  + `${zlZakres(przyklad.skladkaOd, przyklad.skladkaDo)} на місяць, разом із дистрибуційною оплатою. `
+  + 'Реальний внесок розраховує система страховика після оцінки ризику.';
+// Zdanie kończy się zwykłym słowem: nazwa z „S.A." albo „sp. z o.o." na końcu dałaby dwie kropki.
+const podmioty = `Страховиком є ${FIRMA.ubezpieczyciel}, а договір укладають через `
+  + `${COVERHOLDERZY.join(' і ')} — ковергольдерів Lloyd’s (coverholders).`;
+const grupy = `${liczebnikUk(ZAWODY.length, ['професійна група', 'професійні групи', 'професійних груп'])}, `
+  + `для кожної — окремий розрахунок і опис ризику. ${ZAWODY_UK.length} з них описано українською, `
+  + 'решту — польською.';
 
 const jsonld = graf([
   organizacja(),
@@ -161,9 +199,7 @@ const KAFELKI = ZAWODY_UK.map((z) => {
           Страхування від втрати доходу
         </h1>
         <p data-odpowiedz class="text-[clamp(1.05rem,2vw,1.2rem)] leading-relaxed text-tekst-drugi max-w-[32em] m-0">
-          На B2B допомогу по хворобі від ZUS рахують від задекларованої бази внесків, а не від того,
-          що ви реально заробляєте. Поліс виплачує до {b2b}% доходу на B2B і до {etat}% на трудовому
-          договорі — виплата можлива з першого дня непрацездатності.
+          {lead}
         </p>
         <div class="flex flex-wrap gap-3 mt-9">
           <a href="/uk/wniosek/" class="bg-akcent-ciemny text-white px-8 py-4 font-bold hover:bg-akcent-hover">
@@ -176,7 +212,7 @@ const KAFELKI = ZAWODY_UK.map((z) => {
         <ul class="flex flex-wrap gap-x-7 gap-y-2 mt-9 text-[14px] text-tekst-drugi list-none m-0 p-0">
           <li>Не виходячи з дому</li>
           <li>Пропозиція за 1–2 робочі дні</li>
-          <li>Два страховики</li>
+          <li>Варіанти Leadenhall і CEU</li>
         </ul>
         {/* Język obsługi mówimy od razu, przy pierwszym przycisku — nie w stopce. */}
         <p class="text-[14px] leading-relaxed text-tekst-drugi max-w-[34em] mt-6 mb-0">
@@ -196,32 +232,29 @@ const KAFELKI = ZAWODY_UK.map((z) => {
       Скільки ви реально отримаєте від ZUS, якщо захворієте?
     </h2>
     <p data-odpowiedz class="text-[1.12rem] leading-relaxed text-tekst-drugi max-w-[42em] mt-0 mb-9">
-      Допомога по хворобі становить 80% бази нарахування внесків — а не 80% вашого доходу. За
-      найнижчої бази різниця для фахівця на контракті сягає понад десять тисяч злотих на місяць.
+      {zusWstep}
     </p>
 
     <div class="border border-linia overflow-x-auto">
       <table class="w-full border-collapse text-left min-w-[36rem]">
-        <caption class="sr-only">Місячні надходження від ZUS і за полісом при доході 18 000 zł</caption>
+        <caption class="sr-only">Місячна допомога від ZUS і виплата за полісом при доході 18 000 zł на B2B</caption>
         <thead>
           <tr class="bg-tlo-jasne border-b border-linia-mocna">
             <th scope="col" class="font-mono text-[11px] tracking-[0.11em] uppercase font-semibold text-tekst-drugi px-6 py-4">Місяць на лікарняному</th>
-            <th scope="col" class="font-mono text-[11px] tracking-[0.11em] uppercase font-semibold text-tekst-drugi px-6 py-4">Лише ZUS</th>
-            <th scope="col" class="font-mono text-[11px] tracking-[0.11em] uppercase font-semibold text-akcent-tekst px-6 py-4">ZUS + поліс</th>
+            <th scope="col" class="font-mono text-[11px] tracking-[0.11em] uppercase font-semibold text-tekst-drugi px-6 py-4">Допомога ZUS</th>
+            <th scope="col" class="font-mono text-[11px] tracking-[0.11em] uppercase font-semibold text-akcent-tekst px-6 py-4">Виплата за полісом</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <th scope="row" class="px-6 py-5 font-semibold text-[16px]">Дохід {zl(18000)}, найнижча база ZUS</th>
-            <td class="px-6 py-5 font-mono text-xl font-semibold text-alarm">{zl(przyklad.zus)}</td>
-            <td class="px-6 py-5 font-mono text-xl font-semibold text-akcent-ciemny">{zl(przyklad.zus + przyklad.swiadczenie)}</td>
+            <th scope="row" class="px-6 py-5 font-semibold text-[16px]">Дохід {zl(18000)} на B2B, duży ZUS зі страхуванням на випадок хвороби</th>
+            <td class="px-6 py-5 font-mono text-xl font-semibold text-alarm">{zl(ZASILEK_JDG.duzy)}</td>
+            <td class="px-6 py-5 font-mono text-xl font-semibold text-akcent-ciemny">{zl(przyklad.swiadczenie)}</td>
           </tr>
         </tbody>
       </table>
     </div>
-    <p class="text-[13px] leading-relaxed text-tekst-drugi mt-4 mb-0">
-      Симуляція, а не пропозиція. Реальний внесок розраховує система страховика після оцінки ризику.
-    </p>
+    <p class="text-[13px] leading-relaxed text-tekst-drugi mt-4 mb-0">{zusPrzypis}</p>
   </section>
 
   <section class="bg-tlo-jasne border-y border-linia" aria-labelledby="dla-ukraincow">
@@ -230,7 +263,7 @@ const KAFELKI = ZAWODY_UK.map((z) => {
         Якщо ви з України і працюєте в Польщі
       </h2>
       <p class="text-[1.05rem] leading-relaxed text-tekst-drugi max-w-[42em] mt-0 mb-9">
-        Шість речей, які варто знати до подання заявки. Страховики — {UBEZPIECZYCIELE.join(' та ')}.
+        Шість речей, які варто знати до подання заявки. {podmioty}
       </p>
       <dl class="grid gap-x-10 gap-y-8 m-0 grid-cols-[repeat(auto-fill,minmax(20rem,1fr))]">
         {DLA_UKRAINCOW.map((p) => (
@@ -254,8 +287,7 @@ const KAFELKI = ZAWODY_UK.map((z) => {
   <section class="max-w-[1200px] mx-auto px-5 py-16 lg:py-20">
     <h2 class="text-[clamp(1.6rem,4vw,2.5rem)] leading-tight mb-3">Для кого цей поліс</h2>
     <p class="text-[1.05rem] leading-relaxed text-tekst-drugi max-w-[42em] mt-0 mb-8">
-      {ZAWODY.length} професійних груп, для кожної — окремий розрахунок і опис ризику. Три з них
-      описано українською, решту — польською.
+      {grupy}
     </p>
     <ul class="grid gap-3 list-none m-0 p-0 grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] max-w-[52em]">
       {KAFELKI.map((k) => (

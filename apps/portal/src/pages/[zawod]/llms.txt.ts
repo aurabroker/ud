@@ -10,10 +10,11 @@
  * gdy trafi na tę stronę.
  */
 import type { APIRoute, GetStaticPaths } from 'astro';
-import { ZAWODY, zawod, tresc, pokrewne, slugKategorii } from '@ud/zawody';
+import { ZAWODY, zawod, tresc, pokrewne, slugKategorii, malymi } from '@ud/zawody';
 import { FIRMA, SERWIS } from '../../lib/firma';
-import { symuluj, zl, zlZakres, ZUS_MIESIECZNIE, MIESIECY_WYPLATY, OKRESY }
+import { symuluj, zl, zlZakres, MIESIECY_WYPLATY, MIESIECY_MAX, OKRESY, OPIS_KALIBRACJI }
   from '../../lib/symulacja';
+import { ZUS_TEKST, ZASILEK_JDG } from '../../lib/zus';
 
 export const getStaticPaths: GetStaticPaths = () =>
   ZAWODY.map((z) => ({ params: { zawod: z.slug } }));
@@ -23,8 +24,8 @@ export const GET: APIRoute = ({ params }) => {
   const o = z.odmiana;
   const t = tresc(z.slug);
 
-  const dochod = Math.max(8000, Math.round((z.swiadczenieDzienne ?? 400) * 30 / 0.8 / 1000) * 1000);
-  const w = symuluj({ dochod, zatrudnienie: 'b2b' });
+  const dochod = z.dochodPrzykladowy;
+  const w = symuluj({ dochod });
 
   const ryzyka = (t?.ryzyka ?? z.ryzyka)
     .map((r) => `- **${r.tytul}** — ${r.opis}`)
@@ -40,9 +41,9 @@ export const GET: APIRoute = ({ params }) => {
     .map((p) => `- [${p.nazwa}](${SERWIS.url}/${p.slug}/)`)
     .join('\n');
 
-  const tekst = `# Ubezpieczenie utraty dochodu dla ${o.dopelniacz.toLowerCase()}
+  const tekst = `# Ubezpieczenie utraty dochodu dla ${malymi(o.dopelniacz)}
 
-> ${t?.wstep ?? `Ochrona dochodu ${o.dopelniacz.toLowerCase()} na wypadek całkowitej niezdolności do wykonywania zawodu wskutek choroby lub nieszczęśliwego wypadku.`}
+> ${t?.wstep ?? `Ochrona dochodu ${malymi(o.dopelniacz)} na wypadek całkowitej niezdolności do wykonywania zawodu wskutek choroby lub nieszczęśliwego wypadku.`}
 
 Strona: ${SERWIS.url}/${z.slug}/
 Kategoria zawodowa: ${z.kategoria}
@@ -50,7 +51,7 @@ Odmiana nazwy: ${o.mianownik} / ${o.dopelniacz} / ${o.narzednik} / liczba mnoga:
 
 ## Jak wygląda dochód w tym zawodzie
 
-${t?.dochod ?? `Zarobki ${o.dopelniacz.toLowerCase()} na kontrakcie zależą od wykonanej pracy, a nie od gotowości do niej.`}
+${t?.dochod ?? `Zarobki ${malymi(o.dopelniacz)} na kontrakcie zależą od wykonanej pracy, a nie od gotowości do niej.`}
 
 ## Co się dzieje przy niezdolności do pracy
 
@@ -68,17 +69,20 @@ ubezpieczyciela po ocenie ryzyka.
 - Dochód przyjęty do wyliczenia: ${zl(dochod)} miesięcznie
 - Limit świadczenia przy kontrakcie B2B: 80%
 - Miesięczne świadczenie z polisy: ${zl(w.swiadczenie)}
-- Okres wypłaty: ${OKRESY.slice(0, -1).join(', ')} albo ${OKRESY.at(-1)} miesięcy;
-  składka poniżej dotyczy wariantu najkrótszego, ${MIESIECY_WYPLATY}-miesięcznego
-- Zasiłek ZUS przy podstawie ${zl(ZUS_MIESIECZNIE)}: ${zl(w.zus)}
-- Szacowana składka miesięczna: ${zlZakres(w.skladkaOd, w.skladkaDo)} — przedział ze stawek
-  najtańszej i najdroższej z ofert, które faktycznie wystawiliśmy
+- Okres wypłaty: najdłużej przez ${MIESIECY_MAX} miesięcy (warianty ${OKRESY.slice(0, -1).join(', ')}
+  i ${OKRESY.at(-1)} miesięcy); składka poniżej dotyczy wariantu najkrótszego,
+  ${MIESIECY_WYPLATY}-miesięcznego
+- Zasiłek chorobowy z ZUS: ${zl(ZASILEK_JDG.duzy)} miesięcznie przed podatkiem — ${ZUS_TEKST.wzor},
+  ${ZUS_TEKST.scenariusz}; ${ZUS_TEKST.dopiski}
+- Szacowana składka miesięczna: ${zlZakres(w.skladkaOd, w.skladkaDo)}, razem z opłatą
+  dystrybucyjną — przedział od najtańszej do najdroższej stawki ${OPIS_KALIBRACJI}
 ${pytania}
 ## Wyłączenia
 
 Nieobjęte ochroną: wypalenie zawodowe jako samodzielna diagnoza, choroby
-psychiczne, częściowa niezdolność do pracy, schorzenia leczone w ciągu
-24 miesięcy przed zawarciem umowy.
+psychiczne jako jedyna przyczyna niezdolności (w CEU także bez tego warunku),
+częściowa niezdolność do pracy, schorzenia leczone w ciągu 24 miesięcy przed
+zawarciem umowy.
 
 ## Zawody pokrewne
 

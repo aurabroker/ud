@@ -22,6 +22,10 @@ import { resolve } from 'node:path';
 import { uruchomKlaster, wczytaj } from './lib/pg-tymczasowy.mjs';
 
 const TESTY = wczytaj('supabase/tests/leady.sql');
+// Statystyki według źródła leada (ud_leady_statystyki_zrodla) — po leady.sql, we
+// własnej transakcji wycofywanej na końcu pliku, więc testy współbieżności niżej
+// jadą na stanie po leady.sql.
+const TESTY_ZRODLA = wczytaj('supabase/tests/statystyki-zrodla.sql');
 
 let wyjscie = 1;
 let klaster;
@@ -35,7 +39,9 @@ const { psql, sesja } = klaster;
 
 try {
   // ── Asercje SQL ───────────────────────────────────────────────────────────
-  const r = psql(TESTY);
+  const r1 = psql(TESTY);
+  const r2 = psql(TESTY_ZRODLA);
+  const r = { status: r1.status || r2.status, stdout: `${r1.stdout}\n${r2.stdout}`, stderr: `${r1.stderr}\n${r2.stderr}` };
   const linie = `${r.stderr}\n${r.stdout}`.split('\n');
   const pass = linie.filter((l) => /NOTICE:\s+PASS /.test(l)).length;
   const fail = linie.filter((l) => /NOTICE:\s+FAIL /.test(l)).map((l) => l.replace(/^.*NOTICE:\s+/, ''));

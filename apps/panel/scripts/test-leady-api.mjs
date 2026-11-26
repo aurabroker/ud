@@ -27,6 +27,7 @@ import {
   przetworz,
   graniceOkresu,
   statystyki,
+  statystykiZrodel,
   synchronizuj,
   szczegoly,
   warianty,
@@ -548,6 +549,41 @@ try {
     assert.equal(wybrany.okres, 'miesiac');
     await assert.rejects(statystyki(sbSql, INES, new URLSearchParams()), (e) => e.status === 403);
   });
+  await t('statystyki według źródła: te same parametry i widoczność co statystyki, Razem = podsumowanie sprzedaży', async () => {
+    // Klientka z reklamy (gclid w danych — nie może wyjść z funkcji).
+    sql(`update public.ud_clients set form_data = '{"zrodlo": {"utm_source": "ads", "utm_medium": "internet", "utm_campaign": "jesien26",
+           "platne": true, "zgoda_marketing": true, "gclid": "GCLID-SEKRET-API"}}' where full_name = 'Anna Kowalska'`);
+    const a = await statystykiZrodel(sbSql, ADM, new URLSearchParams());
+    assert.deepEqual(a.wiersze.map((w) => w.klucz), ['ads', 'agent', 'inne', 'brak']);
+    assert.equal(a.okres, 'wszystko');
+    assert.equal(a.agent, null);
+    assert.equal(a.ucieto, 0);
+    assert.ok(a.wiersze[0].wnioski >= 1, 'Anna w „Google Ads"');
+    assert.deepEqual(a.wiersze[0].pod.map((p) => p.etykieta), ['jesien26']);
+    assert.ok(!JSON.stringify(a).includes('SEKRET'), 'bez identyfikatora kliknięcia');
+    const s = await statystyki(sbSql, ADM, new URLSearchParams());
+    assert.equal(a.razem.sprzedaze, s.podsumowanie.sprzedaze);
+    assert.equal(a.razem.skladka_roczna_suma, Number(s.podsumowanie.skladka_roczna_suma));
+    assert.equal(a.razem.prowizja_suma, Number(s.podsumowanie.prowizja_suma));
+
+    const o = await statystykiZrodel(sbSql, OLEK, new URLSearchParams(`agent=${ULA}&okres=miesiac`));
+    assert.equal(o.agent, OLEK, 'parametr agenta u zwykłego agenta jest ignorowany');
+    assert.equal(o.okres, 'miesiac');
+    const so = await statystyki(sbSql, OLEK, new URLSearchParams(`agent=${ULA}&okres=miesiac`));
+    assert.equal(o.razem.sprzedaze, so.podsumowanie.sprzedaze);
+    const w = await statystykiZrodel(sbSql, ADM, new URLSearchParams(`agent=${OLEK}&okres=cokolwiek`));
+    assert.equal(w.agent, OLEK);
+    assert.equal(w.okres, 'wszystko');
+    await assert.rejects(statystykiZrodel(sbSql, INES, new URLSearchParams()), (e) => e.status === 403);
+  });
+  await t('statystyki według źródła: brak funkcji w bazie → 503 z wyjaśnieniem; inny błąd → 502', async () => {
+    const bez = { rpc: async () => ({ data: null, error: { code: 'PGRST202', message: 'Could not find the function public.ud_leady_statystyki_zrodla' } }) };
+    await assert.rejects(statystykiZrodel(bez, ADM, new URLSearchParams()),
+      (e) => e instanceof BladApi && e.status === 503 && /nie są jeszcze włączone w bazie/.test(e.message));
+    const zla = { rpc: async () => ({ data: null, error: { code: '57014', message: 'canceling statement due to statement timeout' } }) };
+    await assert.rejects(statystykiZrodel(zla, ADM, new URLSearchParams()),
+      (e) => e instanceof BladApi && e.status === 502 && !/statement/.test(e.message));
+  });
   await t('statystyki: granice okresu w czasie polskim', () => {
     const teraz = new Date('2026-03-31T23:30:00Z');   // w Polsce już 1 kwietnia
     assert.deepEqual(graniceOkresu('miesiac', teraz), { od: '2026-04-01 00:00:00 Europe/Warsaw', do: '2026-05-01 00:00:00 Europe/Warsaw' });
@@ -983,7 +1019,8 @@ try {
   await t('kontrakt: wszystkie funkcje SQL z leady.js były wołane (nazwy argumentów zgodne z sygnaturą)', () => {
     const wolane = new Set(sbSql.wywolania.map(([n]) => n));
     for (const f of ['ud_leady_plan', 'ud_leady_synchronizuj', 'ud_leady_liczniki', 'ud_leady_kolumna', 'ud_lead_szczegoly', 'ud_lead_zmien', 'ud_lead_notatka', 'ud_leady_zwin',
-                     'ud_lead_plik', 'ud_lead_plik_dodaj', 'ud_lead_polisa_reczna', 'ud_leady_statystyki', 'ud_leady_polisy']) {
+                     'ud_lead_plik', 'ud_lead_plik_dodaj', 'ud_lead_polisa_reczna', 'ud_leady_statystyki', 'ud_leady_polisy',
+                     'ud_leady_statystyki_zrodla']) {
       assert.ok(wolane.has(f), `nie wołano ${f}`);
     }
   });

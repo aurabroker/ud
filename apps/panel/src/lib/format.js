@@ -39,3 +39,12 @@ export function offerNoDisplay(n) {
 export function dateP(s) {
   return s ? new Date(s).toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—';
 }
+
+/** Data z godziną czasu polskiego: „19.10.2026, 19:13". */
+export function dateTimeP(s) {
+  return s
+    ? new Date(s).toLocaleString('pl-PL', {
+        timeZone: 'Europe/Warsaw', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+      })
+    : '—';
+}

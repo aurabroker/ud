@@ -23,7 +23,7 @@
  */
 import Baza from '../../../layouts/Baza.astro';
 import { graf, organizacja, serwis, strona, okruszki } from '../../../lib/seo';
-import { FIRMA, UBEZPIECZYCIELE } from '../../../lib/firma';
+import { FIRMA } from '../../../lib/firma';
 import { zl } from '../../../lib/symulacja';
 import { KROKI, PROG_KLAUZUL_NW, PYTANIA_MEDYCZNE } from '@ud/wniosek/schemat';
 import { HEALTH_SURVEY_THRESHOLD } from '@ud/wniosek/ankieta';
@@ -195,7 +195,7 @@ const PRZYGOTUJ = [
         </h2>
         <ul class="flex flex-col gap-3 text-[15px] leading-relaxed text-tekst-drugi list-none m-0 p-0">
           <li>Симуляцію внеску одразу після заповнення.</li>
-          <li>Пропозицію від двох страховиків — {UBEZPIECZYCIELE.join(' і ')}.</li>
+          <li>Пропозицію з варіантами двох представників Lloyd’s — Leadenhall і CEU.</li>
           <li>Комплект документів: OWU і картку продукту — польською мовою.</li>
         </ul>
       </div>

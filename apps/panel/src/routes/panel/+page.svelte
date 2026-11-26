@@ -1,4 +1,5 @@
 <script>
+  import { potwierdz } from '$lib/potwierdz.js';
   import { enhance } from '$app/forms';
   let { data, form } = $props();
   let refreshingAll = $state(false);
@@ -20,8 +21,8 @@
     </p>
   </div>
   <div style="display:flex;gap:.5rem;">
-    <form method="POST" action="?/refreshAll" use:enhance={() => { refreshingAll = true; return async ({ update }) => { await update(); refreshingAll = false; }; }}
-      onsubmit={(e) => { if (!confirm('Zastosować aktualne reguły do wszystkich ofert? Ponownie odczyta PDF-y i wygeneruje podsumowania.')) e.preventDefault(); }}>
+    <form method="POST" action="?/refreshAll"
+      use:enhance={potwierdz('Zastosować aktualne reguły do wszystkich ofert? Ponownie odczyta PDF-y i wygeneruje podsumowania.', () => { refreshingAll = true; return async ({ update }) => { await update(); refreshingAll = false; }; })}>
       <button class="btn btn-ghost" type="submit" disabled={refreshingAll} title="Ponowny odczyt PDF-ów i regeneracja podsumowań we wszystkich ofertach">
         {refreshingAll ? 'Odświeżam…' : '↻ Odśwież wszystkie'}
       </button>
@@ -31,9 +32,19 @@
     {:else}
       <a class="btn btn-ghost" href="/panel?widok=archiwum">📥 Archiwum ({data.wArchiwum})</a>
     {/if}
+    <a class="btn btn-ghost" href="/panel/kosz" title="Usunięte oferty — można je przywrócić przez 30 dni">🗑 Kosz{#if data.wKoszu !== null} ({data.wKoszu}){/if}</a>
     <a class="btn btn-primary" href="/panel/new">+ Nowa oferta</a>
   </div>
 </div>
+
+{#if form?.deleted || (data.usunieto && !form)}
+  <div class="ok-box" style="margin-bottom:1rem;">
+    Oferta jest w <a href="/panel/kosz">koszu</a> — przez 30 dni możesz ją stamtąd przywrócić (z tym samym linkiem dla klienta).
+  </div>
+{/if}
+{#if form?.error}
+  <div class="error-box" style="margin-bottom:1rem;">{form.error}</div>
+{/if}
 
 {#if form?.refreshedAll}
   <div class="{form.refreshedAll.errors?.length ? 'error-box' : 'ok-box'}" style="margin-bottom:1rem;">
@@ -72,8 +83,8 @@
             <td class="muted">{fmtDate(o.created_at)}</td>
             <td style="text-align:right;white-space:nowrap;">
               <a href="/panel/offer/{o.id}">Otwórz →</a>
-              <form method="POST" action="?/delete" use:enhance={() => ({ update }) => update()} style="display:inline;margin-left:.75rem;"
-                onsubmit={(e) => { if (!confirm('Usunąć ofertę?')) e.preventDefault(); }}>
+              <form method="POST" action="?/delete" style="display:inline;margin-left:.75rem;"
+                use:enhance={potwierdz('Przenieść ofertę do kosza? Klient straci dostęp do linku. Przez 30 dni można ją przywrócić z „Kosza".', () => ({ update }) => update())}>
                 <input type="hidden" name="id" value={o.id} />
                 <button class="btn btn-ghost" style="padding:.25rem .55rem;font-size:.78rem;color:var(--red-600);">Usuń</button>
               </form>

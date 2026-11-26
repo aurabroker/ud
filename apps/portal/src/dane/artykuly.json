@@ -3,6 +3,161 @@
   "zrodlo": "aura_articles (status=published, platforms zawiera UtrataDochodu.pl); zdjęcia z preview_image_800/1600",
   "artykuly": [
     {
+      "slug": "ciaza-wylaczenie-ubezpieczenie-utraty-dochodu",
+      "tytul": "Ciąża a ubezpieczenie od utraty dochodu. Dlaczego polisa nie zapłaci za L4 w ciąży i co chroni Twój dochód zamiast niej",
+      "zajawka": "Ciąża i poród są wyłączone we wszystkich OWU polis od utraty dochodu, które oferujemy. Sprawdź, ile płaci ZUS na B2B w 2026 r. i jak przygotować się przed ciążą.",
+      "tagi": [
+        "ZUS",
+        "OWU",
+        "ciąża"
+      ],
+      "opublikowano": "2026-11-23T22:07:00Z",
+      "utworzono": "2026-11-23T22:07:00Z",
+      "obraz": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/ciaza-wylaczenie-ubezpieczenie-utraty-dochodu-cover-800.webp",
+      "obrazDuzy": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/ciaza-wylaczenie-ubezpieczenie-utraty-dochodu-cover-1600.webp"
+    },
+    {
+      "slug": "przychodzi-fizjoterapeuta-do-lekarza",
+      "tytul": "Przychodzi fizjoterapeuta do lekarza. Trzy kontrakty, jedna para rąk",
+      "zajawka": "Przy dużym ZUS z chorobowym fizjoterapeuta z trzema kontraktami dostanie na L4 ok. 3 902 zł, tyle co z jednym. Co płaci polisa, gdy zawiodą ręce?",
+      "tagi": [
+        "ZUS",
+        "OWU",
+        "fizjoterapeuci"
+      ],
+      "opublikowano": "2026-11-20T07:30:00Z",
+      "utworzono": "2026-11-20T07:30:00Z",
+      "obraz": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/przychodzi-fizjoterapeuta-do-lekarza-cover-800.webp",
+      "obrazDuzy": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/przychodzi-fizjoterapeuta-do-lekarza-cover-1600.webp"
+    },
+    {
+      "slug": "przychodzi-elektryk-do-lekarza",
+      "tytul": "Przychodzi elektryk do lekarza. Ten sam upadek z drabiny, dwie różne kwoty z ZUS",
+      "zajawka": "Po wypadku u klienta elektryk na JDG dostanie z ZUS 100% podstawy, po upadku w domu bez chorobowego nic. Co zmienia polisa?",
+      "tagi": [
+        "ZUS",
+        "OWU",
+        "elektrycy"
+      ],
+      "opublikowano": "2026-11-18T07:32:00Z",
+      "utworzono": "2026-11-18T07:32:00Z",
+      "obraz": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/przychodzi-elektryk-do-lekarza-cover-800.webp",
+      "obrazDuzy": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/przychodzi-elektryk-do-lekarza-cover-1600.webp"
+    },
+    {
+      "slug": "przychodzi-radca-prawny-do-lekarza",
+      "tytul": "Przychodzi radca prawny do lekarza. Termin na apelację nie bierze zwolnienia",
+      "zajawka": "Termin na apelację biegnie mimo choroby. Radca z kancelarią na dużym ZUS z chorobowym dostanie na L4 ok. 3 902 zł. Co zmienia polisa?",
+      "tagi": [
+        "ZUS",
+        "OWU",
+        "radcowie prawni"
+      ],
+      "opublikowano": "2026-11-18T07:31:00Z",
+      "utworzono": "2026-11-18T07:31:00Z",
+      "obraz": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/przychodzi-radca-prawny-do-lekarza-cover-800.webp",
+      "obrazDuzy": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/przychodzi-radca-prawny-do-lekarza-cover-1600.webp"
+    },
+    {
+      "slug": "przychodzi-pielegniarka-do-lekarza",
+      "tytul": "Przychodzi pielęgniarka do lekarza. Ile daje ZUS z etatu, a ile z kontraktu",
+      "zajawka": "Kontrakt obok pełnego etatu daje pielęgniarce na L4 0 zł z ZUS. Ile wynosi zasiłek z etatu w 2026 r. i co liczy polisa dla personelu medycznego?",
+      "tagi": [
+        "ZUS",
+        "OWU",
+        "pielęgniarki"
+      ],
+      "opublikowano": "2026-11-12T07:30:00Z",
+      "utworzono": "2026-11-12T07:30:00Z",
+      "obraz": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/przychodzi-pielegniarka-do-lekarza-cover-800.webp",
+      "obrazDuzy": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/przychodzi-pielegniarka-do-lekarza-cover-1600.webp"
+    },
+    {
+      "slug": "przychodzi-stomatolog-do-lekarza",
+      "tytul": "Przychodzi stomatolog do lekarza. Ile traci dentysta z własnym gabinetem, gdy sam trafi na L4",
+      "zajawka": "Przy dużym ZUS z chorobowym dentysta dostanie na L4 ok. 3 902 zł miesięcznie, a gabinet dalej płaci czynsz i pensje. Co zmienia polisa dla stomatologa?",
+      "tagi": [
+        "ZUS",
+        "OWU",
+        "stomatolodzy"
+      ],
+      "opublikowano": "2026-11-10T07:30:00Z",
+      "utworzono": "2026-11-10T07:30:00Z",
+      "obraz": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/przychodzi-stomatolog-do-lekarza-cover-800.webp",
+      "obrazDuzy": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/przychodzi-stomatolog-do-lekarza-cover-1600.webp"
+    },
+    {
+      "slug": "przychodzi-architekt-do-lekarza",
+      "tytul": "Przychodzi architekt do lekarza. Pracownia, projekt i dochód na L4",
+      "zajawka": "Nadzór autorski nie może po prostu stanąć, a OC nie płaci za Twój dochód. Sprawdź, ile architekt dostaje z ZUS na L4 w 2026 r. i co liczy polisa.",
+      "tagi": [
+        "ZUS",
+        "OWU",
+        "architekci"
+      ],
+      "opublikowano": "2026-10-31T07:30:00Z",
+      "utworzono": "2026-10-31T07:30:00Z",
+      "obraz": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/przychodzi-architekt-do-lekarza-cover-800.webp",
+      "obrazDuzy": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/przychodzi-architekt-do-lekarza-cover-1600.webp"
+    },
+    {
+      "slug": "przychodzi-kosmetyczka-do-lekarza",
+      "tytul": "Przychodzi kosmetyczka do lekarza. Ile zasiłku dostanie we własnym gabinecie i co liczy polisa",
+      "zajawka": "Na uldze na start zasiłek to 0 zł, na preferencyjnym ZUS z dobrowolnym chorobowym ok. 995 zł. Ile kosmetyczka dostaje na L4 w 2026 r. i co liczy polisa?",
+      "tagi": [
+        "ZUS",
+        "OWU",
+        "branża beauty"
+      ],
+      "opublikowano": "2026-10-30T07:30:00Z",
+      "utworzono": "2026-10-30T07:30:00Z",
+      "zmieniono": "2026-11-02T12:09:00Z",
+      "obraz": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/przychodzi-kosmetyczka-do-lekarza-cover-800.webp",
+      "obrazDuzy": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/przychodzi-kosmetyczka-do-lekarza-cover-1600.webp"
+    },
+    {
+      "slug": "przychodzi-kierowca-do-lekarza",
+      "tytul": "Przychodzi kierowca do lekarza. Ile kierowca zawodowy traci na L4, gdy wypłata to w dużej części diety",
+      "zajawka": "Mediana zarobków kierowcy to 9 tys. zł na rękę, ale zasiłek liczy się bez diet. Sprawdź, ile kierowca dostaje na L4 w 2026 r. i co zmienia polisa.",
+      "tagi": [
+        "ZUS",
+        "OWU",
+        "kierowcy"
+      ],
+      "opublikowano": "2026-10-28T10:49:24Z",
+      "utworzono": "2026-10-28T10:49:24Z",
+      "obraz": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/przychodzi-kierowca-do-lekarza-cover-800.webp",
+      "obrazDuzy": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/przychodzi-kierowca-do-lekarza-cover-1600.webp"
+    },
+    {
+      "slug": "przychodzi-lekarz-do-lekarza",
+      "tytul": "Przychodzi lekarz do lekarza. Ile traci specjalista na kontrakcie, gdy sam trafi na L4",
+      "zajawka": "73% specjalistów pracuje na B2B, a przy minimalnym dużym ZUS zasiłek pokrywa ok. 15% mediany kontraktu. Sprawdź, co zmienia polisa dla lekarzy.",
+      "tagi": [
+        "ZUS",
+        "OWU",
+        "lekarze"
+      ],
+      "opublikowano": "2026-10-26T20:05:49Z",
+      "utworzono": "2026-10-26T20:05:49Z",
+      "obraz": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/przychodzi-lekarz-do-lekarza-cover-800.webp",
+      "obrazDuzy": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/przychodzi-lekarz-do-lekarza-cover-1600.webp"
+    },
+    {
+      "slug": "nowotwory-utrata-dochodu-b2b",
+      "tytul": "193 tysiące nowych diagnoz raka w rok. Ile zapłaci ZUS na B2B i gdzie kończy się polisa",
+      "zajawka": "W 2023 r. KRN zarejestrował 192 922 nowe zachorowania na nowotwory złośliwe. Sprawdź, ile zapłaci ZUS na B2B w czasie leczenia i co o raku mówią OWU polis od utraty dochodu.",
+      "tagi": [
+        "ZUS",
+        "OWU",
+        "nowotwory"
+      ],
+      "opublikowano": "2026-10-23T10:15:58Z",
+      "utworzono": "2026-10-23T10:15:58Z",
+      "obraz": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/nowotwory-utrata-dochodu-b2b-cover-800.webp",
+      "obrazDuzy": "https://kukvgsjrmrqtzhkszzum.supabase.co/storage/v1/object/public/article-images/normalized/nowotwory-utrata-dochodu-b2b-cover-1600.webp"
+    },
+    {
       "slug": "zawal-udar-utrata-dochodu",
       "tytul": "Zawał albo udar. Co roku dotyka to ponad 140 tysięcy Polaków — i ile kosztuje to Twój dochód",
       "zajawka": "Ponad 140 tys. zawałów i udarów rocznie. Sprawdź, ile zapłaci ZUS na B2B po zawale lub udarze i jaka luka zostaje w Twoim budżecie.",
@@ -52,6 +207,7 @@
       ],
       "opublikowano": "2026-07-07T10:46:45Z",
       "utworzono": "2026-06-17T08:04:29Z",
+      "zmieniono": "2026-10-28T18:55:00Z",
       "obraz": null,
       "obrazDuzy": null
     },
@@ -88,7 +244,8 @@
       "zajawka": "Wypadek przy pracy rzadko zaczyna się dramatyczną sceną. Częściej to zwykły poranek: hala, magazyn, budowa, biuro — i nagle kilka miesięcy bez dochodu.",
       "tagi": [
         "ZUS",
-        "L4"
+        "L4",
+        "wypadek przy pracy"
       ],
       "opublikowano": "2026-05-27T08:21:41Z",
       "utworzono": "2026-05-27T08:21:41Z",

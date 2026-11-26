@@ -14,11 +14,14 @@
  * który już go czyta, i kosztuje tyle, co nic.
  */
 import type { APIRoute } from 'astro';
-import { ZAWODY, kategorie, wKategorii, slugKategorii, tresc } from '@ud/zawody';
+import { ZAWODY, kategorie, wKategorii, slugKategorii, tresc, malymi } from '@ud/zawody';
 import { ARTYKULY } from '../lib/artykuly';
-import { FIRMA, SERWIS, UBEZPIECZYCIELE } from '../lib/firma';
-import { ZUS_MIESIECZNIE, LIMIT, OKRESY, zl } from '../lib/symulacja';
+import { FIRMA, SERWIS, OPIS_UBEZPIECZYCIELA } from '../lib/firma';
+import { LIMIT, LIMIT_CEU_ZDANIE, OKRESY, MIESIECY_MAX, zl } from '../lib/symulacja';
+import { SWIADCZENIE_MAX } from '../lib/granice';
+import { ZASILEK_JDG, ZUS_TEKST } from '../lib/zus';
 import { krokiSlownie } from '@ud/wniosek/schemat';
+import { WYLACZENIA_KROTKO } from '../lib/wylaczenia';
 
 export const GET: APIRoute = () => {
   const kat = kategorie();
@@ -30,7 +33,7 @@ export const GET: APIRoute = () => {
         // Opis bierzemy z pierwszego zdania treści redakcyjnej, jeśli istnieje —
         // wtedy każdy wiersz niesie coś, czego nie ma w samej nazwie zawodu.
         const opis = t?.wstep?.split(/(?<=[.!?])\s/)[0]
-          ?? `Ubezpieczenie utraty dochodu dla ${z.odmiana.dopelniacz.toLowerCase()}.`;
+          ?? `Ubezpieczenie utraty dochodu dla ${malymi(z.odmiana.dopelniacz)}.`;
         return `- [${z.nazwa}](${SERWIS.url}/${z.slug}/): ${opis}`;
       })
       .join('\n');
@@ -50,8 +53,7 @@ export const GET: APIRoute = () => {
 
 Serwis prowadzi ${FIRMA.nazwaPelna} z siedzibą w Warszawie, agent ubezpieczeniowy
 wpisany do Rejestru Pośredników Ubezpieczeniowych KNF pod numerem ${FIRMA.rpu}
-(KRS ${FIRMA.krs}, REGON ${FIRMA.regon}). Partnerzy ubezpieczeniowi:
-${UBEZPIECZYCIELE.join(' oraz ')}.
+(KRS ${FIRMA.krs}, REGON ${FIRMA.regon}). ${OPIS_UBEZPIECZYCIELA}
 
 ## Na czym polega produkt
 
@@ -59,18 +61,23 @@ Ubezpieczenie utraty dochodu, zwane też prywatnym L4, chroni przed całkowitą
 niezdolnością do wykonywania zawodu z powodu choroby lub nieszczęśliwego wypadku.
 
 - **Limit świadczenia:** do ${Math.round(LIMIT.b2b * 100)}% udokumentowanego dochodu przy samozatrudnieniu
-  i kontrakcie B2B, do ${Math.round(LIMIT.etat * 100)}% przy umowie o pracę i umowie zlecenia.
-- **Punkt odniesienia:** zasiłek chorobowy z ZUS wynosi 80% podstawy wymiaru składek.
-  Przy najniższej podstawie daje to około ${zl(Math.round(ZUS_MIESIECZNIE * 0.8))} miesięcznie, niezależnie
-  od faktycznych zarobków — i to jest luka, którą polisa zamyka.
-- **Okres wypłaty:** świadczenie miesięczne wypłacane przez ${OKRESY.slice(0, -1).join(', ')}
-  albo ${OKRESY.at(-1)} miesięcy — okres wybiera się przy zawarciu umowy, najkrótszy
-  wariant to ${OKRESY[0]} miesiące.
+  i kontrakcie B2B, do ${Math.round(LIMIT.etat * 100)}% przy umowie o pracę i umowie zlecenia,
+  najwyżej ${zl(SWIADCZENIE_MAX)} miesięcznie. ${LIMIT_CEU_ZDANIE}
+- **Punkt odniesienia:** zasiłek chorobowy z ZUS to ${ZUS_TEKST.wzor}. Przedsiębiorca
+  ${ZUS_TEKST.scenariusz} dostaje ${zl(ZASILEK_JDG.duzy)} miesięcznie przed podatkiem,
+  niezależnie od faktycznych zarobków; ${ZUS_TEKST.dopiski}. To jest luka, którą polisa zamyka.
+  ${ZUS_TEKST.etat}
+- **Okres wypłaty:** świadczenie miesięczne wypłacane najdłużej przez ${MIESIECY_MAX} miesięcy.
+  Okres wybiera się przy zawarciu umowy: ${OKRESY.slice(0, -1).join(', ')} albo ${OKRESY.at(-1)}
+  miesięcy; najkrótszy wariant to ${OKRESY[0]} miesiące. Pierwsza wypłata przysługuje po okresie wyczekiwania
+  ustalonym w umowie.
 - **Ryzyka:** okresowa niezdolność do pracy (świadczenie miesięczne), trwała
   niezdolność do pracy oraz śmierć i inwalidztwo wskutek nieszczęśliwego wypadku
   (świadczenia jednorazowe).
 - **Warianty:** Leadenhall MEDICARE (LW047), MEDICA (LW046) dla zawodów medycznych
-  oraz Utrata Dochodu (LW044) dla pozostałych. Warunki szczególne HIV/WZW
+  oraz Utrata Dochodu (LW044) dla pozostałych; CEU Utrata Dochodu i LOI Premium dla osób,
+  które nie zatrudniają nikogo, kto przejmuje ich obowiązki, oraz CEU Utrata Dochodu
+  dla zatrudniających. Warunki szczególne HIV/WZW
   (LW048 do MEDICA, LW049 do MEDICARE) dokupuje się tylko do wariantów medycznych:
   dają osobne świadczenie za samo zakażenie po niezamierzonym kontakcie z krwią
   lub płynami ustrojowymi w pracy — jednorazową wypłatę oraz zwrot kosztów leków
@@ -80,12 +87,9 @@ niezdolnością do wykonywania zawodu z powodu choroby lub nieszczęśliwego wyp
 
 Te wyłączenia są istotne i często pomijane w materiałach marketingowych:
 
-- wypalenie zawodowe jako samodzielna diagnoza,
-- choroby psychiczne,
-- częściowa niezdolność do pracy,
-- schorzenia leczone w ciągu 24 miesięcy przed zawarciem umowy, o ile nie
-  zostały zgłoszone i zaakceptowane przez ubezpieczyciela,
-- kwarantanna i izolacja bez orzeczonej niezdolności do pracy.
+${WYLACZENIA_KROTKO.map((w) => `- ${w}`).join('\n')}
+
+Pełna lista z paragrafami: [Wyłączenia](${SERWIS.url}/wylaczenia/).
 
 Zakażenie HIV albo WZW **nie** jest wyłączone: niezdolność do pracy, do której
 doprowadzi, ocenia się na zasadach ogólnych. Klauzula HIV/WZW nie jest warunkiem
@@ -125,7 +129,8 @@ ${sekcjaArtykulow}
 
 - [O nas](${SERWIS.url}/o-nas/): kim jesteśmy, z kim współpracujemy i pod jakimi
   numerami da się nas zweryfikować w rejestrach.
-- [Opinie klientów](${SERWIS.url}/opinie/): wszystkie zebrane opinie, bez selekcji.
+- [Opinie klientów](${SERWIS.url}/opinie/): opinie publikujemy dopiero po potwierdzeniu,
+  że autor zawarł polisę za naszym pośrednictwem; formularz opinii.
 - [Współpraca dla agentów](${SERWIS.url}/pracuj-z-nami/): oferta dla sieci sprzedaży
   i agentów ubezpieczeń życiowych.
 - [Klauzula informacyjna RODO](${SERWIS.url}/klauzula-informacyjna/): co dzieje się

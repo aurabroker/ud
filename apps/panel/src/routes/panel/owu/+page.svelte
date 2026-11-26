@@ -1,4 +1,5 @@
 <script>
+  import { potwierdz } from '$lib/potwierdz.js';
   import { enhance } from '$app/forms';
   import { insurerLabel } from '$lib/format.js';
   let { data, form } = $props();
@@ -86,8 +87,8 @@
                   <input type="hidden" name="id" value={o.id} /><input type="hidden" name="active" value={o.active} />
                   <button class="btn btn-ghost" style="padding:.3rem .6rem;font-size:.78rem;">{o.active ? 'Wyłącz' : 'Włącz'}</button>
                 </form>
-                <form method="POST" action="?/delete" use:enhance={() => ({ update }) => update()} style="display:inline;"
-                  onsubmit={(e) => { if (!confirm('Usunąć OWU?')) e.preventDefault(); }}>
+                <form method="POST" action="?/delete" style="display:inline;"
+                  use:enhance={potwierdz('Usunąć OWU?', () => ({ update }) => update())}>
                   <input type="hidden" name="id" value={o.id} />
                   <button class="btn btn-ghost" style="padding:.3rem .6rem;font-size:.78rem;color:var(--red-600);">Usuń</button>
                 </form>

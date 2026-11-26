@@ -23,6 +23,7 @@
 import { json } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
 import { createAdminClient } from '$lib/server/supabase.js';
+import { sprawdzTokenCrona } from '$lib/server/cronBramka.js';
 import { sendSms } from '$lib/server/sms.js';
 import { wOknieWysylki } from '$lib/server/smsOferta.js';
 import { wyslijPrzypomnienia } from '$lib/server/przypomnieniaOfert.js';
@@ -53,17 +54,12 @@ export async function POST({ request, getClientAddress }) {
     return json({ ok: false, error: 'brak konfiguracji' }, { status: 503 });
   }
 
-  const { data: zgodny, error: bladTokenu } = await sb.rpc('edge_cron_token_matches', { token });
-  if (bladTokenu) {
-    await zapiszBlad(sb, 'Przypomnienia ofert: nie da się sprawdzić tokenu crona', { blad: bladTokenu.message }, ip);
-    return json({ ok: false, error: 'nie da się sprawdzić tokenu' }, { status: 503 });
-  }
-  if (zgodny !== true) {
-    // Bez wpisu w ud_errors: cron bierze token z tego samego Vaulta, z którym
-    // go porównujemy, więc zły token to zawsze ktoś z zewnątrz — a wpis za
-    // każde jego żądanie pozwoliłby mu zapchać dziennik błędów.
-    console.warn(`[${ZRODLO}] zły token crona`, ip);
-    return json({ ok: false, error: 'zły token' }, { status: 401 });
+  // Zły token bez wpisu w ud_errors (patrz cronBramka.js), błąd bazy — z wpisem.
+  const bramka = await sprawdzTokenCrona(sb, token);
+  if (!bramka.ok) {
+    if (bramka.doDziennika) await zapiszBlad(sb, 'Przypomnienia ofert: nie da się sprawdzić tokenu crona', { blad: bramka.doDziennika }, ip);
+    else console.warn(`[${ZRODLO}] ${bramka.error}`, ip);
+    return json({ ok: false, error: bramka.error }, { status: bramka.status });
   }
 
   if (env.SMSAPI_TEST === '1') {

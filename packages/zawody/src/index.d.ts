@@ -15,8 +15,14 @@ export interface Zawod {
   slug: string;
   nazwa: string;
   kategoria: string;
-  /** Maksymalne świadczenie dzienne w złotych. */
-  swiadczenieDzienne: number | null;
+  /**
+   * Miesięczny dochód netto, dla którego strona zawodu liczy przykład.
+   * Do 21.10.2026 stało tu „maksymalne świadczenie dzienne" (250–600 zł) ze
+   * starego serwisu — limitu dziennego w ofercie nie ma, więc strony
+   * kategorii obiecywały liczbę bez pokrycia. Wartości przeliczone tak, żeby
+   * przykłady na stronach zawodów zostały te same.
+   */
+  dochodPrzykladowy: number;
   /** Co dostaje osoba w tym zawodzie bez polisy — zdanie z llms.txt. */
   bezUbezpieczenia: string | null;
   ryzyka: Ryzyko[];
@@ -45,6 +51,8 @@ export function slugi(): string[];
 export function kategorie(): Kategoria[];
 export function wKategorii(nazwa: string): Zawod[];
 export function pokrewne(slug: string, ile?: number): Zawod[];
+export function malymi(tekst: string): string;
+export function liczebnik(n: number, formy: [string, string, string]): string;
 export function slugKategorii(nazwa: string): string;
 export function przekierowania(): { z: string; na: string }[];
 

@@ -9,18 +9,19 @@
  */
 import Baza from '../../../layouts/Baza.astro';
 import { graf, organizacja, serwis, strona, okruszki, faq, usluga } from '../../../lib/seo';
-import { symuluj, zl, ZUS_MIESIECZNIE, LIMIT } from '../../../lib/symulacja';
+import { symuluj, zl, zlZakres, LIMIT } from '../../../lib/symulacja';
+import { ZASILEK_JDG } from '../../../lib/zus';
 import { KROKI, PROG_KLAUZUL_NW } from '@ud/wniosek/schemat';
 import { HEALTH_SURVEY_THRESHOLD } from '@ud/wniosek/ankieta';
-import { UBEZPIECZYCIELE } from '../../../lib/firma';
-import { GLOWNA_UK, KROKI_UK, krokiUk } from '../../../lib/uk';
+import { COVERHOLDERZY } from '../../../lib/firma';
+import { GLOWNA_UK, KROKI_UK, krokiUk, ZUS_TEKST_UK, LIMIT_CEU_ZDANIE_UK } from '../../../lib/uk';
 
 const sciezka = '/uk/jak-to-dziala/';
 const tytul = 'Як працює страхування від втрати доходу — крок за кроком | UtrataDochodu.pl';
 const opis = 'Від чого залежить виплата, як рахують внесок, що відбувається після подання заявки '
   + 'і скільки триває шлях від форми до поліса.';
 
-const przyklad = symuluj({ dochod: 18000, zatrudnienie: 'b2b' });
+const przyklad = symuluj({ dochod: 18000 });
 const b2b = Math.round(LIMIT.b2b * 100);
 const etat = Math.round(LIMIT.etat * 100);
 
@@ -36,8 +37,10 @@ const ETAPY = [
   {
     tytul: 'Ми перевіряємо заявку й добираємо варіант',
     czas: 'того самого дня',
-    opis: `Порівнюємо умови обох страховиків (${UBEZPIECZYCIELE.join(' та ')}) з огляду на вашу `
-      + 'професію. Для медичних професій призначені варіанти MEDICA та MEDICARE, для решти — LW044.',
+    opis: `Порівнюємо умови ${COVERHOLDERZY.join(' і ')} — ковергольдерів Lloyd’s (coverholders) — `
+      + 'з огляду на вашу професію та форму роботи. У Leadenhall медичним професіям відповідають '
+      + 'варіанти MEDICA та MEDICARE, решті — LW044; CEU має варіанти Utrata Dochodu, LOI Premium '
+      + 'і Utrata Dochodu dla zatrudniających.',
   },
   {
     tytul: 'Страховик оцінює ризик',
@@ -67,9 +70,10 @@ const PYTANIA = [
   },
   {
     pytanie: 'Від чого залежить розмір виплати?',
-    odpowiedz: `Від підтвердженого документами доходу та форми зайнятості. Ліміт становить `
-      + `${b2b}% доходу за самозайнятості та контракту B2B і ${etat}% — за трудового договору. `
-      + 'Страхування не може бути фінансово вигіднішим за роботу — інакше зник би стимул повертатися.',
+    odpowiedz: `Від підтвердженого документами доходу, форми зайнятості та продукту. Ліміт становить `
+      + `до ${b2b}% доходу за самозайнятості та контракту B2B і до ${etat}% — за трудового договору. `
+      + `${LIMIT_CEU_ZDANIE_UK} Страхування не може бути фінансово вигіднішим за роботу — інакше `
+      + 'зник би стимул повертатися.',
   },
   {
     pytanie: 'Чи потрібні медичні обстеження?',
@@ -95,6 +99,16 @@ const sciezkaOkruszkow = [
   { ...GLOWNA_UK },
   { nazwa: 'Як це працює', url: sciezka },
 ];
+
+/* Zdania z kwotami składamy tutaj — Astro gubi spację obok {wyrażenia} na końcu linii. */
+const luka = `Допомога по хворобі від ZUS — це ${ZUS_TEKST_UK.wzor}. На повному ZUS (duży ZUS) `
+  + 'з найнижчою базою і з добровільним страхуванням на випадок хвороби це '
+  + `${zl(ZASILEK_JDG.duzy)} на місяць до оподаткування — незалежно від того, чи ви заробляєте `
+  + `8 000 zł, чи 80 000 zł. На пільговому ZUS це близько ${zl(ZASILEK_JDG.preferencyjny)}, `
+  + 'а без страхування на випадок хвороби — нічого.';
+const przypis = `Симуляція: допомога ZUS — ${ZUS_TEKST_UK.scenariusz}, повний ліміт виплати, внесок `
+  + `разом із дистрибуційною оплатою. ${ZUS_TEKST_UK.brutto} Реальний внесок і суму розраховує `
+  + 'страховик після оцінки ризику.';
 
 const jsonld = graf([
   organizacja(),
@@ -147,38 +161,32 @@ const jsonld = graf([
 
   <section class="max-w-[1200px] mx-auto px-5 py-16">
     <h2 class="text-[clamp(1.6rem,4vw,2.4rem)] leading-tight mb-3">Звідки береться розрив</h2>
-    <p class="text-[1.08rem] leading-relaxed text-tekst-drugi max-w-[42em] mt-0 mb-8">
-      Допомога по хворобі від ZUS — це 80% бази нарахування внесків. За найнижчої бази це
-      {zl(przyklad.zus)} на місяць — незалежно від того, чи ви заробляєте 8 000 zł, чи 80 000 zł.
-    </p>
+    <p class="text-[1.08rem] leading-relaxed text-tekst-drugi max-w-[42em] mt-0 mb-8">{luka}</p>
 
     <div class="border border-linia overflow-x-auto max-w-[52em]">
-      <table class="w-full border-collapse text-left min-w-[34rem]">
-        <caption class="sr-only">Порівняння місячних надходжень на лікарняному при доході 18 000 zł на B2B</caption>
+      <table class="w-full border-collapse text-left min-w-[20rem]">
+        <caption class="sr-only">Допомога ZUS, виплата за полісом та орієнтовний внесок при доході 18 000 zł на B2B</caption>
         <tbody>
           <tr class="border-b border-linia">
-            <th scope="row" class="px-6 py-4 font-semibold text-[15.5px]">Місячний дохід</th>
+            <th scope="row" class="px-6 py-4 font-semibold text-[15.5px]">Місячний дохід нетто</th>
             <td class="px-6 py-4 font-mono text-lg">{zl(18000)}</td>
           </tr>
           <tr class="border-b border-linia">
-            <th scope="row" class="px-6 py-4 font-semibold text-[15.5px]">Допомога від ZUS (найнижча база)</th>
-            <td class="px-6 py-4 font-mono text-lg text-alarm font-semibold">{zl(przyklad.zus)}</td>
+            <th scope="row" class="px-6 py-4 font-semibold text-[15.5px]">Допомога від ZUS (duży ZUS зі страхуванням на випадок хвороби)</th>
+            <td class="px-6 py-4 font-mono text-lg text-alarm font-semibold">{zl(ZASILEK_JDG.duzy)}</td>
           </tr>
           <tr class="border-b border-linia">
             <th scope="row" class="px-6 py-4 font-semibold text-[15.5px]">Виплата за полісом ({b2b}%)</th>
             <td class="px-6 py-4 font-mono text-lg text-akcent-ciemny font-semibold">{zl(przyklad.swiadczenie)}</td>
           </tr>
           <tr class="bg-tlo-jasne">
-            <th scope="row" class="px-6 py-5 font-semibold text-[16px]">Разом на лікарняному</th>
-            <td class="px-6 py-5 font-mono text-xl font-semibold text-akcent-ciemny">{zl(przyklad.zus + przyklad.swiadczenie)}</td>
+            <th scope="row" class="px-6 py-5 font-semibold text-[16px]">Орієнтовний місячний внесок</th>
+            <td class="px-6 py-5 font-mono text-xl font-semibold whitespace-nowrap">{zlZakres(przyklad.skladkaOd, przyklad.skladkaDo)}</td>
           </tr>
         </tbody>
       </table>
     </div>
-    <p class="text-[13px] leading-relaxed text-tekst-drugi mt-4 mb-0 max-w-[42em]">
-      Симуляція за припущення найнижчої бази ZUS ({zl(ZUS_MIESIECZNIE)}) і повного ліміту
-      виплати. Реальний внесок і суму розраховує страховик після оцінки ризику.
-    </p>
+    <p class="text-[13px] leading-relaxed text-tekst-drugi mt-4 mb-0 max-w-[42em]">{przypis}</p>
   </section>
 
   <section class="bg-tlo-jasne border-y border-linia">

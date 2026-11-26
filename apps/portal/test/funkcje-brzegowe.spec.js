@@ -37,6 +37,9 @@ test.describe('funkcje wołane przez cron wpuszczają tylko cron', () => {
     // Przypomnienia o niedokończonych wnioskach: marketing bezpośredni, więc
     // bramka musi stać przed odczytem kandydatów (adresów e-mail).
     ['wniosek-przypomnienie', 'supabase.rpc("ud_wnioski_do_przypomnienia"'],
+    // Kalibrator stawek: otwiera pull requesty zmieniające ceny na stronie
+    // i czyta agregaty z ofert — nic z tego przed sprawdzeniem tokenu.
+    ['kalibrator', '.from("ud_kalibracja_ustawienia")'],
   ]) {
     test(`${nazwa}: token x-cron-token sprawdzany przed pierwszym odczytem`, () => {
       const zrodlo = funkcja(nazwa);
@@ -47,6 +50,24 @@ test.describe('funkcje wołane przez cron wpuszczają tylko cron', () => {
       expect(sprawdzenie, 'token sprawdzany za późno').toBeLessThan(odczyt);
     });
   }
+
+  test('kalibrator: token sprawdzany przed każdym odczytem — bazy, GitHuba i strony', () => {
+    const zrodlo = funkcja('kalibrator');
+    const sprawdzenie = gdzie(zrodlo, 'supabase.rpc("edge_cron_token_matches"', 'wywołanie edge_cron_token_matches');
+    expect(gdzie(zrodlo, 'req.headers.get("x-cron-token")'), 'nagłówek czytany za późno').toBeLessThan(sprawdzenie);
+    for (const odczyt of [
+      '.from("ud_kalibracja_przebiegi")',
+      'supabase.rpc("ud_kalibracja_stawek"',
+      'await pobierzPlik(',
+      'await sprawdzStrone(',
+    ]) {
+      expect(sprawdzenie, `${odczyt} przed sprawdzeniem tokenu`).toBeLessThan(gdzie(zrodlo, odczyt));
+    }
+    // Błąd sprawdzania tokenu to 503 z wpisem w ud_errors, nie przepustka.
+    const blok = zrodlo.slice(sprawdzenie, zrodlo.indexOf('if (zgoda !== true)', sprawdzenie));
+    expect(blok).toContain('503');
+    expect(blok).toContain('logError(');
+  });
 
   test('digest escape’uje pola wpisane przez odwiedzającego', () => {
     const zrodlo = funkcja('send-digest-email');

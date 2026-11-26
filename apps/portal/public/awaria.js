@@ -34,14 +34,14 @@
       '#' + ID + ' .ud-aw-okno{position:relative;background:#fff;border-radius:0;padding:28px 24px;',
       'max-width:420px;width:100%;box-shadow:0 25px 50px -12px rgba(0,0,0,.45);text-align:center;',
       'max-height:90vh;overflow-y:auto;box-sizing:border-box}',
-      '#' + ID + ' .ud-aw-ikona{width:60px;height:60px;border-radius:0;background:#FDECEB;color:#D6453D;',
+      '#' + ID + ' .ud-aw-ikona{width:60px;height:60px;border-radius:0;background:#FDECEB;color:#B5352E;',
       'font-size:28px;font-weight:700;line-height:60px;margin:0 auto 16px}',
       '#' + ID + ' h2{margin:0 0 8px;font-size:20px;font-weight:800;color:#0F2E40}',
       '#' + ID + ' p{margin:0 0 20px;font-size:14px;line-height:1.6;color:#4E6D7D}',
       '#' + ID + ' .ud-aw-tel{display:flex;align-items:center;justify-content:center;gap:8px;',
-      'background:#0E96D0;color:#fff;text-decoration:none;font-weight:800;font-size:19px;',
+      'background:#0A6A96;color:#fff;text-decoration:none;font-weight:800;font-size:19px;',
       'padding:14px 16px;border-radius:0;margin-bottom:10px}',
-      '#' + ID + ' .ud-aw-tel:hover{background:#0B7CAF}',
+      '#' + ID + ' .ud-aw-tel:hover{background:#08597F}',
       '#' + ID + ' .ud-aw-zglos{display:block;width:100%;box-sizing:border-box;background:#F4FBFE;color:#0F2E40;',
       'text-decoration:none;font-weight:700;font-size:14px;padding:11px 16px;border-radius:0;margin-bottom:8px}',
       '#' + ID + ' .ud-aw-zglos:hover{background:#DDF1FA}',
@@ -52,7 +52,7 @@
       '#' + ID + ' summary{font-size:12px;color:#8AA3AF;cursor:pointer}',
       '#' + ID + ' pre{margin:8px 0 0;background:#F4FBFE;border:1px solid #D3E9F4;border-radius:0;',
       'padding:10px;font-size:11px;line-height:1.5;color:#4E6D7D;white-space:pre-wrap;word-break:break-word}',
-      '#' + ID + ' .ud-aw-kopiuj{margin-top:8px;background:none;border:0;color:#0B7CAF;font-size:12px;',
+      '#' + ID + ' .ud-aw-kopiuj{margin-top:8px;background:none;border:0;color:#08597F;font-size:12px;',
       'cursor:pointer;padding:0;font-family:inherit;text-decoration:underline}',
       'body.ud-awaria-blokada{overflow:hidden}'
     ].join('');
@@ -199,6 +199,26 @@
     return !!plik && plik.indexOf(location.origin) === 0;
   }
 
+  /* Przeglądarki wbudowane w aplikacje (Facebook, Instagram, Messenger, Chrome
+     i Edge na iOS) wstrzykują do strony własny kod i wołają funkcje, których
+     na stronie nie ma. Taki błąd ma za plik adres strony, więc wyglądał na nasz:
+     „Can't find variable: _AutofillCallbackHandler @ https://utratadochodu.pl/
+     ?fbclid=…:1" (iPhone, FBAN/FBIOS, 25.10.2026) — strona działała, a klient
+     dostawał okienko awarii. Dwa sygnały: znana nazwa z takiego kodu albo
+     „plik" = sama strona i linia 1. W pierwszej linii naszego HTML-a nie ma
+     skryptu (pilnuje tego test/awaria.spec.js), więc nasz błąd tak nie wygląda. */
+  var WSTRZYKNIETE = /_AutofillCallbackHandler|_pcmBridgeCallbackHandler|__gCrWeb|instantSearchSDKJSBridge|webkit\.messageHandlers|WeixinJSBridge|zaloJSV2|vivoNewsDetailPage|ztePageScrollModule|SymBrowser_|getReadModeConfig|getReadModeRender|getReadModeExtract/;
+
+  function bezKotwicy(adres) {
+    var i = adres.indexOf('#');
+    return i < 0 ? adres : adres.slice(0, i);
+  }
+
+  function wstrzykniety(tekst, plik, linia) {
+    if (WSTRZYKNIETE.test(tekst)) return true;
+    return !!plik && (linia || 0) <= 1 && bezKotwicy(plik) === bezKotwicy(location.href);
+  }
+
   function auto(kod, szczegoly) {
     if (autoZuzyty) return;
     autoZuzyty = true;
@@ -208,6 +228,7 @@
   window.addEventListener('error', function (e) {
     if (e && e.target && e.target !== window && e.target.tagName) return; // błąd wczytania zasobu — nie straszymy
     if (!naszSkrypt(e && e.filename)) return;
+    if (wstrzykniety((e.message || '') + ' ' + ((e.error && e.error.stack) || ''), e.filename, e.lineno)) return;
     auto('SKRYPT', (e.message || '') + ' @ ' + (e.filename || '') + ':' + (e.lineno || 0));
   });
 
@@ -215,6 +236,7 @@
     var r = e && e.reason;
     var stack = (r && r.stack) || '';
     if (stack.indexOf(location.origin) === -1) return; // nie nasz kod
+    if (WSTRZYKNIETE.test(((r && r.message) || '') + ' ' + stack)) return;
     auto('PROMISE', (r && r.message) || String(r));
   });
 

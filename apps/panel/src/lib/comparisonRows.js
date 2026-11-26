@@ -17,9 +17,25 @@ export const EXTRAS_SECTION_LABEL = 'Postanowienia dodatkowe';
 /**
  * Klauzule, których sama pozycja w tabeli nie wyczerpuje — ich treść musi być
  * wydrukowana pod tabelą porównania (prezentacja oferty i PDF rekomendacji).
- * @type {Record<string, { title: string, text: string }>}
+ * Tytuł i treść mogą być funkcją pozycji z oferty (numer klauzuli i próg
+ * przychodu zależą od OWU).
+ * @type {Record<string, { title: string | ((e: any) => string), text: string | ((e: any) => string) }>}
  */
 export const EXTRA_NOTES = {
+  // CEU: klauzula 2 OWU LOI PREMIUM / klauzula 13 OWU Utrata Dochodu (z 01.04.2026).
+  // Sam wiersz „TAK” obiecywałby wypłatę od pierwszego dnia bez warunków.
+  first_day: {
+    title: (e) => `Wypłata świadczenia od 1. dnia — ${e?.klauzula || 'klauzula opcjonalna CEU'}`,
+    text: (e) =>
+      'Świadczenie z tytułu czasowej całkowitej niezdolności do wykonywania zawodu jest wypłacane ' +
+      'od pierwszego dnia niezdolności, a okres oczekiwania nie ma zastosowania, gdy łącznie: ' +
+      'niezdolność trwa nieprzerwanie co najmniej 30 dni oraz średni miesięczny przychód z 12 miesięcy ' +
+      'bezpośrednio poprzedzających zawarcie umowy wynosi co najmniej ' +
+      (e?.prog_przychodu != null ? money(e.prog_przychodu) : 'kwotę określoną w klauzuli') +
+      '. Klauzula nie ma zastosowania do niezdolności będącej następstwem chorób lub urazów kręgosłupa ' +
+      'oraz wad wrodzonych lub zwyrodnień — wtedy okres oczekiwania wynosi 30 dni — i nie obejmuje ' +
+      'niezdolności będącej następstwem uprawiania niebezpiecznych aktywności włączonych do ochrony.'
+  },
   degenerative_limit: {
     title: 'Ograniczenie świadczenia z tytułu zwyrodnień — Klauzula LW144',
     text:
@@ -142,7 +158,14 @@ function extraCell(d, key) {
 export function extraNotes(documents) {
   return extraKeys(documents)
     .filter((e) => EXTRA_NOTES[e.key])
-    .map((e) => ({ key: e.key, ...EXTRA_NOTES[e.key] }));
+    .map((e) => {
+      const n = EXTRA_NOTES[e.key];
+      return {
+        key: e.key,
+        title: typeof n.title === 'function' ? n.title(e) : n.title,
+        text: typeof n.text === 'function' ? n.text(e) : n.text
+      };
+    });
 }
 
 /**

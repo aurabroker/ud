@@ -5,7 +5,11 @@ import { ZAWODY, TRESCI } from '@ud/zawody';
 import { KROKI } from '@ud/wniosek';
 import { PARY } from '../src/lib/jezyki.ts';
 import { ZAWODY_UK } from '../src/dane/uk/zawody.ts';
-import { GRANICE_WIEKU, KROKI_UK } from '../src/lib/uk.ts';
+import { GRANICE_WIEKU, KROKI_UK, ZUS_TEKST_UK } from '../src/lib/uk.ts';
+import { ZUS_TEKST, ZASILEK_JDG } from '../src/lib/zus.ts';
+import { symuluj, zl, zlZakres } from '../src/lib/symulacja.ts';
+import { GRUPY } from '../src/lib/wylaczenia.ts';
+import { GRUPY_UK } from '../src/dane/uk/wylaczenia.ts';
 
 /**
  * Wersja ukraińska (`/uk/`).
@@ -129,7 +133,8 @@ test('przełącznik języka prowadzi do tej samej strony, a bez przekładu — n
 test('na stronach ukraińskich nie zostały polskie napisy układu i kalkulatora', () => {
   const POLSKIE = ['Przejdź do treści', 'Policz składkę', 'Symulacja składki', 'Przejdź do wniosku',
     'Zawody według branży', 'Najczęstsze pytania', 'Strona główna', 'Świadczenie z polisy',
-    'Forma zatrudnienia</legend>', 'aria-label="Główna"'];
+    'Zasiłek chorobowy z ZUS', 'Szacowana składka', 'Wolisz odkładać', 'aria-label="Główna"',
+    'agent ubezpieczeniowy', 'Czego polisa nie obejmuje', 'To jest symulacja', 'Źródło:'];
   for (const s of stronyUk()) {
     const d = html(s);
     for (const napis of POLSKIE) expect(d, `${s}: został polski napis „${napis}"`).not.toContain(napis);
@@ -178,10 +183,73 @@ test('limity 80% i 65% oraz okresy wypłaty stoją na stronie głównej tak jak 
   const uk = tresc(html('/uk/'));
   expect(uk).toContain('до 80% доходу на B2B');
   expect(uk).toContain('до 65% на трудовому');
-  expect(uk).toMatch(/Виплата триває 24, 36, 48 або 60 місяців/);
+  // Okres wypłaty to czas NAJDŁUŻSZY (CLAUDE.md, „Kalkulator — okres wypłaty świadczenia").
+  expect(uk).toMatch(/Виплата триває щонайдовше 24, 36, 48 або 60 місяців/);
   // Zastrzeżenie przy kwocie: symulacja, nie oferta.
   expect(uk).toMatch(/Це симуляція, а не пропозиція/);
   expect(uk).toMatch(/діапазон з останніх виставлених пропозицій/);
+  // Wyjątek od limitu B2B stoi wszędzie tam, gdzie limit jest podany jako reguła.
+  expect(uk).toContain('CEU «Utrata dochodu» ліміт становить 65%');
+});
+
+test('wersja ukraińska nie obiecuje więcej niż polska: bez „od pierwszego dnia" i bez sumy ZUS + polisa', () => {
+  /**
+   * Trzy zdania zdjęte z polskiego serwisu 21.10.2026 (CLAUDE.md), które stały
+   * w pierwszej wersji przekładu, bo powstała z nieaktualnej gałęzi:
+   * świadczenie „od pierwszego dnia", okres wypłaty jako minimum i suma
+   * zasiłku brutto ze świadczeniem. Skan po plikach .md — tak jak zus.spec.js.
+   */
+  for (const s of stronyUk()) {
+    const md = readFileSync(join(DIST, s, 'index.md'), 'utf8');
+    expect(md, `${s}: „od pierwszego dnia"`).not.toMatch(/першого дня/);
+    expect(md, `${s}: okres wypłaty jako minimum`).not.toMatch(/щонайменше протягом \d+ місяц/);
+    expect(md, `${s}: suma zasiłku i świadczenia`).not.toMatch(/ZUS \+ поліс|Разом на лікарняному/);
+    expect(md, `${s}: „karencja" po ukraińsku`).not.toMatch(/каренці/i);
+  }
+});
+
+test('Leadenhall i CEU nie są po ukraińsku ubezpieczycielami', () => {
+  /**
+   * Ubezpieczycielem jest Lloyd’s Insurance Company S.A.; Leadenhall i CEU to
+   * coverholderzy (CLAUDE.md, „Kto jest kim"). „Страховики" w liczbie mnogiej
+   * to w tym serwisie zawsze błąd — ubezpieczyciel jest jeden.
+   */
+  for (const s of stronyUk()) {
+    const md = readFileSync(join(DIST, s, 'index.md'), 'utf8');
+    expect(md, `${s}: Leadenhall i CEU nazwani ubezpieczycielami`)
+      .not.toMatch(/страховики|двох страховиків|обох страховиків|обидва страховики/i);
+  }
+  const glowna = readFileSync(join(DIST, 'uk', 'index.md'), 'utf8');
+  expect(glowna).toContain('Страховиком є Lloyd’s Insurance Company S.A.');
+  expect(glowna).toMatch(/ковергольдерів Lloyd’s/);
+  // Nazwa kończąca się na „S.A." albo „sp. z o.o." nie dostaje drugiej kropki.
+  for (const s of stronyUk()) {
+    expect(readFileSync(join(DIST, s, 'index.md'), 'utf8'), `${s}: podwójna kropka`).not.toMatch(/(S\.A|o\.o)\.\./);
+  }
+});
+
+test('ubezpieczony musi mieć PESEL — strona ukraińska mówi to wprost', () => {
+  // Potwierdzenie właściciela z 26.11.2026; kreator ma to pole jako wymagane.
+  expect(readFileSync(join(DIST, 'uk', 'index.md'), 'utf8')).toMatch(/повинна мати номер PESEL/);
+  expect(readFileSync(join(DIST, 'uk', 'wniosek', 'index.md'), 'utf8')).toMatch(/Номер PESEL/);
+});
+
+test('zdania o ZUS-ie i napisy kalkulatora mają po ukraińsku te same pola co po polsku', () => {
+  expect(Object.keys(ZUS_TEKST_UK).sort()).toEqual(Object.keys(ZUS_TEKST).sort());
+  // Kwoty w przekładzie idą z tych samych stałych, więc muszą w nim stać.
+  expect(ZUS_TEKST_UK.dopiski).toContain(zl(ZASILEK_JDG.preferencyjny));
+
+  /**
+   * Kalkulator: jeden komponent, dwa zestawy napisów. Klucz dopisany tylko po
+   * polsku dałby po ukraińsku `undefined` w treści albo wyjątek w funkcji.
+   */
+  const zrodlo = readFileSync('src/components/Kalkulator.svelte', 'utf8');
+  const blok = (jezyk, koniec) => zrodlo.slice(zrodlo.indexOf(`    ${jezyk}: {`), zrodlo.indexOf(koniec));
+  const klucze = (tekst) => [...tekst.matchAll(/^ {6}(\w+):/gm)].map(([, k]) => k).sort();
+  const pl = klucze(blok('pl', '    uk: {'));
+  const uk = klucze(blok('uk', '  const t = $derived'));
+  expect(pl.length, 'nie znaleziono napisów kalkulatora — zmienił się układ pliku?').toBeGreaterThan(10);
+  expect(uk).toEqual(pl);
 });
 
 test('wyłączenia po ukraińsku: tyle samo grup, pozycji i pytań co po polsku', () => {
@@ -195,17 +263,47 @@ test('wyłączenia po ukraińsku: tyle samo grup, pozycji i pytań co po polsku'
   expect(policz(tresc(html('/uk/wylaczenia/')))).toEqual(pl);
 });
 
+test('wyłączenia po ukraińsku: przekład pozycja w pozycję, z paragrafami z polskiego źródła', () => {
+  /**
+   * Lista polska ma przy każdej pozycji paragrafy OWU. Przekład ich nie
+   * przepisuje — bierze je z polskiego pliku po numerze grupy i pozycji —
+   * więc liczba pozycji w każdej grupie musi się zgadzać, inaczej przekład
+   * stanąłby przy cudzym paragrafie.
+   */
+  expect(GRUPY_UK.map((g) => g.pozycje.length)).toEqual(GRUPY.map((g) => g.pozycje.length));
+  for (const g of GRUPY_UK) {
+    for (const p of g.pozycje) {
+      expect(p.co.trim().length, 'pusta nazwa pozycji').toBeGreaterThan(5);
+      expect(p.czemu, `„${p.co}": opis nie po ukraińsku`).toMatch(/[а-яіїєґ]{4,}/i);
+    }
+  }
+
+  const uk = tresc(html('/uk/wylaczenia/'));
+  const wszystkie = GRUPY.flatMap((g) => g.pozycje);
+  expect((uk.match(/Джерело:/g) ?? []).length).toBe(wszystkie.length);
+  // Paragrafy stoją w zapisie polskim, słowo w słowo jak na stronie polskiej.
+  const bezEncji = uk.replace(/&#x27;|&#39;/g, "'").replace(/&amp;/g, '&');
+  for (const p of wszystkie) {
+    expect(bezEncji, `brak źródła „${p.zrodla.slice(0, 40)}…"`).toContain(p.zrodla);
+  }
+  // Wojna: polska pozycja mówi o wojnie i działaniach wojennych, nie o samym „udziale".
+  expect(uk).toMatch(/Виключено війну та воєнні дії/);
+  expect(tresc(html('/uk/'))).toMatch(/охоплюють захистом увесь світ, але виключають війну/);
+});
+
 test('wyłączenia po ukraińsku trzymają się OWU: zakażenie HIV/WZW nie jest wyłączeniem', () => {
   const md = readFileSync(join(DIST, 'uk', 'wylaczenia', 'index.md'), 'utf8');
   const [lista, pytania = ''] = md.split(/^#+ Найчастіші запитання/m);
   expect(pytania, 'nie znaleziono sekcji pytań').not.toBe('');
 
-  expect(lista, 'HIV/WZW na ukraińskiej liście wyłączeń').not.toMatch(/HIV|WZW|ВІЛ|гепатит/i);
+  // „ВІЛ" wielkimi literami i bez /i: „віл" siedzi w „добровільне" i „цивільного".
+  expect(lista, 'HIV/WZW na ukraińskiej liście wyłączeń').not.toMatch(/HIV|WZW|гепатит/i);
+  expect(lista, 'HIV/WZW na ukraińskiej liście wyłączeń').not.toMatch(/ВІЛ/);
   expect(pytania).toMatch(/Саме зараження не виключено/);
   expect(pytania).toMatch(/LW048/);
   expect(pytania).toMatch(/LW049/);
   // Psychiatria: Leadenhall wyłącza tylko jako JEDYNĄ przyczynę, CEU bez tego zastrzeżenia.
-  expect(lista).toMatch(/єдина причина непрацездатності/);
+  expect(lista).toMatch(/єдина причина непрацездатності/i);
   expect(lista).toMatch(/У CEU такого застереження немає/);
   // Tych pozycji nie ma w żadnym OWU i nie mogą wrócić w przekładzie.
   expect(lista).not.toMatch(/вроджен|естетичн/i);
@@ -287,14 +385,21 @@ test('kalkulator po ukraińsku liczy to samo co polski', async ({ page }) => {
   await page.goto('/uk/');
   await expect(page.getByRole('heading', { name: /Симуляція внеску/ })).toBeVisible();
 
-  // Te same liczby co w kalkulator.spec.js: 18 000 × 0,8 = 14 400; 291–351; 2800 × 0,8 = 2240.
-  await expect(wynik(page, 'Виплата за полісом')).toHaveText('14 400 zł');
-  await expect(wynik(page, 'Орієнтовний місячний внесок')).toHaveText('291–351 zł');
-  await expect(wynik(page, 'Допомога по хворобі від ZUS')).toHaveText('2 240 zł');
+  // Kwoty liczone z tych samych plików co strona (jak w kalkulator.spec.js) — wpisane
+  // na sztywno robiłyby się czerwone przy każdej zmianie stawek w kalibracja.json.
+  const w = symuluj({ dochod: 18000 });
+  await expect(wynik(page, 'Виплата за полісом')).toHaveText(zl(w.swiadczenie));
+  await expect(wynik(page, 'Орієнтовний місячний внесок')).toHaveText(zlZakres(w.skladkaOd, w.skladkaDo));
+  await expect(wynik(page, 'Допомога по хворобі від ZUS')).toHaveText(zl(ZASILEK_JDG.duzy));
 
-  await page.getByText('Трудовий договір').click();
-  await expect(wynik(page, 'Виплата за полісом')).toHaveText('11 700 zł');
-  await expect(page.getByText('до 65% підтвердженого документами доходу')).toBeVisible();
+  // Kalkulator liczy tylko B2B (decyzja z 21.10.2026): etat ma zdanie opisu, bez przełącznika.
+  await expect(page.locator('[data-etat]')).toHaveText(ZUS_TEKST_UK.etat);
+  await expect(page.locator('input[type="radio"]')).toHaveCount(0);
+
+  // Odkładanie liczy tylko polska strona — odnośnik mówi to wprost i niesie hreflang.
+  const odkladanie = page.locator('a[data-odkladanie]');
+  await expect(odkladanie).toHaveAttribute('hreflang', 'pl');
+  await expect(odkladanie).toContainText('польською');
 
   // Przycisk prowadzi do przewodnika, nie wprost do polskiego formularza.
   await expect(page.getByRole('link', { name: 'Як подати заявку' }).last()).toHaveAttribute('href', '/uk/wniosek/');

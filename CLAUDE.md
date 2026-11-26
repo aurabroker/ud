@@ -70,6 +70,76 @@ naprawdę nie ma zdjęcia" — wtedy renderuj kafelek zastępczy, a nie czekaj.
       + 'preview_image_url, thumbnail_url')
 ```
 
+### W portalu zdjęcia bloga idą przez `/media/`, nie z kubełka
+
+Supabase Storage dokleja do **każdej** odpowiedzi `x-robots-tag: none`, więc
+zdjęcia podane wprost z `supabase.co` nie trafiały do Grafiki Google
+(sprawdzone 21.10.2026). Nagłówka nie wyłączymy — kubełek obsługuje jedenaście
+serwisów. Portal podaje warianty spod `/media/<plik>`
+(`functions/media/[plik].js` strumieniuje plik, jak `/owu/`); adres przepisuje
+build (`przezMedia()` w `src/lib/artykuly.ts`), a `artykuly.json` i pliki
+treści zostają z adresami z bazy. Funkcja przepuszcza tylko nazwy z
+normalizacji (`<slug>-cover|contentN-800|1600.webp`); ten sam warunek
+(`dozwolony()`) stosuje `przezMedia()`. Funkcja odpowiada 304 na
+`If-None-Match` z ETagiem pliku, a adres z zapytaniem (`?v=…`) dostaje 301 na
+czysty — bufor strefy ma zapytanie w kluczu i `?v=` wołałoby Supabase przy
+każdym żądaniu. Pilnuje tego `test/media.spec.js`.
+
+**Nowa okładka pod tą samą nazwą — `/media/` czyta kubełek kluczem
+serwisowym (od 28.10.2026, zgoda właściciela).** Normalizacja zapisuje warianty
+z `max-age` na rok, a CDN Supabase nie unieważnia kopii po nadpisaniu.
+Zapytanie nie wchodzi do klucza ich bufora: `?d=2026-10-27`, o który nikt
+wcześniej nie pytał, i losowe `?x=…` dawały od razu `HIT` — dlatego znacznik
+`?d=<dzień>` z 28.10 cofnięto (po podmianie okładki
+„przychodzi-lekarz-do-lekarza” `/media/` podawał stary wariant 1600 także po
+wyczyszczeniu naszego bufora). Teraz `pobierz()` w funkcji idzie prywatną
+ścieżką `/storage/v1/object/article-images/normalized/<plik>` z
+`SUPABASE_SERVICE_ROLE_KEY` (ten sam sekret co `/owu/`; `private, no-cache`,
+`cf-cache-status: DYNAMIC` — omija ich bufor). Bez sekretu albo przy odmowie
+Storage (4xx/5xx, wyjątek) idzie publicznym adresem, żeby zdjęcia nie znikły
+z całego bloga; klucz siedzi tylko w nagłówkach zapytania do Supabase.
+Po podmianie okładki zostaje NASZ bufor (doba w przeglądarce, tydzień na
+krawędzi): czyścisz go przez konektor Cloudflare, `POST
+/zones/<strefa>/purge_cache` z adresami `/media/…`. Token środowiska
+(`CF_API`) tego nie umie (Authentication error). Sprawdzasz po `etag` i `age`
+z `curl -sI https://utratadochodu.pl/media/<plik>` — `etag` ma się równać
+`etag` pliku z prywatnej ścieżki, a `utratadochodu.pages.dev/media/<plik>`
+(bez bufora strefy) pokazuje, co daje sama funkcja.
+
+**Funkcja nie trzyma niczego w Cache API (`caches.default`) i ma tak zostać.**
+Do 28.10.2026 trzymała: po wdrożeniu klucza serwisowego i wyczyszczeniu
+bufora po adresie, a potem po prefiksie, domena dalej podawała stary wariant
+1600 lekarzy (`age` 49 486 s, `last-modified` 26.10), a pages.dev ten sam kod
+z nowym plikiem. Wpisów Cache API nie usuwa czyszczenie po adresie ani po
+prefiksie (dokumentacja Cloudflare: tylko „Purge Everything” albo Cache-Tag),
+więc stara kopia żyła do 7 dni (`s-maxage`) osobno w każdym węźle. Bufor
+strefy domyślnie trzyma `.webp` i wystarcza.
+
+**Znana słabość:** `normalized/` trzyma warianty wszystkich jedenastu serwisów,
+a funkcja sprawdza tylko kształt nazwy — wariant cudzego wpisu wyjdzie spod
+naszej domeny, jeśli ktoś zna jego nazwę. Listy slugów nie da się w funkcji
+zaimportować (akapit niżej); droga na później to lista generowana w buildzie
+jako plik statyczny, czytany jak `owu-adresy.json`.
+
+**W `functions/` nie ma atrybutów importu (`with`/`assert { type: 'json' }`).**
+Funkcje kompiluje wrangler z obrazu budowania Pages — 21.10.2026 wrangler 3
+z esbuildem 0.17, który atrybutów nie zna. Import `artykuly.json` przeszedł
+lokalnie (Astro, Node 22, nawet wrangler 4), a build Pages padł na
+„Expected ";" but found "with"" i produkcja została na poprzedniej wersji.
+Node 22 z kolei nie wczyta JSON-a bez atrybutu, więc funkcja nie importuje
+JSON-a wcale. Sprawdzaj bundel `npx wrangler@3 pages functions build`
+(wranglera nie ma w repozytorium); skan składni: `test/funkcje-skladnia.spec.js`.
+Wynik budowania Pages widać w statusach commita na GitHubie
+(`/repos/aurabroker/ud/commits/<sha>/check-runs`, „Cloudflare Pages: utratadochodu")
+— API Pages jest stąd niedostępne.
+
+Domyślny `og:image` to `public/og-domyslny.jpg` (1200×630, odtwarzany
+`node scripts/og-domyslny.mjs`), wpisy mają `og:type article` i największy
+wariant okładki (`obrazDuzy`, nominalnie 1600 px). Normalizacja nie powiększa,
+więc wpis z wąskim źródłem dostaje pod nazwą -1600 plik węższy
+(w-pracy-duzo-wypadkow: 800×600 — za mało na dużą miniaturę w Discover). Do 21.10.2026 karta OG wskazywała plik, którego nie było, na 34
+stronach. Pilnuje tego `test/og.spec.js`.
+
 ### Renderowanie zdjęcia — wzorzec obowiązkowy
 
 Nie używaj statycznych emoji ani placeholderów, gdy dostępne są URL-e zdjęć.
@@ -169,6 +239,18 @@ Nowy artykuł idzie tak:
    zamiast czekać na cron; potem sprawdź `images_status = 'ready'`.
 3. Jeden wpis na początku `artykuly.json`, w formacie pozostałych, z adresami
    800/1600 w `obraz`/`obrazDuzy`, i plik `artykuly/<slug>.html` z treścią.
+   **Tagi: gdy pierwszy to „ZUS", ostatni ma wyróżniać wpis** („kierowcy",
+   „wypadek przy pracy"). Kafel na `/blog/` pokazuje wtedy „ZUS · <ostatni
+   tag>" (`etykietaKafla()` w `artykuly.ts`, decyzja właściciela z 28.10.2026)
+   — sam „ZUS" stał nad sześcioma wpisami i nic o nich nie mówił. Ten sam tag
+   dopisz w `aura_articles.tags`, żeby baza i repo się nie rozjechały.
+   Pilnuje tego `artykuly.spec.js` (etykiety „ZUS · …" różne od siebie).
+   **Każdy obrazek w treści ma `alt` z opisem** — edytor CMS-a go nie
+   wymaga, a Bing (08.11.2026) zgłosił trzy takie wpisy. Opis dopisz w pliku
+   treści i tym samym `replace` w `aura_articles.content` (zmiana treści
+   przestawia wpis na `pending`; `aura_normalize_article_images` oddaje go
+   jako `ready` bez zmian). Pusty `alt=""` tylko dla ozdób (`ol.ikony`).
+   Pilnuje tego `test/obrazki-alt.spec.js`.
 
 **Obrazek w treści (infografika, wykres) — z sandboksa nie wyślesz go do
 kubełka**, bo `article-images` przyjmuje wysyłki tylko od zalogowanych. Droga,
@@ -193,6 +275,67 @@ może wyprzedzić wpis.
 Okładka i infografika w jednym wywołaniu przekroczyły limit workera
 (546 `WORKER_RESOURCE_LIMIT`). Drugie wywołanie zrobiło resztę, bo okładka była
 już w `aura_article_images` — przy dwóch obrazkach licz się z dwoma wywołaniami.
+
+**Więcej niż trzy obrazki (z okładką) — kilka wywołań, nic nie przywracasz.**
+Funkcja robi trzy nowe zdjęcia na wywołanie (`MAKS_ZDJEC`). Do 26.10.2026
+przebieg przerwany na tym limicie przepisywał treść częściowo i stawiał
+`ready`: cron już artykułu nie brał, a ręczne wywołanie numerowało pozostałe
+obrazki od 1 i nadpisywało pliki `content1…` innym obrazkiem
+(„przychodzi-lekarz-do-lekarza": okładka i sześć ikon — wtedy obchodzone
+przywracaniem treści z `aura_article_content_backup` przed każdym
+wywołaniem). Od wersji z 26.10.2026:
+
+- **numer obrazka z treści bierze się z rejestru**, nie z kolejności:
+  obrazek już przemielony poznajemy po sumie (pod dowolnym numerem), nowy
+  dostaje 1 + największy numer z rejestru i z adresów `<slug>-contentN-` w treści
+  (`kolejnyNumer()`). Świeży artykuł dostaje dalej 1, 2, 3… w kolejności
+  z treści; obrazek dopisany do znormalizowanego artykułu — kolejny wolny numer;
+  ten sam obrazek wklejony dwa razy — jeden plik;
+- **przebieg przerwany na limicie zostaje `pending`** i cron (co 10 minut) bierze
+  następne trzy. Przebieg z postępem (treść się zmieniła) oddaje próbę:
+  `images_attempts` wraca do wartości sprzed wywołania, najwyżej `MAKS_PROB − 1`
+  — inaczej artykuł z szesnastoma obrazkami utknąłby na limicie, a ręczne
+  wywołanie artykułu po pięciu nieudanych nie oddałoby go cronowi. Przebieg bez
+  postępu próbę zużywa i po pięciu kończy się `error` („przerwane po 5
+  próbach…"). Sama okładka postępem nie jest — okładka spod adresu, który za
+  każdym razem daje inne bajty, kręciłaby się w cronie bez końca. Odpowiedź
+  niesie `zostalo` i `stan`;
+- **kafelek artykułu bez okładki to pierwszy obrazek w kolejności z treści**
+  (`pierwszyWTresci()`), nie plik nr 1 — numer mówi, kiedy obrazek przemielono,
+  a nr 1 mógł z treści zniknąć albo nie powstać;
+- **błąd odczytu rejestru przerywa przebieg** — bez rejestru numer wziąłby się
+  z samej treści;
+- **wywołanie nie zaczyna kolejnego artykułu bez budżetu** (dawniej przy
+  `limit` > 1 albo `wszystkie` taki artykuł dostawał `ready` bez obejrzenia).
+
+Artykuł z wieloma obrazkami: jedno `aura_normalize_article_images('{"slug": …}')`
+i albo czekasz na cron, albo wołasz dalej, dopóki `images_status` nie będzie
+`ready`. Pilnuje tego `test/normalizacja-zdjec.spec.js` — prawdziwe źródło
+funkcji na atrapach bazy (z wyzwalaczem `aura_articles_images_pending`),
+kubełka i ImageMagick; 15 przypadków, na wersji sprzed poprawki 9 z pierwszych
+10 czerwonych. Przed wdrożeniem poprawka przeszła przegląd czterech niezależnych
+agentów (numeracja, stan i wyzwalacz, środowisko Deno, testy) — z niego kafelek,
+limit prób i okładka bez postępu.
+
+**Stan na 26.10.2026: WDROŻONE jako v10** (`verify_jwt = false`, jeden plik
+`index.ts`, `ezbr_sha256` `b1269eba…`). Osobny agent pobrał treść przez
+`get_edge_function`: md5 `4008ebeabcae1ae2031b8d85d7ece806`, równe
+repozytorium. Sondy: POST bez tokenu → 401, zły token → 401. Wywołanie przez
+`aura_normalize_article_images('{}')` (token z Vaulta) → 200, „nic nie czeka”
+(wszystkie 18 artykułów `ready`).
+
+**Lista z ikonami w treści:** `<ol class="ikony" role="list">`, w każdym `<li>`
+najpierw `<img … alt="" width="256" height="256">` (ikona jest ozdobą, treść
+niesie tekst obok), potem `<p>`. Style stoją w `blog/[slug]/index.astro` —
+bez nich ikona rozciąga się na całą szerokość jak infografika. Źródło ikony
+ma 256 px, więc warianty `-800`/`-1600` też mają 256 px (normalizacja nie
+powiększa).
+
+**Źródła, których sandbox nie otwiera** (money.pl, NIL, PDF-y izb lekarskich —
+proxy odpowiada 403), czyta się przez bazę:
+`net.http_get('https://r.jina.ai/<adres>')` oddaje tekst strony albo PDF-a do
+`net._http_response`, a stamtąd `regexp_matches` wyciąga zdania z liczbami.
+Tylko dokumenty publiczne — adres idzie przez cudzą usługę.
 
 **Tabele w treści** `normalizuj()` owija w kontener przewijany w poziomie
 (`.tabela`). Bez niego tabela z pięcioma kolumnami rozpychała stronę na
@@ -310,6 +453,20 @@ w niewłaściwy.
 NODE_PATH=$(npm root -g) node tests/quick-form-test.js
 ```
 
+### Portal: skrypt Turnstile na KAŻDEJ stronie z formularzem
+
+Komponenty portalu (`Opinia.svelte`, `SzybkiKontakt.svelte`, `Wniosek.svelte`)
+montują widżet przez `window.turnstile` — bez
+`<script … turnstile/v0/api.js?render=explicit&onload=onloadTurnstileCallback>`
+na stronie token idzie pusty, a funkcja odpowiada 400. Skrypt stał tylko na
+`/wniosek/`, więc **od 14.10 do 21.10.2026 `/opinie/` i `/pracuj-z-nami/` nie
+przyjęły ani jednego zgłoszenia**, bez śladu w `ud_errors`. Nowa strona
+z takim formularzem dostaje ten sam tag przed `</Baza>`. Pilnuje tego
+`test/turnstile.spec.js` (każda strona z wyspą `kluczTurnstile` w dist ma
+skrypt) — testy formularzy podają atrapę **zamiast** api.js przez
+`page.route`, nie `addInitScript`: tamta wersja przechodziła na stronie bez
+skryptu.
+
 ---
 
 ## CSP (Content-Security-Policy)
@@ -378,8 +535,10 @@ w panelu Supabase.
 
 ## Funkcje brzegowe — kto może je wołać
 
-Jedenaście z czternastu funkcji ma `verify_jwt = false` (do 01.10.2026 dziewięć
-z dwunastu — dołożyły `wniosek-szkic` i `wniosek-przypomnienie`), więc platforma wpuszcza
+Trzynaście z szesnastu funkcji ma `verify_jwt = false` (stan na 20.10.2026; do
+01.10.2026 dziewięć z dwunastu — dołożyły `wniosek-szkic`, `wniosek-przypomnienie`,
+20.10 `kalibrator`, a 08.10 `send-payment-reminders`, której kodu w tym
+repozytorium nie ma i której bramki nikt stąd nie sprawdzał), więc platforma wpuszcza
 do nich każdego, kto zna adres — a roboty te adresy znajdują (17.09 SemrushBot
 zapukał GET-em do `div-send-email`). Bramka musi siedzieć w kodzie funkcji.
 Stan po audycie z 24.09.2026:
@@ -392,6 +551,7 @@ Stan po audycie z 24.09.2026:
 | `send-digest-email`, `sync-beauty-companies` | pg_cron | nagłówek `x-cron-token` z Vaulta |
 | `normalize-article-images` | pg_cron | nagłówek `x-blog-token` z Vaulta |
 | `review-admin` | panel opinii | JWT + `profiles.rola = 'admin'` |
+| `kalibrator` | pg_cron (zadanie `kalibracja-stawek`) — wdrożona 20.10.2026 (v1), zadanie **włączone 23.10.2026**, tryb `na_sucho` | nagłówek `x-cron-token` z Vaulta, sprawdzany przed pierwszym odczytem; `verify_jwt = false` |
 | `send-offer-email` | stary `js/client.js` w udapp — w praktyce nikt | treść wyłącznie z bazy, wysyłka tylko do 30 min po wyborze |
 | `div-send-email` | formularz kancelarii (rozwod.waw.pl) | **żadna** — patrz niżej |
 | pozostałe trzy | — | `verify_jwt = true` |
@@ -453,6 +613,20 @@ Treść do wdrożenia generuj skryptem (`json.dumps`) z pliku w repo, zamiast
 przepisywać — w `form-submit` stoi twarda spacja (U+00A0) w `parseAmount()`,
 która przy przepisywaniu znika bez śladu.
 
+**Nie zamieniaj takich znaków na `\u00a0` „dla bezpieczeństwa".** 20.10.2026
+(`kalibrator`) zapis `\u00a0` / `\u202f` / `\u2009` jako tekst w treści
+wdrożenia doszedł na produkcję jako prawdziwe znaki — droga przez MCP dekoduje
+o jeden poziom więcej. Znaki wpisane wprost przeszły bez zmian, więc wdrożona
+treść zgadza się z repozytorium tylko wtedy, gdy repozytorium ma je wprost.
+
+**Po wdrożeniu porównaj treść z repozytorium (md5), i to cudzymi rękami.**
+Osobny agent, który pliku w repo nie czytał, pobiera funkcję przez
+`get_edge_function`, zapisuje treść przez `json.loads` i liczy md5 — kopia
+robiona przez kogoś, kto zna oryginał, potrafi po cichu „poprawić" właśnie
+ten błąd, którego szukamy. Tak sprawdzony `kalibrator` v1: `index.ts`
+md5 `3a0a236aaac70add811cb0247983c62b`, `logger.ts`
+`41dc46f97766499da5d4b07588bbf1b3` — oba równe repozytorium.
+
 Pilnuje tego `test/funkcje-brzegowe.spec.js` — czyta źródła i sprawdza, że
 bramki stoją przed pierwszym odczytem. Na wersjach sprzed 24.09 wywala się
 w dziewięciu z dziesięciu testów.
@@ -476,6 +650,13 @@ Zasady:
   nie psują strony użytkownikowi, a modal tylko by straszył.
 - Podpięty w: `style.js` (wniosek), `app.js` (szybki kontakt),
   `opinia.html` (opinie). Nową ścieżkę wysyłki podpinaj tak samo.
+- **Portal (`apps/portal/public/awaria.js`) przemilcza kod wstrzyknięty przez
+  przeglądarki w aplikacjach** (Facebook, Instagram, Chrome i Edge na iOS):
+  znane nazwy (`_AutofillCallbackHandler`, `webkit.messageHandlers`…) albo błąd
+  z „plikiem" = adres strony w linii 1. 25.10.2026 klient z Facebooka na iPhonie
+  dostał okienko awarii przez „Can't find variable: _AutofillCallbackHandler".
+  Reguła linii 1 działa, bo w pierwszej linii naszego HTML-a nie ma skryptu —
+  pilnuje tego `test/awaria.spec.js` (portal).
 - Test: `NODE_PATH=$(npm root -g) node tests/awaria-test.js`.
 
 ## Ikona strony (favicon)
@@ -573,6 +754,27 @@ obecność banera — atrapa przechodzi każdy test oparty na DOM-ie.
 Do zamknięcia po stronie klienta: druga właściwość GA4 (`G-D9XHPWP5DE`) —
 inaczej historia ruchu zostaje rozbita na dwie niepełne właściwości.
 
+### Cloudflare Zaraz — GA4 WYŁĄCZONY 23.11.2026, nie włączaj z powrotem
+
+Strefa `utratadochodu.pl` miała w Zaraz narzędzie „Google Analytics 4”
+(`G-MGB0RBTCC9`, ta sama właściwość co portal) **bez modułu zgody**: Cloudflare
+wstrzykiwał `/cdn-cgi/zaraz/s.js` do każdej strony, stawiał ciasteczka
+`cf_zaraz_client`, `cfz_google-analytics_v4` i `cfzs_google-analytics_v4`
+i liczył odsłony w GA4 po stronie serwera — **zanim ktokolwiek kliknął
+w baner**, obok całego Consent Mode z `zgody.js`. Osobom ze zgodą odsłony
+liczyły się dwa razy (Zaraz + `gtag`). Testy portalu tego nie widziały: Zaraz
+dokłada skrypt na krawędzi, nie w buildzie. Znalezione 21.11.2026 przy
+sprawdzaniu źródła leada na żywej stronie, wyłączone 23.11.2026 decyzją
+właściciela („wyłącz ten ZARAZ G4”) — `tools.<id>.enabled = false` przez API
+(konektor Cloudflare; token środowiska `CF_API` Zaraz nie czyta). Narzędzie
+zostało w konfiguracji, wyłączone; bez włączonych narzędzi Zaraz nie wstrzykuje
+niczego. Po wyłączeniu: przed zgodą zero żądań do Google i zero ciasteczek poza
+`cf_clearance`, po „Akceptuję wszystkie” — `gtag/js?id=G-MGB0RBTCC9` z portalu.
+**Liczba odsłon w GA4 spadnie** (koniec liczenia bez zgody i podwójnego
+liczenia) — to poprawne. Sprawdzasz Chromium z nagłówkami przeglądarki
+(goły `curl` nie dostaje wstrzykniętych skryptów strefy): po wejściu na `/`
+nie ma `window.zaraz` ani ciasteczek `cfz_*`.
+
 ### Konwersja Ads liczy WNIOSKI, nie odsłony podziękowania
 
 Stary `thankyou.html` miał w treści goły strzał:
@@ -661,6 +863,12 @@ w formacie llmstxt.org, ten — wierną kopią jednej podstrony.
   chce go *bardziej* niż HTML-a — porównujemy wagi `q`, a przy remisie wygrywa
   typ wymieniony imiennie. Naiwne „czy nagłówek zawiera markdown" wysłałoby
   Markdown przeglądarce, bo jej Accept kończy się typem zbiorczym.
+- **Kropka `·` w `<span aria-hidden="true">` zostaje w `.md` tekstem** — inaczej
+  linia wpisu sklejała się w „26 października 20267 min czytaniaZUS".
+- **Obrazek z `alt=""` do `.md` nie idzie** (`DO_USUNIECIA` w
+  `integracje/markdown.mjs`). Ozdoba nic agentowi nie mówi, a ikona przy
+  punkcie listy dawała `1. ![](…)` i wypychała treść punktu poza listę.
+  Obrazek z opisem (infografika) zostaje.
 - **Brak pliku `.md` nie daje 404.** Warstwa zasobów Pages podaje wtedy stronę
   główną ze statusem 200. Samo `response.ok` tego nie odsiewa, więc middleware
   sprawdza typ MIME odpowiedzi — inaczej agent dostaje HTML opisany jako
@@ -768,7 +976,461 @@ rozumie każdy robot i nie ma powodu mówić tego samego dwa razy.
 
 ---
 
+### IndexNow — zgłoszenia z builda produkcyjnego (od 08.11.2026)
+
+Bing Webmaster Tools zgłaszał „Protokół IndexNow nie został wdrożony" —
+o nowym wpisie dowiadywał się z mapy strony, kiedy sam do niej zajrzał.
+Teraz robi to integracja `ud:indexnow` (`integracje/indexnow.mjs`), na końcu
+builda, po sitemap i `ud:markdown`:
+
+1. Zapisuje `dist/indexnow.json`: dla każdego adresu z mapy strony SHA-256
+   jego pliku `.md`. **Skrót z `.md`, nie z HTML-a** — HTML ma nazwy plików
+   z `/_astro/`, więc każda zmiana CSS-u zmieniałaby skrót wszystkich stron
+   i każde wdrożenie zgłaszałoby cały serwis. Dwa buildy tego samego kodu
+   dają identyczny manifest (sprawdzone).
+2. **Tylko build produkcyjny** (`CF_PAGES=1` i `CF_PAGES_BRANCH` =
+   `GALAZ_PRODUKCYJNA`) pobiera `https://utratadochodu.pl/indexnow.json` —
+   manifest wdrożenia, które ten build zastąpi — i wysyła do
+   `api.indexnow.org` adresy nowe, zmienione i usunięte. Zmiana gałęzi
+   produkcyjnej w Pages = zmiana tej stałej, inaczej zgłoszenia po cichu
+   ustaną.
+3. 404 na manifeście = pierwsze wdrożenie, zgłaszamy wszystko. **Każda inna
+   niepewność (5xx, sieć, zepsuty plik) = nic nie zgłaszamy** — zgłaszanie
+   całego serwisu przy każdej awarii uczyłoby Binga ignorować zgłoszenia.
+   Pusta mapa strony też nic nie zgłasza (to awaria builda, nie usunięcie).
+4. **Nic nie przerywa builda.** Wynik leży w polu `zgloszenie` manifestu na
+   żywej stronie: `curl -s https://utratadochodu.pl/indexnow.json | jq
+   .zgloszenie` (`zgloszono` + `status` 200/202, `bez-zmian`, `pominiete`
+   z powodem, `odmowa`). API Pages, a więc i logu builda, stąd nie widać.
+5. **Porażka nie przepada.** Różnica liczy się względem pola `zgloszone`
+   (skróty z ostatniego UDANEGO zgłoszenia; manifest z wersji 1 — `strony`).
+   Po odmowie albo braku odpowiedzi manifest niesie stare `zgloszone` dalej,
+   więc następne wdrożenie zgłasza te same adresy jeszcze raz. Do 10.11.2026
+   tak nie było: build `bfb2168` dostał od `api.indexnow.org` „brak
+   odpowiedzi" po 10 s i 16 adresów przepadło. Dlatego też limit 20 s
+   i zapasowy punkt: przy braku odpowiedzi albo 5xx zgłoszenie idzie do
+   `www.bing.com/indexnow` (`punkt` w manifeście mówi, który przyjął); 4xx
+   nie idzie drugi raz, bo drugi punkt sprawdza ten sam klucz. Przepada tylko
+   to, co zmieniło się we wdrożeniu, przy którym nie dało się odczytać
+   manifestu z żywej strony.
+
+Ręczne zgłoszenie przez bazę (z sandboksa IndexNow jest zablokowany):
+`net.http_post(url := 'https://api.indexnow.org/indexnow', body := jsonb_build_object('host', 'utratadochodu.pl', 'key', <KLUCZ>, 'keyLocation', …, 'urlList', …), headers := '{"Content-Type": "application/json"}', timeout_milliseconds := 30000)`
+— nagłówek dokładnie `application/json`, z `charset` pg_net odmawia.
+10.11.2026 tak poszło całe 235 adresów: HTTP 200, klucz przyjęty.
+
+Klucz (`KLUCZ` w integracji) leży w `public/<klucz>.txt` — sam klucz, bez
+nowej linii; nie jest sekretem, protokół każe go wystawić. Plik klucza
+i manifest są wypisane z `_routes.json`. Wymiana klucza: nowa stała, nowy
+plik, stary plik usunąć, nowy wpis w `_routes.json` (test pilnuje jednego
+pliku klucza).
+
+Zgłoszenie idzie kilkadziesiąt sekund **przed** tym, jak wdrożenie zacznie
+odpowiadać — Bing nie pobiera stron w tej samej minucie. `api.indexnow.org`
+i `www.bing.com` są z sandboksa zablokowane (proxy), więc ręcznego zgłoszenia
+stąd nie wyślesz; w razie potrzeby przez `net.http_post` w bazie albo
+`submit_indexnow_urls` konektora OpenSEO. **Crawler Hints w Cloudflare tego
+nie zastąpi**: zgłasza zmiany po `MISS` w buforze, a nasze strony HTML idą
+przez funkcję (`DYNAMIC`). Google IndexNow nie czyta.
+
+Pilnuje tego `test/indexnow.spec.js` (plik klucza, `_routes.json`, manifest
+z builda, cały przebieg na podstawionej sieci: podgląd bez sieci, pierwsze
+wdrożenie, różnica, awarie, odmowa IndexNow, zapasowy punkt, ponowienie
+przy kolejnym wdrożeniu, hook bez wyjątku).
+
+### `/kup-online` — link sprzedażowy Leadenhall z licznikiem (od 11.11.2026)
+
+Klient, który woli kupić sam, przez internet, idzie na stronę sprzedaży
+Leadenhall z naszym kodem pośrednika — Leadenhall przypisuje nam polisę po
+`employeeCode` w adresie (potwierdzone przez właściciela). Leadenhall
+raportuje sprzedaż, nie wejścia, więc ruch liczymy sami:
+`https://utratadochodu.pl/kup-online?z=<miejsce>` (`functions/kup-online/[[reszta]].js`)
+odpowiada 302 na `CEL` i w tle zapisuje kliknięcie w `ud_klikniecia`
+(migracja `20261111101126_klikniecia.sql`, wdrożona przez MCP 11.11.2026).
+
+- **Link Leadenhall wychodzi bez zmian** — `?z=` ani UTM-y do niego nie
+  przechodzą. Ich strona (Webflow, `utratadochodu.leadenhall.com`) czyta kod
+  z adresu i zapisuje go w `localStorage` („URL → localStorage → domyślny”,
+  sprawdzone przez `net.http_get` 11.11.2026). Nowy link = nowa stała `CEL`.
+- **W bazie: czas, cel, źródło** — a od migracji `20261120100000` także
+  `platne` (wejście z reklamy) i nazwa kampanii (`utm_campaign`,
+  `gad_campaignid`), patrz „Źródło leada" niżej. Bez IP, User-Agenta,
+  ciasteczek i identyfikatora kliknięcia, więc licznik nie potrzebuje zgody
+  i liczy wszystkich. Źródło z `?z=` przechodzi
+  białą listę `^[a-z0-9-]{1,32}$` (inne → `inne`, brak → `bezposrednio`);
+  ta sama reguła stoi w CHECK tabeli. RLS bez polityk, tylko `service_role`.
+- **Nie liczą się:** HEAD, prefetch (`Sec-Purpose`/`Purpose`, a od
+  11.11.2026 także `X-Purpose: preview` — aplikacja Facebooka na Androidzie
+  pobiera stronę, gdy post tylko pojawi się na ekranie), roboty,
+  podglądy linków (WhatsApp, Messenger, Slack pobierają adres przy samym
+  wklejeniu), pusty User-Agent i wejścia na `*.pages.dev`. Liczby
+  z Facebooka mogą być więc zaniżone: stuknięcie podane z pobranej
+  wcześniej kopii do nas nie dochodzi.
+- **Link na Facebooku — przed pierwszym postem test.** Robot Facebooka
+  idzie za naszym 302 i czyta `<link rel="canonical">` Leadenhall
+  (`og:url` tam nie ma), więc karta posta (tytuł, zdjęcie, domena) i liczniki
+  udostępnień będą z ich `/info/?employeeCode=trcVyBxTrw`. Dokąd prowadzi
+  stuknięcie w kartę, Meta nie dokumentuje: badanie NDSS 2020 widziało adres
+  wklejony, starsze relacje — canonical (przegląd 11.11.2026, dziewięciu
+  agentów, bez rozstrzygnięcia). Test: Sharing Debugger („Canonical URL”,
+  „Redirect Path”) i post „Tylko ja” — w `l.facebook.com/l.php?u=…` ma stać
+  `kup-online` albo `CVRZSKkHi7`, nie `trcVyBxTrw`. Adres zostaw w treści
+  posta (zwykły link w tekście prowadzi tam, gdzie wpisano). **Nie podawaj
+  robotowi Facebooka innej strony niż ludziom** (200 z naszym `og:url`,
+  302 dla reszty): karta z naszą domeną i automatyczne przejście na
+  leadenhall.com to u Mety „zwodnicze przekierowanie”, przy reklamie grozi
+  blokadą konta. Pewna droga to zwykła strona na naszej domenie, ta sama dla
+  wszystkich, z przyciskiem do `/kup-online`.
+- **Przycisk „Udostępnij” w Safari na iOS i Chrome na Androidzie wysyła
+  canonical**, czyli adres z `trcVyBxTrw` — klient, który na ich stronie
+  udostępni ją dalej, wysyła kod domowy Leadenhall. Naprawić to może tylko
+  Leadenhall: canonical z kodem z adresu. Sam canonical bez kodu nie
+  wystarczy — nowy odwiedzający bez kodu dostaje kod domowy z ich skryptu;
+  chroniłby tylko kod zapamiętany wcześniej w tej przeglądarce.
+- **Przekierowanie nie czeka na bazę** (`waitUntil`) i ma `no-store` — wpis
+  w buforze albo zapamiętane przekierowanie omijałyby licznik. Nieudany zapis
+  idzie do `ud_errors` (źródło `kup-online`); licznik, który po cichu stoi,
+  wygląda jak brak zainteresowania. Bez `SUPABASE_SERVICE_ROLE_KEY`
+  przekierowanie działa, tylko nic się nie liczy.
+- **Nie w ramce.** Leadenhall ramek nie zabrania (brak `X-Frame-Options`
+  i CSP), ale kod pośrednika siedzi w `localStorage`, a w ramce z cudzej
+  domeny przeglądarki trzymają go osobno od zwykłej wizyty u Leadenhall —
+  klient, który wróci do nich wprost (mail, inna karta, telefon), mógłby
+  przyjść bez naszego kodu. Do tego ankieta zdrowotna i płatność pod naszym
+  adresem.
+- **Do wiedzy przy tekstach:** online Leadenhall sprzedaje LW050 TTD UNIPRO
+  i LW051 MULTIPRO (OWU na tej stronie), nie LW044 z naszych ofert —
+  **wyłącznie okresową niezdolność do pracy** (TTD w nazwach plików OWU;
+  potwierdzenie właściciela 12.11.2026). Trwałej niezdolności i NW online nie
+  ma — te są tylko w ofercie po wniosku. Przy linku na naszej stronie:
+  Leadenhall to coverholder Lloyd's (`firma.ts`), nie ubezpieczyciel.
+- **`utratadochodu.leadenhall.com` to WŁASNY serwis sprzedaży Leadenhall**
+  (nazwa produktu w subdomenie, nie strona zrobiona pod nas). Kod
+  `trcVyBxTrw` z ich `<link rel="canonical">` to ich kod domowy
+  (`DEFAULT_EMPLOYEE_CODE_PROD`, w EIS pracownik Leadenhall z tagiem
+  `LH_INTERNAL`) — wpisywany każdemu, kto przyjdzie bez kodu; sprawdzone
+  11.11.2026 przez `net.http_get` na
+  `/iau_live/bts/api/employee-code/<kod>/employee`. Nasz `CVRZSKkHi7` to
+  Aura Expert bez tagów, więc klient z naszego linku trafia do ich
+  „przestrzeni partnera" (`/partner`). Przypisanie to ostatni kod z adresu:
+  adres z `trcVyBxTrw` (udostępnienie strony — serwisy społecznościowe biorą
+  canonical) nadpisuje nasz kod w `localStorage`; adres bez kodu go zostawia.
+  Inna przeglądarka albo telefon zaczynają bez naszego kodu.
+
+**Ramka „Zakup online” na `/wniosek/` (wariant A, decyzja właściciela
+12.11.2026) — przełącznik `KUP_ONLINE_NA_STRONIE` w `src/lib/kupOnline.ts`,
+WŁĄCZONY 12.11.2026 decyzją właściciela („włącz”); tekst ramki
+zaakceptował prawnik tego samego dnia (potwierdzenie właściciela)**.
+Wyłączenie = `false`, build, testy, brama, push. **Każda zmiana tekstu
+(`KUP_ONLINE`) wymaga ponownej akceptacji prawnika** — tak jak klauzula
+i polityka prywatności. Tekst, etykieta i adres (`?z=wniosek`) stoją
+w jednym pliku; nazwa Leadenhall z `firma.ts`.
+
+- **Statyczna ramka w bocznej kolumnie, POZA kreatorem** — nie w kroku
+  kontakt i nie „dopiero po e-mailu i telefonie”. Bez zaznaczonej zgody
+  kontakt ze szkicu i tak nie jest zapisywany (ok. 45% szkiców), więc bramka
+  nie dawała leada, tylko przeszkodę; zgoda nie może odblokowywać linku
+  (RODO art. 7 ust. 4); kreator to ścieżka, którą wpływają pieniądze.
+  Przegląd z 11.11.2026: trzy niezależne oceny (sprzedaż, prawo, technika)
+  i sceptyk.
+- **Na telefonie kolumna stoi pod kreatorem** (za przyciskiem „Dalej” kroku
+  kontakt), na komputerze — w kolumnie obok kreatora, widoczna u góry każdego
+  kroku (kolumna nie jest przyklejona; przy przewijaniu długiego kroku znika,
+  „Dalej” przewija z powrotem do góry). Tak ma być: najpierw wniosek, link
+  jest wyjściem dla kogoś, kto i tak by odszedł.
+- **Przypomnień nie wyciszamy** i nie oznaczamy szkicu „poszedł do
+  Leadenhall” (kolumna z datą przy e-mailu to nowe dane osobowe i nowa
+  klauzula). Osoba ze zgodą, którą Leadenhall odrzuci (np. na ankiecie
+  zdrowotnej), wraca do nas tylko przez przypomnienie i „Niedokończone” —
+  zgoda v1-2026-10 to obejmuje.
+- **Nowa karta** (`target="_blank"`, w nazwie odnośnika dla czytnika ekranu
+  „otworzy się w nowej karcie”). Tekst nie obiecuje, że wniosek zostanie
+  otwarty: przeglądarki wbudowane w aplikacje (Facebook, Instagram) ładują
+  link w tym samym widoku, a stan kreatora żyje tylko w pamięci.
+- **Przy linku agenta (`?agent=`) ramki nie ma** — usuwa ją wbudowany skrypt
+  zaraz za nią (nic nie zapisuje w urządzeniu, działa przed malowaniem).
+  Klient agenta, który kupiłby online, poszedłby na kod firmy.
+- **Zakres stoi na wierzchu ramki** (prośba właściciela z 12.11.2026):
+  „✓ Online: tylko okresowa niezdolność do pracy (miesięczne świadczenie)”
+  i „✗ Tylko w ofercie po wniosku: trwała niezdolność do pracy, śmierć /
+  inwalidztwo w wyniku nieszczęśliwego wypadku”. Nazwy ryzyk idą z `RYZYKA`
+  w `@ud/wniosek` — te same co w kreatorze.
+- **Tekst: „ich warunki mogą się różnić”, nie „to inne warunki”** — LW050
+  („Beauty”) bywa też w naszych polisach. `asystent/instrukcja.md` mówi
+  ostrzej („nie te same warianty”) i nie mówi, że online jest tylko okresowa
+  niezdolność; do wyrównania przy następnej zmianie instrukcji (wymaga
+  ponownych testów asystentki).
+- Przy `false` HTML jest jak przed zmianą (komentarz w szablonie stoi
+  w wyrażeniu `{/* */}`, nie trafia do strony), ale cztery klasy ramki
+  zostają w CSS (Tailwind skanuje źródło) — plik CSS ma nowy skrót.
+- Ramka trafia też do `/wniosek/index.md` (część `<main>`).
+
+Pilnuje tego `test/kup-online.spec.js`: kreator nie ma linku na żadnym kroku
+(źródła `Wniosek.svelte`, `packages/wniosek/src` i bundel — SSR pokazuje tylko
+krok kontakt); przy `false` linku ani śladu ramki nie ma w HTML-u; przy `true`
+jedna ramka w `<aside>`, `target="_blank"` z `noopener nofollow`, Leadenhall
+jako coverholder, a w przeglądarce — obok kreatora przy 1440 px, pod „Dalej”
+przy 390 px, bez poziomego przewijania i bez ramki przy `?agent=` (ten test
+jest pomijany, gdy przełącznik jest wyłączony).
+
+**W panelu (od v.0.75):** Niedokończone → „Kup online u Leadenhall —
+kliknięcia", pod lejkiem: tydzień × miejsce z ostatnich 12 tygodni, sześć
+najczęstszych miejsc, reszta w „pozostałe" (`?z=` wpisuje każdy, kto ma
+link). **Zwija baza, nie przeglądarka** (v.0.76): `ud_klikniecia_tabela(p_od,
+p_miejsc)` (migracja `20261111130946`) oddaje najwyżej 12 × 7 wierszy
+z widoku `ud_klikniecia_tydzien` (`20261111130054`) — w v.0.75 zwijał panel
+PO limicie 1000 wierszy PostgREST, więc zalew różnych `?z=` wypchnąłby
+prawdziwe tygodnie (przegląd z 11.11.2026). Obie rzeczy `security_invoker`,
+tylko `service_role`. Rachunek w `src/lib/klikniecia.js`, test
+`pnpm test:klikniecia`. Błąd tego zapytania pokazuje się w samej tabeli —
+nie zasłania listy osób do kontaktu. **Nie oznaczaj linków `?z=inne` ani
+`?z=bezposrednio`** — tak funkcja portalu zapisuje `?z=` nieczytelne i brak
+`?z=`, więc w tabeli to się zleje.
+
+**Od v.0.80 komórka ma też „w tym z reklamy"** (kolumny `z_reklamy`
+i `zmierzonych` z widoku i z `ud_klikniecia_tabela`, migracja
+`20261120100000`). „—" = tydzień sprzed pomiaru (`platne` NULL — kliknięć
+sprzed 20.11.2026 nikt nie sprawdzał pod kątem reklamy, więc to nie jest
+zero), „≥ N" = tydzień zmierzony w części. Panel bez tej migracji (cztery
+kolumny wyniku) tej części po prostu nie pokazuje. „Z reklamy" liczy się tą
+samą regułą co „Google Ads" w Statystykach — patrz „Źródło leada".
+
+**API Leadenhall, które woła ich strona (11.11.2026), i nic więcej:**
+`GET /iau_live/bts/api/employee-code/<kod>/employee` — publicznie, bez
+logowania: imię, nazwisko, e-mail, telefon, nazwa agencji i tagi pośrednika
+(stąd ich stopka); `POST /iau_live/b2c/api/tracking/PA-MISC-B2C/events/<zdarzenie>`
+— ich własny pomiar (`landing-page`, `page`, `industry-seen`,
+`industry-confirmed`, z `employeeCode`), z przeglądarki tylko zapis. Raport
+wejść i wybranych zawodów dla naszego kodu może dać tylko Leadenhall.
+Innych adresów ich API nie sprawdzamy — to cudzy system.
+
+Wejścia tygodniowo z podziałem na miejsca:
+
+```sql
+select date_trunc('week', czas at time zone 'Europe/Warsaw')::date as tydzien,
+       zrodlo, count(*)
+from public.ud_klikniecia where cel = 'leadenhall'
+group by 1, 2 order by 1 desc, 3 desc;
+```
+
+Pilnuje tego `test/kup-online.spec.js` (link bez zmian, `no-store`
+i `noindex`, zapis celu, źródła i — bez identyfikatora kliknięcia — znacznika
+reklamy z kampanią, biała lista źródła zgodna z CHECK, czego nie liczymy,
+awaria bazy → `ud_errors`, baza bez nowych kolumn → zapis samym celem
+i źródłem, przekierowanie nie czeka na bazę, middleware przepuszcza 302).
+
+## Źródło leada — parametry w adresie, nie w urządzeniu (od 20.11.2026, etap 1)
+
+Pytanie właściciela: ile wniosków, sprzedanych polis i składek przyszło
+z Google Ads. Kampania kieruje na stronę główną z UTM-ami, Google dokleja
+`gclid` (czasem `gbraid`/`wbraid`) i `gad_*` — i do 20.11.2026 wszystko to
+ginęło przy pierwszym kliknięciu w odnośnik. Teraz każdy nowy wniosek z
+parametrami kampanii ma `ud_clients.form_data.zrodlo`, a panel go pokazuje.
+**Etap 1 niczego nie wysyła do Google Ads ani GA4.**
+
+**Stan na 26.11.2026: WDROŻONE w całości.** Portal i panel v.0.80 — push
+`79f4cad` 21.11.2026 po „wypychaj"; migracje — 26.11.2026, wklejone przez
+właściciela w SQL Editor (MCP poprosił o potwierdzenie, bo pierwsza ma
+`DROP FUNCTION`, i nikt nie odpowiedział), wersje `20261120100000`
+i `20261120110000` odnotowane w `schema_migrations` ręcznie, pliki w repo
+noszą te same nazwy. Sprawdzone na produkcji: trzy nowe kolumny
+`ud_klikniecia` (`platne` bez wartości domyślnej, NULL dozwolony) z dwoma
+CHECK-ami, widok z `z_reklamy` i `zmierzonych` (`security_invoker`),
+`ud_klikniecia_tabela` z sześcioma kolumnami wyniku; treść obu funkcji =
+repozytorium (md5 `e6b84d0d…` i `226a00f7…`), wykonanie tylko
+`service_role`. Kolejność odwrotna zadziałała jak zaplanowano: przez 21–26.11
+`/kup-online` zapisał 4 kliknięcia samym celem i źródłem (`platne` NULL,
+w panelu „—"), zero wpisów w `ud_errors`. Pierwszy wniosek ze źródłem przyszedł
+z ChatGPT (`utm_source=chatgpt.com` — ChatGPT sam dokleja ten parametr do
+podawanych linków), więc w Statystykach to „Inne: chatgpt.com". Na żywej
+stronie: parametry jadą w adresie przez kalkulator do wniosku, magazyny
+przeglądarki puste. Zdanie do polityki prywatności czeka na prawnika
+(propozycja w raporcie z 20.11.2026) — nie publikuj go bez akceptacji.
+
+| Element | Co robi |
+|---|---|
+| `apps/portal/public/zrodlo.js` | dokleja parametry kampanii do odnośników wewnętrznych **w chwili kliknięcia** (`click` + `auxclick`); `Baza.astro` ładuje go po `zgody.js`, z `defer`; wypisany z `_routes.json` |
+| `packages/wniosek/src/zrodlo.js` | `zrodloZAdresu(search, zgodaMarketing)` → `{zrodlo: {…}}` albo `{}` — reguły wartości; skrypt portalu, `/kup-online` i CHECK-i to ich kopie |
+| `Wniosek.svelte` | `zrodloWizyty()` w `wyslij()` obok `zLinkuAgenta()`, w `try/catch` → `{}`. **Do `wniosek-szkic` źródło nie idzie** |
+| `form-submit` | **bez zmian** — kopiuje ciało żądania do `form_data` (`{...body}`), więc `zrodlo` ląduje tam samo. Sprawdzone 20.11.2026: produkcja v26 = repozytorium (poza opisanym zapisem NBSP/BOM w `liczbaScisla`) |
+| `functions/kup-online` | `platne`, `utm_campaign`, `gad_campaignid` w `ud_klikniecia` |
+| panel `src/lib/zrodlo.js` | **jedyna** reguła rodzaju źródła — lista klientów, karta i Statystyki |
+| `ud_leady_statystyki_zrodla()` | surowe grupy do Statystyk; rodzaju nie liczy (SQL liczący regułę drugi raz rozjechałby się z listą klientów przy pierwszej poprawce) |
+
+Parametry: `gclid`, `gbraid`, `wbraid`, `gad_source`, `gad_campaignid`,
+`utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content`.
+Identyfikatory kliknięcia `^[A-Za-z0-9_-]{1,200}$`, `gad_*`
+`^[A-Za-z0-9_-]{1,32}$`, `utm_*` 1–100 znaków po trim, bez znaków
+sterujących. Wartość niepoprawna nie jedzie dalej. Nie ruszamy obcych domen,
+`mailto:`/`tel:`, samych `#`, `download`, plików (`/owu/`, `/media/`,
+`/pobierz/`, `.pdf`, `.md`, `.txt`, `.xml` i inne) ani `/podziekowanie/`.
+Parametru, który odnośnik już ma (`?agent=`, `?dochod=`, `?odkladam=`,
+`?z=`), nie nadpisujemy; `#fragment` zostaje. Jedyna nawigacja programowa
+w portalu to przekierowanie na `/podziekowanie/` — celowo bez parametrów;
+na nowe jest `window.UDZrodlo.adres(href)`.
+
+### Dlaczego tak — trzy decyzje, których nie „upraszczaj"
+
+- **Adres, nie `sessionStorage` ani ciasteczko.** Zapis w urządzeniu na
+  potrzeby pomiaru wymaga zgody (art. 399 PKE) — ta sama zasada co przy
+  `?agent=` i identyfikatorze szkicu. Skrypt niczego nie zapisuje; test
+  sprawdza, że po przejściu kreatora w magazynach są tylko `ud_zgody`
+  i `ud:wniosek`. **W chwili kliknięcia, nie przy wczytaniu**: odnośniki
+  z wysp powstają po hydratacji, kalkulator przepisuje swoje przy każdej
+  zmianie kwoty, a roboty nie klikają — HTML, który czytają, ma czyste
+  adresy. **Skrypt nigdy nie rzuca i jest w ES5** (test parsuje go acornem
+  w trybie ES5): błąd z naszej domeny `awaria.js` zamienia w okienko awarii
+  na każdej stronie.
+- **`gclid`/`gbraid`/`wbraid` tylko przy zgodzie na marketing.**
+  Identyfikator kliknięcia służy wyłącznie pomiarowi skuteczności reklam
+  (etap 2: import konwersji offline do Ads) — kto nie zgodził się na cookies
+  marketingowe, odmówił właśnie tego. Bez zgody wniosek dostaje
+  `platne: true` (sam fakt wejścia z reklamy), parametry kampanii
+  i `zgoda_marketing: false`. Zgodę kreator czyta w chwili wysyłki:
+  `UDCookies.stan()?.marketing === true`. Panel identyfikatora nie pokazuje
+  nigdzie (`bezIdentyfikatorow()` czyści `form_data` przed kartą klienta).
+- **`form_data.zrodlo`, nie kolumna w `ud_clients`.** Kolumna to migracja
+  `ud_clients` i zmiana `form-submit` — jedynej ścieżki, którą wpływają
+  pieniądze (ABSOLUTE_RULE). `form_data` przyjmuje to, co przyszło, bez
+  zmian w funkcji i bez wyzwalacza; panel czyta ścieżką JSON
+  (`zrodlo:form_data->zrodlo` w jawnej liście kolumn). Cena: `form_data`
+  zapisuje każdy, kto przejdzie Turnstile, więc źródło da się podrobić —
+  psuje to tylko liczby w panelu, a SQL i panel obcinają `utm_*`
+  i kampanię do 100 znaków (jeden spreparowany wniosek z 2 MB w
+  `utm_campaign` szedłby inaczej w danych strony do każdego, kto otworzy
+  Statystyki).
+
+### Reguła rodzaju źródła (`rodzajZrodla`, panel)
+
+1. `zrodlo.platne === true` (JSON `true`, nie napis) **albo** `utm_source`
+   ads/google przy `utm_medium` cpc/internet/paid → **Google Ads** (druga
+   połowa łapie kampanię, której Safari wyciął `gclid`);
+2. niepusty `affiliate_code_used` → **Link agenta**;
+3. inny `utm_source` → **Inne: <utm_source>**;
+4. brak `zrodlo` → **Brak danych** — także każdy NOWY wniosek z wejścia bez
+   parametrów (wyszukiwarka, adres wpisany ręcznie, link bez UTM-ów), nie
+   tylko stare wnioski i klienci dodani w panelu. Panel tak to opisuje.
+
+`/kup-online` stosuje **tę samą** regułę 1 (kopia w `reklama()`; test
+porównuje obie zachowaniem), bo „z reklamy" na Niedokończonych i „Google
+Ads" w Statystykach właściciel czyta obok siebie.
+
+### Panel (v.0.80)
+
+- **Klienci:** kolumna „Źródło", filtr `?zrodlo=ads|agent|inne|brak`
+  w adresie; karta klienta — sekcja „Źródło" (rodzaj, kampania =
+  `utm_campaign`, a bez niej `gad_campaignid`, słowo kluczowe = `utm_term`).
+  Pole `source` na karcie nazywa się teraz „Sposób zgłoszenia" — to dwie
+  różne rzeczy.
+- **Statystyki → „Według źródła":** wnioski, sprzedane polisy (Wygrany),
+  Σ składek rocznych i prowizji w okresie, z podziałem na kampanie.
+  Widoczność jak w `ud_leady_statystyki` (agent — swoje, także z cudzym
+  agentem w adresie). Wnioski: klienci z `source` innym niż `manual`
+  i `polisa`, po dacie utworzenia, u agenta — klienci jego leadów;
+  sprzedaże, składki i prowizja **dokładnie** jak w `ud_leady_statystyki`
+  (test SQL porównuje sumy). Load woła `synchronizuj()` przed oboma RPC —
+  bez tego wniosek z `?agent=` brakowałby agentowi, dopóki ktoś nie otworzy
+  tablicy. Brak funkcji w bazie → komunikat tylko w tej sekcji.
+
+### Skutki uboczne, o których trzeba wiedzieć
+
+- **Istniejące tagi (GA4, Ads, Pixel — tylko po zgodzie) widzą teraz `gclid`
+  i UTM-y w adresach podstron.** Kto zgodzi się na cookies dopiero na
+  `/wniosek/`, ma tam `gclid`, więc łącznik konwersji Ads go złapie — liczba
+  konwersji z Ads i atrybucja w GA4 mogą po wdrożeniu WZROSNĄĆ (jak przy
+  `url_passthrough`). To nie jest błąd pomiaru, tylko koniec gubienia
+  parametrów. Pixel poza `TAGI.bezPixela` (np. `/kalkulator/`) dostaje
+  w adresie `gclid`.
+- **Adres skopiowany z paska niesie cudzy `gclid`.** Wniosek odbiorcy będzie
+  „Google Ads" z identyfikatorem pierwszej osoby. Import offline (etap 2)
+  musi wysłać jeden `gclid` najwyżej raz, a `gclid` u różnych klientów
+  pominąć.
+- Długie przytrzymanie „Otwórz w nowej karcie" na telefonie nie wysyła
+  `click` — taka karta parametrów nie dostaje.
+
+### Wdrożenie — kolejność
+
+1. Migracja `20261120100000` (ma `DROP FUNCTION` — gdy MCP odmówi, SQL
+   Editor), potem `20261120110000`; md5 treści funkcji, uprawnienia (tylko
+   `service_role`), nazwy plików = wersje w bazie.
+2. Push (portal i panel v.0.80 wychodzą razem).
+   Odwrotna kolejność nic nie psuje, tylko gubi dane: `/kup-online` przy
+   400 `PGRST204` zapisuje sam cel i źródło (`platne` NULL), panel chowa
+   „z reklamy" i pokazuje komunikat w sekcji źródeł.
+3. `sprawdz-wdrozenie.sh` na domenie, potem w przeglądarce: wejście
+   `/?utm_source=test&gclid=TEST`, kliknięcie w „Policz składkę" → adres
+   niesie parametry; wniosek testowy przez bramę (`form_data.zrodlo`).
+
+Testy: `packages/wniosek` `pnpm test` (`zrodlo.test.js`); portal
+`test/zrodlo.spec.js` (doklejanie, `?agent=` zostaje, wartości złe odpadają,
+magazyny, ciało `form-submit` z `zrodlo`, `gclid` tylko przy zgodzie,
+zgodność skryptu, pakietu, `reklama()`, reguły panelu i CHECK-ów)
+i `test/kup-online.spec.js`; panel `pnpm test:zrodlo`,
+`pnpm test:klikniecia` (z SQL), `pnpm test:leady-sql`
+(`supabase/tests/statystyki-zrodla.sql`), `klienci.spec.js`,
+`statystyki.spec.js`.
+
+## Asystentka AI (ElevenLabs) — zbudowana, NIE na stronie (od 11.11.2026)
+
+Agent `agent_8401m75hfzvbefm8thwzfzktybrg` („UtrataDochodu.pl — asystentka na
+stronie (Monika)”), zbudowany od nowa na wzór agenta Beauty. Stary agent
+(`agent_7401m4ba22wqfthb27mhyj0tfcd0`) nietknięty — nie archiwizuj go bez
+słowa właściciela. Wszystko, co o nim wiadomo, leży w `asystent/`:
+
+| Plik | Co |
+|---|---|
+| `instrukcja.md` | instrukcja (system prompt); w ElevenLabs ma być identyczna — po wgraniu porównaj `prompt_chars` z `agents_get_config_summary` z liczbą znaków pliku |
+| `pierwsza-wiadomosc.txt` | powitanie: AI, nie porada, zapis tekstu 30 dni u ElevenLabs, nie podawaj danych |
+| `baza-wiedzy.json` | 23 dokumenty z naszej domeny (strony `.md`, `llms.txt`, OWU i karty z `/owu/`), odświeżane codziennie |
+| `testy.json` | 26 rozmów symulowanych z identyfikatorami testów w ElevenLabs |
+| `przed-uruchomieniem.md` | lista dla prawnika (A), wstawienie na stronę (B), stan agenta, dwie warstwy testów, błąd na stronie do decyzji |
+
+**Stan na 11.11.2026: testów nie przechodzi.** Przebieg 2 (instrukcja v2,
+czat): oceniający ElevenLabs 33/52, przegląd zapisów potwierdził 44 usterki,
+w tym 5 blokujących. Instrukcja v3 (poprawki z przeglądu) jest wgrana
+i sprawdzona co do liczby znaków, ale **nieprzetestowana** — w koncie
+ElevenLabs skończyły się kredyty (konto wspólne z agentem Beauty). Wyniki
+i dalsze kroki: „Jak testujemy” w `przed-uruchomieniem.md`.
+
+**Na stronę dopiero po zielonych testach v3 i po A i B z `przed-uruchomieniem.md`** — m.in. punkt
+o asystentce w polityce prywatności (zatwierdzony przez prawnika), CSP,
+skrypt widżetu ładowany po kliknięciu, tylko `/kalkulator/`.
+
+Rzeczy, których nie upraszczaj:
+
+- **Oceniający ElevenLabs nie wystarcza.** Pierwszy przebieg: 37/46
+  zaliczonych, a niezależny przegląd zapisów względem stron i OWU potwierdził
+  42 usterki (m.in. klauzula „od 1-ego dnia” przypisana Leadenhall, „ZUS przy
+  B2B od pierwszego dnia” bez warunku chorobowego, ocena roszczenia klienta
+  z polisą). Po każdej zmianie instrukcji: cały zestaw dwa razy + przegląd
+  zapisów z weryfikacją zarzutów.
+- **Baza wiedzy to żywe strony serwisu.** Zmiana kalkulatora, `zus.ts`,
+  `llms.txt` albo OWU dociera do asystentki w ciągu doby (auto-sync) — po
+  takiej zmianie uruchom testy. Nowy dokument potrzebuje indeksu RAG dla
+  `multilingual_e5_large_instruct`, inaczej asystentka go nie znajdzie.
+- **Czat tekstowy domyślnie** (`text_only`); liczby dla głosu normalizuje
+  silnik ElevenLabs (`text_normalisation_type: elevenlabs`). Przy normalizacji
+  „w instrukcji” model pisał numery i adresy słownie także w czacie.
+- **Maskowania danych w zapisach nie ma** — ElevenLabs daje je tylko
+  w planie Enterprise. Ochroną jest instrukcja (nie pyta, nie powtarza)
+  i 30 dni retencji.
+- **Rozmowy tylko z `utratadochodu.pl`** (allowlista + wymagany Origin),
+  limit 300 rozmów dziennie i 10 naraz; strona może nadpisać wyłącznie
+  `text_only`.
+- Odesłanie do zakupu online: `/kup-online?z=asystent` (licznik kliknięć).
+- **Po ukraińsku asystentka odpowiada już dziś** (reguła „Inny język” w
+  instrukcji), ale nie jest do tego przygotowana: powitanie z informacją o AI
+  i zapisie rozmowy jest tylko po polsku, a cztery rozmowy z 26.11.2026 — przy
+  okazji pierwszy przebieg instrukcji v3 — pokazały usterki, także niezależne
+  od języka. Zapis: „Asystentka po ukraińsku” w `przed-uruchomieniem.md`,
+  testy w `testy-uk.json` (nie są podpięte do agenta).
+
 ## Przepięcie domeny — co musi być, zanim pójdzie
+
+**Stan na 14.10.2026: przepięcie już się odbyło.** `utratadochodu.pl` podaje
+portal z projektu Pages `utratadochodu` (te same pliki co
+`utratadochodu.pages.dev`, bez `noindex`, `/wniosek/` odpowiada 200). Sekcja
+zostaje jako lista kontrolna — każdy punkt dalej obowiązuje.
 
 ### Stare adresy mają dokąd prowadzić
 
@@ -842,6 +1504,24 @@ To są ustawienia w panelu Cloudflare i decyzje klienta:
   Nie są sekretami, widać je w źródle strony.
 - Podpis prawnika pod regulaminem, polityką prywatności i klauzulą
   informacyjną oraz okresy retencji danych.
+- **Web Analytics w projekcie Pages `utratadochodu` WYŁĄCZONE 26.10.2026**
+  (właściciel). Pages wstrzykiwał beacon z tokenem `375a50f7…` (witryna
+  `e52e5eac…`, host wyłącznie `utratadochodu.pages.dev`); na `utratadochodu.pl`
+  pomiar wracał bez nagłówka CORS („blocked by CORS policy …
+  cloudflareinsights.com/cdn-cgi/rum") i nic się nie liczyło. Strefa
+  `utratadochodu.pl` ma własną witrynę (`5ffa234b…`, beacon `34add153…`)
+  z automatyczną instalacją, ale nie dokłada jej, gdy na stronie stoi już
+  beacon z Pages. **Nie włączaj Web Analytics w projekcie Pages z powrotem.**
+  Przełącznik jest w zakładce **Metrics**, nie w Settings: Workers & Pages →
+  `utratadochodu` → Metrics → Web Analytics; Pages wstrzykuje beacon przy
+  wdrożeniu, więc zmiana działa po Retry deployment. Po wyłączeniu witryna
+  `e52e5eac…` zniknęła z listy, a strona ma beacon `34add153…`. **Strefa
+  wstrzykuje go tylko przy nagłówkach przeglądarki** — goły `curl`
+  (Accept `*/*`) dostaje stronę bez żadnego beaconu, więc sprawdzaj
+  z `-A` i `Accept: text/html…` albo w Chromium. Samego wysłania pomiaru
+  stąd nie widać: proxy sandboksa blokuje `static.cloudflareinsights.com`.
+  Odczyt `GET /accounts/<id>/rum/site_info/list` działa z sandboksa, API Pages —
+  nie (Authentication error).
 
 ---
 
@@ -869,6 +1549,124 @@ Pilnuje tego `test/kalkulator.spec.js`: okresy muszą być wymienione
 w komplecie, przy składce musi stać, którego wariantu dotyczy, a ciąg
 „zamiast 12" nie może wrócić na stronę.
 
+**Okres to czas NAJDŁUŻSZY, nie najkrótszy** (LW044 § 15 pkt 9: okres
+odszkodowawczy). Do 21.10.2026 kalkulator pisał „minimum przez 24 miesiące".
+Przy świadczeniu piszemy **„najdłużej przez 60 miesięcy"** (najdłuższy wariant,
+stała `MIESIECY_MAX`; decyzja właściciela z 21.10.2026), a przy składce —
+że dotyczy wariantu z wypłatą do 24 miesięcy. O starcie wypłaty: „po okresie
+wyczekiwania ustalonym w umowie". **„Od pierwszego dnia niezdolności" nie wraca** (stało
+w stopce 231 stron, w opisie i FAQ strony głównej): LW044 za sam okres
+wyczekiwania świadczenia nie daje. Słowo „karencja" też nie — patrz
+„okres wyczekiwania" niżej.
+
+## Kalkulator — zasiłek ZUS i tylko B2B (od 21.10.2026)
+
+Do 21.10.2026 serwis podawał zasiłek **2 240 zł** na prawie dwustu stronach,
+w plikach `.md`, `llms.txt` i w dwóch blokach FAQ w danych strukturalnych.
+To była płaca minimalna z 2021 r. (2 800 zł, stary `Calculator.js` wypisywał ją
+jako kwotę zasiłku) pomnożona przez portal jeszcze raz przez 0,8.
+
+Teraz liczy to **`src/lib/zus.ts`** ze stałych roku (płaca minimalna,
+prognoza przeciętnego wynagrodzenia) i jest jedynym źródłem kwot i zdań
+o ZUS-ie — `ZUS_TEKST` idzie do kalkulatora, stron, `llms.txt` i FAQ.
+Decyzje właściciela z 21.10.2026:
+
+| Co | Jak |
+|---|---|
+| Kwota główna | duży ZUS z najniższą podstawą (60% prognozy) **i** dobrowolnym chorobowym: 3 902 zł (2026) |
+| Dopiski przy kwocie | preferencyjny ZUS około 995 zł, bez chorobowego 0 zł |
+| Wzór | 80% podstawy po odliczeniu 13,71%; najdłużej 182 dni; przedsiębiorca po 90 dniach nieprzerwanego ubezpieczenia chorobowego — wcześniejsze, np. z etatu, się wlicza przy przerwie do 30 dni |
+| Etat | **kalkulator go nie liczy** — jedno zdanie opisu bez kwot (`ZUS_TEKST.etat`); na etacie zasiłek zależy od pensji, a przełącznik pokazywał przy nim zasiłek przedsiębiorcy |
+| Limit 80% B2B / 65% etat | zostaje („jest dobrze"); od 28.10.2026 tam, gdzie tekst podaje limit jako regułę, stoi też `LIMIT_CEU_ZDANIE` — w CEU „Utrata dochodu" 65% także na B2B (OWU v9.8 § 6 ust. 2 pkt 2, § 10 ust. 3; decyzja właściciela) |
+| Najwyższe świadczenie | 50 000 zł/mies. — podawane publicznie; liczba z `RYZYKA` w `@ud/wniosek` (`SWIADCZENIE_MAX`), nie wpisana drugi raz |
+
+Zasiłek to kwota **brutto**, a dochód w kalkulatorze — netto. Dlatego tabele
+pokazują zasiłek i świadczenie z polisy **obok siebie, bez sumy „ZUS +
+polisa"**: suma brutto z netto przekraczała dochód i przeczyła zdaniu, że
+ubezpieczenie nie może być korzystniejsze niż praca. Składka jest opisana jako
+kwota **razem z opłatą dystrybucyjną** (tak liczy kalibracja, `premium_total`).
+
+**Co rok w styczniu `test/zus.spec.js` robi się czerwony** (`ROK` starszy niż
+bieżący). To test, nie bramka w buildzie — nowe kwoty wpisuje się w `zus.ts`
+(płaca minimalna, prognoza przeciętnego wynagrodzenia), test sprawdza, że
+podstawy wynikają z nich, i skanuje cały build (bez wpisów bloga) na „2 240 zł",
+„2 800 zł", „od pierwszego dnia niezdolności", „karencj", „minimum przez N
+miesięcy" i „zł / dzień".
+
+### Odkładanie obok składki — „Gdyby odkładać samodzielnie" (od 22.10.2026)
+
+Ile miesięcy odkładania daje równowartość jednego i dwóch miesięcy
+świadczenia (pomysł właściciela: klientka uznała 250 zł składki za dużo przy
+świadczeniu 10 000 zł). Od 23.10.2026 (decyzja właściciela: „strona ciągnie się
+do dołu w nieskończoność") to **druga kolumna karty kalkulatora na
+`/kalkulator/`**, nie osobna sekcja: tekst wstępu 1/3, karta 2/3
+(`xl:grid-cols-[1fr_2fr]`), w karcie składka | odkładanie, przypisy pod obiema
+kolumnami. Obok siebie od 1280 px — przy 1024 px kolumny miały po 290 px
+i wyniki łamały się na dwie linie. Na telefonie odkładanie stoi zaraz pod
+przyciskiem wniosku.
+
+- `Kalkulator.svelte` z `zOdkladaniem` (tylko `/kalkulator/`) renderuje
+  `Odkladanie.svelte` ze świadczeniem i górną granicą składki. Rachunek:
+  `src/lib/odkladanie.ts`; pytanie w FAQ strony liczone tym samym kodem.
+- **Oprocentowanie stałe: 3% rocznie** (`OPROCENTOWANIE`), bez pola — decyzja
+  właściciela. Przy wyniku stoi „przyjmujemy oprocentowanie oszczędności 3%
+  rocznie, wpłatę na koniec każdego miesiąca, bez inflacji".
+- **Kwota odkładana idzie za GÓRNĄ granicą składki** (w dziesiątkach złotych),
+  dopóki klient nie wpisze własnej; „Odkładaj tyle co składka" wraca do niej.
+  Górna, nie dolna: z nią odkładanie wychodzi najkrócej, więc porównanie nie
+  jest ustawione pod polisę.
+- Adresy: `?dochod=30000` ustawia dochód, `?odkladam=250` kwotę (link od
+  agenta: `https://utratadochodu.pl/kalkulator/?dochod=12500&odkladam=250#odkladanie`),
+  dawne `?swiadczenie=10000` daje dochód 12 500 zł. Czytane tylko z adresu.
+  Kalkulator na innych stronach linkuje tu z `?dochod=`.
+- **Zdanie „odłożone pieniądze zostają Twoje — składka nie wraca" zostaje**
+  przy wyniku, razem z okresem wyczekiwania i wyłączeniami. Bez niego to
+  reklama, a nie porównanie. Nie pisz przy świadczeniu „za każdy miesiąc
+  niezdolności" (to „od pierwszego dnia" innymi słowami) — przegląd z 22.10.
+- Pole i suwak to jedna wartość: wyczyszczone albo przekroczone pole nie
+  przestawia wyniku ani suwaka, po wyjściu z pola wraca do liczby, z której
+  liczony jest wynik.
+- **Nie dopisuj „ile lat na całe 24/60 miesięcy świadczenia".** Przy takim
+  horyzoncie o wyniku decyduje założenie o odsetkach, nie rachunek (240 000 zł
+  po 250 zł: 80 lat bez odsetek, 36 przy 4% rocznie).
+- `liczebnik` żyje w `@ud/zawody/liczebnik` — osobny eksport, żeby wyspa nie
+  wciągała do przeglądarki danych wszystkich zawodów.
+
+Pilnuje tego `test/odkladanie.spec.js` (rachunek miesiąc po miesiącu, kwota za
+składką i własna, adresy, układ 1/3–2/3 przy 1440 px i kolejność na 390 px,
+treść w `.md` i w FAQPage). Kalibrator dalej czyta przedział składki dla
+14 400 zł z `kalkulator/index.md` — karta startuje od dochodu 18 000 zł.
+
+### Astro gubi spację przy łamaniu linii obok `{wyrażenia}`
+
+W szablonie `.astro` odstęp z przełamaniem linii **tuż przed albo tuż po
+wyrażeniu albo znaczniku** znika: `przez {MIESIECY_WYPLATY}⏎miesiące` dało
+„24miesiące", `stawki⏎{OPIS_KALIBRACJI}` — „stawkiz ofert",
+`.⏎{ZUS_TEKST.brutto}` — „0 zł.Zasiłek", a `</a>⏎<span>` wychodzi jako
+`</a><span>`. Łam linię między dwoma zwykłymi słowami albo dopisz `{' '}`.
+Svelte tego nie robi. Na ekranie bloki stoją jeden pod drugim i nic nie
+widać, ale w `.md` i w nazwie odnośnika (czytnik ekranu, robot) słowa się
+sklejają — stąd „Alergologświadczenie do 500 zł / dzień" na stronach kategorii.
+
+### Dane zawodów: dochód przykładowy, nie limit dzienny
+
+Pole `swiadczenieDzienne` (250–600 zł) przyszło ze starego serwisu i stało na
+każdym kafelku stron kategorii jako „świadczenie do 500 zł / dzień". **Limitu
+dziennego w ofercie nie ma.** Od 21.10.2026 w `zawody.json` jest
+`dochodPrzykladowy` — miesięczny dochód, dla którego strona zawodu liczy
+przykład (wartości przeliczone tak, żeby przykłady się nie zmieniły). Na
+kafelku stoi pierwsze ryzyko zawodu. Nie przywracaj kwot dziennych.
+
+Pomocniki w `@ud/zawody` (test: `packages/zawody/test/pomocnicy.test.js`):
+
+- `liczebnik(n, [1, 2–4, 5+])` — „43 zawody", nie „43 zawodów".
+- `malymi()` zamiast `toLowerCase()` na odmianach i nazwach grup —
+  „specjalisty HR", „AI engineera", „IT / tech" zamiast „hr", „ai", „it".
+- `pokrewne()` bierze kolejne zawody po bieżącym, z zawinięciem. Pierwsze
+  z alfabetu zostawiały 61 ze 188 stron bez odnośnika z tej sekcji.
+- `przekierowania()` daje każdą regułę także bez ukośnika na końcu — Pages
+  dopasowuje `_redirects` dosłownie i `/stary-adres` kończył się 404.
+
 ## Kalkulator — stawka pochodzi z ofert, nie z sufitu
 
 Stawka 1,5% ze starego `Calculator.js` leżała **poniżej najtańszej oferty,
@@ -882,24 +1680,47 @@ importuje, reszta serwisu bierze je z `symulacja.ts`. Ten plik jest pomyślany
 tak, żeby dało się go przeliczyć maszynowo — nie wpisuj wartości bezpośrednio
 w kodzie.
 
+Od 14.10.2026 liczy je funkcja SQL `ud_kalibracja_stawek()` metodą
+**osoby-v1** (sekcja „Kalibrator stawek" niżej, pełny opis
+w MODEL-SKLADKI.md). Jednostką jest **osoba** (PESEL), nie wariant — jedna
+oferta z sześcioma wariantami ważyłaby inaczej sześć razy więcej niż druga.
+
 | Pole | Skąd |
 |---|---|
-| `stawka.dol` / `stawka.gora` | najtańsza i najdroższa zaobserwowana oferta (2,02% / 2,44%) |
-| `stawka.srodek` | mediana zaokrąglona do 2,2% — tam, gdzie musi paść jedna liczba |
-| `okresy` | mnożniki policzone z par ofert: 24 → 1,00, 36 → 1,25 |
-| `zrodlo` | ile ofert i wariantów stoi za tymi liczbami — metryczka kalibracji, nie treść strony |
+| `stawka.dol` / `stawka.gora` | najtańsza i najdroższa **osoba** z ofert z 12 miesięcy, w górę do 0,01 p.p. (14.10: 2,02% / 3,22%) |
+| `stawka.srodek` | mediana osób, w górę do 0,1 p.p., nie wyżej niż `gora` (2,2%) — żadna strona go dziś nie pokazuje |
+| `okresy` | mnożniki z par w jednej ofercie, ≥ 3 osoby, rozrzut ≤ 1,05: 24 → 1,00, 36 → 1,25 |
+| `zrodlo` | metoda, okno dat, liczba osób, ofert, wariantów i par — metryczka kalibracji, nie treść strony |
 
-**Składka jest przedziałem, nie liczbą.** Rozrzut 2,02–2,44% jest prawdziwy
+Do bazy stawek wchodzi tylko wariant porównywalny z kalkulatorem: Leadenhall,
+samo świadczenie okresowe (bez trwałej i śmierci), 12 rat, okres wyczekiwania
+do 21 dni, bez płatnych dodatków (LW144 dozwolony) i **bez klauzuli HIV/WZW** —
+ta ma własny mnożnik 1,07, więc wariant z nią zawyżałby górę (stare „2,44%"
+było właśnie takim wariantem). Składka **brutto** (`premium_total`, z opłatą
+dystrybucyjną) — tyle płaci klient; `ud_skladka_netto` z panelu to podstawa
+prowizji, nie cena.
+
+**Składka jest przedziałem, nie liczbą.** Rozrzut 2,02–3,22% jest prawdziwy
 i bierze się z wieku, klasy ryzyka i okresu wyczekiwania, o które kalkulator
-nie pyta. Jedna liczba udawałaby precyzję, której w tym produkcie nie ma.
+nie pyta (góra to dziś jedyna osoba po pięćdziesiątce w próbie). Jedna liczba
+udawałaby precyzję, której w tym produkcie nie ma.
 
-**W treści na stronie nie ma liczby ofert ani wariantów.** Stoi tam „przedział
-z ostatnio wystawionych ofert" i „ze wszystkich wariantów we wszystkich
-ofertach". To nie jest ogólnikowość dla samej ogólnikowości: konkretna liczba
-zestarzeje się przy pierwszej nowej ofercie, a wtedy albo ktoś ją poprawia
-ręcznie w trzech miejscach, albo worker `ud-kalibrator` musi przepisywać
-treść zamiast samych stawek. Pola `zrodlo` używaj w dokumentacji i w bramkach
-workera, nie w zdaniu na stronie.
+`kalibracja.json` jest sprawdzany przy imporcie (`sprawdzKalibracje()`
+w `symulacja.ts`): brak pola, napis zamiast liczby albo stawka spoza 1–5%
+**wywala build**, a Pages zostawia poprzednie wdrożenie. Bez tego zła wartość
+budowała się do „NaN zł" na blisko dwustu podstronach. Testy liczą kwoty
+z pliku (`kalkulator.spec.js`) — nie wpisuj kwot do testów, bo pierwsza
+zmiana stawek zrobi je czerwonymi, a następna sesja „naprawi" je cofnięciem
+pliku.
+
+**W treści na stronie nie ma liczby ofert ani wariantów.** Opis metody stoi
+w jednej stałej, `OPIS_KALIBRACJI` w `symulacja.ts` („z ofert wystawionych
+w ostatnich 12 miesiącach, w wariancie porównywalnym z kalkulatorem: …"),
+i stamtąd idzie do kalkulatora, podstron zawodów i ich `llms.txt` (decyzja
+właściciela z 14.10.2026: tekst ma opisywać metodę). Konkretna liczba
+zestarzałaby się przy pierwszej nowej ofercie, a wtedy kalibrator musiałby
+przepisywać treść zamiast samych stawek. Pola `zrodlo` używaj w dokumentacji
+i w bramkach kalibratora, nie w zdaniu na stronie.
 
 Na stronie mówimy **„okres wyczekiwania"**, nie „karencja" — w kolumnach bazy
 (`wait_accident`, `wait_illness`) i w MODEL-SKLADKI.md termin techniczny
@@ -917,9 +1738,178 @@ składka bazowa 1500 zł wobec 1404 zł. Druga oferta z klauzulą nie rozstrzyga
 bo jej dwa warianty bez klauzuli różnią się ceną przy identycznych widocznych
 parametrach (+3% albo +13%). Mnożnik siedzi w `symulacja.ts`, nie
 w `kalibracja.json` — jedna para to za mało na przeliczanie maszynowe
-i planowany worker ma go nie ruszać.
+i kalibrator go nie rusza.
+
+## Kalibrator stawek — funkcja brzegowa `kalibrator` (od 14.10.2026)
+
+Opis metody i bramek: `apps/portal/MODEL-SKLADKI.md`, część „Kalibrator".
+Tu tylko to, co trzeba wiedzieć, zanim się go dotknie.
+
+**Stan na 23.10.2026: WDROŻONE, zadanie cron WŁĄCZONE, tryb `na_sucho`.**
+Cron włączony 23.10.2026 decyzją właściciela („włącz cron"); pierwszy przebieg
+w poniedziałek 26.10 o 05:40 UTC (6:40 czasu polskiego). Od tego dnia co dzień
+roboczy mail z porównaniem na `biuro@utratadochodu.com`, zero zapisów do
+GitHuba. Po „wypychaj" właściciela (20.10):
+
+- push `14547bd` — portal z nowymi stawkami na żywej stronie (14 400 zł:
+  291–464 zł zamiast 291–351 zł);
+- migracja przez MCP jako wersja `20261020104145` (plik w repo przemianowany
+  na tę nazwę); md5 treści `ud_kalibracja_stawek` i `ud_kalibracja_uruchom`
+  = repozytorium, wykonanie tylko `service_role`, obie tabele z RLS, zadanie
+  `kalibracja-stawek` **wyłączone**, tryb `na_sucho`;
+- funkcja `kalibrator` v1, `verify_jwt = false`, treść = repozytorium (md5,
+  patrz „Wdrażanie przez MCP"); sondy: GET → 405, POST bez tokenu → 401,
+  zły token → 401;
+- `select public.ud_kalibracja_uruchom();` → HTTP 200, „na sucho: bez zmian",
+  strona pokazuje przedział z pliku, mail na `biuro@utratadochodu.com` wyszedł,
+  `ud_errors` pusty.
+
+Stawki z żywych danych 20.10 = plik (2,02% / 2,2% / 3,22%, 36 mies. × 1,25),
+tylko metryczka urosła: 13 osób, 14 ofert, 29 wariantów, 7 par (w pliku 10 /
+11 / 22 / 5 z 14.10). Sama metryczka nie jest zmianą — `zrodlo` w pliku
+odświeży się przy pierwszej propozycji ze zmienionymi stawkami.
+
+**Zostaje po stronie właściciela:** około dwóch tygodni na sucho (od
+26.10.2026), potem token GitHuba i tryb `propozycja`.
+
+Przepływ: pg_cron `kalibracja-stawek` (pn–pt 05:40 UTC, **powstaje
+wyłączone**) → `ud_kalibracja_uruchom()` (token z Vaulta) → funkcja
+`kalibrator` → RPC `ud_kalibracja_stawek()` → porównanie z `kalibracja.json`
+z gałęzi produkcyjnej. Tryb w `ud_kalibracja_ustawienia.tryb`:
+
+| Tryb | Co robi |
+|---|---|
+| `wylaczony` | wpis w `ud_kalibracja_przebiegi` i koniec |
+| `na_sucho` (domyślny) | codzienny mail z porównaniem na `biuro@utratadochodu.com`; **zero zapisów do GitHuba** |
+| `propozycja` | zmiana stawek jako PR z gałęzi `kalibrator/propozycja` do produkcyjnej; **scala właściciel** |
+
+Decyzje właściciela z 14.10.2026: **każda zmiana stawek przez jego
+kliknięcie** (nigdy commit prosto na produkcję), góra = najdroższa osoba,
+klauzula HIV/WZW poza bazą, tekst na stronie opisuje metodę. Około dwóch
+tygodni na sucho przed przełączeniem na `propozycja`.
+
+Rzeczy, których nie upraszczaj:
+
+- **Twarda lista zapisów do GitHuba (`zapisDozwolony()`).** Drzewo z jednym
+  wpisem (`kalibracja.json`), commit z jednym rodzicem, gałąź bota, PR z niej
+  do produkcyjnej, tytuł i opis PR. Ani scalenia, ani zamknięcia, ani zapisu
+  na gałąź produkcyjną, ani Contents API. Test to sprawdza dla każdej drogi.
+- **Commit najpierw, gałąź raz.** Propozycja to commit z rodzicem = HEAD
+  produkcyjnej i drzewem HEAD z podmienionym plikiem; gałąź bota przestawiana
+  jednym ruchem wprost na niego. **Nigdy „reset gałęzi bota na HEAD, potem
+  zapis pliku"** — w tej chwili GitHub mógł uznać otwarty PR za scalony, choć
+  nic nie weszło (przegląd z 14.10.2026). Scalenie nie cofa niczego innego.
+  Otwarty PR na czas aktualizacji dostaje `[NIEAKTUALNE]` i opis bez skrótu;
+  końcowy opis dopiero po przestawieniu gałęzi.
+- **Nieaktualny PR jest oznaczany.** Gdy dane przestają dawać liczby z
+  otwartego PR (bez zmian albo odmowa), tytuł dostaje `[NIEAKTUALNE]`, opis —
+  „nie scalaj", a mail — alarm. Nie scalaj PR kalibratora z tym przedrostkiem.
+  Ręczne poprawki na gałęzi bota przepadają przy następnej propozycji.
+- **Odrzucona propozycja nie wraca.** Skrót stawek i okresów stoi w opisie PR;
+  PR zamknięty bez scalenia wycisza te same liczby. Nowe dane — nowy skrót.
+  Zamknięcie PR z `[NIEAKTUALNE]` niczego nie wycisza (skrótu w nim nie ma).
+- **Dziennik `ud_kalibracja_przebiegi` steruje mailami.** Powtórka odmowy
+  i błędu to cały ciąg identycznych wpisów, nie ostatni wpis; mail o
+  propozycji liczy się od ostatniego zapisu PR (ten sam numer bywa
+  przepisywany); znaczniki uwag lądują w `powod` tylko z wysłanym mailem.
+  Nie czyść dziennika ręcznie — kalibrator wyśle wtedy maile od nowa.
+- **Nowych okresów (48, 60) kalibrator nie dopisuje** — zgłasza je mailem
+  „do decyzji". `MNOZNIK_HIV_WZW` nie jest w pliku i tak ma zostać.
+- **Ręczna zmiana stawek w `kalibracja.json` wróci jako PR** do wartości
+  z danych przy najbliższym przebiegu w trybie `propozycja`. Zamknięcie tego
+  PR bez scalenia ją wycisza.
+- **Funkcja SQL wykonywalna tylko przez `service_role`** (`SECURITY INVOKER`,
+  `revoke` od anon/authenticated). Plan z 17.09 zakładał `SECURITY DEFINER`
+  i klucz anonimowy — to byłby odczyt bazy ofert kluczem z każdego źródła
+  strony.
+
+**Push z sesji po scalonym PR kalibratora:** scalenie to commit na gałęzi
+produkcyjnej, którego lokalna kopia nie ma — przed pushem dociągnij gałąź
+(`git pull --rebase origin claude/portal-rebuild-seo-llm-yz2x4t`), inaczej
+push zostanie odrzucony. Nigdy `--force` na tej gałęzi.
+
+### Wdrożenie — kolejność (dopiero po „wypychaj")
+
+Kroki 1–4 wykonane 20.10.2026, krok 5 — 23.10.2026 (stan wyżej).
+
+1. Push (portal z nowymi stawkami, migracja i funkcja w repo).
+2. Migracja przez MCP (funkcje bez UPDATE/DELETE w ciele, więc przejdzie);
+   sprawdzenie md5 treści funkcji, uprawnień i crona (wyłączony).
+3. Wdrożenie `kalibrator` przez MCP: `verify_jwt: false`, pliki
+   `source/index.ts` + `_shared/logger.ts`, treść generowana skryptem z repo.
+4. Sondy: GET → 405, POST bez tokenu → 401; potem
+   `select public.ud_kalibracja_uruchom();` i mail na sucho.
+5. Cron włączany za zgodą właściciela:
+   `select cron.alter_job((select jobid from cron.job where jobname =
+   'kalibracja-stawek'), active := true);`.
+
+Po stronie właściciela: potwierdzić w Cloudflare „Production branch"
+projektów `utratadochodu` i `udappnew` (ślady z GitHuba wskazują
+`claude/portal-rebuild-seo-llm-yz2x4t`, API Pages jest stąd niedostępne);
+opcjonalnie Build watch paths, żeby scalenie samego `kalibracja.json` nie
+przebudowywało panelu; po okresie na sucho — token GitHuba (fine-grained,
+tylko `aurabroker/ud`, Contents i Pull requests: write) jako sekret
+`GITHUB_KALIBRATOR_TOKEN` w Edge Functions → Secrets i przełączenie trybu:
+`update public.ud_kalibracja_ustawienia set tryb = 'propozycja';`.
+
+Testy:
+
+```
+cd apps/panel && pnpm test:kalibracja-sql      # metoda SQL, 58 przypadków
+cd apps/portal && pnpm build && NODE_NO_WARNINGS=1 npx playwright test \
+  test/kalibrator.spec.js test/kalkulator.spec.js test/funkcje-brzegowe.spec.js
+```
+
+`kalibracja.sql` sprawdza metodę na zamrożonym, zanonimizowanym zestawie
+z produkcji (127 wariantów, `kalibracja-fixture.sql`) — oczekiwane liczby
+policzyła niezależna implementacja, nie sama funkcja. Każda z 44 mutacji
+migracji (każdy filtr z osobna, osoba po kliencie zamiast PESEL-u, składka
+netto, zaokrąglenie do najbliższej, środek ponad górę, progi, `SECURITY
+DEFINER`, brak `revoke`, stan crona) daje czerwony wynik. Bez binariów Postgresa test
+kończy się błędem, nie zielonym wynikiem.
 
 ---
+
+## Kto jest kim: ubezpieczyciel, coverholderzy, agent (od 21.10.2026)
+
+**Ubezpieczycielem jest Lloyd’s Insurance Company S.A.** (Bruksela).
+**Leadenhall Insurance S.A. i CEU sp. z o.o. to coverholderzy Lloyd’s** —
+przedstawiciele ubezpieczyciela w sprawach zawarcia i wykonania umowy
+(OWU LW044 § 1 ust. 3, OWU CEU § 1, karty produktu). Aura Expert sp. z o.o. to
+agent ubezpieczeniowy (RPU 11229690/A). Do 21.10.2026 serwis nazywał
+Leadenhall i CEU ubezpieczycielami — na stronie głównej, w `/jak-to-dziala/`,
+w `llms.txt` i w klauzuli RODO. Poprawki w klauzuli i polityce prywatności
+zatwierdził prawnik (21.10.2026).
+
+- Nazwy bierz z `firma.ts`: `FIRMA.ubezpieczyciel`, `COVERHOLDERZY`,
+  `OPIS_PODMIOTOW`. Stary eksport `UBEZPIECZYCIELE` (lista coverholderów pod
+  błędną nazwą) został usunięty i test pilnuje, żeby nie wrócił.
+- Szkody w CEU likwiduje WAGAS S.A. w imieniu ubezpieczyciela, nie CEU.
+- Nazwa kończąca się na „S.A." albo „sp. z o.o." nie dostaje drugiej kropki.
+
+Pilnuje tego `test/podmioty.spec.js` (także na `/` i `/jak-to-dziala/`).
+
+### Opinie — tylko od potwierdzonych klientów
+
+21.10.2026 zdjęte obie opinie ze strony (właściciel: „nie klienci"); w bazie
+mają `ud_review.approved = false`, wiersze zostały. `/opinie/` pokazuje
+**wyłącznie** wpisy z polem `potwierdzonoKlienta` (data ISO) w
+`src/dane/opinie.json`, dopisywanym ręcznie po sprawdzeniu, że autor zawarł
+polisę za naszym pośrednictwem. Strona tak to opisuje — przy formularzu, który
+zbiera tylko imię, miasto i zawód, potwierdzenie wymaga dopasowania
+w kartotece. `scripts/synchronizuj.mjs` przepisuje opinie z `approved = true`
+bez pola `potwierdzonoKlienta` — przed jego użyciem trzeba to obsłużyć
+(i tak nie uruchamiaj go w całości, patrz „Nowy artykuł w portalu").
+
+### Ekspert serwisu
+
+`src/lib/ekspert.ts`: „Marek Cieśla — broker ubezpieczeniowy od 2009 roku,
+ekspert w zakresie ubezpieczeń utraty dochodu" — słowo w słowo od właściciela
+(21.10.2026). Nie dopisuj tytułów, uprawnień ani zdjęcia, których właściciel
+nie podał. Ten sam węzeł `Person` (`ekspert()` w `seo.ts`) jest autorem
+`BlogPosting` każdego wpisu i stoi w JSON-LD `/o-nas/` pod `#ekspert`; ramka
+pod wpisem linkuje do `/o-nas/#ekspert`. **Do potwierdzenia u prawnika:**
+„broker" przy osobie obok spółki działającej jako agent.
 
 ## Zakażenie HIV/WZW nie jest wyłączeniem
 
@@ -967,6 +1957,27 @@ wobec choroby somatycznej, czyli odwrotnie niż w Leadenhall.
 Przed dopisaniem pozycji do tej listy sprawdź ją w tekście OWU — strona jest
 pisana pod cytowanie przez modele językowe, więc błąd wychodzi poza serwis.
 Pilnuje tego `test/wylaczenia.spec.js`.
+
+**23.11.2026 — druga weryfikacja, po pytaniu właściciela „dlaczego nie ma
+informacji o ciąży?”.** Na liście brakowało **ciąży i porodu**, wyłączonych we
+wszystkich sześciu OWU (Leadenhall § 11 ust. 1 lit. g z powikłaniami innymi niż
+uszkodzenia ciała; CEU § 18 pkt 7, LOI Premium § 13 pkt 7 — wyłączenie
+bezwzględne), **zwyrodnień** w Leadenhall (§ 9 ust. 3–4, § 7 ust. 2; MEDICA
+i MEDICARE 30% przez 12 miesięcy) i **pracy na wysokości > 2 m, pod ziemią, pod
+wodą, na morzu i w służbach ratowniczych** w CEU (§ 18 pkt 2). Poprawione też:
+terroryzm (wyłączony tylko z bronią jądrową, chemiczną albo biologiczną),
+depresja w Leadenhall (OWU jej nie wymieniają z nazwy — lista z § 9 ust. 5),
+krok wniosku z aktywnościami (`zdrowie`, nie „zakres”) i dwa zdania bez źródła
+(„najczęstsza przyczyna odmowy”, „zgłoszenie zwykle kończy się zwyżką”).
+**Lista żyje teraz w `src/lib/wylaczenia.ts`** — każda pozycja ma pole `zrodla`
+z paragrafami, strona je pokazuje, a `llms.txt` bierze z tego pliku
+`WYLACZENIA_KROTKO`. Pozycja bez paragrafu nie wchodzi. „Wyłączenia” są od
+23.11.2026 w menu głównym (od 1024 px; na telefonie menu nie ma, został przycisk
+„Zobacz, co nie jest objęte” na stronie głównej) i w stopce (kolumna
+„Ubezpieczenie” i dolny pasek — decyzja właściciela). OWU „dla zatrudniających”
+2.6 ma w § 18 pkt 2 „2 metrów nad poziomem morza” (w pozostałych: „gruntu na
+zewnątrz budynku”), a definicja niebezpiecznej aktywności odsyła do § 20 zamiast
+§ 19 — to błędy w samym OWU, zgłoszone właścicielowi.
 
 ---
 
@@ -1428,13 +2439,18 @@ wersji) — taką sprawę prowadzi agent. Gdy SMSAPI odrzuci numer z oferty
 (kod 13, np. stacjonarny), numer z kartoteki nie jest próbowany — ta wersja
 zostaje bez przypomnienia.
 
-**Zadanie crona powstało WYŁĄCZONE** (migracja
-`20261012123157_oferty_przypomnienia_sms.sql`, zastosowana 12.10.2026;
-`…162649_…_2.sql` go nie rusza). Włączenie to decyzja właściciela po obejrzeniu
-listy i treści:
+**Zadanie crona WŁĄCZONE 13.10.2026 ok. 14:35** decyzją właściciela
+(powstało wyłączone w migracji `20261012123157_oferty_przypomnienia_sms.sql`).
+Pierwsze uruchomienie 13.10 o 15:25: 15 kandydatów, 6 SMS-ów przyjętych przez
+SMSAPI, 0 błędów. Wyłączenie:
 `select cron.alter_job((select jobid from cron.job where jobname =
-'oferty-przypomnienia-sms'), active := true);` — wyłączenie tak samo,
-z `active := false`.
+'oferty-przypomnienia-sms'), active := false);` (włączenie — `true`).
+
+Do 13.10.2026 projekt `udappnew` (panel) **nie miał `SMSAPI_TOKEN`
+ani `SMSAPI_SENDER`** — ostatni prawdziwy SMS wyszedł 20.09 jeszcze ze starego
+projektu `udapp`, a SMS „wysłaliśmy ofertę" z v.0.68 szedł w trybie bez tokenu
+(`stub`). Gdy `/health` pokaże `SMSAPI_TOKEN: MISSING`, żaden SMS nie wychodzi
+— ani o ofercie, ani przypomnienie (to drugie zapisze wtedy `ud_errors`).
 
 Podstawa prawna: kontakt w sprawie oferty, o którą klient sam prosił
 (klauzula informacyjna: „Przygotowanie oferty i obsługa wniosku", art. 6 ust.
@@ -1481,6 +2497,139 @@ dopiero po `email.sent`, a w logu zostaje ślad próby z tym numerem.
 
 Migracja: `supabase/migrations/20260917200000_oferty_archiwum_wersje.sql`.
 
+### Wybór klienta widać na górze oferty i karty klienta (panel v.0.72, 20.10.2026)
+
+Klientka wybrała w portalu jeden z czterech wariantów, a panel pokazywał
+„Wybrano: Utrata dochodu (Leadenhall)" — nazwę produktu, wspólną dla
+wszystkich wariantów oferty. Wybór był zapisany poprawnie
+(`ud_offers.client_choice.document_id`), tylko nikt go nie pokazywał.
+
+- **Opis wariantu** stoi w jednym miejscu, `src/lib/wybranyWariant.js`
+  (numer, świadczenie, okres odszkodowawczy, wyczekiwanie, trwała, śmierć,
+  składki — etykiety jak w tabeli porównania). Korzystają z niego strona
+  oferty, karta klienta i mail do agenta. Nie wracaj do samej nazwy produktu.
+- **Strona oferty, od góry:** kontakt z klientem (telefon, e-mail, zawód,
+  karta klienta) → „Klient wybrał wariant nr …" ze wszystkimi parametrami →
+  „Link dla klienta" i „Wersja N" **obok siebie** (`.of-para`, na wąskim
+  ekranie jedna pod drugą) → porównanie wariantów.
+- **Karta klienta:** „Oferty klienta" na samej górze, z kolumną „Wybór
+  klienta" i linkiem do oferty.
+- **Tabela porównania** (`OfferComparison.svelte`, wspólna dla panelu
+  i strony klienta) po decyzji ma wiersz ze znaczkiem „✓ Wybrany" i zieloną
+  kolumnę. Wcześniej znaczek stał tylko w wierszu przycisków „Wybieram ten",
+  który po wyborze znika — klient też nie widział, co wybrał.
+- **Mail „Decyzja klienta" do agenta** niesie numer wariantu, kwoty i link do
+  oferty w panelu; wartości są escape'owane.
+- **Zawód w karcie kontaktu (v.0.73)** to ten, który wskazał klient
+  (`ud_clients.profession`). Zawodu z oferty ubezpieczyciela
+  (`ud_offer_documents.profession`) obok **nie** pokazujemy — v.0.73 dopisywał
+  „· w ofercie ubezpieczyciela: Kosmetyczka", a v.0.74 to zdjął decyzją
+  właściciela z 21.10.2026: „stylistka paznokci to to samo co kosmetyczka".
+  Ubezpieczyciel ma własną listę zawodów i agent sam wybiera z niej pozycję,
+  więc różnica nazw to nie rozjazd do wyjaśniania. Nie przywracaj dopisku.
+  Zawód z oferty pokazuje się tylko wtedy, gdy klient żadnego nie podał
+  (z dopiskiem „z oferty ubezpieczyciela"). `src/lib/zawodKlienta.js`; loader
+  czyta zawód tylko przypiętego klienta, nie całej listy wyboru.
+
+Test: `pnpm test:wybor` w `apps/panel` (na kodzie sprzed zmiany 16 czerwonych).
+
+### Link do oferty wygasa (panel v.0.77–0.78, od 13.11.2026)
+
+`ud_offers.share_expires_at` to koniec ważności linku `/offer/<share_token>`.
+Nowa oferta dostaje w bazie **60 dni od utworzenia**, a udana wysyłka do
+klienta przedłuża termin do co najmniej 60 dni od wysyłki (`waznoscPoWysylce`
+w `src/lib/server/linkOferty.js`, nigdy nie skraca). Wygasły link: strona
+oferty 410 „Link do oferty wygasł", a `unlock`, `choice`, `question`
+i `download` odmawiają **przed** sprawdzeniem hasła (wygasły link nie zużywa
+prób PIN-u i nie zakłada nowego).
+
+**Od 19.11.2026 `share_expires_at` jest `NOT NULL`** (migracja
+`20261119204221_oferty_waznosc_starych_linkow.sql`, decyzja właściciela „60 dni
+od ostatniej wysyłki + C”, zastosowana przez MCP przed panelem v.0.78 — push na
+gałąź produkcyjną wdraża `udappnew` od razu). Linki sprzed 13.11.2026 dostały termin: oferta zamknięta
+(kupiona, odrzucona, w archiwum) — nieważny od razu; pozostałe — `sent_at` + 60
+dni, a nigdy niewysłana — `created_at` + 60 dni. Bez dolnej granicy „nie krócej
+niż N dni od dziś” (właściciel jej nie chciał): z 53 starych linków 24 wygasły od
+razu, 29 zostało ważnych (najdłużej do 18.01.2027). Ta sama reguła poszła na kopie
+w `ud_offers_kosz` — przywrócenie wstawia ofertę z JSON-a przez
+`jsonb_populate_record` i kopia bez klucza padłaby na `NOT NULL`. Panel od
+v.0.78 nie ma gałęzi „NULL = bez terminu”: brak daty = link nieważny,
+a `waznoscPoWysylce(null)` daje pełny termin od teraz. **Kolejność była: najpierw
+migracja, potem panel v.0.78** — odwrotnie stare linki byłyby przez chwilę
+nieważne. Dodając kolumnę `NOT NULL` do tabel ofert, uzupełnij też kopie
+w koszu (sekcja „Kosz ofert”).
+
+**Agent widzi termin na stronie oferty** (karta „Link dla klienta"): „Link
+ważny do …" albo czerwone „Link wygasł …", i przycisk „Ustaw ważność: 60 dni
+od dziś" / „Odnów link: 60 dni od dziś" (akcja `przedluzLink`, ta sama reguła
+co wysyłka: `waznoscPoWysylce` — termin = później z dwóch: obecny albo dziś +
+60 dni, więc NIE dodaje 60 dni i nigdy nie skraca; stąd etykieta „od dziś”, nie
+„przedłuż o”). Bez tego „Kopiuj" podawał po cichu link, który klient zobaczy
+jako wygasły. Nieudany zapis statusu i terminu po
+wysłanym mailu pokazuje się agentowi (`zapisPoWysylce`) — mail już wyszedł,
+więc wysyłka się nie cofa, ale wygasły link poszedłby do klienta jako 410.
+
+**Brak daty w obiekcie oferty (`null` albo brak pola, gdy zapytanie zapomni
+dobrać kolumnę) = link nieaktywny** — zamyka link zamiast go po cichu
+otwierać.
+
+**Nowa trasa pod `/offer/[token]` musi dobrać `share_expires_at` i zawołać
+`linkOfertyAktywny(offer)` przed hasłem i danymi** — pilnuje tego
+`scripts/test-link-oferty.mjs` (czyta źródła wszystkich tras).
+
+`ud_offer_by_token` (SQL) nie jest używana przez panel. Do 13.11 zwracała
+anonimowo cały wiersz oferty (e-mail, telefon, kod dostępu) z pominięciem PIN-u;
+teraz zwraca tylko nazwę, numer, status i termin, wyłącznie dla ważnego linku
+poza archiwum, i tylko `service_role`. Licznika otwarć nie ma — świadomie:
+stronę chroni hasło z limitem prób.
+
+Kolejność wdrożenia: **migracja `…_oferty_wygasanie_linku.sql`, potem panel**
+— panel czyta `share_expires_at`; bez kolumny zapytanie o ofertę zwróci błąd
+i strona oferty odpowie 404 każdemu klientowi. **Migracja zastosowana na
+produkcji 16.11.2026** (wersja `20261116170158`; testy na produkcji 15/15),
+więc panel z tą zmianą można wdrożyć w dowolnej chwili.
+
+Testy w `apps/panel`: `pnpm test:link-oferty` (helper i strażnik tras bez bazy +
+SQL na jednorazowym Postgresie: `supabase/tests/link-oferty.sql`, ten sam plik
+idzie na produkcji jako jedno zapytanie i wszystko wycofuje).
+
+### Oferta CEU LOI PREMIUM — czytnik sprawdzony na prawdziwej ofercie (panel v.0.79, 20.11.2026)
+
+`parseCEU.js` powstał na próbce i do 20.11.2026 nie przeczytał żadnej
+prawdziwej oferty CEU — pierwsza (`LOIP/2026/001093`, oferta UD/2026/CE/00052)
+wyszła z dziurami, które klient widział w tabeli porównania. Układ tej oferty:
+nazwa klauzuli i jej status w **osobnych liniach**, nazwy z punktorem „l "
+(znak z czcionki symboli), „4. Ubezpieczony Imię Nazwisko" w osobnej linii,
+**jeden** „Okres oczekiwania 30 dni" dla wypadku i choroby, a klauzula wypłaty
+od 1. dnia — zdaniem w pozycji 12 („Klauzula wypłaty od 1-ego dnia włączona do
+ubezpieczenia."), nie na liście klauzul opcjonalnych.
+
+- **Okres oczekiwania CEU idzie do obu kolumn** (`wait_accident` =
+  `wait_illness`; OWU LOI PREMIUM § 2 pkt 4 nie rozróżnia wypadku i choroby).
+  Wcześniej tabela pokazywała „—".
+- **Zakażenie HIV/WZW z CEU ma wspólny klucz `hiv_wzw`** — ten sam wiersz co
+  Leadenhall i ta sama reguła `coversHivWzw()`. Wcześniej punktor robił z niego
+  klucz techniczny `ceu_l_zakazenie_hiv_wzw`.
+- **Wypłata od 1. dnia (`first_day`) ma warunki pod tabelą** (`EXTRA_NOTES`
+  w `comparisonRows.js`, treść i tytuł liczone z pozycji): niezdolność
+  nieprzerwanie ≥ 30 dni **i** średni miesięczny przychód z 12 miesięcy przed
+  umową co najmniej **20 000 zł (LOI PREMIUM, klauzula 2)** albo **15 000 zł
+  (Utrata Dochodu, klauzula 13)**; nie dotyczy kręgosłupa, wad wrodzonych
+  i zwyrodnień (wtedy 30 dni okresu oczekiwania) ani niebezpiecznych
+  aktywności. Sprawdzone w OWU z 01.04.2026 (LOI PREMIUM v1.2, Utrata Dochodu
+  v9.8). Dla OWU „dla zatrudniających" próg nie jest wpisany (nie sprawdzony) —
+  notatka mówi „kwotę określoną w klauzuli". Sam wiersz „TAK" bez tej notatki
+  obiecywałby wypłatę od pierwszego dnia bez warunków — nie zdejmuj jej.
+- **Oferty już zapisane poprawia „Odśwież"** na stronie oferty
+  (`refreshOfferDocuments`: ponowny odczyt PDF-ów, brakujące OWU, nowe
+  podsumowanie) — bez migracji.
+- „Istotne informacje o warunkach oferty" (`offerConditions.js`) są pisane pod
+  Leadenhall (śmierć i inwalidztwo NW, rozszerzenia LW…) i pokazują się także
+  przy wariancie CEU — LOI PREMIUM śmierci nie obejmuje. Do osobnej decyzji.
+
+Test: `pnpm test:extras` (układ tej oferty z wymyślonymi danymi; na kodzie
+sprzed zmiany 16 czerwonych).
+
 ### Podmiana wersji OWU — co wolno, a co urywa dostęp
 
 Na stronie pokazujemy **tylko aktualne OWU**. Wgląd w wersje historyczne idzie
@@ -1521,6 +2670,108 @@ jako pokryta.
 Test: `pnpm test:owu` w `apps/panel`. `test:parser` z tego samego katalogu to
 narzędzie ręczne — bierze dwa pliki PDF jako argumenty i bez nich się wywala;
 to nie jest regres.
+
+
+### Kosz ofert — 30 dni na przywrócenie (panel v.0.70, 13.10.2026)
+
+Decyzja właściciela po przypadkowym usunięciu oferty UD/2026/CE/00034:
+„Usuń" kasowało ofertę na stałe razem z wariantami, PDF-ami w kubełku,
+PIN-ami, pytaniami klienta i historią wysyłek. Odtworzenie szło z maila
+w Resend (link z tokenem) i PDF-ów z Dysku — bez kosza nie ma innej drogi,
+bo kopia bazy przywraca całą bazę naraz.
+
+Od v.0.70 oba przyciski „Usuń" (lista ofert i strona oferty) wołają
+`ud_oferta_do_kosza()` (migracja `…_oferty_kosz.sql`):
+
+- **W `ud_offers_kosz` zostaje komplet**: wiersz oferty i wszystkie wiersze
+  zależne jako JSON (warianty, pliki, PIN-y, pytania, wysyłki) oraz leady, przy
+  których ten wariant był sprzedany. **Potem oferta jest usuwana jak dotąd.**
+  To jest sedno: żadne miejsce czytające `ud_offers` — lista, strona klienta
+  pod linkiem, tablica leadów, statystyki, przypomnienia SMS — nie musi wiedzieć
+  o koszu. Oferty w koszu po prostu nie ma, klient traci dostęp od razu.
+  Nie zamieniaj tego na kolumnę „usunięto" w `ud_offers` — trzeba by dopisać
+  filtr w kilkudziesięciu zapytaniach, a jedno przeoczone zostawia klientowi
+  otwarty link do „usuniętej" oferty.
+- **Pliki PDF zostają w kubełku** przez 30 dni (adresy podpisuje panel tylko
+  dla istniejących ofert, więc nikt ich nie widzi).
+- **Przywrócenie** (`/panel/kosz` → „Przywróć", `ud_oferta_z_kosza()`) wstawia
+  wszystko z powrotem z **tym samym id i `share_token`** — link z maila do
+  klienta znowu działa, numer, status, wersja, stan przypomnienia i historia
+  wysyłek też wracają. Sprzedany wariant wraca do leada tylko wtedy, gdy lead
+  dalej jest w „Wygrany" i nikt nie wpisał innego; wersja leada rośnie.
+- **Usuwa** właściciel oferty albo administrator (`ud_leady_widzi`, jak RLS
+  na `ud_offers`). Do v.0.69 panel kasował kluczem serwisowym, więc każdy
+  zalogowany agent mógł usunąć cudzą ofertę po id — kosz to zamknął.
+  **Widzi i przywraca**: ci sami oraz osoba, która ofertę usunęła. Konto
+  nieaktywne — nic.
+- **Po 30 dniach wpis jest nie do przywrócenia i znika z listy**, a cron
+  `kosz-ofert-czyszczenie` (co godzinę o :17, włączony; najwyżej 20 wpisów
+  naraz) woła `POST /api/cron/kosz-ofert` (token z Vaulta). SQL **zajmuje**
+  wpisy (`czyszczenie_od`, `FOR UPDATE SKIP LOCKED`), dopiero potem panel usuwa
+  pliki z kubełka — tylko ścieżki `<offer_id>/…` — i wpis. Zajęty albo po
+  terminie wpis `ud_oferta_z_kosza` odrzuca (`po_terminie`): przywrócenie nie
+  może się wcisnąć między usunięcie plików a usunięcie wpisu i oddać oferty
+  z martwymi odnośnikami do PDF-ów. Najpierw pliki, potem wpis: wpis bez
+  plików da się powtórzyć za godzinę, pliki bez wpisu zostałyby w kubełku na
+  zawsze. To jest usunięcie danych osobowych na dobre.
+- Twarde `deleteOffer()` zostało wyłącznie do sprzątania po nieudanym
+  utworzeniu oferty (PDF nie dał się odczytać). „Usuń wariant" na stronie
+  oferty nadal kasuje wariant na stałe — kosz go nie obejmuje.
+
+**„Anuluj" w okienku potwierdzenia nie działał** (do v.0.69): przy
+`use:enhance` SvelteKit ignoruje `preventDefault()` z `onsubmit`, więc
+`onsubmit={(e) => { if (!confirm(…)) e.preventDefault(); }}` wysyłało formularz
+mimo „Anuluj". Tak najpewniej poszła do usunięcia oferta 00034; tak samo
+działały „Usuń OWU" (kasuje plik z kubełka na stałe), „Usuń logo", „Usuń plik"
+dystrybutora i „Odśwież wszystkie". Od v.0.70 jedyny wzorzec to
+`use:enhance={potwierdz('…', dalej)}` z `src/lib/potwierdz.js` — `cancel()`
+wewnątrz funkcji enhance. `test:kosz` pilnuje, żeby `onsubmit` z `confirm(`
+nie wrócił w żadnym pliku `.svelte`.
+
+Dodając do tabel ofert kolumnę NOT NULL, pamiętaj o koszu: przywrócenie
+wstawia wiersze przez `jsonb_populate_record(set)`, więc kopia sprzed zmiany
+dostanie w nowej kolumnie NULL i przywrócenie się nie uda.
+
+Dwa przypadki brzegowe, które migracja obsługuje (przegląd z 13.10.2026 na
+schemacie produkcji):
+
+- **Konto właściciela usunięte w panelu Supabase**, gdy oferta leży w koszu:
+  `ud_offers.user_id` ma na produkcji klucz do `auth.users` z `ON DELETE SET
+  NULL`, więc przywrócenie zeruje `user_id`, jak baza zrobiłaby to żywej
+  ofercie — zamiast padać na kluczu obcym. Ofertę bez właściciela widzi
+  administrator.
+- **Oferta wstawiona ręcznie z powrotem z tym samym id** (SQL Editor), gdy jej
+  wpis wciąż jest w koszu: ponowne „Usuń" zastępuje stary wpis nowym i dopisuje
+  jego pliki do listy czyszczenia. Wcześniej `unique(offer_id)` blokował
+  usunięcie, a stary wpis z danymi klienta nie znikał nigdy.
+
+**Stan na 14.10.2026: WDROŻONE.** Migracja wklejona przez właściciela w SQL
+Editor (wersja `20261013150000` odnotowana ręcznie), panel v.0.71. Sprawdzone
+na produkcji: treść 5 funkcji = repozytorium (md5), uprawnienia tylko
+`service_role`, tabela z RLS bez polityk i bez dostępu dla anon/authenticated,
+cron `kosz-ofert-czyszczenie` włączony (`17 * * * *`). Przebieg „do kosza →
+lista → przywrócenie" na prawdziwym schemacie w wycofanej transakcji: `ok`,
+oferta na liście, `ok`, wiersze „bit w bit", wpis z kosza znika.
+
+**Panel v.0.70 poszedł na produkcję przed migracją** (13.10.2026): push na
+gałąź roboczą wdrożył `udappnew` od razu, a migracja czekała na wklejenie.
+Bez funkcji w bazie „Usuń" kończy się błędem i nic nie znika — od v.0.71 po
+polsku („Kosz ofert nie jest jeszcze włączony w bazie — nic nie zostało
+usunięte…"), wcześniej surowym `PGRST202`. Kolejność „baza, potem panel"
+trzeba pilnować **przed pushem**, nie przed scaleniem.
+
+Testy: `pnpm test:kosz` w `apps/panel` — warstwa panelu na atrapie (komunikaty,
+także brak funkcji w bazie, kolejność czyszczenia, tylko pliki z katalogu
+oferty, źródła: oba „Usuń" idą do kosza, użytkownik z sesji, token crona przed
+czymkolwiek) i funkcje SQL na jednorazowym Postgresie (`supabase/tests/kosz.sql`,
+51 przypadków: przeniesienie, przywrócenie „bit w bit", kto usuwa i kto widzi,
+termin 30 dni, zajęcie przez czyszczenie, konflikt linku, usunięty właściciel,
+ponowne usunięcie odtworzonej oferty, uprawnienia). Atrapa
+(`supabase/tests/kosz-stub.sql`) ma klucz `user_id → auth.users` i domyślne
+uprawnienia do nowych tabel jak produkcja — bez nich brak `revoke` w migracji
+przechodził na zielono. Bramka tokenu crona jest wspólna
+(`src/lib/server/cronBramka.js`, przypomnienia i kosz) i sprawdzana zachowaniem:
+przepuszcza tylko `true` z bazy.
 
 ---
 
@@ -1860,6 +3111,65 @@ zapisać w zakładce i sprawdzić w SSR. W archiwum etap zostaje (np. „Klient
 ubezpieczony"), ale bez odnośnika: zarchiwizowanego leada nie ma na tablicy.
 Klient bez leada zostaje na liście. Karta klienta otwiera się z obu widoków.
 
+### Klienci: świadczenie, stan oferty, menu, sąsiedzi na karcie (v.0.80, 20.11.2026)
+
+Prośba właściciela z 20.11.2026. Kolumny: Klient (nazwisko, pod nim telefon
+jako `tel:`), **Świadczenie**, Akcja, Źródło, Przypisany do, Dodano —
+kolumny „Kontakt" już nie ma (e-mail jest w wyszukiwaniu i w menu).
+
+- **Świadczenie** = miesięczne świadczenie z okresowej niezdolności,
+  `ud_clients.temp_incapacity_sum`. Kolumna jest na produkcji **tekstem**
+  (20.11: 73 z 83 to same cyfry, 10 pustych) — czyta ją `kwotaZTekstu` jak
+  SQL-owe `ud_kwota`; do przeglądarki idzie liczba, śmieci dają „—", nigdy
+  NaN. Format „8000 zł/mies." — polski zapis nie grupuje liczb czterocyfrowych.
+- **Pod odznaką Akcja — stan najnowszej WYSŁANEJ oferty** (`sent_at`, także
+  w archiwum — archiwizacja to porządek na liście, nie koniec sprawy; wtedy
+  „· w archiwum"): `src/lib/klienci/oferta.js`. „Otwarta" znaczy, że klient
+  wpisał kod i zobaczył ofertę **po ostatniej wysyłce**: `viewed_at` ustawia
+  tylko pierwsze otwarcie w statusie `sent`, a ponowna wysyłka podbija
+  `sent_at` i `wersja`, więc `viewed_at` < `sent_at` to otwarcie poprzedniej
+  wersji (20.11: 6 z 18 ofert `sent`). Brzmienie:
+  „wysłana 10.11 · otwarta 12.11", „wysłana 15.11 · nieotwarta",
+  „wysłana ponownie 16.11 · nieotwarta (poprzednia wersja otwarta 12.11)",
+  na końcu decyzja („· wariant wybrany 07.11" / „· rezygnacja 08.11"); wybór
+  bez otwarcia po ostatniej wysyłce (karta otwarta wcześniej) nie twierdzi
+  ani „otwarta", ani „nieotwarta". Wyszukiwanie dokładnie „otwarta",
+  „nieotwarta" albo „decyzja" filtruje po stanie, nie po tekście —
+  „nieotwarta" i „poprzednia wersja otwarta" zawierają słowo „otwarta".
+- **Menu wiersza na lewy przycisk** (decyzja właściciela): kliknięcie
+  w wiersz poza odnośnikiem, przyciskiem i polem otwiera menu: Otwórz kartę
+  klienta, Utwórz ofertę, Pokaż na tablicy (gdy lead jest na tablicy),
+  Zadzwoń, Napisz e-mail, Kopiuj telefon. Nazwisko dalej prowadzi wprost do
+  karty. Lewy klik nie otwiera menu przy zaznaczonym tekście, drugim
+  kliknięciu podwójnego i z klawiszem modyfikującym; prawy klik — te same
+  wyjątki co na tablicy (Shift, odnośniki, pola, zaznaczenie zostawiają menu
+  przeglądarki; `src/lib/menuKontekstowe.js`, wspólne z `Tablica.svelte`).
+  Z klawiatury: przycisk „⋯" w pierwszej komórce. Komunikat „Skopiowano
+  telefon" idzie przez stały region `role="status"` (region dodany razem
+  z tekstem czytniki często przemilczają).
+- **`Menu.svelte` (wspólne z tablicą): Enter/Spacja na pozycji-odnośniku
+  klika odnośnik** — wcześniej Enter tylko zamykał menu i „Zadzwoń" na
+  tablicy nie dzwonił. Po `tel:`/`mailto:` fokus wraca na przycisk menu
+  (strona zostaje); po odnośniku wewnętrznym — nie.
+- **Karta klienta: „← Poprzedni klient" / „Następny klient →" i „N z M"**
+  w kolejności i z filtrami listy (`?widok=`, `?zrodlo=` jadą w odnośnikach
+  i w „Wróć do listy"). Kolejność i filtry są w JEDNYM module,
+  `src/lib/klienci/lista.js` (`created_at` malejąco, remis po `id`) —
+  `klienciWKolejnosci()` w `server/klienci.js` służy i liście, i strzałkom,
+  więc nie mogą się rozjechać. Strzałki liczą tylko widocznych klientów
+  (`klienciWidoczni`) i nie wołają synchronizacji tablicy. Gdy wyliczenie
+  sąsiadów się nie uda, karta i tak się pokazuje, ze strzałkami nieaktywnymi.
+  Dane karty są `$derived` — zwykłe `const` zostawiało po przejściu do
+  sąsiada poprzedniego klienta pod nowym adresem.
+- Lista i strzałki czytają wszystkich widocznych klientów, więc obie podlegają
+  limitowi 1000 wierszy PostgREST (lista podlegała mu już wcześniej).
+
+Testy: `klienci.spec.js` (SSR), `klienci-menu.spec.js` i
+`klienci-karta.spec.js` (przeglądarka, harnessy `test/leady/klienci.html`
+i `karta.html` z prawdziwymi stronami), `menu.spec.js`, `test:leady-model`.
+Panelowy `playwright.config.js` ma na sztywno `chromium-1194`; w obrazie bez
+niego: `PLAYWRIGHT_CHROMIUM=/opt/pw-browsers/chromium-<wersja>/chrome-linux64/chrome`.
+
 ### Nagłówek: „Ustawienia" zamiast trzech zakładek (v.0.66, 05.10.2026)
 
 Wysyłki, Panel Admina i dawne Ustawienia są jedną pozycją **„Ustawienia"
@@ -2097,7 +3407,7 @@ które zgodę ma — nie z kartoteki klientów.
 
 ---
 
-## Wersja ukraińska (`/uk/`)
+## Wersja ukraińska (`/uk/`) — gałąź `claude/wersja-ukrainska`, NIE na produkcji
 
 Od 26.11.2026 część portalu ma odpowiednik po ukraińsku: strona główna,
 „Jak to działa", wyłączenia, przewodnik po wniosku i trzy zawody (programista,
@@ -2105,12 +3415,22 @@ fryzjer, kosmetyczka). Powód: w latach 2022–2025 Ukraińcy założyli w Polsc
 109 tys. jednoosobowych firm (PIE), a po ukraińsku polskiej polisy od utraty
 dochodu nie opisywał nikt.
 
+**Gałąź odchodzi od `claude/portal-rebuild-seo-llm-yz2x4t` (produkcyjnej),
+nie od `main`.** Pierwsza wersja (commit `01d60f2`) powstała z `main`, który
+stoi od 12.10.2026 — czyli była przekładem polszczyzny sprzed sześciu tygodni
+(zasiłek 2 240 zł, „od pierwszego dnia", Leadenhall i CEU jako
+ubezpieczyciele, stara lista wyłączeń). 26.11.2026 gałąź produkcyjna została
+do niej scalona, a przekład wyrównany z obecną treścią. **`main` nie jest
+gałęzią produkcyjną** — pracę nad portalem zaczynaj od produkcyjnej, a PR
+z wersją ukraińską kieruj do niej. Scalenie do produkcyjnej = wdrożenie.
+
 | Co | Gdzie |
 |---|---|
 | lista par PL ↔ UK, `hreflang`, przełącznik | `src/lib/jezyki.ts` |
 | strony | `src/pages/uk/` |
 | treść trzech zawodów | `src/dane/uk/zawody.ts` |
-| nazwy kroków wniosku, granice wieku | `src/lib/uk.ts` |
+| lista wyłączeń (przekład `src/lib/wylaczenia.ts`) | `src/dane/uk/wylaczenia.ts` |
+| nazwy kroków wniosku, granice wieku, zdania o ZUS-ie i kalibracji | `src/lib/uk.ts` |
 | napisy kalkulatora | `NAPISY` w `Kalkulator.svelte` |
 | napisy banera cookies | `NAPISY` w `public/zgody.js` |
 
@@ -2130,18 +3450,48 @@ dochodu nie opisywał nikt.
 - **Treść ukraińska to przekład polskiej, zdanie w zdanie.** Polskie teksty
   były sprawdzane z OWU; zdanie dopisane tylko po ukraińsku jest nowym
   twierdzeniem o produkcie. Wyjątkiem jest sekcja „Якщо ви з України" na
-  `/uk/` i jedno zdanie o wojnie na `/uk/wylaczenia/` — tam każde zdanie ma
-  w komentarzu źródło (paragraf OWU, pole formularza albo przepis).
-- **Kwot, limitów i okresów nie wpisuj.** Idą z `symulacja.ts` i ze schematu
-  wniosku, tak jak po polsku.
+  `/uk/` — tam każda pozycja ma w komentarzu źródło (polska treść sprawdzona
+  z OWU, schemat wniosku, potwierdzenie właściciela albo przepis), a dwie
+  odczytane tylko ze streszczenia OWU są oznaczone „DO SPRAWDZENIA".
+- **Wyłączenia: przekład pozycja w pozycję, paragrafy z polskiego pliku.**
+  `polaczone()` w `src/dane/uk/wylaczenia.ts` spina przekład z `GRUPY`
+  z `src/lib/wylaczenia.ts` po numerze grupy i pozycji i bierze stamtąd
+  `zrodla` (stoją na stronie w zapisie polskim, `lang="pl"`). Rozjazd liczby
+  grup albo pozycji **przerywa build** — lepiej nie wdrożyć, niż postawić
+  przekład przy cudzym paragrafie. Dodajesz pozycję po polsku — dodaj jej
+  przekład w tym samym miejscu listy.
+- **Kwot, limitów i okresów nie wpisuj.** Idą z `symulacja.ts`, `zus.ts`,
+  `granice.ts` i ze schematu wniosku, tak jak po polsku. Zdania z kwotami
+  (`ZUS_TEKST_UK`, `OPIS_KALIBRACJI_UK`, `LIMIT_CEU_ZDANIE_UK` w `uk.ts`) są
+  przekładem polskich stałych, pole w pole, złożonym z tych samych liczb.
+- **Te same zakazy co po polsku:** bez „od pierwszego dnia" (`першого дня`),
+  okres wypłaty to czas NAJDŁUŻSZY (`щонайдовше`), zasiłek i świadczenie obok
+  siebie bez sumy, „період очікування" (nie „каренція"). Ubezpieczyciel jest
+  jeden — Lloyd’s Insurance Company S.A.; Leadenhall i CEU to „ковергольдери
+  Lloyd’s", nigdy „страховики". Zdanie nie kończy się nazwą z „S.A." ani
+  „sp. z o.o." (druga kropka).
 - **Poprawiasz polski tekst — popraw ukraiński.** Dotyczy wyłączeń, pytań,
-  etapów, treści trzech zawodów, napisów kalkulatora i banera cookies.
+  etapów, treści trzech zawodów, `ZUS_TEKST`, `OPIS_KALIBRACJI`, napisów
+  kalkulatora i banera cookies.
+- **Zdania z `{wyrażeniem}` składaj w frontmatterze strony**, nie w szablonie
+  (patrz „Astro gubi spację…") — strony ukraińskie tak robią.
 - **Strona ukraińska nie ładuje Newsreadera ani Public Sans** — nie mają
   cyrylicy. `Baza.astro` podstawia tam kroje systemowe pod te same zmienne.
 - **Odnośnik z ukraińskiej strony do polskiej ma `hreflang="pl"`** i polską
-  nazwę (dokumenty, strony prawne, lista zawodów).
+  nazwę (dokumenty, strony prawne, lista zawodów, artykuł o ciąży,
+  odkładanie na `/kalkulator/`).
+- **Przełącznik „UA" w pasku strony polskiej jest schowany poniżej 640 px
+  i od 1024 do 1279 px** — tam siedem pozycji menu i przycisk mieszczą się na
+  styk, a z przełącznikiem pasek wychodził 2 px poza ekran. W obu zakresach
+  wersję ukraińską wskazuje odnośnik „Українською" w stopce.
 - **Obsługa jest po polsku i strona mówi to wprost** przy każdym telefonie.
   Jeśli pojawi się obsługa po ukraińsku, zmień te zdania — nie wcześniej.
+- **Polskie strony nie mogą się przez to zmienić.** Sprawdzone 26.11.2026:
+  wszystkie 242 pliki `.md` polskich stron, `llms.txt`, `_redirects`,
+  `_routes.json` i `_headers` z builda tej gałęzi są bajt w bajt takie jak
+  z gałęzi produkcyjnej; w HTML-u polskich stron doszły tylko odnośniki
+  `hreflang`, przełącznik w pasku i odnośnik w stopce. Po kolejnym scaleniu
+  produkcyjnej powtórz to porównanie (dwa buildy, `diff` po `.md`).
 
 ### Nowy zawód po ukraińsku
 
@@ -2151,31 +3501,36 @@ i odnośnik w stopce powstają same.
 
 ### Do potwierdzenia przed publikacją (stan na 26.11.2026)
 
-Gałąź `claude/wersja-ukrainska` nie jest scalona. Zanim trafi na `main`:
+Gałąź `claude/wersja-ukrainska` nie jest scalona. Zanim trafi na produkcyjną:
 
-1. Leadenhall i CEU: czy przyjmują obywateli Ukrainy i jakich dokumentów
-   wymagają. Strona mówi tylko, że OWU nie stawia warunku obywatelstwa
-   (LW044 § 15 ust. 18, CEU § 29 pkt 12) — odczytane ze streszczenia PDF-ów,
-   nie z pełnego tekstu.
-2. Zdania o wojnie i stanie wojennym (LW044 § 11 ust. 1 lit. a i d; CEU § 18
-   pkt 6 i 10, § 29 pkt 20) oraz o dokumentach do wypłaty (LW044 § 14 ust. 6;
-   CEU § 11 ust. 2) — to samo źródło, do sprawdzenia z pełnym tekstem OWU.
+1. **Obywatelstwo.** Właściciel (26.11.2026): ubezpieczony musi mieć PESEL —
+   strona to mówi („PESEL і вік"). Zdanie, że OWU nie stawia warunku
+   obywatelstwa (LW044 § 15 ust. 18, CEU § 29 pkt 12), jest odczytane ze
+   streszczenia PDF-ów, nie z pełnego tekstu — do sprawdzenia (`pdftotext`
+   z `/owu/<slug>.pdf`).
+2. **Dokumenty do wypłaty w CEU** (§ 11 ust. 2: ZUS ZLA, a bez prawa do ZLA
+   zaświadczenie od lekarza prowadzącego) — to samo źródło, do sprawdzenia.
+   Zdania o wojnie i o ochronie na całym świecie nie są już osobnym
+   twierdzeniem: to przekład polskiej listy wyłączeń (z paragrafami,
+   sprawdzonej 23.11.2026) i odpowiedzi z `tresci.json`.
 3. Przekład przeczytany przez osobę znającą ukraiński i polski.
 4. Baner cookies po ukraińsku — przekład 1:1 polskiego; akceptacja tak jak
    przy treści polskiej.
-5. Kto odpowiada na zapytanie po ukraińsku.
-
-Polska pozycja na `/wylaczenia/` mówi „Udział w działaniach wojennych",
-a oba OWU wyłączają także zdarzenia SPOWODOWANE wojną. Wersja ukraińska mówi
-to drugie; polską warto sprawdzić przy okazji punktu 2.
+5. **Kto odpowiada na zapytanie po ukraińsku.** Właściciel (26.11.2026):
+   asystentka z ElevenLabs. Stan i czego brakuje: „Asystentka po ukraińsku"
+   w `asystent/przed-uruchomieniem.md`. Dopóki asystentki nie ma na stronie,
+   zdania „Розмова — польською мовою" zostają.
 
 ### Testy
 
-`test/uk.spec.js` — 21 testów. Większość sprawdza zgodność z wersją polską
-(te same kwoty, tyle samo wyłączeń, etapów, pytań, ryzyk), a nie samą wersję
-ukraińską; do tego `hreflang` w obie strony, etykiety przewodnika porównane
-ze źródłem kreatora, baner cookies po ruchu sieciowym i szerokość 390 px.
-Jakości przekładu testy nie sprawdzają.
+`test/uk.spec.js` — 26 testów. Większość sprawdza zgodność z wersją polską
+(te same kwoty, tyle samo wyłączeń, etapów, pytań, ryzyk, te same paragrafy
+przy wyłączeniach, te same pola w zdaniach o ZUS-ie i w napisach kalkulatora),
+a nie samą wersję ukraińską; do tego zakazane zwroty, nazwy podmiotów,
+`hreflang` w obie strony, etykiety przewodnika porównane ze źródłem kreatora,
+baner cookies po ruchu sieciowym i szerokość 390 px. Kwoty w testach liczone
+z tych samych plików co strona, nie wpisane. Jakości przekładu testy nie
+sprawdzają.
 
 ---
 
@@ -2197,6 +3552,17 @@ Kontrasty, które już policzyliśmy dla tła białego:
 | `--color-linia-pole` (krawędź pola) | 3,09:1 | 3:1 dla elementów interfejsu |
 | `--color-tekst-drugi` | 5,52:1 | 4,5:1 dla drobnego tekstu |
 | `--color-tekst-trzeci` | 2,65:1 | **za mało na tekst** — tylko do ozdobników |
+| `--color-alarm` (kwoty ZUS, błędy formularzy) | 5,98:1 | 4,5:1 — do 22.10.2026 #D6453D, 4,40:1 |
+| `--color-akcent-ciemny` (linki, kwoty świadczenia, tło przycisków z białym napisem) | 5,97:1 | 4,5:1 — do 23.10.2026 #0E96D0, 3,34:1 |
+| `--color-akcent-hover` | 7,65:1 | 4,5:1 — do 23.10.2026 #0B7CAF, 4,65:1 na bieli, 4,45:1 na `tlo-jasne` |
+| `--color-akcent` (#1BAEE5) | 2,55:1 | **tylko ozdoby, obramowania i znak marki** — nie tekst |
+
+Tekst stoi także na cyjanowych tłach (`tlo-jasne`, `tlo-cyjan`, `tlo-mocne`) —
+`test/kontrast.spec.js` liczy kontrast tokenów tekstu z `global.css` na każdym
+z nich, biały napis na przyciskach i kolory w samodzielnym CSS banera zgód
+(`zgody.js`) i okienka awarii (`awaria.js`) — tych tokeny z `global.css` nie
+obejmują, więc zmiana palety idzie też tam. Nowy kolor tekstu dopisz do tego
+testu.
 
 `--color-tekst-trzeci` nie nadaje się na treść, którą ktoś ma przeczytać.
 Etykiety typu „Jednorazowe świadczenie" trafiły tam przez pomyłkę i wróciły
@@ -2345,10 +3711,11 @@ możliwym zdjęciem (czerń pod spodem), w obrębie kolumny tekstu:
 
 Dwie rzeczy, których nie ruszaj bez ponownego przeliczenia:
 
-- **Etykieta mono nie może wrócić na `--color-akcent-ciemny`** — ten daje na
-  czystej bieli 3,34:1, czyli za mało dla 12 px. Stąd `--color-akcent-tekst`
-  (#0A6A96, 5,97:1). `--color-akcent-hover` też nie wystarczy (4,65:1 zostawia
-  zero zapasu, gdy tłem jest zasłona, a nie biel).
+- **Etykieta mono stoi na `--color-akcent-tekst`** (#0A6A96, 5,97:1). Do
+  23.10.2026 `--color-akcent-ciemny` był jaśniejszy (#0E96D0, 3,34:1 na bieli
+  — za mało dla 12 px); od tego dnia oba mają tę samą wartość. Nie rozjaśniaj
+  `--color-akcent-ciemny` z powrotem — stoi na nim tekst i biały napis każdego
+  przycisku „Policz składkę".
 - **Wersja mobilna zasłony liczy stopnie w pikselach, nie w procentach.**
   Wysokość pasa zależy od długości tekstu, a ten jest inny na każdej ze 188
   podstron; przy procentach tekst potrafiłby wypaść tam, gdzie zasłona jeszcze
@@ -2480,3 +3847,27 @@ Kadr 3:2, rozdzielczość 2K, sto kredytów za ujęcie. Pliku nie wgrywa się do
 repozytorium: adres z generatora idzie do `aura_articles.preview_image_url`,
 a normalizacja sama go pobiera i zapisuje warianty 800/1600 w kubełku (patrz
 „Nowy artykuł w portalu").
+
+**Okładka z generatora cięższa niż ~0,5 MB — przez wsrv.nl w 1600 px.**
+Plik spoza kubełka normalizacja dekoduje sama (usługa skalowania Supabase
+bierze tylko pliki z kubełka i powyżej 1,5 MB). Okładki 2K z Artlista ważą
+280–430 kB i przechodzą; okładki partii 1 „Przychodzi… do lekarza” (generacje
+z 30.10.2026) ważą 0,8–1,0 MB i każde wywołanie kończyło się 546
+`WORKER_RESOURCE_LIMIT` (10.11.2026, stomatolog: dwie próby). Działa adres
+`https://wsrv.nl/?url=<adres generatora, zakodowany>&w=1600&output=jpg&q=90` —
+ten sam obraz, JPEG 1600 px, ~340 kB; warianty wychodzą 1600×1067. W SQL:
+`'https://wsrv.nl/?url=' || replace(replace(replace(replace(replace(replace(preview_image_url,'%','%25'),'&','%26'),'?','%3F'),'=','%3D'),'/','%2F'),':','%3A') || '&w=1600&output=jpg&q=90'`.
+Rozmiar źródła sprawdzisz przed publikacją: `net.http_get` z nagłówkiem
+`Range: bytes=0-0` i `headers->>'content-range'`. Adres idzie przez cudzą
+usługę — tylko dla obrazu, który i tak będzie publiczny.
+
+**Bloom (trybloom.ai) zamiast Artlista**, gdy ten wymaga ponownego logowania
+(26.10.2026, „przychodzi-lekarz-do-lekarza"): okładka z `bytedance/seedream-5-pro`
+(`size: "2400x1600"`), ikony z `openai/gpt-image-2.5-flare` — pierwsza z opisu,
+pięć kolejnych z nią jako obrazem wzorcowym, żeby zestaw był spójny. Marka
+UtrataDochodu w Bloom ma starą paletę i nie przyjmuje briefów („not ready for
+briefs"), więc kolory serwisu podajesz w promptcie. Wynik leży pod stałym
+adresem `https://www.rainbrand.com/img/<id>` — ten idzie do
+`preview_image_url`. Z sandboksa ten host jest zablokowany, ale narzędzie
+zapisuje kopię WebP w pełnej rozdzielczości w `tool-results/` sesji — stamtąd
+ikony poszły do repozytorium i dalej drogą przez GitHub.

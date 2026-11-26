@@ -20,10 +20,12 @@ import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { uruchomKlaster, wczytaj } from '../../scripts/lib/pg-tymczasowy.mjs';
 import {
   BladApi, adresPliku, dodajPolise, notatka, odczytajPoliseNowa, odczytajWgranaPolise, odpowiedzKolumny, odpowiedzLicznikow,
-  odpowiedzSzczegolow, odpowiedzWariantow, polisy, przetworz, statystyki, uzupelnijZPolisy, wczytajTablice, wgrajPolise, zmien, zwin,
+  odpowiedzSzczegolow, odpowiedzWariantow, polisy, przetworz, statystyki, statystykiZrodel, synchronizuj, uzupelnijZPolisy, wczytajTablice,
+  wgrajPolise, zmien, zwin,
 } from '../../src/lib/server/leady.js';
 import { liczNiedokonczone } from '../../src/lib/server/niedokonczone.js';
-import { listaKlientow } from '../../src/lib/server/klienci.js';
+import { kartaKlienta, listaKlientow } from '../../src/lib/server/klienci.js';
+import { filtryListy } from '../../src/lib/klienci/lista.js';
 
 const panel = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -35,7 +37,7 @@ export const UZYTKOWNICY = {
 };
 
 export async function startuj() {
-  const klaster = await uruchomKlaster({ dodatkowe: ['pomocnicze.sql'] });
+  const klaster = await uruchomKlaster({ dodatkowe: ['pomocnicze.sql', 'karta-klienta-stub.sql'] });
   const fixture = wczytaj('supabase/tests/fixture-ui.sql');
   const sql = (q) => {
     const r = klaster.psql(q);
@@ -90,6 +92,23 @@ export async function startuj() {
       return { data: r.stdout.trim() ? JSON.parse(r.stdout.trim()) : null, error: null };
     },
   };
+  // Lista kolumn z .select() jak w PostgREST: 'a, b', 'alias:kol->klucz',
+  // 'kol->>klucz', '*'. Wykonywana naprawdę — brakująca kolumna to błąd, jak na
+  // produkcji, a zapytanie, które ma czytać tylko `form_data->zrodlo`, nie dostaje
+  // całego form_data (tego test listy klientów pilnuje). Zagnieżdżeń (relacji)
+  // atrapa nie zna i mówi to wprost.
+  const projekcja = (kolumny) => {
+    if (typeof kolumny !== 'string' || !kolumny.trim() || kolumny.trim() === '*') return 't.*';
+    return kolumny.split(',').map((x) => x.trim()).filter(Boolean).map((pole) => {
+      const m = /^(?:([A-Za-z_][A-Za-z0-9_]*):)?([A-Za-z_][A-Za-z0-9_]*)((?:->>?[A-Za-z0-9_]+)*)$/.exec(pole);
+      if (!m) throw new Error(`Atrapa nie zna projekcji: ${pole}`);
+      const [, alias, kolumna, sciezka] = m;
+      const kroki = [...sciezka.matchAll(/(->>?)([A-Za-z0-9_]+)/g)];
+      const wyrazenie = kroki.reduce((w, [, op, k]) => `${w}${op}'${k}'`, `t."${kolumna}"`);
+      return `${wyrazenie} as "${alias ?? (kroki.length ? kroki.at(-1)[2] : kolumna)}"`;
+    }).join(', ');
+  };
+
   // Klient „z sesją agenta" do ofert i wariantów: czyta prawdziwe wiersze z bazy
   // testowej (bez RLS — uprawnienia ofert to osobny temat, nie tablicy leadów).
   // Ten sam kształt służy też licznikowi „Niedokończone" (select z count/head + is null).
@@ -97,8 +116,13 @@ export async function startuj() {
     from: (tabela) => {
       const warunki = [];
       let tylkoLiczba = false;
+      let kolumny = 't.*';
       const zapytanie = {
-        select: (_kolumny, opcje) => { tylkoLiczba = Boolean(opcje?.head && opcje?.count); return zapytanie; },
+        select: (lista, opcje) => {
+          tylkoLiczba = Boolean(opcje?.head && opcje?.count);
+          kolumny = projekcja(lista);
+          return zapytanie;
+        },
         eq: (k, v) => { warunki.push(`${k}::text = ${literal(String(v))}::jsonb #>> '{}'`); return zapytanie; },
         in: (k, v) => { warunki.push(`${k}::text in (select jsonb_array_elements_text(${literal(v.map(String))}::jsonb))`); return zapytanie; },
         is: (k, v) => {
@@ -106,25 +130,44 @@ export async function startuj() {
           warunki.push(`${k} is null`);
           return zapytanie;
         },
+        not: (k, op, v) => {
+          if (op !== 'is' || v !== null) throw new Error('Atrapa obsługuje tylko .not(kolumna, \'is\', null)');
+          warunki.push(`${k} is not null`);
+          return zapytanie;
+        },
         order: () => zapytanie,
         limit: () => zapytanie,
         maybeSingle: async () => {
           const zrodlo = `select * from public.${tabela}${warunki.length ? ` where ${warunki.join(' and ')}` : ''} limit 1`;
-          const w = sql(`select to_jsonb(t) from (${zrodlo}) t`);
+          const w = sql(`select to_jsonb(p) from (select ${kolumny} from (${zrodlo}) t) p`);
           return { data: w ? JSON.parse(w) : null, error: null };
         },
         then: (rozwiaz, odrzuc) => {
           try {
             const zrodlo = `select * from public.${tabela}${warunki.length ? ` where ${warunki.join(' and ')}` : ''}`;
             if (tylkoLiczba) { rozwiaz({ data: null, count: Number(sql(`select count(*) from (${zrodlo}) t`)), error: null }); return; }
-            // Kolejność po created_at, gdy tabela ją ma (ud_leady_etap jej nie ma).
-            const w = sql(`select coalesce(jsonb_agg(to_jsonb(t) order by to_jsonb(t)->>'created_at'), '[]'::jsonb) from (${zrodlo}) t`);
+            // Kolejność po created_at całego wiersza, gdy tabela ją ma (ud_leady_etap jej nie ma).
+            const w = sql(`select coalesce(jsonb_agg(to_jsonb(p) - '__kolejnosc' order by p.__kolejnosc), '[]'::jsonb)
+                             from (select ${kolumny}, to_jsonb(t)->>'created_at' as __kolejnosc from (${zrodlo}) t) p`);
             rozwiaz({ data: JSON.parse(w), error: null });
           } catch (e) { odrzuc(e); }
         },
       };
       return zapytanie;
     },
+  };
+
+  // „Według źródła" jak w load strony statystyk: osobno, błąd tylko w tej sekcji.
+  // ?brakZrodel=1 — udaje panel wdrożony przed migracją (rpc bez funkcji w bazie).
+  const zrodlaStatystyk = async (uzytkownik, parametry) => {
+    const transport = parametry.get('brakZrodel') === '1'
+      ? { rpc: async (n) => ({ data: null, error: { code: 'PGRST202', message: `Could not find the function public.${n}` } }) }
+      : sb;
+    try {
+      return { zr: await statystykiZrodel(transport, uzytkownik, parametry), zrBlad: '' };
+    } catch (e) {
+      return { zr: null, zrBlad: e instanceof BladApi && e.status !== 403 ? e.message : 'Nie udało się wczytać statystyk według źródła.' };
+    }
   };
 
   // ── Kubełek polis w pamięci; adres podpisany = ścieżka serwera testowego ────
@@ -236,9 +279,12 @@ export async function startuj() {
             return res.end(body);
           }
           if (sciezka === '/__test/ssr-statystyki') {
-            // Strona /panel/statystyki z danymi z tej samej funkcji co jej load (+page.server.js).
+            // Strona /panel/statystyki z danymi z tych samych funkcji co jej load (+page.server.js).
             const { render } = await serwer.ssrLoadModule('svelte/server');
             const Strona = (await serwer.ssrLoadModule('/src/routes/panel/statystyki/+page.svelte')).default;
+            // Jak load strony: najpierw synchronizacja leadów (statystyki.spec.js
+            // sprawdza też, że load ją woła przed obiema funkcjami).
+            await synchronizuj(sb);
             let st;
             try {
               st = await statystyki(sb, uzytkownik, url.searchParams);
@@ -246,23 +292,54 @@ export async function startuj() {
               if (e instanceof BladApi) return odpowiedz(res, e.status, { komunikat: e.message });
               throw e;
             }
-            const { body } = render(Strona, { props: { data: { st, blad: '' } } });
+            const { body } = render(Strona, { props: { data: { st, blad: '', ...(await zrodlaStatystyk(uzytkownik, url.searchParams)) } } });
             res.setHeader('content-type', 'text/html; charset=utf-8');
             return res.end(`<!doctype html><meta charset="utf-8"><body>${body}</body>`);
+          }
+          if (sciezka === '/__test/ssr-klient') {
+            // Karta klienta (/panel/klienci/<id>) z danymi z tej samej funkcji co jej load.
+            // ?nazwa= — klient po nazwisku z fixture. Dane strony idą też jako JSON
+            // (tak SvelteKit oddaje je przeglądarce) — test sprawdza, czego w nich nie ma.
+            const { render } = await serwer.ssrLoadModule('svelte/server');
+            const Strona = (await serwer.ssrLoadModule('/src/routes/panel/klienci/[id]/+page.svelte')).default;
+            const id = sql(`select id from public.ud_clients where full_name = ${literal(url.searchParams.get('nazwa') ?? '')}::jsonb #>> '{}'`);
+            // ?widok= i ?zrodlo= — filtry listy, z której agent przyszedł (strzałki „Poprzedni / Następny").
+            const dane = await kartaKlienta({ rpc: (n, a) => sb.rpc(n, a), from: (t) => sbOferty.from(t) }, uzytkownik, id,
+              filtryListy(url.searchParams));
+            if (!dane) return odpowiedz(res, 404, { komunikat: 'Klient nie znaleziony' });
+            const { body } = render(Strona, { props: { data: dane } });
+            res.setHeader('content-type', 'text/html; charset=utf-8');
+            return res.end(`<!doctype html><meta charset="utf-8"><body>${body}<script type="application/json" id="dane-strony">${
+              JSON.stringify(dane).replace(/</g, '\\u003c')}</script></body>`);
+          }
+          if (sciezka === '/__test/karta-dane') {
+            // Dane karty klienta dla harnessu w przeglądarce (test/leady/karta.html) — odpowiednik load.
+            const id = sql(`select id from public.ud_clients where full_name = ${literal(url.searchParams.get('nazwa') ?? '')}::jsonb #>> '{}'`);
+            const dane = await kartaKlienta({ rpc: (n, a) => sb.rpc(n, a), from: (t) => sbOferty.from(t) }, uzytkownik, id,
+              filtryListy(url.searchParams));
+            return dane ? odpowiedz(res, 200, dane) : odpowiedz(res, 404, { komunikat: 'Klient nie znaleziony' });
+          }
+          if (sciezka === '/__test/klienci-dane') {
+            // Dane zakładki „Klienci" dla harnessu w przeglądarce (test/leady/klienci.html) — odpowiednik load.
+            const clients = await listaKlientow({ rpc: (n, a) => sb.rpc(n, a), from: (t) => sbOferty.from(t) }, uzytkownik);
+            return odpowiedz(res, 200, { clients, ...filtryListy(url.searchParams) });
           }
           if (sciezka === '/__test/ssr-klienci') {
             // Zakładka „Klienci" z danymi z tej samej funkcji co jej load (+page.server.js).
             const { render } = await serwer.ssrLoadModule('svelte/server');
             const Strona = (await serwer.ssrLoadModule('/src/routes/panel/klienci/+page.svelte')).default;
             const clients = await listaKlientow({ rpc: (n, a) => sb.rpc(n, a), from: (t) => sbOferty.from(t) }, uzytkownik);
-            const { body } = render(Strona, { props: { data: { clients, archiwum: url.searchParams.get('widok') === 'archiwum' } } });
+            const { body } = render(Strona, { props: { data: { clients, ...filtryListy(url.searchParams) } } });
             res.setHeader('content-type', 'text/html; charset=utf-8');
-            return res.end(`<!doctype html><meta charset="utf-8"><body>${body}</body>`);
+            // Dane listy jak JSON (tak SvelteKit oddaje je przeglądarce) — test sprawdza, czego w nich nie ma.
+            return res.end(`<!doctype html><meta charset="utf-8"><body>${body}<script type="application/json" id="dane-strony">${
+              JSON.stringify(clients).replace(/</g, '\\u003c')}</script></body>`);
           }
           if (sciezka === '/__test/statystyki-dane') {
             // Dane strony /panel/statystyki dla harnessu w przeglądarce (odpowiednik load).
             try {
-              return odpowiedz(res, 200, { st: await statystyki(sb, uzytkownik, url.searchParams), blad: '', ja: uzytkownik });
+              return odpowiedz(res, 200, { st: await statystyki(sb, uzytkownik, url.searchParams), blad: '', ja: uzytkownik,
+                ...(await zrodlaStatystyk(uzytkownik, url.searchParams)) });
             } catch (e) {
               if (e instanceof BladApi) return odpowiedz(res, e.status, e.body);
               throw e;

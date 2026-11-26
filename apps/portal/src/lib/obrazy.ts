@@ -1,4 +1,5 @@
 import type { ImageMetadata } from 'astro';
+import { malymi } from '@ud/zawody';
 
 /**
  * Zdjęcia ilustracyjne: własne dla zawodu, wspólne dla kategorii.
@@ -91,7 +92,8 @@ export function zdjecieZawodu(
   return kategoria ? { obraz: kategoria, opis: opisIlustracji(nazwaKategorii) } : null;
 }
 
-export const opisIlustracji = (co: string) => `Zdjęcie ilustracyjne — ${co.toLowerCase()}`;
+/** Małymi literami, ale ze skrótami: „it / tech" czytało się jak zaimek. */
+export const opisIlustracji = (co: string) => `Zdjęcie ilustracyjne — ${malymi(co)}`;
 
 /** @deprecated Nazwa z czasów, gdy zdjęcia były wyłącznie kategorii. */
 export const opisKategorii = opisIlustracji;

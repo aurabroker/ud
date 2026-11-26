@@ -12,3 +12,11 @@ export {
   HEALTH_SURVEY_COLS,
   parseSum,
 } from './ankieta.js';
+export {
+  PARAMETRY_ZRODLA,
+  IDENTYFIKATORY_KLIKNIECIA,
+  PARAMETRY_PLATNE,
+  wartoscZrodlaPoprawna,
+  parametryZrodla,
+  zrodloZAdresu,
+} from './zrodlo.js';

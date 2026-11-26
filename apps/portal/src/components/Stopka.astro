@@ -17,6 +17,7 @@ const KOLUMNY: Record<Jezyk, { tytul: string; linki: Link[] }[]> = {
       linki: [
         { nazwa: 'Jak to działa', url: '/jak-to-dziala/' },
         { nazwa: 'Kalkulator',    url: '/kalkulator/' },
+        { nazwa: 'Wyłączenia',    url: '/wylaczenia/' },
         { nazwa: 'Zawody',        url: '/zawody/' },
         { nazwa: 'Blog',          url: '/blog/' },
       ],
@@ -75,13 +76,19 @@ const KOLUMNY: Record<Jezyk, { tytul: string; linki: Link[] }[]> = {
 const NAPISY = {
   pl: {
     opis: 'Prywatne ubezpieczenie utraty dochodu dla samozatrudnionych, kontraktowych, '
-      + 'freelancerów oraz etatowców. Świadczenie możliwe od pierwszego dnia niezdolności do pracy.',
+      + 'freelancerów oraz etatowców. Świadczenie wypłacane co miesiąc, po okresie '
+      + 'wyczekiwania ustalonym w umowie.',
     branze: 'Zawody według branży',
+    agent: 'agent ubezpieczeniowy',
+    wylaczenia: { nazwa: 'Czego polisa nie obejmuje', url: '/wylaczenia/' },
   },
   uk: {
     opis: 'Приватне страхування від втрати доходу для самозайнятих, контрактників, фрилансерів '
-      + 'і працівників на трудовому договорі в Польщі. Виплата можлива з першого дня непрацездатності.',
+      + 'і працівників на трудовому договорі в Польщі. Виплата щомісяця, після періоду '
+      + 'очікування, визначеного в договорі.',
     branze: '',
+    agent: 'страховий агент',
+    wylaczenia: { nazwa: 'Що не покривається', url: `${PREFIKS_UK}/wylaczenia/` },
   },
 }[jezyk];
 
@@ -134,8 +141,13 @@ const przelacznik = {
       </nav>
     )}
 
-    <div class="flex flex-wrap gap-4 justify-between pt-7 mt-10 border-t border-linia text-[13px] text-tekst-trzeci">
-      <span>© {new Date().getFullYear()} {FIRMA.nazwa} · KRS {FIRMA.krs} · REGON {FIRMA.regon}</span>
+    <div class="flex flex-wrap gap-4 justify-between pt-7 mt-10 border-t border-linia text-[13px] text-tekst-drugi">
+      <span>
+        {/* Odstępy wprost: Astro gubi spację z przełamaniem linii obok znacznika. */}
+        © {new Date().getFullYear()} {FIRMA.nazwa} · {NAPISY.agent},{' '}
+        <a href={FIRMA.rejestrUrl} class="hover:text-akcent-ciemny" rel="noopener">RPU {FIRMA.rpu}</a>{' '}
+        · KRS {FIRMA.krs} · REGON {FIRMA.regon}
+      </span>
       <span>
         {/* Przełącznik języka stoi tu na każdej szerokości ekranu — na telefonie
             to jedyne miejsce strony polskiej, z którego widać wersję ukraińską. */}
@@ -145,6 +157,8 @@ const przelacznik = {
         <a href={`mailto:${FIRMA.email}`} class="hover:text-akcent-ciemny">{FIRMA.email}</a>
         <span aria-hidden="true"> · </span>
         <a href={`tel:${FIRMA.telefon}`} class="hover:text-akcent-ciemny">{FIRMA.telefonWyswietlany}</a>
+        <span aria-hidden="true"> · </span>
+        <a href={NAPISY.wylaczenia.url} class="hover:text-akcent-ciemny">{NAPISY.wylaczenia.nazwa}</a>
       </span>
     </div>
   </div>

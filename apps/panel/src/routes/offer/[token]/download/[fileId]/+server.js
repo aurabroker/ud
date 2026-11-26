@@ -2,15 +2,17 @@ import { error } from '@sveltejs/kit';
 import { createAdminClient } from '$lib/server/supabase.js';
 import { isVerified } from '$lib/server/clientAuth.js';
 import { signedFileUrl } from '$lib/server/offers.js';
+import { linkOfertyAktywny } from '$lib/server/linkOferty.js';
 
 export async function GET({ params, cookies }) {
   const sb = createAdminClient();
   const { data: offer } = await sb
     .from('ud_offers')
-    .select('id')
+    .select('id, share_expires_at')
     .eq('share_token', params.token)
     .maybeSingle();
   if (!offer) throw error(404, 'Nie znaleziono');
+  if (!linkOfertyAktywny(offer)) throw error(410, 'Link do oferty wygasł');
 
   if (!(await isVerified(cookies, offer.id))) throw error(403, 'Wymagane hasło');
 

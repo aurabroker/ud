@@ -27,3 +27,8 @@
 # najpóźniej po tygodniu.
 /email/*
   Cache-Control: public, max-age=604800
+
+# Manifest IndexNow (integracje/indexnow.mjs) — dla builda, nie dla indeksu.
+/indexnow.json
+  X-Robots-Tag: noindex
+  Cache-Control: no-cache

@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<title>Karta Open Graph — źródło public/og-domyslny.jpg</title>
+<!--
+  Źródło obrazka public/og-domyslny.jpg (1200 × 630), który idzie w og:image
+  każdej strony bez własnego zdjęcia. Odtwarzanie:
+
+    cd apps/portal && node scripts/og-domyslny.mjs
+
+  Skrypt wstawia w miejsce dwóch znaczników kroje serwisu (pobrane
+  z utratadochodu.pl) i znak marki z src/components/Znak.astro, renderuje
+  stronę w Chromium i zapisuje JPEG. Otwarta wprost w przeglądarce pokaże
+  kroje zastępcze i bez znaku — to jest szablon, nie podgląd.
+
+  Kolory to tokeny z src/styles/global.css. Serwis jest jasny, bez trybu
+  ciemnego (decyzja klienta z 28.08.2026) — karta też.
+
+  Tekst ma być prawdziwy bez przypisu: nazwa marki i to, czym serwis się
+  zajmuje. Żadnych kwot, procentów ani obietnic wypłaty — karta wisi przy
+  każdym udostępnionym linku, także tam, gdzie nikt nie przeczyta OWU.
+-->
+<style>
+/* KROJE */
+
+:root {
+  --tlo:          #FFFFFF;
+  --tlo-cyjan:    #EDF7FC;
+  --tlo-mocne:    #DDF1FA;
+  --tlo-hero:     #CBE9F8;
+  --akcent:       #1BAEE5;
+  --akcent-tekst: #0A6A96;
+  --linia:        #D3E9F4;
+  --tekst:        #0F2E40;
+  --tekst-drugi:  #4E6D7D;
+}
+
+html, body { margin: 0; padding: 0; }
+
+body {
+  width: 1200px;
+  height: 630px;
+  overflow: hidden;
+  background: var(--tlo);
+  color: var(--tekst);
+  font-family: 'Public Sans', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Ten sam gradient co pas nagłówka strony głównej (bg-linear-102 from-tlo
+   via-tlo-cyjan to-tlo-hero), przesunięty tak, żeby tekst stał na bieli. */
+.karta {
+  position: relative;
+  box-sizing: border-box;
+  width: 1200px;
+  height: 630px;
+  padding: 68px 80px 64px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: linear-gradient(102deg, var(--tlo) 0%, var(--tlo) 42%, var(--tlo-cyjan) 66%, var(--tlo-hero) 100%);
+  border-bottom: 10px solid var(--akcent);
+}
+
+.marka {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-weight: 700;
+  font-size: 30px;
+  letter-spacing: -0.025em;
+  line-height: 1;
+}
+.marka svg { width: 34px; height: 40px; flex: none; }
+.marka b { font-weight: 700; color: var(--akcent); }
+
+.tresc { max-width: 700px; }
+
+.etykieta {
+  margin: 0 0 22px;
+  font-family: 'IBM Plex Mono', 'Courier New', monospace;
+  font-weight: 600;
+  font-size: 20px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--akcent-tekst);
+}
+
+h1 {
+  margin: 0;
+  font-family: 'Newsreader', Georgia, serif;
+  font-weight: 500;
+  font-size: 72px;
+  line-height: 1.07;
+  letter-spacing: -0.012em;
+}
+
+.adres {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 500;
+  color: var(--tekst-drugi);
+}
+
+/* Duży znak po prawej, na najmocniejszym cyjanie gradientu. */
+.znak {
+  position: absolute;
+  right: 92px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 262px;
+  height: 308px;
+}
+.znak svg { width: 100%; height: 100%; }
+</style>
+</head>
+<body>
+  <div class="karta">
+    <div class="marka"><!-- ZNAK --><span>Utrata<b>Dochodu</b>.pl</span></div>
+
+    <div class="tresc">
+      <p class="etykieta">Ubezpieczenie utraty dochodu</p>
+      <h1>Dla specjalistów i&nbsp;przedsiębiorców</h1>
+    </div>
+
+    <p class="adres">utratadochodu.pl</p>
+
+    <div class="znak" aria-hidden="true"><!-- ZNAK --></div>
+  </div>
+</body>
+</html>

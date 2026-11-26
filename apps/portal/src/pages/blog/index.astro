@@ -8,7 +8,7 @@
  * Tu każdy ma własny adres i gotowy HTML, a lista jest tylko spisem.
  */
 import Baza from '../../layouts/Baza.astro';
-import { ARTYKULY, dataPl } from '../../lib/artykuly';
+import { ARTYKULY, dataPl, etykietaKafla } from '../../lib/artykuly';
 import { graf, organizacja, serwis, strona, okruszki, abs } from '../../lib/seo';
 import Znak from '../../components/Znak.astro';
 
@@ -54,6 +54,11 @@ const jsonld = graf([
  * Wcześniej w kafelku lądował oryginał z kubełka — od 2 do 16 MB. Adres
  * surowy zostaje jako awaryjny, gdyby normalizacja nie zdążyła: ciężkie
  * zdjęcie jest gorsze niż lekkie, ale lepsze niż puste miejsce.
+ *
+ * `a.obraz` i `a.obrazDuzy` wskazują już naszą domenę (`/media/<plik>`):
+ * Storage dokleja do każdego pliku `x-robots-tag: none`, więc zdjęcia
+ * z kubełka nie trafiały do indeksu grafiki. Adres przepisuje build
+ * (przezMedia w lib/artykuly.ts), plik podaje functions/media/[plik].js.
  */
 ---
 <Baza tytul={tytul} opis={opis} sciezka={sciezka} jsonld={jsonld}>
@@ -110,7 +115,7 @@ const jsonld = graf([
               <div class="p-6 flex flex-col flex-grow">
                 {a.tagi.length > 0 && (
                   <p class="font-mono text-[10.5px] tracking-[0.12em] uppercase text-akcent-ciemny font-semibold m-0 mb-3">
-                    {a.tagi[0]}
+                    {etykietaKafla(a.tagi).join(' · ')}
                   </p>
                 )}
                 <h2 class="text-[19px] leading-snug m-0 mb-3">

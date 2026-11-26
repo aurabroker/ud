@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
-import { kategorie, ZAWODY } from '@ud/zawody';
+import { kategorie, ZAWODY, malymi } from '@ud/zawody';
 
 /**
  * Wykrywanie martwych linków wewnętrznych w zbudowanym serwisie.
@@ -164,7 +164,7 @@ test('zdjęcia zawodów: nazwa pliku to slug zawodu i strona go pokazuje', () =>
     const html = readFileSync(join(DIST, `${slug}/index.html`), 'utf8');
     const alt = html.match(/<img[^>]*\balt="([^"]*)"/)?.[1];
     expect(alt, `/${slug}/ dziedziczy zdjęcie kategorii mimo własnego pliku`)
-      .toBe(`Zdjęcie ilustracyjne — ${zawod.odmiana.mianownik.toLowerCase()}`);
+      .toBe(`Zdjęcie ilustracyjne — ${malymi(zawod.odmiana.mianownik)}`);
   }
 });
 

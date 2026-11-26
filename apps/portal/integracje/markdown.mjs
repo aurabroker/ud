@@ -31,8 +31,12 @@ import { NodeHtmlMarkdown } from 'node-html-markdown';
  */
 import { countTokens } from 'gpt-tokenizer/encoding/o200k_base';
 
-/** Elementy, które w tekście są szumem albo nie mają odpowiednika w Markdownie. */
-const DO_USUNIECIA = 'script, style, svg, noscript, template, [aria-hidden="true"]';
+/**
+ * Elementy, które w tekście są szumem albo nie mają odpowiednika w Markdownie.
+ * Obrazek z `alt=""` jest z definicji ozdobą — ikona przy punkcie listy
+ * w artykule dawała `1. ![](…)` i wypychała treść punktu poza listę.
+ */
+const DO_USUNIECIA = 'script, style, svg, noscript, template, [aria-hidden="true"], img[alt=""]';
 
 /**
  * Listy definicji (`<dl>`) nie mają odpowiednika w Markdownie, a stoją na nich
@@ -89,6 +93,12 @@ export function markdownDlaAgentow({ serwis }) {
             continue;
           }
 
+          // Kropka między datą, czasem czytania i tagami wpisu jest ukryta przed
+          // czytnikiem ekranu, więc wypadała razem z ozdobami — a z nią odstęp:
+          // „26 października 20267 min czytaniaZUS". W Markdownie zostaje tekstem.
+          for (const kropka of tresc.querySelectorAll('span[aria-hidden="true"]')) {
+            if (kropka.text.trim() === '·') kropka.replaceWith(' · ');
+          }
           tresc.querySelectorAll(DO_USUNIECIA).forEach((w) => w.remove());
           nadajPelneAdresy(tresc, serwis);
 

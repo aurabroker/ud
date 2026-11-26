@@ -154,6 +154,39 @@ test('w Markdownie nie ma nawigacji, stopki ani banera zgód', () => {
   expect(md, 'sam znacznik nawigacji').not.toContain('Przejdź do treści');
 });
 
+test('obrazek-ozdoba (alt="") nie trafia do Markdownu', () => {
+  // Ikona przy punkcie listy dawała „1. ![](…)" i wypychała treść punktu
+  // poza listę. Sprawdzane na każdej stronie, która ma taki obrazek w treści.
+  let sprawdzonych = 0;
+  for (const adres of WSZYSTKIE) {
+    const html = readFileSync(join(DIST, adres, 'index.html'), 'utf8');
+    const tresc = html.split('id="tresc"')[1] ?? '';
+    const ozdoby = [...tresc.matchAll(/<img\b[^>]*>/g)]
+      .map((m) => m[0])
+      .filter((img) => /\balt=""/.test(img))
+      .map((img) => img.match(/\bsrc="([^"]+)"/)?.[1])
+      .filter(Boolean);
+    if (!ozdoby.length) continue;
+    sprawdzonych++;
+    const md = readFileSync(join(DIST, adres, 'index.md'), 'utf8');
+    for (const src of ozdoby) {
+      expect(md, `${adres}: ozdoba ${src} w Markdownie`).not.toContain(src.split('/').at(-1));
+    }
+  }
+  expect(sprawdzonych, 'żadna strona nie ma obrazka-ozdoby w treści — test nic nie sprawdził').toBeGreaterThan(0);
+});
+
+test('wpis bloga: data, czas czytania i tagi nie sklejają się w Markdownie', () => {
+  // Kropki-separatory są aria-hidden; bez nich wychodziło „26 października 20267 min czytaniaZUS".
+  const wpisy = WSZYSTKIE.filter((a) => /^\/blog\/[^/]+\/$/.test(a));
+  expect(wpisy.length).toBeGreaterThan(5);
+  for (const adres of wpisy) {
+    const md = readFileSync(join(DIST, adres, 'index.md'), 'utf8');
+    expect(md, `${adres}: sklejona linia z datą`).toMatch(/\d{4} · \d+ min czytania/);
+    expect(md, `${adres}: data przyklejona do czasu czytania`).not.toMatch(/\d{4}\d+ min czytania/);
+  }
+});
+
 test('adresy w Markdownie są bezwzględne', () => {
   const md = readFileSync(join(DIST, 'programista', 'index.md'), 'utf8');
   const wzgledne = [...md.matchAll(/\]\((\/[^)]*)\)/g)].map((t) => t[1]);

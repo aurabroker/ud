@@ -1,8 +1,11 @@
 <script>
+  import { potwierdz } from '$lib/potwierdz.js';
   import { enhance } from '$app/forms';
   import OfferComparison from '$lib/components/OfferComparison.svelte';
   import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
-  import { dateP } from '$lib/format.js';
+  import { dateP, dateTimeP, offerNoDisplay } from '$lib/format.js';
+  import { wybranyWariant, opisWariantu } from '$lib/wybranyWariant.js';
+  import { zawodKlienta } from '$lib/zawodKlienta.js';
   let { data, form } = $props();
   let sending = $state(false);
   let copied = $state(false);
@@ -17,8 +20,16 @@
   let delBusy = $state(false);
   const docLabel = (d) => d?.source_filename || d?.offer_number || d?.insurer_type || 'wariant';
 
-  const statusLabel = { draft: 'Szkic', sent: 'Wysłana', viewed: 'Otwarta', chosen: 'Wybrana', rejected: 'Rezygnacja' };
-  const choice = data.offer.client_choice;
+  const statusLabel = { draft: 'Szkic', sent: 'Wysłana', viewed: 'Otwarta', chosen: 'Wybrana', bought: 'Kupiona', rejected: 'Rezygnacja' };
+  const choice = $derived(data.offer.client_choice);
+  // Wariant wybrany przez klienta — na górze strony i oznaczony w tabeli porównania.
+  const wybrany = $derived(wybranyWariant(choice, data.documents));
+  // Kontakt: z oferty, a czego w niej brak — z kartoteki przypiętego klienta.
+  const klient = $derived(data.clients.find((x) => x.id === data.offer.client_id) || null);
+  const telefon = $derived(data.offer.client_phone || klient?.phone || '');
+  const email = $derived(data.offer.client_email || klient?.email || '');
+  // Zawód podany przez klienta; z oferty ubezpieczyciela tylko, gdy klient go nie podał.
+  const zawod = $derived(zawodKlienta(data.zawodKlienta, data.documents));
 
   // pola edycji
   let eClientId = $state(data.offer.client_id || '');
@@ -48,20 +59,67 @@
   <div>
     <h1 style="font-size:1.5rem;">{data.offer.name}</h1>
     <p class="muted">
-      {#if data.offer.offer_number}<strong>{data.offer.offer_number}</strong> · {/if}{data.offer.client_name || 'Bez nazwiska'} · <span class="badge badge-{data.offer.status}">{statusLabel[data.offer.status]}</span>
+      {#if data.offer.offer_number}<strong>{data.offer.offer_number}</strong>{' · '}{/if}{data.offer.client_name || 'Bez nazwiska'} · <span class="badge badge-{data.offer.status}">{statusLabel[data.offer.status]}</span>
     </p>
   </div>
   <div style="display:flex;gap:.5rem;">
     <button class="btn btn-ghost" onclick={() => (editing = !editing)}>{editing ? 'Zamknij edycję' : '✎ Edytuj'}</button>
-    <form method="POST" action="?/delete" use:enhance={() => ({ update }) => update()}
-      onsubmit={(e) => { if (!confirm('Usunąć całą ofertę? Tej operacji nie można cofnąć.')) e.preventDefault(); }}>
+    <form method="POST" action="?/delete"
+      use:enhance={potwierdz('Przenieść ofertę do kosza? Klient straci dostęp do linku. Przez 30 dni ofertę można przywrócić z „Kosza" na liście ofert.', () => ({ update }) => update())}>
       <button class="btn btn-ghost" style="color:var(--red-600);">🗑 Usuń ofertę</button>
     </form>
   </div>
 </div>
 
+<!-- Kontakt z klientem — pierwsza rzecz na stronie oferty -->
+<div class="card card-pad of-kontakt">
+  <div class="of-kontakt-pola">
+    <span><span class="muted">Klient:</span> <strong>{data.offer.client_name || klient?.full_name || 'Bez nazwiska'}</strong></span>
+    <span><span class="muted">Telefon:</span> {#if telefon}<a href="tel:{telefon.replace(/\s+/g, '')}"><strong>{telefon}</strong></a>{:else}—{/if}</span>
+    <span><span class="muted">E-mail:</span> {#if email}<a href="mailto:{email}">{email}</a>{:else}—{/if}</span>
+    <span class="of-zawod"><span class="muted">Zawód:</span>
+      {#if zawod.zawod}<strong>{zawod.zawod}</strong>{#if zawod.zOferty}<span class="muted">{' (z oferty ubezpieczyciela)'}</span>{/if}{:else}—{/if}
+    </span>
+  </div>
+  {#if data.offer.client_id}
+    <a class="btn btn-ghost" href="/panel/klienci/{data.offer.client_id}">Karta klienta →</a>
+  {/if}
+</div>
+
+<!-- Decyzja klienta — wybrany wariant ze wszystkimi parametrami -->
+{#if choice}
+  <div class="card card-pad" style="margin-bottom:1.25rem;border-left:4px solid {choice.rejected ? 'var(--red-600)' : 'var(--green-600)'};">
+    {#if choice.rejected}
+      <h3 style="font-size:1rem;margin:0;color:var(--red-700);">
+        Klient zrezygnował{choice.rejected_at ? ` — ${dateTimeP(choice.rejected_at)}` : ''}
+      </h3>
+    {:else}
+      <h3 style="font-size:1rem;margin-bottom:.6rem;">
+        ✓ Klient wybrał wariant{(wybrany?.offer_number || choice.offer_number) ? ` nr ${offerNoDisplay(wybrany?.offer_number || choice.offer_number)}` : ''}
+        {#if choice.chosen_at}<span class="muted" style="font-weight:400;"> · {dateTimeP(choice.chosen_at)}</span>{/if}
+      </h3>
+      {#if wybrany}
+        <dl class="of-wybor">
+          {#each opisWariantu(wybrany) as [etykieta, wartosc]}
+            <div><dt>{etykieta}</dt><dd>{wartosc}</dd></div>
+          {/each}
+        </dl>
+        <p class="muted" style="margin:.6rem 0 0;font-size:.82rem;">
+          {wybrany.source_filename ? `Plik: ${wybrany.source_filename} · ` : ''}W tabeli porównania niżej ta kolumna ma znaczek „✓ Wybrany" i zielone tło.
+        </p>
+      {:else}
+        <p style="margin:0;color:var(--red-700);">
+          Tego wariantu nie ma już w ofercie — usunięto go po decyzji klienta. Numer z chwili wyboru:
+          {offerNoDisplay(choice.offer_number)}.
+        </p>
+      {/if}
+    {/if}
+  </div>
+{/if}
+
 {#if form?.error}<div class="error-box">{form.error}</div>{/if}
 {#if form?.saved && !form?.refreshed && !form?.filesAdded}<div class="ok-box">Zapisano.</div>{/if}
+{#if form?.przedluzono}<div class="ok-box">Link ważny do {dateP(form.przedluzono)}.</div>{/if}
 {#if form?.filesAdded}<div class="ok-box">Dodano plików do oferty: {form.filesAdded}.</div>{/if}
 {#if form?.refreshed}
   <div class="{form.refreshed.errors?.length ? 'error-box' : 'ok-box'}">
@@ -161,13 +219,17 @@
         {:else}<span class="muted">nie wysłano</span>{/if}
       </li>
     </ul>
+    {#if form.zapisPoWysylce}
+      <p role="alert" style="color:var(--red-700);margin:.35rem 0 0;"><strong>Uwaga:</strong> e-mail wyszedł, ale status oferty i termin linku nie zapisały się ({form.zapisPoWysylce}). Sprawdź termin linku niżej i w razie potrzeby kliknij „Odnów”.</p>
+    {/if}
     {#if form.pinDev}<strong>PIN testowy: {form.pinDev}</strong> (widoczny tylko bez realnej wysyłki).<br />{/if}
     <a href="/panel/logi">Historia wysyłek →</a>
   </div>
 {/if}
 
-<!-- Link + wysyłka -->
-<div class="card card-pad" style="margin-bottom:1.25rem;">
+<!-- Link dla klienta i Wersja (historia wysyłek) — obok siebie -->
+<div class="of-para">
+<div class="card card-pad">
   <h3 style="font-size:1rem;margin-bottom:.75rem;">Link dla klienta</h3>
   <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;">
     <input class="input" style="flex:1;min-width:240px;" readonly value={data.link} />
@@ -178,6 +240,16 @@
       </button>
     </form>
     <a class="btn btn-ghost" href="/panel/offer/{data.offer.id}/summary" target="_blank" rel="noopener">⬇ Pobierz PDF</a>
+  </div>
+  <div style="margin-top:.6rem;display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;font-size:.9rem;">
+    {#if data.linkAktywny}
+      <span>Link ważny do <strong>{dateP(data.linkWaznyDo)}</strong>.</span>
+    {:else}
+      <span role="alert" style="color:#b42318;"><strong>Link wygasł{data.linkWaznyDo ? ` ${dateP(data.linkWaznyDo)}` : ''}</strong> — klient zobaczy komunikat, że link wygasł. Odnów go przed wysłaniem.</span>
+    {/if}
+    <form method="POST" action="?/przedluzLink" use:enhance>
+      <button class="btn btn-ghost" type="submit">{data.linkAktywny ? 'Ustaw ważność: 60 dni od dziś' : 'Odnów link: 60 dni od dziś'}</button>
+    </form>
   </div>
   {#if data.offer.access_code}
     <p style="margin-top:.6rem;font-size:.9rem;">
@@ -190,8 +262,8 @@
   {/if}
 </div>
 
-<!-- Decyzja klienta, archiwum i historia wysyłek -->
-<div class="card card-pad" style="margin-bottom:1.25rem;">
+<!-- Wersja: kupiona / archiwum i historia wysyłek -->
+<div class="card card-pad">
   <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
     <h3 style="font-size:1rem;margin:0;">
       Wersja {data.offer.wersja || 1}
@@ -225,6 +297,7 @@
   {#if data.wysylki.length === 0}
     <p class="muted" style="margin:0;">Jeszcze nic nie wysłano.</p>
   {:else}
+    <div class="of-przewijana">
     <table>
       <thead><tr><th>Wersja</th><th>Kanał</th><th>Odbiorca</th><th>Kiedy</th><th>Wynik</th></tr></thead>
       <tbody>
@@ -244,7 +317,9 @@
         {/each}
       </tbody>
     </table>
+    </div>
   {/if}
+</div>
 </div>
 
 <!-- Porównanie wariantów -->
@@ -258,7 +333,7 @@
     </form>
   </div>
   {#if data.documents.length}
-    <OfferComparison documents={data.documents} />
+    <OfferComparison documents={data.documents} chosenId={wybrany?.id ?? null} />
     {#if editing}
       <div style="margin-top:1rem;display:flex;flex-direction:column;gap:.4rem;">
         {#each data.documents as d}
@@ -293,18 +368,6 @@
     </form>
   </div>
 </div>
-
-<!-- Wybór klienta -->
-{#if choice}
-  <div class="card card-pad" style="margin-bottom:1.25rem;border-left:4px solid var(--green-600);">
-    <h3 style="font-size:1rem;margin-bottom:.5rem;">Decyzja klienta</h3>
-    {#if choice.rejected}
-      <p style="color:var(--red-700);font-weight:600;">Klient zrezygnował{choice.rejected_at ? ` (${dateP(choice.rejected_at)})` : ''}.</p>
-    {:else}
-      <p style="font-weight:600;">Wybrano: {choice.insurer_name || choice.insurer_type} {choice.chosen_at ? `· ${dateP(choice.chosen_at)}` : ''}</p>
-    {/if}
-  </div>
-{/if}
 
 <!-- Pliki -->
 <div class="card card-pad" style="margin-bottom:1.25rem;">
@@ -368,3 +431,26 @@
   onconfirm={() => delForm?.requestSubmit()}
   oncancel={() => (delDoc = null)}
 />
+
+<style>
+  .of-kontakt {
+    display: flex; align-items: center; justify-content: space-between; gap: .75rem 1.5rem;
+    flex-wrap: wrap; margin-bottom: 1.25rem;
+  }
+  .of-kontakt-pola { display: flex; gap: .5rem 1.75rem; flex-wrap: wrap; font-size: .95rem; }
+  .of-wybor {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: .5rem 1.25rem; margin: 0;
+  }
+  .of-wybor dt { font-size: .75rem; color: var(--slate-500); }
+  .of-wybor dd { margin: .1rem 0 0; font-weight: 600; }
+  /* „Link dla klienta" i „Wersja" obok siebie; na węższym ekranie jedna pod drugą. */
+  .of-para {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1.25rem; align-items: start; margin-bottom: 1.25rem;
+  }
+  @media (max-width: 960px) {
+    .of-para { grid-template-columns: minmax(0, 1fr); }
+  }
+  .of-przewijana { overflow-x: auto; }
+</style>

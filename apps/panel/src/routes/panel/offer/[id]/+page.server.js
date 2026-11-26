@@ -1,8 +1,10 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { createAdminClient } from '$lib/server/supabase.js';
 import { klienciWidoczni } from '$lib/server/widocznosc.js';
-import { sendOfferToClient, deleteOffer, deleteOfferDocument, addDocumentsToOffer, refreshOfferDocuments, addAttachmentsToOffer, oznaczKupiona, ustawArchiwum, historiaWysylek } from '$lib/server/offers.js';
+import { sendOfferToClient, deleteOfferDocument, addDocumentsToOffer, refreshOfferDocuments, addAttachmentsToOffer, oznaczKupiona, ustawArchiwum, historiaWysylek } from '$lib/server/offers.js';
 import { clientBaseUrl } from '$lib/server/appUrl.js';
+import { przeniesDoKosza } from '$lib/server/kosz.js';
+import { linkOfertyAktywny, waznoscPoWysylce } from '$lib/server/linkOferty.js';
 
 export async function load({ params, locals }) {
   const { user } = await locals.safeGetSession();
@@ -18,13 +20,17 @@ export async function load({ params, locals }) {
   const swoi = await klienciWidoczni(sb, user.id);
   const widoczni = swoi && offer.client_id && !swoi.includes(offer.client_id) ? [...swoi, offer.client_id] : swoi;
   const klienci = sb.from('ud_clients').select('id, full_name, email, phone').order('created_at', { ascending: false }).limit(500);
-  const [{ data: documents }, { data: files }, { data: questions }, { data: pin }, { data: clients }] =
+  const [{ data: documents }, { data: files }, { data: questions }, { data: pin }, { data: clients }, { data: przypiety }] =
     await Promise.all([
       sb.from('ud_offer_documents').select('*').eq('offer_id', offer.id).order('sort_order'),
       sb.from('ud_offer_files').select('*').eq('offer_id', offer.id),
       sb.from('ud_offer_questions').select('*').eq('offer_id', offer.id).order('asked_at', { ascending: false }),
       sb.from('ud_offer_pins').select('expires_at, verified_at, attempts').eq('offer_id', offer.id).maybeSingle(),
-      widoczni === null ? klienci : widoczni.length ? klienci.in('id', widoczni) : Promise.resolve({ data: [] })
+      widoczni === null ? klienci : widoczni.length ? klienci.in('id', widoczni) : Promise.resolve({ data: [] }),
+      // Zawód wskazany przez klienta — tylko przypiętego, nie całej listy wyboru.
+      offer.client_id
+        ? sb.from('ud_clients').select('profession').eq('id', offer.client_id).maybeSingle()
+        : Promise.resolve({ data: null })
     ]);
 
   const wysylki = await historiaWysylek(offer.id);
@@ -36,8 +42,12 @@ export async function load({ params, locals }) {
     questions: questions || [],
     pin,
     clients: clients || [],
+    zawodKlienta: przypiety?.profession ?? null,
     wysylki,
-    link: `${clientBaseUrl()}/offer/${offer.share_token}`
+    link: `${clientBaseUrl()}/offer/${offer.share_token}`,
+    // Termin linku dla agenta: „Kopiuj” nie może po cichu podać linku, który klient zobaczy jako wygasły.
+    linkWaznyDo: offer.share_expires_at ?? null,
+    linkAktywny: linkOfertyAktywny(offer)
   };
 }
 
@@ -71,10 +81,24 @@ export const actions = {
     if (!user) throw redirect(303, '/login');
     try {
       const res = await sendOfferToClient(params.id);
-      return { sent: true, email: res.email, sms: res.sms, pinDev: res.pinDev, wersja: res.wersja };
+      return { sent: true, email: res.email, sms: res.sms, pinDev: res.pinDev, wersja: res.wersja, zapisPoWysylce: res.zapisPoWysylce };
     } catch (e) {
       return fail(400, { error: e?.message || 'Błąd wysyłki' });
     }
+  },
+
+  // Przedłużenie linku bez ponownej wysyłki (link udostępniany ręcznie przez „Kopiuj”).
+  // Ta sama reguła co przy wysyłce: co najmniej 60 dni od teraz, nigdy krócej niż było.
+  przedluzLink: async ({ params, locals }) => {
+    const { user } = await locals.safeGetSession();
+    if (!user) throw redirect(303, '/login');
+    const sb = createAdminClient();
+    const { data: o, error: e1 } = await sb.from('ud_offers').select('id, share_expires_at').eq('id', params.id).maybeSingle();
+    if (e1 || !o) return fail(404, { error: 'Oferta nie znaleziona' });
+    const nowa = waznoscPoWysylce(o.share_expires_at);
+    const { error: e2 } = await sb.from('ud_offers').update({ share_expires_at: nowa }).eq('id', o.id);
+    if (e2) return fail(400, { error: 'Przedłużenie linku: ' + e2.message });
+    return { przedluzono: nowa };
   },
 
   save: async ({ params, request, locals }) => {
@@ -169,14 +193,16 @@ export const actions = {
     }
   },
 
+  // „Usuń" przenosi do kosza na 30 dni (od 13.10.2026). Twarde deleteOffer
+  // zostało tylko do sprzątania po nieudanym utworzeniu oferty.
   delete: async ({ params, locals }) => {
     const { user } = await locals.safeGetSession();
     if (!user) throw redirect(303, '/login');
     try {
-      await deleteOffer(params.id);
+      await przeniesDoKosza(createAdminClient(), params.id, user.id);
     } catch (e) {
       return fail(400, { error: e?.message || 'Błąd usuwania' });
     }
-    throw redirect(303, '/panel');
+    throw redirect(303, '/panel?usunieto=1');
   }
 };

@@ -1,30 +1,17 @@
 import { error, redirect } from '@sveltejs/kit';
 import { createAdminClient } from '$lib/server/supabase.js';
-import { klientWidoczny } from '$lib/server/widocznosc.js';
+import { kartaKlienta } from '$lib/server/klienci.js';
+import { filtryListy } from '$lib/klienci/lista.js';
 
-export async function load({ params, locals }) {
+export async function load({ params, locals, url }) {
   const { user } = await locals.safeGetSession();
   if (!user) throw redirect(303, '/login');
 
-  const sb = createAdminClient();
+  // Dane karty składa src/lib/server/klienci.js (ta sama funkcja w teście SSR):
+  // widoczność, form_data bez identyfikatorów kliknięcia, opis źródła, strzałki
+  // „Poprzedni / Następny klient" po liście z filtrami z adresu (?widok, ?zrodlo).
+  const karta = await kartaKlienta(createAdminClient(), user.id, params.id, filtryListy(url.searchParams));
   // Cudzy klient wygląda dla agenta jak nieistniejący — bez zdradzania, że jest.
-  if (!/^[0-9a-f-]{36}$/i.test(params.id) || !(await klientWidoczny(sb, user.id, params.id))) {
-    throw error(404, 'Klient nie znaleziony');
-  }
-  const { data: client } = await sb.from('ud_clients').select('*').eq('id', params.id).maybeSingle();
-  if (!client) throw error(404, 'Klient nie znaleziony');
-
-  let owner_name = null;
-  if (client.referred_by) {
-    const { data: p } = await sb.from('ud_user_profiles').select('full_name').eq('id', client.referred_by).maybeSingle();
-    owner_name = p?.full_name || 'nieznany user';
-  }
-
-  const { data: offers } = await sb
-    .from('ud_offers')
-    .select('id, name, status, created_at, source')
-    .eq('client_id', client.id)
-    .order('created_at', { ascending: false });
-
-  return { client, owner_name, offers: offers || [] };
+  if (!karta) throw error(404, 'Klient nie znaleziony');
+  return karta;
 }

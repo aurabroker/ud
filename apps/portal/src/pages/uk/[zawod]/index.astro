@@ -11,13 +11,14 @@
 import { zawod, slugKategorii } from '@ud/zawody';
 import Baza from '../../../layouts/Baza.astro';
 import Kalkulator from '../../../components/Kalkulator.svelte';
-import { symuluj, zl, zlZakres, ZUS_MIESIECZNIE, LIMIT } from '../../../lib/symulacja';
+import { symuluj, zl, zlZakres, LIMIT, MIESIECY_WYPLATY, MIESIECY_MAX } from '../../../lib/symulacja';
+import { ZASILEK_JDG } from '../../../lib/zus';
 import { graf, organizacja, serwis, strona, okruszki, usluga, faq } from '../../../lib/seo';
 import { FIRMA } from '../../../lib/firma';
 import { Image, getImage } from 'astro:assets';
 import { obrazZawodu, obrazKategorii } from '../../../lib/obrazy';
 import { ZAWODY_UK, zawodUk } from '../../../dane/uk/zawody';
-import { GLOWNA_UK } from '../../../lib/uk';
+import { GLOWNA_UK, ZUS_TEKST_UK, OPIS_KALIBRACJI_UK } from '../../../lib/uk';
 
 export function getStaticPaths() {
   return ZAWODY_UK.map((z) => ({ params: { zawod: z.slug }, props: { slug: z.slug } }));
@@ -34,10 +35,25 @@ const tytul = `Страхування від втрати доходу для ${
 const opis = `Скільки реально отримує ${nazwaMala} на лікарняному і як поліс закриває розрив між `
   + 'допомогою ZUS і доходом. Розрахунок внеску онлайн, пропозиція за 1–2 робочі дні.';
 
-/** Ten sam wzór co na stronie polskiej — nie zmieniaj jednego bez drugiego. */
-const dochodPrzykladowy = Math.max(8000, Math.round((pl.swiadczenieDzienne ?? 400) * 30 / 0.8 / 1000) * 1000);
-const wynik = symuluj({ dochod: dochodPrzykladowy, zatrudnienie: 'b2b' });
+/** Ten sam dochód przykładowy co na stronie polskiej — z danych zawodu. */
+const dochodPrzykladowy = pl.dochodPrzykladowy;
+const wynik = symuluj({ dochod: dochodPrzykladowy });
 const b2b = Math.round(LIMIT.b2b * 100);
+
+/*
+ * Zdania z kwotami składamy tutaj, a nie w szablonie: Astro gubi spację przy
+ * przełamaniu linii obok {wyrażenia} i słowa sklejają się w pliku .md.
+ * Każde jest przekładem zdania z polskiego szablonu `[zawod]/index.astro`.
+ */
+const zusOdpowiedz = `Допомога по хворобі — це ${ZUS_TEKST_UK.wzor}, а не 80% доходу. На повному ZUS `
+  + '(duży ZUS) з найнижчою базою і з добровільним страхуванням на випадок хвороби це '
+  + `${zl(ZASILEK_JDG.duzy)} на місяць до оподаткування, незалежно від заробітку; ${ZUS_TEKST_UK.dopiski}.`;
+const zusPodpis = `Допомога ZUS, виплата за полісом та орієнтовний внесок при доході ${zl(dochodPrzykladowy)} на B2B`;
+const zusPrzypis = 'Симуляція, а не пропозиція. Виплата щомісяця, щонайдовше протягом '
+  + `${MIESIECY_MAX} місяців, залежно від варіанта; внесок стосується варіанта з виплатою до `
+  + `${MIESIECY_WYPLATY} місяців. Допомога ZUS — ${ZUS_TEKST_UK.scenariusz}. ${ZUS_TEKST_UK.brutto} `
+  + 'Внесок разом із дистрибуційною оплатою — діапазон від найдешевшої до найдорожчої ставки '
+  + `${OPIS_KALIBRACJI_UK}. Реальний внесок розраховує система страховика після оцінки ризику.`;
 
 const sciezkaOkruszkow = [
   { ...GLOWNA_UK },
@@ -160,44 +176,33 @@ const ogObraz = obraz
         <h2 class="text-[clamp(1.5rem,3vw,2rem)] leading-tight mb-3">
           Скільки {nazwaMala} отримає від ZUS на лікарняному?
         </h2>
-        <p data-odpowiedz class="text-lg leading-relaxed font-medium text-tekst m-0 mb-6">
-          Допомога по хворобі — це 80% бази нарахування внесків, а не 80% доходу. За найнижчої
-          бази це {zl(wynik.zus)} на місяць, незалежно від заробітку.
-        </p>
+        <p data-odpowiedz class="text-lg leading-relaxed font-medium text-tekst m-0 mb-6">{zusOdpowiedz}</p>
 
         <div class="border border-linia overflow-x-auto">
-          <table class="w-full border-collapse text-left min-w-[36rem]">
-            <caption class="sr-only">
-              Порівняння місячних надходжень від ZUS і за полісом при доході {zl(dochodPrzykladowy)}
-            </caption>
-            <thead>
-              <tr class="bg-tlo-jasne border-b border-linia-mocna">
-                <th scope="col" class="font-mono text-[11px] tracking-[0.11em] uppercase font-semibold text-tekst-drugi px-6 py-4">Місяць на лікарняному</th>
-                <th scope="col" class="font-mono text-[11px] tracking-[0.11em] uppercase font-semibold text-tekst-drugi px-6 py-4">Лише ZUS</th>
-                <th scope="col" class="font-mono text-[11px] tracking-[0.11em] uppercase font-semibold text-akcent-tekst px-6 py-4">ZUS + поліс</th>
-              </tr>
-            </thead>
+          <table class="w-full border-collapse text-left min-w-[20rem]">
+            <caption class="sr-only">{zusPodpis}</caption>
             <tbody>
-              <tr class="border-b border-linia-lekka">
-                <th scope="row" class="px-6 py-5 font-semibold text-[16px]">Дохід {zl(dochodPrzykladowy)}, найнижча база ZUS</th>
-                <td class="px-6 py-5 font-mono text-xl font-semibold text-alarm">{zl(wynik.zus)}</td>
-                <td class="px-6 py-5 font-mono text-xl font-semibold text-akcent-ciemny">{zl(wynik.zus + wynik.swiadczenie)}</td>
+              <tr class="border-b border-linia">
+                <th scope="row" class="px-6 py-4 font-semibold text-[15.5px]">Місячний дохід нетто</th>
+                <td class="px-6 py-4 font-mono text-lg">{zl(dochodPrzykladowy)}</td>
               </tr>
-              <tr>
-                <th scope="row" class="px-6 py-5 font-semibold text-[16px]">Різниця за місяць</th>
-                <td class="px-6 py-5 font-mono text-[15px] text-tekst-drugi">—</td>
-                <td class="px-6 py-5 font-mono text-xl font-semibold text-akcent-ciemny">+{zl(wynik.swiadczenie)}</td>
+              <tr class="border-b border-linia">
+                <th scope="row" class="px-6 py-4 font-semibold text-[15.5px]">Допомога від ZUS (duży ZUS зі страхуванням на випадок хвороби)</th>
+                <td class="px-6 py-4 font-mono text-lg text-alarm font-semibold">{zl(ZASILEK_JDG.duzy)}</td>
+              </tr>
+              <tr class="border-b border-linia">
+                <th scope="row" class="px-6 py-4 font-semibold text-[15.5px]">Виплата за полісом ({b2b}% доходу)</th>
+                <td class="px-6 py-4 font-mono text-lg text-akcent-ciemny font-semibold">{zl(wynik.swiadczenie)}</td>
+              </tr>
+              <tr class="bg-tlo-jasne">
+                <th scope="row" class="px-6 py-5 font-semibold text-[16px]">Орієнтовний місячний внесок</th>
+                <td class="px-6 py-5 font-mono text-xl font-semibold whitespace-nowrap">{zlZakres(wynik.skladkaOd, wynik.skladkaDo)}</td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        <p class="text-[13px] leading-relaxed text-tekst-drugi mt-4 mb-0">
-          Симуляція, а не пропозиція. Суми пораховано для доходу {zl(dochodPrzykladowy)} і ліміту
-          {b2b}% на B2B; допомога ZUS — за бази {zl(ZUS_MIESIECZNIE)}. Реальний внесок розраховує
-          система страховика після оцінки ризику — у пропозиціях, які ми виставили, за такої суми
-          він становив {zlZakres(wynik.skladkaOd, wynik.skladkaDo)} на місяць.
-        </p>
+        <p class="text-[13px] leading-relaxed text-tekst-drugi mt-4 mb-0">{zusPrzypis}</p>
       </section>
 
       <section>
@@ -220,9 +225,9 @@ const ogObraz = obraz
       <section class="border border-linia-mocna bg-tlo-jasne p-8">
         <h2 class="text-[clamp(1.35rem,2.5vw,1.7rem)] leading-tight m-0 mb-3">Перш ніж подати заявку — перевірте виключення</h2>
         <p class="text-[16px] leading-relaxed text-tekst-drugi m-0 mb-5">
-          Професійне вигорання як самостійний діагноз, психічні захворювання, часткова
-          непрацездатність і захворювання, які лікували протягом 24 місяців до укладення
-          договору, не охоплені захистом.
+          Професійне вигорання як самостійний діагноз, психічні захворювання як єдина причина
+          непрацездатності (у CEU також без цієї умови), часткова непрацездатність і захворювання,
+          які лікували протягом 24 місяців до укладення договору, не охоплені захистом.
         </p>
         <a href="/uk/wylaczenia/" class="font-semibold text-akcent-tekst border-b-[1.5px] border-linia-mocna pb-0.5 hover:text-akcent-hover">
           Повний список виключень

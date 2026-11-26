@@ -1,17 +1,18 @@
 ---
 import Baza from '../../layouts/Baza.astro';
 import { graf, organizacja, serwis, strona, okruszki, faq, usluga } from '../../lib/seo';
-import { symuluj, zl, ZUS_MIESIECZNIE, LIMIT } from '../../lib/symulacja';
+import { symuluj, zl, zlZakres, LIMIT, LIMIT_CEU_ZDANIE } from '../../lib/symulacja';
+import { ZUS_TEKST, ZASILEK_JDG } from '../../lib/zus';
 import { KROKI, PROG_KLAUZUL_NW, krokiSlownie } from '@ud/wniosek/schemat';
 import { HEALTH_SURVEY_THRESHOLD } from '@ud/wniosek/ankieta';
-import { FIRMA, UBEZPIECZYCIELE } from '../../lib/firma';
+import { COVERHOLDERZY } from '../../lib/firma';
 
 const sciezka = '/jak-to-dziala/';
 const tytul = 'Jak działa ubezpieczenie utraty dochodu — krok po kroku | UtrataDochodu.pl';
 const opis = 'Od czego zależy świadczenie, jak liczy się składkę, co się dzieje po złożeniu '
   + 'wniosku i ile trwa droga od formularza do polisy.';
 
-const przyklad = symuluj({ dochod: 18000, zatrudnienie: 'b2b' });
+const przyklad = symuluj({ dochod: 18000 });
 
 const ETAPY = [
   {
@@ -23,9 +24,10 @@ const ETAPY = [
   {
     tytul: 'Sprawdzamy wniosek i dobieramy wariant',
     czas: 'ten sam dzień',
-    opis: `Porównujemy warunki obu ubezpieczycieli (${UBEZPIECZYCIELE.join(' i ')}) `
-      + 'pod kątem Twojego zawodu. Dla zawodów medycznych właściwe są warianty MEDICA '
-      + 'i MEDICARE, dla pozostałych — LW044.',
+    opis: `Porównujemy warunki ${COVERHOLDERZY.join(' i ')} — coverholderów Lloyd’s — `
+      + 'pod kątem Twojego zawodu i formy pracy. W Leadenhall zawodom medycznym odpowiadają '
+      + 'warianty MEDICA i MEDICARE, pozostałym — LW044; CEU ma warianty Utrata Dochodu, '
+      + 'LOI Premium i Utrata Dochodu dla zatrudniających.',
   },
   {
     tytul: 'Ubezpieczyciel ocenia ryzyko',
@@ -55,9 +57,9 @@ const PYTANIA = [
   },
   {
     pytanie: 'Od czego zależy wysokość świadczenia?',
-    odpowiedz: `Od udokumentowanego dochodu i formy zatrudnienia. Limit wynosi `
+    odpowiedz: `Od udokumentowanego dochodu, formy zatrudnienia i produktu. Limit wynosi do `
       + `${Math.round(LIMIT.b2b * 100)}% dochodu przy samozatrudnieniu i kontrakcie B2B `
-      + `oraz ${Math.round(LIMIT.etat * 100)}% przy umowie o pracę. Ubezpieczenie nie może `
+      + `oraz do ${Math.round(LIMIT.etat * 100)}% przy umowie o pracę. ${LIMIT_CEU_ZDANIE} Ubezpieczenie nie może `
       + 'być korzystniejsze finansowo niż praca — inaczej zniknąłby bodziec do powrotu.',
   },
   {
@@ -135,37 +137,39 @@ const jsonld = graf([
   <section class="max-w-[1200px] mx-auto px-5 py-16">
     <h2 class="text-[clamp(1.6rem,4vw,2.4rem)] leading-tight mb-3">Skąd bierze się luka</h2>
     <p class="text-[1.08rem] leading-relaxed text-tekst-drugi max-w-[42em] mt-0 mb-8">
-      Zasiłek chorobowy z ZUS to 80% podstawy wymiaru składek. Przy najniższej podstawie
-      daje to {zl(przyklad.zus)} miesięcznie — niezależnie od tego, czy zarabiasz
-      8 000 zł, czy 80 000 zł.
+      Zasiłek chorobowy z ZUS to {ZUS_TEKST.wzor}. Na dużym ZUS-ie z najniższą podstawą
+      i z dobrowolnym chorobowym daje to {zl(ZASILEK_JDG.duzy)} miesięcznie przed podatkiem —
+      niezależnie od tego, czy zarabiasz 8 000 zł, czy 80 000 zł. Na preferencyjnym ZUS-ie
+      to około {zl(ZASILEK_JDG.preferencyjny)}, a bez chorobowego nic.
     </p>
 
     <div class="border border-linia overflow-x-auto max-w-[52em]">
-      <table class="w-full border-collapse text-left min-w-[34rem]">
-        <caption class="sr-only">Porównanie miesięcznych wpływów na zwolnieniu przy dochodzie 18 000 zł na B2B</caption>
+      <table class="w-full border-collapse text-left min-w-[20rem]">
+        <caption class="sr-only">Zasiłek z ZUS, świadczenie z polisy i szacowana składka przy dochodzie 18 000 zł na B2B</caption>
         <tbody>
           <tr class="border-b border-linia">
-            <th scope="row" class="px-6 py-4 font-semibold text-[15.5px]">Dochód miesięczny</th>
+            <th scope="row" class="px-6 py-4 font-semibold text-[15.5px]">Dochód miesięczny netto</th>
             <td class="px-6 py-4 font-mono text-lg">{zl(18000)}</td>
           </tr>
           <tr class="border-b border-linia">
-            <th scope="row" class="px-6 py-4 font-semibold text-[15.5px]">Zasiłek z ZUS (najniższa podstawa)</th>
-            <td class="px-6 py-4 font-mono text-lg text-alarm font-semibold">{zl(przyklad.zus)}</td>
+            <th scope="row" class="px-6 py-4 font-semibold text-[15.5px]">Zasiłek z ZUS (duży ZUS z chorobowym)</th>
+            <td class="px-6 py-4 font-mono text-lg text-alarm font-semibold">{zl(ZASILEK_JDG.duzy)}</td>
           </tr>
           <tr class="border-b border-linia">
             <th scope="row" class="px-6 py-4 font-semibold text-[15.5px]">Świadczenie z polisy ({Math.round(LIMIT.b2b * 100)}%)</th>
             <td class="px-6 py-4 font-mono text-lg text-akcent-ciemny font-semibold">{zl(przyklad.swiadczenie)}</td>
           </tr>
           <tr class="bg-tlo-jasne">
-            <th scope="row" class="px-6 py-5 font-semibold text-[16px]">Razem na zwolnieniu</th>
-            <td class="px-6 py-5 font-mono text-xl font-semibold text-akcent-ciemny">{zl(przyklad.zus + przyklad.swiadczenie)}</td>
+            <th scope="row" class="px-6 py-5 font-semibold text-[16px]">Szacowana składka miesięczna</th>
+            <td class="px-6 py-5 font-mono text-xl font-semibold">{zlZakres(przyklad.skladkaOd, przyklad.skladkaDo)}</td>
           </tr>
         </tbody>
       </table>
     </div>
-    <p class="text-[13px] leading-relaxed text-tekst-trzeci mt-4 mb-0 max-w-[42em]">
-      Symulacja przy założeniu najniższej podstawy ZUS ({zl(ZUS_MIESIECZNIE)}) i pełnego
-      limitu świadczenia. Realną składkę i sumę wylicza ubezpieczyciel po ocenie ryzyka.
+    <p class="text-[13px] leading-relaxed text-tekst-drugi mt-4 mb-0 max-w-[42em]">
+      Symulacja: zasiłek {ZUS_TEKST.scenariusz}, pełny limit świadczenia, składka razem
+      z opłatą dystrybucyjną. {ZUS_TEKST.brutto} Realną składkę i sumę wylicza
+      ubezpieczyciel po ocenie ryzyka.
     </p>
   </section>
 

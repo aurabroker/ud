@@ -1,4 +1,5 @@
 <script>
+  import { potwierdz } from '$lib/potwierdz.js';
   import UstawieniaNav from '$lib/components/UstawieniaNav.svelte';
   import { enhance } from '$app/forms';
   let { data, form } = $props();
@@ -55,8 +56,7 @@
   {#if s.logo_url}
     <div style="display:flex;align-items:center;gap:1.25rem;margin-bottom:1rem;flex-wrap:wrap;">
       <img src={s.logo_url} alt="Logo" style="height:64px;width:auto;border:1px solid var(--slate-200);border-radius:8px;padding:6px;background:#fff;" />
-      <form method="POST" action="?/removeLogo" use:enhance
-        onsubmit={(e) => { if (!confirm('Usunąć logo?')) e.preventDefault(); }}>
+      <form method="POST" action="?/removeLogo" use:enhance={potwierdz('Usunąć logo?')}>
         <button class="btn btn-ghost" style="color:var(--red-600);">Usuń logo</button>
       </form>
     </div>
@@ -208,8 +208,7 @@
   {#if s.distributor_pdf_path}
     <div style="display:flex;align-items:center;gap:1.25rem;margin-bottom:1rem;flex-wrap:wrap;">
       <a class="btn btn-ghost" href="/dystrybutor" target="_blank" rel="noopener">📄 {s.distributor_pdf_name || 'Informacja o dystrybutorze.pdf'}</a>
-      <form method="POST" action="?/removeDistributor" use:enhance
-        onsubmit={(e) => { if (!confirm('Usunąć plik informacji o dystrybutorze?')) e.preventDefault(); }}>
+      <form method="POST" action="?/removeDistributor" use:enhance={potwierdz('Usunąć plik informacji o dystrybutorze?')}>
         <button class="btn btn-ghost" style="color:var(--red-600);">Usuń plik</button>
       </form>
     </div>

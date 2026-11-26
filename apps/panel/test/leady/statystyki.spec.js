@@ -1,5 +1,6 @@
 /**
- * Strona /panel/statystyki i migająca zakładka „Niedokończone" (zmiany z 02.10.2026).
+ * Strona /panel/statystyki (z sekcją „Według źródła", panel v.0.80) i migająca
+ * zakładka „Niedokończone" (zmiany z 02.10.2026).
  *
  * Obie renderowane po stronie serwera z prawdziwego komponentu i z danymi z tych
  * samych funkcji co ich `load` (ud_leady_statystyki, liczNiedokonczone) na bazie
@@ -7,6 +8,7 @@
  * co SQL zwrócił, a agent nie dostaje cudzych liczb nawet z parametrem w adresie.
  */
 import { test, expect } from '@playwright/test';
+import { readFileSync } from 'node:fs';
 import { adres, leadId, reset, sql } from './pomocnicy.js';
 
 test.beforeEach(async ({ request }) => { await reset(request); });
@@ -139,6 +141,114 @@ test('ryzyka bez „niezdolność do pracy" i „świadczenie miesięczne"; okre
   await expect(ryzyko(page, 'okresowa').locator('td').nth(1)).toHaveText(/zł \/ mies\.$/);
   const tekst = await page.locator('body').innerText();
   expect(tekst).not.toMatch(/niezdolność do pracy|świadczenie miesięczne/i);
+});
+
+// ─── Według źródła (panel v.0.80) ───────────────────────────────────────────
+// Źródło z form_data.zrodlo i kod agenta (affiliate_code_used); liczby z SQL
+// ud_leady_statystyki_zrodla, rodzaj z src/lib/zrodlo.js.
+async function zrodla(request) {
+  await sql(request, `
+    update public.ud_clients set form_data = '{"zrodlo": {"utm_source": "ads", "utm_medium": "internet", "utm_campaign": "jesien26",
+      "platne": true, "zgoda_marketing": true, "gclid": "GCLID-SEKRET-1"}}' where full_name = 'Jerzy Duda';
+    update public.ud_clients set form_data = '{"zrodlo": {"platne": true, "gad_source": "1", "gad_campaignid": "998877", "zgoda_marketing": false}}'
+     where full_name = 'Celina Zielińska';
+    update public.ud_clients set affiliate_code_used = 'AG7' where full_name = 'Grażyna Pawlak';
+    update public.ud_clients set form_data = '{"zrodlo": {"utm_source": "Newsletter", "platne": false, "zgoda_marketing": false}}'
+     where full_name = 'Anna Kowalska';
+    update public.ud_user_profiles set prowizja_procent = 15 where id = tt.id_ula();`);
+}
+const zrodloWiersz = (page, k) => page.locator(`section[data-zrodla] tr[data-zrodlo="${k}"] > *`);
+const podwiersze = (page, k) => page.locator(`section[data-zrodla] tr[data-zrodlo-pod="${k}"] th`);
+
+test('według źródła: wnioski, sprzedane polisy, składki i prowizja na rodzaj; kampanie pod Google Ads; Razem = sprzedaże', async ({ page, request }) => {
+  await sprzedaze(request);
+  await zrodla(request);
+  await wczytaj(page, request, '/__test/ssr-statystyki', 'adm');
+
+  const sekcja = page.locator('section[data-zrodla]');
+  await expect(sekcja.getByRole('heading', { name: 'Według źródła' })).toBeVisible();
+  await expect(sekcja.locator('thead th')).toHaveText(['Źródło', 'Wnioski', 'Sprzedane polisy', 'Składki roczne', 'Prowizja']);
+  await expect(sekcja.locator('tbody tr[data-zrodlo] th')).toHaveText(['Google Ads', 'Link agenta', 'Inne', 'Brak danych']);
+
+  // Jerzy (reklama, sprzedany: 3 600 × 15%) + Celina (reklama, bez sprzedaży).
+  await expect(zrodloWiersz(page, 'ads')).toHaveText(['Google Ads', '2', '1', /^3[\s ]?600 zł$/, '540 zł']);
+  await expect(podwiersze(page, 'ads')).toHaveText([/kampania:\s+jesien26/, /kampania:\s+998877/]);
+  // Grażyna z linku agenta, sprzedana przez Olka (bez stawki).
+  await expect(zrodloWiersz(page, 'agent')).toHaveText(['Link agenta', '1', '1', /^2[\s ]?400 zł$/, /^0 zł \(1 sprzedaż bez stawki\)$/]);
+  await expect(zrodloWiersz(page, 'inne')).toHaveText(['Inne', '1', '0', '0 zł', '0 zł']);
+  await expect(podwiersze(page, 'inne')).toHaveText([/utm_source:\s+newsletter/]);
+  // Pozostali klienci z fixture (bez źródła); Bartek sprzedany bez kwot.
+  const wszyscy = Number(await sql(request, 'select count(*) from public.ud_clients'));
+  await expect(zrodloWiersz(page, 'brak')).toHaveText(['Brak danych', String(wszyscy - 4), '1 (1 bez kwot)', '0 zł', '0 zł']);
+  await expect(zrodloWiersz(page, 'razem')).toHaveText(['Razem', String(wszyscy), '3', /^6[\s ]?000 zł$/, '540 zł']);
+  // Razem sprzedaży = kafel „Sprzedaże" (ta sama definicja sprzedaży).
+  await expect(stat(page, 'sprzedaze')).toHaveText('3');
+  await expect(stat(page, 'prowizja')).toHaveText('540 zł');
+
+  await expect(sekcja.locator('[data-zrodla-przypis]')).toContainText('Wnioski liczone po dacie wniosku, sprzedaż po dacie sprzedaży');
+  await expect(sekcja.locator('[data-zrodla-przypis]')).toContainText('„Brak danych” = wejście bez parametrów kampanii (wyszukiwarka, adres wpisany ręcznie, link bez UTM-ów), wnioski sprzed 20.11.2026 i klienci dodani w panelu');
+  expect(await page.content()).not.toMatch(/SEKRET|gclid/);
+});
+
+test('według źródła: agent tylko swoje (także z cudzym agentem w adresie), administrator — wybrany agent', async ({ page, request }) => {
+  await sprzedaze(request);
+  await zrodla(request);
+  // Ula: leady Anna, Dariusz, Filip, Henryk, Jerzy; sprzedaż — Jerzy.
+  await wczytaj(page, request, `/__test/ssr-statystyki?agent=${OLEK}`, 'ula');
+  await expect(zrodloWiersz(page, 'ads')).toHaveText(['Google Ads', '1', '1', /^3[\s ]?600 zł$/, '540 zł']);
+  await expect(podwiersze(page, 'ads')).toHaveText([/jesien26/]);
+  await expect(zrodloWiersz(page, 'agent')).toHaveText(['Link agenta', '0', '0', '0 zł', '0 zł']);
+  await expect(zrodloWiersz(page, 'razem')).toHaveText(['Razem', '5', '1', /^3[\s ]?600 zł$/, '540 zł']);
+  await expect(page.locator('section[data-zrodla]')).not.toContainText('998877');      // kampania klientki Olka
+  await expect(page.locator('[data-zrodla-przypis]')).toContainText('Wnioski Twoich klientów i Twoje sprzedaże.');
+
+  await wczytaj(page, request, `/__test/ssr-statystyki?agent=${OLEK}`, 'adm');
+  // Olek: Celina (reklama), Grażyna (link agenta, sprzedana), Karolina (brak).
+  await expect(zrodloWiersz(page, 'ads')).toHaveText(['Google Ads', '1', '0', '0 zł', '0 zł']);
+  await expect(zrodloWiersz(page, 'agent')).toHaveText(['Link agenta', '1', '1', /^2[\s ]?400 zł$/, /bez stawki/]);
+  await expect(zrodloWiersz(page, 'razem').nth(2)).toHaveText('1');
+});
+
+test('według źródła: wniosek z linku agenta liczy się agentowi od razu, zanim ktoś otworzy tablicę', async ({ page, request }) => {
+  // Nowy wniosek z ?agent=<kod Uli>: w ud_clients jest, leada jeszcze nie ma (powstaje przy synchronizacji).
+  await sql(request, `update public.ud_user_profiles set affiliate_code = 'AGULA' where id = tt.id_ula();
+    insert into public.ud_clients (id, created_at, full_name, email, phone, source, affiliate_code_used, form_data)
+    values ('c0000000-0000-0000-0000-0000000000f1', now(), 'Zenon Nowy', 'zenon@x.pl', '500900900', 'form', 'AGULA',
+            '{"zrodlo": {"utm_source": "ads", "utm_medium": "internet", "platne": true, "zgoda_marketing": false}}');`);
+  expect(await sql(request, `select count(*) from public.ud_leady where klient_id = 'c0000000-0000-0000-0000-0000000000f1'`)).toBe('0');
+  await wczytaj(page, request, '/__test/ssr-statystyki', 'ula');
+  await expect(zrodloWiersz(page, 'ads')).toHaveText(['Google Ads', '1', '0', '0 zł', '0 zł']);
+  await wczytaj(page, request, `/__test/ssr-statystyki?agent=a0000000-0000-0000-0000-0000000000a2`, 'adm');
+  await expect(zrodloWiersz(page, 'ads')).toHaveText(['Google Ads', '1', '0', '0 zł', '0 zł']);
+});
+
+test('load statystyk synchronizuje leady PRZED obiema funkcjami (harness robi to samo, więc to sprawdza źródło)', () => {
+  const kod = readFileSync(new URL('../../src/routes/panel/statystyki/+page.server.js', import.meta.url), 'utf8');
+  const sync = kod.indexOf('await synchronizuj(sb);');
+  expect(sync, 'load nie woła synchronizuj(sb)').toBeGreaterThan(0);
+  expect(sync).toBeLessThan(kod.indexOf('Promise.allSettled('));
+});
+
+test('według źródła: okres — wnioski po dacie wniosku, sprzedaż po dacie sprzedaży', async ({ page, request }) => {
+  await sprzedaze(request);   // Jerzy sprzedany w poprzednim miesiącu
+  await zrodla(request);
+  await sql(request, `update public.ud_clients set created_at = date_trunc('month', now()) - interval '15 days' where full_name = 'Jerzy Duda';
+                      update public.ud_clients set created_at = now() where full_name = 'Celina Zielińska';`);
+  await wczytaj(page, request, '/__test/ssr-statystyki?okres=poprzedni', 'adm');
+  await expect(zrodloWiersz(page, 'ads')).toHaveText(['Google Ads', '1', '1', /^3[\s ]?600 zł$/, '540 zł']);
+  await expect(podwiersze(page, 'ads')).toHaveText([/jesien26/]);
+  await wczytaj(page, request, '/__test/ssr-statystyki?okres=miesiac', 'adm');
+  await expect(zrodloWiersz(page, 'ads')).toHaveText(['Google Ads', '1', '0', '0 zł', '0 zł']);
+  await expect(podwiersze(page, 'ads')).toHaveText([/998877/]);
+});
+
+test('według źródła: brak funkcji w bazie (panel przed migracją) — komunikat w sekcji, reszta statystyk działa', async ({ page, request }) => {
+  await sprzedaze(request);
+  await wczytaj(page, request, '/__test/ssr-statystyki?brakZrodel=1', 'adm');
+  await expect(page.locator('[data-zrodla-blad]')).toHaveText(/nie są jeszcze włączone w bazie — reszta statystyk działa/);
+  await expect(page.locator('section[data-zrodla] table')).toHaveCount(0);
+  await expect(stat(page, 'sprzedaze')).toHaveText('3');
+  await expect(page.locator('section[aria-labelledby="st-agenci"]')).toBeVisible();
 });
 
 test('zakładka „Niedokończone" miga, dopóki czeka kontakt ze zgodą; obsłużone, bez zgody i ukończone się nie liczą', async ({ page, request }) => {

@@ -241,6 +241,23 @@ test('K19: strzałki, Home/End, Enter, Esc, Tab — pełna obsługa i prawidłow
   await expect(menu(page)).toHaveCount(0);
 });
 
+test('menu: „Zadzwoń" (tel:) z klawiatury nie zabiera z tablicy — fokus wraca do „…" karty, nie na <body>', async ({ page }) => {
+  await otworz(page);
+  // Bez aplikacji do tel: w przeglądarce testowej — patrz klienci-menu.spec.js (blur zamykałby następne menu).
+  await page.evaluate(() => window.addEventListener('click', (e) => {
+    if (e.target?.closest?.('a[href^="tel:"]')) e.preventDefault();
+  }, true));
+  const url = page.url();
+  const przycisk = page.getByRole('button', { name: 'Akcje leada Anna Kowalska' });
+  await przycisk.focus();
+  await page.keyboard.press('Enter');
+  await page.getByRole('menuitem', { name: 'Zadzwoń: 500100200' }).focus();
+  await page.keyboard.press('Enter');
+  await expect(menu(page)).toHaveCount(0);
+  expect(page.url()).toBe(url);
+  await expect(przycisk).toBeFocused();
+});
+
 test('K24: Shift + prawy klik zostawia natywne menu, a aplikacja działa dalej', async ({ page }) => {
   await otworz(page);
   await nasluchujMenu(page);

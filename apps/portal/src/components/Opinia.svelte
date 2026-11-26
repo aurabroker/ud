@@ -31,6 +31,9 @@
 
   const poprawny = $derived(imie.trim().length >= 2 && miasto.trim().length >= 2 && ocena >= 1);
 
+  /** 1 gwiazdka, 2–4 gwiazdki, 5 gwiazdek — wcześniej czytnik ekranu słyszał „5 gwiazdki". */
+  const gwiazdki = (n) => (n === 1 ? 'gwiazdka' : n >= 2 && n <= 4 ? 'gwiazdki' : 'gwiazdek');
+
   async function wyslij(zdarzenie) {
     zdarzenie.preventDefault();
     if (!poprawny || stan === 'wysylanie') return;
@@ -73,7 +76,7 @@
   <div class="border-l-[3px] border-akcent bg-tlo-jasne p-7" role="status">
     <h3 class="text-[20px] font-semibold m-0 mb-2">Dziękujemy</h3>
     <p class="text-[15.5px] leading-relaxed text-tekst-drugi m-0">
-      Opinia trafiła do nas i pojawi się na stronie po weryfikacji.
+      Opinia trafiła do nas. Pojawi się na stronie, gdy potwierdzimy, że jesteś naszym klientem.
     </p>
   </div>
 {:else}
@@ -105,7 +108,7 @@
             <input type="radio" name="ocena" value={gwiazdka} bind:group={ocena} class="sr-only">
             <span aria-hidden="true"
                   class="text-[2rem] leading-none {gwiazdka <= ocena ? 'text-akcent' : 'text-linia-mocna'}">★</span>
-            <span class="sr-only">{gwiazdka} {gwiazdka === 1 ? 'gwiazdka' : 'gwiazdki'} z 5</span>
+            <span class="sr-only">{gwiazdka} {gwiazdki(gwiazdka)} z 5</span>
           </label>
         {/each}
       </div>

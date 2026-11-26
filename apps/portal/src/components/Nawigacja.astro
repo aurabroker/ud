@@ -9,6 +9,7 @@ const POZYCJE = {
   pl: [
     { nazwa: 'Jak to działa', url: '/jak-to-dziala/' },
     { nazwa: 'Kalkulator',    url: '/kalkulator/' },
+    { nazwa: 'Wyłączenia',    url: '/wylaczenia/' },
     { nazwa: 'Zawody',        url: '/zawody/' },
     { nazwa: 'Blog',          url: '/blog/' },
     { nazwa: 'Dokumenty',     url: '/dokumenty/' },
@@ -55,25 +56,27 @@ const aktywna = (url: string) => sciezka === url || (url !== '/' && sciezka.star
       <span class="text-xl font-bold tracking-tight">Utrata<span class="text-akcent">Dochodu</span></span>
     </a>
 
-    <ul class="hidden lg:flex gap-7 items-center text-[15px] font-medium text-tekst-drugi list-none m-0 p-0">
+    <ul class="hidden lg:flex gap-5 xl:gap-7 items-center text-[15px] font-medium text-tekst-drugi list-none m-0 p-0">
       {POZYCJE.map((p) => (
         <li>
           <a href={p.url}
-             class:list={['hover:text-akcent-ciemny', aktywna(p.url) && 'text-akcent-ciemny font-bold']}
+             class:list={['whitespace-nowrap hover:text-akcent-ciemny', aktywna(p.url) && 'text-akcent-ciemny font-bold']}
              aria-current={aktywna(p.url) ? 'page' : undefined}>{p.nazwa}</a>
         </li>
       ))}
     </ul>
 
     <div class="flex items-center gap-4 shrink-0">
-      {/* Na stronie polskiej przełącznik chowa się poniżej 640 px: logo
-          i przycisk zajmują tam całą szerokość paska. Na telefonie wersję
-          ukraińską wskazuje odnośnik w stopce. Strona ukraińska ma krótszy
-          napis na przycisku, więc mieści przełącznik zawsze. */}
+      {/* Na stronie polskiej przełącznik chowa się w dwóch zakresach szerokości:
+          poniżej 640 px (logo i przycisk zajmują cały pasek) i od 1024 do 1279 px
+          — tam siedem pozycji menu i przycisk mieszczą się na styk, a z przełącznikiem
+          pasek wychodził 2 px poza ekran. W obu zakresach wersję ukraińską
+          wskazuje odnośnik w stopce. Strona ukraińska ma trzy pozycje menu
+          i krótszy napis na przycisku, więc mieści przełącznik zawsze. */}
       <a href={przelacznik.url} lang={drugi} hreflang={drugi}
          aria-label={przelacznik.opis} title={przelacznik.opis}
          class:list={['font-mono text-[13px] font-semibold tracking-[0.08em] text-akcent-tekst hover:text-akcent-hover',
-                      'border border-linia px-2 py-1.5', jezyk === 'pl' && 'hidden sm:inline-block']}>
+                      'border border-linia px-2 py-1.5', jezyk === 'pl' && 'hidden sm:inline-block lg:hidden xl:inline-block']}>
         {przelacznik.skrot}
       </a>
       <a href={NAPISY.ctaUrl}

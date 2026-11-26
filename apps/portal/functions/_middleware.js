@@ -201,7 +201,10 @@ export async function onRequest({ request, next }) {
     // bufor pośredni mógłby podać przeglądarce zapisany wcześniej Markdown.
     naglowki.append('Vary', 'Accept');
     naglowki.append('Link', ZASOBY);
-    if (toStrona(url.pathname)) {
+    // Wariant markdownowy ogłaszamy tylko przy stronie, która istnieje (2xx).
+    // Pod nieznanym adresem Pages podaje 404.html ze statusem 404, a pliku
+    // `<adres>/index.md` tam nie ma — odnośnik prowadziłby agenta w pustkę.
+    if (toStrona(url.pathname) && odpowiedz.status >= 200 && odpowiedz.status < 300) {
       naglowki.append('Link', `<${url.pathname}index.md>; rel="alternate"; type="text/markdown"`);
     }
     return przepisz();
