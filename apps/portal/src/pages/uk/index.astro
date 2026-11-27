@@ -33,7 +33,7 @@ const tytul = 'Страхування від втрати доходу в Пол
 const b2b = Math.round(LIMIT.b2b * 100);
 const etat = Math.round(LIMIT.etat * 100);
 
-const opis = `Приватний лікарняний для B2B і контрактників у Польщі. Поліс щомісяця виплачує до ${b2b}% `
+const opis = `Приватний лікарняний для B2B і фахівців на контракті в Польщі. Поліс щомісяця виплачує до ${b2b}% `
   + 'доходу, тоді як ZUS рахує допомогу від задекларованої бази внесків, а не від того, що ви заробляєте.';
 
 const PYTANIA = [
@@ -58,7 +58,7 @@ const PYTANIA = [
       + 'за роботу.',
   },
   {
-    pytanie: 'Відколи виплачують кошти?',
+    pytanie: 'Відколи починається виплата?',
     odpowiedz: 'Після завершення періоду очікування (okres wyczekiwania), визначеного в договорі '
       + 'й відлічуваного від початку непрацездатності. Далі щомісяця, доки триває непрацездатність, '
       + `щонайдовше протягом ${MIESIECY_MAX} місяців — залежно від періоду, обраного в договорі.`,
@@ -150,12 +150,12 @@ const przyklad = symuluj({ dochod: 18000 });
 /* Zdania z kwotami składamy tutaj — Astro gubi spację obok {wyrażenia} na końcu linii. */
 const lead = 'На B2B допомогу по хворобі від ZUS рахують від задекларованої бази внесків, а не від '
   + `того, що ви реально заробляєте. Поліс щомісяця виплачує до ${b2b}% доходу на B2B і до ${etat}% `
-  + 'на трудовому договорі.';
+  + 'за трудовим договором.';
 const zusWstep = `Допомога по хворобі — це ${ZUS_TEKST_UK.wzor}, а не 80% вашого доходу. За `
-  + 'найнижчої бази різниця для фахівця на контракті сягає понад десять тисяч злотих на місяць.';
-const zusPrzypis = `Симуляція, а не пропозиція. Допомога ZUS — ${ZUS_TEKST_UK.scenariusz}; `
+  + 'найнижчої бази різниця для фахівця на контракті сягає кільканадцяти тисяч злотих на місяць.';
+const zusPrzypis = `Орієнтовний розрахунок, а не пропозиція. Допомога ZUS — ${ZUS_TEKST_UK.scenariusz}; `
   + `${ZUS_TEKST_UK.dopiski}. ${ZUS_TEKST_UK.brutto} Орієнтовний внесок за такої виплати: `
-  + `${zlZakres(przyklad.skladkaOd, przyklad.skladkaDo)} на місяць, разом із дистрибуційною оплатою. `
+  + `${zlZakres(przyklad.skladkaOd, przyklad.skladkaDo)} на місяць, разом із платою за дистрибуцію (opłata dystrybucyjna). `
   + 'Реальний внесок розраховує система страховика після оцінки ризику.';
 // Zdanie kończy się zwykłym słowem: nazwa z „S.A." albo „sp. z o.o." na końcu dałaby dwie kropki.
 const podmioty = `Страховиком є ${FIRMA.ubezpieczyciel}, а договір укладають через `
@@ -335,7 +335,7 @@ const KAFELKI = ZAWODY_UK.map((z) => {
       <div class="max-w-[38em]">
         <h2 class="text-[clamp(1.4rem,3vw,1.9rem)] leading-tight m-0 mb-2">Волієте поговорити?</h2>
         <p class="text-[16px] leading-relaxed text-tekst-drugi m-0">
-          Пройдемо заявку разом телефоном. Без зобов’язань. Розмова — польською мовою.
+          Заповнимо заявку разом, телефоном. Без зобов’язань. Розмова — польською мовою.
         </p>
       </div>
       <a href={`tel:${FIRMA.telefon}`} class="bg-akcent-ciemny text-white px-8 py-4 font-bold text-lg hover:bg-akcent-hover">

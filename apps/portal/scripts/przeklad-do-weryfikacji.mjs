@@ -120,14 +120,14 @@ const DOPISKI_UK = [
 const SLOWNIK = [
   ['ubezpieczenie utraty dochodu', 'страхування від втрати доходу', /страхування від втрати доходу/],
   ['polisa', 'поліс', /поліс/],
-  ['świadczenie (z polisy), wypłata', 'виплата (за полісом)', /виплат[аиу] за полісом/],
-  ['składka (ubezpieczeniowa)', 'внесок', /внесок|внеску/, 'to samo słowo co przy składkach ZUS — jak po polsku'],
+  ['świadczenie (z polisy), wypłata', 'виплата (за полісом); przy pierwszym użyciu: страхова виплата', /виплат[аиу] за полісом/, 'nie „кошти”'],
+  ['składka (ubezpieczeniowa)', 'внесок; przy pierwszym użyciu: страховий внесок', /страхов\S+ внес/, 'to samo słowo co przy składkach ZUS — jak po polsku'],
   ['składki ZUS', 'внески ZUS', /внесків/],
   ['podstawa wymiaru składek', 'база нарахування внесків', /баз[аиу] нарахування внесків/],
-  ['zasiłek chorobowy', 'допомога по хворобі', /допомог[аиу] по хворобі/],
-  ['ubezpieczenie chorobowe (w ZUS)', 'страхування на випадок хвороби', /страхування(м)? на випадок хвороби/],
+  ['zasiłek chorobowy', 'допомога по хворобі', /допомог[аиу] по хворобі/, 'tak pisze ZUS w materiałach po ukraińsku'],
+  ['ubezpieczenie chorobowe (w ZUS)', 'страхування на випадок хвороби', /страхування(м)? на випадок хвороби/, 'tak pisze ZUS w materiałach po ukraińsku'],
   ['zwolnienie lekarskie, L4', 'лікарняний', /лікарнян/],
-  ['preferencyjny ZUS', 'пільговий ZUS', /пільгов\S+ ZUS/],
+  ['preferencyjny ZUS', 'пільговий ZUS (preferencyjny ZUS)', /пільгов\S+ ZUS/],
   ['duży ZUS', 'duży ZUS (zostaje po polsku)', /duży ZUS/],
   ['okres wyczekiwania', 'період очікування', /період\S* очікування/, 'nigdy „каренція”'],
   ['okres wypłaty (okres odszkodowawczy)', 'період виплати', /період\S* виплати/],
@@ -147,15 +147,18 @@ const SLOWNIK = [
   ['ocena ryzyka', 'оцінка ризику', /оцінк\S+ ризику/],
   ['klasa ryzyka (zawodu)', 'клас ризику', /клас\S* (професійного )?ризику/],
   ['ankieta medyczna', 'медична анкета', /медичн\S+ анкет/],
-  ['opłata dystrybucyjna', 'дистрибуційна оплата', /дистрибуційн\S+ оплат/],
+  ['opłata dystrybucyjna', 'плата за дистрибуцію (opłata dystrybucyjna)', /плат\S+ за дистрибуцію/, 'to nie prowizja agenta'],
   ['składka w ratach', 'внесок частинами', /частинами/],
   ['zgłoszenie roszczenia, szkoda', 'звернення по виплату', /звернення по виплату/],
   ['działalność gospodarcza', 'підприємницька діяльність', /підприємницьк\S+ діяльн/],
   ['samozatrudnienie, samozatrudnieni', 'самозайнятість, самозайняті', /самозайнят/],
   ['umowa o pracę', 'трудовий договір (umowa o pracę)', /трудов\S+ договор/],
   ['ryczałt', 'ричалт (ryczałt)', /ричалт/],
-  ['symulacja (składki)', 'симуляція (внеску)', /[Сс]имуляці/],
-  ['fryzjer / kosmetyczka / programista', 'перукар / косметолог / програміст', /косметолог/],
+  ['symulacja (składki)', 'орієнтовний розрахунок (внеску)', /[Оо]рієнтовн\S+ розрахун/, 'nie „симуляція” — to także „udawanie choroby”'],
+  ['kontraktowi, specjaliści na kontrakcie', 'фахівці на контракті', /фахівц\S+ на контракті/, 'nie „контрактники” — to żołnierze kontraktowi'],
+  ['na umowie o pracę', 'за трудовим договором', /за трудов\S+ договор/],
+  ['faktury', 'рахунки-фактури (faktury)', /рахунків-фактур/],
+  ['fryzjer / kosmetyczka / programista', 'перукар / косметолог (kosmetyczka) / програміст', /Косметолог \(kosmetyczka\)/],
 ];
 
 /* ───────────────────────────── czytanie builda ───────────────────────────── */
@@ -487,7 +490,7 @@ i poprawki zostawiasz po ukraińsku.
 - **Po polsku zostają**: nazwy własne i skróty (ZUS, PESEL, OWU, JDG, B2B, NIP, Leadenhall, CEU, Lloyd’s,
   symbole LW044 itd., nazwy produktów „Utrata dochodu”, „LOI Premium”), „duży ZUS”, kwoty w „zł”,
   nazwy polskich dokumentów i etykiety pól formularza (formularz wniosku jest tylko po polsku),
-  wiersze „Джерело: …” z paragrafami OWU oraz polski termin w nawiasie przy ukraińskim
+  paragrafy OWU w wierszach „Джерело: …” oraz polski termin w nawiasie przy ukraińskim
   (np. „період очікування (okres wyczekiwania)”).
 - **Zdania, których nie ma po polsku**, bo dotyczą tylko czytelnika ukraińskiego: że wniosek, umowa, OWU
   i rozmowa z doradcą są po polsku; dopiski „(польською)” przy odnośnikach do polskich stron; zdanie,
@@ -504,19 +507,37 @@ i poprawki zostawiasz po ukraińsku.
 | --- | --- | --- |
 ${slownik}
 
+## Rozstrzygnięte po pierwszej weryfikacji (27.11.2026) — nie zgłaszaj ponownie
+
+Trzy niezależne modele sprawdziły poprzednią wersję. Poniższe sprawy są zamknięte; zgłoś je tylko
+wtedy, gdy masz argument, którego tu nie ma.
+
+- **„допомога по хворобі”** i **„страхування на випадок хвороби”** zostają — tak nazywa te
+  świadczenia sam ZUS w swoich materiałach po ukraińsku.
+- **„варіант із виплатою до 24 місяців”** jest wierne polskiemu „wariant z wypłatą do 24 miesięcy”
+  („do” znaczy tu „najdłużej”; to nazwa wariantu, nie obietnica).
+- **„поліс завжди його охоплює”** (przewodnik, ryzyko podstawowe) to przekład zdania z polskiego
+  formularza: „Ryzyko podstawowe — polisa zawsze je obejmuje”.
+- **„ковергольдери Lloyd’s (coverholders)”** bez dopisku „upoważnieni przedstawiciele”: takie
+  brzmienie mają tylko warunki Leadenhall, w CEU rola jest inna.
+- **„клаузула”** zostaje przy nazwach klauzul z polskich dokumentów (klient zobaczy „Klauzula …”
+  w ofercie); przy RODO stoi „інформація про обробку персональних даних”.
+- **„косметолог (kosmetyczka)”**: polska nazwa w nawiasie odróżnia zawód od lekarza-kosmetologa.
+- **„заявка”**, **„період очікування”**, **„виключення”**, **„Відхиляю всі” / „Приймаю всі”** — bez zmian.
+
 ## Pytania, na które szczególnie chcemy odpowiedzi
 
-1. **„внесок”** jako składka ubezpieczeniowa — czy klient w Ukrainie tak to nazwie, czy raczej
-   „страховий платіж” / „страхова премія”? Tekst używa „внесок” także dla składek ZUS (jak polskie „składka”).
-2. **„виплата (за полісом)”** jako świadczenie z polisy — czy wystarcza, czy powinno być „страхова виплата”?
-3. **„допомога по хворобі”** jako zasiłek chorobowy z ZUS — czy to naturalny odpowiednik?
-4. **„період очікування”** jako okres wyczekiwania (czas od początku niezdolności do pierwszej wypłaty).
-5. **„ковергольдер”**, **„клаузула”**, **„дистрибуційна оплата”** — zrozumiałe czy żargon? Co zamiast?
-6. **„страхування на випадок хвороби”** jako dobrowolne ubezpieczenie chorobowe w ZUS oraz **„пільговий ZUS”**.
-7. **„заявка”** jako wniosek o ubezpieczenie (a nie „заява”).
-8. **„косметолог”** jako polska „kosmetyczka” (zawód: zabiegi kosmetyczne, stylizacja paznokci, bez
-   wykształcenia medycznego) i **„перукар”** jako „fryzjer” — czy czytelnik rozpozna w tym swój zawód?
-9. Czy gdziekolwiek tekst brzmi jak przekład z polskiego albo z rosyjskiego — podaj trzy najgorsze miejsca.
+1. Czy po poprawkach gdziekolwiek zostało słowo **„симуляція”**, **„контрактник”**, **„кошти”**
+   (w znaczeniu świadczenia) albo **„дистрибуційна оплата”**? Zastąpiły je: „орієнтовний розрахунок”,
+   „фахівець на контракті”, „виплата”, „плата за дистрибуцію”.
+2. **„плата за дистрибуцію (opłata dystrybucyjna), яку сплачують разом із кожною частиною внеску”**
+   — czy to zdanie jest zrozumiałe? To opłata doliczana do raty, nie prowizja agenta.
+3. **„одним із чинників непрацездатності стала хвороба або травма”** (polskie „do niezdolności
+   przyczyniła się”) — czy oddaje, że wystarczy częściowy wpływ, a nie wyłączna przyczyna?
+4. **„Строк попередження про розірвання”** jako okres wypowiedzenia w kontrakcie B2B.
+5. **„медичне втручання”** jako polski „zabieg” (procedura medyczna, niekoniecznie operacja).
+6. **„рахунки-фактури (faktury)”** w liście dokumentów i **„фактура”** w zdaniu o dniach bez faktury.
+7. Czy gdziekolwiek tekst brzmi jak przekład z polskiego albo z rosyjskiego — podaj trzy najgorsze miejsca.
 
 ## Jak czytać pliki
 

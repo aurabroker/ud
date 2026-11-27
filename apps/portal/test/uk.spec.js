@@ -273,11 +273,11 @@ test('strona ukraińska pokazuje te same kwoty co polska', () => {
 test('limity 80% i 65% oraz okresy wypłaty stoją na stronie głównej tak jak po polsku', () => {
   const uk = tresc(html('/uk/'));
   expect(uk).toContain('до 80% доходу на B2B');
-  expect(uk).toContain('до 65% на трудовому');
+  expect(uk).toContain('до 65% за трудовим');
   // Okres wypłaty to czas NAJDŁUŻSZY (CLAUDE.md, „Kalkulator — okres wypłaty świadczenia").
   expect(uk).toMatch(/Виплата триває щонайдовше 24, 36, 48 або 60 місяців/);
   // Zastrzeżenie przy kwocie: symulacja, nie oferta.
-  expect(uk).toMatch(/Це симуляція, а не пропозиція/);
+  expect(uk).toMatch(/Це орієнтовний розрахунок, а не пропозиція/);
   expect(uk).toMatch(/діапазон з останніх виставлених пропозицій/);
   // Wyjątek od limitu B2B stoi wszędzie tam, gdzie limit jest podany jako reguła.
   expect(uk).toContain('CEU «Utrata dochodu» ліміт становить 65%');
@@ -373,10 +373,17 @@ test('wyłączenia po ukraińsku: przekład pozycja w pozycję, z paragrafami z 
   const wszystkie = GRUPY.flatMap((g) => g.pozycje);
   expect((uk.match(/Джерело:/g) ?? []).length).toBe(wszystkie.length);
   // Paragrafy stoją w zapisie polskim, słowo w słowo jak na stronie polskiej.
+  // Wyjątek: gdy polskie źródło zaczyna się zdaniem („Wynika z definicji
+  // niezdolności: …"), zdanie jest przetłumaczone, a paragrafy za nim zostają.
   const bezEncji = uk.replace(/&#x27;|&#39;/g, "'").replace(/&amp;/g, '&');
+  const zeZdaniem = wszystkie.filter((p) => /^Wynika z /.test(p.zrodla));
+  expect(zeZdaniem.length, 'test zakłada, że są źródła zaczynające się zdaniem').toBeGreaterThan(0);
   for (const p of wszystkie) {
-    expect(bezEncji, `brak źródła „${p.zrodla.slice(0, 40)}…"`).toContain(p.zrodla);
+    const paragrafy = p.zrodla.replace(/^Wynika z [^:]+:\s*/, '');
+    expect(bezEncji, `brak źródła „${paragrafy.slice(0, 40)}…"`).toContain(paragrafy);
   }
+  expect(uk, 'polskie zdanie w wierszu źródła na stronie ukraińskiej').not.toMatch(/Wynika z /);
+  expect((uk.match(/Джерело: Випливає з /g) ?? []).length).toBe(zeZdaniem.length);
   // Wojna: polska pozycja mówi o wojnie i działaniach wojennych, nie o samym „udziale".
   expect(uk).toMatch(/Виключено війну та воєнні дії/);
   expect(tresc(html('/uk/'))).toMatch(/охоплюють захистом увесь світ, але виключають війну/);
@@ -474,7 +481,7 @@ const wynik = (page, etykieta) =>
 
 test('kalkulator po ukraińsku liczy to samo co polski', async ({ page }) => {
   await page.goto('/uk/');
-  await expect(page.getByRole('heading', { name: /Симуляція внеску/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Орієнтовний розрахунок внеску/ })).toBeVisible();
 
   // Kwoty liczone z tych samych plików co strona (jak w kalkulator.spec.js) — wpisane
   // na sztywno robiłyby się czerwone przy każdej zmianie stawek w kalibracja.json.
@@ -503,7 +510,7 @@ test('kalkulator na stronie zawodu po ukraińsku ma ten sam dochód co po polsku
   const kwotaPl = await wynik(page, 'Świadczenie z polisy').textContent();
 
   await page.goto('/uk/programista/');
-  const ukrainski = page.getByRole('heading', { name: /Симуляція внеску для програміста/ });
+  const ukrainski = page.getByRole('heading', { name: /Орієнтовний розрахунок внеску для програміста/ });
   await ukrainski.scrollIntoViewIfNeeded();
   await expect(ukrainski).toBeVisible();
   await expect(wynik(page, 'Виплата за полісом')).toHaveText(kwotaPl.trim());

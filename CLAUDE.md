@@ -3538,6 +3538,64 @@ i skrypt jeszcze raz.
 - Zmieniasz słownik przekładu — zmień `SLOWNIK` w skrypcie; idzie do
   instrukcji dla sprawdzającego.
 
+### Pierwsza weryfikacja przekładu — trzy modele, 27.11.2026
+
+Żaden z trzech nie znalazł różnicy w kwotach ani zakazanej obietnicy. Każdy
+zarzut był sprawdzony z polskim źródłem, zanim cokolwiek się zmieniło —
+opinia modelu to materiał, nie polecenie (dwa z trzech proponowały np.
+„дохід" za „przychód"). Lista spraw zamkniętych stoi też w instrukcji dla
+sprawdzającego („Rozstrzygnięte po pierwszej weryfikacji").
+
+**Słownik po weryfikacji — tych słów nie przywracaj:**
+
+| Było | Jest | Dlaczego |
+|---|---|---|
+| симуляція (внеску) | орієнтовний розрахунок | po ukraińsku „симуляція" to przede wszystkim udawanie choroby |
+| контрактники | фахівці на контракті | „контрактник" to żołnierz kontraktowy |
+| дистрибуційна оплата | плата за дистрибуцію (opłata dystrybucyjna) | wszyscy trzej: sztuczne; nie „комісія" ani „винагорода агента" — to nie prowizja |
+| кошти (świadczenie) | виплата | jedno słowo na świadczenie; „повернення коштів" (zwrot) zostaje |
+| на трудовому договорі | за трудовим договором | kalka z „na umowie o pracę" |
+| Строк розірвання | Строк попередження про розірвання | okres wypowiedzenia, nie termin rozwiązania |
+| операція (za „zabieg") | медичне втручання | „zabieg" nie musi być operacją |
+| понад десять | кільканадцять | „kilkanaście" to 11–19 |
+| Перейти до змісту | Перейти до вмісту | „зміст" to spis treści |
+
+Przy pierwszym użyciu stoi pełna nazwa: „страховий внесок", „страхова
+виплата", „пільговий ZUS (preferencyjny ZUS)", „Косметолог (kosmetyczka)".
+
+**Zostało, mimo zarzutów — z powodem:**
+
+- **„допомога по хворобі" i „страхування на випадок хвороби"** — tak pisze
+  sam ZUS po ukraińsku („Базові виплати на випадок хвороби" na zus.pl
+  i gov.pl); dwa modele chciały „допомога по тимчасовій непрацездатності",
+  czyli nazwy świadczenia ukraińskiego.
+- **„варіант із виплатою до 24 місяців"** — wierne polskiemu „do 24 miesięcy"
+  (decyzja właściciela z 21.10.2026). Zmiana na „щонайдовше" wymagałaby
+  zmiany polskiego.
+- **„поліс завжди його охоплює"** — przekład zdania z formularza („Ryzyko
+  podstawowe — polisa zawsze je obejmuje").
+- **„ковергольдери Lloyd’s (coverholders)" bez dopisku „upoważnieni
+  przedstawiciele"** — to brzmienie ma tylko LW044 § 1 ust. 3; w CEU rola
+  jest inna (komentarz w `firma.ts`).
+- **„клаузула"** przy nazwach klauzul z oferty; przy RODO — „інформація про
+  обробку персональних даних".
+- **„виручка" za „przychód"** — „дохід" to dochód; w CEU liczy się przychód.
+
+**Wiersz „Джерело:" ma przetłumaczony wstęp**, gdy polskie źródło zaczyna
+się zdaniem („Wynika z definicji niezdolności: …"): `WSTEPY_ZRODEL`
+w `src/dane/uk/wylaczenia.ts`. Paragrafy zostają po polsku. Nowe polskie
+źródło-zdanie bez przekładu **przerywa build**.
+
+**Do decyzji właściciela — polski formularz, nie przekład.** Pod
+„Aktywności podwyższonego ryzyka" kreator mówi: „Zaznacz, co uprawiasz
+regularnie. Nie wyklucza to z ochrony — wpływa na ocenę ryzyka." Dwa z trzech
+modeli przeczytały przekład tego zdania jako obietnicę ochrony (jeden jako
+błąd krytyczny), wbrew liście wyłączeń: aktywność z listy jest objęta tylko
+wtedy, gdy potwierdzi to polisa, a CEU liczy także jednorazowe uczestnictwo.
+Przewodnik `/uk/wniosek/` mówi więc sens („позначка не означає відмови
+у страхуванні") i dokłada zdanie z listy wyłączeń. **Polskiego formularza nie
+ruszałem** — to `Wniosek.svelte`, ścieżka, którą wpływają pieniądze.
+
 ### Nowy zawód po ukraińsku
 
 Wpis w `ZAWODY_UK` (`src/dane/uk/zawody.ts`) z przekładem treści z
@@ -3558,7 +3616,8 @@ Gałąź `claude/wersja-ukrainska` nie jest scalona. Zanim trafi na produkcyjną
    Zdania o wojnie i o ochronie na całym świecie nie są już osobnym
    twierdzeniem: to przekład polskiej listy wyłączeń (z paragrafami,
    sprawdzonej 23.11.2026) i odpowiedzi z `tresci.json`.
-3. Przekład przeczytany przez osobę znającą ukraiński i polski.
+3. Przekład przeczytany przez osobę znającą ukraiński i polski. 27.11.2026
+   sprawdziły go trzy modele językowe (sekcja wyżej) — człowiek jeszcze nie.
 4. Baner cookies po ukraińsku — przekład 1:1 polskiego; akceptacja tak jak
    przy treści polskiej.
 5. **Kto odpowiada na zapytanie po ukraińsku.** Właściciel (26.11.2026):

@@ -22,13 +22,13 @@ const procent = (ulamek: number, miejsc = 0) =>
  */
 export const ZUS_TEKST_UK = {
   scenariusz: `за повних внесків ZUS (duży ZUS) з найнижчої бази (${zl(PODSTAWA.standardowa)}) `
-    + `і добровільного страхування на випадок хвороби, яке сплачується щонайменше `
+    + `і добровільного страхування на випадок хвороби, внески на яке сплачують щонайменше `
     + `${WYCZEKIWANIE_DOBROWOLNE_DNI} днів`,
-  dopiski: `на пільговому ZUS — близько ${zl(ZASILEK_JDG.preferencyjny)}, `
+  dopiski: `на пільговому ZUS (preferencyjny ZUS) — близько ${zl(ZASILEK_JDG.preferencyjny)}, `
     + `без страхування на випадок хвороби — ${zl(ZASILEK_JDG.bezChorobowego)}`,
   wzor: `${procent(STOPA_ZASILKU)} бази нарахування внесків після відрахування ${procent(ODLICZENIE_SKLADEK, 2)}`,
   brutto: 'Допомога ZUS — це сума до вирахування податку на доходи.',
-  etat: `На трудовому договорі (umowa o pracę) ZUS виплачує щонайменше 80% зарплати протягом `
+  etat: `За трудовим договором (umowa o pracę) ZUS виплачує щонайменше 80% зарплати протягом `
     + `${OKRES_ZASILKOWY_DNI} днів. Поліс захищає дохід у разі тривалішої непрацездатності.`,
 } as const;
 
@@ -70,8 +70,8 @@ export const GLOWNA_UK = { nazwa: 'Головна', url: '/uk/' } as const;
 export const KROKI_UK: Record<string, { tytul: string; opis: string }> = {
   kontakt: {
     tytul: 'Контакт',
-    opis: 'ім’я та прізвище, адреса e-mail, номер телефону та — якщо ви її позначите — згода '
-      + 'на контакт щодо заявки',
+    opis: 'ім’я та прізвище, адреса e-mail, номер телефону та згода на контакт щодо заявки, '
+      + 'якщо ви її позначите',
   },
   dane: {
     tytul: 'Основні дані',
@@ -83,7 +83,7 @@ export const KROKI_UK: Record<string, { tytul: string; opis: string }> = {
   },
   zdrowie: {
     tytul: 'Стан здоров’я',
-    opis: 'медична анкета — дані особливої категорії, які обробляють лише за чіткої згоди',
+    opis: 'медична анкета — дані особливої категорії, які обробляють лише за явної згоди',
   },
   zgody: {
     tytul: 'Згоди',
