@@ -83,15 +83,18 @@ const PYTANIA = [
  *  - treść polskich stron sprawdzona z OWU (lista wyłączeń z paragrafami,
  *    `packages/zawody/data/tresci.json`) — tłumaczymy ją tu zdanie w zdanie;
  *  - schemat wniosku i potwierdzenie właściciela;
- *  - dwie pozycje odczytane ze STRESZCZENIA plików OWU, nie z pełnego tekstu
- *    (obywatelstwo i dokumenty CEU) — oznaczone „DO SPRAWDZENIA", wypisane też
- *    w CLAUDE.md („Do potwierdzenia przed publikacją").
+ *  - dwie pozycje (obywatelstwo i dokumenty CEU) sprawdzone 27.11.2026 z pełnym
+ *    tekstem OWU spod /owu/<slug>.pdf — paragrafy przy pozycjach.
  */
 const DLA_UKRAINCOW = [
   {
-    // DO SPRAWDZENIA z pełnym tekstem OWU. LW044 § 15 ust. 18 („osoba fizyczna określona
-    // w pozycji 3 Polisy"); CEU § 29 pkt 12 („określona w Polisie osoba fizyczna objęta
-    // ochroną ubezpieczeniową") — żadne nie stawia warunku obywatelstwa ani miejsca zamieszkania.
+    // Sprawdzone 27.11.2026 z pełnym tekstem sześciu OWU. Leadenhall LW044, LW046 i LW047
+    // § 15 ust. 18: „Ubezpieczony oznacza osobę fizyczną określoną w pozycji 3 Polisy";
+    // CEU Utrata dochodu § 29 pkt 12 (LOI Premium pkt 11, dla zatrudniających — tak samo):
+    // „określoną w Polisie osobę fizyczną objętą ochroną ubezpieczeniową" + warunki co do
+    // formy pracy (umowa, kontrakt, JDG). W żadnym z sześciu tekstów nie ma słowa o
+    // obywatelstwie, rezydencji ani prawie pobytu; „miejsce zamieszkania" pada tylko przy
+    // właściwości sądu i w klauzulach dodatkowych.
     tytul: 'Громадянство',
     opis: 'У загальних умовах страхування (OWU) Leadenhall і CEU немає вимоги польського '
       + 'громадянства: застрахований — це особа, вказана в полісі. Рішення про прийняття на '
@@ -135,13 +138,21 @@ const DLA_UKRAINCOW = [
   {
     // Pierwsze zdanie: tresci.json, programista („dokumentacja medyczna ma być po polsku
     // (Leadenhall przyjmuje też angielską), a ubezpieczyciel może wezwać na badanie
-    // u swojego lekarza"). Drugie zdanie — DO SPRAWDZENIA z pełnym tekstem OWU
-    // (CEU § 11 ust. 2: ZUS ZLA, a bez prawa do ZLA zaświadczenie od lekarza prowadzącego).
+    // u swojego lekarza"). Język dokumentów sprawdzony 27.11.2026 w pełnym tekście:
+    // LW044 — „w języku polskim lub angielskim", CEU — „w języku polskim".
+    // Drugie zdanie — CEU Utrata dochodu § 11 ust. 2–3 (LOI Premium § 10 ust. 2–3), pełny
+    // tekst: Ubezpieczony „obowiązany jest udokumentować" niezdolność drukiem ZUS ZLA,
+    // a bez prawa do ZLA — „zaświadczeniem o stanie zdrowia (…) wystawionym przez lekarza
+    // prowadzącego"; ust. 3: samo zaświadczenie „nie będzie wystarczające", komisja lekarska
+    // powołana przez ubezpieczyciela może orzec inaczej. Stąd „потрібно задокументувати",
+    // nie „підтверджує".
     tytul: 'Документи для виплати',
     opis: 'Під час звернення по виплату медична документація має бути польською (Leadenhall '
       + 'приймає також англійську), тож документи українською потрібно перекласти; страховик може '
-      + 'викликати на огляд до свого лікаря. У CEU непрацездатність підтверджує лікарняний ZUS ZLA, '
-      + 'а якщо права на нього немає — довідка про стан здоров’я від лікаря, який веде лікування.',
+      + 'викликати на огляд до свого лікаря. У CEU непрацездатність потрібно задокументувати '
+      + 'лікарняним ZUS ZLA, а якщо права на нього немає — довідкою про стан здоров’я від лікаря, '
+      + 'який веде лікування. Самої довідки може бути недостатньо: непрацездатність може оцінити '
+      + 'лікарська комісія, яку скликає страховик.',
   },
 ];
 

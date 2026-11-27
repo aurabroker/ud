@@ -3407,7 +3407,12 @@ które zgodę ma — nie z kartoteki klientów.
 
 ---
 
-## Wersja ukraińska (`/uk/`) — gałąź `claude/wersja-ukrainska`, NIE na produkcji
+## Wersja ukraińska (`/uk/`) — na produkcji od 27.11.2026
+
+**Scalona do gałęzi produkcyjnej 27.11.2026 decyzją właściciela („puszczaj
+to").** Powstała na gałęzi `claude/wersja-ukrainska`; dalsze zmiany idą jak
+każda praca nad portalem — od gałęzi produkcyjnej. Co zostało otwarte po
+publikacji: „Po publikacji — co zostało otwarte" niżej.
 
 Od 26.11.2026 część portalu ma odpowiednik po ukraińsku: strona główna,
 „Jak to działa", wyłączenia, przewodnik po wniosku i trzy zawody (programista,
@@ -3586,15 +3591,19 @@ się zdaniem („Wynika z definicji niezdolności: …"): `WSTEPY_ZRODEL`
 w `src/dane/uk/wylaczenia.ts`. Paragrafy zostają po polsku. Nowe polskie
 źródło-zdanie bez przekładu **przerywa build**.
 
-**Do decyzji właściciela — polski formularz, nie przekład.** Pod
-„Aktywności podwyższonego ryzyka" kreator mówi: „Zaznacz, co uprawiasz
-regularnie. Nie wyklucza to z ochrony — wpływa na ocenę ryzyka." Dwa z trzech
-modeli przeczytały przekład tego zdania jako obietnicę ochrony (jeden jako
-błąd krytyczny), wbrew liście wyłączeń: aktywność z listy jest objęta tylko
-wtedy, gdy potwierdzi to polisa, a CEU liczy także jednorazowe uczestnictwo.
-Przewodnik `/uk/wniosek/` mówi więc sens („позначка не означає відмови
-у страхуванні") i dokłada zdanie z listy wyłączeń. **Polskiego formularza nie
-ruszałem** — to `Wniosek.svelte`, ścieżka, którą wpływają pieniądze.
+**Zdanie pod „Aktywności podwyższonego ryzyka" w polskim formularzu —
+zmienione 27.11.2026 decyzją właściciela.** Do tego dnia kreator mówił:
+„Zaznacz, co uprawiasz regularnie. Nie wyklucza to z ochrony — wpływa na ocenę
+ryzyka." Dwa z trzech modeli przeczytały przekład tego zdania jako obietnicę
+ochrony (jeden jako błąd krytyczny), wbrew liście wyłączeń: aktywność z listy
+jest objęta tylko wtedy, gdy potwierdzi to polisa, a CEU liczy także
+jednorazowe uczestnictwo. Teraz w `Wniosek.svelte` stoi: „Zaznacz, co
+uprawiasz regularnie. Zaznaczenie nie oznacza odmowy — wpływa na ocenę ryzyka.
+Aktywność z listy jest objęta, jeśli potwierdzi to polisa." Przewodnik
+`/uk/wniosek/` mówi to samo („позначка не означає відмови у страхуванні…").
+**„Nie wyklucza to z ochrony" nie wraca** — pilnuje tego test w `uk.spec.js`
+(formularz, lista wyłączeń i przewodnik). To podpowiedź pod polem, nie treść
+zgody: nie ma numeru wersji i nie idzie do funkcji brzegowej.
 
 ### Nowy zawód po ukraińsku
 
@@ -3602,37 +3611,59 @@ Wpis w `ZAWODY_UK` (`src/dane/uk/zawody.ts`) z przekładem treści z
 `packages/zawody/data/tresci.json`. Strona, para `hreflang`, kafelek na `/uk/`
 i odnośnik w stopce powstają same.
 
-### Do potwierdzenia przed publikacją (stan na 26.11.2026)
+### Sprawdzone z pełnym tekstem OWU przed publikacją (27.11.2026)
 
-Gałąź `claude/wersja-ukrainska` nie jest scalona. Zanim trafi na produkcyjną:
+Dwa zdania sekcji „Якщо ви з України" były odczytane ze streszczenia PDF-ów.
+27.11.2026 sprawdzone z pełnym tekstem sześciu OWU spod `/owu/<slug>.pdf`,
+pobranym przez bazę (`net.http_get('https://r.jina.ai/<adres>')`, potem
+`regexp_matches` po `net._http_response`):
 
-1. **Obywatelstwo.** Właściciel (26.11.2026): ubezpieczony musi mieć PESEL —
-   strona to mówi („PESEL і вік"). Zdanie, że OWU nie stawia warunku
-   obywatelstwa (LW044 § 15 ust. 18, CEU § 29 pkt 12), jest odczytane ze
-   streszczenia PDF-ów, nie z pełnego tekstu — do sprawdzenia (`pdftotext`
-   z `/owu/<slug>.pdf`).
-2. **Dokumenty do wypłaty w CEU** (§ 11 ust. 2: ZUS ZLA, a bez prawa do ZLA
-   zaświadczenie od lekarza prowadzącego) — to samo źródło, do sprawdzenia.
-   Zdania o wojnie i o ochronie na całym świecie nie są już osobnym
-   twierdzeniem: to przekład polskiej listy wyłączeń (z paragrafami,
-   sprawdzonej 23.11.2026) i odpowiedzi z `tresci.json`.
-3. Przekład przeczytany przez osobę znającą ukraiński i polski. 27.11.2026
+- **Obywatelstwo — potwierdzone.** LW044, LW046 i LW047 § 15 ust. 18:
+  „Ubezpieczony oznacza osobę fizyczną określoną w pozycji 3 Polisy"; CEU
+  Utrata dochodu § 29 pkt 12, LOI Premium pkt 11, „dla zatrudniających" —
+  „określoną w Polisie osobę fizyczną objętą ochroną ubezpieczeniową" plus
+  warunki co do formy pracy. W żadnym z sześciu tekstów nie pada obywatelstwo,
+  rezydencja ani prawo pobytu („miejsce zamieszkania" tylko przy właściwości
+  sądu i w klauzulach dodatkowych). PESEL to wymóg wniosku (właściciel,
+  26.11.2026), nie OWU.
+- **Dokumenty do wypłaty w CEU — potwierdzone, zdanie doprecyzowane.** § 11
+  ust. 2 (LOI Premium § 10 ust. 2): niezdolność trzeba udokumentować drukiem
+  ZUS ZLA, a bez prawa do niego — zaświadczeniem o stanie zdrowia od lekarza
+  prowadzącego. Ust. 3: samo zaświadczenie „nie będzie wystarczające", komisja
+  lekarska powołana przez ubezpieczyciela może orzec inaczej — dlatego na
+  stronie stoi „потрібно задокументувати" (nie „підтверджує") i zdanie
+  o komisji. Język dokumentów też się zgadza: LW044 „w języku polskim lub
+  angielskim", CEU „w języku polskim".
+
+Tekst z konwertera ma w plikach Leadenhall spacje przed polskimi znakami
+(„osob ę fizyczn ą") — szukaj wzorcem, który je dopuszcza (`osob ?[aęy]
++fizyczn`), inaczej wyjdzie fałszywe „nie ma".
+
+### Po publikacji — co zostało otwarte
+
+1. Przekład przeczytany przez osobę znającą ukraiński i polski. 27.11.2026
    sprawdziły go trzy modele językowe (sekcja wyżej) — człowiek jeszcze nie.
-4. Baner cookies po ukraińsku — przekład 1:1 polskiego; akceptacja tak jak
-   przy treści polskiej.
-5. **Kto odpowiada na zapytanie po ukraińsku.** Właściciel (26.11.2026):
+   Zdanie o komisji lekarskiej w „Документи для виплати" dopisane po tej
+   weryfikacji — żaden model go nie czytał.
+2. Baner cookies po ukraińsku — przekład 1:1 polskiego; akceptacja prawnika
+   tak jak przy treści polskiej — jeszcze jej nie ma.
+3. **Kto odpowiada na zapytanie po ukraińsku.** Właściciel (26.11.2026):
    asystentka z ElevenLabs. Stan i czego brakuje: „Asystentka po ukraińsku"
    w `asystent/przed-uruchomieniem.md`. Dopóki asystentki nie ma na stronie,
    zdania „Розмова — польською мовою" zostają.
+4. Strony `/uk/` trafiają do mapy strony i do zgłoszenia IndexNow przy
+   pierwszym wdrożeniu produkcyjnym — w Search Console warto sprawdzić pary
+   `hreflang` po kilku dniach.
 
 ### Testy
 
-`test/uk.spec.js` — 29 testów. Większość sprawdza zgodność z wersją polską
+`test/uk.spec.js` — 30 testów. Większość sprawdza zgodność z wersją polską
 (te same kwoty, tyle samo wyłączeń, etapów, pytań, ryzyk i akapitów w każdej
 sekcji, te same paragrafy przy wyłączeniach, te same pola w zdaniach o ZUS-ie
 i w napisach kalkulatora), a nie samą wersję ukraińską; do tego zakazane
 zwroty, nazwy podmiotów, `hreflang` w obie strony, flaga w przełączniku,
-etykiety przewodnika porównane ze źródłem kreatora, baner cookies po ruchu
+etykiety przewodnika porównane ze źródłem kreatora, zdanie o aktywnościach
+podwyższonego ryzyka w formularzu i przewodniku, baner cookies po ruchu
 sieciowym i szerokość paska od 360 do 1440 px. Kwoty w testach liczone
 z tych samych plików co strona, nie wpisane. Jakości przekładu testy nie
 sprawdzają.

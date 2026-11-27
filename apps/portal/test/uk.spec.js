@@ -437,6 +437,26 @@ test('zawody po ukraińsku: przekład ma tyle samo ryzyk i pytań co polska tre�
   }
 });
 
+test('aktywności podwyższonego ryzyka: ani formularz, ani przewodnik nie obiecują ochrony', () => {
+  /**
+   * Do 27.11.2026 kreator pisał pod listą aktywności „Nie wyklucza to z ochrony" —
+   * wbrew liście wyłączeń, według której aktywność z listy jest objęta tylko wtedy,
+   * gdy potwierdzi to polisa. Obie wersje mają mówić to samo co lista.
+   */
+  const kreator = readFileSync('src/components/Wniosek.svelte', 'utf8').replace(/\s+/g, ' ');
+  expect(kreator).not.toContain('Nie wyklucza to z ochrony');
+  expect(kreator).toContain('Zaznaczenie nie oznacza odmowy — wpływa na ocenę ryzyka. '
+    + 'Aktywność z listy jest objęta, jeśli potwierdzi to polisa.');
+
+  const lista = readFileSync('src/lib/wylaczenia.ts', 'utf8').replace(/'\s*\+\s*'/g, '');
+  expect(lista).toContain('Aktywność z listy może być objęta ochroną, jeśli potwierdzi to polisa.');
+
+  const przewodnik = tresc(html('/uk/wniosek/')).replace(/\s+/g, ' ');
+  expect(przewodnik).toContain('Позначка не означає відмови у страхуванні');
+  expect(przewodnik).toContain('якщо це підтвердить поліс');
+  expect(przewodnik).not.toMatch(/не виключає (вас )?(із|з) захисту/);
+});
+
 test('przewodnik po wniosku cytuje etykiety, które naprawdę są w kreatorze', () => {
   /**
    * Formularz zostaje po polsku, a przewodnik objaśnia jego pola. Etykieta,

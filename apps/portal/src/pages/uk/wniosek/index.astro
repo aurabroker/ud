@@ -77,10 +77,10 @@ const SLOWNIK: Record<string, { pl: string; uk: string }[]> = {
     { pl: 'Ankieta rozszerzona',
       uk: `Розширена анкета — з’являється, коли сума постійної непрацездатності перевищує ${zl(HEALTH_SURVEY_THRESHOLD)}.` },
     { pl: 'Aktywności podwyższonego ryzyka',
-      // Formularz mówi: „Nie wyklucza to z ochrony — wpływa na ocenę ryzyka". Dwóch z trzech
-      // sprawdzających przekład (27.11.2026) przeczytało to jako obietnicę ochrony, wbrew liście
-      // wyłączeń. Dlatego tu stoi sens (zaznaczenie nie oznacza odmowy) i zdanie z listy wyłączeń,
-      // sprawdzonej z OWU: aktywność z listy jest objęta, jeśli potwierdzi to polisa.
+      // Formularz (od 27.11.2026, decyzja właściciela): „Zaznaczenie nie oznacza odmowy —
+      // wpływa na ocenę ryzyka. Aktywność z listy jest objęta, jeśli potwierdzi to polisa."
+      // Do tego dnia stało „Nie wyklucza to z ochrony", co dwóch z trzech sprawdzających
+      // przekład przeczytało jako obietnicę ochrony, wbrew liście wyłączeń.
       uk: 'Заняття підвищеного ризику — позначте те, чим займаєтеся регулярно. Позначка не означає '
         + 'відмови у страхуванні: вона впливає на оцінку ризику. Заняття зі списку може бути '
         + 'охоплене захистом, якщо це підтвердить поліс.' },

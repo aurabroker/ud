@@ -85,9 +85,10 @@ const TYLKO_UK = {
         + 'Przed wyjazdem zadzwoń i zapytaj, jak to się ma do Twojej polisy.',
       '**Dokumenty do wypłaty**\n\nPrzy zgłoszeniu roszczenia dokumentacja medyczna ma być po polsku '
         + '(Leadenhall przyjmuje też angielską), więc dokumenty po ukraińsku trzeba przetłumaczyć; '
-        + 'ubezpieczyciel może wezwać na badanie u swojego lekarza. W CEU niezdolność do pracy potwierdza '
-        + 'zwolnienie ZUS ZLA, a gdy nie ma do niego prawa — zaświadczenie o stanie zdrowia od lekarza '
-        + 'prowadzącego.',
+        + 'ubezpieczyciel może wezwać na badanie u swojego lekarza. W CEU niezdolność do pracy trzeba '
+        + 'udokumentować zwolnieniem ZUS ZLA, a gdy nie ma do niego prawa — zaświadczeniem o stanie '
+        + 'zdrowia od lekarza prowadzącego. Samo zaświadczenie może nie wystarczyć: niezdolność może '
+        + 'ocenić komisja lekarska powołana przez ubezpieczyciela.',
       'Zasady zasiłku chorobowego dla cudzoziemców po ukraińsku opisuje oficjalna strona gov.pl — '
         + '„Podstawowe świadczenia na wypadek choroby”. Ogólne warunki ubezpieczenia — [OWU i karty produktu] '
         + '(po polsku).',
