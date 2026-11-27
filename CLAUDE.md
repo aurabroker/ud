@@ -3414,6 +3414,19 @@ to").** Powstała na gałęzi `claude/wersja-ukrainska`; dalsze zmiany idą jak
 każda praca nad portalem — od gałęzi produkcyjnej. Co zostało otwarte po
 publikacji: „Po publikacji — co zostało otwarte" niżej.
 
+**Stan na 27.11.2026: WDROŻONE.** PR #23 scalony (commit `8667855`), budowanie
+Pages `utratadochodu` i `udappnew` — success. Z sandboksa tej sesji domena nie
+odpowiadała, więc żywą stronę sprawdzono przez bazę (`net.http_get`): `/uk/`
+i `/uk/wniosek/` 200 z `lang="uk"`, pary `hreflang` i flaga na `/`, `/wniosek/`
+i `/uk/`, 7 adresów `/uk/` w mapie strony, IndexNow `zgloszono` (7 adresów,
+HTTP 200), bundel kreatora na żywo niesie nowe zdanie o aktywnościach. Brama
+formularza: 13 zaliczonych, 0 upadłych; część D pominięta w sandboksie
+i powtórzona z bazy — 60 × `net.http_post` na `form-submit` z niepoprawnym
+tokenem (to samo ciało co w skrypcie) → 60 × 400 „Weryfikacja bezpieczeństwa
+nie powiodła się", zero 5xx, zero wpisów w `ud_errors`. Czasu odpowiedzi (p95)
+tą drogą nie widać. **Nie sprawdzone:** wygląd w przeglądarce na żywej domenie
+i `sprawdz-wdrozenie.sh`.
+
 Od 26.11.2026 część portalu ma odpowiednik po ukraińsku: strona główna,
 „Jak to działa", wyłączenia, przewodnik po wniosku i trzy zawody (programista,
 fryzjer, kosmetyczka). Powód: w latach 2022–2025 Ukraińcy założyli w Polsce
