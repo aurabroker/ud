@@ -3668,6 +3668,52 @@ Tekst z konwertera ma w plikach Leadenhall spacje przed polskimi znakami
    pierwszym wdrożeniu produkcyjnym — w Search Console warto sprawdzić pary
    `hreflang` po kilku dniach.
 
+### Kampania Google Ads dla `/uk/` — skrypt gotowy, NIE uruchomiony (27.11.2026)
+
+`narzedzia/ads-kampania-uk.js` to skrypt Google Ads (Narzędzia → Działania
+zbiorcze → Skrypty), który zakłada osobną kampanię w wyszukiwarce dla stron
+`/uk/`: budżet, kampania **wstrzymana**, dwie grupy reklam z elastyczną reklamą
+po ukraińsku, frazy w dopasowaniu do wyrażenia, słowa wykluczające i sufiks
+adresu z UTM-ami (`utm_source=google&utm_medium=cpc&utm_campaign=uk_szukaj
+&utm_term={keyword}` — po nim panel pokazuje wnioski jako „Google Ads" z nazwą
+kampanii). Budżet 20 zł dziennie i stawka do 4 zł to wartości startowe wpisane
+przez asystenta, nie decyzja właściciela.
+
+**Stan:** napisany i przetestowany na atrapie `AdsApp`, **w koncie nie był
+uruchamiany** — z tej sesji nie ma dostępu do Google Ads. Nazwy pól wzięte
+z definicji API v26 (googleapis, 27.11.2026); czy Google przyjmie operacje,
+pokaże dopiero „Podgląd" w koncie. Popytu na frazy nie zmierzono (Ahrefs,
+Semrush i OpenSEO bez kredytów). Tekstów reklam nie czytał nikt znający
+ukraiński.
+
+Rzeczy, których nie „poprawiaj":
+
+- **Bez kryterium języka.** Od końca września 2026 kampania w wyszukiwarce nie
+  ma ustawienia języka (dopasowanie po języku reklamy i strony), a API odrzuca
+  `CampaignCriterion.language` błędem `OPERATION_NOT_PERMITTED_FOR_CONTEXT` —
+  przy jednym atomowym `mutateAll` razem z całą kampanią.
+- **`containsEuPoliticalAdvertising` musi być ustawione** — bez niego API
+  odrzuca tworzenie kampanii. Kampania bez deklaracji gdziekolwiek w koncie
+  blokuje od 01.04.2026 każdą zmianę robioną skryptem; skrypt wypisuje takie
+  kampanie przed próbą.
+- **Numer konta w nazwach zasobów bez myślników** (`getCustomerId()` oddaje
+  `123-456-7890`).
+- **`PRESENCE`**, nie domyślne „obecność lub zainteresowanie" — inaczej reklamy
+  idą do Ukrainy.
+- **Opis o polskim wniosku i PESEL-u przypięty do pierwszej pozycji** — stoi
+  zawsze; bez niego płacimy za kliknięcia osób, które odpadną na formularzu.
+- **Teksty to zdania ze stron `/uk/`, bez kwot, procentów i cudzych znaków
+  towarowych** (Leadenhall, CEU, Lloyd’s). Limit 80% ma zastrzeżenie dla CEU,
+  którego w reklamie się nie zmieści; kwoty zmieniają się ze stawkami i ZUS-em.
+- **Zapytania o „лікарняний" tylko z dopiskiem JDG / B2B / ФОП**, a wśród
+  wykluczeń „карта побиту", „віза", „втрати роботи" — to inne produkty i inni
+  ludzie (etat, polisa do pobytu).
+
+Test: `node --test "narzedzia/test/*.test.mjs"` (27 przypadków: limity i zakazy
+w tekstach, kształt operacji, bezpieczniki; 23 celowe usterki w skrypcie —
+każda daje czerwony wynik). Test wiąże też sufiks kampanii z regułą źródła
+w `@ud/wniosek` i w panelu.
+
 ### Testy
 
 `test/uk.spec.js` — 30 testów. Większość sprawdza zgodność z wersją polską
