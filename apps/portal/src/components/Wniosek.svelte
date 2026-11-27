@@ -740,7 +740,8 @@
         <fieldset class="border-0 p-0 mt-10">
           <legend class="text-xl mb-2" style="font-family: var(--font-naglowek);">Aktywności podwyższonego ryzyka</legend>
           <p class="text-[15px] leading-relaxed text-tekst-drugi mt-0 mb-5">
-            Zaznacz, co uprawiasz regularnie. Nie wyklucza to z ochrony — wpływa na ocenę ryzyka.
+            Zaznacz, co uprawiasz regularnie. Zaznaczenie nie oznacza odmowy — wpływa na ocenę ryzyka.
+            Aktywność z listy jest objęta, jeśli potwierdzi to polisa.
           </p>
           <div class="grid gap-2.5 sm:grid-cols-2">
             {#each AKTYWNOSCI_RYZYKOWNE as a}

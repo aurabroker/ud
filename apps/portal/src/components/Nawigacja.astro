@@ -1,31 +1,73 @@
 ---
 import Znak from './Znak.astro';
+import Flaga from './Flaga.astro';
+import { GLOWNA, odpowiednik, PREFIKS_UK, type Jezyk } from '../lib/jezyki';
 
-interface Props { sciezka: string }
-const { sciezka } = Astro.props;
+interface Props { sciezka: string; jezyk?: Jezyk }
+const { sciezka, jezyk = 'pl' } = Astro.props;
 
-const POZYCJE = [
-  { nazwa: 'Jak to działa', url: '/jak-to-dziala/' },
-  { nazwa: 'Kalkulator',    url: '/kalkulator/' },
-  { nazwa: 'Wyłączenia',    url: '/wylaczenia/' },
-  { nazwa: 'Zawody',        url: '/zawody/' },
-  { nazwa: 'Blog',          url: '/blog/' },
-  { nazwa: 'Dokumenty',     url: '/dokumenty/' },
-  { nazwa: 'O nas',         url: '/o-nas/' },
-];
+const POZYCJE = {
+  pl: [
+    { nazwa: 'Jak to działa', url: '/jak-to-dziala/' },
+    { nazwa: 'Kalkulator',    url: '/kalkulator/' },
+    { nazwa: 'Wyłączenia',    url: '/wylaczenia/' },
+    { nazwa: 'Zawody',        url: '/zawody/' },
+    { nazwa: 'Blog',          url: '/blog/' },
+    { nazwa: 'Dokumenty',     url: '/dokumenty/' },
+    { nazwa: 'O nas',         url: '/o-nas/' },
+  ],
+  // Tylko strony, które naprawdę są po ukraińsku. Odnośnik z ukraińską nazwą
+  // prowadzący do polskiej strony jest gorszy niż jego brak — polskie
+  // dokumenty stoją w stopce, oznaczone jako polskie.
+  uk: [
+    { nazwa: 'Як це працює',       url: `${PREFIKS_UK}/jak-to-dziala/` },
+    { nazwa: 'Що не покривається', url: `${PREFIKS_UK}/wylaczenia/` },
+    { nazwa: 'Як подати заявку',   url: `${PREFIKS_UK}/wniosek/` },
+  ],
+}[jezyk];
+
+const NAPISY = {
+  pl: { nawigacja: 'Główna', cta: 'Policz składkę', ctaKrotkie: null, ctaUrl: '/wniosek/' },
+  // Krótki napis na telefonie: pełny („Подати заявку") z logo i flagą nie
+  // mieści się w 390 px.
+  uk: { nawigacja: 'Головна навігація', cta: 'Подати заявку', ctaKrotkie: 'Заявка',
+        ctaUrl: `${PREFIKS_UK}/wniosek/` },
+}[jezyk];
+
+/**
+ * Przełącznik języka prowadzi do TEJ SAMEJ strony w drugim języku, a gdy jej
+ * tam nie ma — na stronę główną drugiej wersji. Flaga i nazwa należą do
+ * języka, NA KTÓRY przełącza (`lang` mówi czytnikowi ekranu, jak ją wymówić).
+ */
+const drugi: Jezyk = jezyk === 'pl' ? 'uk' : 'pl';
+const przelacznik = {
+  url: odpowiednik(sciezka, jezyk) ?? GLOWNA[drugi],
+  skrot: drugi === 'uk' ? 'UA' : 'PL',
+  opis: drugi === 'uk' ? 'Українська версія' : 'Wersja polska',
+};
 
 /** Podświetlamy pozycję także na podstronach: /zawody/ dla /lekarz/. */
 const aktywna = (url: string) => sciezka === url || (url !== '/' && sciezka.startsWith(url));
 ---
 <header class="bg-tlo border-b border-linia">
-  <nav class="max-w-[1200px] mx-auto px-5 h-[74px] flex items-center justify-between gap-6"
-       aria-label="Główna">
-    <a href="/" class="flex items-center gap-2.5 shrink-0">
+  {/* Szerokości paska są policzone, nie dobrane na oko — trzy progi:
+      poniżej 390 px (telefony 360 i 375 px) logo ma 18 px, a przycisk 14 px
+      i węższe marginesy: 32 + 162,5 + 8 + 26 + 8 + 121,3 = 357,8 px;
+      od 390 px rozmiary pełne, ciaśniejsze tylko odstępy: 386,5 px;
+      od 640 px układ komputerowy. Do 26.11.2026 pasek strony polskiej
+      przy 360 px wychodził 12 px poza ekran (cała strona przewijała się
+      w poziomie) — pilnuje tego `test/uk.spec.js`. */}
+  <nav class="max-w-[1200px] mx-auto px-4 sm:px-5 h-[74px] flex items-center justify-between gap-2 min-[390px]:gap-2.5 sm:gap-6"
+       aria-label={NAPISY.nawigacja}>
+    <a href={GLOWNA[jezyk]} class="flex items-center gap-2.5 shrink-0">
       <Znak wysokosc={28} />
-      <span class="text-xl font-bold tracking-tight">Utrata<span class="text-akcent">Dochodu</span></span>
+      <span class="text-lg min-[390px]:text-xl font-bold tracking-tight">Utrata<span class="text-akcent">Dochodu</span></span>
     </a>
 
-    <ul class="hidden lg:flex gap-5 xl:gap-7 items-center text-[15px] font-medium text-tekst-drugi list-none m-0 p-0">
+    {/* Strona polska ma siedem pozycji: od 1024 do 1279 px odstęp 16 px
+        zamiast 20 — inaczej flaga nie mieści się obok przycisku. */}
+    <ul class:list={['hidden lg:flex xl:gap-7 items-center text-[15px] font-medium text-tekst-drugi list-none m-0 p-0',
+                     jezyk === 'pl' ? 'gap-4' : 'gap-5']}>
       {POZYCJE.map((p) => (
         <li>
           <a href={p.url}
@@ -35,9 +77,25 @@ const aktywna = (url: string) => sciezka === url || (url !== '/' && sciezka.star
       ))}
     </ul>
 
-    <a href="/wniosek/"
-       class="bg-akcent-ciemny text-white px-6 py-3.5 font-bold text-[15px] shrink-0 hover:bg-akcent-hover">
-      Policz składkę
-    </a>
+    <div class="flex items-center gap-2 min-[390px]:gap-2.5 sm:gap-4 shrink-0">
+      {/* Flaga stoi na pasku na każdej szerokości od 340 px (węższy ekran:
+          odnośnik w stopce). Skrót „UA"/„PL" obok niej — od 640 px; na stronie
+          polskiej znika jeszcze od 1024 do 1279 px, gdzie siedem pozycji menu
+          zostawia miejsce na samą flagę. Pole dotyku jest szersze niż flaga
+          (`px-2 -mx-2`): odstęp po obu stronach ma co najmniej 8 px, więc
+          nie zachodzi na logo ani na przycisk. */}
+      <a href={przelacznik.url} lang={drugi} hreflang={drugi}
+         aria-label={przelacznik.opis} title={przelacznik.opis}
+         class="przelacznik-jezyka max-[339px]:hidden flex items-center gap-1.5 py-3 px-2 -mx-2 font-mono text-[13px] font-semibold tracking-[0.08em] text-akcent-tekst hover:text-akcent-hover">
+        <Flaga jezyk={drugi} />
+        <span class:list={['hidden', jezyk === 'pl' ? 'sm:inline lg:hidden xl:inline' : 'sm:inline']}>{przelacznik.skrot}</span>
+      </a>
+      <a href={NAPISY.ctaUrl}
+         class="bg-akcent-ciemny text-white py-3.5 px-3 min-[390px]:px-3.5 sm:px-6 font-bold text-sm min-[390px]:text-[15px] hover:bg-akcent-hover">
+        {NAPISY.ctaKrotkie
+          ? <><span class="sm:hidden">{NAPISY.ctaKrotkie}</span><span class="hidden sm:inline">{NAPISY.cta}</span></>
+          : NAPISY.cta}
+      </a>
+    </div>
   </nav>
 </header>

@@ -1,0 +1,224 @@
+---
+/**
+ * Przewodnik po wniosku — po ukraińsku.
+ *
+ * To NIE jest przetłumaczony formularz i tak ma zostać:
+ *
+ * - Zgody w kreatorze to teksty z numerem wersji, zatwierdzone przez prawnika
+ *   i zapisane także w funkcji brzegowej (`ZGODA_KONTAKT`, mapa `ZGODY`
+ *   w `wniosek-szkic`). Wersja ukraińska byłaby nową zgodą: nowa treść, nowa
+ *   akceptacja, nowe wdrożenie funkcji.
+ * - Odpowiedzi w ankiecie medycznej są oświadczeniem klienta. Błąd w przekładzie
+ *   pytania obciąża jego, przy szkodzie — jako zarzut zatajenia.
+ * - Kreator to jedyna ścieżka, którą wpływają pieniądze (CLAUDE.md,
+ *   ABSOLUTE_RULE). Tłumaczenie strony nie jest powodem, żeby go dotykać.
+ *
+ * Strona objaśnia więc kroki i polskie etykiety pól, mówi wprost, że formularz
+ * jest po polsku, i prowadzi do `/wniosek/`. Nie ma pary `hreflang`
+ * z `/wniosek/` — to nie jest ta sama treść w innym języku.
+ *
+ * Polskie etykiety w `SLOWNIK` są cytatami z kreatora. `test/uk.spec.js`
+ * sprawdza, że każda nadal stoi w `Wniosek.svelte` albo w schemacie — po
+ * zmianie etykiety w kreatorze test wskaże wpis do poprawienia tutaj.
+ */
+import Baza from '../../../layouts/Baza.astro';
+import { graf, organizacja, serwis, strona, okruszki } from '../../../lib/seo';
+import { FIRMA } from '../../../lib/firma';
+import { zl } from '../../../lib/symulacja';
+import { KROKI, PROG_KLAUZUL_NW, PYTANIA_MEDYCZNE } from '@ud/wniosek/schemat';
+import { HEALTH_SURVEY_THRESHOLD } from '@ud/wniosek/ankieta';
+import { GLOWNA_UK, GRANICE_WIEKU, KROKI_UK, krokiUk } from '../../../lib/uk';
+
+const sciezka = '/uk/wniosek/';
+const tytul = 'Як подати заявку на страхування від втрати доходу | UtrataDochodu.pl';
+const opis = `Заявка онлайн польською мовою: ${krokiUk(KROKI.length)}, близько п’яти хвилин. `
+  + 'Пояснюємо українською кожен крок і кожне поле форми.';
+
+/** Polska etykieta z kreatora → objaśnienie po ukraińsku. */
+const SLOWNIK: Record<string, { pl: string; uk: string }[]> = {
+  kontakt: [
+    { pl: 'Imię i nazwisko', uk: 'Ім’я та прізвище латиницею, як у ваших польських документах.' },
+    { pl: 'Adres e-mail', uk: 'Адреса e-mail — на неї надійде пропозиція.' },
+    { pl: 'Telefon', uk: 'Польський номер телефону — дев’ять цифр.' },
+    {
+      pl: 'Zgoda jest dobrowolna — wniosek możesz złożyć bez niej.',
+      uk: 'Над цим реченням є необов’язкова згода на те, щоб ми зв’язалися з вами e-mail або '
+        + 'телефоном щодо заявки, навіть якщо ви її не завершите. Заявку можна подати без неї.',
+    },
+  ],
+  dane: [
+    { pl: 'PESEL', uk: 'Номер PESEL — 11 цифр. Форма перевіряє контрольну цифру й вік: '
+        + `від ${GRANICE_WIEKU.od} до ${GRANICE_WIEKU.do} років.` },
+    { pl: 'Forma zatrudnienia', uk: 'Форма зайнятості: «Samozatrudnienie (B2B / JDG)» — '
+        + 'самозайнятість, «Umowa o pracę» — трудовий договір, «Umowa zlecenie / o dzieło» — '
+        + 'цивільно-правовий договір.' },
+    { pl: 'Zawód', uk: 'Професія — оберіть зі списку або впишіть польською.' },
+    { pl: 'Forma opodatkowania', uk: 'Форма оподаткування: загальні правила (skala podatkowa), '
+        + 'лінійний податок 19%, ричалт (ryczałt) або податкова карта.' },
+    { pl: 'Waga (kg)', uk: 'Вага в кілограмах — необов’язкове поле.' },
+    { pl: 'Wzrost (cm)', uk: 'Зріст у сантиметрах — необов’язкове поле.' },
+    { pl: 'Prowadzę działalność i zatrudniam pracowników',
+      uk: 'Позначте, якщо ведете діяльність і маєте найманих працівників, — з’явиться кілька додаткових полів.' },
+  ],
+  zakres: [
+    { pl: 'Okresowa niezdolność do pracy',
+      uk: 'Тимчасова непрацездатність — щомісячна виплата. Це основний ризик, поліс завжди його охоплює.' },
+    { pl: 'Trwała niezdolność do pracy', uk: 'Постійна непрацездатність — одноразова виплата.' },
+    { pl: 'Śmierć / inwalidztwo w wyniku nieszczęśliwego wypadku',
+      uk: 'Смерть або інвалідність унаслідок нещасного випадку — одноразова виплата.' },
+    { pl: 'Klauzule dodatkowe',
+      uk: `Додаткові клаузули — з’являються, коли сума на випадок смерті та інвалідності перевищує ${zl(PROG_KLAUZUL_NW)}.` },
+  ],
+  zdrowie: [
+    { pl: 'Stan zdrowia',
+      uk: `Запитань про здоров’я — ${PYTANIA_MEDYCZNE.length}; відповіді: «tak» (так) або «nie» (ні).` },
+    { pl: 'Opisz krótko, czego dotyczy',
+      uk: 'Якщо відповідь «tak» — коротко опишіть, чого це стосується. Пишіть польською.' },
+    { pl: 'Ankieta rozszerzona',
+      uk: `Розширена анкета — з’являється, коли сума постійної непрацездатності перевищує ${zl(HEALTH_SURVEY_THRESHOLD)}.` },
+    { pl: 'Aktywności podwyższonego ryzyka',
+      // Formularz (od 27.11.2026, decyzja właściciela): „Zaznaczenie nie oznacza odmowy —
+      // wpływa na ocenę ryzyka. Aktywność z listy jest objęta, jeśli potwierdzi to polisa."
+      // Do tego dnia stało „Nie wyklucza to z ochrony", co dwóch z trzech sprawdzających
+      // przekład przeczytało jako obietnicę ochrony, wbrew liście wyłączeń.
+      uk: 'Заняття підвищеного ризику — позначте те, чим займаєтеся регулярно. Позначка не означає '
+        + 'відмови у страхуванні: вона впливає на оцінку ризику. Заняття зі списку може бути '
+        + 'охоплене захистом, якщо це підтвердить поліс.' },
+  ],
+  zgody: [
+    { pl: 'głównymi wyłączeniami odpowiedzialności',
+      uk: 'Підтвердження, що ви ознайомилися з основними виключеннями. Українською вони описані на сторінці «Що не покривається».' },
+    { pl: 'klauzulą informacyjną',
+      uk: 'Підтвердження, що ви ознайомилися з інформацією про обробку персональних даних (RODO), регламентом '
+        + 'і політикою приватності. Ці документи — польською мовою.' },
+  ],
+};
+
+const sciezkaOkruszkow = [
+  { ...GLOWNA_UK },
+  { nazwa: 'Як подати заявку', url: sciezka },
+];
+
+const jsonld = graf([
+  organizacja(),
+  serwis(),
+  okruszki(sciezkaOkruszkow),
+  strona({ url: sciezka, tytul, opis, okruszki: sciezkaOkruszkow, jezyk: 'uk' }),
+]);
+
+const PRZYGOTUJ = [
+  'Номер PESEL.',
+  'Адресу e-mail і польський номер телефону.',
+  'Місячний дохід нетто — на його підставі рахують виплату.',
+  'Назву професії та форму зайнятості й оподаткування.',
+];
+---
+<Baza tytul={tytul} opis={opis} sciezka={sciezka} jsonld={jsonld} jezyk="uk">
+  <nav aria-label="Навігаційний ланцюжок" class="bg-tlo-jasne border-b border-linia-lekka">
+    <ol class="max-w-[1200px] mx-auto px-5 py-3 flex flex-wrap gap-2 items-center text-[13px] text-tekst-drugi list-none m-0">
+      <li><a href={GLOWNA_UK.url} class="hover:text-akcent-ciemny">{GLOWNA_UK.nazwa}</a></li>
+      <li aria-hidden="true">/</li>
+      <li><span class="text-tekst font-semibold" aria-current="page">Як подати заявку</span></li>
+    </ol>
+  </nav>
+
+  <div class="max-w-[1200px] mx-auto px-5 py-14 flex flex-col lg:flex-row gap-14">
+    <div class="lg:w-[52em] min-w-0">
+      <h1 class="text-[clamp(1.9rem,4.5vw,2.8rem)] leading-[1.08] mb-4">Як подати заявку на страхування</h1>
+      <p data-odpowiedz class="text-[1.1rem] leading-relaxed text-tekst-drugi max-w-[38em] mt-0 mb-6">
+        Заявку заповнюють онлайн польською мовою: {krokiUk(KROKI.length)}, близько п’яти хвилин.
+        Наприкінці ви отримаєте орієнтовний розрахунок страхового внеску, а пропозицію з реальною ставкою — за 1–2 робочі
+        дні, після оцінки ризику страховиком.
+      </p>
+
+      <div class="border border-linia-mocna bg-tlo-jasne p-6 mb-10 max-w-[44em]">
+        <h2 class="text-lg m-0 mb-2">Чому форма польською</h2>
+        <p class="text-[15px] leading-relaxed text-tekst-drugi m-0">
+          Згоди та медична анкета — це заяви, які ви подаєте страховикові, а договір
+          і загальні умови страхування (OWU) існують лише польською. Тому форму ми не перекладаємо,
+          а пояснюємо нижче кожен крок. Якщо не розумієте запитання — не вгадуйте, зателефонуйте:{' '}
+          <a href={`tel:${FIRMA.telefon}`} class="font-semibold text-tekst whitespace-nowrap hover:text-akcent-ciemny">{FIRMA.telefonWyswietlany}</a>{' '}
+          (розмова польською мовою).
+        </p>
+      </div>
+
+      <h2 class="text-[clamp(1.4rem,3vw,1.8rem)] leading-tight mb-4">Що підготувати</h2>
+      <ul class="list-disc flex flex-col gap-2.5 text-[16px] leading-relaxed text-tekst-drugi m-0 mb-12 pl-5 max-w-[40em]">
+        {PRZYGOTUJ.map((p) => <li>{p}</li>)}
+      </ul>
+
+      <h2 class="text-[clamp(1.4rem,3vw,1.8rem)] leading-tight mb-6">Кроки форми та польські назви полів</h2>
+      <ol class="list-none m-0 p-0 flex flex-col gap-8">
+        {KROKI.map((k, i) => (
+          <li class="border border-linia">
+            <div class="bg-tlo-jasne border-b border-linia px-6 py-4">
+              <p class="font-mono text-[11.5px] tracking-[0.1em] uppercase text-akcent-tekst font-semibold m-0">
+                Крок {i + 1} із {KROKI.length} · <span lang="pl">{k.tytul}</span>
+              </p>
+              <h3 class="text-[19px] font-semibold m-0 mt-1.5 leading-snug">{KROKI_UK[k.id].tytul}</h3>
+              <p class="text-[15px] leading-relaxed text-tekst-drugi m-0 mt-1.5">
+                На цьому кроці: {KROKI_UK[k.id].opis}.
+              </p>
+            </div>
+            <dl class="m-0 px-6">
+              {SLOWNIK[k.id].map((p) => (
+                <div class="py-4 border-b border-linia-lekka last:border-b-0 flex flex-col sm:flex-row gap-1.5 sm:gap-8">
+                  <dt class="sm:w-[15em] shrink-0 font-semibold text-[15.5px]" lang="pl">{p.pl}</dt>
+                  <dd class="m-0 text-[15.5px] leading-relaxed text-tekst-drugi">{p.uk}</dd>
+                </div>
+              ))}
+            </dl>
+            {k.id === 'zdrowie' && (
+              <p class="text-[15px] leading-relaxed m-0 px-6 py-4 border-t border-linia bg-tlo-jasne">
+                Відповідайте чесно. Приховування хвороби не заощаджує внесок — воно дає
+                страховикові змогу відмовити у виплаті саме тоді, коли вона буде найпотрібніша.
+              </p>
+            )}
+            {k.id === 'zgody' && (
+              <p class="text-[15px] leading-relaxed m-0 px-6 py-4 border-t border-linia bg-tlo-jasne">
+                Перш ніж позначити згоди, перегляньте{' '}
+                <a href="/uk/wylaczenia/" class="text-akcent-tekst underline decoration-linia-mocna underline-offset-2">що не покривається</a>.{' '}
+                Кнопки форми: <span lang="pl">«Dalej»</span> — далі, <span lang="pl">«Wstecz»</span> — назад.
+              </p>
+            )}
+          </li>
+        ))}
+      </ol>
+
+      <div class="mt-12">
+        <a href="/wniosek/" hreflang="pl"
+           class="inline-block bg-akcent-ciemny text-white px-8 py-4 font-bold text-lg hover:bg-akcent-hover">
+          Перейти до заявки (польською)
+        </a>
+      </div>
+    </div>
+
+    <aside class="lg:w-[22em] shrink-0 flex flex-col gap-5">
+      <div class="border border-linia-mocna bg-tlo-jasne p-6">
+        <h2 class="font-mono text-[11px] tracking-[0.12em] uppercase text-akcent-tekst font-semibold m-0 mb-4">
+          Що ви отримаєте
+        </h2>
+        <ul class="flex flex-col gap-3 text-[15px] leading-relaxed text-tekst-drugi list-none m-0 p-0">
+          <li>Орієнтовний розрахунок внеску одразу після заповнення.</li>
+          <li>Пропозицію з варіантами двох представників Lloyd’s — Leadenhall і CEU.</li>
+          <li>Комплект документів: OWU і картку продукту — польською мовою.</li>
+        </ul>
+      </div>
+
+      <div class="border border-linia bg-tlo p-6">
+        <h2 class="text-lg m-0 mb-2">Застрягли на якомусь полі?</h2>
+        <p class="text-[15px] leading-relaxed text-tekst-drugi m-0 mb-3">
+          Зателефонуйте — заповнимо заявку разом, телефоном. Розмова польською мовою.
+        </p>
+        <a href={`tel:${FIRMA.telefon}`} class="text-lg font-bold text-tekst hover:text-akcent-ciemny">
+          {FIRMA.telefonWyswietlany}
+        </a>
+      </div>
+
+      <p class="text-[13px] leading-relaxed text-tekst-drugi m-0">
+        Суми, показані у формі, — це орієнтовний розрахунок, а не пропозиція. Реальний внесок розраховує
+        система страховика після оцінки ризику.
+      </p>
+    </aside>
+  </div>
+</Baza>

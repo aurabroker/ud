@@ -23,15 +23,27 @@
    * (Odkladanie.svelte) dla tego samego świadczenia. Strona może wtedy podać
    * dochód w adresie: ?dochod=30000, a dawne linki ?swiadczenie=14400 dają
    * dochód, z którego wychodzi to świadczenie.
+   *
+   * ── Dwa języki, jeden kalkulator ─────────────────────────────────────────
+   *
+   * Napisy stoją w `NAPISY` poniżej, po jednym zestawie na język; układ i cała
+   * arytmetyka są wspólne. Osobny komponent ukraiński byłby kopią, a kopia
+   * rozjeżdża się przy pierwszej zmianie, której ktoś nie powtórzy w dwóch
+   * miejscach — tutaj oznaczałoby to dwie różne składki dla tego samego
+   * dochodu. Zmieniasz zdanie po polsku — zmień jego odpowiednik niżej
+   * (`test/uk.spec.js` pilnuje, że oba zestawy mają te same klucze).
+   * Kwoty zostają w złotych w obu wersjach: polisa i dochód są w złotych.
+   * Odkładanie (`zOdkladaniem`) istnieje tylko po polsku, na /kalkulator/.
    */
   import { onMount } from 'svelte';
   import { symuluj, zl, zlZakres, LIMIT, MIESIECY_WYPLATY, MIESIECY_MAX, OKRESY, OPIS_KALIBRACJI, ZAKRES_DOCHODU }
     from '../lib/symulacja';
   import { ZUS_TEKST, ZASILEK_JDG } from '../lib/zus';
+  import { ZUS_TEKST_UK, OPIS_KALIBRACJI_UK } from '../lib/uk';
   import { wZakresie } from '../lib/odkladanie';
   import Odkladanie from './Odkladanie.svelte';
 
-  let { dochodPoczatkowy = 18000, zawod = '', kompaktowy = false, zOdkladaniem = false } = $props();
+  let { dochodPoczatkowy = 18000, zawod = '', kompaktowy = false, zOdkladaniem = false, jezyk = 'pl' } = $props();
 
   let dochod = $state(dochodPoczatkowy);
   let hivWzw = $state(false);
@@ -43,7 +55,76 @@
   const limitProcent = Math.round(LIMIT.b2b * 100);
 
   /** „24, 36, 48 albo 60" — bez przecinka przed ostatnim. */
-  const okresy = OKRESY.slice(0, -1).join(', ') + ' albo ' + OKRESY.at(-1);
+  const okresy = (lacznik) => OKRESY.slice(0, -1).join(', ') + ` ${lacznik} ` + OKRESY.at(-1);
+
+  const NAPISY = {
+    pl: {
+      naglowek: (z) => `Symulacja składki${z ? ` dla ${z}` : ''}`,
+      wstep: 'Przesuń suwak, żeby zobaczyć, jak zmienia się świadczenie i szacowana składka.',
+      dochod: 'Miesięczny dochód netto z działalności lub B2B',
+      dochodAria: 'Miesięczny dochód netto z działalności lub kontraktu B2B, w złotych',
+      suwak: (p) => `Suwak ustawiony na ${p}% zakresu.`,
+      limit: (p) => `Polisa obejmuje do ${p}% udokumentowanego dochodu z działalności lub kontraktu B2B.`,
+      etat: ZUS_TEKST.etat,
+      klauzula: 'Klauzula HIV / WZW',
+      swiadczenie: 'Świadczenie z polisy',
+      swiadczenieOpis: `wypłacane co miesiąc, najdłużej przez ${MIESIECY_MAX} miesięcy`,
+      zus: 'Zasiłek chorobowy z ZUS',
+      zusOpis: `duży ZUS z chorobowym (${ZUS_TEKST.dopiski})`,
+      skladka: 'Szacowana składka miesięczna',
+      skladkaOpis: `wariant z wypłatą do ${MIESIECY_WYPLATY} miesięcy, razem z opłatą dystrybucyjną; `
+        + 'przedział z ostatnio wystawionych ofert',
+      przycisk: 'Przejdź do wniosku',
+      wniosek: (z) => (z ? `/wniosek/?zawod=${encodeURIComponent(z)}` : '/wniosek/'),
+      odkladanie: 'Wolisz odkładać samodzielnie? Policz, ile to potrwa',
+      zastrzezenie: 'To jest symulacja, nie oferta. Realną składkę wylicza system ubezpieczyciela po ocenie '
+        + `ryzyka — może różnić się od tej kwoty. Zasiłek ZUS to ${ZUS_TEKST.wzor}, `
+        + `${ZUS_TEKST.scenariusz}. ${ZUS_TEKST.brutto}`,
+      skad: `Przedział składki policzyliśmy ${OPIS_KALIBRACJI} — od najtańszej do najdroższej stawki, `
+        + 'jaka w nich wystąpiła, razem z opłatą dystrybucyjną, którą płaci się w racie. '
+        + 'Na Twoją składkę wpłyną wiek, klasa ryzyka Twojego zawodu, długość okresu wyczekiwania, '
+        + 'o które ten kalkulator nie pyta.',
+      okres: `Świadczenie wypłacane jest najdłużej przez ${okresy('albo')} miesięcy — okres wybierasz przy `
+        + `zawarciu umowy. Powyższa składka dotyczy wariantu najkrótszego, ${MIESIECY_WYPLATY}-miesięcznego; `
+        + 'dłuższy okres wypłaty podnosi składkę.',
+    },
+    uk: {
+      naglowek: (z) => `Орієнтовний розрахунок внеску${z ? ` для ${z}` : ''}`,
+      wstep: 'Пересуньте повзунок, щоб побачити, як змінюються страхова виплата й орієнтовний страховий внесок.',
+      dochod: 'Місячний дохід нетто від підприємницької діяльності або B2B',
+      dochodAria: 'Місячний дохід нетто від підприємницької діяльності або контракту B2B, у злотих',
+      suwak: (p) => `Повзунок встановлено на ${p}% діапазону.`,
+      limit: (p) => `Поліс покриває до ${p}% підтвердженого документами доходу від підприємницької `
+        + 'діяльності або контракту B2B.',
+      etat: ZUS_TEKST_UK.etat,
+      klauzula: 'Клаузула ВІЛ / вірусних гепатитів (HIV / WZW)',
+      swiadczenie: 'Виплата за полісом',
+      swiadczenieOpis: `щомісяця, щонайдовше протягом ${MIESIECY_MAX} місяців`,
+      zus: 'Допомога по хворобі від ZUS',
+      // Średnik zamiast nawiasu jak po polsku: dopiska ma już nawias z polską nazwą.
+      zusOpis: `duży ZUS зі страхуванням на випадок хвороби; ${ZUS_TEKST_UK.dopiski}`,
+      skladka: 'Орієнтовний місячний внесок',
+      skladkaOpis: `варіант із виплатою до ${MIESIECY_WYPLATY} місяців, разом із платою за дистрибуцію; `
+        + 'діапазон з останніх виставлених пропозицій',
+      przycisk: 'Як подати заявку',
+      // Formularz jest po polsku, więc przycisk prowadzi do przewodnika po nim,
+      // a nie wprost do kreatora (patrz src/pages/uk/wniosek/).
+      wniosek: () => '/uk/wniosek/',
+      odkladanie: 'Волієте відкладати самостійно? Порахуйте, скільки це триватиме (польською)',
+      zastrzezenie: 'Це орієнтовний розрахунок, а не пропозиція. Реальний внесок розраховує система страховика після '
+        + `оцінки ризику — він може відрізнятися від цієї суми. Допомога ZUS — це ${ZUS_TEKST_UK.wzor}, `
+        + `${ZUS_TEKST_UK.scenariusz}. ${ZUS_TEKST_UK.brutto}`,
+      skad: `Діапазон внеску ми порахували ${OPIS_KALIBRACJI_UK} — від найдешевшої до найдорожчої `
+        + 'ставки, що в них траплялася, разом із платою за дистрибуцію (opłata dystrybucyjna), яку '
+        + 'сплачують разом із кожною частиною внеску. На ваш внесок вплинуть вік, клас ризику вашої професії та тривалість '
+        + 'періоду очікування (okres wyczekiwania), про які цей калькулятор не питає.',
+      okres: `Виплата триває щонайдовше ${okresy('або')} місяців — період ви обираєте під час `
+        + `укладення договору. Наведений внесок стосується найкоротшого, ${MIESIECY_WYPLATY}-місячного `
+        + 'варіанта; довший період виплати підвищує внесок.',
+    },
+  };
+
+  const t = $derived(NAPISY[jezyk] ?? NAPISY.pl);
 
   onMount(() => {
     if (!zOdkladaniem) return;
@@ -59,62 +140,56 @@
 <div class="border border-linia bg-tlo p-7 {kompaktowy ? '' : 'shadow-[0_18px_46px_-16px_rgba(15,46,64,0.18)]'}
             {zOdkladaniem ? 'md:grid md:grid-cols-2 md:gap-x-8' : ''}">
 <div>
-  <h2 class="text-xl m-0 mb-1">Symulacja składki{zawod ? ` dla ${zawod}` : ''}</h2>
+  <h2 class="text-xl m-0 mb-1">{t.naglowek(zawod)}</h2>
   <p class="text-[14px] leading-relaxed text-tekst-drugi mt-0 mb-6">
-    Przesuń suwak, żeby zobaczyć, jak zmienia się świadczenie i szacowana składka.
+    {t.wstep}
   </p>
 
   <label class="block mb-6">
     <span class="flex flex-wrap items-baseline justify-between gap-2 mb-2.5">
-      <span class="text-sm font-semibold">Miesięczny dochód netto z działalności lub B2B</span>
+      <span class="text-sm font-semibold">{t.dochod}</span>
       <output class="font-mono text-lg font-semibold text-akcent-ciemny">{zl(dochod)}</output>
     </span>
     <input type="range" min={MIN} max={MAX} step={KROK} bind:value={dochod}
-           aria-label="Miesięczny dochód netto z działalności lub kontraktu B2B, w złotych"
+           aria-label={t.dochodAria}
            class="w-full accent-akcent-ciemny">
     <span class="flex justify-between font-mono text-[11px] text-tekst-trzeci mt-1.5">
       <span>{zl(MIN)}</span><span>{zl(MAX)}</span>
     </span>
-    <span class="sr-only">Suwak ustawiony na {procent}% zakresu.</span>
+    <span class="sr-only">{t.suwak(procent)}</span>
   </label>
 
   <div class="mb-5 text-[13px] leading-relaxed text-tekst-drugi">
-    <p class="m-0">
-      Polisa obejmuje do {limitProcent}% udokumentowanego dochodu z działalności
-      lub kontraktu B2B.
-    </p>
-    <p class="mt-1.5 mb-0" data-etat>{ZUS_TEKST.etat}</p>
+    <p class="m-0">{t.limit(limitProcent)}</p>
+    <p class="mt-1.5 mb-0" data-etat>{t.etat}</p>
   </div>
 
   <div class="mb-6">
     <label class="flex items-center gap-3 cursor-pointer text-[15px]">
       <input type="checkbox" bind:checked={hivWzw} class="w-4.5 h-4.5 accent-akcent-ciemny">
-      Klauzula HIV / WZW
+      {t.klauzula}
     </label>
   </div>
 
   <dl class="border-t border-linia m-0">
     <div class="flex items-baseline justify-between gap-4 py-4 border-b border-linia-lekka">
       <dt class="text-[15px] text-tekst-drugi">
-        Świadczenie z polisy<span class="sr-only">:</span>
-        <span class="block text-[13px]">wypłacane co miesiąc, najdłużej przez {MIESIECY_MAX} miesięcy</span>
+        {t.swiadczenie}<span class="sr-only">:</span>
+        <span class="block text-[13px]">{t.swiadczenieOpis}</span>
       </dt>
       <dd class="font-mono text-2xl font-semibold text-akcent-ciemny m-0 whitespace-nowrap">{zl(wynik.swiadczenie)}</dd>
     </div>
     <div class="flex items-baseline justify-between gap-4 py-4 border-b border-linia-lekka">
       <dt class="text-[15px] text-tekst-drugi">
-        Zasiłek chorobowy z ZUS<span class="sr-only">:</span>
-        <span class="block text-[13px]">duży ZUS z chorobowym ({ZUS_TEKST.dopiski})</span>
+        {t.zus}<span class="sr-only">:</span>
+        <span class="block text-[13px]">{t.zusOpis}</span>
       </dt>
       <dd class="font-mono text-lg font-semibold text-alarm m-0 whitespace-nowrap">{zl(ZASILEK_JDG.duzy)}</dd>
     </div>
     <div class="flex items-baseline justify-between gap-4 py-4">
       <dt class="text-[15px] font-semibold">
-        Szacowana składka miesięczna<span class="sr-only">:</span>
-        <span class="block text-[13px] font-normal text-tekst-drugi">
-          wariant z wypłatą do {MIESIECY_WYPLATY} miesięcy, razem z opłatą dystrybucyjną;
-          przedział z ostatnio wystawionych ofert
-        </span>
+        {t.skladka}<span class="sr-only">:</span>
+        <span class="block text-[13px] font-normal text-tekst-drugi">{t.skladkaOpis}</span>
       </dt>
       <dd class="font-mono text-2xl font-semibold m-0 whitespace-nowrap">
         {zlZakres(wynik.skladkaOd, wynik.skladkaDo)}
@@ -122,14 +197,17 @@
     </div>
   </dl>
 
-  <a href={zawod ? `/wniosek/?zawod=${encodeURIComponent(zawod)}` : '/wniosek/'}
+  <a href={t.wniosek(zawod)}
      class="block text-center bg-akcent-ciemny text-white py-4 font-bold mt-2 hover:bg-akcent-hover">
-    Przejdź do wniosku
+    {t.przycisk}
   </a>
   {#if !zOdkladaniem}
+    <!-- Odkładanie liczy tylko polska strona /kalkulator/ — z wersji ukraińskiej
+         odnośnik mówi to wprost i niesie hreflang. -->
     <a href={`/kalkulator/?dochod=${dochod}#odkladanie`} data-odkladanie
+       hreflang={jezyk === 'pl' ? undefined : 'pl'}
        class="block text-center text-[14px] text-akcent-tekst underline underline-offset-2 mt-3 hover:text-akcent-hover">
-      Wolisz odkładać samodzielnie? Policz, ile to potrwa
+      {t.odkladanie}
     </a>
   {/if}
 </div>
@@ -141,21 +219,8 @@
 <!-- Przypisy pod obiema kolumnami: na telefonie odkładanie stoi zaraz pod
      przyciskiem wniosku, a nie pod trzema akapitami drobnego druku. -->
 <div class={zOdkladaniem ? 'md:col-span-2 border-t border-linia mt-8 pt-2' : ''}>
-  <p class="text-[12.5px] leading-relaxed text-tekst-drugi mt-4 mb-0">
-    To jest symulacja, nie oferta. Realną składkę wylicza system ubezpieczyciela po ocenie
-    ryzyka — może różnić się od tej kwoty. Zasiłek ZUS to {ZUS_TEKST.wzor},
-    {ZUS_TEKST.scenariusz}. {ZUS_TEKST.brutto}
-  </p>
-  <p class="text-[12.5px] leading-relaxed text-tekst-drugi mt-2.5 mb-0">
-    Przedział składki policzyliśmy {OPIS_KALIBRACJI} — od najtańszej do najdroższej stawki,
-    jaka w nich wystąpiła, razem z opłatą dystrybucyjną, którą płaci się w racie.
-    Na Twoją składkę wpłyną wiek, klasa ryzyka Twojego zawodu, długość okresu wyczekiwania,
-    o które ten kalkulator nie pyta.
-  </p>
-  <p class="text-[12.5px] leading-relaxed text-tekst-drugi mt-2.5 mb-0">
-    Świadczenie wypłacane jest najdłużej przez {okresy} miesięcy — okres wybierasz przy
-    zawarciu umowy. Powyższa składka dotyczy wariantu najkrótszego, {MIESIECY_WYPLATY}-miesięcznego;
-    dłuższy okres wypłaty podnosi składkę.
-  </p>
+  <p class="text-[12.5px] leading-relaxed text-tekst-drugi mt-4 mb-0">{t.zastrzezenie}</p>
+  <p class="text-[12.5px] leading-relaxed text-tekst-drugi mt-2.5 mb-0">{t.skad}</p>
+  <p class="text-[12.5px] leading-relaxed text-tekst-drugi mt-2.5 mb-0">{t.okres}</p>
 </div>
 </div>

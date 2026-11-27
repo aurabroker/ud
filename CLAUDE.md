@@ -1418,6 +1418,12 @@ Rzeczy, których nie upraszczaj:
   limit 300 rozmów dziennie i 10 naraz; strona może nadpisać wyłącznie
   `text_only`.
 - Odesłanie do zakupu online: `/kup-online?z=asystent` (licznik kliknięć).
+- **Po ukraińsku asystentka odpowiada już dziś** (reguła „Inny język” w
+  instrukcji), ale nie jest do tego przygotowana: powitanie z informacją o AI
+  i zapisie rozmowy jest tylko po polsku, a cztery rozmowy z 26.11.2026 — przy
+  okazji pierwszy przebieg instrukcji v3 — pokazały usterki, także niezależne
+  od języka. Zapis: „Asystentka po ukraińsku” w `przed-uruchomieniem.md`,
+  testy w `testy-uk.json` (nie są podpięte do agenta).
 
 ## Przepięcie domeny — co musi być, zanim pójdzie
 
@@ -3398,6 +3404,269 @@ takiej zgody nie zbiera nigdzie: zgoda w kreatorze dotyczy wyłącznie kontaktu
 w sprawie niedokończonego wniosku, a `ud_clients` i `udochodu_contacts` nie
 mają pola zgody marketingowej. Lista w Resend musi więc pochodzić ze źródła,
 które zgodę ma — nie z kartoteki klientów.
+
+---
+
+## Wersja ukraińska (`/uk/`) — na produkcji od 27.11.2026
+
+**Scalona do gałęzi produkcyjnej 27.11.2026 decyzją właściciela („puszczaj
+to").** Powstała na gałęzi `claude/wersja-ukrainska`; dalsze zmiany idą jak
+każda praca nad portalem — od gałęzi produkcyjnej. Co zostało otwarte po
+publikacji: „Po publikacji — co zostało otwarte" niżej.
+
+Od 26.11.2026 część portalu ma odpowiednik po ukraińsku: strona główna,
+„Jak to działa", wyłączenia, przewodnik po wniosku i trzy zawody (programista,
+fryzjer, kosmetyczka). Powód: w latach 2022–2025 Ukraińcy założyli w Polsce
+109 tys. jednoosobowych firm (PIE), a po ukraińsku polskiej polisy od utraty
+dochodu nie opisywał nikt.
+
+**Gałąź odchodzi od `claude/portal-rebuild-seo-llm-yz2x4t` (produkcyjnej),
+nie od `main`.** Pierwsza wersja (commit `01d60f2`) powstała z `main`, który
+stoi od 12.10.2026 — czyli była przekładem polszczyzny sprzed sześciu tygodni
+(zasiłek 2 240 zł, „od pierwszego dnia", Leadenhall i CEU jako
+ubezpieczyciele, stara lista wyłączeń). 26.11.2026 gałąź produkcyjna została
+do niej scalona, a przekład wyrównany z obecną treścią. **`main` nie jest
+gałęzią produkcyjną** — pracę nad portalem zaczynaj od produkcyjnej, a PR
+z wersją ukraińską kieruj do niej. Scalenie do produkcyjnej = wdrożenie.
+
+| Co | Gdzie |
+|---|---|
+| lista par PL ↔ UK, `hreflang`, przełącznik | `src/lib/jezyki.ts` |
+| strony | `src/pages/uk/` |
+| treść trzech zawodów | `src/dane/uk/zawody.ts` |
+| lista wyłączeń (przekład `src/lib/wylaczenia.ts`) | `src/dane/uk/wylaczenia.ts` |
+| nazwy kroków wniosku, granice wieku, zdania o ZUS-ie i kalibracji | `src/lib/uk.ts` |
+| napisy kalkulatora | `NAPISY` w `Kalkulator.svelte` |
+| napisy banera cookies | `NAPISY` w `public/zgody.js` |
+
+### Zasady, które łatwo złamać
+
+- **Kod języka to `uk`, nie `ua`.** `ua` jest kodem kraju; jako `lang` albo
+  `hreflang` jest błędny i wyszukiwarka go pomija.
+- **Podkatalog, nie domena `.ua`.** Klienci prowadzą firmy w Polsce, a końcówka
+  `.ua` kieruje wyszukiwarkę na Ukrainę i zaczyna od zera. Domena ukraińska
+  może najwyżej przekierowywać na `/uk/`.
+- **Formularz wniosku zostaje po polsku.** Zgody mają numer wersji i treść
+  zatwierdzoną przez prawnika, zapisaną też w funkcji brzegowej; odpowiedzi
+  w ankiecie medycznej są oświadczeniem klienta, a błąd przekładu obciążyłby
+  jego. `/uk/wniosek/` jest przewodnikiem po polskim kreatorze, nie jego
+  przekładem — dlatego nie ma pary `hreflang` z `/wniosek/`. Tłumaczenie
+  kreatora to osobna decyzja właściciela i prawnika, nie ciąg dalszy tej pracy.
+- **Treść ukraińska to przekład polskiej, zdanie w zdanie.** Polskie teksty
+  były sprawdzane z OWU; zdanie dopisane tylko po ukraińsku jest nowym
+  twierdzeniem o produkcie. Wyjątkiem jest sekcja „Якщо ви з України" na
+  `/uk/` — tam każda pozycja ma w komentarzu źródło (polska treść sprawdzona
+  z OWU, schemat wniosku, potwierdzenie właściciela albo przepis), a dwie
+  odczytane tylko ze streszczenia OWU są oznaczone „DO SPRAWDZENIA".
+- **Wyłączenia: przekład pozycja w pozycję, paragrafy z polskiego pliku.**
+  `polaczone()` w `src/dane/uk/wylaczenia.ts` spina przekład z `GRUPY`
+  z `src/lib/wylaczenia.ts` po numerze grupy i pozycji i bierze stamtąd
+  `zrodla` (stoją na stronie w zapisie polskim, `lang="pl"`). Rozjazd liczby
+  grup albo pozycji **przerywa build** — lepiej nie wdrożyć, niż postawić
+  przekład przy cudzym paragrafie. Dodajesz pozycję po polsku — dodaj jej
+  przekład w tym samym miejscu listy.
+- **Kwot, limitów i okresów nie wpisuj.** Idą z `symulacja.ts`, `zus.ts`,
+  `granice.ts` i ze schematu wniosku, tak jak po polsku. Zdania z kwotami
+  (`ZUS_TEKST_UK`, `OPIS_KALIBRACJI_UK`, `LIMIT_CEU_ZDANIE_UK` w `uk.ts`) są
+  przekładem polskich stałych, pole w pole, złożonym z tych samych liczb.
+- **Te same zakazy co po polsku:** bez „od pierwszego dnia" (`першого дня`),
+  okres wypłaty to czas NAJDŁUŻSZY (`щонайдовше`), zasiłek i świadczenie obok
+  siebie bez sumy, „період очікування" (nie „каренція"). Ubezpieczyciel jest
+  jeden — Lloyd’s Insurance Company S.A.; Leadenhall i CEU to „ковергольдери
+  Lloyd’s", nigdy „страховики". Zdanie nie kończy się nazwą z „S.A." ani
+  „sp. z o.o." (druga kropka).
+- **Poprawiasz polski tekst — popraw ukraiński.** Dotyczy wyłączeń, pytań,
+  etapów, treści trzech zawodów, `ZUS_TEKST`, `OPIS_KALIBRACJI`, napisów
+  kalkulatora i banera cookies.
+- **Zdania z `{wyrażeniem}` składaj w frontmatterze strony**, nie w szablonie
+  (patrz „Astro gubi spację…") — strony ukraińskie tak robią.
+- **Strona ukraińska nie ładuje Newsreadera ani Public Sans** — nie mają
+  cyrylicy. `Baza.astro` podstawia tam kroje systemowe pod te same zmienne.
+- **Odnośnik z ukraińskiej strony do polskiej ma `hreflang="pl"`** i polską
+  nazwę (dokumenty, strony prawne, lista zawodów, artykuł o ciąży,
+  odkładanie na `/kalkulator/`).
+- **Przełącznik języka to flaga w pasku, na każdej szerokości od 340 px**
+  (prośba właściciela z 26.11.2026). Flaga i nazwa należą do języka, NA KTÓRY
+  się przełącza: na stronie polskiej ukraińska, na ukraińskiej polska.
+  `Flaga.astro` to SVG, nie emoji (Windows nie ma flag w kroju systemowym),
+  z ramką — biała i żółta połowa zlewałyby się z białym paskiem — i z
+  `aria-hidden`; nazwę niesie `aria-label` odnośnika. Skrót „UA"/„PL" obok
+  flagi stoi od 640 px, a na stronie polskiej znika jeszcze od 1024 do
+  1279 px. **Szerokości paska są policzone, nie dobrane na oko** (komentarz
+  w `Nawigacja.astro`): poniżej 390 px logo ma 18 px, przycisk 14 px i węższe
+  marginesy (357,8 px z 360), od 390 px rozmiary pełne (386,5 px), a menu
+  strony polskiej od 1024 do 1279 px ma odstępy 16 zamiast 20 px. Przy okazji
+  zniknęło przewijanie w poziomie paska strony polskiej przy 360 px (było
+  12 px poza ekranem, także na produkcji). Poniżej 340 px flagi nie ma —
+  zostaje odnośnik „Українською" w stopce. Zmieniasz napis przycisku albo
+  dokładasz pozycję menu — przelicz; pilnuje tego test „pasek z flagą mieści
+  się w ekranie" (dziewięć szerokości, cztery strony).
+- **Obsługa jest po polsku i strona mówi to wprost** przy każdym telefonie.
+  Jeśli pojawi się obsługa po ukraińsku, zmień te zdania — nie wcześniej.
+- **Polskie strony nie mogą się przez to zmienić.** Sprawdzone 26.11.2026:
+  wszystkie 242 pliki `.md` polskich stron, `llms.txt`, `_redirects`,
+  `_routes.json` i `_headers` z builda tej gałęzi są bajt w bajt takie jak
+  z gałęzi produkcyjnej; w HTML-u polskich stron doszły tylko odnośniki
+  `hreflang`, przełącznik w pasku i odnośnik w stopce. Po kolejnym scaleniu
+  produkcyjnej powtórz to porównanie (dwa buildy, `diff` po `.md`).
+  Wyjątek, świadomy: pasek nawigacji (punkt o fladze wyżej) wygląda na
+  telefonie inaczej także na stronach polskich.
+
+### Pliki dla sprawdzających przekład
+
+```
+cd apps/portal && pnpm build && node scripts/przeklad-do-weryfikacji.mjs
+```
+
+Zapisuje do `apps/portal/przeklad-do-weryfikacji/` (katalog w `.gitignore` —
+wynik starzeje się przy każdej zmianie treści) instrukcję dla modelu
+sprawdzającego ze słownikiem, po jednym pliku na stronę ukraińską, plik
+z napisami wspólnymi (pasek, stopka, baner cookies) i `przeklad-uk-komplet.md`
+ze wszystkim naraz. Właściciel wrzuca je do innych modeli językowych
+(26.11.2026) — poprawki z ich odpowiedzi wprowadzasz w źródłach, potem build
+i skrypt jeszcze raz.
+
+- **Treść idzie z builda, nie ze źródeł** — segmenty to gotowe zdania
+  z kwotami, nie szablony z `${…}`. Pary stron skrypt bierze z `hreflang`,
+  więc nowy zawód po ukraińsku trafia do zestawienia sam.
+- **Skrypt nie zgaduje.** Sekcje zestawia po nagłówkach, akapity — tylko gdy
+  jest ich tyle samo; inaczej sekcja stoi „w całości" z uwagą. Inny układ
+  nagłówków albo termin ze słownika, którego nie ma w tekście, to ostrzeżenie
+  i kod wyjścia 2.
+- **Akapit dopisany tylko po ukraińsku wpisujesz w skrypcie świadomie**:
+  `DOPISKI_UK` (pojedynczy akapit), `TYLKO_UK` (cała sekcja, z zamierzoną
+  treścią po polsku) albo `ROZNE_CELOWO` (sekcja celowo inna). Test
+  „zestawienie do weryfikacji…" uruchamia skrypt i robi się czerwony, gdy
+  jakakolwiek sekcja ma po polsku i po ukraińsku inną liczbę akapitów —
+  26.11.2026 tak wyszedł akapit wstępu do ryzyk („Ryzyko w tym zawodzie różni
+  się od biurowego…"), którego strony zawodów po ukraińsku nie miały.
+- Zmieniasz słownik przekładu — zmień `SLOWNIK` w skrypcie; idzie do
+  instrukcji dla sprawdzającego.
+
+### Pierwsza weryfikacja przekładu — trzy modele, 27.11.2026
+
+Żaden z trzech nie znalazł różnicy w kwotach ani zakazanej obietnicy. Każdy
+zarzut był sprawdzony z polskim źródłem, zanim cokolwiek się zmieniło —
+opinia modelu to materiał, nie polecenie (dwa z trzech proponowały np.
+„дохід" za „przychód"). Lista spraw zamkniętych stoi też w instrukcji dla
+sprawdzającego („Rozstrzygnięte po pierwszej weryfikacji").
+
+**Słownik po weryfikacji — tych słów nie przywracaj:**
+
+| Było | Jest | Dlaczego |
+|---|---|---|
+| симуляція (внеску) | орієнтовний розрахунок | po ukraińsku „симуляція" to przede wszystkim udawanie choroby |
+| контрактники | фахівці на контракті | „контрактник" to żołnierz kontraktowy |
+| дистрибуційна оплата | плата за дистрибуцію (opłata dystrybucyjna) | wszyscy trzej: sztuczne; nie „комісія" ani „винагорода агента" — to nie prowizja |
+| кошти (świadczenie) | виплата | jedno słowo na świadczenie; „повернення коштів" (zwrot) zostaje |
+| на трудовому договорі | за трудовим договором | kalka z „na umowie o pracę" |
+| Строк розірвання | Строк попередження про розірвання | okres wypowiedzenia, nie termin rozwiązania |
+| операція (za „zabieg") | медичне втручання | „zabieg" nie musi być operacją |
+| понад десять | кільканадцять | „kilkanaście" to 11–19 |
+| Перейти до змісту | Перейти до вмісту | „зміст" to spis treści |
+
+Przy pierwszym użyciu stoi pełna nazwa: „страховий внесок", „страхова
+виплата", „пільговий ZUS (preferencyjny ZUS)", „Косметолог (kosmetyczka)".
+
+**Zostało, mimo zarzutów — z powodem:**
+
+- **„допомога по хворобі" i „страхування на випадок хвороби"** — tak pisze
+  sam ZUS po ukraińsku („Базові виплати на випадок хвороби" na zus.pl
+  i gov.pl); dwa modele chciały „допомога по тимчасовій непрацездатності",
+  czyli nazwy świadczenia ukraińskiego.
+- **„варіант із виплатою до 24 місяців"** — wierne polskiemu „do 24 miesięcy"
+  (decyzja właściciela z 21.10.2026). Zmiana na „щонайдовше" wymagałaby
+  zmiany polskiego.
+- **„поліс завжди його охоплює"** — przekład zdania z formularza („Ryzyko
+  podstawowe — polisa zawsze je obejmuje").
+- **„ковергольдери Lloyd’s (coverholders)" bez dopisku „upoważnieni
+  przedstawiciele"** — to brzmienie ma tylko LW044 § 1 ust. 3; w CEU rola
+  jest inna (komentarz w `firma.ts`).
+- **„клаузула"** przy nazwach klauzul z oferty; przy RODO — „інформація про
+  обробку персональних даних".
+- **„виручка" za „przychód"** — „дохід" to dochód; w CEU liczy się przychód.
+
+**Wiersz „Джерело:" ma przetłumaczony wstęp**, gdy polskie źródło zaczyna
+się zdaniem („Wynika z definicji niezdolności: …"): `WSTEPY_ZRODEL`
+w `src/dane/uk/wylaczenia.ts`. Paragrafy zostają po polsku. Nowe polskie
+źródło-zdanie bez przekładu **przerywa build**.
+
+**Zdanie pod „Aktywności podwyższonego ryzyka" w polskim formularzu —
+zmienione 27.11.2026 decyzją właściciela.** Do tego dnia kreator mówił:
+„Zaznacz, co uprawiasz regularnie. Nie wyklucza to z ochrony — wpływa na ocenę
+ryzyka." Dwa z trzech modeli przeczytały przekład tego zdania jako obietnicę
+ochrony (jeden jako błąd krytyczny), wbrew liście wyłączeń: aktywność z listy
+jest objęta tylko wtedy, gdy potwierdzi to polisa, a CEU liczy także
+jednorazowe uczestnictwo. Teraz w `Wniosek.svelte` stoi: „Zaznacz, co
+uprawiasz regularnie. Zaznaczenie nie oznacza odmowy — wpływa na ocenę ryzyka.
+Aktywność z listy jest objęta, jeśli potwierdzi to polisa." Przewodnik
+`/uk/wniosek/` mówi to samo („позначка не означає відмови у страхуванні…").
+**„Nie wyklucza to z ochrony" nie wraca** — pilnuje tego test w `uk.spec.js`
+(formularz, lista wyłączeń i przewodnik). To podpowiedź pod polem, nie treść
+zgody: nie ma numeru wersji i nie idzie do funkcji brzegowej.
+
+### Nowy zawód po ukraińsku
+
+Wpis w `ZAWODY_UK` (`src/dane/uk/zawody.ts`) z przekładem treści z
+`packages/zawody/data/tresci.json`. Strona, para `hreflang`, kafelek na `/uk/`
+i odnośnik w stopce powstają same.
+
+### Sprawdzone z pełnym tekstem OWU przed publikacją (27.11.2026)
+
+Dwa zdania sekcji „Якщо ви з України" były odczytane ze streszczenia PDF-ów.
+27.11.2026 sprawdzone z pełnym tekstem sześciu OWU spod `/owu/<slug>.pdf`,
+pobranym przez bazę (`net.http_get('https://r.jina.ai/<adres>')`, potem
+`regexp_matches` po `net._http_response`):
+
+- **Obywatelstwo — potwierdzone.** LW044, LW046 i LW047 § 15 ust. 18:
+  „Ubezpieczony oznacza osobę fizyczną określoną w pozycji 3 Polisy"; CEU
+  Utrata dochodu § 29 pkt 12, LOI Premium pkt 11, „dla zatrudniających" —
+  „określoną w Polisie osobę fizyczną objętą ochroną ubezpieczeniową" plus
+  warunki co do formy pracy. W żadnym z sześciu tekstów nie pada obywatelstwo,
+  rezydencja ani prawo pobytu („miejsce zamieszkania" tylko przy właściwości
+  sądu i w klauzulach dodatkowych). PESEL to wymóg wniosku (właściciel,
+  26.11.2026), nie OWU.
+- **Dokumenty do wypłaty w CEU — potwierdzone, zdanie doprecyzowane.** § 11
+  ust. 2 (LOI Premium § 10 ust. 2): niezdolność trzeba udokumentować drukiem
+  ZUS ZLA, a bez prawa do niego — zaświadczeniem o stanie zdrowia od lekarza
+  prowadzącego. Ust. 3: samo zaświadczenie „nie będzie wystarczające", komisja
+  lekarska powołana przez ubezpieczyciela może orzec inaczej — dlatego na
+  stronie stoi „потрібно задокументувати" (nie „підтверджує") i zdanie
+  o komisji. Język dokumentów też się zgadza: LW044 „w języku polskim lub
+  angielskim", CEU „w języku polskim".
+
+Tekst z konwertera ma w plikach Leadenhall spacje przed polskimi znakami
+(„osob ę fizyczn ą") — szukaj wzorcem, który je dopuszcza (`osob ?[aęy]
++fizyczn`), inaczej wyjdzie fałszywe „nie ma".
+
+### Po publikacji — co zostało otwarte
+
+1. Przekład przeczytany przez osobę znającą ukraiński i polski. 27.11.2026
+   sprawdziły go trzy modele językowe (sekcja wyżej) — człowiek jeszcze nie.
+   Zdanie o komisji lekarskiej w „Документи для виплати" dopisane po tej
+   weryfikacji — żaden model go nie czytał.
+2. Baner cookies po ukraińsku — przekład 1:1 polskiego; akceptacja prawnika
+   tak jak przy treści polskiej — jeszcze jej nie ma.
+3. **Kto odpowiada na zapytanie po ukraińsku.** Właściciel (26.11.2026):
+   asystentka z ElevenLabs. Stan i czego brakuje: „Asystentka po ukraińsku"
+   w `asystent/przed-uruchomieniem.md`. Dopóki asystentki nie ma na stronie,
+   zdania „Розмова — польською мовою" zostają.
+4. Strony `/uk/` trafiają do mapy strony i do zgłoszenia IndexNow przy
+   pierwszym wdrożeniu produkcyjnym — w Search Console warto sprawdzić pary
+   `hreflang` po kilku dniach.
+
+### Testy
+
+`test/uk.spec.js` — 30 testów. Większość sprawdza zgodność z wersją polską
+(te same kwoty, tyle samo wyłączeń, etapów, pytań, ryzyk i akapitów w każdej
+sekcji, te same paragrafy przy wyłączeniach, te same pola w zdaniach o ZUS-ie
+i w napisach kalkulatora), a nie samą wersję ukraińską; do tego zakazane
+zwroty, nazwy podmiotów, `hreflang` w obie strony, flaga w przełączniku,
+etykiety przewodnika porównane ze źródłem kreatora, zdanie o aktywnościach
+podwyższonego ryzyka w formularzu i przewodniku, baner cookies po ruchu
+sieciowym i szerokość paska od 360 do 1440 px. Kwoty w testach liczone
+z tych samych plików co strona, nie wpisane. Jakości przekładu testy nie
+sprawdzają.
 
 ---
 
